@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict
 
 from mock import call, patch
 
+from runway.cfngin.hooks.protocols import CfnginHookProtocol
 from runway.cfngin.hooks.utils import handle_hooks
 from runway.config.models.cfngin import CfnginHookDefinitionModel
 
@@ -230,11 +231,14 @@ class TestHooks(unittest.TestCase):
         )
 
 
-class MockHook:
+class MockHook(CfnginHookProtocol):
     """Mock hook class."""
 
-    def __init__(self, **kwargs: Any) -> None:
+    args: Dict[str, Any]
+
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         """Instantiate class."""
+        self.args = {}
 
     def post_deploy(self) -> Dict[str, str]:
         """Run during the **post_deploy** stage."""

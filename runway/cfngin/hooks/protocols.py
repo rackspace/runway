@@ -7,12 +7,15 @@ For more information on protocols, refer to
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, overload
 
 from typing_extensions import Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from ...context import CfnginContext
+
+
+_T = TypeVar("_T")
 
 
 class CfnginHookArgsProtocol(Protocol):
@@ -24,8 +27,18 @@ class CfnginHookArgsProtocol(Protocol):
 
     """
 
+    @overload
     @abstractmethod
-    def get(self, name: str, default: Any = None) -> Any:
+    def get(self, _name: str) -> Optional[Any]:
+        ...
+
+    @overload
+    @abstractmethod
+    def get(self, _name: str, default: Union[Any, _T]) -> Union[Any, _T]:
+        ...
+
+    @abstractmethod
+    def get(self, _name: str, default: Union[Any, _T] = None) -> Union[Any, _T]:
         """Safely get the value of an attribute.
 
         Args:
@@ -36,19 +49,19 @@ class CfnginHookArgsProtocol(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def __contains__(self, name: str) -> bool:
+    def __contains__(self, _name: str) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def __getattribute__(self, name: str) -> Any:
+    def __getattribute__(self, _name: str) -> Any:
         raise NotImplementedError
 
     @abstractmethod
-    def __getitem__(self, name: str) -> Any:
+    def __getitem__(self, _name: str) -> Any:
         raise NotImplementedError
 
     @abstractmethod
-    def __setitem__(self, name: str, value: Any) -> None:
+    def __setitem__(self, _name: str, _value: Any) -> None:
         raise NotImplementedError
 
 

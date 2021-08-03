@@ -13,7 +13,6 @@ from ...exceptions import FailedVariableLookup
 from ...utils import BaseModel, load_object_from_string
 from ...variables import Variable, resolve_variables
 from ..blueprints.base import Blueprint
-from .protocols import CfnginHookProtocol
 
 if TYPE_CHECKING:
     from ...config.models.cfngin import CfnginHookDefinitionModel
@@ -111,7 +110,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
             kwargs = {}
 
         try:
-            if isinstance(method, CfnginHookProtocol):
+            if isinstance(method, type):
                 result = getattr(
                     method(context=context, provider=provider, **kwargs), stage
                 )()
