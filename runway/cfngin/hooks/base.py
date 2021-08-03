@@ -4,14 +4,15 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union, cast
 
-from pydantic import BaseModel
 from troposphere import Tags
 
 from ...config.models.cfngin import CfnginStackDefinitionModel
+from ...utils import BaseModel
 from ..actions import deploy
 from ..exceptions import StackFailed
 from ..stack import Stack
 from ..status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED
+from .protocols import CfnginHookProtocol
 
 if TYPE_CHECKING:
     from ..._logging import RunwayLogger
@@ -28,32 +29,8 @@ class HookArgsBaseModel(BaseModel):
 
     tags: Dict[str, str] = {}
 
-    def __contains__(self, name: str) -> bool:
-        """Implement evaluation of 'in' conditional.
 
-        Args:
-            name: The name to check for existence in the model.
-
-        """
-        return name in self.__dict__
-
-    def __getitem__(self, name: str) -> Any:
-        """Implement evaluation of self[name].
-
-        Args:
-            name: Attribute name to return the value for.
-
-        Returns:
-            The value associated with the provided name/attribute name.
-
-        Raises:
-            AttributeError: If attribute does not exist on this object.
-
-        """
-        return getattr(self, name)
-
-
-class Hook:
+class Hook(CfnginHookProtocol):
     """Base class for hooks.
 
     Not all hooks need to be classes and not all classes need to be hooks.
@@ -77,7 +54,9 @@ class Hook:
     stack: Optional[Stack] = None
     stack_name: str = "stack"
 
-    def __init__(self, context: CfnginContext, provider: Provider, **kwargs: Any):
+    def __init__(  # pylint: disable=super-init-not-called
+        self, context: CfnginContext, provider: Provider, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:

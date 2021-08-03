@@ -10,6 +10,7 @@ from typing_extensions import Literal, TypedDict
 
 from ....compat import cached_property
 from ....utils import BaseModel, JsonEncoder
+from ..protocols import CfnginHookProtocol
 from ..utils import TagDataModel
 
 if TYPE_CHECKING:
@@ -106,10 +107,12 @@ class ArgsDataModel(BaseModel):
         )
 
 
-class _Parameter:
+class _Parameter(CfnginHookProtocol):
     """AWS SSM Parameter Store Parameter."""
 
-    def __init__(
+    args: ArgsDataModel
+
+    def __init__(  # pylint: disable=super-init-not-called
         self,
         context: CfnginContext,
         *,
