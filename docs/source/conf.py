@@ -62,6 +62,9 @@ rst_epilog = """
 .. |Dict| replace::
   :data:`~typing.Dict`
 
+.. |Protocol| replace::
+  :class:`~typing.Protocol`
+
 .. |Stack| replace::
   :class:`~runway.cfngin.stack.Stack`
 

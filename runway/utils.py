@@ -55,7 +55,7 @@ class BaseModel(_BaseModel):
     """Base class for Runway models."""
 
     def get(self, name: str, default: Any = None) -> Any:
-        """Implement evaluation of self.get.
+        """Safely get the value of an attribute.
 
         Args:
             name: Attribute name to return the value for.
