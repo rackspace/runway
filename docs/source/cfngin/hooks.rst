@@ -1536,16 +1536,17 @@ A custom hook must be in an executable, importable python package or standalone 
 The hook must be importable using your current ``sys.path``.
 This takes into account the :attr:`~cfngin.config.sys_path` defined in the :class:`~cfngin.config` file as well as any ``paths`` of :attr:`~cfngin.config.package_sources`.
 
-The hook must accept a minimum of two arguments, ``context`` and ``provider``.
-Aside from the required arguments, it can have any number of additional arguments or use ``**kwargs`` to accept anything passed to it.
-The values for these additional arguments come from the :attr:`~cfngin.hook.args` field of the hook definition.
+When executed, the hook will have various keyword arguments passed to it.
+The keyword arguments that will always be passed to the hook are ``context`` (:class:`~runway.context.CfnginContext`) and ``provider`` (:class:`~runway.cfngin.providers.aws.default.Provider`).
+Anything defined in the :attr:`~cfngin.hook.args` field will also be passed to hook as a keyword argument.
+For this reason, it is recommended to use an unpack operator (``**kwargs``) in addition to the keyword arguments the hook requires to ensure future compatibility and account for misconfigurations.
 
 The hook must return ``True`` or a truthy object if it was successful.
 It must return ``False`` or a falsy object if it failed.
 This signifies to CFNgin whether or not to halt execution if the hook is :attr:`~cfngin.hook.required`.
-If a |Dict| or :class:`~cfngin.utils.MutableMap` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
+If a |Dict| or :class:`~runway.utils.MutableMap` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
 It will be stored as ``context.hook_data[data_key]`` where :attr:`~cfngin.hook.data_key` is the value set in the hook definition.
-If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict| or :class:`~cfngin.utils.MutableMap`, it will not be added to the context object.
+If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict| or :class:`~runway.utils.MutableMap`, it will not be added to the context object.
 
 If using boto3 in a hook, use :meth:`context.get_session() <runway.context.CfnginContext.get_session>` instead of creating a new session to ensure the correct credentials are used.
 
@@ -1572,16 +1573,17 @@ Example Hook Function
   :caption: local_path/hooks/my_hook.py
 
   """My hook."""
-  from __future__ import annotations
-
   from typing import Dict, Optional
 
 
-  def do_something(*, is_failure: bool = True, **kwargs: str) -> Optional[Dict[str, str]]:
+  def do_something(
+      *, is_failure: bool = True, name: str = "Kevin", **_kwargs: str
+  ) -> Optional[Dict[str, str]]:
       """Do something."""
       if is_failure:
           return None
-      return {"result": f"You are not a failure {kwargs.get('name', 'Kevin')}."}
+      return {"result": f"You are not a failure {name}."}
+
 
 .. code-block:: yaml
   :caption: local_path/cfngin.yaml
@@ -1598,19 +1600,39 @@ Example Hook Function
 Example Hook Class
 ==================
 
+Hook classes must implement the interface detailed by the :class:`~runway.cfngin.hooks.protocols.CfnginHookProtocol` |Protocol|.
+This can be done implicitly or `explicitly <https://www.python.org/dev/peps/pep-0544/#explicitly-declaring-implementation>`__ (by creating a subclass of :class:`~runway.cfngin.hooks.protocols.CfnginHookProtocol`).
+
+As shown in this example, :class:`~runway.cfngin.hooks.base.HookArgsBaseModel` or it's parent class :class:`~runway.utils.BaseModel` can be used to create self validating and sanitizing data models.
+These can then be used to parse the values provided in the :attr:`~cfngin.hook.args` field to ensure they match what is expected.
+
 .. code-block:: python
   :caption: local_path/hooks/my_hook.py
 
   """My hook."""
   import logging
-  from typing import Dict, Optional
+  from typing import Any, Dict, Optional
 
-  from runway.cfngin.hooks.base import Hook
+  from runway.utils import BaseModel
+  from runway.cfngin.hooks.protocols import CfnginHookProtocol
 
   LOGGER = logging.getLogger(__name__)
 
 
-  class MyClass(Hook):
+  class MyClassArgs(BaseModel):
+      """Arguments for MyClass hook.
+
+      Attributes:
+          is_failure: Force the hook to fail if true.
+          name: Name used in the response.
+
+      """
+
+      is_failure: bool = False
+      name: str
+
+
+  class MyClass(CfnginHookProtocol):
       """My class does a thing.
 
       Keyword Args:
@@ -1631,6 +1653,12 @@ Example Hook Class
 
       """
 
+      args: MyClassArgs
+
+      def __init__(self, **kwargs: Any) -> None:
+          """Instantiate class."""
+          self.args = MyClassArgs.parse_obj(kwargs)
+
       def post_deploy(self) -> Optional[Dict[str, str]]:
           """Run during the **post_deploy** stage."""
           if self.args["is_failure"]:
@@ -1648,6 +1676,7 @@ Example Hook Class
       def pre_destroy(self) -> None:
           """Run during the **pre_destroy** stage."""
           LOGGER.error("pre_destroy is not supported by this hook")
+
 
 .. code-block:: yaml
   :caption: local_path/cfngin.yaml
