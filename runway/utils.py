@@ -64,7 +64,7 @@ class BaseModel(_BaseModel):
         """
         return getattr(self, name, default)
 
-    def __contains__(self, name: str) -> bool:
+    def __contains__(self, name: object) -> bool:
         """Implement evaluation of 'in' conditional.
 
         Args:

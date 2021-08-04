@@ -1,11 +1,13 @@
 """CFNgin context."""
 from __future__ import annotations
 
-import collections
+import collections.abc
 import json
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Union, cast
+
+from pydantic import BaseModel
 
 from .._logging import PrefixAdaptor, RunwayLogger
 from ..cfngin.exceptions import (
@@ -59,7 +61,7 @@ class CfnginContext(BaseContext):
         force_stacks: List of stacks to force.
         hook_data: Values returned by hooks that are stored based on the ``data_key``
             defined for the hook. Returned values are only stored if a ``data_key``
-            was provided AND the return value is a dict.
+            was provided AND the return value is a dict or ``pydantic.BaseModel``.
         logger: Custom logger to use when logging messages.
         parameters: Parameters passed from Runway or read from a file.
         stack_names: List of Stack names to operate on. If value is falsy, all
@@ -447,7 +449,7 @@ class CfnginContext(BaseContext):
             "persistent graph updated:\n%s", self.persistent_graph.dumps(indent=4)
         )
 
-    def set_hook_data(self, key: str, data: collections.Mapping[str, Any]) -> None:
+    def set_hook_data(self, key: str, data: Any) -> None:
         """Set hook data for the given key.
 
         Args:
@@ -455,10 +457,10 @@ class CfnginContext(BaseContext):
             data: A dictionary of data to store, as returned from a hook.
 
         """
-        if not isinstance(data, collections.Mapping):  # type: ignore
+        if not isinstance(data, (BaseModel, collections.abc.Mapping)):
             raise TypeError(
-                f"Hook (key: {key}) data must be an instance of "
-                "collections.Mapping (a dictionary for example)."
+                f"Hook data (key: {key}) must be an instance of "
+                "collections.abc.Mapping (a dictionary for example) or pydantic.BaseModel."
             )
 
         if key in self.hook_data:
