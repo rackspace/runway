@@ -5,9 +5,9 @@ import collections.abc
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List, Mapping, cast
+from typing import TYPE_CHECKING, Any, Dict, List
 
-from pydantic import Extra, Field
+import pydantic
 
 from ...exceptions import FailedVariableLookup
 from ...utils import BaseModel, load_object_from_string
@@ -32,14 +32,14 @@ class BlankBlueprint(Blueprint):
 class TagDataModel(BaseModel):
     """AWS Resource Tag data model."""
 
-    key: str = Field(..., alias="Key")
-    value: str = Field(..., alias="Value")
+    key: str = pydantic.Field(..., alias="Key")
+    value: str = pydantic.Field(..., alias="Value")
 
     class Config:
         """Model configuration."""
 
         allow_population_by_field_name = True
-        extra = Extra.forbid
+        extra = pydantic.Extra.forbid
 
 
 def full_path(path: str) -> str:
@@ -132,16 +132,14 @@ def handle_hooks(  # pylint: disable=too-many-statements
                 "non-required hook %s failed; return value: %s", hook.path, result
             )
         else:
-            if isinstance(result, collections.abc.Mapping):
+            if isinstance(result, (collections.abc.Mapping, pydantic.BaseModel)):
                 if hook.data_key:
                     LOGGER.debug(
                         "adding result for hook %s to context in data_key %s",
                         hook.path,
                         hook.data_key,
                     )
-                    context.set_hook_data(
-                        hook.data_key, cast(Mapping[str, Any], result)
-                    )
+                    context.set_hook_data(hook.data_key, result)
                 else:
                     LOGGER.debug(
                         "hook %s returned result data but no data key set; ignoring",

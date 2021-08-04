@@ -45,7 +45,7 @@ Only the following actions allow pre/post hooks:
     :type: Optional[str]
     :value: None
 
-    If set, and the hook returns data (a dictionary), the results will be stored in :attr:`CfnginContext.hook_data <runway.context.CfnginContext.hook_data>` with the ``data_key`` as its key.
+    If set, and the hook returns data (a dictionary or ``pydantic.BaseModel``), the results will be stored in :attr:`CfnginContext.hook_data <runway.context.CfnginContext.hook_data>` with the ``data_key`` as its key.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -1546,7 +1546,7 @@ It must return ``False`` or a falsy object if it failed.
 This signifies to CFNgin whether or not to halt execution if the hook is :attr:`~cfngin.hook.required`.
 If a |Dict| or :class:`~runway.utils.MutableMap` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
 It will be stored as ``context.hook_data[data_key]`` where :attr:`~cfngin.hook.data_key` is the value set in the hook definition.
-If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict| or :class:`~runway.utils.MutableMap`, it will not be added to the context object.
+If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict|, :class:`~runway.utils.MutableMap`, or ``pydantic.BaseModel``, it will not be added to the context object.
 
 If using boto3 in a hook, use :meth:`context.get_session() <runway.context.CfnginContext.get_session>` instead of creating a new session to ensure the correct credentials are used.
 
