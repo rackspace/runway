@@ -1,4 +1,4 @@
-"""Test Runway utils."""
+"""Test runway.utils.__init__."""
 # pylint: disable=no-self-use
 # pyright: basic
 from __future__ import annotations

@@ -229,6 +229,7 @@ good-names = [
   "db",
   "f",
   "fn",
+  "fp",
   "gb",
   "i",
   "id",
@@ -319,7 +320,7 @@ ignored-classes = [
   "runway.config.ConfigComponent",
   "runway.utils.MutableMap",
 ]
-ignored-modules = ["distutils"]
+ignored-modules = ["_typeshed", "distutils"]
 
 
 [tool.pyright]
