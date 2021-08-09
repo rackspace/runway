@@ -1068,7 +1068,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "moto"
-version = "2.2.0"
+version = "2.2.1"
 description = "A library that allows your python tests to easily mock out the boto library"
 category = "dev"
 optional = false
@@ -1078,7 +1078,6 @@ python-versions = "*"
 boto3 = ">=1.9.201"
 botocore = ">=1.12.201"
 cryptography = ">=3.3.1"
-docker = {version = ">=2.5.1", optional = true, markers = "extra == \"ec2\""}
 Jinja2 = ">=2.10.1"
 MarkupSafe = "!=2.0.0a1"
 more-itertools = "*"
@@ -1100,14 +1099,12 @@ cloudformation = ["docker (>=2.5.1)", "PyYAML (>=5.1)", "cfn-lint (>=0.4.0)"]
 cognitoidp = ["python-jose[cryptography] (>=3.1.0,<4.0.0)", "ecdsa (<0.15)"]
 dynamodb2 = ["docker (>=2.5.1)"]
 dynamodbstreams = ["docker (>=2.5.1)"]
-ec2 = ["docker (>=2.5.1)", "sshpubkeys (>=3.1.0)"]
+ec2 = ["sshpubkeys (>=3.1.0)"]
+efs = ["sshpubkeys (>=3.1.0)"]
 iotdata = ["jsondiff (>=1.1.2)"]
 s3 = ["PyYAML (>=5.1)"]
 server = ["PyYAML (>=5.1)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "ecdsa (<0.15)", "docker (>=2.5.1)", "jsondiff (>=1.1.2)", "aws-xray-sdk (>=0.93,!=0.96)", "idna (>=2.5,<3)", "cfn-lint (>=0.4.0)", "sshpubkeys (>=3.1.0)", "flask", "flask-cors"]
-ses = ["docker (>=2.5.1)"]
-sns = ["docker (>=2.5.1)"]
-sqs = ["docker (>=2.5.1)"]
-ssm = ["docker (>=2.5.1)", "PyYAML (>=5.1)"]
+ssm = ["PyYAML (>=5.1)"]
 xray = ["aws-xray-sdk (>=0.93,!=0.96)"]
 
 [[package]]
@@ -2669,8 +2666,8 @@ more-itertools = [
     {file = "more_itertools-8.8.0-py3-none-any.whl", hash = "sha256:2cf89ec599962f2ddc4d568a05defc40e0a587fbc10d5989713638864c36be4d"},
 ]
 moto = [
-    {file = "moto-2.2.0-py2.py3-none-any.whl", hash = "sha256:01cae56a272a5bf952335df854a8e616f7e6dbb135f88d5f00b979be61bfb448"},
-    {file = "moto-2.2.0.tar.gz", hash = "sha256:54824ad7fb5040d60558f7f34e0cb32e2de1d97612c03a1f9accfe3d5b94d2a6"},
+    {file = "moto-2.2.1-py2.py3-none-any.whl", hash = "sha256:ab9f7114bf5b60e9d3ae518c0694bf53e111a5c0c195b19e89707c97ab71b53c"},
+    {file = "moto-2.2.1.tar.gz", hash = "sha256:4ea538fe090b964c22bb98a6f87d3c589eaf754893d297d58b74dedb94d4448c"},
 ]
 mypy-boto3 = [
     {file = "mypy-boto3-1.18.5.tar.gz", hash = "sha256:9e9424d380a1e57ce6cd97d192e93a18855c08c88a4b53d7423bd0e2b0dd17e8"},
