@@ -70,7 +70,7 @@ typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.8\""
 
 [[package]]
 name = "aws-sam-translator"
-version = "1.36.0"
+version = "1.38.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 category = "main"
 optional = false
@@ -509,19 +509,19 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.52.0"
+version = "0.53.0"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
-aws-sam-translator = ">=1.36.0"
-jsonpatch = {version = "*", markers = "python_version != \"3.4\""}
+aws-sam-translator = ">=1.38.0"
+jsonpatch = "*"
 jsonschema = ">=3.0,<4.0"
 junit-xml = ">=1.9,<2.0"
 networkx = {version = ">=2.4,<3.0", markers = "python_version >= \"3.5\""}
-pyyaml = {version = ">=5.4", markers = "python_version != \"3.4\" and python_version != \"3.5\""}
+pyyaml = {version = ">5.4", markers = "python_version != \"3.5\""}
 six = ">=1.11"
 
 [[package]]
@@ -2264,9 +2264,9 @@ awacs = [
     {file = "awacs-2.0.0.tar.gz", hash = "sha256:af4a3f754f18726425c6a0faf758624e486dc18d5d8da6faf9312fce5a2efbd3"},
 ]
 aws-sam-translator = [
-    {file = "aws-sam-translator-1.36.0.tar.gz", hash = "sha256:fa1b990d9329d19052e7b91cf0b19371ed9d31a529054b616005884cd662b584"},
-    {file = "aws_sam_translator-1.36.0-py2-none-any.whl", hash = "sha256:4195ae8196f04803e7f0384a2b5ccd8c2b06ce0d8dc408aa1f1ce96c23bcf39d"},
-    {file = "aws_sam_translator-1.36.0-py3-none-any.whl", hash = "sha256:f7d51b661fe1f5613a882f4733d1c92eff4dac36a076eafd18031d209b178695"},
+    {file = "aws-sam-translator-1.38.0.tar.gz", hash = "sha256:0ecadda9cf5ab2318f57f1253181a2151e4c53cd35d21717a923c075a5a65cb6"},
+    {file = "aws_sam_translator-1.38.0-py2-none-any.whl", hash = "sha256:dc6b816bb5cfd9709299f9b263fc0cf5ae60aca4166d1c90413ece651f1556bb"},
+    {file = "aws_sam_translator-1.38.0-py3-none-any.whl", hash = "sha256:ee7c7c5e44ec67202622ca877140545496527ffcc45da3beeda966f007443a88"},
 ]
 babel = [
     {file = "Babel-2.9.1-py2.py3-none-any.whl", hash = "sha256:ab49e12b91d937cd11f0b67cb259a57ab4ad2b59ac7a3b41d6c06c0ac5b0def9"},
@@ -2359,8 +2359,8 @@ cfn-flip = [
     {file = "cfn_flip-1.2.3.tar.gz", hash = "sha256:2bed32a1f4dca26dc64178d52511fd4ef778b5ccbcf32559cac884ace75bde6a"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.52.0.tar.gz", hash = "sha256:f26d30bfd6e8ef4f3563c9d3bc5499728eaf614b040563448d2063a2de730308"},
-    {file = "cfn_lint-0.52.0-py3-none-any.whl", hash = "sha256:3d345b0427d34d2a30f2ce4733da17840b8216418fab03ebc278f7eefb2a573f"},
+    {file = "cfn-lint-0.53.0.tar.gz", hash = "sha256:b7f5964842f7a44c5af9c61d64308dc4bcb718cf5de5428781d5564e9663463d"},
+    {file = "cfn_lint-0.53.0-py3-none-any.whl", hash = "sha256:d17359e3ca9477eccaea700fac4bf028f5bc368a338c017adde5187f2691cab8"},
 ]
 chardet = [
     {file = "chardet-4.0.0-py2.py3-none-any.whl", hash = "sha256:f864054d66fd9118f2e67044ac8981a54775ec5b67aed0441892edb553d21da5"},
