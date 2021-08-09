@@ -1920,7 +1920,7 @@ dev = ["transifex-client", "sphinxcontrib-httpdomain", "bump2version"]
 
 [[package]]
 name = "sphinx-tabs"
-version = "3.1.0"
+version = "3.2.0"
 description = "Tabbed views for Sphinx"
 category = "main"
 optional = true
@@ -1932,7 +1932,7 @@ pygments = "*"
 sphinx = ">=2,<5"
 
 [package.extras]
-code_style = ["pre-commit (==2.6)"]
+code_style = ["pre-commit (==2.13.0)"]
 testing = ["coverage", "pytest (>=3.6,<4)", "pytest-cov", "pytest-regressions", "pygments", "sphinx-testing", "bs4", "rinohtype"]
 
 [[package]]
@@ -2449,8 +2449,10 @@ cryptography = [
     {file = "cryptography-3.4.7-cp36-abi3-win_amd64.whl", hash = "sha256:de4e5f7f68220d92b7637fc99847475b59154b7a1b3868fb7385337af54ac9ca"},
     {file = "cryptography-3.4.7-pp36-pypy36_pp73-manylinux2010_x86_64.whl", hash = "sha256:26965837447f9c82f1855e0bc8bc4fb910240b6e0d16a664bb722df3b5b06873"},
     {file = "cryptography-3.4.7-pp36-pypy36_pp73-manylinux2014_x86_64.whl", hash = "sha256:eb8cc2afe8b05acbd84a43905832ec78e7b3873fb124ca190f574dca7389a87d"},
+    {file = "cryptography-3.4.7-pp37-pypy37_pp73-macosx_10_10_x86_64.whl", hash = "sha256:b01fd6f2737816cb1e08ed4807ae194404790eac7ad030b34f2ce72b332f5586"},
     {file = "cryptography-3.4.7-pp37-pypy37_pp73-manylinux2010_x86_64.whl", hash = "sha256:7ec5d3b029f5fa2b179325908b9cd93db28ab7b85bb6c1db56b10e0b54235177"},
     {file = "cryptography-3.4.7-pp37-pypy37_pp73-manylinux2014_x86_64.whl", hash = "sha256:ee77aa129f481be46f8d92a1a7db57269a2f23052d5f2433b4621bb457081cc9"},
+    {file = "cryptography-3.4.7-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:bf40af59ca2465b24e54f671b2de2c59257ddc4f7e5706dbd6930e26823668d3"},
     {file = "cryptography-3.4.7.tar.gz", hash = "sha256:3d10de8116d25649631977cb37da6cbdd2d6fa0e0281d014a5b7d337255ca713"},
 ]
 decorator = [
@@ -3038,8 +3040,8 @@ sphinx-rtd-theme = [
     {file = "sphinx_rtd_theme-0.5.2.tar.gz", hash = "sha256:32bd3b5d13dc8186d7a42fc816a23d32e83a4827d7d9882948e7b837c232da5a"},
 ]
 sphinx-tabs = [
-    {file = "sphinx-tabs-3.1.0.tar.gz", hash = "sha256:5eee2a869b1226e1f618f0c7ed267e5e3c24425565e6313cad80d00a7119694f"},
-    {file = "sphinx_tabs-3.1.0-py3-none-any.whl", hash = "sha256:63df94e84bc05eb8598419a313ffc24455a14d1a580d174bb748404063958a67"},
+    {file = "sphinx-tabs-3.2.0.tar.gz", hash = "sha256:33137914ed9b276e6a686d7a337310ee77b1dae316fdcbce60476913a152e0a4"},
+    {file = "sphinx_tabs-3.2.0-py3-none-any.whl", hash = "sha256:1e1b1846c80137bd81a78e4a69b02664b98b1e1da361beb30600b939dfc75065"},
 ]
 sphinxcontrib-apidoc = [
     {file = "sphinxcontrib-apidoc-0.3.0.tar.gz", hash = "sha256:729bf592cf7b7dd57c4c05794f732dc026127275d785c2a5494521fdde773fb9"},
