@@ -77,7 +77,17 @@ def run_module_command(
     exit_on_error: bool = True,
     logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
 ) -> None:
-    """Shell out to provisioner command."""
+    """Shell out to provisioner command.
+
+    Args:
+        cmd_list: Command to run.
+        env_vars: Environment variables.
+        exit_on_error: If true, ``subprocess.CalledProcessError`` will be caught
+            and the resulting exit code will be passed to ``sys.exit()``.
+            If false, the error will not be caught within this function.
+            logger: Optionally, supply a logger to use.
+
+    """
     logger.debug("running command: %s", " ".join(cmd_list))
     if exit_on_error:
         try:

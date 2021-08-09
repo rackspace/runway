@@ -181,19 +181,23 @@ class TestCloudDevelopmentKit:
             "diff", args_list=["stack_name"], include_context=True
         )
 
-    def test_cdk_diff_raise_called_process_error(
+    @pytest.mark.parametrize("return_code", [1, 2])
+    def test_cdk_diff_catch_called_process_error_sys_exit(
         self,
         mocker: MockerFixture,
+        return_code: int,
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
-        """Test cdk_diff raise CalledProcessError."""
+        """Test cdk_diff catch CalledProcessError and call sys.exit() with return code."""
         mocker.patch.object(CloudDevelopmentKit, "gen_cmd")
         mocker.patch(
-            f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, "")
+            f"{MODULE}.run_module_command",
+            side_effect=CalledProcessError(return_code, ""),
         )
-        with pytest.raises(CalledProcessError):
+        with pytest.raises(SystemExit) as excinfo:
             CloudDevelopmentKit(runway_context, module_root=tmp_path).cdk_diff()
+        assert excinfo.value.args == (return_code,)
 
     def test_cdk_list(
         self,
