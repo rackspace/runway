@@ -20,6 +20,38 @@ Prerequisites
 We strongly recommend you commit the package-lock.json that is generated after running ``npm install``.
 
 
+***************
+Recommendations
+***************
+
+
+Feature Flags
+=============
+
+The AWS CDK uses `feature flags <https://docs.aws.amazon.com/cdk/latest/guide/featureflags.html>`__ to enable potentially breaking behaviors prior to the next major release that makes them default behaviors.
+Flags are stored as Runtime context values in ``cdk.json`` (or ``~/.cdk.json``).
+
+.. sphinx doesn't like displaying these feature flags as `data` so they have to be headers
+
+aws-cdk:enableDiffNoFail
+------------------------
+
+This feature flag is available in version ``^1.0.0``.
+
+If this is set to ``true`` (recommend), ``cdk diff`` will always exit with ``0``.
+With this set to ``false``, ``cdk diff`` will exit with a non-zero exit code if there is a diff.
+This will result in Runway exiting before all stacks/modules/deployments are processed.
+
+.. rubric:: Example
+.. code-block:: json
+
+  {
+    "context": {
+      "aws-cdk:enableDiffNoFail": true
+    },
+  }
+
+
 ************
 Environments
 ************
