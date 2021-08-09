@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 import platform
 import subprocess
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
@@ -152,16 +153,27 @@ class CloudDevelopmentKit(RunwayModuleNpm):
     def cdk_diff(self, stack_name: Optional[str] = None) -> None:
         """Execute ``cdk diff`` command."""
         self.logger.info("plan (in progress)")
-        run_module_command(
-            cmd_list=self.gen_cmd(
-                "diff",
-                args_list=[stack_name] if stack_name else None,
-                include_context=True,
-            ),
-            env_vars=self.ctx.env.vars,
-            exit_on_error=False,
-            logger=self.logger,
-        )
+        try:
+            run_module_command(
+                cmd_list=self.gen_cmd(
+                    "diff",
+                    args_list=[stack_name] if stack_name else None,
+                    include_context=True,
+                ),
+                env_vars=self.ctx.env.vars,
+                exit_on_error=False,
+                logger=self.logger,
+            )
+        except subprocess.CalledProcessError as exc:
+            self.logger.error("CDK returned %s when running diff", exc.returncode)
+            self.logger.error(
+                "this can be the result of a runtime error or the stack (%s) "
+                "differing from what has been deployed if aws-cdk:enableDiffNoFail "
+                "is not enabled",
+                stack_name,
+            )
+            # TODO raise error instead of sys.exit() when refactoring cli error handling
+            sys.exit(exc.returncode)
         self.logger.info("plan (complete)")
 
     def cdk_list(self) -> List[str]:
