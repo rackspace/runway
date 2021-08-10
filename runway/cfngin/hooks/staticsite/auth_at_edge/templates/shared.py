@@ -325,7 +325,8 @@ def http_post_with_retry(url, data, headers):
         try:
             encoded_data = urlencode(data).encode()
             req = request.Request(url, encoded_data, headers)
-            res = request.urlopen(req).read()
+            with request.urlopen(req) as opened_url:
+                res = opened_url.read()
             read = res.decode("utf-8")
             json_data = json.loads(read)
             return json_data
