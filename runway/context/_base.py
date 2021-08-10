@@ -87,6 +87,11 @@ class BaseContext:
     ) -> boto3.Session:
         """Create a thread-safe boto3 session.
 
+        If ``profile`` is provided, it will take priority.
+
+        If no credential arguments are passed, will attempt to find them in
+        environment variables.
+
         Args:
             aws_access_key_id: AWS Access Key ID.
             aws_secret_access_key: AWS secret Access Key.
@@ -104,17 +109,27 @@ class BaseContext:
                 profile,
                 region or "default",
             )
-        elif aws_access_key_id:
-            self.logger.debug(
-                'building session with Access Key "%s" in region "%s"',
-                aws_access_key_id,
-                region or "default",
+        else:  # use explicit values or grab values from env vars
+            aws_access_key_id = aws_access_key_id or self.env.vars.get(
+                "AWS_ACCESS_KEY_ID"
             )
+            aws_secret_access_key = aws_secret_access_key or self.env.vars.get(
+                "AWS_SECRET_ACCESS_KEY"
+            )
+            aws_session_token = aws_session_token or self.env.vars.get(
+                "AWS_SESSION_TOKEN"
+            )
+            if aws_access_key_id:
+                self.logger.debug(
+                    'building session with Access Key "%s" in region "%s"',
+                    aws_access_key_id,
+                    region or "default",
+                )
         session = boto3.Session(
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
             aws_session_token=aws_session_token,
-            botocore_session=Session(),  # type: ignore
+            botocore_session=Session(),
             region_name=region,
             profile_name=profile,
         )

@@ -1,0 +1,8 @@
+namespace: ${namespace}
+cfngin_bucket: ""
+
+sys_path: ../fixtures
+
+stacks:
+  - name: test-assume-role
+    class_path: blueprints.Dummy

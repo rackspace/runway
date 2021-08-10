@@ -1,0 +1,6 @@
+account_id:
+  test: "523485371024"
+  test-alt: "395611358874"
+
+runner_role:
+  test-alt: arn:aws:iam::395611358874:role/runway-test-infrastructure-gh-action-runner
