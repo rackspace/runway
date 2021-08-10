@@ -502,7 +502,7 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
         "merged with the variables defined here.",
     )
     sys_path: Path = Field(
-        Path.cwd(),
+        "./",
         description="Directory to use as the root of a relative 'file_path'. "
         "If not provided, the current working directory is used.",
     )
