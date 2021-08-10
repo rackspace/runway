@@ -131,6 +131,8 @@ class TestRunwayDeploymentDefinition:
 
         assert isinstance(result, list)
         assert len(result) == 1
+        # for some reason, the current version of pylint does not see this as list
+        # pylint: disable=unsubscriptable-object
         assert result[0]._data.dict(exclude_unset=True) == data[0]
 
     def test_register_variable(self) -> None:
