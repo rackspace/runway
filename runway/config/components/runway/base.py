@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from abc import abstractclassmethod
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, cast
 
 from ...._logging import PrefixAdaptor
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-class ConfigComponentDefinition:
+class ConfigComponentDefinition(ABC):
     """Base class for Runway config components."""
 
     _data: ConfigProperty
@@ -99,15 +99,16 @@ class ConfigComponentDefinition:
             name=var_name, value=var_value, variable_type="runway"
         )
 
-    @abstractclassmethod
-    def parse_obj(cls, obj: Any) -> ConfigComponentDefinition:  # noqa
+    @classmethod
+    @abstractmethod
+    def parse_obj(cls, obj: Any) -> ConfigComponentDefinition:
         """Parse a python object into this class.
 
         Args:
             obj: The object to parse.
 
         """
-        raise NotImplementedError  # cov: ignore
+        raise NotImplementedError
 
     def __contains__(self, name: str) -> bool:
         """Implement evaluation of 'in' conditional."""
