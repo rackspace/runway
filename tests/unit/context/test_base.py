@@ -47,7 +47,16 @@ def mock_sso_botocore_session(mocker: MockerFixture) -> MagicMock:
 class TestBaseContext:
     """Test runway.context._base.BaseContext."""
 
-    env = DeployEnvironment(explicit_name="test")
+    env = DeployEnvironment(
+        environ={
+            "AWS_ACCESS_KEY_ID": "testing",
+            "AWS_SECRET_ACCESS_KEY": "testing",
+            "AWS_SESSION_TOKEN": "foobar",
+            "AWS_DEFAULT_REGION": "us-east-1",
+            "AWS_REGION": "us-east-1",
+        },
+        explicit_name="test",
+    )
 
     def test_boto3_credentials(self, mocker: MockerFixture) -> None:
         """Test boto3_credentials."""
@@ -99,9 +108,9 @@ class TestBaseContext:
         ctx = BaseContext(deploy_environment=self.env)
         assert ctx.get_session() == mock_boto3_session.return_value
         mock_boto3_session.assert_called_once_with(
-            aws_access_key_id=None,
-            aws_secret_access_key=None,
-            aws_session_token=None,
+            aws_access_key_id=self.env.vars["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=self.env.vars["AWS_SECRET_ACCESS_KEY"],
+            aws_session_token=self.env.vars["AWS_SESSION_TOKEN"],
             botocore_session=mock_sso_botocore_session.return_value,
             region_name=None,
             profile_name=None,
@@ -154,9 +163,9 @@ class TestBaseContext:
         ctx = BaseContext(deploy_environment=self.env)
         assert ctx.get_session(region="us-east-2") == mock_boto3_session.return_value
         mock_boto3_session.assert_called_once_with(
-            aws_access_key_id=None,
-            aws_secret_access_key=None,
-            aws_session_token=None,
+            aws_access_key_id=self.env.vars["AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=self.env.vars["AWS_SECRET_ACCESS_KEY"],
+            aws_session_token=self.env.vars["AWS_SESSION_TOKEN"],
             botocore_session=mock_sso_botocore_session.return_value,
             region_name="us-east-2",
             profile_name=None,
