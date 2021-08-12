@@ -14,7 +14,10 @@ defaults:
 
 
 env:
+  AWS_DEFAULT_OUTPUT: json
   AWS_DEFAULT_REGION: us-east-1
+  AWS_MAX_ATTEMPTS: 20  # retry attempts for AWS API calls
+  AWS_RETRY_MODE: standard  # defaults to "legacy"; this handles more errors
   PYTEST_ADDOPTS: --color=yes
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
 
