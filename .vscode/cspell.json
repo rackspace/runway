@@ -68,6 +68,7 @@
         "fstring",
         "markexpr",
         "Ngin",
-        "rglob"
+        "rglob",
+        "unsubscriptable"
     ]
 }

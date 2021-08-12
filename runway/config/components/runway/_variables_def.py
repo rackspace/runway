@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, cast
 
 import yaml
 
@@ -21,8 +21,8 @@ class RunwayVariablesDefinition(MutableMap):
 
     default_names = ["runway.variables.yml", "runway.variables.yaml"]
 
-    # used to track persistent state on the class
-    __has_notified_missing_file = False  # tracked to only log the message once
+    # used to track persistent state on the class to only log the message once
+    _has_notified_missing_file: ClassVar[bool] = False
 
     def __init__(self, data: RunwayVariablesDefinitionModel) -> None:
         """Instantiate class."""
@@ -46,12 +46,12 @@ class RunwayVariablesDefinition(MutableMap):
                 LOGGER.verbose("found variables file: %s", test_path)
                 return yaml.safe_load(test_path.read_text())
 
-        if not self.__class__.__has_notified_missing_file:
+        if not self._has_notified_missing_file:
             LOGGER.info(
                 "could not find %s in the current directory; continuing without a variables file",
                 " or ".join(self.default_names),
             )
-            self.__class__.__has_notified_missing_file = True
+            self.__class__._has_notified_missing_file = True
         return {}
 
     @classmethod

@@ -831,7 +831,7 @@ class SourceProcessor:
         ls_remote_output = subprocess.check_output(["git", "ls-remote", uri, ref])
         # incorrectly detected - https://github.com/PyCQA/pylint/issues/3045
         if b"\t" in ls_remote_output:  # pylint: disable=unsupported-membership-test
-            commit_id = ls_remote_output.split(b"\t")[0]
+            commit_id = ls_remote_output.split(b"\t", maxsplit=1)[0]
             LOGGER.debug("matching commit id found: %s", commit_id)
             return commit_id.decode()
         raise ValueError(f'Ref "{ref}" not found for repo {uri}.')

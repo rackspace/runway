@@ -583,9 +583,9 @@ class RequestParamsMapper:
             "content_language": "ContentLanguage",
             "expires": "Expires",
         }
-        for cli_param_name in general_param_translation:
+        for cli_param_name, cli_param_value in general_param_translation.items():
             if config_params.get(cli_param_name):
-                request_param_name = general_param_translation[cli_param_name]
+                request_param_name = cli_param_value
                 request_params[request_param_name] = config_params[cli_param_name]
         cls._set_grant_params(request_params, config_params)
 

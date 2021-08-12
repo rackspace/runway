@@ -624,6 +624,8 @@ class TestVariableValueList:
         """Test __getitem__."""
         obj = VariableValueList(["val0", "val1"])
         assert obj[1].value == "val1"
+        # for some reason, the current version of pylint does not see this as iterable
+        # pylint: disable=not-an-iterable
         assert [i.value for i in obj[:2]] == ["val0", "val1"]
 
     def test_init(self, mocker: MockerFixture) -> None:

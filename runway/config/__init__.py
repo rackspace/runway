@@ -361,7 +361,8 @@ class CfnginConfig(BaseConfig):
         if processor.configs_to_merge:
             for i in processor.configs_to_merge:
                 LOGGER.debug("merging in remote config: %s", i)
-                config = merge_dicts(yaml.safe_load(open(i)), config)
+                with open(i, "rb") as opened_file:
+                    config = merge_dicts(yaml.safe_load(opened_file), config)
             return cls.resolve_raw_data(yaml.dump(config), parameters=parameters or {})
         return raw_data
 

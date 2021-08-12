@@ -76,7 +76,7 @@ class Git(Source):
         LOGGER.debug("getting commit ID from repo: %s", " ".join(cmd))
         ls_remote_output = subprocess.check_output(cmd)
         if b"\t" in ls_remote_output:
-            commit_id = ls_remote_output.split(b"\t")[0].decode()
+            commit_id = ls_remote_output.split(b"\t", maxsplit=1)[0].decode()
             LOGGER.debug("matching commit id found: %s", commit_id)
             return commit_id
         raise ValueError(f'Ref "{ref}" not found for repo {self.uri}.')

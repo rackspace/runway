@@ -23,7 +23,7 @@ class XrefLookup(LookupHandler):
     DEPRECATION_MSG = "xref Lookup has been deprecated; use the cfn lookup instead"
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(  # pylint: disable=arguments-differ,arguments-renamed
         cls, value: str, provider: Provider, **_: Any
     ) -> str:
         """Fetch an output from the designated, fully qualified stack.

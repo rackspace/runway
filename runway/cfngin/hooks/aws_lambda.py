@@ -538,7 +538,7 @@ def _pip_has_no_color_option(python_path: str) -> bool:
         )
         if isinstance(pip_version_string, bytes):  # type: ignore
             pip_version_string = pip_version_string.decode()
-        if int(pip_version_string.split(".")[0]) > 10:
+        if int(pip_version_string.split(".", maxsplit=1)[0]) > 10:
             return True
     except (AttributeError, ValueError, subprocess.CalledProcessError):
         LOGGER.debug("error checking pip version; assuming it to be pre-v10")
