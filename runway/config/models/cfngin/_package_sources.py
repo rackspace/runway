@@ -55,7 +55,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         title = "CFNgin Git Repository Package Source Definition"
 
     @root_validator
-    def _validate_one_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
+    def _validate_one_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Ensure that only one ref is defined."""
         ref_keys = ["branch", "commit", "tag"]
         count_ref_defs = sum(bool(values.get(i)) for i in ref_keys)

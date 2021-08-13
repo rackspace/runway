@@ -37,7 +37,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
 
     @root_validator
     def _autofill_content_type(  # pylint: disable=no-self-argument,no-self-use
-        cls, values: Dict[str, Any]  # noqa: N805
+        cls, values: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Attempt to fill content_type if not provided."""
         if values.get("content_type"):
@@ -51,7 +51,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
 
     @root_validator(pre=True)
     def _validate_content_or_file(  # pylint: disable=no-self-argument,no-self-use
-        cls, values: Dict[str, Any]  # noqa: N805
+        cls, values: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Validate that content or file is provided."""
         content = values.get("content")

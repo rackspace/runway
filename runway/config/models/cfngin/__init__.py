@@ -161,18 +161,14 @@ class CfnginStackDefinitionModel(ConfigProperty):
     )(utils.resolve_path_field)
 
     @root_validator(pre=True)
-    def _validate_class_and_template(
-        cls, values: Dict[str, Any]  # noqa: N805
-    ) -> Dict[str, Any]:
+    def _validate_class_and_template(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Validate class_path and template_path are not both provided."""
         if values.get("class_path") and values.get("template_path"):
             raise ValueError("only one of class_path or template_path can be defined")
         return values
 
     @root_validator(pre=True)
-    def _validate_class_or_template(
-        cls, values: Dict[str, Any]  # noqa: N805
-    ) -> Dict[str, Any]:
+    def _validate_class_or_template(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Ensure that either class_path or template_path is defined."""
         # if the stack is disabled or locked, it is ok that these are missing
         required = values.get("enabled", True) and not values.get("locked", False)
@@ -291,7 +287,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
 
     @validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", pre=True)
     def _convert_hook_definitions(
-        cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]  # noqa: N805
+        cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]
     ) -> List[Dict[str, Any]]:
         """Convert hooks defined as a dict to a list."""
         if isinstance(v, list):
@@ -300,7 +296,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
 
     @validator("stacks", pre=True)
     def _convert_stack_definitions(
-        cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]  # noqa: N805
+        cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]
     ) -> List[Dict[str, Any]]:
         """Convert stacks defined as a dict to a list."""
         if isinstance(v, list):
@@ -313,7 +309,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
 
     @validator("stacks")
     def _validate_unique_stack_names(
-        cls, stacks: List[CfnginStackDefinitionModel]  # noqa: N805
+        cls, stacks: List[CfnginStackDefinitionModel]
     ) -> List[CfnginStackDefinitionModel]:
         """Validate that each stack has a unique name."""
         stack_names = [stack.name for stack in stacks]
