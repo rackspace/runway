@@ -177,9 +177,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         "supported_identity_providers",
         pre=True,
     )
-    def _convert_comma_delimited_list(
-        cls, v: Union[List[str], str]  # noqa: N805
-    ) -> List[str]:
+    def _convert_comma_delimited_list(cls, v: Union[List[str], str]) -> List[str]:
         """Convert comma delimited lists to a string."""
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]

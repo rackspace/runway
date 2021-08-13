@@ -61,7 +61,7 @@ class RunwayTerraformModuleOptionsDataModel(ConfigProperty):
 
     @validator("args", pre=True)
     def _convert_args(
-        cls, v: Union[List[str], Dict[str, List[str]]]  # noqa: N805
+        cls, v: Union[List[str], Dict[str, List[str]]]
     ) -> Dict[str, List[str]]:
         """Convert args from list to dict."""
         if isinstance(v, list):

@@ -124,13 +124,13 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
         title = "Runway Deployment.assume_role Definition"
 
     @validator("arn")
-    def _convert_arn_null_value(cls, v: Optional[str]) -> Optional[str]:  # noqa: N805
+    def _convert_arn_null_value(cls, v: Optional[str]) -> Optional[str]:
         """Convert a "nul" string into type(None)."""
         null_strings = ["null", "none", "undefined"]
         return None if isinstance(v, str) and v.lower() in null_strings else v
 
     @validator("duration", pre=True)
-    def _validate_duration(cls, v: Union[int, str]) -> Union[int, str]:  # noqa: N805
+    def _validate_duration(cls, v: Union[int, str]) -> Union[int, str]:
         """Validate duration is within the range allowed by AWS."""
         if isinstance(v, str):
             return v
@@ -294,9 +294,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             ]
 
     @root_validator(pre=True)
-    def _convert_simple_module(
-        cls, values: Dict[str, Any]  # noqa: N805
-    ) -> Dict[str, Any]:
+    def _convert_simple_module(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Convert simple modules to dicts."""
         modules = values.get("modules", [])
         result: List[Dict[str, Any]] = []
@@ -309,7 +307,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         return values
 
     @root_validator(pre=True)
-    def _validate_regions(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
+    def _validate_regions(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Validate & simplify regions."""
         raw_regions = values.get("regions", [])
         parallel_regions = values.get("parallel_regions", [])
@@ -448,7 +446,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         use_enum_values = True
 
     @root_validator(pre=True)
-    def _validate_name(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
+    def _validate_name(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Validate module name."""
         if "name" in values:
             return values
@@ -461,7 +459,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         return values
 
     @root_validator(pre=True)
-    def _validate_path(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: N805
+    def _validate_path(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Validate path and sets a default value if needed."""
         if not values.get("path") and not values.get("parallel"):
             values["path"] = Path.cwd()
@@ -469,7 +467,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
 
     @validator("parallel", pre=True)
     def _validate_parallel(
-        cls, v: List[Union[Dict[str, Any], str]], values: Dict[str, Any]  # noqa: N805
+        cls, v: List[Union[Dict[str, Any], str]], values: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Validate parallel."""
         if v and values.get("path"):
@@ -602,9 +600,7 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         validate_assignment = True
 
     @root_validator(pre=True)
-    def _add_deployment_names(
-        cls, values: Dict[str, Any]  # noqa: N805
-    ) -> Dict[str, Any]:
+    def _add_deployment_names(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Add names to deployments that are missing them."""
         deployments = values.get("deployments", [])
         for i, deployment in enumerate(deployments):
