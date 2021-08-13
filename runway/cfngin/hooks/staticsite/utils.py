@@ -4,7 +4,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Union, cast
 
 import zgitignore
 
@@ -13,10 +13,12 @@ from ....utils import FileHash, change_dir
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from _typeshed import StrPath
+
 LOGGER = logging.getLogger(__name__)
 
 
-def calculate_hash_of_files(files: List[str], root: Path) -> str:
+def calculate_hash_of_files(files: Iterable[StrPath], root: Path) -> str:
     """Return a hash of all of the given files at the given root.
 
     Args:
@@ -28,7 +30,7 @@ def calculate_hash_of_files(files: List[str], root: Path) -> str:
 
     """
     file_hash = FileHash(hashlib.md5())
-    file_hash.add_files(sorted(files), relative_to=root)
+    file_hash.add_files(sorted(str(f) for f in files), relative_to=root)
     return file_hash.hexdigest
 
 
@@ -40,7 +42,7 @@ def get_hash_of_files(
     if not directories:
         directories = [{"path": "./"}]
 
-    files_to_hash: List[str] = []
+    files_to_hash: List[StrPath] = []
     for i in directories:
         ignorer = get_ignorer(
             root_path / cast(str, i["path"]), cast(List[str], i.get("exclusions"))
