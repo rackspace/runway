@@ -31,5 +31,8 @@ Then, adjust the delays between each item. Delays should be no longer than `300`
 
 ### Rendering
 
-To render a new copy of the gif, just run `terminalizer render runway-example.yml --output runway-example.gif`.
+To render a new copy of the gif, just run `terminalizer render runway-example.yml --output runway-example.gif --step 3`.
 This will take some time to complete.
+
+We are using `--step 3` (combine 3 steps/frames into one) and `config.quality: 30` to reduce the size of the GIF so it can be served from GitHub to be viewable on PyPi.
+In addition to these settings, the GIF must also be compressed ([GIF Compressor](https://gifcompressor.com/) was used) to achieve the <5MB size required (GitHub restriction).
