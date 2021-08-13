@@ -1,9 +1,10 @@
-"""Test Runway utils."""
+"""Test runway.utils.__init__."""
 # pylint: disable=no-self-use
 # pyright: basic
 from __future__ import annotations
 
 import datetime
+import hashlib
 import json
 import logging
 import os
@@ -22,11 +23,17 @@ from runway.utils import (
     argv,
     ensure_string,
     environ,
+    get_file_hash,
     load_object_from_string,
+    md5sum,
+    sha256sum,
 )
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest import LogCaptureFixture, MonkeyPatch
+    from pytest_mock import MockerFixture
 
 MODULE = "runway.utils"
 VALUE = {
@@ -244,7 +251,7 @@ class TestSafeHaven:
         expected_logs = ["entering a safe haven...", "resetting sys.modules..."]
 
         with SafeHaven() as obj:
-            from .fixtures import mock_hooks  # noqa pylint: disable=E,W,C
+            from ..fixtures import mock_hooks  # noqa pylint: disable=E,W,C
 
             assert sys.modules != orig_val
             obj.reset_sys_modules()
@@ -260,7 +267,7 @@ class TestSafeHaven:
 
         assert module not in sys.modules
         with SafeHaven(sys_modules_exclude=[module]) as obj:
-            from .fixtures import mock_hooks  # noqa pylint: disable=E,W,C
+            from ..fixtures import mock_hooks  # noqa pylint: disable=E,W,C
 
             assert module in sys.modules
             obj.reset_sys_modules()
@@ -340,6 +347,19 @@ def test_environ() -> None:
     assert os.environ == orig_expected, "validate value returned to original"
 
 
+@pytest.mark.parametrize("alg", ["sha256", "md5"])
+def test_get_file_hash(alg: str, tmp_path: Path) -> None:
+    """Test get_file_hash."""
+    contents = b"Hello world"
+    expected = hashlib.new(alg)
+    expected.update(contents)
+
+    test_file = tmp_path / "test.txt"
+    test_file.write_bytes(contents)
+
+    assert get_file_hash(str(test_file), alg) == expected.hexdigest()  # type: ignore
+
+
 def test_load_object_from_string() -> None:
     """Test load object from string."""
     tests = (
@@ -382,3 +402,22 @@ def test_load_object_from_string_reload_conditions(monkeypatch: MonkeyPatch) -> 
 
     load_object_from_string(mock_hook, try_reload=True)
     mock_reload.assert_called_once()
+
+
+def test_md5sum(mocker: MockerFixture) -> None:
+    """Test md5sum."""
+    mock_get_file_hash = mocker.patch(f"{MODULE}.get_file_hash", return_value="success")
+    assert md5sum("test.txt") == mock_get_file_hash.return_value
+    mock_get_file_hash.assert_called_once_with("test.txt", "md5")
+
+
+def test_sha256sum(tmp_path: Path) -> None:
+    """Test sha256sum."""
+    contents = b"Hello world"
+    expected = hashlib.sha256()
+    expected.update(contents)
+
+    test_file = tmp_path / "test.txt"
+    test_file.write_bytes(contents)
+
+    assert sha256sum(str(test_file)) == expected.hexdigest()

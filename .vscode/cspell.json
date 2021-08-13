@@ -63,12 +63,14 @@
     "version": "0.1",
     "words": [
         "abstractmethod",
+        "ALGS",
         "codecov",
         "FQDNs",
         "fstring",
         "markexpr",
         "Ngin",
         "rglob",
+        "typeshed",
         "unsubscriptable"
     ]
 }

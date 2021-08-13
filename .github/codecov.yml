@@ -6,3 +6,9 @@ codecov:
 
 comment:
   after_n_builds: 2
+
+coverage:
+  status:
+    patch:
+      default:
+        threshold: 10

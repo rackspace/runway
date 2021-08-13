@@ -1,6 +1,7 @@
 """Kubectl version management."""
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 import platform
@@ -17,7 +18,7 @@ from typing_extensions import Final
 
 from ..compat import cached_property
 from ..exceptions import KubectlVersionNotSpecified
-from ..utils import get_file_hash
+from ..utils import FileHash
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:
@@ -47,28 +48,28 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
     # the ridiculousness should be short-lived as md5 & sha1 support won't last
     # long.
     try:
-        checksum_type = "sha512"
-        checksum_filename = filename + "." + checksum_type
-        LOGGER.debug("attempting download of kubectl %s checksum...", checksum_type)
+        hash_alg: "hashlib._Hash" = hashlib.sha512()
+        checksum_filename = filename + "." + hash_alg.name
+        LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
         download_request = requests.get(
             kb_url + "/" + checksum_filename, allow_redirects=True
         )
         download_request.raise_for_status()
     except requests.exceptions.HTTPError:
         try:
-            checksum_type = "sha256"
-            checksum_filename = filename + "." + checksum_type
-            LOGGER.debug("attempting download of kubectl %s checksum...", checksum_type)
+            hash_alg = hashlib.sha256()
+            checksum_filename = filename + "." + hash_alg.name
+            LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
             download_request = requests.get(
                 kb_url + "/" + checksum_filename, allow_redirects=True
             )
             download_request.raise_for_status()
         except requests.exceptions.HTTPError:
             try:
-                checksum_type = "sha1"
-                checksum_filename = filename + "." + checksum_type
+                hash_alg = hashlib.sha1()
+                checksum_filename = filename + "." + hash_alg.name
                 LOGGER.debug(
-                    "attempting download of kubectl %s checksum...", checksum_type
+                    "attempting download of kubectl %s checksum...", hash_alg.name
                 )
                 download_request = requests.get(
                     kb_url + "/" + checksum_filename, allow_redirects=True
@@ -76,10 +77,10 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
                 download_request.raise_for_status()
             except requests.exceptions.HTTPError:
                 try:
-                    checksum_type = "md5"
-                    checksum_filename = filename + "." + checksum_type
+                    hash_alg = hashlib.md5()
+                    checksum_filename = filename + "." + hash_alg.name
                     LOGGER.debug(
-                        "attempting download of kubectl %s checksum...", checksum_type
+                        "attempting download of kubectl %s checksum...", hash_alg.name
                     )
                     download_request = requests.get(
                         kb_url + "/" + checksum_filename, allow_redirects=True
@@ -94,15 +95,17 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
     else:
         kb_hash = download_request.content.decode().rstrip("\n")
 
-    if kb_hash != get_file_hash(os.path.join(download_dir, filename), checksum_type):
+    checksum = FileHash(hash_alg)
+    checksum.add_file(os.path.join(download_dir, filename))
+    if kb_hash != checksum.hexdigest:
         LOGGER.error(
             "downloaded kubectl %s does not match %s checksum %s",
             filename,
-            checksum_type,
+            hash_alg.name,
             kb_hash,
         )
         sys.exit(1)
-    LOGGER.debug("kubectl matched %s checksum...", checksum_type)
+    LOGGER.debug("kubectl matched %s checksum...", hash_alg.name)
 
 
 def download_kb_release(
