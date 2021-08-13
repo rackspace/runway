@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Union, cast
 
 import zgitignore
@@ -11,8 +12,6 @@ import zgitignore
 from ....utils import FileHash, change_dir
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from _typeshed import StrPath
 
 LOGGER = logging.getLogger(__name__)
@@ -57,9 +56,7 @@ def get_hash_of_files(
                     for filename in files:
                         filepath = os.path.join(root, filename)
                         if not ignorer.is_ignored(filepath):
-                            files_to_hash.append(
-                                filepath[2:] if filepath.startswith("./") else filepath
-                            )
+                            files_to_hash.append(Path(filepath).resolve())
 
     return calculate_hash_of_files(files_to_hash, root_path)
 
