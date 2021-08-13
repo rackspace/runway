@@ -1,6 +1,7 @@
 """Terraform version management."""
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -34,7 +35,7 @@ from typing_extensions import Final
 
 from ..compat import cached_property
 from ..exceptions import HclParserError
-from ..utils import get_hash_for_filename, merge_dicts, sha256sum
+from ..utils import FileHash, get_hash_for_filename, merge_dicts
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:
@@ -90,7 +91,9 @@ def download_tf_release(  # noqa pylint: disable=too-many-locals,too-many-branch
         handle_bin_download_error(exc, "Terraform")
 
     tf_hash = get_hash_for_filename(filename, os.path.join(download_dir, shasums_name))
-    if tf_hash != sha256sum(os.path.join(download_dir, filename)):
+    checksum = FileHash(hashlib.sha256())
+    checksum.add_file(os.path.join(download_dir, filename))
+    if tf_hash != checksum.hexdigest:
         LOGGER.error(
             "downloaded Terraform %s does not match sha256 %s", filename, tf_hash
         )

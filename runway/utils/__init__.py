@@ -54,6 +54,8 @@ AWS_ENV_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN
 DOC_SITE = "https://docs.onica.com/projects/runway"
 EMBEDDED_LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "embedded")
 
+LOGGER = logging.getLogger(__name__)
+
 
 class BaseModel(_BaseModel):
     """Base class for Runway models."""
@@ -814,7 +816,16 @@ def get_file_hash(
         "shake_256",
     ],
 ) -> str:
-    """Return cryptographic hash of file."""
+    """Return cryptographic hash of file.
+
+    .. deprecated:: 2.4.0
+        Use :class:`runway.utils.FileHash` instead.
+
+    """
+    LOGGER.warning(
+        "%s.get_file_hash is deprecated and will be removed in the next major release",
+        __name__,
+    )
     file_hash = getattr(hashlib, algorithm)()
     with open(filename, "rb") as stream:
         while True:
@@ -826,12 +837,30 @@ def get_file_hash(
 
 
 def md5sum(filename: str) -> str:
-    """Return MD5 hash of file."""
+    """Return MD5 hash of file.
+
+    .. deprecated:: 2.4.0
+        Use :class:`runway.utils.FileHash` instead.
+
+    """
+    LOGGER.warning(
+        "%s.md5sum is deprecated and will be removed in the next major release",
+        __name__,
+    )
     return get_file_hash(filename, "md5")
 
 
 def sha256sum(filename: str) -> str:
-    """Return SHA256 hash of file."""
+    """Return SHA256 hash of file.
+
+    .. deprecated:: 2.4.0
+        Use :class:`runway.utils.FileHash` instead.
+
+    """
+    LOGGER.warning(
+        "%s.sha256sum is deprecated and will be removed in the next major release",
+        __name__,
+    )
     sha256 = hashlib.sha256()
     with open(filename, "rb", buffering=0) as stream:
         mem_view = memoryview(bytearray(128 * 1024))

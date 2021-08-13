@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 import zgitignore
 
-from ....utils import change_dir
+from ....utils import FileHash, change_dir
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -27,21 +27,9 @@ def calculate_hash_of_files(files: List[str], root: Path) -> str:
         A hash of the hashes of the given files.
 
     """
-    file_hash = hashlib.md5()
-    for fname in sorted(files):
-        fileobj = root / fname
-        file_hash.update((fname + "\0").encode())
-        with open(fileobj, "rb") as filedes:
-            for chunk in iter(
-                lambda: filedes.read(4096),  # noqa pylint: disable=cell-var-from-loop
-                "",
-            ):
-                if not chunk:
-                    break
-                file_hash.update(chunk)
-            file_hash.update("\0".encode())
-
-    return file_hash.hexdigest()
+    file_hash = FileHash(hashlib.md5())
+    file_hash.add_files(sorted(files), relative_to=root)
+    return file_hash.hexdigest
 
 
 def get_hash_of_files(
