@@ -597,6 +597,7 @@ class TestParameter:
             ).update_tags()
         ssm_stubber.assert_no_pending_responses()
         assert "skipped updating tags; parameter test does not exist" in caplog.messages
+        assert "updated tags for parameter test" not in caplog.messages
 
 
 class TestSecureString:
