@@ -237,32 +237,39 @@ class _Parameter(CfnginHookProtocol):
         else:
             diff_tag_keys = [i["Key"] for i in current_tags]
 
-        if diff_tag_keys:
-            diff_tag_keys.sort()
-            self.client.remove_tags_from_resource(
-                ResourceId=self.args.name,
-                ResourceType="Parameter",
-                TagKeys=diff_tag_keys,
-            )
-            LOGGER.debug(
-                "removed tags for parameter %s: %s", self.args.name, diff_tag_keys
-            )
+        try:
+            if diff_tag_keys:
+                diff_tag_keys.sort()
+                self.client.remove_tags_from_resource(
+                    ResourceId=self.args.name,
+                    ResourceType="Parameter",
+                    TagKeys=diff_tag_keys,
+                )
+                LOGGER.debug(
+                    "removed tags for parameter %s: %s", self.args.name, diff_tag_keys
+                )
 
-        if self.args.tags:
-            tags_to_add = [
-                cast("TagTypeDef", tag.dict(by_alias=True)) for tag in self.args.tags
-            ]
-            self.client.add_tags_to_resource(
-                ResourceId=self.args.name,
-                ResourceType="Parameter",
-                Tags=tags_to_add,
+            if self.args.tags:
+                tags_to_add = [
+                    cast("TagTypeDef", tag.dict(by_alias=True))
+                    for tag in self.args.tags
+                ]
+                self.client.add_tags_to_resource(
+                    ResourceId=self.args.name,
+                    ResourceType="Parameter",
+                    Tags=tags_to_add,
+                )
+                LOGGER.debug(
+                    "added tags to parameter %s: %s",
+                    self.args.name,
+                    [tag["Key"] for tag in tags_to_add],
+                )
+        except self.client.exceptions.InvalidResourceId:
+            LOGGER.info(
+                "skipped updating tags; parameter %s does not exist", self.args.name
             )
-            LOGGER.debug(
-                "added tags to parameter %s: %s",
-                self.args.name,
-                [tag["Key"] for tag in tags_to_add],
-            )
-        LOGGER.info("updated tags for parameter %s", self.args.name)
+        else:
+            LOGGER.info("updated tags for parameter %s", self.args.name)
 
 
 class SecureString(_Parameter):

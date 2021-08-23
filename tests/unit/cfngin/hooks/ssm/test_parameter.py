@@ -522,6 +522,22 @@ class TestParameter:
                 cfngin_context, name="test", tags=new_tags, type="String"
             ).update_tags()
 
+    def test_update_tags_add_only_raise_client_error(
+        self, cfngin_context: CfnginContext, mocker: MockerFixture, ssm_stubber: Stubber
+    ) -> None:
+        """Test update_tags raise ClientError."""
+        new_tags = [
+            {"Key": "new", "Value": "new-value"},
+            {"Key": "retain", "Value": "retain"},
+        ]
+        mocker.patch.object(Parameter, "get_current_tags", return_value=[])
+        ssm_stubber.add_client_error("add_tags_to_resource")
+        with ssm_stubber, pytest.raises(ClientError):
+            assert Parameter(
+                cfngin_context, name="test", tags=new_tags, type="String"
+            ).update_tags()
+        ssm_stubber.assert_no_pending_responses()
+
     def test_update_tags_delete_only(
         self, cfngin_context: CfnginContext, mocker: MockerFixture, ssm_stubber: Stubber
     ) -> None:
@@ -545,6 +561,43 @@ class TestParameter:
             assert not Parameter(
                 cfngin_context, name="test", type="String"
             ).update_tags()
+
+    def test_update_tags_delete_only_raise_client_error(
+        self, cfngin_context: CfnginContext, mocker: MockerFixture, ssm_stubber: Stubber
+    ) -> None:
+        """Test update_tags raise ClientError."""
+        current_tags = [
+            {"Key": "new", "Value": "current-value"},
+            {"Key": "retain", "Value": "retain"},
+        ]
+        mocker.patch.object(Parameter, "get_current_tags", return_value=current_tags)
+        ssm_stubber.add_client_error("remove_tags_from_resource")
+        with ssm_stubber, pytest.raises(ClientError):
+            assert Parameter(cfngin_context, name="test", type="String").update_tags()
+        ssm_stubber.assert_no_pending_responses()
+
+    def test_update_tags_handle_invalid_resource_id(
+        self,
+        caplog: LogCaptureFixture,
+        cfngin_context: CfnginContext,
+        mocker: MockerFixture,
+        ssm_stubber: Stubber,
+    ) -> None:
+        """Test update_tags handle InvalidResourceId. Can only happen during add."""
+        caplog.set_level(LogLevels.INFO, logger=MODULE)
+        new_tags = [
+            {"Key": "new", "Value": "new-value"},
+            {"Key": "retain", "Value": "retain"},
+        ]
+        mocker.patch.object(Parameter, "get_current_tags", return_value=[])
+        ssm_stubber.add_client_error("add_tags_to_resource", "InvalidResourceId")
+        with ssm_stubber:
+            assert not Parameter(
+                cfngin_context, name="test", tags=new_tags, type="String"
+            ).update_tags()
+        ssm_stubber.assert_no_pending_responses()
+        assert "skipped updating tags; parameter test does not exist" in caplog.messages
+        assert "updated tags for parameter test" not in caplog.messages
 
 
 class TestSecureString:
