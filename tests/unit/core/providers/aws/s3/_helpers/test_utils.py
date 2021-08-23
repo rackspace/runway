@@ -315,7 +315,7 @@ class TestDeleteSourceSubscriber:
         future = Mock()
         assert not DeleteSourceSubscriber().on_done(future)
         assert isinstance(future.set_exception.call_args[0][0], NotImplementedError)
-        assert str(future.set_exception.call_args[0][0]) == "_delete_source()"
+        assert str(future.set_exception.call_args[0][0]) == "_delete_source()"  # type: ignore
 
 
 class TestDirectoryCreatorSubscriber:
