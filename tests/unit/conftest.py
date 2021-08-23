@@ -123,7 +123,7 @@ def yaml_fixtures(request: FixtureRequest, fixture_dir: str) -> Dict[str, Any]:
     )
     result: Dict[str, Any] = {}
     for file_path in file_paths:
-        with open(os.path.join(fixture_dir, file_path)) as _file:
+        with open(os.path.join(fixture_dir, file_path), encoding="utf-8") as _file:
             data = _file.read()
             result[file_path] = yaml.safe_load(data)
     return result

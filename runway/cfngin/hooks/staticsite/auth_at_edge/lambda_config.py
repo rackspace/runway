@@ -91,7 +91,7 @@ def write(  # pylint: disable=too-many-locals
     path = os.path.join(os.path.dirname(__file__), "templates", "shared.py")
     context_dict: Dict[str, Any] = {}
 
-    with open(path) as file_:
+    with open(path, encoding="utf-8") as file_:
         # Dynamically replace our configuration values
         # in the shared.py template file with actual
         # calculated values
@@ -102,7 +102,7 @@ def write(  # pylint: disable=too-many-locals
         filedir, temppath = mkstemp()
 
         # Save the file to a temp path
-        with open(temppath, "w") as tmp:
+        with open(temppath, "w", encoding="utf-8") as tmp:
             tmp.write(shared)
             config = temppath
         os.close(filedir)
@@ -120,7 +120,7 @@ def write(  # pylint: disable=too-many-locals
 
             # Save our dynamic configuration shared file to the
             # temporary folder
-            with open(config) as shared:
+            with open(config, encoding="utf-8") as shared:
                 raw = shared.read()
                 filename = "shared.py"
                 with open(os.path.join(dirpath, filename), "wb") as newfile:

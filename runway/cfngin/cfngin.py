@@ -96,7 +96,7 @@ class CFNgin:
             if os.path.isfile(file_path):
                 LOGGER.info("found environment file: %s", file_path)
                 self._env_file_name = file_path
-                with open(file_path, "r") as file_:
+                with open(file_path, "r", encoding="utf-8") as file_:
                     result.update(parse_environment(file_.read()))
         return MutableMap(**result)
 

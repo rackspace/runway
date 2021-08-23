@@ -101,7 +101,7 @@ def run_module_command(
 def use_npm_ci(path: Path) -> bool:
     """Return true if npm ci should be used in lieu of npm install."""
     # https://docs.npmjs.com/cli/ci#description
-    with open(os.devnull, "w") as fnull:
+    with open(os.devnull, "w", encoding="utf-8") as fnull:
         if (
             (path / "package-lock.json").is_file()
             or (path / "npm-shrinkwrap.json").is_file()

@@ -697,7 +697,7 @@ class Plan:
                 os.makedirs(blueprint_dir)
 
             LOGGER.info('writing stack "%s" -> %s', step.name, path)
-            with open(path, "w") as _file:
+            with open(path, "w", encoding="utf-8") as _file:
                 _file.write(blueprint.rendered)
 
             return True

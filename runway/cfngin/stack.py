@@ -151,7 +151,7 @@ class Stack:
         if not self._stack_policy:
             self._stack_policy = None
             if self.definition.stack_policy_path:
-                with open(self.definition.stack_policy_path) as file_:
+                with open(self.definition.stack_policy_path, encoding="utf-8") as file_:
                     self._stack_policy = file_.read()
 
         return self._stack_policy

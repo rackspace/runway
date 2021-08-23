@@ -177,7 +177,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
                         )
                     )
                 else:
-                    with open(template_path, "r") as template:
+                    with open(template_path, "r", encoding="utf-8") as template:
                         self._rendered = template.read()
             else:
                 raise InvalidConfig(f"Could not find template {self.raw_template_path}")

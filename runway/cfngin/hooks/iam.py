@@ -127,7 +127,7 @@ def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:
         try:
             contents = path.read()
         except AttributeError:
-            with open(utils.full_path(path)) as read_file:
+            with open(utils.full_path(path), encoding="utf-8") as read_file:
                 contents = read_file.read()
 
         if key == "certificate":
