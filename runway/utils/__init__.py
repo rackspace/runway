@@ -27,9 +27,11 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Iterable,
     Iterator,
     List,
     Optional,
+    Set,
     Type,
     Union,
     cast,
@@ -354,10 +356,10 @@ class SafeHaven(ContextManager["SafeHaven"]):
     # pylint: disable=redefined-outer-name
     def __init__(
         self,
-        argv: Optional[List[str]] = None,
+        argv: Optional[Iterable[str]] = None,
         environ: Optional[Dict[str, str]] = None,
-        sys_modules_exclude: Optional[List[str]] = None,
-        sys_path: Optional[List[str]] = None,
+        sys_modules_exclude: Optional[Iterable[str]] = None,
+        sys_path: Optional[Iterable[str]] = None,
     ) -> None:
         """Instantiate class.
 
@@ -378,7 +380,10 @@ class SafeHaven(ContextManager["SafeHaven"]):
         self.__sys_path = list(sys.path)
         # more informative origin for log statements
         self.logger = logging.getLogger("runway." + self.__class__.__name__)
-        self.sys_modules_exclude = sys_modules_exclude or []
+        self.sys_modules_exclude: Set[str] = (
+            set(sys_modules_exclude) if sys_modules_exclude else set()
+        )
+        self.sys_modules_exclude.add("runway")
 
         if isinstance(argv, list):
             sys.argv = argv

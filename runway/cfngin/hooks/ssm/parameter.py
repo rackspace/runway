@@ -1,4 +1,5 @@
 """AWS SSM Parameter Store hooks."""
+# pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
 import json
@@ -79,8 +80,7 @@ class ArgsDataModel(BaseModel):
         allow_population_by_field_name = True
         extra = Extra.ignore
 
-    @validator("policies", pre=True)
-    @classmethod
+    @validator("policies", allow_reuse=True, pre=True)
     def _convert_policies(cls, v: Union[List[Dict[str, Any]], str, Any]) -> str:
         """Convert policies to acceptable value."""
         if isinstance(v, str):
@@ -91,8 +91,7 @@ class ArgsDataModel(BaseModel):
             f"unexpected type {type(v)}; permitted: Optional[Union[List[Dict[str, Any]], str]]"
         )
 
-    @validator("tags", pre=True)
-    @classmethod
+    @validator("tags", allow_reuse=True, pre=True)
     def _convert_tags(
         cls, v: Union[Dict[str, str], List[Dict[str, str]], Any]
     ) -> List[Dict[str, str]]:
