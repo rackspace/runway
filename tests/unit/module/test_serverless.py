@@ -484,7 +484,7 @@ class TestServerless:
         run_module_command = mocker.patch(f"{MODULE}.run_module_command")
         obj = Serverless(runway_context, module_root=tmp_path)
         assert (
-            obj.sls_package(output_path=output_path, skip_install=skip_install)
+            obj.sls_package(output_path=output_path, skip_install=skip_install)  # type: ignore
             == output_path
         )
         if skip_install:
