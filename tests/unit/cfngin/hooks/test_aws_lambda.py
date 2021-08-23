@@ -393,7 +393,7 @@ class TestLambdaHooks(unittest.TestCase):
 
         with self.temp_directory_with_files() as temp_dir3:
             root = cast(str, temp_dir3.path)
-            with open(os.path.join(root, ALL_FILES[0]), "w") as _file:
+            with open(os.path.join(root, ALL_FILES[0]), "w", encoding="utf-8") as _file:
                 _file.write("modified file data")
             hash3 = _calculate_hash(ALL_FILES, root)
 

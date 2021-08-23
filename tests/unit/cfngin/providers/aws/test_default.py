@@ -108,7 +108,7 @@ def generate_get_template(
 ) -> Dict[str, Any]:
     """Generate get template."""
     fixture_dir = os.path.join(os.path.dirname(__file__), "../../fixtures")
-    with open(os.path.join(fixture_dir, file_name), "r") as _file:
+    with open(os.path.join(fixture_dir, file_name), "r", encoding="utf-8") as _file:
         return {
             "StagesAvailable": stages_available or ["Original"],
             "TemplateBody": _file.read(),

@@ -244,7 +244,9 @@ class StaticSite(RunwayModule):
             "pre_destroy": pre_destroy,
         }
 
-        with open(module_dir / "01-dependencies.yaml", "w") as output_stream:
+        with open(
+            module_dir / "01-dependencies.yaml", "w", encoding="utf-8"
+        ) as output_stream:
             yaml.dump(content, output_stream, default_flow_style=False)
         self.logger.debug(
             "created 01-dependencies.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
@@ -400,7 +402,9 @@ class StaticSite(RunwayModule):
             "post_destroy": post_destroy,
         }
 
-        with open(module_dir / "02-staticsite.yaml", "w") as output_stream:
+        with open(
+            module_dir / "02-staticsite.yaml", "w", encoding="utf-8"
+        ) as output_stream:
             yaml.dump(content, output_stream, default_flow_style=False)
         self.logger.debug(
             "created 02-staticsite.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
@@ -420,7 +424,9 @@ class StaticSite(RunwayModule):
             },
         }
 
-        with open(module_dir / "03-cleanup.yaml", "w") as output_stream:
+        with open(
+            module_dir / "03-cleanup.yaml", "w", encoding="utf-8"
+        ) as output_stream:
             yaml.dump(content, output_stream, default_flow_style=False)
         self.logger.debug(
             "created 03-cleanup.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)

@@ -387,7 +387,7 @@ def _handle_use_pipenv(
     if python_path:
         cmd.insert(0, python_path)
         cmd.insert(1, "-m")
-    with open(req_path, "w") as requirements:
+    with open(req_path, "w", encoding="utf-8") as requirements:
         with subprocess.Popen(
             cmd, cwd=package_root, stdout=requirements, stderr=subprocess.PIPE
         ) as pipenv_process:

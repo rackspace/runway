@@ -61,7 +61,7 @@ def is_readable(path: Path) -> bool:
             return False
     else:
         try:
-            with open(path, "r"):
+            with open(path, "r", encoding="utf-8"):
                 pass
         except OSError:
             return False

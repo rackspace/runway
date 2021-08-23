@@ -725,7 +725,7 @@ def get_embedded_lib_path() -> str:
 def get_hash_for_filename(filename: str, hashfile_path: str) -> str:
     """Return hash for filename in the hashfile."""
     filehash = ""
-    with open(hashfile_path, "r") as stream:
+    with open(hashfile_path, "r", encoding="utf-8") as stream:
         for _cnt, line in enumerate(stream):
             if line.rstrip().endswith(filename):
                 match = re.match(r"^[A-Za-z0-9]*", line)

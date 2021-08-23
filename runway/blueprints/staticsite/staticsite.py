@@ -499,7 +499,7 @@ class StaticSite(Blueprint):
             os.path.dirname(__file__),
             "templates/cf_directory_index_rewrite.template.js",
         )
-        with open(path) as file_:
+        with open(path, encoding="utf-8") as file_:
             code_str = file_.read().replace(
                 "{{RewriteDirectoryIndex}}", self.variables["RewriteDirectoryIndex"]
             )

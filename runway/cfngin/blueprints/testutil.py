@@ -45,10 +45,12 @@ class BlueprintTestCase(unittest.TestCase):
         rendered_dict = blueprint.template.to_dict()
         rendered_text = json.dumps(rendered_dict, indent=4, sort_keys=True)
 
-        with open(expected_output + "-result", "w") as expected_output_file:
+        with open(
+            expected_output + "-result", "w", encoding="utf-8"
+        ) as expected_output_file:
             expected_output_file.write(rendered_text)
 
-        with open(expected_output) as expected_output_file:
+        with open(expected_output, encoding="utf-8") as expected_output_file:
             expected_dict = json.loads(expected_output_file.read())
             expected_text = json.dumps(expected_dict, indent=4, sort_keys=True)
 
