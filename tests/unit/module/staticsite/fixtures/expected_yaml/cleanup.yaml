@@ -1,0 +1,6 @@
+cfngin_bucket: ''
+namespace: ${namespace}
+service_role: null
+stacks:
+  test-cleanup:
+    template_path: ./temp/thisfileisnotused.yaml

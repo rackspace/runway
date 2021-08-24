@@ -1,0 +1,23 @@
+cfngin_bucket: ''
+namespace: ${namespace}
+pre_deploy: []
+pre_destroy:
+- args:
+    bucket_name: ${rxref test-dependencies::AWSLogBucketName}
+  path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+  required: true
+- args:
+    bucket_name: ${rxref test-dependencies::ArtifactsBucketName}
+  path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+  required: true
+service_role: null
+stacks:
+  test-dependencies:
+    class_path: runway.blueprints.staticsite.dependencies.Dependencies
+    variables:
+      OAuthScopes:
+      - phone
+      - email
+      - profile
+      - openid
+      - aws.cognito.signin.user.admin

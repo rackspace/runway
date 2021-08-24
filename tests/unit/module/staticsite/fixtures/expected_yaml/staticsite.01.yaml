@@ -1,0 +1,64 @@
+cfngin_bucket: ''
+namespace: ${namespace}
+post_deploy:
+- args:
+    bucket_name: ${cfn ${namespace}-test.BucketName}
+    cf_disabled: false
+    distribution_domain: ${cfn ${namespace}-test.CFDistributionDomainName::default=undefined}
+    distribution_id: ${cfn ${namespace}-test.CFDistributionId::default=undefined}
+    extra_files: []
+    website_url: ${cfn ${namespace}-test.BucketWebsiteURL::default=undefined}
+  path: runway.cfngin.hooks.staticsite.upload_staticsite.sync
+  required: true
+post_destroy:
+- args:
+    parameter_name: ${namespace}-test-hash
+  path: runway.cfngin.hooks.cleanup_ssm.delete_param
+- args:
+    parameter_name: ${namespace}-test-nonce-secret
+  path: runway.cfngin.hooks.cleanup_ssm.delete_param
+- args:
+    parameter_name: ${namespace}-test-hashextra
+  path: runway.cfngin.hooks.cleanup_ssm.delete_param
+pre_deploy:
+- args:
+    artifact_bucket_rxref_lookup: test-dependencies::ArtifactsBucketName
+    options:
+      build_output: ./
+      build_steps: []
+      extra_files: []
+      name: test
+      namespace: ${namespace}
+      path: !module_dir
+      pre_build_steps: []
+      source_hashing:
+        directories:
+        - exclusions: []
+          path: .
+        enabled: true
+        parameter: ${namespace}-test-hash
+  data_key: staticsite
+  path: runway.cfngin.hooks.staticsite.build_staticsite.build
+  required: true
+pre_destroy:
+- args:
+    bucket_name: ${rxref test::BucketName}
+  path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+  required: true
+service_role: null
+stacks:
+  test:
+    class_path: runway.blueprints.staticsite.staticsite.StaticSite
+    variables:
+      Aliases: []
+      Compress: true
+      DisableCloudFront: false
+      LogBucketName: ${rxref test-dependencies::AWSLogBucketName}
+      RedirectPathAuthRefresh: ${default staticsite_redirect_path_auth_refresh::/refreshauth}
+      RedirectPathSignIn: ${default staticsite_redirect_path_sign_in::/parseauth}
+      RedirectPathSignOut: ${default staticsite_redirect_path_sign_out::/}
+      RewriteDirectoryIndex: ''
+      SignOutUrl: ${default staticsite_sign_out_url::/signout}
+      WAFWebACL: ''
+      custom_error_responses: []
+      lambda_function_associations: []

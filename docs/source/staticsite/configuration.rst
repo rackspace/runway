@@ -130,6 +130,22 @@ Options
 Parameters
 **********
 
+.. data:: cloudformation_service_role
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  IAM Role ARN that CloudFormation will use when creating, deleting and updating
+  the CloudFormation stack resources.
+
+  See the `AWS CloudFormation service role <https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html?icmpid=docs_cfn_console>`__ for more information.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    parameters:
+      cloudformation_service_role: arn:aws:iam::123456789012:role/name
+
 .. data:: namespace
   :type: str
   :noindex:

@@ -380,7 +380,7 @@ Top-Level Fields
     By default CFNgin doesn't specify a service role when executing changes to CloudFormation stacks.
     If you would prefer that it do so, you define the IAM Role ARN that CFNgin should use when executing CloudFormation changes.
 
-    This is the equivalent of setting ``RoleARN`` on a call to the following CloudFormation api calls: ``CreateStack``, ``UpdateStack``, ``CreateChangeSet``.
+    This is the equivalent of setting ``RoleARN`` on a call to the following CloudFormation API calls: ``CreateStack``, ``UpdateStack``, ``CreateChangeSet``.
 
     See the `AWS CloudFormation service role <https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-servicerole.html?icmpid=docs_cfn_console>`__ for more information.
 

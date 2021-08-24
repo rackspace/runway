@@ -88,6 +88,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
             rewrite directory indexes.
         role_boundary_arn: Defines an IAM Managed Policy that will be set as the
             permissions boundary for any IAM Roles created to support the site.
+        service_role: IAM role that CloudFormation will use.
         sign_out_url: The path a user should access to sign themselves out of the
             application.
         supported_identity_providers: A comma delimited list of the User Pool
@@ -158,6 +159,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         None, alias="staticsite_rewrite_directory_index"
     )
     role_boundary_arn: Optional[str] = Field(None, alias="staticsite_role_boundary_arn")
+    service_role: Optional[str] = Field(None, alias="cloudformation_service_role")
     sign_out_url: str = Field("/signout", alias="staticsite_sign_out_url")
     supported_identity_providers: List[str] = Field(
         ["COGNITO"], alias="staticsite_supported_identity_providers"
