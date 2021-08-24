@@ -139,6 +139,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         assert not obj.required_group
         assert not obj.rewrite_directory_index
         assert not obj.role_boundary_arn
+        assert not obj.service_role
         assert obj.sign_out_url == "/signout"
         assert obj.supported_identity_providers == ["COGNITO"]
         assert not obj.user_pool_arn
@@ -157,6 +158,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
     def test_init(self) -> None:
         """Test init."""
         data = {
+            "cloudformation_service_role": "aws:arn:iam:123456789012:role/name",
             "staticsite_acmcert_arn": "aws:arn:acm:us-east-1:cert:test",
             "staticsite_additional_redirect_domains": ["github.com"],
             "staticsite_aliases": ["test-alias"],
@@ -226,6 +228,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         assert obj.required_group == data["staticsite_required_group"]
         assert obj.rewrite_directory_index == data["staticsite_rewrite_directory_index"]
         assert obj.role_boundary_arn == data["staticsite_role_boundary_arn"]
+        assert obj.service_role == data["cloudformation_service_role"]
         assert obj.sign_out_url == data["staticsite_sign_out_url"]
         assert (
             obj.supported_identity_providers

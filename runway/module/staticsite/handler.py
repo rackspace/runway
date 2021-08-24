@@ -166,14 +166,25 @@ class StaticSite(RunwayModule):
         self.logger.debug("using temporary directory: %s", module_dir)
         return module_dir
 
-    def _create_dependencies_yaml(self, module_dir: Path) -> None:
+    def _create_dependencies_yaml(self, module_dir: Path) -> Path:
+        """Create CFNgin config file for Static Site dependency stack.
+
+        Resulting config file is save to ``module_dir`` as ``01-dependencies.yaml``.
+
+        Args:
+            module_dir: Path to the Runway module.
+
+        Returns:
+            Path to the file that was created.
+
+        """
         pre_deploy: List[Any] = []
 
         pre_destroy = [
             {
+                "args": {"bucket_name": f"${{rxref {self.name}-dependencies::{i}}}"},
                 "path": "runway.cfngin.hooks.cleanup_s3.purge_bucket",
                 "required": True,
-                "args": {"bucket_name": f"${{rxref {self.name}-dependencies::{i}}}"},
             }
             for i in ["AWSLogBucketName", "ArtifactsBucketName"]
         ]
@@ -183,15 +194,15 @@ class StaticSite(RunwayModule):
                 # Retrieve the appropriate callback urls from the User Pool Client
                 pre_deploy.append(
                     {
-                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
-                        "callback_url_retriever.get",
-                        "required": True,
-                        "data_key": "aae_callback_url_retriever",
                         "args": {
                             "user_pool_arn": self.parameters.user_pool_arn,
                             "aliases": self.parameters.aliases,
                             "stack_name": f"${{namespace}}-{self.name}-dependencies",
                         },
+                        "data_key": "aae_callback_url_retriever",
+                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
+                        "callback_url_retriever.get",
+                        "required": True,
                     }
                 )
 
@@ -199,11 +210,11 @@ class StaticSite(RunwayModule):
                 # Retrieve the user pool id
                 pre_destroy.append(
                     {
+                        "args": self._get_user_pool_id_retriever_variables(),
+                        "data_key": "aae_user_pool_id_retriever",
                         "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
                         "user_pool_id_retriever.get",
                         "required": True,
-                        "data_key": "aae_user_pool_id_retriever",
-                        "args": self._get_user_pool_id_retriever_variables(),
                     }
                 )
 
@@ -211,48 +222,59 @@ class StaticSite(RunwayModule):
                 # User Pool Client that was created
                 pre_destroy.append(
                     {
+                        "args": self._get_domain_updater_variables(),
+                        "data_key": "aae_domain_updater",
                         "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
                         "domain_updater.delete",
                         "required": True,
-                        "data_key": "aae_domain_updater",
-                        "args": self._get_domain_updater_variables(),
                     }
                 )
             else:
                 # Retrieve the user pool id
                 pre_deploy.append(
                     {
+                        "args": self._get_user_pool_id_retriever_variables(),
+                        "data_key": "aae_user_pool_id_retriever",
                         "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
                         "user_pool_id_retriever.get",
                         "required": True,
-                        "data_key": "aae_user_pool_id_retriever",
-                        "args": self._get_user_pool_id_retriever_variables(),
                     }
                 )
 
         content: Dict[str, Any] = {
-            "namespace": "${namespace}",
             "cfngin_bucket": "",
+            "namespace": "${namespace}",
+            "pre_deploy": pre_deploy,
+            "pre_destroy": pre_destroy,
+            "service_role": self.parameters.service_role,
             "stacks": {
-                "%s-dependencies"
-                % self.name: {
+                f"{self.name}-dependencies": {
                     "class_path": "runway.blueprints.staticsite.dependencies.Dependencies",
                     "variables": self._get_dependencies_variables(),
                 }
             },
-            "pre_deploy": pre_deploy,
-            "pre_destroy": pre_destroy,
         }
 
-        with open(
-            module_dir / "01-dependencies.yaml", "w", encoding="utf-8"
-        ) as output_stream:
-            yaml.dump(content, output_stream, default_flow_style=False)
+        out_file = module_dir / "01-dependencies.yaml"
+        with open(out_file, "w", encoding="utf-8") as output_stream:
+            yaml.dump(content, output_stream, default_flow_style=False, sort_keys=True)
         self.logger.debug(
-            "created 01-dependencies.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
+            "created %s:\n%s", out_file.name, yaml.dump(content, Dumper=YamlDumper)
         )
+        return out_file
 
-    def _create_staticsite_yaml(self, module_dir: Path) -> None:
+    def _create_staticsite_yaml(self, module_dir: Path) -> Path:
+        """Create CFNgin config file for Static Site.
+
+        Resulting config file is save to ``module_dir`` as ``02-staticsite.yaml``.
+
+        Args:
+            module_dir: Path to the Runway module.
+
+        Returns:
+            Path to the file that was created.
+
+        """
         # Default parameter name matches build_staticsite hook
         if not self.options.source_hashing.parameter:
             self.options.source_hashing.parameter = f"${{namespace}}-{self.name}-hash"
@@ -277,52 +299,52 @@ class StaticSite(RunwayModule):
 
         pre_deploy = [
             {
+                "args": build_staticsite_args,
+                "data_key": "staticsite",
                 "path": "runway.cfngin.hooks.staticsite.build_staticsite.build",
                 "required": True,
-                "data_key": "staticsite",
-                "args": build_staticsite_args,
             }
         ]
 
         post_deploy = [
             {
-                "path": "runway.cfngin.hooks.staticsite.upload_staticsite.sync",
-                "required": True,
                 "args": {
                     "bucket_name": f"${{cfn ${{namespace}}-{self.name}.BucketName}}",
-                    "website_url": f"${{cfn ${{namespace}}-{self.name}.BucketWebsiteURL"
-                    "::default=undefined}}",
-                    "extra_files": [i.dict() for i in self.options.extra_files],
                     "cf_disabled": site_stack_variables["DisableCloudFront"],
-                    "distribution_id": f"${{cfn ${{namespace}}-{self.name}.CFDistributionId"
-                    "::default=undefined}",
                     "distribution_domain": f"${{cfn ${{namespace}}-{self.name}."
-                    "CFDistributionDomainName::default=undefined}}",
+                    "CFDistributionDomainName::default=undefined}",
+                    "distribution_id": f"${{cfn ${{namespace}}-{self.name}.CFDistributionId::"
+                    "default=undefined}",
+                    "extra_files": [i.dict() for i in self.options.extra_files],
+                    "website_url": f"${{cfn ${{namespace}}-{self.name}.BucketWebsiteURL::"
+                    "default=undefined}",
                 },
+                "path": "runway.cfngin.hooks.staticsite.upload_staticsite.sync",
+                "required": True,
             }
         ]
 
         pre_destroy = [
             {
+                "args": {"bucket_name": f"${{rxref {self.name}::BucketName}}"},
                 "path": "runway.cfngin.hooks.cleanup_s3.purge_bucket",
                 "required": True,
-                "args": {"bucket_name": f"${{rxref {self.name}::BucketName}}"},
             }
         ]
 
         if self.parameters.rewrite_directory_index or self.parameters.auth_at_edge:
             pre_destroy.append(
                 {
+                    "args": {"stack_relative_name": self.name},
                     "path": "runway.cfngin.hooks.staticsite.cleanup.warn",
                     "required": False,
-                    "args": {"stack_relative_name": self.name},
                 }
             )
 
         post_destroy = [
             {
-                "path": "runway.cfngin.hooks.cleanup_ssm.delete_param",
                 "args": {"parameter_name": i},
+                "path": "runway.cfngin.hooks.cleanup_ssm.delete_param",
             }
             for i in [
                 self.options.source_hashing.parameter,
@@ -388,35 +410,47 @@ class StaticSite(RunwayModule):
         ]
 
         content = {
-            "namespace": "${namespace}",
             "cfngin_bucket": "",
+            "namespace": "${namespace}",
+            "post_deploy": post_deploy,
+            "post_destroy": post_destroy,
             "pre_deploy": pre_deploy,
+            "pre_destroy": pre_destroy,
+            "service_role": self.parameters.service_role,
             "stacks": {
                 self.name: {
                     "class_path": f"runway.blueprints.staticsite.{class_path}",
                     "variables": site_stack_variables,
                 }
             },
-            "post_deploy": post_deploy,
-            "pre_destroy": pre_destroy,
-            "post_destroy": post_destroy,
         }
 
-        with open(
-            module_dir / "02-staticsite.yaml", "w", encoding="utf-8"
-        ) as output_stream:
-            yaml.dump(content, output_stream, default_flow_style=False)
+        out_file = module_dir / "02-staticsite.yaml"
+        with open(out_file, "w", encoding="utf-8") as output_stream:
+            yaml.dump(content, output_stream, default_flow_style=False, sort_keys=True)
         self.logger.debug(
             "created 02-staticsite.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
         )
+        return out_file
 
-    def _create_cleanup_yaml(self, module_dir: Path) -> None:
+    def _create_cleanup_yaml(self, module_dir: Path) -> Path:
+        """Create CFNgin config file for Static Site cleanup stack.
+
+        Resulting config file is save to ``module_dir`` as ``03-cleanup.yaml``.
+
+        Args:
+            module_dir: Path to the Runway module.
+
+        Returns:
+            Path to the file that was created.
+
+        """
         content = {
             "namespace": "${namespace}",
             "cfngin_bucket": "",
+            "service_role": self.parameters.service_role,
             "stacks": {
-                "%s-cleanup"
-                % self.name: {
+                f"{self.name}-cleanup": {
                     "template_path": os.path.join(
                         tempfile.gettempdir(), "thisfileisnotused.yaml"
                     ),
@@ -424,24 +458,24 @@ class StaticSite(RunwayModule):
             },
         }
 
-        with open(
-            module_dir / "03-cleanup.yaml", "w", encoding="utf-8"
-        ) as output_stream:
-            yaml.dump(content, output_stream, default_flow_style=False)
+        out_file = module_dir / "03-cleanup.yaml"
+        with open(out_file, "w", encoding="utf-8") as output_stream:
+            yaml.dump(content, output_stream, default_flow_style=False, sort_keys=True)
         self.logger.debug(
-            "created 03-cleanup.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
+            "created %s:\n%s", out_file.name, yaml.dump(content, Dumper=YamlDumper)
         )
+        return out_file
 
     def _get_site_stack_variables(self) -> Dict[str, Any]:
         site_stack_variables: Dict[str, Any] = {
             "Aliases": [],
-            "Compresss": self.parameters.compress,
+            "Compress": self.parameters.compress,
             "DisableCloudFront": self.parameters.cf_disable,
-            "RewriteDirectoryIndex": self.parameters.rewrite_directory_index or "",
+            "RedirectPathAuthRefresh": "${default staticsite_redirect_path_auth_refresh::"
+            "/refreshauth}",
             "RedirectPathSignIn": "${default staticsite_redirect_path_sign_in::/parseauth}",
             "RedirectPathSignOut": "${default staticsite_redirect_path_sign_out::/}",
-            "RedirectPathAuthRefresh": "${default staticsite_redirect_path_auth_refresh"
-            "::/refreshauth}",
+            "RewriteDirectoryIndex": self.parameters.rewrite_directory_index or "",
             "SignOutUrl": "${default staticsite_sign_out_url::/signout}",
             "WAFWebACL": self.parameters.web_acl or "",
         }
@@ -554,9 +588,7 @@ class StaticSite(RunwayModule):
             "oauth_scopes": site_stack_variables["OAuthScopes"],
             "redirect_path_sign_in": site_stack_variables["RedirectPathSignIn"],
             "redirect_path_sign_out": site_stack_variables["RedirectPathSignOut"],
-            "supported_identity_providers": site_stack_variables[
-                "SupportedIdentityProviders"
-            ],
+            "supported_identity_providers": self.parameters.supported_identity_providers,
         }
 
     def _ensure_auth_at_edge_requirements(self) -> None:
