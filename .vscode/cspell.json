@@ -67,8 +67,10 @@
         "codecov",
         "FQDNs",
         "fstring",
+        "hashextra",
         "markexpr",
         "Ngin",
+        "openid",
         "rglob",
         "typeshed",
         "unsubscriptable"
