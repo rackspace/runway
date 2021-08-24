@@ -580,9 +580,10 @@ class StaticSite(RunwayModule):
     def _get_client_updater_variables(
         self, name: str, site_stack_variables: Dict[str, Any]
     ) -> Dict[str, Any]:
-        aliases = [add_url_scheme(x) for x in site_stack_variables["Aliases"]]
         return {
-            "alternate_domains": aliases,
+            "alternate_domains": [
+                add_url_scheme(x) for x in site_stack_variables["Aliases"]
+            ],
             "client_id": f"${{rxref {self.name}-dependencies::AuthAtEdgeClient}}",
             "distribution_domain": f"${{rxref {name}::CFDistributionDomainName}}",
             "oauth_scopes": site_stack_variables["OAuthScopes"],

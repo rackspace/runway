@@ -1,0 +1,48 @@
+cfngin_bucket: ''
+namespace: ${namespace}
+pre_deploy:
+- args:
+    aliases: []
+    stack_name: ${namespace}-test-dependencies
+    user_pool_arn: null
+  data_key: aae_callback_url_retriever
+  path: runway.cfngin.hooks.staticsite.auth_at_edge.callback_url_retriever.get
+  required: true
+pre_destroy:
+- args:
+    bucket_name: ${rxref test-dependencies::AWSLogBucketName}
+  path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+  required: true
+- args:
+    bucket_name: ${rxref test-dependencies::ArtifactsBucketName}
+  path: runway.cfngin.hooks.cleanup_s3.purge_bucket
+  required: true
+- args:
+    created_user_pool_id: ${rxref test-dependencies::AuthAtEdgeUserPoolId}
+    user_pool_arn: null
+  data_key: aae_user_pool_id_retriever
+  path: runway.cfngin.hooks.staticsite.auth_at_edge.user_pool_id_retriever.get
+  required: true
+- args:
+    client_id: ${rxref test-dependencies::AuthAtEdgeClient}
+    client_id_output_lookup: test-dependencies::AuthAtEdgeClient
+  data_key: aae_domain_updater
+  path: runway.cfngin.hooks.staticsite.auth_at_edge.domain_updater.delete
+  required: true
+service_role: null
+stacks:
+  test-dependencies:
+    class_path: runway.blueprints.staticsite.dependencies.Dependencies
+    variables:
+      AuthAtEdge: true
+      CreateUserPool: true
+      OAuthScopes:
+      - phone
+      - email
+      - profile
+      - openid
+      - aws.cognito.signin.user.admin
+      RedirectPathSignIn: ${default staticsite_redirect_path_sign_in::/parseauth}
+      RedirectPathSignOut: ${default staticsite_redirect_path_sign_out::/}
+      SupportedIdentityProviders:
+      - COGNITO

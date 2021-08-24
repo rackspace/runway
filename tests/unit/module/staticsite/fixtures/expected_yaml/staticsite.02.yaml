@@ -120,6 +120,7 @@ stacks:
       RedirectPathSignIn: ${default staticsite_redirect_path_sign_in::/parseauth}
       RedirectPathSignOut: ${default staticsite_redirect_path_sign_out::/}
       RewriteDirectoryIndex: ''
+      RoleBoundaryArn: aws:arn:iam:123456789012:policy/name
       SignOutUrl: ${default staticsite_sign_out_url::/signout}
       UserPoolArn: arn:aws:cognito-idp:<region>:<account-id>:userpool/<pool>
       WAFWebACL: ''
