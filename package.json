@@ -61,6 +61,6 @@
   "devDependencies": {
     "@cspell/dict-python": "^1.0.37",
     "cspell": "^5.8.2",
-    "pyright": "^1.1.163"
+    "pyright": "^1.1.166"
   }
 }
