@@ -17,8 +17,8 @@ class Iam(Blueprint):
     def create_template(self) -> None:
         """Create template (main function called by CFNgin)."""
         template = self.template
-        template.add_version("2010-09-09")
-        template.add_description("Kubernetes IAM policies - V1.0.0")
+        template.set_version("2010-09-09")
+        template.set_description("Kubernetes IAM policies - V1.0.0")
 
         # Resources
         nodeinstancerole = template.add_resource(

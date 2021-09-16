@@ -124,14 +124,14 @@ class NodeGroup(Blueprint):
     def create_template(self) -> None:
         """Create template (main function called by CFNgin)."""
         template = self.template
-        template.add_version("2010-09-09")
-        template.add_description(
+        template.set_version("2010-09-09")
+        template.set_description(
             "Kubernetes workers via EKS - V1.0.0 "
             "- compatible with amazon-eks-node-v23+"
         )
 
         # Metadata
-        template.add_metadata(
+        template.set_metadata(
             {
                 "AWS::CloudFormation::Interface": {
                     "ParameterGroups": [
