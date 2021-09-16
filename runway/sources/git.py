@@ -59,7 +59,7 @@ class Git(Source):
         with tempfile.TemporaryDirectory() as tmpdirname:
             tmp_repo_path = Path(tmpdirname) / dir_name
             with Repo.clone_from(self.uri, str(tmp_repo_path)) as repo:
-                repo.head.reference = ref
+                repo.head.set_reference(ref)
                 repo.head.reset(index=True, working_tree=True)
             shutil.move(str(tmp_repo_path), self.cache_dir)
 

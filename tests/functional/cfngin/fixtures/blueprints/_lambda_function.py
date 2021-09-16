@@ -120,7 +120,7 @@ class LambdaFunction(Blueprint):
 
     def create_template(self) -> None:
         """Create template."""
-        self.template.add_version("2010-09-09")
-        self.template.add_description("Test Lambda")
+        self.template.set_version("2010-09-09")
+        self.template.set_description("Test Lambda")
         self.iam_role  # pylint: disable=pointless-statement
         self.lambda_function  # pylint: disable=pointless-statement
