@@ -63,7 +63,7 @@ sphinx-rtd-theme = { version = "^0.5", optional = true } # docs
 sphinx-tabs = { version = "^3.0", optional = true }  # docs
 sphinxcontrib-apidoc = { version = "^0.3", optional = true }  # docs
 sphinxcontrib-programoutput = { version = "^0.17", optional = true }  # docs
-troposphere = "^2.4"
+troposphere = ">=2.4, <4"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
 yamllint = "*"
