@@ -765,7 +765,7 @@ class SourceProcessor:
             try:
                 tmp_repo_path = os.path.join(tmp_dir, dir_name)
                 with Repo.clone_from(config.uri, tmp_repo_path) as repo:
-                    repo.head.reference = ref
+                    repo.head.set_reference(ref)
                     repo.head.reset(index=True, working_tree=True)
                 shutil.move(tmp_repo_path, self.package_cache_dir)
             finally:
