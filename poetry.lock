@@ -1080,7 +1080,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "moto"
-version = "2.2.4"
+version = "2.2.6"
 description = "A library that allows your python tests to easily mock out the boto library"
 category = "dev"
 optional = false
@@ -1090,7 +1090,7 @@ python-versions = "*"
 boto3 = ">=1.9.201"
 botocore = ">=1.12.201"
 cryptography = ">=3.3.1"
-importlib-metadata = "*"
+importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 Jinja2 = ">=2.10.1"
 MarkupSafe = "!=2.0.0a1"
 more-itertools = "*"
@@ -2714,8 +2714,8 @@ more-itertools = [
     {file = "more_itertools-8.8.0-py3-none-any.whl", hash = "sha256:2cf89ec599962f2ddc4d568a05defc40e0a587fbc10d5989713638864c36be4d"},
 ]
 moto = [
-    {file = "moto-2.2.4-py2.py3-none-any.whl", hash = "sha256:c99197ee61a2aad85613814fd52661873316987794f1bbc2ff433eb6fcc684b5"},
-    {file = "moto-2.2.4.tar.gz", hash = "sha256:ee652be8c3bb52c6c54bcc811f74afbfb317c59dcdfdc96d6027fe93e1b4a94d"},
+    {file = "moto-2.2.6-py2.py3-none-any.whl", hash = "sha256:e86b0d92bc5f80802a8ae0f338a4fdac15dab82c54eb12db93b356b69407effc"},
+    {file = "moto-2.2.6.tar.gz", hash = "sha256:21c838b63f44e24b9b5015a2cdcc5be7c1e1004e58a69fb7cac71383bce34535"},
 ]
 mypy-boto3 = [
     {file = "mypy-boto3-1.18.40.tar.gz", hash = "sha256:d5292d0d6469fae387aaed9d45474ba548287edae8993093ec225b9a51efd70c"},
