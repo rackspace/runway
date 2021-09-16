@@ -60,7 +60,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 
 [[package]]
 name = "awacs"
-version = "2.0.0"
+version = "2.0.1"
 description = "AWS Access Policy Language creation library"
 category = "main"
 optional = false
@@ -2288,8 +2288,8 @@ attrs = [
     {file = "attrs-21.2.0.tar.gz", hash = "sha256:ef6aaac3ca6cd92904cdd0d83f629a15f18053ec84e6432106f7a4d04ae4f5fb"},
 ]
 awacs = [
-    {file = "awacs-2.0.0-py3-none-any.whl", hash = "sha256:0ba4a6156d09b9de73b9da0220acdb49786b48e834b111e2d15886625d6d9b77"},
-    {file = "awacs-2.0.0.tar.gz", hash = "sha256:af4a3f754f18726425c6a0faf758624e486dc18d5d8da6faf9312fce5a2efbd3"},
+    {file = "awacs-2.0.1-py3-none-any.whl", hash = "sha256:419ef0e89718f262a3866835dcde42c67e07408f310233b5773097474204735a"},
+    {file = "awacs-2.0.1.tar.gz", hash = "sha256:0979fd23c504170471a7c6271915f48e98546d7890043b89250eee692349522b"},
 ]
 aws-sam-translator = [
     {file = "aws-sam-translator-1.38.0.tar.gz", hash = "sha256:0ecadda9cf5ab2318f57f1253181a2151e4c53cd35d21717a923c075a5a65cb6"},
