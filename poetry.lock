@@ -1083,7 +1083,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "moto"
-version = "2.2.7"
+version = "2.2.8"
 description = "A library that allows your python tests to easily mock out the boto library"
 category = "dev"
 optional = false
@@ -1120,7 +1120,7 @@ efs = ["sshpubkeys (>=3.1.0)"]
 iotdata = ["jsondiff (>=1.1.2)"]
 s3 = ["PyYAML (>=5.1)"]
 server = ["PyYAML (>=5.1)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "ecdsa (<0.15)", "docker (>=2.5.1)", "jsondiff (>=1.1.2)", "aws-xray-sdk (>=0.93,!=0.96)", "idna (>=2.5,<3)", "cfn-lint (>=0.4.0)", "sshpubkeys (>=3.1.0)", "setuptools", "flask", "flask-cors"]
-ssm = ["PyYAML (>=5.1)"]
+ssm = ["PyYAML (>=5.1)", "dataclasses"]
 xray = ["aws-xray-sdk (>=0.93,!=0.96)", "setuptools"]
 
 [[package]]
@@ -2714,8 +2714,8 @@ more-itertools = [
     {file = "more_itertools-8.9.0-py3-none-any.whl", hash = "sha256:70401259e46e216056367a0a6034ee3d3f95e0bf59d3aa6a4eb77837171ed996"},
 ]
 moto = [
-    {file = "moto-2.2.7-py2.py3-none-any.whl", hash = "sha256:461955aaccd257151591b1e36c9b2e7ddf7f42e17056f15ccbd64d0eb618742d"},
-    {file = "moto-2.2.7.tar.gz", hash = "sha256:f5d131d0be71890809c94556930f865d25814e2d2e29d74fab749f963a11b518"},
+    {file = "moto-2.2.8-py2.py3-none-any.whl", hash = "sha256:ee745c018f3b279a06bf156c844c82a202ccd61e7cfb10075eca59fb1d490068"},
+    {file = "moto-2.2.8.tar.gz", hash = "sha256:418a47e65fd1a0001068d833b3e9924ce881f2e93e8d45b8cbc8bfa26bfeb7e0"},
 ]
 mypy-boto3 = [
     {file = "mypy-boto3-1.18.42.tar.gz", hash = "sha256:f57892c4dd0c3b225b922fb31fceb24a4c0e2284297e135007dacb842e400bbd"},
