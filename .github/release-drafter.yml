@@ -29,7 +29,7 @@ autolabeler:  # cspell:ignore autolabeler
       - npm/.npmignore
       - npm/postinstall.js
       - npm/preuninstall.js
-  - label: patch
+  - label: changelog:patch
     branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
   - label: poetry
     files:
@@ -69,7 +69,7 @@ category-template: >-
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 commitish: master  # cspell:ignore commitish
 exclude-labels:
-  - skip-changelog
+  - changelog:skip
   - release
 name-template: v$RESOLVED_VERSION
 sort-direction: ascending
@@ -81,11 +81,11 @@ template: |
 version-resolver:
   major:
     labels:
-      - major
+      - changelog:major
   minor:
     labels:
-      - minor
+      - changelog:minor
   patch:
     labels:
-      - patch
+      - changelog:patch
   default: patch

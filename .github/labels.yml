@@ -5,6 +5,18 @@
   - name: bug
     color: d73a4a
     description: Something isn't working
+  - name: changelog:major
+    color: ffffff
+    description: Major change resulting in a major release
+  - name: changelog:minor
+    color: ffffff
+    description: Minor change resulting in a minor release
+  - name: changelog:patch
+    color: ffffff
+    description: Patch change resulting in a patch release
+  - name: changelog:skip
+    color: ffffff
+    description: Don't include this pull request in the release change log
   - name: cloudformation
     color: ffffff
     description: Changes to CloudFormation templates
@@ -41,15 +53,6 @@
   - name: npm
     color: cc3534
     description: Update to npm configuration
-  - name: major
-    color: ffffff
-    description: Major change resulting in a major release
-  - name: minor
-    color: ffffff
-    description: Minor change resulting in a minor release
-  - name: patch
-    color: ffffff
-    description: Patch change resulting in a patch release
   - name: poetry
     color: '306998'
     description: Update to Poetry configuration
@@ -77,9 +80,6 @@
   - name: release
     color: e4e669
     description: A release task or pull request
-  - name: skip-changelog
-    color: ffffff
-    description: Don't include this pull request in the release change log
   - name: status:abandoned
     color: '000000'
     description: Issue or pull request abandoned by author
