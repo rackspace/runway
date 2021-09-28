@@ -130,7 +130,7 @@ class BaseContext:
             aws_secret_access_key=aws_secret_access_key,
             aws_session_token=aws_session_token,
             botocore_session=Session(),
-            region_name=region,
+            region_name=region or self.env.aws_region,
             profile_name=profile,
         )
         cred_provider = session._session.get_component("credential_provider")  # type: ignore

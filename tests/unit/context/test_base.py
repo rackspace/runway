@@ -112,7 +112,7 @@ class TestBaseContext:
             aws_secret_access_key=self.env.vars["AWS_SECRET_ACCESS_KEY"],
             aws_session_token=self.env.vars["AWS_SESSION_TOKEN"],
             botocore_session=mock_sso_botocore_session.return_value,
-            region_name=None,
+            region_name=self.env.aws_region,
             profile_name=None,
         )
         mock_boto3_session.return_value._session.get_component.assert_called_once_with(
@@ -137,7 +137,7 @@ class TestBaseContext:
             aws_secret_access_key=TEST_BOTO3_CREDS["aws_secret_access_key"],
             aws_session_token=TEST_BOTO3_CREDS["aws_session_token"],
             botocore_session=mock_sso_botocore_session.return_value,
-            region_name=None,
+            region_name=self.env.aws_region,
             profile_name=None,
         )
 
@@ -152,7 +152,7 @@ class TestBaseContext:
             aws_secret_access_key=None,
             aws_session_token=None,
             botocore_session=mock_sso_botocore_session.return_value,
-            region_name=None,
+            region_name=self.env.aws_region,
             profile_name="something",
         )
 
