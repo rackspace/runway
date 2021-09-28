@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 from ..utils import which
 
 if TYPE_CHECKING:
+    from typing import Any
+
     from .._logging import RunwayLogger
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
@@ -28,12 +30,13 @@ def format_npm_command_for_logging(command: List[str]) -> str:
     return " ".join(command)
 
 
+# type hint quated b/c pylint 2.11.1 raises unsubscriptable-object
 def generate_node_command(
     command: str,
     command_opts: List[str],
     path: Path,
     *,
-    logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+    logger: Union[logging.Logger, "logging.LoggerAdapter[Any]"] = LOGGER,
     package: Optional[str] = None,
 ) -> List[str]:
     """Return node bin command list for subprocess execution.
@@ -71,11 +74,12 @@ def generate_node_command(
     return cmd_list
 
 
+# type hint quated b/c pylint 2.11.1 raises unsubscriptable-object
 def run_module_command(
     cmd_list: List[str],
     env_vars: Dict[str, str],
     exit_on_error: bool = True,
-    logger: Union[logging.Logger, logging.LoggerAdapter] = LOGGER,
+    logger: Union[logging.Logger, "logging.LoggerAdapter[Any]"] = LOGGER,
 ) -> None:
     """Shell out to provisioner command.
 

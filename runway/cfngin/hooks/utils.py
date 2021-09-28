@@ -5,7 +5,7 @@ import collections.abc
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 import pydantic
 
@@ -111,11 +111,11 @@ def handle_hooks(  # pylint: disable=too-many-statements
 
         try:
             if isinstance(method, type):
-                result = getattr(
+                result: Any = getattr(
                     method(context=context, provider=provider, **kwargs), stage
                 )()
             else:
-                result = method(context=context, provider=provider, **kwargs)
+                result = cast(Any, method(context=context, provider=provider, **kwargs))
         except Exception:  # pylint: disable=broad-except
             LOGGER.exception("hook %s threw an exception", hook.path)
             if hook.required:
