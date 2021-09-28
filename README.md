@@ -39,14 +39,14 @@ A typical Runway configuration is unobtrusive -- it just lists the deployment or
 ```yml
 deployments:
   - modules:
-    - resources.tf  # terraform resources
-    - backend.sls  # serverless lambda functions
-    - frontend  # static web site
-    environments:  # Environment settings
-        dev:
-            foo: dev-bar
-        prod:
-            foo: prod-bar
+      - resources.tf  # terraform resources
+      - backend.sls  # serverless lambda functions
+      - frontend  # static web site
+    environments:  # Environments
+      dev: "123456789012"  # AWS development Account ID
+      prod: "234567890123"  # AWS production Account ID
+    regions:
+      - us-east-1
 ```
 
 The example above contains enough information for Runway to deploy all resources, lambda functions and a static website backed by S3 and Cloudfront in either dev or prod environments
