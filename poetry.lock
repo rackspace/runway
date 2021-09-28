@@ -1540,7 +1540,7 @@ python-versions = "*"
 
 [[package]]
 name = "pylint"
-version = "2.11.0"
+version = "2.11.1"
 description = "python code static checker"
 category = "dev"
 optional = false
@@ -2892,8 +2892,8 @@ pyinstaller-hooks-contrib = [
     {file = "pyinstaller_hooks_contrib-2021.3-py2.py3-none-any.whl", hash = "sha256:a52bc3834281266bbf77239cfc9521923336ca622f44f90924546ed6c6d3ad5e"},
 ]
 pylint = [
-    {file = "pylint-2.11.0-py3-none-any.whl", hash = "sha256:87ed31da38248b9cc34869516af89f58d3bb1898736674c5759ca99092b382aa"},
-    {file = "pylint-2.11.0.tar.gz", hash = "sha256:315fc81fad20d495f374d8fde685e442d4b6e3b275a5940fc212ae0484cb2eb6"},
+    {file = "pylint-2.11.1-py3-none-any.whl", hash = "sha256:0f358e221c45cbd4dad2a1e4b883e75d28acdcccd29d40c76eb72b307269b126"},
+    {file = "pylint-2.11.1.tar.gz", hash = "sha256:2c9843fff1a88ca0ad98a256806c82c5a8f86086e7ccbdb93297d86c3f90c436"},
 ]
 pyopenssl = [
     {file = "pyOpenSSL-20.0.1-py2.py3-none-any.whl", hash = "sha256:818ae18e06922c066f777a33f1fca45786d85edfe71cd043de6379337a7f274b"},
