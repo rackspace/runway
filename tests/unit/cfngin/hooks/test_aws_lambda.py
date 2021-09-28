@@ -214,7 +214,7 @@ class TestLambdaHooks(unittest.TestCase):
             test_path = "~/test"
 
             mock1.side_effect = lambda p: (  # type: ignore
-                temp_dir.path if p == test_path else orig_expanduser(p)
+                temp_dir.path if p == test_path else orig_expanduser(p)  # type: ignore
             )
 
             results = self.run_hook(functions={"MyFunction": {"path": test_path}})

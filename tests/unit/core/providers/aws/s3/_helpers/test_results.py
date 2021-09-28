@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import time
+from concurrent.futures import CancelledError
 from io import StringIO
 from queue import Queue
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional
 
 import pytest
 from mock import Mock
-from s3transfer.exceptions import CancelledError, FatalError
+from s3transfer.exceptions import FatalError
 
 from runway._logging import LogLevels
 from runway.core.providers.aws.s3._helpers.results import (

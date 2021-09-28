@@ -12,6 +12,7 @@ import sys
 import threading
 import time
 from collections import defaultdict
+from concurrent.futures import CancelledError
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -28,7 +29,7 @@ from typing import (
     cast,
 )
 
-from s3transfer.exceptions import CancelledError, FatalError
+from s3transfer.exceptions import FatalError
 from typing_extensions import Literal
 
 from ......utils import ensure_string

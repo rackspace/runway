@@ -16,7 +16,8 @@ from ..utils import TagDataModel
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm.client import SSMClient
-    from mypy_boto3_ssm.type_defs import ParameterTierType, ParameterTypeDef, TagTypeDef
+    from mypy_boto3_ssm.literals import ParameterTierType
+    from mypy_boto3_ssm.type_defs import ParameterTypeDef, TagTypeDef
 
     from ...._logging import RunwayLogger
     from ....context import CfnginContext
