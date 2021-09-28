@@ -61,19 +61,11 @@ fix-black: ## automatically fix all black errors
 fix-isort: ## automatically fix all isort errors
 	@poetry run isort .
 
-install: ## create a python virtual environment in the project for development
-	@poetry install --extras docs --remove-untracked
-
 lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
 
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
 	@poetry run black . --check --color --diff
-	@echo ""
-
-lint-cspell: ## run cspell
-	@echo "Running cSpell to checking spelling..."
-	@npx cspell "**/*" --color --config .vscode/cspell.json --must-find-files
 	@echo ""
 
 lint-flake8: ## run flake8
@@ -115,10 +107,27 @@ npm-prep: version ## process that needs to be run before creating an npm package
 run-pre-commit: ## run pre-commit for all files
 	@poetry run pre-commit run -a
 
-setup: npm-ci install setup-pre-commit ## setup development environment
+setup: setup-poetry setup-pre-commit setup-npm ## setup development environment
+
+setup-npm: npm-ci ## install node dependencies with npm
+
+setup-poetry: ## setup python virtual environment
+	@poetry install \
+		--extras docs \
+		--remove-untracked
 
 setup-pre-commit: ## install pre-commit git hooks
 	@poetry run pre-commit install
+
+spellcheck: ## run cspell
+	@echo "Running cSpell to checking spelling..."
+	@npx cspell "**/*" \
+		--color \
+		--config .vscode/cspell.json \
+		--must-find-files \
+		--no-progress \
+		--relative \
+		--show-context
 
 test: ## run integration and unit tests
 	@echo "Running integration & unit tests..."
@@ -164,9 +173,6 @@ test-unit: ## run unit tests only
 		--cov=runway \
 		--cov-config=tests/unit/.coveragerc \
 		--cov-report term-missing:skip-covered
-
-update: ## update project python environment
-	@poetry update
 
 version: ## set project version using distance from last tag
 	@VERSION=$$(poetry run dunamai from git --style semver --no-metadata) && \
