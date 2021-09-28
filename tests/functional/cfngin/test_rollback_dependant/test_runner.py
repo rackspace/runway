@@ -44,8 +44,8 @@ def test_deploy_log_messages(deploy_result: Result, namespace: str) -> None:
         "dependent-rollback-child:failed (dependency has failed)",
         "The following steps failed: dependent-rollback-parent, dependent-rollback-child",
     ]
-    expected = "\n".join(f"[runway] {msg}" for msg in expected_lines)
-    assert expected in deploy_result.stdout, (
-        "stdout does not match expected\n\nEXPECTED:\n"
-        f"{expected}\n\nSTDOUT:\n{deploy_result.stdout}"
-    )
+    for line in expected_lines:
+        assert f"[runway] {line}" in deploy_result.stdout, (
+            "stdout is missing expected line\n\nEXPECTED:\n"
+            f"{line}\n\nSTDOUT:\n{deploy_result.stdout}"
+        )
