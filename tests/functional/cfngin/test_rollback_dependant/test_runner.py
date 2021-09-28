@@ -36,11 +36,9 @@ def test_deploy_log_messages(deploy_result: Result, namespace: str) -> None:
     expected_lines = [
         "cfngin.yml:deploy (in progress)",
         "dependent-rollback-parent:submitted (creating new stack)",
-        "dependent-rollback-parent:submitted (rolling back new stack)",
         f"{namespace}-dependent-rollback-parent:roll back reason: "
         "The following resource(s) failed to create: [BrokenWaitCondition]. "
         "Rollback requested by user.",
-        "dependent-rollback-parent:failed (rolled back new stack)",
         "dependent-rollback-child:failed (dependency has failed)",
         "The following steps failed: dependent-rollback-parent, dependent-rollback-child",
     ]
