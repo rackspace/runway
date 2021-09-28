@@ -14,4 +14,4 @@ jobs:
         with:
           node-version: '15'
       - run: make npm-ci
-      - run: make lint-cspell
+      - run: make spellcheck
