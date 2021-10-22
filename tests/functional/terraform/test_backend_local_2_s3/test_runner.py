@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, cast
+from typing import TYPE_CHECKING, Iterator, cast
 
 import pytest
 
@@ -19,7 +19,7 @@ CURRENT_DIR = Path(__file__).parent
 
 
 @pytest.fixture(autouse=True, scope="module")
-def tf_state_bucket(cli_runner: CliRunner) -> None:
+def tf_state_bucket(cli_runner: CliRunner) -> Iterator[None]:
     """Create Terraform state bucket and table."""
     cli_runner.invoke(cli, ["deploy", "--tag", "bootstrap"], env={"CI": "1"})
     yield
@@ -34,7 +34,7 @@ def tf_state_bucket(cli_runner: CliRunner) -> None:
     params=["0.11.15", "0.12.31", "0.13.7", "0.14.11", "0.15.5"],
     scope="module",
 )
-def tf_version(request: SubRequest) -> Generator[str, None, None]:
+def tf_version(request: SubRequest) -> Iterator[str]:
     """Set Terraform version."""
     file_path = CURRENT_DIR / TF_VERSION_FILENAME
     file_path.write_text(cast(str, request.param) + "\n")
@@ -45,7 +45,7 @@ def tf_version(request: SubRequest) -> Generator[str, None, None]:
 @pytest.fixture(scope="function")
 def deploy_local_backend_result(
     cli_runner: CliRunner, local_backend: Path
-) -> Generator[Result, None, None]:
+) -> Iterator[Result]:
     """Execute `runway deploy` with `runway destory` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "local"], env={"CI": "1"})
 
@@ -53,7 +53,7 @@ def deploy_local_backend_result(
 @pytest.fixture(scope="function")
 def deploy_s3_backend_result(
     cli_runner: CliRunner, s3_backend: Path
-) -> Generator[Result, None, None]:
+) -> Iterator[Result]:
     """Execute `runway deploy` with `runway destory` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "test"], env={"CI": "1"})
     # cleanup files

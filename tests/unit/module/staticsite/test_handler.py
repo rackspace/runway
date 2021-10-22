@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 import string
-from typing import TYPE_CHECKING, Any, ClassVar, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 import pytest
 from mock import Mock
@@ -31,7 +31,7 @@ MODULE = "runway.module.staticsite.handler"
 class SafeStringTemplate(string.Template):
     """Custom string.Template subclass that changes the ID pattern."""
 
-    delimiter: ClassVar[str] = "!"
+    delimiter = "!"
 
 
 class TestStaticSite:
