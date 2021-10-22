@@ -22,6 +22,7 @@ from typing import (
     overload,
 )
 
+from pydantic import BaseModel
 from typing_extensions import Literal
 
 from .cfngin.lookups.registry import CFNGIN_LOOKUP_HANDLERS
@@ -44,6 +45,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 _LiteralValue = TypeVar("_LiteralValue", int, str)
+_PydanticModelTypeVar = TypeVar("_PydanticModelTypeVar", bound=BaseModel)
 VariableTypeLiteralTypeDef = Literal["cfngin", "runway"]
 
 
@@ -236,6 +238,13 @@ class VariableValue:
     @overload
     @classmethod
     def parse_obj(
+        cls, obj: _PydanticModelTypeVar, variable_type: VariableTypeLiteralTypeDef = ...
+    ) -> VariableValuePydanticModel[_PydanticModelTypeVar]:
+        ...
+
+    @overload
+    @classmethod
+    def parse_obj(
         cls, obj: Dict[str, Any], variable_type: VariableTypeLiteralTypeDef = ...
     ) -> VariableValue:
         ...
@@ -274,6 +283,8 @@ class VariableValue:
             variable_type: Type of variable (cfngin|runway).
 
         """
+        if isinstance(obj, BaseModel):
+            return VariableValuePydanticModel(obj, variable_type=variable_type)  # type: ignore
         if isinstance(obj, dict):
             return VariableValueDict(obj, variable_type=variable_type)  # type: ignore
         if isinstance(obj, list):
@@ -881,3 +892,101 @@ class VariableValueLookup(VariableValue):
     def __str__(self) -> str:
         """Object displayed as a string."""
         return f"${{{self.lookup_name.value} {self.lookup_query.value}}}"
+
+
+class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
+    """A pydantic model variable value."""
+
+    def __init__(
+        self,
+        data: _PydanticModelTypeVar,
+        variable_type: VariableTypeLiteralTypeDef = "cfngin",
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            data: Data to be stored in the object.
+            variable_type: Type of variable (cfngin|runway).
+
+        """
+        self._data: Dict[str, VariableValue] = {
+            k: self.parse_obj(v, variable_type=variable_type) for k, v in data
+        }
+        self._model_class = type(data)
+        self.variable_type: VariableTypeLiteralTypeDef = variable_type
+
+    @property
+    def dependencies(self) -> Set[str]:
+        """Stack names that this variable depends on."""
+        deps: Set[str] = set()
+        for value in self._data.values():
+            deps.update(value.dependencies)
+        return deps
+
+    @property
+    def resolved(self) -> bool:
+        """Use to check if the variable value has been resolved."""
+        accumulator: bool = True
+        for value in self._data.values():
+            accumulator = accumulator and value.resolved
+        return accumulator
+
+    @property
+    def simplified(self) -> Dict[str, Any]:
+        """Return a simplified version of the value.
+
+        This can be used to concatenate two literals into one literal or
+        flatten nested concatenations.
+
+        """
+        return {field: value.simplified for field, value in self._data.items()}
+
+    @property
+    def value(self) -> _PydanticModelTypeVar:
+        """Value of the variable. Can be resolved or unresolved.
+
+        Uses the original pydantic model class to parse the resolved data back
+        into a pydantic model.
+
+        """
+        return self._model_class.parse_obj(
+            {field: value.value for field, value in self._data.items()}
+        )
+
+    def resolve(
+        self,
+        context: Union[CfnginContext, RunwayContext],
+        provider: Optional[Provider] = None,
+        variables: Optional[RunwayVariablesDefinition] = None,
+        **kwargs: Any,
+    ) -> None:
+        """Resolve the variable value.
+
+        Args:
+            context: The current context object.
+            provider: Subclass of the base provider.
+            variables: Object containing variables passed to Runway.
+
+        """
+        for item in self._data.values():
+            item.resolve(context, provider=provider, variables=variables, **kwargs)
+
+    def __getitem__(self, __key: str) -> VariableValue:
+        """Get item by index."""
+        return self._data[__key]
+
+    def __iter__(self) -> Iterator[str]:
+        """How the object is iterated."""
+        yield from iter(self._data)
+
+    def __len__(self) -> int:
+        """Length of the object."""
+        return len(self._data)
+
+    def __repr__(self) -> str:
+        """Return object representation."""
+        # pylint: disable=no-member
+        return (
+            self._model_class.__name__
+            + f"[{', '.join(f'{k}={v}' for k, v in self._data.items())}]"
+        )
