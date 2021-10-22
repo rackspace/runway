@@ -971,6 +971,10 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
         for item in self._data.values():
             item.resolve(context, provider=provider, variables=variables, **kwargs)
 
+    def __delitem__(self, __key: str) -> None:
+        """Delete item by index."""
+        del self._data[__key]
+
     def __getitem__(self, __key: str) -> VariableValue:
         """Get item by index."""
         return self._data[__key]
@@ -990,3 +994,7 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
             self._model_class.__name__
             + f"[{', '.join(f'{k}={v}' for k, v in self._data.items())}]"
         )
+
+    def __setitem__(self, __key: str, __value: VariableValue) -> None:
+        """Set item by index."""
+        self._data[__key] = __value
