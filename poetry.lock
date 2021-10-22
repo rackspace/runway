@@ -1672,7 +1672,7 @@ pytest = ">=5.0"
 
 [[package]]
 name = "pytest-subprocess"
-version = "1.1.2"
+version = "1.2.0"
 description = "A plugin to fake subprocess for pytest"
 category = "dev"
 optional = false
@@ -1683,8 +1683,8 @@ pytest = ">=4.0.0"
 
 [package.extras]
 dev = ["nox", "changelogd"]
-docs = ["sphinx", "sphinxcontrib-napoleon", "sphinx-autodoc-typehints", "changelogd"]
-test = ["pytest (>=4.0)", "coverage", "docutils (>=0.12)", "Pygments (>=2.0)", "pytest-rerunfailures"]
+docs = ["sphinx", "furo", "sphinxcontrib-napoleon", "sphinx-autodoc-typehints", "changelogd"]
+test = ["pytest (>=4.0)", "coverage", "docutils (>=0.12)", "Pygments (>=2.0)", "pytest-rerunfailures", "pytest-asyncio (>=0.15.1)"]
 
 [[package]]
 name = "pytest-sugar"
@@ -2952,8 +2952,8 @@ pytest-order = [
     {file = "pytest_order-1.0.0-py3-none-any.whl", hash = "sha256:a4cdf12f4c83c76bdfd6e6088e2e157df7fdf91a9c3e3ca7d8809e8dabce0f4b"},
 ]
 pytest-subprocess = [
-    {file = "pytest-subprocess-1.1.2.tar.gz", hash = "sha256:634fc53fa8364a343a052f7c6005bc26efccd6d8721656f2a904a5a1ee1c80bf"},
-    {file = "pytest_subprocess-1.1.2-py3-none-any.whl", hash = "sha256:990e4c7e64f00fe68a78c5698e23638da5ea921e9b50294d60e6627066b7d532"},
+    {file = "pytest-subprocess-1.2.0.tar.gz", hash = "sha256:c4fad4fe51c72638026b31519fbbef51412073e80936946eef8c851ddd6d3994"},
+    {file = "pytest_subprocess-1.2.0-py3-none-any.whl", hash = "sha256:92511728693b4ae7a24548ddef9739376141de0d4d997aa83440934710fa7da9"},
 ]
 pytest-sugar = [
     {file = "pytest-sugar-0.9.4.tar.gz", hash = "sha256:b1b2186b0a72aada6859bea2a5764145e3aaa2c1cfbb23c3a19b5f7b697563d3"},
