@@ -522,7 +522,7 @@ python-versions = ">=3.6.1"
 
 [[package]]
 name = "cfn-flip"
-version = "1.2.3"
+version = "1.3.0"
 description = "Convert AWS CloudFormation templates between JSON and YAML formats"
 category = "main"
 optional = false
@@ -2386,7 +2386,8 @@ cfgv = [
     {file = "cfgv-3.3.1.tar.gz", hash = "sha256:f5a830efb9ce7a445376bb66ec94c638a9787422f96264c98edc6bdeed8ab736"},
 ]
 cfn-flip = [
-    {file = "cfn_flip-1.2.3.tar.gz", hash = "sha256:2bed32a1f4dca26dc64178d52511fd4ef778b5ccbcf32559cac884ace75bde6a"},
+    {file = "cfn_flip-1.3.0-py3-none-any.whl", hash = "sha256:faca8e77f0d32fb84cce1db1ef4c18b14a325d31125dae73c13bcc01947d2722"},
+    {file = "cfn_flip-1.3.0.tar.gz", hash = "sha256:003e02a089c35e1230ffd0e1bcfbbc4b12cc7d2deb2fcc6c4228ac9819307362"},
 ]
 cfn-lint = [
     {file = "cfn-lint-0.54.2.tar.gz", hash = "sha256:82a2cc7d6fa3bbdc303bf1eb87f92ba6b3c552d8aef31918b47b69648ce262d3"},
