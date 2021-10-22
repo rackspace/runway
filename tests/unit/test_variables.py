@@ -1,5 +1,6 @@
 """Tests for runway.variables."""
 # pylint: disable=expression-not-assigned,no-self-use,protected-access,unused-argument
+# pylint: disable=too-many-lines
 # pyright: basic
 from __future__ import annotations
 
@@ -7,6 +8,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, List, Union
 
 import pytest
 from mock import MagicMock, call
+from pydantic import BaseModel
 
 from runway.context import CfnginContext, RunwayContext
 from runway.exceptions import (
@@ -29,6 +31,7 @@ from runway.variables import (
     VariableValueList,
     VariableValueLiteral,
     VariableValueLookup,
+    VariableValuePydanticModel,
     resolve_variables,
 )
 
@@ -301,6 +304,12 @@ class TestVariableValue:
         obj = VariableValue.parse_obj("test")
         assert obj.value == "test"
         assert isinstance(obj, VariableValueLiteral)
+
+    def test_parse_obj_pydantic_model(self) -> None:
+        """Test parse_obj pydantic model."""
+        assert isinstance(
+            VariableValue.parse_obj(BaseModel()), VariableValuePydanticModel
+        )
 
     def test_repr(self) -> None:
         """Test __repr__."""
@@ -893,3 +902,122 @@ class TestVariableValueLookup:
         obj._resolve("success")
         assert obj.resolved is True
         assert obj.value == "success"
+
+
+class TestVariableValuePydanticModel:
+    """Test VariableValuePydanticModel."""
+
+    class ModelClass(BaseModel):
+        """Model class for testing."""
+
+        test: Any = "val"
+
+    def test___delitem__(self) -> None:
+        """Test __delitem__."""
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert "test" in obj
+        del obj["test"]
+        assert "test" not in obj
+
+    def test___getitem__(self, mocker: MockerFixture) -> None:
+        """Test __getitem__."""
+        mocker.patch.object(
+            VariableValuePydanticModel, "parse_obj", return_value="parsed_val"
+        )
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert obj["test"] == "parsed_val"
+
+    def test___init__(self, mocker: MockerFixture) -> None:
+        """Test __init__."""
+        mock_parse_obj = mocker.patch.object(
+            VariableValuePydanticModel, "parse_obj", return_value="parsed_val"
+        )
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert obj._data == {"test": mock_parse_obj.return_value}
+        assert obj._model_class == self.ModelClass
+        mock_parse_obj.assert_called_once_with("val", variable_type="cfngin")
+        assert obj.variable_type == "cfngin"
+
+    def test___iter__(self) -> None:
+        """Test __iter__."""
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert list(iter(obj)) == ["test"]
+
+    def test___len__(self) -> None:
+        """Test __len__."""
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert len(obj) == 1
+
+    def test___repr__(self) -> None:
+        """Test __repr__."""
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert repr(obj) == "ModelClass[test=Literal[val]]"
+
+    def test___setitem__(self, mocker: MockerFixture) -> None:
+        """Test __setitem__."""
+        mocker.patch.object(
+            VariableValuePydanticModel, "parse_obj", return_value="parsed_val"
+        )
+        obj = VariableValuePydanticModel(self.ModelClass())
+        obj["test"] = "new"  # type: ignore
+        assert obj["test"] == "new"
+
+    def test_dependencies(self, mocker: MockerFixture) -> None:
+        """Test dependencies."""
+        mock_literal = MagicMock(dependencies=set("foobar"))
+        mocker.patch.object(
+            VariableValuePydanticModel, "parse_obj", return_value=mock_literal
+        )
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert obj.dependencies == mock_literal.dependencies
+
+    def test_resolve(
+        self, cfngin_context: MockCFNginContext, mocker: MockerFixture
+    ) -> None:
+        """Test resolve."""
+        mock_literal = MagicMock()
+        mock_provider = MagicMock()
+        mocker.patch.object(
+            VariableValuePydanticModel, "parse_obj", return_value=mock_literal
+        )
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert not obj.resolve(
+            cfngin_context,
+            provider=mock_provider,
+            variables={"var": "something"},  # type: ignore
+            kwarg="test",
+        )
+        mock_literal.resolve.assert_called_once_with(
+            cfngin_context,
+            provider=mock_provider,
+            variables={"var": "something"},
+            kwarg="test",
+        )
+
+    @pytest.mark.parametrize("resolved", [False, True])
+    def test_resolved(self, mocker: MockerFixture, resolved: bool) -> None:
+        """Test resolved."""
+        mock_literal = MagicMock(resolved=resolved)
+        mocker.patch.object(
+            VariableValuePydanticModel, "parse_obj", return_value=mock_literal
+        )
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert obj.resolved is resolved
+
+    def test_simplified(self, mocker: MockerFixture) -> None:
+        """Test simplified."""
+        mock_literal = MagicMock(simplified="simplified")
+        mocker.patch.object(
+            VariableValuePydanticModel, "parse_obj", return_value=mock_literal
+        )
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert obj.simplified == {"test": "simplified"}
+
+    def test_value(self, mocker: MockerFixture) -> None:
+        """Test value."""
+        mock_literal = MagicMock(value="value")
+        mocker.patch.object(
+            VariableValuePydanticModel, "parse_obj", return_value=mock_literal
+        )
+        obj = VariableValuePydanticModel(self.ModelClass())
+        assert obj.value == self.ModelClass(test=mock_literal.value)

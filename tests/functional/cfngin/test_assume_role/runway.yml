@@ -13,3 +13,18 @@ deployments:
       namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
     regions:
       - us-east-1
+  - modules:
+      - name: test_assume_role
+        path: ./
+        parameters:
+          namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
+    account_id: ${var account_id.test-alt}
+    assume_role:
+      arn: ${var runner_role.test-alt}
+    environments:
+      test: true
+    parameters:
+      cfngin_bucket: runway-testing-lab-cfngin-bucket-${env AWS_REGION}
+      namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
+    regions:
+      - us-west-2
