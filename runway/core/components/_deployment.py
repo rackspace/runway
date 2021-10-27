@@ -88,9 +88,13 @@ class Deployment:
             if not self.definition.env_vars:
                 return {}
         except UnresolvedVariable:
-            self.definition._env_vars.resolve(  # pylint: disable=protected-access
-                self.ctx, variables=self._variables
-            )
+            # pylint: disable=protected-access
+            if "env_vars" in self.definition._vars:
+                var = self.definition._vars["env_vars"]
+                var.resolve(self.ctx, variables=self._variables)
+                self.definition._data["env_vars"] = var.value
+            else:
+                raise
         return flatten_path_lists(self.definition.env_vars, str(self.ctx.env.root_dir))
 
     @cached_property

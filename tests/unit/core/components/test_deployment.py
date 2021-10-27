@@ -7,7 +7,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 import pytest
-from mock import ANY, MagicMock, PropertyMock, call
+from mock import ANY, MagicMock, Mock, PropertyMock, call
 
 from runway.config.components.runway import (
     RunwayDeploymentDefinition,
@@ -118,7 +118,7 @@ class TestDeployment:
         """Test env_vars_config unresolved."""
         expected = {"key": "val"}
         mocker.patch.object(
-            Deployment, "_Deployment__merge_env_vars", MagicMock(return_value=None)
+            Deployment, "_Deployment__merge_env_vars", Mock(return_value=None)
         )
         mocker.patch.object(
             RunwayDeploymentDefinition,
@@ -127,25 +127,25 @@ class TestDeployment:
                 side_effect=[
                     UnresolvedVariable(
                         Variable("test", "something", variable_type="runway"),
-                        MagicMock(),
+                        Mock(),
                     ),
                     expected,
                 ]
             ),
             create=True,
         )
-        mocker.patch.object(
-            RunwayDeploymentDefinition, "_env_vars", PropertyMock(), create=True
-        )
+        variable = Mock(value=expected)
 
         raw_deployment: Dict[str, Any] = cast(
             Dict[str, Any], fx_deployments.get("min_required")
         )
         deployment = RunwayDeploymentDefinition.parse_obj(raw_deployment)
         obj = Deployment(context=runway_context, definition=deployment)
+        obj.definition._vars.update({"env_vars": variable})
 
         assert obj.env_vars_config == expected
-        obj.definition._env_vars.resolve.assert_called_once()
+        variable.resolve.assert_called_once()
+        assert obj.definition._data["env_vars"] == expected
 
     @pytest.mark.parametrize(
         "config, expected",
