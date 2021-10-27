@@ -122,10 +122,13 @@ class TestK8s:
     ) -> None:
         """Test kbenv."""
         mock_env_mgr = mocker.patch(f"{MODULE}.KBEnvManager", return_value="success")
+        overlay_path = mocker.patch(
+            f"{MODULE}.K8sOptions.overlay_path", tmp_path / "overlay"
+        )
         assert (
             K8s(runway_context, module_root=tmp_path).kbenv == mock_env_mgr.return_value
         )
-        mock_env_mgr.assert_called_once_with(tmp_path)
+        mock_env_mgr.assert_called_once_with(tmp_path, overlay_path=overlay_path)
 
     def test_kubectl_apply(
         self,
