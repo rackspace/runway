@@ -109,6 +109,37 @@ class TestDeployment:
         obj = Deployment(context=runway_context, definition=fx_deployments.load(config))
         assert obj.assume_role_config == expected
 
+    def test_env_vars_config_raise_unresolved_variable(
+        self,
+        fx_deployments: YamlLoaderDeployment,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test env_vars_config raise UnresolvedVariable."""
+        mocker.patch.object(
+            Deployment, "_Deployment__merge_env_vars", Mock(return_value=None)
+        )
+        mocker.patch.object(
+            RunwayDeploymentDefinition,
+            "env_vars",
+            PropertyMock(
+                side_effect=UnresolvedVariable(
+                    Variable("test", "something", variable_type="runway"),
+                    Mock(),
+                )
+            ),
+            create=True,
+        )
+
+        with pytest.raises(UnresolvedVariable):
+            obj = Deployment(
+                context=runway_context,
+                definition=RunwayDeploymentDefinition.parse_obj(
+                    cast(Dict[str, Any], fx_deployments.get("min_required"))
+                ),
+            )
+            assert not obj.env_vars_config
+
     def test_env_vars_config_unresolved(
         self,
         fx_deployments: YamlLoaderDeployment,
