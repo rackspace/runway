@@ -99,7 +99,7 @@ class K8s(RunwayModule):
     @cached_property
     def kbenv(self) -> KBEnvManager:
         """Kubectl environmet manager."""
-        return KBEnvManager(self.path)
+        return KBEnvManager(self.path, overlay_path=self.options.overlay_path)
 
     @cached_property
     def kubectl_bin(self) -> str:
