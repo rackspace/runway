@@ -31,8 +31,7 @@ class Iam(Blueprint):
                         "AmazonEKSWorkerNodePolicy",
                         "AmazonEKS_CNI_Policy",
                         "AmazonEC2ContainerRegistryReadOnly",
-                        # SSM agent not shipped ootb
-                        # 'AmazonSSMManagedInstanceCore'
+                        "AmazonSSMManagedInstanceCore",
                     ]
                 ],
             )

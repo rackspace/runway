@@ -3,7 +3,7 @@ cfngin_bucket: ""  # not needed for these small templates
 sys_path: ./
 
 lookups:
-  bootstrap_value: local_lookups.bootstrap_value.bootstrap_value
+  bootstrap_value: local_lookups.BootstrapValue
 
 # Could specify a SSH keypair to allow access to the instances
 # pre_deploy:
@@ -13,19 +13,17 @@ lookups:
 #       keypair: &keypair-name my_keypair_name_here
 
 stacks:
-  - name: k8s-workers
+  - name: runway-sample-k8s-workers
     template_path: templates/k8s_workers.yaml
     variables:
       NodeImageId: ${eks_node_image_id}
       NodeInstanceType: ${default eks_node_instance_type::c5.large}
-      NodeInstanceProfile: ${rxref k8s-iam::NodeInstanceProfile}
-      ClusterName: ${rxref k8s-eks::EksClusterName}
+      NodeInstanceProfile: ${rxref runway-sample-k8s-iam::NodeInstanceProfileArn}
+      ClusterName: ${rxref runway-sample-k8s-eks::EksClusterName}
       NodeGroupName: k8s-workers
-      ClusterControlPlaneSecurityGroup: ${rxref k8s-eks::ClusterControlPlaneSecurityGroup}
-      VpcId: ${rxref k8s-eks::VpcId}
-      Subnets: ${rxref k8s-eks::Subnets}
-      UseSpotInstances: "${eks_use_spot_instances}"
-      SpotBidPrice: "${eks_spot_bid_price}"
-      BootstrapArguments: "--kubelet-extra-args '--node-labels=node-role.kubernetes.io/worker=true'"
-      UseDesiredInstanceCount: ${bootstrap_value k8s-workers::true::false}  # set ASG DesiredCount only on initial deployment
+      ClusterControlPlaneSecurityGroup: ${rxref runway-sample-k8s-eks::ClusterControlPlaneSecurityGroup}
+      VpcId: ${rxref runway-sample-k8s-eks::VpcId}
+      Subnets: ${rxref runway-sample-k8s-eks::Subnets}
+      BootstrapArguments: "--kubelet-extra-args '--node-labels=node.kubernetes.io/worker=true'"
+      UseDesiredInstanceCount: ${bootstrap_value runway-sample-k8s-workers::bootstrap=true, post_bootstrap=false}  # set ASG DesiredCount only on initial deployment
       # KeyName: *keypair-name

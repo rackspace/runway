@@ -28,12 +28,12 @@ class Cluster(Blueprint):
         },
         "EksSubnets": {
             "type": EC2SubnetIdList,
-            "description": "Subnets where the Kubernetes cluster " "will live",
+            "description": "Subnets where the Kubernetes cluster will live.",
         },
         "EksVersion": {"type": CFNString, "description": "Kubernetes version"},
         "VPC": {
             "type": EC2VPCId,
-            "description": "VPC where the Kubernetes cluster will live",
+            "description": "VPC where the Kubernetes cluster will live.",
         },
     }
 

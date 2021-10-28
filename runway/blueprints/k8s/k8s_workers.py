@@ -57,7 +57,7 @@ class NodeGroup(Blueprint):
         },
         "NodeInstanceProfile": {
             "type": CFNString,
-            "description": "Instance profile for the " "nodes.",
+            "description": "Instance profile for the nodes.",
         },
         "NodeAutoScalingGroupMinSize": {
             "type": CFNNumber,
@@ -86,7 +86,7 @@ class NodeGroup(Blueprint):
             "description": "Arguments to pass to the "
             "bootstrap script. See "
             "files/bootstrap.sh in "
-            "https://github.com/awslabs/amazon-eks-ami",  # noqa
+            "https://github.com/awslabs/amazon-eks-ami",
             "default": "",
         },
         "NodeGroupName": {
@@ -104,20 +104,7 @@ class NodeGroup(Blueprint):
         },
         "UseDesiredInstanceCount": {
             "type": CFNString,
-            "description": "Should the initial " "bootstrap instance count " "be used?",
-        },
-        "UseSpotInstances": {
-            "type": CFNString,
-            "default": "no",
-            "allowed_values": ["yes", "no"],
-            "description": "Should the instances be " "configured as spot instances?",
-        },
-        "SpotBidPrice": {
-            "type": CFNString,
-            "description": "Bid price for Spot instance workers "
-            "(only relevant if UseSpotInstances "
-            'is set to "yes")',
-            "default": "0.68",
+            "description": "Should the initial bootstrap instance count be used?",
         },
     }
 
@@ -159,8 +146,6 @@ class NodeGroup(Blueprint):
                                     "NodeImageId",
                                     "NodeVolumeSize",
                                     "KeyName",
-                                    "UseSpotInstances",
-                                    "SpotBidPrice",
                                     "BootstrapArguments",
                                 ]
                             ],
@@ -177,9 +162,6 @@ class NodeGroup(Blueprint):
         )
 
         # Conditions
-        template.add_condition(
-            "SetSpotPrice", Equals(self.variables["UseSpotInstances"].ref, "yes")
-        )
         template.add_condition(
             "DesiredInstanceCountSpecified",
             Equals(self.variables["UseDesiredInstanceCount"].ref, "true"),
@@ -228,7 +210,7 @@ class NodeGroup(Blueprint):
                 GroupId=nodesecuritygroup.ref(),
                 SourceSecurityGroupId=self.variables[
                     "ClusterControlPlaneSecurityGroup"
-                ].ref,  # noqa
+                ].ref,
                 IpProtocol="tcp",
                 FromPort=1025,
                 ToPort=65535,
@@ -286,43 +268,86 @@ class NodeGroup(Blueprint):
             )
         )
 
-        nodelaunchconfig = template.add_resource(
-            autoscaling.LaunchConfiguration(
-                "NodeLaunchConfig",
-                AssociatePublicIpAddress=True,
-                IamInstanceProfile=self.variables["NodeInstanceProfile"].ref,
-                ImageId=self.variables["NodeImageId"].ref,
-                InstanceType=self.variables["NodeInstanceType"].ref,
-                KeyName=If("KeyNameSpecified", self.variables["KeyName"].ref, NoValue),
-                SecurityGroups=[nodesecuritygroup.ref()],
-                SpotPrice=If(
-                    "SetSpotPrice", self.variables["SpotBidPrice"].ref, NoValue
-                ),
-                BlockDeviceMappings=[
-                    autoscaling.BlockDeviceMapping(
-                        DeviceName="/dev/xvda",
-                        Ebs=autoscaling.EBSBlockDevice(
-                            VolumeSize=self.variables["NodeVolumeSize"].ref,
-                            VolumeType="gp2",
-                            DeleteOnTermination=True,
+        nodelaunchtemplate = template.add_resource(
+            ec2.LaunchTemplate(
+                "NodeLaunchTemplate",
+                LaunchTemplateData=ec2.LaunchTemplateData(
+                    BlockDeviceMappings=[
+                        ec2.LaunchTemplateBlockDeviceMapping(
+                            DeviceName="/dev/xvda",
+                            Ebs=ec2.EBSBlockDevice(
+                                DeleteOnTermination=True,
+                                VolumeSize=self.variables["NodeVolumeSize"].ref,
+                                VolumeType="gp2",
+                            ),
                         ),
-                    )
-                ],
-                UserData=Base64(
-                    Sub(
-                        "\n".join(
-                            [
-                                "#!/bin/bash",
-                                "set -o xtrace",
-                                "/etc/eks/bootstrap.sh ${ClusterName} ${BootstrapArguments}",
-                                "/opt/aws/bin/cfn-signal --exit-code $? \\",
-                                "--stack ${AWS::StackName} \\",
-                                "--resource NodeGroup \\",
-                                "--region ${AWS::Region}",
-                            ]
+                    ],
+                    IamInstanceProfile=ec2.IamInstanceProfile(
+                        Arn=self.variables["NodeInstanceProfile"].ref
+                    ),
+                    ImageId=self.variables["NodeImageId"].ref,
+                    InstanceType=self.variables["NodeInstanceType"].ref,
+                    KeyName=If(
+                        "KeyNameSpecified", self.variables["KeyName"].ref, NoValue
+                    ),
+                    MetadataOptions=ec2.MetadataOptions(
+                        HttpPutResponseHopLimit=2,
+                        HttpEndpoint="enabled",
+                        HttpTokens="optional",
+                    ),
+                    SecurityGroupIds=[nodesecuritygroup.ref()],
+                    UserData=Base64(
+                        Sub(
+                            "\n".join(
+                                [
+                                    "#!/bin/bash",
+                                    "set -o xtrace",
+                                    "/etc/eks/bootstrap.sh ${ClusterName} ${BootstrapArguments}",
+                                    "/opt/aws/bin/cfn-signal --exit-code $? \\",
+                                    "         --stack  ${AWS::StackName} \\",
+                                    "         --resource NodeGroup  \\",
+                                    "         --region ${AWS::Region}",
+                                    "sudo yum install -y "
+                                    "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/"
+                                    "latest/linux_amd64/amazon-ssm-agent.rpm",
+                                    "sudo systemctl enable amazon-ssm-agent",
+                                    "sudo systemctl start amazon-ssm-agent",
+                                ]
+                            )
                         )
-                    )
-                ),
+                    ),
+                )
+                # AssociatePublicIpAddress=True,
+                # IamInstanceProfile=self.variables["NodeInstanceProfile"].ref,
+                # ImageId=self.variables["NodeImageId"].ref,
+                # InstanceType=self.variables["NodeInstanceType"].ref,
+                # KeyName=If("KeyNameSpecified", self.variables["KeyName"].ref, NoValue),
+                # SecurityGroups=[nodesecuritygroup.ref()],
+                # BlockDeviceMappings=[
+                #     autoscaling.BlockDeviceMapping(
+                #         DeviceName="/dev/xvda",
+                #         Ebs=autoscaling.EBSBlockDevice(
+                #             VolumeSize=self.variables["NodeVolumeSize"].ref,
+                #             VolumeType="gp2",
+                #             DeleteOnTermination=True,
+                #         ),
+                #     )
+                # ],
+                # UserData=Base64(
+                #     Sub(
+                #         "\n".join(
+                #             [
+                #                 "#!/bin/bash",
+                #                 "set -o xtrace",
+                #                 "/etc/eks/bootstrap.sh ${ClusterName} ${BootstrapArguments}",
+                #                 "/opt/aws/bin/cfn-signal --exit-code $? \\",
+                #                 "--stack ${AWS::StackName} \\",
+                #                 "--resource NodeGroup \\",
+                #                 "--region ${AWS::Region}",
+                #             ]
+                #         )
+                #     )
+                # ),
             )
         )
 
@@ -334,10 +359,12 @@ class NodeGroup(Blueprint):
                     self.variables["NodeAutoScalingGroupMaxSize"].ref,
                     NoValue,
                 ),
-                LaunchConfigurationName=nodelaunchconfig.ref(),
+                LaunchTemplate=autoscaling.LaunchTemplateSpecification(
+                    LaunchTemplateId=nodelaunchtemplate.ref(),
+                    Version=nodelaunchtemplate.get_att("LatestVersionNumber"),
+                ),
                 MinSize=self.variables["NodeAutoScalingGroupMinSize"].ref,
                 MaxSize=self.variables["NodeAutoScalingGroupMaxSize"].ref,
-                VPCZoneIdentifier=self.variables["Subnets"].ref,
                 Tags=[
                     autoscaling.Tag(
                         "Name", Sub("${ClusterName}-${NodeGroupName}-Node"), True
@@ -346,6 +373,7 @@ class NodeGroup(Blueprint):
                         Sub("kubernetes.io/cluster/${ClusterName}"), "owned", True
                     ),
                 ],
+                VPCZoneIdentifier=self.variables["Subnets"].ref,
                 UpdatePolicy=UpdatePolicy(
                     AutoScalingRollingUpdate=AutoScalingRollingUpdate(
                         MinInstancesInService="1", MaxBatchSize="1"

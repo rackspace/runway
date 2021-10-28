@@ -1,11 +1,16 @@
 """Execute the AWS CLI update-kubeconfig command."""
+from __future__ import annotations
+
 import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from runway.config import RunwayConfig
+
+if TYPE_CHECKING:
+    from runway.context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -49,10 +54,11 @@ def copy_template_to_env(path: Path, env: str, region: str):
         )
 
 
-def create_runway_environments(*, namespace: str, **_: Any):
+def create_runway_environments(*, context: CfnginContext, namespace: str, **_: Any):
     """Copy k8s module templates into new environment directories.
 
     Args:
+        context: CFNgin context.
         namespace: Current CFNgin namespace.
 
     Returns: boolean for whether or not the hook succeeded.
@@ -63,9 +69,8 @@ def create_runway_environments(*, namespace: str, **_: Any):
     )
 
     environment = namespace
-    region = os.environ["AWS_REGION"]
 
-    runway_config_path = Path(os.environ.get("RUNWAYCONFIG", ""))
+    runway_config_path = RunwayConfig.find_config_file(Path.cwd().parent)
     if not runway_config_path.is_file():
         LOGGER.warning("could not find RUNWAYCONFIG=%s", runway_config_path)
         return False
@@ -82,6 +87,8 @@ def create_runway_environments(*, namespace: str, **_: Any):
                 path = ""
             if path.endswith(".k8s"):
                 copy_template_to_env(
-                    runway_config_path.parent / path, environment, region
+                    runway_config_path.parent / path,
+                    environment,
+                    context.env.aws_region,
                 )
     return True

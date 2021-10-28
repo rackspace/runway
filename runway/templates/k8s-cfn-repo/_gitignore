@@ -1,3 +1,4 @@
-*.pyc
-*.pyo
+*.py[co]
+.kube
+.runway
 __pycache__
