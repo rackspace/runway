@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 from cfn_flip import to_yaml
+from typing_extensions import Literal
 
 from ....blueprints.tf_state import TfState
 from ....context import CfnginContext
@@ -46,16 +47,21 @@ def copy_sample(ctx: click.Context, src: Path, dest: Path) -> None:
     shutil.copytree(src, dest)
 
 
-def write_tfstate_template(dest: Path) -> None:
+def write_tfstate_template(
+    dest: Path, *, bucket_deletion_policy: Literal["Delete", "Retain"] = "Retain"
+) -> None:
     """Write TfState blueprint as a YAML CFN template.
 
     Args:
         dest: File to be written to.
+        bucket_deletion_policy: CloudFormation deletion policy for S3 Bucket.
 
     """
     LOGGER.debug('writing TfState as a YAML template to "%s"', dest)
     dest.write_text(
         to_yaml(
-            TfState("test", CfnginContext(environment={"namespace": "test"})).to_json()
+            TfState("test", CfnginContext(environment={"namespace": "test"})).to_json(
+                {"BucketDeletionPolicy": bucket_deletion_policy}
+            )
         )
     )

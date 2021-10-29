@@ -3,6 +3,20 @@ terraform {
   backend "s3" {
     key = "eks-job-s3-echo.tfstate"
   }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.63"
+    }
+
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 1.13"
+    }
+  }
+
+  required_version = "~> 1.0"
 }
 
 # Variable definitions
@@ -10,7 +24,6 @@ variable "region" {}
 
 # Provider and access setup
 provider "aws" {
-  version = "~> 3.22"
   region = var.region
 }
 
@@ -19,24 +32,23 @@ data "aws_region" "current" {}
 
 locals {
   cluster_name = "k8s-${terraform.workspace}"
-  job_name = "s3-echo"
-  sa_name = "${local.job_name}-serviceaccount"
+  job_name     = "s3-echo"
+  sa_name      = "${local.job_name}-serviceaccount"
 }
 
 data "aws_eks_cluster" "cluster" {
-  name = "${local.cluster_name}"
+  name = local.cluster_name
 }
 
 data "aws_eks_cluster_auth" "cluster_auth" {
-  name = "${data.aws_eks_cluster.cluster.id}"
+  name = data.aws_eks_cluster.cluster.id
 }
 
 provider "kubernetes" {
-  host = data.aws_eks_cluster.cluster.endpoint
+  host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-  token = data.aws_eks_cluster_auth.cluster_auth.token
-  load_config_file = false
-  version = "~> 1.13"
+  token                  = data.aws_eks_cluster_auth.cluster_auth.token
+  load_config_file       = false
 }
 
 data "aws_ssm_parameter" "oidc_iam_provider_cluster_url" {
@@ -48,29 +60,29 @@ data "aws_ssm_parameter" "oidc_iam_provider_cluster_arn" {
 
 resource "aws_s3_bucket" "bucket" {
   bucket_prefix = "eks-${local.job_name}-"
-  acl = "private"
+  acl           = "private"
   force_destroy = "true"
 }
 
 data "aws_iam_policy_document" "service_account_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
-    effect = "Allow"
+    effect  = "Allow"
 
     condition {
-      test = "StringEquals"
+      test     = "StringEquals"
       variable = "${replace(data.aws_ssm_parameter.oidc_iam_provider_cluster_url.value, "https://", "")}:sub"
-      values = ["system:serviceaccount:default:${local.sa_name}"]
+      values   = ["system:serviceaccount:default:${local.sa_name}"]
     }
 
     principals {
-      identifiers = ["${data.aws_ssm_parameter.oidc_iam_provider_cluster_arn.value}"]
-      type = "Federated"
+      identifiers = [data.aws_ssm_parameter.oidc_iam_provider_cluster_arn.value]
+      type        = "Federated"
     }
   }
 }
 resource "aws_iam_role" "service_account" {
-  name_prefix = "eks-${local.sa_name}-"
+  name_prefix        = "eks-${local.sa_name}-"
   assume_role_policy = data.aws_iam_policy_document.service_account_assume_role_policy.json
 }
 data "aws_iam_policy_document" "service_account" {
@@ -80,7 +92,7 @@ data "aws_iam_policy_document" "service_account" {
       "s3:ListBucket",
       "s3:ListBucketVersions"
     ]
-    resources = ["${aws_s3_bucket.bucket.arn}"]
+    resources = [aws_s3_bucket.bucket.arn]
   }
 
   statement {
@@ -101,11 +113,11 @@ resource "kubernetes_service_account" "service_account" {
   metadata {
     name = local.sa_name
     annotations = {
-        "eks.amazonaws.com/role-arn" = aws_iam_role.service_account.arn
+      "eks.amazonaws.com/role-arn" = aws_iam_role.service_account.arn
     }
   }
   depends_on = [
-    "aws_iam_role_policy.service_account",
+    aws_iam_role_policy.service_account,
   ]
   # Sleep on initial creation here to avoid api errors on initial job creation.
   provisioner "local-exec" {
@@ -123,8 +135,8 @@ resource "kubernetes_job" "job" {
       spec {
         service_account_name = kubernetes_service_account.service_account.metadata[0].name
         container {
-          name    = "main"
-          image   = "amazonlinux:2018.03"
+          name  = "main"
+          image = "amazonlinux:2018.03"
           command = [
             "sh",
             "-c",
@@ -144,8 +156,8 @@ resource "kubernetes_job" "job" {
           }
           volume_mount {
             mount_path = "/var/run/secrets/kubernetes.io/serviceaccount"
-            name = kubernetes_service_account.service_account.default_secret_name
-            read_only = true
+            name       = kubernetes_service_account.service_account.default_secret_name
+            read_only  = true
           }
         }
         volume {
