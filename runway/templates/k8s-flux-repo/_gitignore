@@ -1,7 +1,7 @@
-.terraform
-terraform.tfstate.d
+*.py[co]
 .kube
-.kubeconfig
+.runway
+.terraform
 __pycache__
 
 # Ignore any infrastructure repos coincidentally co-located here

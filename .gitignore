@@ -13,7 +13,6 @@
 .secrets
 .serverless
 .terraform
-.terraform.lock.hcl
 .venv
 .vscode/bookmarks.json
 artifacts/*

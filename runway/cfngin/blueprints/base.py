@@ -58,7 +58,9 @@ _T = TypeVar("_T")
 class CFNParameter:
     """Wrapper around a value to indicate a CloudFormation Parameter."""
 
-    def __init__(self, name: str, value: Union[bool, int, List[Any], str, Any]) -> None:
+    def __init__(
+        self, name: str, value: Union[bool, float, int, List[Any], str, Any]
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -72,12 +74,12 @@ class CFNParameter:
         elif isinstance(value, bool):
             LOGGER.debug("converting parameter %s boolean '%s' to string", name, value)
             self.value = str(value).lower()
-        elif isinstance(value, int):
+        elif isinstance(value, (float, int)):
             LOGGER.debug("converting parameter %s integer '%s' to string", name, value)
             self.value = str(value)
         else:
             raise TypeError(
-                f"CFNParameter ({name}) value must be one of bool, int, str, "
+                f"CFNParameter ({name}) value must be one of bool, float, int, str, "
                 f"List[str] but got: {type(value)}"
             )
 

@@ -1,29 +1,39 @@
 ---
 deployments:
   - modules:
-      - k8s-master.cfn
-      - aws-auth-cm.k8s
-      - k8s-workers.cfn
-      - service-hello-world.k8s  # sample app
-    regions:
-      - us-west-2
-    environments:
-      dev:
-        # master settings
-        namespace: dev
-        region: us-west-2
-        VPCid: VPCIDHERE
-        EksSubnets: SUBNETID1HERE,SUBNETID2HERE,etc
-        EksVersion: "'1.18.9'"
-        # worker settings
-        # https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html
-        eks_node_image_id: ami-0f9f033f2355ab1f8  # us-west-2 1.18.9
-        eks_node_instance_type: t2.medium
-        eks_use_spot_instances: "no"
-        eks_spot_bid_price: "0.68"
+      - name: EKS Cluster
+        path: k8s-master.cfn
+      - path: aws-auth-cm.k8s
+      - name: EKS Worker Nodes
+        path: k8s-workers.cfn
+        parameters:
+          eks_node_image_id: ${var eks.image.${env AWS_REGION}}
+          eks_node_instance_type: ${var eks.instance_type.${env DEPLOY_ENVIRONMENT}}
+      - name: Sample Application
+        path: service-hello-world.k8s
     env_vars:
-      dev:
-        KUBECONFIG:
-          - .kube
-          - dev
-          - config
+      KUBECONFIG:
+        - .kube
+        - ${env DEPLOY_ENVIRONMENT}
+        - config
+    parameters:
+      namespace: ${env DEPLOY_ENVIRONMENT}
+      VpcId: ${var vpc.${env DEPLOY_ENVIRONMENT}}
+      EksSubnets: ${var subnets.${env DEPLOY_ENVIRONMENT}}
+      EksVersion: ${var eks.version}
+    regions:
+      - us-east-1
+
+variables:
+  eks:
+    version: '1.21'
+    # latest AMI for an EKS version can be found here:
+    #   https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html
+    image:
+      us-east-1: ami-0c385d0d99fce057d
+    instance_type:
+      dev: t3.medium
+  subnets:
+    dev: SUBNETID1HERE,SUBNETID2HERE,etc
+  vpc:
+    dev: VPCIDHERE

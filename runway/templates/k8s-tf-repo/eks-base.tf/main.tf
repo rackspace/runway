@@ -3,6 +3,25 @@ terraform {
   backend "s3" {
     key = "eks-base.tfstate"
   }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.63"
+    }
+
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 1.13"
+    }
+
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 3.1"
+    }
+  }
+
+  required_version = "~> 1.0"
 }
 
 # Variable definitions
@@ -13,11 +32,7 @@ variable "az-count" { default = 3 }
 
 # Provider and access setup
 provider "aws" {
-  version = "~> 3.22"
   region = var.region
-}
-provider "tls" {
-  version = "~> 3.0"
 }
 
 # Data and resources
@@ -31,31 +46,31 @@ locals {
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
-  version = "~> 2.64.0"
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 3.10.0"
 
   name = local.cluster_name
   cidr = var.vpc-cidr
 
   azs = [
-    for num in range(var.az-count):
+    for num in range(var.az-count) :
     data.aws_availability_zones.available.names[num]
   ]
   private_subnets = [
-    for num in range(0, var.az-count):
+    for num in range(0, var.az-count) :
     cidrsubnet(var.vpc-cidr, 6, num)
   ]
   public_subnets = [
-    for num in range(var.az-count, var.az-count * 2):
+    for num in range(var.az-count, var.az-count * 2) :
     cidrsubnet(var.vpc-cidr, 6, num)
   ]
 
   enable_nat_gateway = true
 
   tags = {
-     "kubernetes.io/cluster/${local.cluster_name}" = "shared",
-     "Environment" = terraform.workspace,
-     "Terraform" = "true"
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared",
+    "Environment"                                 = terraform.workspace,
+    "Terraform"                                   = "true"
   }
 }
 
@@ -82,12 +97,12 @@ resource "aws_iam_role_policy_attachment" "cluster-AmazonEKSClusterPolicy" {
 resource "aws_security_group" "cluster" {
   name_prefix = "eks-cluster-"
   description = "Cluster communication with worker nodes"
-  vpc_id = module.vpc.vpc_id
+  vpc_id      = module.vpc.vpc_id
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
@@ -109,15 +124,15 @@ resource "aws_iam_role" "node" {
 }
 resource "aws_iam_role_policy_attachment" "node-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role = aws_iam_role.node.name
+  role       = aws_iam_role.node.name
 }
 resource "aws_iam_role_policy_attachment" "node-AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role = aws_iam_role.node.name
+  role       = aws_iam_role.node.name
 }
 resource "aws_iam_role_policy_attachment" "node-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role = aws_iam_role.node.name
+  role       = aws_iam_role.node.name
 }
 # SSM agent not shipped ootb
 # resource "aws_iam_role_policy_attachment" "node-AmazonSSMManagedInstanceCore" {
@@ -131,12 +146,12 @@ resource "aws_iam_instance_profile" "node" {
 resource "aws_security_group" "node" {
   name_prefix = "eks-node-"
   description = "Security group for all nodes in the cluster"
-  vpc_id = module.vpc.vpc_id
+  vpc_id      = module.vpc.vpc_id
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -145,41 +160,41 @@ resource "aws_security_group" "node" {
   }
 }
 resource "aws_security_group_rule" "node-ingress-self" {
-  description = "Allow node to communicate with each other"
-  from_port = 0
-  protocol = "-1"
-  security_group_id = aws_security_group.node.id
+  description              = "Allow node to communicate with each other"
+  from_port                = 0
+  protocol                 = "-1"
+  security_group_id        = aws_security_group.node.id
   source_security_group_id = aws_security_group.node.id
-  to_port = 65535
-  type = "ingress"
+  to_port                  = 65535
+  type                     = "ingress"
 }
 
 resource "aws_security_group_rule" "node-ingress-cluster" {
-  description = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
-  from_port = 1025
-  protocol = "tcp"
-  security_group_id = aws_security_group.node.id
+  description              = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
+  from_port                = 1025
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.node.id
   source_security_group_id = aws_security_group.cluster.id
-  to_port = 65535
-  type = "ingress"
+  to_port                  = 65535
+  type                     = "ingress"
 }
 resource "aws_security_group_rule" "cluster-ingress-node-https" {
-  description = "Allow pods to communicate with the cluster API Server"
-  from_port = 443
-  protocol = "tcp"
-  security_group_id = aws_security_group.cluster.id
+  description              = "Allow pods to communicate with the cluster API Server"
+  from_port                = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.cluster.id
   source_security_group_id = aws_security_group.node.id
-  to_port = 443
-  type = "ingress"
+  to_port                  = 443
+  type                     = "ingress"
 }
 
 resource "aws_eks_cluster" "cluster" {
-  name = local.cluster_name
+  name     = local.cluster_name
   role_arn = aws_iam_role.cluster.arn
 
   vpc_config {
     security_group_ids = [aws_security_group.cluster.id]
-    subnet_ids = module.vpc.private_subnets[*]
+    subnet_ids         = module.vpc.private_subnets[*]
   }
 
   # version doesn't need to be specified until it's time to upgrade
@@ -187,7 +202,7 @@ resource "aws_eks_cluster" "cluster" {
 
   depends_on = [
     aws_iam_role_policy_attachment.cluster-AmazonEKSClusterPolicy,
-    module.vpc.natgw_ids,  # would be better to just depend on the entire module, if it were possible
+    module.vpc.natgw_ids, # would be better to just depend on the entire module, if it were possible
   ]
 
   # API will timeout on initial connection attempts (i.e. when using the config_map
@@ -202,11 +217,10 @@ data "aws_eks_cluster_auth" "cluster_auth" {
 }
 
 provider "kubernetes" {
-  host = aws_eks_cluster.cluster.endpoint
+  host                   = aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(aws_eks_cluster.cluster.certificate_authority[0].data)
-  token = data.aws_eks_cluster_auth.cluster_auth.token
-  load_config_file = false
-  version = "~> 1.13"
+  token                  = data.aws_eks_cluster_auth.cluster_auth.token
+  load_config_file       = false
 }
 
 resource "kubernetes_config_map" "aws_auth_configmap" {
@@ -227,27 +241,31 @@ resource "kubernetes_config_map" "aws_auth_configmap" {
     - system:masters
 YAML
   }
-# In place of, or addition to, the IAM role ^ defined here in the system:masters group,
-# individual IAM users can be specified by adding mapUsers to the data block:
-#     mapUsers = <<YAML
-# - userarn: arn:aws:iam::123456789012:user/guy.incognito
-#   username: guy.incognito
-#   groups:
-#     - system:masters
-# YAML
+  # In place of, or addition to, the IAM role ^ defined here in the system:masters group,
+  # individual IAM users can be specified by adding mapUsers to the data block:
+  #     mapUsers = <<YAML
+  # - userarn: arn:aws:iam::123456789012:user/guy.incognito
+  #   username: guy.incognito
+  #   groups:
+  #     - system:masters
+  # YAML
 }
 
 
 resource "aws_eks_node_group" "node" {
-  cluster_name = aws_eks_cluster.cluster.name
-  node_group_name = "base"
+  cluster_name  = aws_eks_cluster.cluster.name
   node_role_arn = aws_iam_role.node.arn
-  subnet_ids = module.vpc.private_subnets[*]
+  subnet_ids    = module.vpc.private_subnets[*]
 
   scaling_config {
     desired_size = 1
-    max_size = 1
-    min_size = 1
+    max_size     = 1
+    min_size     = 1
+  }
+
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes        = [scaling_config[0].desired_size]
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
@@ -264,18 +282,18 @@ data "tls_certificate" "cluster-cert-thumbprint" {
   url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
 }
 resource "aws_iam_openid_connect_provider" "cluster" {
-  client_id_list = ["sts.amazonaws.com"]
+  client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.cluster-cert-thumbprint.certificates[0].sha1_fingerprint]
-  url = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
+  url             = aws_eks_cluster.cluster.identity[0].oidc[0].issuer
 }
 
 resource "aws_ssm_parameter" "oidc_iam_provider_cluster_url" {
-  name = "/${local.cluster_name}/oidc-iam-provider-cluster-url"
-  type = "String"
+  name  = "/${local.cluster_name}/oidc-iam-provider-cluster-url"
+  type  = "String"
   value = aws_iam_openid_connect_provider.cluster.url
 }
 resource "aws_ssm_parameter" "oidc_iam_provider_cluster_arn" {
-  name = "/${local.cluster_name}/oidc-iam-provider-cluster-arn"
-  type = "String"
+  name  = "/${local.cluster_name}/oidc-iam-provider-cluster-arn"
+  type  = "String"
   value = aws_iam_openid_connect_provider.cluster.arn
 }

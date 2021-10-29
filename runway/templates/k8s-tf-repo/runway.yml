@@ -1,16 +1,16 @@
 ---
 deployments:
   - modules:
-      - tfstate.cfn
+      - path: tfstate.cfn
     parameters:
       namespace: ${env DEPLOY_ENVIRONMENT}
     regions:
-      - us-west-2
+      - us-east-1
   - modules:
-      - eks-base.tf
-      - gen-kubeconfig.cfn  # just generating the local kubeconfig file
-      - job-s3-echo.tf
-      - service-hello-world.k8s
+      - path: eks-base.tf
+      - path: gen-kubeconfig.cfn  # just generating the local kubeconfig file
+      - path: job-s3-echo.tf
+      - path: service-hello-world.k8s
     env_vars:
       KUBECONFIG:
         - .kube
@@ -25,4 +25,4 @@ deployments:
         bucket: ${cfn ${env DEPLOY_ENVIRONMENT}-tf-state.TerraformStateBucketName}
         dynamodb_table: ${cfn ${env DEPLOY_ENVIRONMENT}-tf-state.TerraformStateTableName}
     regions:
-      - us-west-2
+      - us-east-1
