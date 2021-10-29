@@ -4,19 +4,19 @@
 
 This repo represents a sample Terraform infrastructure deployment of EKS, featuring:
 
-* Consolidated configuration for each environment in runway.yml
-  * Environments in this context correlate with separate k8s clusters (e.g. a dev & prod cluster)
-* Per-environment kubectl version management
-  * Because each k8s environment has a `.kubectl-version` file, kubectl does not need to be installed (Runway will handle downloading and executing the appropriate version for the environment)
-* IAM Role enabled Service Account (IRSA) usage
-* kustomize-templated k8s configurations
-  * Runway uses the kustomize base/overlays directory structure to apply per-environment k8s configurations
+- Consolidated configuration for each environment in runway.yml
+  - Environments in this context correlate with separate k8s clusters (e.g. a dev & prod cluster)
+- Per-environment kubectl version management
+  - Because each k8s environment has a `.kubectl-version` file, kubectl does not need to be installed (Runway will handle downloading and executing the appropriate version for the environment)
+- IAM Role enabled Service Account (IRSA) usage
+- kustomize-templated k8s configurations
+  - Runway uses the kustomize base/overlays directory structure to apply per-environment k8s configurations
 
 ## Prerequisites
 
-* [awscli](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
-* [Runway](https://pypi.org/project/runway/)
-* AWS IAM Role or IAM User (should be the User or assumed Role being used to access the AWS account)
+- [awscli](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
+- [Runway](https://pypi.org/project/runway/)
+- AWS IAM Role or IAM User (should be the User or assumed Role being used to access the AWS account)
 
 ## Setup
 

@@ -3,12 +3,25 @@ terraform {
   backend "s3" {
     key = "eks-flux.tfstate"
   }
+
   required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.63"
+    }
+
     docker = {
       source  = "kreuzwerker/docker"
       version = "~> 2.9"
     }
+
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 1.13"
+    }
   }
+
+  required_version = "~> 1.0"
 }
 
 # Variable definitions
@@ -16,15 +29,14 @@ variable "region" {}
 
 # Data and resources
 locals {
-  cluster_name = "k8s-${terraform.workspace}"
-  flux_repository = "flux-${terraform.workspace}"
-  flux_namespace = "flux"
+  cluster_name         = "k8s-${terraform.workspace}"
+  flux_repository      = "flux-${terraform.workspace}"
+  flux_namespace       = "flux"
   flux_service_account = "flux"
-  flux_version = "1.21.1"  # also referenced in Dockerfile
+  flux_version         = "1.21.1" # also referenced in Dockerfile
 }
 
 provider "aws" {
-  version = "~> 3.22"
   region = var.region
 }
 
@@ -44,11 +56,10 @@ data "aws_ssm_parameter" "oidc_iam_provider_cluster_arn" {
 }
 
 provider "kubernetes" {
-  host = data.aws_eks_cluster.cluster.endpoint
+  host                   = data.aws_eks_cluster.cluster.endpoint
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-  token = data.aws_eks_cluster_auth.cluster_auth.token
-  load_config_file = false
-  version = "1.13"
+  token                  = data.aws_eks_cluster_auth.cluster_auth.token
+  load_config_file       = false
 }
 
 resource "kubernetes_namespace" "flux" {
@@ -165,9 +176,9 @@ resource "kubernetes_service_account" "flux_service_account" {
       app  = local.flux_namespace
       name = local.flux_namespace
     }
-    annotations = map(
-      "eks.amazonaws.com/role-arn", aws_iam_role.flux_service_account.arn
-    )
+    annotations = tomap({
+      "eks.amazonaws.com/role-arn" = aws_iam_role.flux_service_account.arn
+    })
   }
   depends_on = [
     aws_iam_role_policy.flux_service_account,
@@ -187,7 +198,7 @@ resource "kubernetes_config_map" "flux_git_config" {
     }
   }
   data = {
-    giturl    = aws_codecommit_repository.flux_repository.clone_url_http
+    giturl = aws_codecommit_repository.flux_repository.clone_url_http
     # The credential line can be scoped more narrowly, like:
     # [credential "${aws_codecommit_repository.flux_repository.clone_url_http}"]
     # but git 2.26.2 (in the current flux images e.g. 1.21) doesn't seem to work with it
@@ -397,7 +408,7 @@ resource "kubernetes_deployment" "flux" {
         container {
           name  = "flux"
           image = docker_registry_image.flux.name
-          args  = [
+          args = [
             "--memcached-service=",
             "--ssh-keygen-dir=/var/fluxd/keygen",
             "--git-url=$(GIT_URL)",
@@ -407,7 +418,7 @@ resource "kubernetes_deployment" "flux" {
             "--git-user=Flux",
             "--git-email=Flux",
             "--listen-metrics=:3031",
-            "--sync-garbage-collection"]
+          "--sync-garbage-collection"]
 
           port {
             container_port = 3030

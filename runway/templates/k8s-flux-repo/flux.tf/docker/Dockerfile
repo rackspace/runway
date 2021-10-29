@@ -1,5 +1,5 @@
 # image version noted here and in terraform local variables file
-FROM fluxcd/flux:1.21.1
+FROM fluxcd/flux:1.24.1
 
 # This hack is widely applied to avoid python printing issues in docker containers.
 # See: https://github.com/Docker-Hub-frolvlad/docker-alpine-python3/pull/13
