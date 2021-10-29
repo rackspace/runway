@@ -55,9 +55,6 @@
         "docs/runway-example.yml",
         "typings/**"
     ],
-    "import": [
-        "@cspell/dict-python/cspell-ext.json"
-    ],
     "language": "en",
     "maxNumberOfProblems": 100,
     "version": "0.2",
