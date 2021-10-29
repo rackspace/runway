@@ -316,38 +316,7 @@ class NodeGroup(Blueprint):
                             )
                         )
                     ),
-                )
-                # AssociatePublicIpAddress=True,
-                # IamInstanceProfile=self.variables["NodeInstanceProfile"].ref,
-                # ImageId=self.variables["NodeImageId"].ref,
-                # InstanceType=self.variables["NodeInstanceType"].ref,
-                # KeyName=If("KeyNameSpecified", self.variables["KeyName"].ref, NoValue),
-                # SecurityGroups=[nodesecuritygroup.ref()],
-                # BlockDeviceMappings=[
-                #     autoscaling.BlockDeviceMapping(
-                #         DeviceName="/dev/xvda",
-                #         Ebs=autoscaling.EBSBlockDevice(
-                #             VolumeSize=self.variables["NodeVolumeSize"].ref,
-                #             VolumeType="gp2",
-                #             DeleteOnTermination=True,
-                #         ),
-                #     )
-                # ],
-                # UserData=Base64(
-                #     Sub(
-                #         "\n".join(
-                #             [
-                #                 "#!/bin/bash",
-                #                 "set -o xtrace",
-                #                 "/etc/eks/bootstrap.sh ${ClusterName} ${BootstrapArguments}",
-                #                 "/opt/aws/bin/cfn-signal --exit-code $? \\",
-                #                 "--stack ${AWS::StackName} \\",
-                #                 "--resource NodeGroup \\",
-                #                 "--region ${AWS::Region}",
-                #             ]
-                #         )
-                #     )
-                # ),
+                ),
             )
         )
 
