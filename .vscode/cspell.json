@@ -73,6 +73,7 @@
         "markexpr",
         "openid",
         "rglob",
+        "tomap",
         "typeshed",
         "unsubscriptable"
     ]
