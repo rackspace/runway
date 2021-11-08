@@ -82,6 +82,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             "stacks": [
                 {"name": "stack1", "template_path": "."},
                 {"name": "stack2", "template_path": "."},
+                {"name": "stack3", "stack_name": "foobar-stack", "template_path": "."},
             ],
         }
     )
@@ -160,6 +161,13 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         assert obj.get_stack("stack1") == obj.stacks[0]
         assert not obj.get_stack("dev-stack1")
         assert not obj.get_stack("stack12")
+
+    def test_get_stack_def_stack_name(self) -> None:
+        """Test get_stack stack def has stack_name."""
+        obj = CfnginContext(config=self.config)
+        assert obj.get_stack("stack3") == obj.stacks[2]
+        assert obj.get_stack("foobar-stack") == obj.stacks[2]
+        assert obj.get_stack("test-foobar-stack") == obj.stacks[2]
 
     def test_init(self, tmp_path: Path) -> None:
         """Test init."""
@@ -588,6 +596,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         assert obj.stacks_dict == {
             "test-stack1": obj.stacks[0],
             "test-stack2": obj.stacks[1],
+            "test-foobar-stack": obj.stacks[2],
         }
 
     def test_stacks(self) -> None:

@@ -367,7 +367,14 @@ class CfnginContext(BaseContext):
             name: Name of a Stack as defined in the config.
 
         """
-        return self.stacks_dict.get(self.get_fqn(name))
+        stack_fqn = self.get_fqn(name)
+        if stack_fqn in self.stacks_dict:  # quickly get stack from fqn
+            return self.stacks_dict[stack_fqn]
+        # account for stack def using stack_name and stack.name was provided
+        for stack in self.stacks:
+            if stack.name == name:
+                return stack
+        return None
 
     def lock_persistent_graph(self, lock_code: str) -> None:
         """Locks the persistent graph in s3.
