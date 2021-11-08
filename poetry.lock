@@ -1379,11 +1379,11 @@ flake8-polyfill = ">=1.0.2,<2"
 
 [[package]]
 name = "pipenv"
-version = "2021.5.29"
+version = "2021.11.5.post0"
 description = "Python Development Workflow for Humans."
 category = "dev"
 optional = false
-python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+python-versions = ">=3.6"
 
 [package.dependencies]
 certifi = "*"
@@ -1391,8 +1391,8 @@ virtualenv = "*"
 virtualenv-clone = ">=0.2.5"
 
 [package.extras]
-dev = ["towncrier", "bs4", "twine", "sphinx (<2)", "flake8 (>=3.3.0,<4.0)", "parver", "invoke", "black"]
-tests = ["pytest (<5.0)", "pytest-timeout", "pytest-xdist (<2.0)", "flaky", "mock"]
+dev = ["towncrier", "bs4", "twine", "sphinx", "flake8 (>=3.3.0,<4.0)", "parver", "invoke", "black"]
+tests = ["pytest (>=5.0)", "pytest-timeout", "pytest-xdist", "flaky", "mock"]
 
 [[package]]
 name = "platformdirs"
@@ -2833,8 +2833,8 @@ pep8-naming = [
     {file = "pep8_naming-0.11.1-py2.py3-none-any.whl", hash = "sha256:f43bfe3eea7e0d73e8b5d07d6407ab47f2476ccaeff6937c84275cd30b016738"},
 ]
 pipenv = [
-    {file = "pipenv-2021.5.29-py2.py3-none-any.whl", hash = "sha256:d180f5be4775c552fd5e69ae18a9d6099d9dafb462efe54f11c72cb5f4d5e977"},
-    {file = "pipenv-2021.5.29.tar.gz", hash = "sha256:05958fadcd70b2de6a27542fcd2bd72dd5c59c6d35307fdac3e06361fb06e30e"},
+    {file = "pipenv-2021.11.5.post0-py2.py3-none-any.whl", hash = "sha256:78d22df8ffee924c34d249fe4defc228efeb33a6f7dff8003eb25ffed53a0723"},
+    {file = "pipenv-2021.11.5.post0.tar.gz", hash = "sha256:f60ca33c355bce1af5eb743249f7d42a9c677df71bbfaf9d706e7ec06fae56f1"},
 ]
 platformdirs = [
     {file = "platformdirs-2.3.0-py3-none-any.whl", hash = "sha256:8003ac87717ae2c7ee1ea5a84a1a61e87f3fbd16eb5aadba194ea30a9019f648"},
