@@ -94,7 +94,8 @@ class MockBoto3Session:
         """
         key = f"{service_name}.{region_name or self.region_name}"
         client = boto3.client(  # type: ignore
-            service_name, region_name=region_name or self.region_name
+            service_name,  # type: ignore
+            region_name=region_name or self.region_name,
         )
         stubber = Stubber(client)  # type: ignore
         self._clients[key] = client  # type: ignore
@@ -147,7 +148,8 @@ class MockCFNginContext(CfnginContext):
         key = f"{service_name}.{region or self.env.aws_region}"
 
         self._boto3_test_client[key] = boto3.client(  # type: ignore
-            service_name, region_name=region or self.env.aws_region
+            service_name,  # type: ignore
+            region_name=region or self.env.aws_region,
         )
         self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
         return self._boto3_test_stubber[key]
@@ -229,7 +231,7 @@ class MockRunwayContext(RunwayContext):
         key = f"{service_name}.{region or self.env.aws_region}"
 
         self._boto3_test_client[key] = boto3.client(  # type: ignore
-            service_name,
+            service_name,  # type: ignore
             region_name=region or self.env.aws_region,
             **self.boto3_credentials,
         )
