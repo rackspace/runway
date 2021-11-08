@@ -2,66 +2,33 @@
 
 version: 2
 updates:
-  - package-ecosystem: github-actions
-    directory: /
+  - directory: /
     labels:
       - maintenance
       - github_actions
     open-pull-requests-limit: 5
+    package-ecosystem: github-actions
     schedule:
       interval: daily
       time: "08:00"
       timezone: America/New_York
-  - package-ecosystem: npm  # dev dependencies
-    allow:
-      - dependency-type: development
-      - dependency-type: indirect
-    directory: /
+  - directory: /
     labels:
-      - changelog:skip
-      - dependencies
+      - maintenance
       - javascript
     open-pull-requests-limit: 5
+    package-ecosystem: npm
     schedule:
       interval: daily
       time: "08:00"
       timezone: America/New_York
-  - package-ecosystem: npm  # prod dependencies
-    allow:
-      - dependency-type: production
-    directory: /
-    labels:
-      - dependencies
-      - javascript
-    open-pull-requests-limit: 5
-    schedule:
-      interval: daily
-      time: "08:00"
-      timezone: America/New_York
-  - package-ecosystem: pip  # dev dependencies
-    allow:
-      - dependency-type: development
-      - dependency-type: indirect
-    labels:
-      - changelog:skip
-      - dependencies
-      - poetry
-      - python
-    open-pull-requests-limit: 10
-    schedule:
-      day: friday
-      interval: weekly
-      time: "07:30"
-      timezone: America/New_York
-  - package-ecosystem: pip  # prod dependencies
-    allow:
-      - dependency-type: production
-    directory: /
+  - directory: /
     labels:
       - dependencies
       - poetry
       - python
     open-pull-requests-limit: 10
+    package-ecosystem: pip
     schedule:
       day: monday
       interval: weekly
