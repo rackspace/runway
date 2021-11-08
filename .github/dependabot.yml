@@ -42,6 +42,7 @@ updates:
     allow:
       - dependency-type: development
       - dependency-type: indirect
+    directory: /
     labels:
       - changelog:skip
       - dependencies
