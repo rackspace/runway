@@ -71,7 +71,7 @@ def update(
         cognito_client.update_user_pool_client(
             AllowedOAuthScopes=oauth_scopes,
             AllowedOAuthFlows=["code"],
-            SupportedIdentityProviders=supported_identity_providers,
+            SupportedIdentityProviders=supported_identity_providers or [],
             AllowedOAuthFlowsUserPoolClient=True,
             ClientId=client_id,
             CallbackURLs=redirect_uris["sign_in"],

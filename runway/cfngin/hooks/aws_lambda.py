@@ -45,6 +45,7 @@ from ..utils import ensure_s3_bucket
 
 if TYPE_CHECKING:
     from mypy_boto3_s3.client import S3Client
+    from mypy_boto3_s3.literals import ObjectCannedACLType
     from mypy_boto3_s3.type_defs import HeadObjectOutputTypeDef
 
     from ...context import CfnginContext
@@ -74,17 +75,6 @@ DockerizePipArgTypeDef = Optional[
         Literal[
             "false", "False", "no", "No", "non-linux", "true", "True", "yes", "Yes"
         ],
-    ]
-]
-PayloadAclTypeDef = Optional[
-    Literal[
-        "authenticated-read",
-        "aws-exec-read",
-        "bucket-owner-full-control",
-        "bucket-owner-read",
-        "private",
-        "public-read-write",
-        "public-read",
     ]
 ]
 
@@ -722,7 +712,7 @@ def _upload_code(
     name: str,
     contents: Union[bytes, str],
     content_hash: str,
-    payload_acl: PayloadAclTypeDef,
+    payload_acl: ObjectCannedACLType,
 ) -> Code:
     """Upload a ZIP file to S3 for use by Lambda.
 
@@ -829,7 +819,7 @@ def _upload_function(
     name: str,
     options: _UploadFunctionOptionsTypeDef,
     follow_symlinks: bool,
-    payload_acl: PayloadAclTypeDef,
+    payload_acl: ObjectCannedACLType,
     sys_path: str,
 ) -> Code:
     """Build a Lambda payload from user configuration and uploads it to S3.
@@ -1111,7 +1101,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
 
     # Check for S3 object acl. Valid values from:
     # https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
-    payload_acl = cast(PayloadAclTypeDef, kwargs.get("payload_acl", "private"))
+    payload_acl = cast("ObjectCannedACLType", kwargs.get("payload_acl", "private"))
 
     # Always use the global client for s3
     session = context.get_session(region=bucket_region)
