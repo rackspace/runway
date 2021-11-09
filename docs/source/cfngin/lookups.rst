@@ -694,6 +694,11 @@ The lookup must return a string if being used for a CloudFormation parameter.
 
 If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.CfnginContext.get_session>` instead of creating a new session to ensure the correct credentials are used.
 
+.. important::
+  When using a :func:`pydantic.root_validator` or :func:`pydantic.validator` in a lookup ``allow_reuse=True`` must be passed to the decorator.
+  This is because of how lookups are loaded/re-loaded when they are registered.
+  Failure to do so will result in an error if the lookup is registered more than once.
+
 
 .. rubric:: Example
 .. code-block:: python
