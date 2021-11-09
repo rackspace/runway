@@ -4,7 +4,18 @@ from __future__ import annotations
 import json
 import logging
 from distutils.util import strtobool
-from typing import TYPE_CHECKING, Any, Dict, Optional, Sequence, Set, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
 
 import yaml
 from troposphere import BaseAWSObject
@@ -25,6 +36,9 @@ TransformToTypeLiteral = Literal["bool", "str"]
 
 class LookupHandler:
     """Base class for lookup handlers."""
+
+    TYPE_NAME: ClassVar[str]
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def dependencies(cls, __lookup_query: VariableValue) -> Set[str]:

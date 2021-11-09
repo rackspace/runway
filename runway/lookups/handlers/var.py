@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from typing_extensions import Final, Literal
+
 from .base import LookupHandler
 
 if TYPE_CHECKING:
@@ -17,6 +19,9 @@ TYPE_NAME = "var"
 
 class VarLookup(LookupHandler):
     """Variable definition Lookup."""
+
+    TYPE_NAME: Final[Literal["var"]] = "var"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

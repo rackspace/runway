@@ -6,7 +6,7 @@ import re
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 from botocore.exceptions import ClientError
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Final, Literal, TypedDict
 
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path
@@ -14,11 +14,12 @@ from ...utils import read_value_from_path
 if TYPE_CHECKING:
     from ....context import CfnginContext
 
-TYPE_NAME = "dynamodb"
-
 
 class DynamodbLookup(LookupHandler):
     """DynamoDB lookup."""
+
+    TYPE_NAME: Final[Literal["dynamodb"]] = "dynamodb"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

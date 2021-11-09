@@ -6,13 +6,13 @@ import operator
 import re
 from typing import TYPE_CHECKING, Any, Dict
 
+from typing_extensions import Final, Literal
+
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
-
-TYPE_NAME = "ami"
 
 
 class ImageNotFound(Exception):
@@ -31,6 +31,9 @@ class ImageNotFound(Exception):
 
 class AmiLookup(LookupHandler):
     """AMI lookup."""
+
+    TYPE_NAME: Final[Literal["ami"]] = "ami"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

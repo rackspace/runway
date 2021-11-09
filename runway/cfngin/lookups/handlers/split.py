@@ -2,13 +2,16 @@
 # pyright: reportIncompatibleMethodOverride=none
 from typing import Any, List
 
-from ....lookups.handlers.base import LookupHandler
+from typing_extensions import Final, Literal
 
-TYPE_NAME = "split"
+from ....lookups.handlers.base import LookupHandler
 
 
 class SplitLookup(LookupHandler):
     """Split lookup."""
+
+    TYPE_NAME: Final[Literal["split"]] = "split"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

@@ -5,17 +5,20 @@ from __future__ import annotations
 import codecs
 from typing import TYPE_CHECKING, Any, BinaryIO, Union, cast
 
+from typing_extensions import Final, Literal
+
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
 
-TYPE_NAME = "kms"
-
 
 class KmsLookup(LookupHandler):
     """AWS KMS lookup."""
+
+    TYPE_NAME: Final[Literal["kms"]] = "kms"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

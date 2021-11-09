@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from typing_extensions import Final, Literal
+
 from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
@@ -12,7 +14,6 @@ if TYPE_CHECKING:
     from ...providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)
-TYPE_NAME = "xref"
 
 XREF_PRESISTENT_STATE = {"has_warned": False}
 
@@ -21,6 +22,8 @@ class XrefLookup(LookupHandler):
     """Xref lookup."""
 
     DEPRECATION_MSG = "xref Lookup has been deprecated; use the cfn lookup instead"
+    TYPE_NAME: Final[Literal["xref"]] = "xref"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ,arguments-renamed

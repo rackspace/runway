@@ -5,14 +5,14 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Any, NamedTuple, Set
 
+from typing_extensions import Final, Literal
+
 from ....lookups.handlers.base import LookupHandler
 from ...exceptions import StackDoesNotExist
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
     from ....variables import VariableValue
-
-TYPE_NAME = "output"
 
 
 class OutputQuery(NamedTuple):
@@ -24,6 +24,9 @@ class OutputQuery(NamedTuple):
 
 class OutputLookup(LookupHandler):
     """AWS CloudFormation Output lookup."""
+
+    TYPE_NAME: Final[Literal["output"]] = "output"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

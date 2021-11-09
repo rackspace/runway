@@ -17,7 +17,7 @@ from mock import MagicMock
 from runway.cfngin.exceptions import StackDoesNotExist
 from runway.cfngin.providers.aws.default import Provider
 from runway.exceptions import OutputDoesNotExist
-from runway.lookups.handlers.cfn import TYPE_NAME, CfnLookup, OutputQuery
+from runway.lookups.handlers.cfn import CfnLookup, OutputQuery
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
@@ -352,8 +352,3 @@ def test_outputquery() -> None:
     result = OutputQuery("stack_name", "output_name")
     assert result.stack_name == "stack_name"
     assert result.output_name == "output_name"
-
-
-def test_type_name() -> None:
-    """Test runway.lookups.handlers.cfn.TYPE_NAME."""
-    assert TYPE_NAME == "cfn"

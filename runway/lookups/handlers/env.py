@@ -4,16 +4,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from typing_extensions import Final, Literal
+
 from .base import LookupHandler
 
 if TYPE_CHECKING:
     from ...context import RunwayContext
 
-TYPE_NAME = "env"
-
 
 class EnvLookup(LookupHandler):
     """Environment variable Lookup."""
+
+    TYPE_NAME: Final[Literal["env"]] = "env"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ
