@@ -687,8 +687,8 @@ The lookup must be importable using your current ``sys.path``.
 This takes into account the :attr:`~cfngin.config.sys_path` defined in the config file as well as any ``paths`` of :class:`~cfngin.package_sources`.
 
 The lookup must be a subclass of :class:`~runway.lookups.handlers.base.LookupHandler` with a ``@classmethod`` of ``handle`` with a similar signature to what is provided in the example below.
+The subclass must override the :attr:`~runway.lookups.handlers.base.LookupHandler.TYPE_NAME` class variable with a name that will be used to register the lookup.
 There must be only one lookup per file.
-The file containing the lookup class must have a ``TYPE_NAME`` global variable with a value of the name that will be used to register the lookup.
 
 The lookup must return a string if being used for a CloudFormation parameter.
 
@@ -706,7 +706,7 @@ If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.Cfn
   """Example lookup."""
   from __future__ import annotations
 
-  from typing import TYPE_CHECKING, Any, Optional, Union
+  from typing import TYPE_CHECKING, Any, Final, Literal, Optional, Union
 
   from runway.cfngin.utils import read_value_from_path
   from runway.lookups.handlers.base import LookupHandler
@@ -715,11 +715,12 @@ If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.Cfn
       from runway.cfngin.providers.aws.default import Provider
       from runway.context import CfnginContext, RunwayContext
 
-  TYPE_NAME = "mylookup"
-
 
   class MylookupLookup(LookupHandler):
       """My lookup."""
+
+      TYPE_NAME: Final[Literal["mylookup"]] = "mylookup"
+      """Name that the Lookup is registered as."""
 
       @classmethod
       def handle(
