@@ -1544,9 +1544,14 @@ For this reason, it is recommended to use an unpack operator (``**kwargs``) in a
 The hook must return ``True`` or a truthy object if it was successful.
 It must return ``False`` or a falsy object if it failed.
 This signifies to CFNgin whether or not to halt execution if the hook is :attr:`~cfngin.hook.required`.
-If a |Dict| or :class:`~runway.utils.MutableMap` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
+If a |Dict|, :class:`~runway.utils.MutableMap`, or :class:`pydantic.BaseModel` is returned, it can be accessed by subsequent hooks, lookups, or Blueprints from the context object.
 It will be stored as ``context.hook_data[data_key]`` where :attr:`~cfngin.hook.data_key` is the value set in the hook definition.
-If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict|, :class:`~runway.utils.MutableMap`, or ``pydantic.BaseModel``, it will not be added to the context object.
+If :attr:`~cfngin.hook.data_key` is not provided or the type of the returned data is not a |Dict|, :class:`~runway.utils.MutableMap`, or :class:`pydantic.BaseModel`, it will not be added to the context object.
+
+.. important::
+  When using a :func:`pydantic.root_validator` or :func:`pydantic.validator` ``allow_reuse=True`` must be passed to the decorator.
+  This is because of how hooks are loaded/re-loaded for each usage.
+  Failure to do so will result in an error if the hook is used more than once.
 
 If using boto3 in a hook, use :meth:`context.get_session() <runway.context.CfnginContext.get_session>` instead of creating a new session to ensure the correct credentials are used.
 
