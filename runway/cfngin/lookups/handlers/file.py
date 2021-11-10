@@ -7,11 +7,11 @@ import base64
 import collections.abc
 import json
 import re
-from typing import Any, Callable, Dict, Final, List, Mapping, Sequence, Union, overload
+from typing import Any, Callable, Dict, List, Mapping, Sequence, Union, overload
 
 import yaml
 from troposphere import Base64, GenericHelperFn
-from typing_extensions import Literal
+from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path
