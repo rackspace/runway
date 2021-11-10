@@ -12,6 +12,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Optional, Union, cast
 
 from botocore.exceptions import ClientError
+from typing_extensions import Final, Literal
 
 from ...cfngin.exceptions import StackDoesNotExist
 from ...exceptions import OutputDoesNotExist
@@ -24,7 +25,6 @@ if TYPE_CHECKING:
     from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
-TYPE_NAME = "cfn"
 
 
 class OutputQuery(NamedTuple):
@@ -36,6 +36,9 @@ class OutputQuery(NamedTuple):
 
 class CfnLookup(LookupHandler):
     """CloudFormation Stack Output lookup."""
+
+    TYPE_NAME: Final[Literal["cfn"]] = "cfn"
+    """Name that the Lookup is registered as."""
 
     @staticmethod
     def should_use_provider(args: Dict[str, str], provider: Optional[Provider]) -> bool:

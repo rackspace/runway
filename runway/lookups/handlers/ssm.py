@@ -4,17 +4,21 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Union
 
+from typing_extensions import Final, Literal
+
 from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
     from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
-TYPE_NAME = "ssm"
 
 
 class SsmLookup(LookupHandler):
     """SSM Parameter Store Lookup."""
+
+    TYPE_NAME: Final[Literal["ssm"]] = "ssm"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

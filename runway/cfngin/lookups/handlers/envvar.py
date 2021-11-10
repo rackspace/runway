@@ -3,14 +3,17 @@
 import os
 from typing import Any
 
+from typing_extensions import Final, Literal
+
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path
-
-TYPE_NAME = "envvar"
 
 
 class EnvvarLookup(LookupHandler):
     """Environment variable lookup."""
+
+    TYPE_NAME: Final[Literal["envvar"]] = "envvar"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(cls, value: str, **_: Any) -> str:  # pylint: disable=arguments-differ

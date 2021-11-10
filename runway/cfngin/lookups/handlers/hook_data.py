@@ -6,6 +6,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from troposphere import BaseAWSObject
+from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import MutableMap
@@ -14,11 +15,13 @@ if TYPE_CHECKING:
     from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
-TYPE_NAME = "hook_data"
 
 
 class HookDataLookup(LookupHandler):
     """Hook data lookup."""
+
+    TYPE_NAME: Final[Literal["hook_data"]] = "hook_data"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

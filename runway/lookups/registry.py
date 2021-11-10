@@ -5,8 +5,13 @@ import logging
 from typing import Dict, Type, Union, cast
 
 from ..utils import load_object_from_string
-from .handlers import cfn, ecr, env, random_string, ssm, var
 from .handlers.base import LookupHandler
+from .handlers.cfn import CfnLookup
+from .handlers.ecr import EcrLookup
+from .handlers.env import EnvLookup
+from .handlers.random_string import RandomStringLookup
+from .handlers.ssm import SsmLookup
+from .handlers.var import VarLookup
 
 RUNWAY_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
 LOGGER = logging.getLogger(__name__)
@@ -54,9 +59,9 @@ def unregister_lookup_handler(lookup_type: str) -> None:
     RUNWAY_LOOKUP_HANDLERS.pop(lookup_type, None)
 
 
-register_lookup_handler(cfn.TYPE_NAME, cfn.CfnLookup)
-register_lookup_handler(ecr.TYPE_NAME, ecr.EcrLookup)
-register_lookup_handler(env.TYPE_NAME, env.EnvLookup)
-register_lookup_handler(random_string.TYPE_NAME, random_string.RandomStringLookup)
-register_lookup_handler(ssm.TYPE_NAME, ssm.SsmLookup)
-register_lookup_handler(var.TYPE_NAME, var.VarLookup)
+register_lookup_handler(CfnLookup.TYPE_NAME, CfnLookup)
+register_lookup_handler(EcrLookup.TYPE_NAME, EcrLookup)
+register_lookup_handler(EnvLookup.TYPE_NAME, EnvLookup)
+register_lookup_handler(RandomStringLookup.TYPE_NAME, RandomStringLookup)
+register_lookup_handler(SsmLookup.TYPE_NAME, SsmLookup)
+register_lookup_handler(VarLookup.TYPE_NAME, VarLookup)

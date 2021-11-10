@@ -5,6 +5,8 @@ import base64
 import logging
 from typing import TYPE_CHECKING, Any, Union  # pylint: disable=W
 
+from typing_extensions import Final, Literal
+
 from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
@@ -14,11 +16,12 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-TYPE_NAME = "ecr"
-
 
 class EcrLookup(LookupHandler):
     """ECR Lookup."""
+
+    TYPE_NAME: Final[Literal["ecr"]] = "ecr"
+    """Name that the Lookup is registered as."""
 
     @staticmethod
     def get_login_password(client: ECRClient) -> str:

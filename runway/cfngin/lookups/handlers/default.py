@@ -4,16 +4,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Optional
 
+from typing_extensions import Final, Literal
+
 from ....lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
 
-TYPE_NAME = "default"
-
 
 class DefaultLookup(LookupHandler):
     """Lookup to provide a default value."""
+
+    TYPE_NAME: Final[Literal["default"]] = "default"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

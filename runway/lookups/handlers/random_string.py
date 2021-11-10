@@ -7,13 +7,13 @@ import secrets
 import string
 from typing import TYPE_CHECKING, Any, Callable, List, Sequence, Union
 
+from typing_extensions import Final, Literal
+
 from ...utils import BaseModel
 from .base import LookupHandler
 
 if TYPE_CHECKING:
     from ...context import CfnginContext, RunwayContext
-
-TYPE_NAME = "random.string"
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,6 +29,9 @@ class ArgsDataModel(BaseModel):
 
 class RandomStringLookup(LookupHandler):
     """Random string lookup."""
+
+    TYPE_NAME: Final[Literal["random.string"]] = "random.string"
+    """Name that the Lookup is registered as."""
 
     @staticmethod
     def calculate_char_set(args: ArgsDataModel) -> str:

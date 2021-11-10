@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from typing_extensions import Final, Literal
+
 from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
@@ -11,11 +13,12 @@ if TYPE_CHECKING:
     from ....context import CfnginContext
     from ...providers.aws.default import Provider
 
-TYPE_NAME = "rxref"
-
 
 class RxrefLookup(LookupHandler):
     """Rxref lookup."""
+
+    TYPE_NAME: Final[Literal["rxref"]] = "rxref"
+    """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ

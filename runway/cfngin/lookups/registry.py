@@ -4,12 +4,23 @@ from __future__ import annotations
 import logging
 from typing import Dict, Type, Union, cast
 
-from ...lookups.handlers import cfn, ecr, random_string, ssm
 from ...lookups.handlers.base import LookupHandler
+from ...lookups.handlers.cfn import CfnLookup
+from ...lookups.handlers.ecr import EcrLookup
+from ...lookups.handlers.random_string import RandomStringLookup
+from ...lookups.handlers.ssm import SsmLookup
 from ...utils import DOC_SITE, load_object_from_string
-from .handlers import ami, default, dynamodb, envvar
-from .handlers import file as file_handler
-from .handlers import hook_data, kms, output, rxref, split, xref
+from .handlers.ami import AmiLookup
+from .handlers.default import DefaultLookup
+from .handlers.dynamodb import DynamodbLookup
+from .handlers.envvar import EnvvarLookup
+from .handlers.file import FileLookup
+from .handlers.hook_data import HookDataLookup
+from .handlers.kms import KmsLookup
+from .handlers.output import OutputLookup
+from .handlers.rxref import RxrefLookup
+from .handlers.split import SplitLookup
+from .handlers.xref import XrefLookup
 
 CFNGIN_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
 LOGGER = logging.getLogger(__name__)
@@ -65,18 +76,18 @@ def unregister_lookup_handler(lookup_type: str) -> None:
     CFNGIN_LOOKUP_HANDLERS.pop(lookup_type, None)
 
 
-register_lookup_handler(ami.TYPE_NAME, ami.AmiLookup)
-register_lookup_handler(cfn.TYPE_NAME, cfn.CfnLookup)
-register_lookup_handler(default.TYPE_NAME, default.DefaultLookup)
-register_lookup_handler(dynamodb.TYPE_NAME, dynamodb.DynamodbLookup)
-register_lookup_handler(ecr.TYPE_NAME, ecr.EcrLookup)
-register_lookup_handler(envvar.TYPE_NAME, envvar.EnvvarLookup)
-register_lookup_handler(file_handler.TYPE_NAME, file_handler.FileLookup)
-register_lookup_handler(hook_data.TYPE_NAME, hook_data.HookDataLookup)
-register_lookup_handler(kms.TYPE_NAME, kms.KmsLookup)
-register_lookup_handler(output.TYPE_NAME, output.OutputLookup)
-register_lookup_handler(random_string.TYPE_NAME, random_string.RandomStringLookup)
-register_lookup_handler(rxref.TYPE_NAME, rxref.RxrefLookup)
-register_lookup_handler(split.TYPE_NAME, split.SplitLookup)
-register_lookup_handler(ssm.TYPE_NAME, ssm.SsmLookup)
-register_lookup_handler(xref.TYPE_NAME, xref.XrefLookup)
+register_lookup_handler(AmiLookup.TYPE_NAME, AmiLookup)
+register_lookup_handler(CfnLookup.TYPE_NAME, CfnLookup)
+register_lookup_handler(DefaultLookup.TYPE_NAME, DefaultLookup)
+register_lookup_handler(DynamodbLookup.TYPE_NAME, DynamodbLookup)
+register_lookup_handler(EcrLookup.TYPE_NAME, EcrLookup)
+register_lookup_handler(EnvvarLookup.TYPE_NAME, EnvvarLookup)
+register_lookup_handler(FileLookup.TYPE_NAME, FileLookup)
+register_lookup_handler(HookDataLookup.TYPE_NAME, HookDataLookup)
+register_lookup_handler(KmsLookup.TYPE_NAME, KmsLookup)
+register_lookup_handler(OutputLookup.TYPE_NAME, OutputLookup)
+register_lookup_handler(RandomStringLookup.TYPE_NAME, RandomStringLookup)
+register_lookup_handler(RxrefLookup.TYPE_NAME, RxrefLookup)
+register_lookup_handler(SplitLookup.TYPE_NAME, SplitLookup)
+register_lookup_handler(SsmLookup.TYPE_NAME, SsmLookup)
+register_lookup_handler(XrefLookup.TYPE_NAME, XrefLookup)
