@@ -1123,16 +1123,8 @@ docs = ["sphinx"]
 test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
-name = "more-itertools"
-version = "8.10.0"
-description = "More routines for operating on iterables, beyond itertools"
-category = "dev"
-optional = false
-python-versions = ">=3.5"
-
-[[package]]
 name = "moto"
-version = "2.2.15"
+version = "2.2.16"
 description = "A library that allows your python tests to easily mock out the boto library"
 category = "dev"
 optional = false
@@ -1145,7 +1137,6 @@ cryptography = ">=3.3.1"
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 Jinja2 = ">=2.10.1"
 MarkupSafe = "!=2.0.0a1"
-more-itertools = "*"
 python-dateutil = ">=2.1,<3.0.0"
 pytz = "*"
 PyYAML = {version = ">=5.1", optional = true, markers = "extra == \"s3\""}
@@ -1168,6 +1159,7 @@ dynamodbstreams = ["docker (>=2.5.1)"]
 ec2 = ["sshpubkeys (>=3.1.0)"]
 efs = ["sshpubkeys (>=3.1.0)"]
 iotdata = ["jsondiff (>=1.1.2)"]
+route53resolver = ["sshpubkeys (>=3.1.0)"]
 s3 = ["PyYAML (>=5.1)"]
 server = ["PyYAML (>=5.1)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "ecdsa (<0.15)", "docker (>=2.5.1)", "jsondiff (>=1.1.2)", "aws-xray-sdk (>=0.93,!=0.96)", "idna (>=2.5,<4)", "cfn-lint (>=0.4.0)", "sshpubkeys (>=3.1.0)", "setuptools", "flask", "flask-cors"]
 ssm = ["PyYAML (>=5.1)", "dataclasses"]
@@ -2810,13 +2802,9 @@ mock = [
     {file = "mock-4.0.3-py3-none-any.whl", hash = "sha256:122fcb64ee37cfad5b3f48d7a7d51875d7031aaf3d8be7c42e2bee25044eee62"},
     {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
 ]
-more-itertools = [
-    {file = "more-itertools-8.10.0.tar.gz", hash = "sha256:1debcabeb1df793814859d64a81ad7cb10504c24349368ccf214c664c474f41f"},
-    {file = "more_itertools-8.10.0-py3-none-any.whl", hash = "sha256:56ddac45541718ba332db05f464bebfb0768110111affd27f66e0051f276fa43"},
-]
 moto = [
-    {file = "moto-2.2.15-py2.py3-none-any.whl", hash = "sha256:5f743a8fa312b57d6ad72a17c134cf81a21e7d7cd2e602c5062d352390114af2"},
-    {file = "moto-2.2.15.tar.gz", hash = "sha256:c5692058863803d8a17e422cea48f6f745895760a4be05cd479c0b481cc8e3b0"},
+    {file = "moto-2.2.16-py2.py3-none-any.whl", hash = "sha256:9dd772426c56083a43c7d9c543183b644d70039df32e907d05bc7d7189a4dde1"},
+    {file = "moto-2.2.16.tar.gz", hash = "sha256:fef15c831b1356b22beeb4f1b4694945597485bdc111039f1b304ab091141444"},
 ]
 mypy-boto3 = [
     {file = "mypy-boto3-1.20.5.tar.gz", hash = "sha256:30e3815907145d6f4e75cbb5b722c9a7c9635c81f6b44523e8f0a3d50d7eefd0"},
@@ -3327,6 +3315,7 @@ typed-ast = [
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.0-py3-none-any.whl", hash = "sha256:829704698b22e13ec9eaf959122315eabb370b0884400e9818334d8b677023d9"},
+    {file = "typing_extensions-4.0.0.tar.gz", hash = "sha256:2cdf80e4e04866a9b3689a51869016d36db0814d84b8d8a568d22781d45d27ed"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.7-py2.py3-none-any.whl", hash = "sha256:c4fdf4019605b6e5423637e01bc9fe4daef873709a7973e195ceba0a62bbc844"},
