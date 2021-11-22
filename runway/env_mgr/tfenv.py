@@ -19,7 +19,6 @@ from typing import (
     Dict,
     Generator,
     List,
-    NamedTuple,
     Optional,
     Union,
     cast,
@@ -34,6 +33,7 @@ import requests
 from typing_extensions import Final
 
 from ..compat import cached_property
+from ..core.utils import Version
 from ..exceptions import HclParserError
 from ..utils import FileHash, get_hash_for_filename, merge_dicts
 from . import EnvManager, handle_bin_download_error
@@ -148,33 +148,6 @@ def load_terraform_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
     return result
 
 
-class VersionTuple(NamedTuple):
-    """Terraform version tuple.
-
-    Attributes:
-        major: Major release version number.
-        minor: Minor release version number.
-        patch: Patch release version number.
-        prerelease: Prerelease identifier (e.g. ``beta2``).
-
-    """
-
-    major: int
-    minor: int
-    patch: int
-    prerelease: Optional[str] = None
-    prerelease_number: Optional[int] = None
-
-    def __str__(self) -> str:
-        """Format as string."""
-        result = f"{self.major}.{self.minor}.{self.patch}"
-        if self.prerelease:
-            result += f"-{self.prerelease}"
-        if self.prerelease_number:
-            result += str(self.prerelease_number)
-        return result
-
-
 class TFEnvManager(EnvManager):
     """Terraform version management.
 
@@ -182,10 +155,7 @@ class TFEnvManager(EnvManager):
 
     """
 
-    VERSION_REGEX: Final[str] = (
-        r"^(?P<major>[0-9]*)\.(?P<minor>[0-9]*)\.(?P<patch>[0-9]*)"
-        r"(\-(?P<prerelease>alpha|beta|oci|rc)(?P<prerelease_number>[0-9]*)?)?"
-    )
+    VERSION_REGEX: Final[str] = r"^(Terraform v)?(?P<version>[0-9]+\.[0-9]+\.[0-9]+\S*)"
     VERSION_OUTPUT_REGEX: Final[
         str
     ] = r"^Terraform v(?P<version>[0-9]*\.[0-9]*\.[0-9]*)(?P<suffix>-.*)?"
@@ -273,7 +243,7 @@ class TFEnvManager(EnvManager):
         return _flatten_lists(result)
 
     @cached_property
-    def version(self) -> Optional[VersionTuple]:
+    def version(self) -> Optional[Version]:
         """Terraform version."""
         version_requested = self.current_version or self.get_version_from_file()
 
@@ -427,7 +397,7 @@ class TFEnvManager(EnvManager):
         *,
         cwd: Optional[Union[Path, str]] = None,
         env: Optional[Dict[str, str]] = None,
-    ) -> Optional[VersionTuple]:
+    ) -> Optional[Version]:
         """Get Terraform version from an executable.
 
         Args:
@@ -442,11 +412,11 @@ class TFEnvManager(EnvManager):
         match = re.search(cls.VERSION_OUTPUT_REGEX, output)
         if not match:
             return None
-        return cls.parse_version_string(match.group("version"))
+        return cls.parse_version_string(output)
 
     @classmethod
-    def parse_version_string(cls, version: str) -> VersionTuple:
-        """Parse version string into a :class:`VersionTuple`.
+    def parse_version_string(cls, version: str) -> Version:
+        """Parse version string into a :class:`Version`.
 
         Args:
             version: Version string to parse. Must be in the format of
@@ -458,10 +428,4 @@ class TFEnvManager(EnvManager):
             raise ValueError(
                 f"provided version doesn't conform to regex: {cls.VERSION_REGEX}"
             )
-        return VersionTuple(
-            major=int(match.group("major")),
-            minor=int(match.group("minor")),
-            patch=int(match.group("patch")),
-            prerelease=match.group("prerelease") or None,
-            prerelease_number=int(match.group("prerelease_number") or 0) or None,
-        )
+        return Version(match.group("version"))

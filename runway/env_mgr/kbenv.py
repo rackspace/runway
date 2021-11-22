@@ -9,7 +9,7 @@ import re
 import shutil
 import sys
 import tempfile
-from typing import TYPE_CHECKING, Generator, NamedTuple, Optional, cast
+from typing import TYPE_CHECKING, Generator, Optional, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -17,6 +17,7 @@ import requests
 from typing_extensions import Final
 
 from ..compat import cached_property
+from ..core.utils import Version
 from ..exceptions import KubectlVersionNotSpecified
 from ..utils import FileHash
 from . import EnvManager, handle_bin_download_error
@@ -153,34 +154,6 @@ def download_kb_release(
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
-class VersionTuple(NamedTuple):
-    """Terraform version tuple.
-
-    Attributes:
-        major: Major release version number.
-        minor: Minor release version number.
-        patch: Patch release version number.
-        prerelease: Prerelease identifier (e.g. ``beta``).
-        prerelease_number: Prerelease number (e.g. ``.3``).
-
-    """
-
-    major: int
-    minor: int
-    patch: int
-    prerelease: Optional[str] = None
-    prerelease_number: Optional[int] = None
-
-    def __str__(self) -> str:
-        """Format as string."""
-        result = f"v{self.major}.{self.minor}.{self.patch}"
-        if self.prerelease:
-            result += f"-{self.prerelease}"
-        if self.prerelease_number:
-            result += f".{self.prerelease_number}"
-        return result
-
-
 class KBEnvManager(EnvManager):
     """kubectl version management.
 
@@ -188,10 +161,7 @@ class KBEnvManager(EnvManager):
 
     """
 
-    VERSION_REGEX: Final[str] = (
-        r"^(v)?(?P<major>[0-9]*)\.(?P<minor>[0-9]*)\.(?P<patch>[0-9]*)"
-        r"(\-(?P<prerelease>alpha|beta|oci|rc)(\.)?(?P<prerelease_number>[0-9]*)?)?"
-    )
+    VERSION_REGEX: Final[str] = r"^(v)?(?P<version>[0-9]+\.[0-9]+\.[0-9]+\S*)"
 
     def __init__(
         self, path: Optional[Path] = None, *, overlay_path: Optional[Path] = None
@@ -207,7 +177,7 @@ class KBEnvManager(EnvManager):
         self.overlay_path = overlay_path
 
     @cached_property
-    def version(self) -> Optional[VersionTuple]:
+    def version(self) -> Optional[Version]:
         """Terraform version."""
         if not self.current_version:
             self.current_version = self.get_version_from_file()
@@ -305,8 +275,8 @@ class KBEnvManager(EnvManager):
             pass
 
     @classmethod
-    def parse_version_string(cls, version: str) -> VersionTuple:
-        """Parse version string into a :class:`VersionTuple`.
+    def parse_version_string(cls, version: str) -> Version:
+        """Parse version string into a :class:`Version`.
 
         Args:
             version: Version string to parse. Must be in the format of
@@ -318,10 +288,4 @@ class KBEnvManager(EnvManager):
             raise ValueError(
                 f"provided version doesn't conform to regex: {cls.VERSION_REGEX}"
             )
-        return VersionTuple(
-            major=int(match.group("major")),
-            minor=int(match.group("minor")),
-            patch=int(match.group("patch")),
-            prerelease=match.group("prerelease") or None,
-            prerelease_number=int(match.group("prerelease_number") or 0) or None,
-        )
+        return Version(f"v{match.group('version')}")

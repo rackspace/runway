@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Optional, Tuple
+from typing import TYPE_CHECKING, Optional
 
 import pytest
 
-from runway.env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager, VersionTuple
+from runway.core.utils import Version
+from runway.env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -52,20 +53,14 @@ class TestKBEnvManager:
     @pytest.mark.parametrize(
         "provided, expected",
         [
-            ("0.15.2", VersionTuple(0, 15, 2)),
-            ("v0.15.2", VersionTuple(0, 15, 2)),
-            ("0.13.0", VersionTuple(0, 13, 0)),
-            ("v0.13.0", VersionTuple(0, 13, 0)),
-            ("0.15.0-alpha.13", VersionTuple(0, 15, 0, "alpha", 13)),
-            ("v0.15.0-alpha.13", VersionTuple(0, 15, 0, "alpha", 13)),
-            ("0.15.0-beta", VersionTuple(0, 15, 0, "beta", None)),
-            ("v0.15.0-beta", VersionTuple(0, 15, 0, "beta", None)),
-            ("0.15.0-rc.1", VersionTuple(0, 15, 0, "rc", 1)),
-            ("v0.15.0-rc.1", VersionTuple(0, 15, 0, "rc", 1)),
+            ("0.15.2", Version("v0.15.2")),
+            ("v0.15.2", Version("v0.15.2")),
+            ("0.15.0-alpha.13", Version("v0.15.0-alpha.13")),
+            ("v0.15.0-alpha.13", Version("v0.15.0-alpha.13")),
         ],
     )
     def test_parse_version_string(
-        self, provided: str, expected: Optional[VersionTuple]
+        self, provided: str, expected: Optional[Version]
     ) -> None:
         """Test parse_version_string."""
         assert KBEnvManager.parse_version_string(provided) == expected
@@ -78,11 +73,11 @@ class TestKBEnvManager:
                 f"provided version doesn't conform to regex: {KBEnvManager.VERSION_REGEX}"
             ),
         ):
-            KBEnvManager.parse_version_string("0.15")
+            KBEnvManager.parse_version_string("invalid")
 
     def test_set_version(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test set_version."""
-        version = VersionTuple(1, 22, 0)
+        version = Version("1.22.0")
         mocker.patch.object(KBEnvManager, "get_version_from_file", return_value=None)
         obj = KBEnvManager(tmp_path)
         assert not obj.current_version
@@ -169,19 +164,3 @@ class TestKBEnvManager:
         assert (
             KBEnvManager(mod_path, overlay_path=overlay_path).version_file == expected
         )
-
-
-class TestVersionTuple:
-    """Test VersionTuple."""
-
-    @pytest.mark.parametrize(
-        "provided, expected",
-        [
-            ((0, 15, 5), "v0.15.5"),
-            ((0, 15, 5, "rc"), "v0.15.5-rc"),
-            ((0, 15, 5, "rc", 3), "v0.15.5-rc.3"),
-        ],
-    )
-    def test_str(self, provided: Tuple[Any, ...], expected: str) -> None:
-        """Test __str__."""
-        assert str(VersionTuple(*provided)) == expected

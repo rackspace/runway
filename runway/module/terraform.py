@@ -19,7 +19,8 @@ from ..config.models.runway.options.terraform import (
     RunwayTerraformBackendConfigDataModel,
     RunwayTerraformModuleOptionsDataModel,
 )
-from ..env_mgr.tfenv import TFEnvManager, VersionTuple
+from ..core.utils import Version
+from ..env_mgr.tfenv import TFEnvManager
 from ..utils import DOC_SITE, which
 from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
@@ -129,7 +130,7 @@ class Terraform(RunwayModule):
         """Return auto.tfvars file if one is being used."""
         file_path = self.path / "runway-parameters.auto.tfvars.json"
         if self.parameters and self.options.write_auto_tfvars:
-            if self.version < (0, 10):
+            if self.version < Version("0.10"):
                 self.logger.warning(
                     "Terraform version does not support the use of "
                     "*.auto.tfvars; some variables may be missing"
@@ -202,7 +203,7 @@ class Terraform(RunwayModule):
         sys.exit(1)
 
     @cached_property
-    def version(self) -> VersionTuple:
+    def version(self) -> Version:
         """Version of Terraform being used."""
         if not self.tfenv.current_version and self.options.version:
             self.tfenv.set_version(self.options.version)
@@ -376,9 +377,9 @@ class Terraform(RunwayModule):
         https://www.terraform.io/docs/cli/commands/destroy.html
 
         """
-        if self.version >= (0, 15, 2):
+        if self.version >= Version("0.15.2"):
             return self._terraform_destroy_15_2()
-        if self.version >= (0, 12):
+        if self.version >= Version("0.12"):
             return self._terraform_destroy_12()
         return self._terraform_destroy_legacy()
 
