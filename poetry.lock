@@ -541,7 +541,7 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.56.0"
+version = "0.56.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "main"
 optional = false
@@ -2463,8 +2463,8 @@ cfn-flip = [
     {file = "cfn_flip-1.3.0.tar.gz", hash = "sha256:003e02a089c35e1230ffd0e1bcfbbc4b12cc7d2deb2fcc6c4228ac9819307362"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.56.0.tar.gz", hash = "sha256:3e39895bc844506f774889bfd3b71db2cdd7ee76bb52102f518dd55b854091fe"},
-    {file = "cfn_lint-0.56.0-py3-none-any.whl", hash = "sha256:4e2049c0d575f8e7df966457e623b1aef5639cccfd38e5049d33535c12f3c10e"},
+    {file = "cfn-lint-0.56.1.tar.gz", hash = "sha256:9cbc67e0380f51f28510628e8c9784a5c74c5e52e9eece06cb8078f1c647280a"},
+    {file = "cfn_lint-0.56.1-py3-none-any.whl", hash = "sha256:2ec763c55581d90669a1348688204e51ba7dd52a701fa38b16da5afc90659436"},
 ]
 chardet = [
     {file = "chardet-4.0.0-py2.py3-none-any.whl", hash = "sha256:f864054d66fd9118f2e67044ac8981a54775ec5b67aed0441892edb553d21da5"},
@@ -3327,6 +3327,7 @@ typed-ast = [
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.0-py3-none-any.whl", hash = "sha256:829704698b22e13ec9eaf959122315eabb370b0884400e9818334d8b677023d9"},
+    {file = "typing_extensions-4.0.0.tar.gz", hash = "sha256:2cdf80e4e04866a9b3689a51869016d36db0814d84b8d8a568d22781d45d27ed"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.7-py2.py3-none-any.whl", hash = "sha256:c4fdf4019605b6e5423637e01bc9fe4daef873709a7973e195ceba0a62bbc844"},
