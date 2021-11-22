@@ -34,6 +34,22 @@ class TestKBEnvManager:
         version_file.write_text("v1.22.0")
         assert obj.get_version_from_file(version_file) == "v1.22.0"
 
+    @pytest.mark.parametrize("version_requested", ["v1.21.0", "1.12.0"])
+    def test_install_version_requested(
+        self, mocker: MockerFixture, tmp_path: Path, version_requested: str
+    ) -> None:
+        """Test install version_requested."""
+        mock_download_kb_release = mocker.patch(f"{MODULE}.download_kb_release")
+        mocker.patch.object(KBEnvManager, "versions_dir", tmp_path / "kbenv")
+        obj = KBEnvManager(tmp_path)
+        assert obj.install(version_requested) == str(obj.bin)
+        mock_download_kb_release.assert_called_once_with(
+            version_requested
+            if version_requested.startswith("v")
+            else f"v{version_requested}",
+            obj.versions_dir,
+        )
+
     def test_list_installed(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test list_installed."""
         mocker.patch.object(KBEnvManager, "versions_dir", tmp_path)
