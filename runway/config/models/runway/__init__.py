@@ -141,7 +141,7 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
         return v
 
     _validate_string_is_lookup = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator("duration", allow_reuse=True, pre=True)(
             utils.validate_string_is_lookup
         ),
@@ -171,7 +171,7 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
         title = "Runway Deployment.regions Definition"
 
     _validate_string_is_lookup = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator("parallel", allow_reuse=True, pre=True)(
             utils.validate_string_is_lookup
         ),
@@ -339,7 +339,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         return values
 
     _validate_string_is_lookup = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator(
             "env_vars",
             "environments",
@@ -491,7 +491,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
 
     # TODO add regex to schema
     _validate_string_is_lookup = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator(
             "env_vars",
             "environments",
@@ -533,7 +533,7 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
         title = "Runway Variables Definition"
 
     _convert_null_values = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator("*", allow_reuse=True)(utils.convert_null_values),
     )
 

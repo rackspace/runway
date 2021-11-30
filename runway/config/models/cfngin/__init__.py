@@ -168,7 +168,7 @@ class CfnginStackDefinitionModel(ConfigProperty):
                 ]
 
     _resolve_path_fields = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator("stack_policy_path", "template_path", allow_reuse=True)(
             utils.resolve_path_field
         ),
@@ -296,7 +296,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         title = "CFNgin Config File"
 
     _resolve_path_fields = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(
             utils.resolve_path_field
         ),

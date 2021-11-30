@@ -2,13 +2,16 @@
 # pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 
 from pydantic import Extra, Field, validator
 from typing_extensions import Literal
 
 from .. import utils
 from ..base import ConfigProperty
+
+if TYPE_CHECKING:
+    from typing import Callable
 
 ValidRunwayTestTypeValues = Literal["cfn-lint", "script", "yamllint"]
 
@@ -55,7 +58,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
 
     # TODO add regex to schema
     _validate_string_is_lookup = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator("args", "required", allow_reuse=True, pre=True)(
             utils.validate_string_is_lookup
         ),
@@ -82,7 +85,7 @@ class CfnLintRunwayTestArgs(ConfigProperty):
 
     # TODO add regex to schema
     _validate_string_is_lookup = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator("cli_args", allow_reuse=True, pre=True)(
             utils.validate_string_is_lookup
         ),
@@ -132,7 +135,7 @@ class ScriptRunwayTestArgs(ConfigProperty):
 
     # TODO add regex to schema
     _validate_string_is_lookup = cast(
-        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        "classmethod[Callable[..., Any]]",
         validator("commands", allow_reuse=True, pre=True)(
             utils.validate_string_is_lookup
         ),
