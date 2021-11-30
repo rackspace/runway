@@ -12,7 +12,6 @@ import pytest
 from mock import MagicMock, Mock
 
 from runway._logging import LogLevels
-from runway.env_mgr.tfenv import VersionTuple
 from runway.module.terraform import (
     Terraform,
     TerraformBackendConfig,
@@ -20,6 +19,7 @@ from runway.module.terraform import (
     gen_workspace_tfvars_files,
     update_env_vars_with_tf_var_values,
 )
+from runway.utils import Version
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -96,7 +96,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
     ) -> None:
         """Test auto_tfvars."""
         caplog.set_level(LogLevels.DEBUG, logger=MODULE)
-        mocker.patch.object(Terraform, "version", VersionTuple(0, 15, 5))
+        mocker.patch.object(Terraform, "version", Version("0.15.5"))
         options = {
             "terraform_write_auto_tfvars": True,
         }
@@ -128,7 +128,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
     ) -> None:
         """Test auto_tfvars with a version that does not support it."""
         caplog.set_level(LogLevels.WARNING, logger=MODULE)
-        mocker.patch.object(Terraform, "version", VersionTuple(0, 9, 0))
+        mocker.patch.object(Terraform, "version", Version("0.9.0"))
         options = {"terraform_write_auto_tfvars": True}
         parameters = {"key": "val"}
         obj = Terraform(
@@ -596,11 +596,11 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
     @pytest.mark.parametrize(
         "version, expected_subcmd, expected_options",
         [
-            (VersionTuple(0, 15, 5), "apply", ["-destroy", "-auto-approve"]),
-            (VersionTuple(0, 15, 2), "apply", ["-destroy", "-auto-approve"]),
-            (VersionTuple(0, 15, 1), "destroy", ["-auto-approve"]),
-            (VersionTuple(0, 12, 3), "destroy", ["-auto-approve"]),
-            (VersionTuple(0, 11, 2), "destroy", ["-force"]),
+            (Version("0.15.5"), "apply", ["-destroy", "-auto-approve"]),
+            (Version("0.15.2"), "apply", ["-destroy", "-auto-approve"]),
+            (Version("0.15.1"), "destroy", ["-auto-approve"]),
+            (Version("0.13.3"), "destroy", ["-auto-approve"]),
+            (Version("0.11.2"), "destroy", ["-force"]),
         ],
     )
     def test_terraform_destroy(
@@ -610,7 +610,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
-        version: VersionTuple,
+        version: Version,
     ) -> None:
         """Test terraform_destroy."""
         mock_gen_command = mocker.patch.object(
@@ -791,7 +791,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test version."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         tfenv = Mock(current_version="0.15.5", version=version)
         mocker.patch.object(Terraform, "tfenv", tfenv)
         assert Terraform(runway_context, module_root=tmp_path).version == version
@@ -800,7 +800,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test version from executable."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         tfenv = Mock(current_version=None, version=None)
         tfenv.get_version_from_executable.return_value = version
         mocker.patch.object(Terraform, "tfenv", tfenv)
@@ -813,7 +813,7 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test version from options."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         tfenv = Mock(current_version=None, version=version)
         mocker.patch.object(Terraform, "tfenv", tfenv)
         assert (

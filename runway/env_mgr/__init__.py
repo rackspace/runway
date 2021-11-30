@@ -7,14 +7,15 @@ import platform
 import shutil
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generator, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Generator, Optional, Union, cast
 
 from ..compat import cached_property
 
 if TYPE_CHECKING:
     from urllib.error import URLError
 
-    from runway._logging import RunwayLogger
+    from .._logging import RunwayLogger
+    from ..utils import Version
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -143,7 +144,7 @@ class EnvManager:
         """List installed versions of <bin>."""
         raise NotImplementedError
 
-    def uninstall(self, version: Union[str, Tuple[Any, ...]]) -> bool:
+    def uninstall(self, version: Union[str, Version]) -> bool:
         """Uninstall a version of the managed binary.
 
         Args:

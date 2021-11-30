@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import hcl
 import hcl2
@@ -17,12 +17,12 @@ from runway._logging import LogLevels
 from runway.env_mgr.tfenv import (
     TF_VERSION_FILENAME,
     TFEnvManager,
-    VersionTuple,
     get_available_tf_versions,
     get_latest_tf_version,
     load_terraform_module,
 )
 from runway.exceptions import HclParserError
+from runway.utils import Version
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -183,19 +183,19 @@ class TestTFEnvManager:
         "output, expected",
         [
             ("", None),
-            ("Terraform v0.15.5\non darwin_amd64", VersionTuple(0, 15, 5)),
+            ("Terraform v0.15.5\non darwin_amd64", Version("v0.15.5")),
             (
                 "Terraform v0.10.3\n\n"
                 "Your version of Terraform is out of date! The latest version\n"
                 "is 0.15.5. You can update by downloading from www.terraform.io",
-                VersionTuple(0, 10, 3),
+                Version("v0.10.3"),
             ),
-            ("Terraform v0.15.0-alpha.13", VersionTuple(0, 15, 0)),
+            ("Terraform v0.15.0-alpha.13", Version("v0.15.0-alpha.13")),
         ],
     )
     def test_get_version_from_executable(
         self,
-        expected: Optional[VersionTuple],
+        expected: Optional[Version],
         fake_process: FakeProcess,
         output: str,
     ) -> None:
@@ -237,7 +237,7 @@ class TestTFEnvManager:
 
     def test_install(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test install."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         mocker.patch.object(TFEnvManager, "version", version)
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mock_download = mocker.patch(f"{MODULE}.download_tf_release")
@@ -252,7 +252,7 @@ class TestTFEnvManager:
         self, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test install."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         mocker.patch.object(TFEnvManager, "version", version)
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mock_download = mocker.patch(f"{MODULE}.download_tf_release")
@@ -263,7 +263,7 @@ class TestTFEnvManager:
 
     def test_install_set_version(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test install set version."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         mocker.patch.object(TFEnvManager, "version", version)
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mock_download = mocker.patch(f"{MODULE}.download_tf_release")
@@ -307,15 +307,12 @@ class TestTFEnvManager:
     @pytest.mark.parametrize(
         "provided, expected",
         [
-            ("0.15.2", VersionTuple(0, 15, 2)),
-            ("0.13.0", VersionTuple(0, 13, 0)),
-            ("0.15.0-alpha13", VersionTuple(0, 15, 0, "alpha", 13)),
-            ("0.15.0-beta", VersionTuple(0, 15, 0, "beta", None)),
-            ("0.15.0-rc1", VersionTuple(0, 15, 0, "rc", 1)),
+            ("0.15.2", Version("0.15.2")),
+            ("0.15.0-alpha13", Version("0.15.0-alpha13")),
         ],
     )
     def test_parse_version_string(
-        self, provided: str, expected: Optional[VersionTuple]
+        self, provided: str, expected: Optional[Version]
     ) -> None:
         """Test parse_version_string."""
         assert TFEnvManager.parse_version_string(provided) == expected
@@ -332,7 +329,7 @@ class TestTFEnvManager:
 
     def test_set_version(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test set_version."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mocker.patch.object(TFEnvManager, "get_version_from_file", return_value=None)
         tfenv = TFEnvManager(tmp_path)
@@ -432,7 +429,7 @@ class TestTFEnvManager:
 
     def test_version(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test version."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mock_get_available_tf_versions = mocker.patch(
             f"{MODULE}.get_available_tf_versions", return_value=[]
@@ -450,7 +447,7 @@ class TestTFEnvManager:
 
     def test_version_latest(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test version latest."""
-        version = VersionTuple(0, 15, 5)
+        version = Version("0.15.5")
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mock_get_available_tf_versions = mocker.patch(
             f"{MODULE}.get_available_tf_versions", return_value=["0.15.5", "0.15.4"]
@@ -468,7 +465,7 @@ class TestTFEnvManager:
         self, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test version latest."""
-        version = VersionTuple(0, 14, 3)
+        version = Version("0.14.3")
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mock_get_available_tf_versions = mocker.patch(
             f"{MODULE}.get_available_tf_versions",
@@ -485,7 +482,7 @@ class TestTFEnvManager:
 
     def test_version_min_required(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test version minimum required."""
-        version = VersionTuple(0, 14, 3)
+        version = Version("0.14.3")
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mock_get_available_tf_versions = mocker.patch(
             f"{MODULE}.get_available_tf_versions",
@@ -546,19 +543,3 @@ class TestTFEnvManager:
         expected = subdir / TF_VERSION_FILENAME
         expected.touch()
         assert tfenv.version_file == expected
-
-
-class TestVersionTuple:
-    """Test VersionTuple."""
-
-    @pytest.mark.parametrize(
-        "provided, expected",
-        [
-            ((0, 15, 5), "0.15.5"),
-            ((0, 15, 5, "rc"), "0.15.5-rc"),
-            ((0, 15, 5, "rc", 3), "0.15.5-rc3"),
-        ],
-    )
-    def test_str(self, provided: Tuple[Any, ...], expected: str) -> None:
-        """Test __str__."""
-        assert str(VersionTuple(*provided)) == expected
