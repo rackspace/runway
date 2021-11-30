@@ -12,10 +12,11 @@ from typing import (
     Any,
     ClassVar,
     Dict,
-    ItemsView,
+    Iterable,
     List,
     NoReturn,
     Optional,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -254,7 +255,7 @@ class BaseModel:
         """
         return getattr(self, name)
 
-    def __iter__(self) -> ItemsView[str, Any]:
+    def __iter__(self) -> Iterable[Tuple[str, Any]]:
         """Iterate object."""
         yield from self.__dict__.items()
 

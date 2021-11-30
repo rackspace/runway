@@ -140,8 +140,11 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
             raise ValueError("duration must be less than or equal to 43,200")
         return v
 
-    _validate_string_is_lookup = validator("duration", allow_reuse=True, pre=True)(
-        utils.validate_string_is_lookup
+    _validate_string_is_lookup = cast(
+        "classmethod[Callable[..., Any]]",
+        validator("duration", allow_reuse=True, pre=True)(
+            utils.validate_string_is_lookup
+        ),
     )
 
 
@@ -167,8 +170,11 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
         }
         title = "Runway Deployment.regions Definition"
 
-    _validate_string_is_lookup = validator("parallel", allow_reuse=True, pre=True)(
-        utils.validate_string_is_lookup
+    _validate_string_is_lookup = cast(
+        "classmethod[Callable[..., Any]]",
+        validator("parallel", allow_reuse=True, pre=True)(
+            utils.validate_string_is_lookup
+        ),
     )
 
 
@@ -332,16 +338,19 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             values["parallel_regions"] = regions.parallel
         return values
 
-    _validate_string_is_lookup = validator(
-        "env_vars",
-        "environments",
-        "module_options",
-        "parallel_regions",
-        "parameters",
-        "regions",
-        allow_reuse=True,
-        pre=True,
-    )(utils.validate_string_is_lookup)
+    _validate_string_is_lookup = cast(
+        "classmethod[Callable[..., Any]]",
+        validator(
+            "env_vars",
+            "environments",
+            "module_options",
+            "parallel_regions",
+            "parameters",
+            "regions",
+            allow_reuse=True,
+            pre=True,
+        )(utils.validate_string_is_lookup),
+    )
 
 
 class RunwayFutureDefinitionModel(ConfigProperty):
@@ -481,9 +490,17 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         return result
 
     # TODO add regex to schema
-    _validate_string_is_lookup = validator(
-        "env_vars", "environments", "options", "parameters", allow_reuse=True, pre=True
-    )(utils.validate_string_is_lookup)
+    _validate_string_is_lookup = cast(
+        "classmethod[Callable[..., Any]]",
+        validator(
+            "env_vars",
+            "environments",
+            "options",
+            "parameters",
+            allow_reuse=True,
+            pre=True,
+        )(utils.validate_string_is_lookup),
+    )
 
 
 # https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models
@@ -515,7 +532,10 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
         }
         title = "Runway Variables Definition"
 
-    _convert_null_values = validator("*", allow_reuse=True)(utils.convert_null_values)
+    _convert_null_values = cast(
+        "classmethod[Callable[..., Any]]",
+        validator("*", allow_reuse=True)(utils.convert_null_values),
+    )
 
 
 class RunwayVersionField(SpecifierSet):
