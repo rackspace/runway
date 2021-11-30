@@ -1418,7 +1418,7 @@ flake8-polyfill = ">=1.0.2,<2"
 
 [[package]]
 name = "pipenv"
-version = "2021.11.15"
+version = "2021.11.23"
 description = "Python Development Workflow for Humans."
 category = "dev"
 optional = false
@@ -2902,8 +2902,8 @@ pep8-naming = [
     {file = "pep8_naming-0.12.1-py2.py3-none-any.whl", hash = "sha256:4a8daeaeb33cfcde779309fc0c9c0a68a3bbe2ad8a8308b763c5068f86eb9f37"},
 ]
 pipenv = [
-    {file = "pipenv-2021.11.15-py2.py3-none-any.whl", hash = "sha256:5f28737dafd5b1a100850f97bb98dfb96bba41fd2d6beae72a287a8da10b0d3f"},
-    {file = "pipenv-2021.11.15.tar.gz", hash = "sha256:616766b1e8dfc24b2e7c6dfbbc8276b7d7ba07e778e5eb0f1b6e59fcd4532fd1"},
+    {file = "pipenv-2021.11.23-py2.py3-none-any.whl", hash = "sha256:10ee98b58399e9bace042f3dc9644fdfc9f1a27f0a17a03642b7d24e533ee0ac"},
+    {file = "pipenv-2021.11.23.tar.gz", hash = "sha256:1bde859e8bbd1d21d503fd995bc0170048d6da7686ab885f074592c99a16e8f3"},
 ]
 platformdirs = [
     {file = "platformdirs-2.4.0-py3-none-any.whl", hash = "sha256:8868bbe3c3c80d42f20156f22e7131d2fb321f5bc86a2a345375c6481a67021d"},
