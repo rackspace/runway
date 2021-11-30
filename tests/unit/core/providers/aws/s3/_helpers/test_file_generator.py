@@ -270,7 +270,7 @@ class TestFileGenerator:
         mock_list_objects.assert_called_once_with(
             bucket="bucket", prefix="", page_size=None, extra_args={}
         )
-        assert result == []
+        assert not result
 
     def test_list_objects_single(self) -> None:
         """Test list_objects."""

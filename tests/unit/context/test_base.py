@@ -69,7 +69,7 @@ class TestBaseContext:
     def test_boto3_credentials_empty(self, mocker: MockerFixture) -> None:
         """Test boto3_credentials empty."""
         mocker.patch.object(self.env, "vars", TEST_BOTO3_CREDS)
-        assert BaseContext(deploy_environment=self.env).boto3_credentials == {}
+        assert not BaseContext(deploy_environment=self.env).boto3_credentials
 
     def test_current_aws_creds(self, mocker: MockerFixture) -> None:
         """Test current_aws_creds."""

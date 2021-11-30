@@ -96,7 +96,7 @@ class TestDockerImageBuildApiOptions:
     def test_init_default(self) -> None:
         """Test init default."""
         obj = DockerImageBuildApiOptions()
-        assert obj.buildargs == {}
+        assert not obj.buildargs and isinstance(obj.buildargs, dict)
         assert obj.custom_context is False
         assert not obj.extra_hosts
         assert obj.forcerm is False

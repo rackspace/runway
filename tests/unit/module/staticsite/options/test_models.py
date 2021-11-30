@@ -103,9 +103,9 @@ class TestRunwayStaticSiteModuleOptionsDataModel:
         """Test init default."""
         obj = RunwayStaticSiteModuleOptionsDataModel()
         assert obj.build_output == "./"
-        assert obj.build_steps == []
-        assert obj.extra_files == []
-        assert obj.pre_build_steps == []
+        assert not obj.build_steps and isinstance(obj.build_steps, list)
+        assert not obj.extra_files and isinstance(obj.extra_files, list)
+        assert not obj.pre_build_steps and isinstance(obj.pre_build_steps, list)
         assert obj.source_hashing == RunwayStaticSiteSourceHashingDataModel()
 
     def test_init_extra(self) -> None:
@@ -206,7 +206,7 @@ class TestRunwayStaticSiteSourceHashingDirectoryDataModel:
     def test_init_default(self, tmp_path: Path) -> None:
         """Test init default."""
         obj = RunwayStaticSiteSourceHashingDirectoryDataModel(path=tmp_path)
-        assert obj.exclusions == []
+        assert not obj.exclusions and isinstance(obj.exclusions, list)
         assert obj.path == tmp_path
 
     def test_init_extra(self, tmp_path: Path) -> None:
