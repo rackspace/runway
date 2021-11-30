@@ -97,7 +97,7 @@ class TestConfigComponentDefinition:
         obj = SampleConfigComponentDefinition(data)
         assert obj._data == data
         assert obj.data == data.dict()
-        assert obj._vars == {}
+        assert not obj._vars and isinstance(obj._vars, dict)
 
     def test_get(self) -> None:
         """Test get."""

@@ -416,7 +416,9 @@ class TestOnDoneFilteredSubscriber:
         future = FakeTransferFuture(exception=exception)
         subscriber.on_done(future)  # type: ignore
         assert subscriber.on_failure_calls == [(future, exception)]
-        assert subscriber.on_success_calls == []
+        assert not subscriber.on_success_calls and isinstance(
+            subscriber.on_success_calls, list
+        )
 
     def test_on_done_success(self):
         """Test on_done."""
@@ -424,7 +426,9 @@ class TestOnDoneFilteredSubscriber:
         future = FakeTransferFuture("return-value")
         subscriber.on_done(future)  # type: ignore
         assert subscriber.on_success_calls == [future]
-        assert subscriber.on_failure_calls == []
+        assert not subscriber.on_failure_calls and isinstance(
+            subscriber.on_failure_calls, list
+        )
 
 
 class TestProvideCopyContentTypeSubscriber:

@@ -175,14 +175,13 @@ class TestSyncExtraFiles:
         s3_stub = cfngin_context.add_stubber("s3")
 
         with s3_stub as stub:
-            assert (
-                sync_extra_files(
-                    cfngin_context,
-                    "bucket",
-                    extra_files=[{"name": "test.yaml", "content": {}}],
-                )
-                == []
+            result = sync_extra_files(
+                cfngin_context,
+                "bucket",
+                extra_files=[{"name": "test.yaml", "content": {}}],
             )
+            assert isinstance(result, list)
+            assert not result
             stub.assert_no_pending_responses()
 
     def test_file_reference(self, cfngin_context: MockCFNginContext) -> None:
@@ -254,15 +253,14 @@ class TestSyncExtraFiles:
         )
 
         with s3_stub as s3_stub, ssm_stub as ssm_stub:
-            assert (
-                sync_extra_files(
-                    cfngin_context,
-                    "bucket",
-                    extra_files=[extra],
-                    hash_tracking_parameter="hash_name",
-                )
-                == []
+            result = sync_extra_files(
+                cfngin_context,
+                "bucket",
+                extra_files=[extra],
+                hash_tracking_parameter="hash_name",
             )
+            assert isinstance(result, list)
+            assert not result
             s3_stub.assert_no_pending_responses()
             ssm_stub.assert_no_pending_responses()
 

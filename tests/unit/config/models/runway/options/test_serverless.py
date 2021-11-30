@@ -16,8 +16,10 @@ class TestRunwayServerlessModuleOptionsDataModel:
     def test_init_default(self) -> None:
         """Test init default values."""
         obj = RunwayServerlessModuleOptionsDataModel()
-        assert obj.args == []
-        assert obj.extend_serverless_yml == {}
+        assert not obj.args and isinstance(obj.args, list)
+        assert not obj.extend_serverless_yml and isinstance(
+            obj.extend_serverless_yml, dict
+        )
         assert obj.promotezip == RunwayServerlessPromotezipOptionDataModel()
         assert obj.skip_npm_ci is False
 

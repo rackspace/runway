@@ -47,7 +47,7 @@ class TestKBEnvManager:
     def test_list_installed_none(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test list_installed."""
         mocker.patch.object(KBEnvManager, "versions_dir", tmp_path)
-        assert list(KBEnvManager().list_installed()) == []
+        assert not list(KBEnvManager().list_installed())
 
     @pytest.mark.parametrize(
         "provided, expected",

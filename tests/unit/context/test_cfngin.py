@@ -184,7 +184,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         assert obj.config_path == tmp_path
         assert obj.env == self.env
         assert obj.force_stacks == ["stack-01"]
-        assert obj.hook_data == {}
+        assert not obj.hook_data and isinstance(obj.hook_data, dict)
         assert obj.logger
         assert obj.parameters == {"key": "val"}
         assert obj.stack_names == ["stack-02"]
@@ -198,10 +198,10 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         assert obj.config_path == Path.cwd()
         assert isinstance(obj.env, DeployEnvironment)
         assert obj.force_stacks == []
-        assert obj.hook_data == {}
+        assert not obj.hook_data and isinstance(obj.hook_data, dict)
         assert obj.logger
-        assert obj.parameters == {}
-        assert obj.stack_names == []
+        assert not obj.parameters and isinstance(obj.parameters, dict)
+        assert not obj.stack_names and isinstance(obj.stack_names, list)
 
     def test_lock_persistent_graph_locked(self, mocker: MockerFixture) -> None:
         """Test lock_persistent_graph no graph."""
@@ -375,7 +375,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
     def test_persistent_graph_location_empty(self, config_ext: Dict[str, str]) -> None:
         """Test persistent_graph_location."""
         config = CfnginConfig.parse_obj({"namespace": "test", **config_ext})
-        assert CfnginContext(config=config).persistent_graph_location == {}
+        assert not CfnginContext(config=config).persistent_graph_location
 
     def test_persistent_graph_location(self) -> None:
         """Test persistent_graph_location."""
