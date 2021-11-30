@@ -4,7 +4,18 @@ from __future__ import annotations
 
 import copy
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, TypeVar, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import yaml
 from pydantic import Extra, Field, Protocol, root_validator, validator
@@ -156,9 +167,12 @@ class CfnginStackDefinitionModel(ConfigProperty):
                     {"type": "string", "pattern": utils.CFNGIN_LOOKUP_STRING_REGEX},
                 ]
 
-    _resolve_path_fields = validator(
-        "stack_policy_path", "template_path", allow_reuse=True
-    )(utils.resolve_path_field)
+    _resolve_path_fields = cast(
+        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        validator("stack_policy_path", "template_path", allow_reuse=True)(
+            utils.resolve_path_field
+        ),
+    )
 
     @root_validator(pre=True)
     def _validate_class_and_template(cls, values: Dict[str, Any]) -> Dict[str, Any]:
@@ -281,8 +295,11 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         schema_extra = {"description": "Configuration file for Runway's CFNgin."}
         title = "CFNgin Config File"
 
-    _resolve_path_fields = validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(
-        utils.resolve_path_field
+    _resolve_path_fields = cast(
+        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(
+            utils.resolve_path_field
+        ),
     )
 
     @validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", pre=True)

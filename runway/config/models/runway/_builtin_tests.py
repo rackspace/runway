@@ -2,7 +2,7 @@
 # pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
-from typing import Any, Dict, List, Union
+from typing import Any, Callable, Dict, List, Union, cast
 
 from pydantic import Extra, Field, validator
 from typing_extensions import Literal
@@ -54,9 +54,12 @@ class RunwayTestDefinitionModel(ConfigProperty):
         return super().__new__(cls)
 
     # TODO add regex to schema
-    _validate_string_is_lookup = validator(
-        "args", "required", allow_reuse=True, pre=True
-    )(utils.validate_string_is_lookup)
+    _validate_string_is_lookup = cast(
+        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        validator("args", "required", allow_reuse=True, pre=True)(
+            utils.validate_string_is_lookup
+        ),
+    )
 
 
 class CfnLintRunwayTestArgs(ConfigProperty):
@@ -78,8 +81,11 @@ class CfnLintRunwayTestArgs(ConfigProperty):
         title = "cfn-lint Runway Test Arguments"
 
     # TODO add regex to schema
-    _validate_string_is_lookup = validator("cli_args", allow_reuse=True, pre=True)(
-        utils.validate_string_is_lookup
+    _validate_string_is_lookup = cast(
+        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        validator("cli_args", allow_reuse=True, pre=True)(
+            utils.validate_string_is_lookup
+        ),
     )
 
 
@@ -125,8 +131,11 @@ class ScriptRunwayTestArgs(ConfigProperty):
         title = "Script Runway Test Arguments"
 
     # TODO add regex to schema
-    _validate_string_is_lookup = validator("commands", allow_reuse=True, pre=True)(
-        utils.validate_string_is_lookup
+    _validate_string_is_lookup = cast(
+        classmethod[Callable[..., Any]],  # pylint: disable=unsubscriptable-object
+        validator("commands", allow_reuse=True, pre=True)(
+            utils.validate_string_is_lookup
+        ),
     )
 
 
