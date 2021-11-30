@@ -14,8 +14,8 @@ from ..compat import cached_property
 if TYPE_CHECKING:
     from urllib.error import URLError
 
-    from runway._logging import RunwayLogger
-    from runway.core.utils import Version
+    from .._logging import RunwayLogger
+    from ..utils import Version
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 

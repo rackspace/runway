@@ -17,9 +17,8 @@ import requests
 from typing_extensions import Final
 
 from ..compat import cached_property
-from ..core.utils import Version
 from ..exceptions import KubectlVersionNotSpecified
-from ..utils import FileHash
+from ..utils import FileHash, Version
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:

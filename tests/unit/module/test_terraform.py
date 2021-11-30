@@ -12,7 +12,6 @@ import pytest
 from mock import MagicMock, Mock
 
 from runway._logging import LogLevels
-from runway.core.utils import Version
 from runway.module.terraform import (
     Terraform,
     TerraformBackendConfig,
@@ -20,6 +19,7 @@ from runway.module.terraform import (
     gen_workspace_tfvars_files,
     update_env_vars_with_tf_var_values,
 )
+from runway.utils import Version
 
 if TYPE_CHECKING:
     from pathlib import Path

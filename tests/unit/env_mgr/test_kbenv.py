@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Optional
 
 import pytest
 
-from runway.core.utils import Version
 from runway.env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager
+from runway.utils import Version
 
 if TYPE_CHECKING:
     from pathlib import Path

@@ -14,7 +14,6 @@ import pytest
 from mock import MagicMock, call
 
 from runway._logging import LogLevels
-from runway.core.utils import Version
 from runway.env_mgr.tfenv import (
     TF_VERSION_FILENAME,
     TFEnvManager,
@@ -23,6 +22,7 @@ from runway.env_mgr.tfenv import (
     load_terraform_module,
 )
 from runway.exceptions import HclParserError
+from runway.utils import Version
 
 if TYPE_CHECKING:
     from pathlib import Path

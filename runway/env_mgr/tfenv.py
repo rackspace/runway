@@ -33,9 +33,8 @@ import requests
 from typing_extensions import Final
 
 from ..compat import cached_property
-from ..core.utils import Version
 from ..exceptions import HclParserError
-from ..utils import FileHash, get_hash_for_filename, merge_dicts
+from ..utils import FileHash, Version, get_hash_for_filename, merge_dicts
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:

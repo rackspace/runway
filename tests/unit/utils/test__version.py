@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from runway.core.utils import Version
+from runway.utils import Version
 
 
 class TestVersion:

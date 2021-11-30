@@ -19,9 +19,8 @@ from ..config.models.runway.options.terraform import (
     RunwayTerraformBackendConfigDataModel,
     RunwayTerraformModuleOptionsDataModel,
 )
-from ..core.utils import Version
 from ..env_mgr.tfenv import TFEnvManager
-from ..utils import DOC_SITE, which
+from ..utils import DOC_SITE, Version, which
 from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
 

@@ -14,7 +14,7 @@ from .._logging import RunwayLogger as _RunwayLogger
 from ..tests.registry import TEST_HANDLERS as _TEST_HANDLERS
 from ..utils import DOC_SITE
 from ..utils import YamlDumper as _YamlDumper
-from . import components, providers, type_defs, utils
+from . import components, providers, type_defs
 
 if TYPE_CHECKING:
     from ..config import RunwayConfig
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast(_RunwayLogger, _logging.getLogger(__name__))
 
-__all__ = ["Runway", "components", "providers", "type_defs", "utils"]
+__all__ = ["Runway", "components", "providers", "type_defs"]
 
 
 class Runway:
