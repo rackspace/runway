@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Union, cast
 
-import zgitignore
+import igittigitt
 
 from ....utils import FileHash, change_dir
 
@@ -37,40 +37,54 @@ def get_hash_of_files(
     root_path: Path,
     directories: Optional[List[Dict[str, Union[List[str], str]]]] = None,
 ) -> str:
-    """Generate md5 hash of files."""
-    if not directories:
-        directories = [{"path": "./"}]
+    """Generate md5 hash of files.
+
+    Args:
+        root_path: Base directory where all paths will be relative to.
+            This should already be resolve to an absolute path.
+        directories: List of mappings that describe the paths to hash and files
+            to exclude.
+
+    """
+    directories = directories or [{"path": "./"}]
 
     files_to_hash: List[StrPath] = []
     for i in directories:
-        ignorer = get_ignorer(
-            root_path / cast(str, i["path"]), cast(List[str], i.get("exclusions"))
+        gitignore = get_ignorer(
+            root_path / cast(str, i["path"]),
+            cast(Optional[List[str]], i.get("exclusions")),
         )
 
         with change_dir(root_path):
             for root, dirs, files in os.walk(cast(str, i["path"]), topdown=True):
-                if (root != "./") and ignorer.is_ignored(root, True):
+                sub_root = Path(root).resolve()
+                if root != "./" and gitignore.match(sub_root):
                     dirs[:] = []  # type: ignore
                     files[:] = []  # type: ignore
                 else:
                     for filename in files:
-                        filepath = os.path.join(root, filename)
-                        if not ignorer.is_ignored(filepath):
-                            files_to_hash.append(Path(filepath).resolve())
+                        filepath = sub_root / filename
+                        if not gitignore.match(filepath):
+                            files_to_hash.append(filepath)
 
     return calculate_hash_of_files(files_to_hash, root_path)
 
 
 def get_ignorer(
     path: Path, additional_exclusions: Optional[List[str]] = None
-) -> zgitignore.ZgitIgnore:
-    """Create ignorer with directory gitignore file."""
-    ignorefile = zgitignore.ZgitIgnore()
-    gitignore_file = path / ".gitignore"
-    if gitignore_file.is_file():
-        ignorefile.add_patterns(gitignore_file.read_text().splitlines())
+) -> igittigitt.IgnoreParser:
+    """Create gitignore filter from directory ``.gitignore`` file.
 
-    if additional_exclusions:
-        ignorefile.add_patterns(additional_exclusions)
+    Args:
+        path: Top-level directory that the gitignore filter will be created for.
+            This directory and it's subdirectories will be searched for
+            ``.gitignore`` files to use.
+        additional_exclusions: Additional gitignore patterns to add.
 
-    return ignorefile
+    """
+    additional_exclusions = additional_exclusions or []
+    gitignore = igittigitt.IgnoreParser()
+    gitignore.parse_rule_files(path)
+    for rule in additional_exclusions:
+        gitignore.add_rule(rule, path)
+    return gitignore
