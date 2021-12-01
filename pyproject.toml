@@ -46,6 +46,7 @@ docker = "*"  # used in runway.cfngin.hooks
 dunamai = { version = "^1.5", optional = true }  # docs
 formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
+igittigitt = ">=2.0.5"
 importlib-metadata = { version = "*", python = "<3.8" }
 jinja2 = "^2.7"  # used in runway.cfngin.blueprints.raw
 jsx-lexer = { version = "^1.0", optional = true }  # docs
@@ -67,7 +68,6 @@ troposphere = ">=2.4, <4"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
 yamllint = "*"
-zgitignore = "*"  # only used in runway.cfngin.hooks.staticsite.utils
 
 [tool.poetry.dev-dependencies]
 black = "^21.6b0"
