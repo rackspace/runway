@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-from contextlib import suppress
 from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 from ...compat import cached_property
@@ -124,10 +123,9 @@ class Action(BaseAction):
             LOGGER.notice("using default blueprint to create cfngin_bucket...")
             self.context.config.stacks = [self.default_cfngin_bucket_stack]
             # clear cached values that were populated by checking the previous condition
-            with suppress(AttributeError):
-                del self.context.stacks_dict
-            with suppress(AttributeError):
-                del self.context.stacks
+            self.context._del_cached_property(  # pylint: disable=protected-access
+                "stacks", "stacks_dict"
+            )
         if self.provider_builder:
             self.provider_builder.region = self.context.bucket_region
         deploy.Action(

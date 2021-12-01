@@ -20,6 +20,7 @@ from ..config.models.runway.options.terraform import (
     RunwayTerraformModuleOptionsDataModel,
 )
 from ..env_mgr.tfenv import TFEnvManager
+from ..mixins import DelCachedPropMixin
 from ..utils import DOC_SITE, Version, which
 from .base import ModuleOptions, RunwayModule
 from .utils import run_module_command
@@ -75,7 +76,7 @@ TerraformActionTypeDef = Literal[
 ]
 
 
-class Terraform(RunwayModule):
+class Terraform(RunwayModule, DelCachedPropMixin):
     """Terraform Runway Module."""
 
     options: TerraformOptions
@@ -518,7 +519,7 @@ class Terraform(RunwayModule):
             env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
-        del self.current_workspace
+        self._del_cached_property("current_workspace")
 
     def terraform_workspace_show(self) -> str:
         """Execute ``terraform workspace show`` command.

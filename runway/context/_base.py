@@ -9,6 +9,7 @@ import boto3
 from ..aws_sso_botocore.session import Session
 from ..cfngin.ui import ui
 from ..constants import BOTO3_CREDENTIAL_CACHE
+from ..mixins import DelCachedPropMixin
 from ..type_defs import Boto3CredentialsTypeDef
 from .sys_info import SystemInfo
 
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-class BaseContext:
+class BaseContext(DelCachedPropMixin):
     """Base class for context objects."""
 
     env: DeployEnvironment
