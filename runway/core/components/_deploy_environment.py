@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, cast
 import click
 
 from ...compat import cached_property
+from ...mixins import DelCachedPropMixin
 from ...type_defs import EnvVarsAwsCredentialsTypeDef
 from ...utils import AWS_ENV_VARS
 
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
 
-class DeployEnvironment:
+class DeployEnvironment(DelCachedPropMixin):
     """Runway deploy environment."""
 
     __name: Optional[str]
@@ -167,14 +168,11 @@ class DeployEnvironment:
         """
         if self._ignore_git_branch != value:
             self._ignore_git_branch = value
-            try:
-                del self.name
-                LOGGER.debug(
-                    "value of ignore_git_branch has changed; "
-                    "cleared cached name so it can be determined again"
-                )
-            except AttributeError:
-                pass  # it's fine if it does not exist yes
+            self._del_cached_property("name")
+            LOGGER.debug(
+                "value of ignore_git_branch has changed; "
+                "cleared cached name so it can be determined again"
+            )
 
     @property
     def max_concurrent_cfngin_stacks(self) -> int:

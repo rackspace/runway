@@ -268,10 +268,7 @@ class KBEnvManager(EnvManager):
         if self.current_version == version:
             return
         self.current_version = version
-        try:
-            del self.version
-        except Exception:  # pylint: disable=broad-except
-            pass
+        self._del_cached_property("version")
 
     @classmethod
     def parse_version_string(cls, version: str) -> Version:

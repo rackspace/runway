@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, List, Optional, Union
 from botocore.exceptions import ClientError
 
 from .....compat import cached_property
+from .....mixins import DelCachedPropMixin
 from .._response import BaseResponse
 from ._sync_handler import S3SyncHandler
 
@@ -24,7 +25,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class Bucket:
+class Bucket(DelCachedPropMixin):
     """AWS S3 bucket."""
 
     def __init__(
@@ -119,9 +120,7 @@ class Bucket:
                 {"LocationConstraint": self.client.meta.region_name}
             )
         LOGGER.debug("creating bucket: %s", json.dumps(kwargs))
-        del self.not_found  # clear cached value
-        del self.forbidden  # clear cached value
-        del self.head  # clear cached value
+        self._del_cached_property("forbidden", "not_found", "head")
         return self.client.create_bucket(**kwargs)
 
     def enable_versioning(self) -> None:

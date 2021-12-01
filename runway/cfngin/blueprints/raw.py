@@ -182,10 +182,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
             else:
                 raise InvalidConfig(f"Could not find template {self.raw_template_path}")
             # clear cached properties that rely on this property
-            try:
-                del self.parameter_definitions
-            except Exception:  # pylint: disable=broad-except
-                pass
+            self._del_cached_property("parameter_definitions")
 
         return self._rendered
 
@@ -254,9 +251,5 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
             value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
                 self._resolved_variables[var_name] = value
-
         # clear cached properties that rely on the property set by this
-        try:
-            del self.parameter_values
-        except Exception:  # pylint: disable=broad-except
-            pass
+        self._del_cached_property("parameter_values")

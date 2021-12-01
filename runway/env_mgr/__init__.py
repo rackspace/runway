@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Generator, Optional, Union, cast
 
 from ..compat import cached_property
+from ..mixins import DelCachedPropMixin
 
 if TYPE_CHECKING:
     from urllib.error import URLError
@@ -51,7 +52,7 @@ def handle_bin_download_error(exc: URLError, name: str) -> None:
     sys.exit(1)
 
 
-class EnvManager:
+class EnvManager(DelCachedPropMixin):
     """Base environment manager class.
 
     Attributes:

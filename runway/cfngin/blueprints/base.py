@@ -21,6 +21,7 @@ from typing import (
 from troposphere import Output, Parameter, Ref, Template
 
 from ...compat import cached_property
+from ...mixins import DelCachedPropMixin
 from ...variables import Variable
 from ..exceptions import (
     InvalidUserdataPlaceholder,
@@ -291,7 +292,7 @@ def parse_user_data(
     return res
 
 
-class Blueprint:
+class Blueprint(DelCachedPropMixin):
     """Base implementation for rendering a troposphere template.
 
     Attributes:
@@ -510,14 +511,7 @@ class Blueprint:
         """
         self._resolved_variables = value
         # clear cached properties that rely on this property
-        try:
-            del self.cfn_parameters
-        except Exception:  # pylint: disable=broad-except
-            pass
-        try:
-            del self.parameter_values
-        except Exception:  # pylint: disable=broad-except
-            pass
+        self._del_cached_property("cfn_parameters", "parameter_values")
 
     @property
     def version(self) -> str:
