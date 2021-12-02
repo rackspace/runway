@@ -146,7 +146,7 @@ test-functional: ## run function tests only
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
 			--log-cli-level 15 \
-			--no-cov \
+			--no-cov; \
 	else \
 		echo "  not using pytest-xdist"; \
 		poetry run pytest \
