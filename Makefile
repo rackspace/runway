@@ -142,13 +142,11 @@ test-functional: ## run function tests only
 	@echo "Running functional tests..."
 	@if [ $${CI} ]; then \
 		echo "  using pytest-xdist"; \
-		poetry run pytest \
-			--dist loadfile \
+		poetry run pytest ./tests/functional/cdk/test_multistack \
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
 			--log-cli-level 15 \
 			--no-cov \
-			--numprocesses auto; \
 	else \
 		echo "  not using pytest-xdist"; \
 		poetry run pytest \
