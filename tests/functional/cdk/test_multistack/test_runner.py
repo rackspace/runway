@@ -43,7 +43,7 @@ def destroy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     # pylint: disable=unexpected-keyword-arg
     # (CURRENT_DIR / "cdk.out").unlink(missing_ok=True)
     shutil.rmtree(CURRENT_DIR / "cdk.out", ignore_errors=True)
-    shutil.rmtree(CURRENT_DIR / "node_modules", ignore_errors=True)
+    # shutil.rmtree(CURRENT_DIR / "node_modules", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     for f in CURRENT_DIR.glob("**/*.js"):
         f.unlink()
@@ -56,7 +56,37 @@ def test_deploy_exit_code(deploy_result: Result) -> None:
     """Test deploy exit code."""
     try:
         LOGGER.info(
+            subprocess.check_output(
+                "npm list -g", cwd=CURRENT_DIR, shell=True, text=True
+            )
+        )
+    except subprocess.CalledProcessError as exc:
+        LOGGER.error(exc.output)
+    try:
+        LOGGER.info(
             subprocess.check_output("npm list", cwd=CURRENT_DIR, shell=True, text=True)
+        )
+    except subprocess.CalledProcessError as exc:
+        LOGGER.error(exc.output)
+    try:
+        LOGGER.info(
+            subprocess.check_output(
+                "npx --package aws-cdk cdk doctor",
+                cwd=CURRENT_DIR,
+                shell=True,
+                text=True,
+            )
+        )
+    except subprocess.CalledProcessError as exc:
+        LOGGER.error(exc.output)
+    try:
+        LOGGER.info(
+            subprocess.check_output(
+                "npx --package aws-cdk cdk bootstrap --show-template",
+                cwd=CURRENT_DIR,
+                shell=True,
+                text=True,
+            )
         )
     except subprocess.CalledProcessError as exc:
         LOGGER.error(exc.output)
