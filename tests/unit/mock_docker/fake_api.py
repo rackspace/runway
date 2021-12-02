@@ -1,4 +1,5 @@
 """Fake Docker API."""
+# cspell:disable
 # flake8: noqa=D103
 # pylint: disable=invalid-name,missing-docstring
 from typing import Any, Callable, Dict, Tuple, Union

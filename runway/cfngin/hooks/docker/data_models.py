@@ -341,7 +341,7 @@ class DockerImage(BaseModel):
     @property
     def id(self) -> str:
         """ID of the image."""
-        return cast(str, self.image.id)
+        return self.image.id
 
     @id.setter
     def id(self, value: str) -> None:
@@ -363,7 +363,7 @@ class DockerImage(BaseModel):
     @property
     def short_id(self) -> str:
         """ID of the image truncated to 10 characters plus the ``sha256:`` prefix."""
-        return cast(str, self.image.short_id)
+        return self.image.short_id
 
     @short_id.setter
     def short_id(self, value: str) -> None:
@@ -374,14 +374,12 @@ class DockerImage(BaseModel):
     def tags(self) -> List[str]:
         """List of image tags."""
         self.image.reload()
-        return [uri.split(":")[-1] for uri in cast(List[str], self.image.tags)]
+        return [uri.split(":")[-1] for uri in self.image.tags]
 
     @property
     def uri(self) -> MutableMap:
         """Return a mapping of tag to image URI."""
-        return MutableMap(
-            **{uri.split(":")[-1]: uri for uri in cast(List[str], self.image.tags)}
-        )
+        return MutableMap(**{uri.split(":")[-1]: uri for uri in self.image.tags})
 
 
 class ElasticContainerRegistryRepository(BaseModel):
