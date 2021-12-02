@@ -12,9 +12,7 @@ To fix linting issue automatically, run the following from this directory::
 # pylint: disable=redefined-outer-name
 from __future__ import annotations
 
-import logging
 import shutil
-import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator
 
@@ -26,8 +24,6 @@ if TYPE_CHECKING:
     from click.testing import CliRunner, Result
 
 CURRENT_DIR = Path(__file__).parent
-
-LOGGER = logging.getLogger("runway.pytest")
 
 
 @pytest.fixture(scope="module")
@@ -43,7 +39,7 @@ def destroy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     # pylint: disable=unexpected-keyword-arg
     # (CURRENT_DIR / "cdk.out").unlink(missing_ok=True)
     shutil.rmtree(CURRENT_DIR / "cdk.out", ignore_errors=True)
-    # shutil.rmtree(CURRENT_DIR / "node_modules", ignore_errors=True)
+    shutil.rmtree(CURRENT_DIR / "node_modules", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     for f in CURRENT_DIR.glob("**/*.js"):
         f.unlink()
@@ -54,34 +50,6 @@ def destroy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
 @pytest.mark.order("first")
 def test_deploy_exit_code(deploy_result: Result) -> None:
     """Test deploy exit code."""
-    try:
-        LOGGER.info(
-            subprocess.check_output("npm list", cwd=CURRENT_DIR, shell=True, text=True)
-        )
-    except subprocess.CalledProcessError as exc:
-        LOGGER.error(exc.output)
-    try:
-        LOGGER.info(
-            subprocess.check_output(
-                "npx --package aws-cdk cdk doctor",
-                cwd=CURRENT_DIR,
-                shell=True,
-                text=True,
-            )
-        )
-    except subprocess.CalledProcessError as exc:
-        LOGGER.error(exc.output)
-    try:
-        LOGGER.info(
-            subprocess.check_output(
-                "npx --package aws-cdk cdk bootstrap --show-template",
-                cwd=CURRENT_DIR,
-                shell=True,
-                text=True,
-            )
-        )
-    except subprocess.CalledProcessError as exc:
-        LOGGER.error(exc.output)
     assert deploy_result.exit_code == 0
 
 
