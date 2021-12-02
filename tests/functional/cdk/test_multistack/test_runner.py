@@ -54,7 +54,12 @@ def destroy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
 @pytest.mark.order("first")
 def test_deploy_exit_code(deploy_result: Result) -> None:
     """Test deploy exit code."""
-    LOGGER.info(subprocess.check_output("npm list", shell=True, text=True))
+    try:
+        LOGGER.info(
+            subprocess.check_output("npm list", cwd=CURRENT_DIR, shell=True, text=True)
+        )
+    except subprocess.CalledProcessError as exc:
+        LOGGER.error(exc.output)
     assert deploy_result.exit_code == 0
 
 
