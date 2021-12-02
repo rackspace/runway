@@ -34,7 +34,6 @@ import botocore.exceptions
 import docker
 import docker.types
 import formic
-from docker.models.containers import Container
 from docker.models.images import Image
 from troposphere.awslambda import Code
 from typing_extensions import Literal, TypedDict
@@ -445,12 +444,12 @@ def dockerized_pip(
         # the response can be either a tuple of (Image, Generator[Dict[str, str]])
         # or just Image depending on API version.
         if isinstance(response, tuple):
-            docker_image = cast(str, response[0].id)
+            docker_image = response[0].id
             for log_msg in response[1]:
                 if log_msg.get("stream"):
                     LOGGER.info(log_msg["stream"].strip("\n"))
         else:
-            docker_image = cast(str, response.id)
+            docker_image = response.id
         LOGGER.info('docker image "%s" created', docker_image)
     if runtime:
         if runtime not in SUPPORTED_RUNTIMES:
@@ -477,23 +476,18 @@ def dockerized_pip(
     if python_dontwritebytecode:
         docker_run_args["environment"] = "1"
 
-    container = cast(
-        Container,
-        client.containers.run(
-            image=docker_image,
-            command=["/bin/sh", "-c", pip_cmd],
-            auto_remove=True,
-            detach=True,
-            mounts=[work_dir_mount],
-            **docker_run_args,
-        ),
+    container = client.containers.run(
+        image=cast(str, docker_image),
+        command=["/bin/sh", "-c", pip_cmd],
+        auto_remove=True,
+        detach=True,
+        mounts=[work_dir_mount],
+        **docker_run_args,
     )
 
     # 'stream' creates a blocking generator that allows for real-time logs.
     # this loop ends when the container 'auto_remove's itself.
-    for log in cast(
-        Iterator[bytes], container.logs(stdout=True, stderr=True, stream=True, tail=0)
-    ):
+    for log in container.logs(stdout=True, stderr=True, stream=True, tail=0):
         # without strip there are a bunch blank lines in the output
         LOGGER.info(log.decode().strip())
 

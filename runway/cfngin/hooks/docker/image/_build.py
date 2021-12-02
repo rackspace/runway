@@ -266,10 +266,6 @@ def build(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     for tag in args.tags:
         image.tag(args.repo, tag=tag)
     image.reload()
-    LOGGER.info(
-        "created image %s with tags %s",
-        cast(str, image.short_id),
-        ", ".join(cast(List[str], image.tags)),
-    )
+    LOGGER.info("created image %s with tags %s", image.short_id, ", ".join(image.tags))
     docker_hook_data.image = DockerImage(image=image)
     return docker_hook_data.update_context(context)

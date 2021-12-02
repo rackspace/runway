@@ -55,7 +55,8 @@ def test_remove(
         == docker_hook_data
     )
     mock_from_cfngin_context.assert_called_once_with(cfngin_context)
-    docker_hook_data.client.api.remove_image.assert_has_calls(  # pylint: disable=no-member
+    # pylint: disable=no-member
+    docker_hook_data.client.api.remove_image.assert_has_calls(  # type: ignore
         [
             call(force=True, image=f"{args.repo}:{tag}", noprune=False)
             for tag in args.tags
@@ -82,11 +83,13 @@ def test_remove_image_not_found(
         DockerHookData, "update_context", return_value=docker_hook_data
     )
     cfngin_context.hook_data["docker"] = docker_hook_data
-    docker_hook_data.client.api.remove_image.side_effect = ImageNotFound(
-        args.repo + ":latest"  # type: ignore
+    # pylint: disable=no-member
+    docker_hook_data.client.api.remove_image.side_effect = ImageNotFound(  # type: ignore
+        f"{args.repo}:latest"
     )
     assert remove(context=cfngin_context, **args.dict()) == docker_hook_data
-    docker_hook_data.client.api.remove_image.assert_has_calls(  # pylint: disable=no-member
+    # pylint: disable=no-member
+    docker_hook_data.client.api.remove_image.assert_has_calls(  # type: ignore
         [
             call(force=False, image=f"{args.repo}:{tag}", noprune=False)
             for tag in args.tags
