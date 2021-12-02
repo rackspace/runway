@@ -56,14 +56,6 @@ def test_deploy_exit_code(deploy_result: Result) -> None:
     """Test deploy exit code."""
     try:
         LOGGER.info(
-            subprocess.check_output(
-                "npm list -g", cwd=CURRENT_DIR, shell=True, text=True
-            )
-        )
-    except subprocess.CalledProcessError as exc:
-        LOGGER.error(exc.output)
-    try:
-        LOGGER.info(
             subprocess.check_output("npm list", cwd=CURRENT_DIR, shell=True, text=True)
         )
     except subprocess.CalledProcessError as exc:
