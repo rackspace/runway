@@ -61,9 +61,12 @@
     "words": [
         "abstractmethod",
         "ALGS",
+        "cmds",
         "codecov",
+        "EOCD",
         "FQDNs",
         "fstring",
+        "getuid",
         "hashextra",
         "hashicorp",
         "igittigitt",
@@ -72,6 +75,7 @@
         "openid",
         "rglob",
         "tomap",
+        "tomli",
         "typeshed",
         "unsubscriptable"
     ]
