@@ -42,7 +42,7 @@ cfn-lint = "*"
 cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
 click = "^8.0"
 coloredlogs = "*, !=15.0.1"
-docker = "*"  # used in runway.cfngin.hooks
+docker = ">=3.0.0"  # used in runway.cfngin.hooks
 dunamai = { version = "^1.5", optional = true }  # docs
 formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
