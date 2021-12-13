@@ -23,11 +23,11 @@ to the lookup as it's input/query. This allows the lookup to function during a
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
 
 from pydantic import ValidationError
 from troposphere.awslambda import Code
-from typing_extensions import Literal
+from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import load_object_from_string
