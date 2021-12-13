@@ -29,6 +29,7 @@ class BlankBlueprint(Blueprint):
         """Create template without raising NotImplementedError."""
 
 
+# TODO BREAKING find a better place for this
 class TagDataModel(BaseModel):
     """AWS Resource Tag data model."""
 

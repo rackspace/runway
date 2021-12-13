@@ -97,6 +97,20 @@ class CfnginBucketRequired(CfnginError):
         super().__init__()
 
 
+class CfnginOnlyLookupError(CfnginError):
+    """Attempted to use a CFNgin lookup outside of CFNgin."""
+
+    lookup_name: str
+
+    def __init__(self, lookup_name: str) -> None:
+        """Instantiate class."""
+        self.lookup_name = lookup_name
+        self.message = (
+            f"attempted to use CFNgin only lookup {lookup_name} outside of CFNgin"
+        )
+        super().__init__()
+
+
 class ChangesetDidNotStabilize(CfnginError):
     """Raised when the applying a changeset fails."""
 
