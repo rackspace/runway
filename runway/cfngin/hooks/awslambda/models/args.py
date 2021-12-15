@@ -86,6 +86,25 @@ class DockerOptions(BaseModel):
 
     """
 
+    name: Optional[str] = None
+    """When providing a Dockerfile, this will be the name applied to the resulting image.
+    It is the equivalent to ``name`` in the ``name:tag`` syntax of the
+    ``docker build [--tag, -t]`` command option.
+
+    If not provided, a default image name is used.
+
+    This field is ignore unless ``file`` is provided.
+
+    .. rubric:: Example
+    .. code-block:: yaml
+
+        args:
+          docker:
+            file: Dockerfile
+            name: ${namespace}.runway.awslambda
+
+    """
+
     pull: bool = True
     """Always download updates to the specified image before use.
     When building an image, the ``FROM`` image will be updated during the build

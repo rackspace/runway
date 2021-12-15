@@ -11,12 +11,12 @@ from docker.models.images import Image
 from docker.types.services import Mount
 from mock import Mock, call
 
-from runway.cfngin.hooks.awslambda.constants import AWS_SAM_BUILD_IMAGE_PREFIX
-from runway.cfngin.hooks.awslambda.docker import (
+from runway.cfngin.hooks.awslambda.constants import (
+    AWS_SAM_BUILD_IMAGE_PREFIX,
     DEFAULT_IMAGE_NAME,
     DEFAULT_IMAGE_TAG,
-    DockerDependencyInstaller,
 )
+from runway.cfngin.hooks.awslambda.docker import DockerDependencyInstaller
 from runway.cfngin.hooks.awslambda.models.args import DockerOptions
 from runway.exceptions import DockerConnectionRefusedError, DockerExecFailedError
 
@@ -224,19 +224,30 @@ class TestDockerDependencyInstaller:
             )
 
     @pytest.mark.parametrize(
-        "image, runtime", [(False, False), (False, True), (True, True), (True, False)]
+        "image, name, runtime",
+        [
+            (False, None, False),
+            (False, "foo", True),
+            (True, None, True),
+            (True, "bar", False),
+        ],
     )
     def test_image_build_image(
-        self, image: Optional[str], mocker: MockerFixture, runtime: Optional[str]
+        self,
+        image: Optional[str],
+        mocker: MockerFixture,
+        name: Optional[str],
+        runtime: Optional[str],
     ) -> None:
         """Test image build image."""
         project = Mock(args=Mock(docker=Mock(file="foo", image=image), runtime=runtime))
+        project.args.docker.name = name
         build_image = mocker.patch.object(
             DockerDependencyInstaller, "build_image", return_value="success"
         )
         obj = DockerDependencyInstaller(project, client=Mock())
         assert obj.image == build_image.return_value
-        build_image.assert_called_once_with(project.args.docker.file)
+        build_image.assert_called_once_with(project.args.docker.file, name=name)
 
     @pytest.mark.parametrize(
         "image, runtime, pull",

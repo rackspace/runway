@@ -26,7 +26,7 @@ from docker.types import Mount
 from ...._logging import PrefixAdaptor
 from ....compat import cached_property
 from ....exceptions import DockerConnectionRefusedError, DockerExecFailedError
-from .constants import AWS_SAM_BUILD_IMAGE_PREFIX
+from .constants import AWS_SAM_BUILD_IMAGE_PREFIX, DEFAULT_IMAGE_NAME, DEFAULT_IMAGE_TAG
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -37,9 +37,6 @@ if TYPE_CHECKING:
     from .models.args import AwsLambdaHookArgs, DockerOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
-
-DEFAULT_IMAGE_NAME = "runway.cfngin.hooks.awslambda"
-DEFAULT_IMAGE_TAG = "latest"
 
 
 _T = TypeVar("_T")
@@ -141,7 +138,7 @@ class DockerDependencyInstaller:
 
         """
         if self.options.file:
-            return self.build_image(self.options.file)
+            return self.build_image(self.options.file, name=self.options.name)
         if self.options.image:
             return self.pull_image(self.options.image, force=self.options.pull)
         if self.project.args.runtime:
@@ -198,8 +195,8 @@ class DockerDependencyInstaller:
         self,
         docker_file: Path,
         *,
-        name: str = DEFAULT_IMAGE_NAME,
-        tag: str = DEFAULT_IMAGE_TAG,
+        name: Optional[str] = None,
+        tag: Optional[str] = None,
     ) -> Image:
         """Build Docker image from Dockerfile.
 
@@ -211,7 +208,9 @@ class DockerDependencyInstaller:
             docker_file: Path to the Dockerfile to build. This path should be
                 absolute, must exist, and must be a file.
             name: Name of the Docker image. The name should not contain a tag.
+                If not provided, a default value is use.
             tag: Tag to apply to the image after it is built.
+                If not provided, a default value of ``latest`` is used.
 
         Returns:
             Object representing the image that was built.
@@ -224,7 +223,7 @@ class DockerDependencyInstaller:
             pull=self.options.pull,
         )
         self.log_docker_msg_dict(log_stream)
-        image.tag(name, tag=tag)
+        image.tag(name or DEFAULT_IMAGE_NAME, tag=tag or DEFAULT_IMAGE_TAG)
         image.reload()
         LOGGER.info("built docker image %s (%s)", ", ".join(image.tags), image.id)
         return image
