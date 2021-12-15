@@ -386,12 +386,12 @@ class TestDockerDependencyInstaller:
         getgid = mocker.patch(f"{MODULE}.os.getgid", create=True, return_value=3)
         getuid = mocker.patch(f"{MODULE}.os.getuid", create=True, return_value=4)
         obj = DockerDependencyInstaller(
-            Mock(args=Mock(docker=Mock(extra_files=["foo", "bar"])), cache_dir=False),
+            Mock(args=Mock(docker=Mock(extra_files=["foo", "bar.*"])), cache_dir=False),
             client=Mock(),
         )
         assert obj.post_install_commands == [
-            'cp -v "foo" "/var/task/lambda"',
-            'cp -v "bar" "/var/task/lambda"',
+            'sh -c \'cp -v "foo" "/var/task/lambda"\'',
+            'sh -c \'cp -v "bar."* "/var/task/lambda"\'',
             f"chown -R {getuid.return_value}:{getgid.return_value} /var/task/lambda",
         ]
 

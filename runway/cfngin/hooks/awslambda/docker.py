@@ -161,7 +161,11 @@ class DockerDependencyInstaller:
         """Commands to run after dependencies have been installed."""
         cmds = [
             *[
-                f'cp -v "{extra_file}" "{self.DEPENDENCY_DIR}"'
+                # wildcards need to exist outside of the quotes to work
+                # needs to be wrapped in `sh -c` to resolve wildcard
+                f"sh -c 'cp -v \"{extra_file.rstrip('*')}\"* \"{self.DEPENDENCY_DIR}\"'"
+                if extra_file.endswith("*")
+                else f'sh -c \'cp -v "{extra_file}" "{self.DEPENDENCY_DIR}"\''
                 for extra_file in self.options.extra_files
             ],
         ]

@@ -39,6 +39,9 @@ class DockerOptions(BaseModel):
     These files need to be included in the deployment package for the Lambda Function to run.
     List the files here and the hook will handle copying them into the deployment package.
 
+    The file name may end in a wildcard (``*``) to accommodate ``.so`` files that
+    end in an variable number (see example below).
+
     If the file does not exist, it will result in an error.
 
     .. rubric:: Example
@@ -47,7 +50,7 @@ class DockerOptions(BaseModel):
         args:
           docker:
             extra_files:
-              - /usr/lib64/mysql57/libmysqlclient.so.1020
+              - /usr/lib64/mysql/libmysqlclient.so.*
               - /usr/lib64/libxmlsec1-openssl.so
 
     """

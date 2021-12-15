@@ -101,9 +101,8 @@ class DockerExecFailedError(RunwayError):
 
         """
         self.exit_code = response.get("StatusCode", 1)  # we can assume this will be > 0
-        self.message = response.get("Error", {}).get(
-            "Message", "error message undefined"
-        )
+        error = response.get("Error") or {}  # value from dict could be NoneType
+        self.message = error.get("Message", "error message undefined")
         super().__init__()
 
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
 __version__ = "2.6.3"
 Delete = "Delete"
@@ -43,6 +43,7 @@ class BaseAWSObject(object):
     do_validation: bool
     properties: Dict[str, Any]
     propnames: List[str]
+    props: Dict[str, Tuple[Union[type, Callable[[Any], Any]], bool]]
     resource: Dict[str, Any]
     template: Optional[Template]
     title: str
