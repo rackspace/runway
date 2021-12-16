@@ -90,6 +90,7 @@ register_lookup_handler(
 register_lookup_handler(
     AwsLambdaLookup.CompatibleRuntimes.TYPE_NAME, AwsLambdaLookup.CompatibleRuntimes
 )
+register_lookup_handler(AwsLambdaLookup.Content.TYPE_NAME, AwsLambdaLookup.Content)
 register_lookup_handler(
     AwsLambdaLookup.LicenseInfo.TYPE_NAME, AwsLambdaLookup.LicenseInfo
 )

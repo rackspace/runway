@@ -26,7 +26,7 @@ import logging
 from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
 
 from pydantic import ValidationError
-from troposphere.awslambda import Code
+from troposphere.awslambda import Code, Content
 from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
@@ -303,6 +303,38 @@ class AwsLambdaLookup(LookupHandler):
                     value, context, *args, **kwargs
                 ).compatible_runtimes,
                 **lookup_args,
+            )
+
+    class Content(LookupHandler):
+        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+
+        TYPE_NAME: Final[Literal["awslambda.Content"]] = "awslambda.Content"
+
+        @classmethod
+        def handle(  # pylint: disable=arguments-differ
+            cls,
+            value: str,
+            context: Union[CfnginContext, RunwayContext],
+            *args: Any,
+            **kwargs: Any,
+        ) -> Content:
+            """Retrieve metadata for an AWS Lambda deployment package.
+
+            Args:
+                value: Value to resolve.
+                context: The current context object.
+
+            Returns:
+                Value that can be passed into CloudFormation property
+                ``AWS::Lambda::LayerVersion.Content``.
+
+            """
+            return Content(
+                **AwsLambdaLookup.handle(value, context, *args, **kwargs).dict(
+                    by_alias=True,
+                    exclude_none=True,
+                    include={"bucket_name", "object_key", "object_version_id"},
+                )
             )
 
     class LicenseInfo(LookupHandler):

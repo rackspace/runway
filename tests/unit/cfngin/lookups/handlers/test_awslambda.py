@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from mock import Mock
-from troposphere.awslambda import Code
+from troposphere.awslambda import Code, Content
 
 from runway.cfngin.exceptions import CfnginOnlyLookupError
 from runway.cfngin.hooks.awslambda.base_classes import AwsLambdaHook
@@ -313,7 +313,7 @@ class TestAwsLambdaLookupCodeSha256:
         )
 
 
-class TestCompatibleArchitectures:
+class TestAwsLambdaLookupCompatibleArchitectures:
     """Test TestAwsLambdaLookup.CompatibleArchitectures."""
 
     def test_handle(
@@ -346,7 +346,7 @@ class TestCompatibleArchitectures:
         )
 
 
-class TestCompatibleRuntimes:
+class TestAwsLambdaLookupCompatibleRuntimes:
     """Test TestAwsLambdaLookup.CompatibleRuntimes."""
 
     def test_handle(
@@ -377,7 +377,38 @@ class TestCompatibleRuntimes:
         )
 
 
-class TestLicenseInfo:
+class TestAwsLambdaLookupContent:
+    """Test TestAwsLambdaLookup.Content."""
+
+    def test_handle(
+        self, hook_data: AwsLambdaHookDeployResponse, mocker: MockerFixture
+    ) -> None:
+        """Test handle."""
+        context = Mock()
+        mock_format_results = mocker.patch.object(
+            LookupHandler, "format_results", return_value="success"
+        )
+        mock_handle = mocker.patch.object(
+            AwsLambdaLookup, "handle", return_value=hook_data
+        )
+        result = AwsLambdaLookup.Content.handle(QUERY, context, "arg", foo="bar")
+        assert isinstance(result, Content)
+        assert not hasattr(result, "ImageUri")
+        assert result.S3Bucket == hook_data.bucket_name
+        assert result.S3Key == hook_data.object_key
+        assert result.S3ObjectVersion == hook_data.object_version_id
+        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        mock_format_results.assert_not_called()
+
+    def test_type_name(self) -> None:
+        """Test TYPE_NAME."""
+        assert (
+            AwsLambdaLookup.Content.TYPE_NAME
+            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.Content.__name__}"
+        )
+
+
+class TestAwsLambdaLookupLicenseInfo:
     """Test TestAwsLambdaLookup.LicenseInfo."""
 
     def test_handle(

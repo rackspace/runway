@@ -28,6 +28,7 @@ def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
         "awslambda.CodeSha256",
         "awslambda.CompatibleArchitectures",
         "awslambda.CompatibleRuntimes",
+        "awslambda.Content",
         "awslambda.LicenseInfo",
         "awslambda.Runtime",
         "awslambda.S3Bucket",
