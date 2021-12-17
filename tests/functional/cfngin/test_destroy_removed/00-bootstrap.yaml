@@ -15,22 +15,22 @@ stacks:
     class_path: blueprints.Dummy
 
 post_destroy:
-  - path: hooks.s3_cleanup.delete_prefix
+  - path: hooks.cleanup.s3_delete_prefix
     required: True
     args:
       bucket_name: ${cfngin_bucket}
       prefix: persistent_graphs/${namespace}/
-  - path: hooks.s3_cleanup.delete_prefix
+  - path: hooks.cleanup.s3_delete_prefix
     required: True
     args:
       bucket_name: ${cfngin_bucket}
       prefix: stack_templates/${namespace}-bastion/
-  - path: hooks.s3_cleanup.delete_prefix
+  - path: hooks.cleanup.s3_delete_prefix
     required: True
     args:
       bucket_name: ${cfngin_bucket}
       prefix: stack_templates/${namespace}-other/
-  - path: hooks.s3_cleanup.delete_prefix
+  - path: hooks.cleanup.s3_delete_prefix
     required: True
     args:
       bucket_name: ${cfngin_bucket}

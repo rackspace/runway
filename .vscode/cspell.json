@@ -61,6 +61,7 @@
     "words": [
         "abstractmethod",
         "ALGS",
+        "certifi",
         "cmds",
         "codecov",
         "EOCD",
@@ -70,13 +71,20 @@
         "hashextra",
         "hashicorp",
         "igittigitt",
+        "libltdl",
+        "libmysqlclient",
+        "libxmlsec",
+        "lxml",
         "markexpr",
         "Ngin",
         "openid",
+        "PYXMLSEC",
         "rglob",
+        "runtimes",
         "tomap",
         "tomli",
         "typeshed",
-        "unsubscriptable"
+        "unsubscriptable",
+        "xmlsec"
     ]
 }

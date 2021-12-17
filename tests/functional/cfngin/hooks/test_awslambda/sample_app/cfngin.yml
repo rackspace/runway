@@ -1,0 +1,142 @@
+namespace: ${namespace}
+cfngin_bucket: ''
+
+sys_path: ./../../../fixtures
+
+pre_deploy:
+  - path: runway.cfngin.hooks.awslambda.PythonFunction
+    data_key: awslambda.function.docker
+    args:
+      bucket_name: ${cfngin_bucket}
+      docker:
+        pull: false
+      extend_gitignore:
+        - __init__.py
+        - requirements.txt
+      object_prefix: ${namespace}
+      runtime: python3.9
+      source_code: ./src/docker
+  - path: runway.cfngin.hooks.awslambda.PythonFunction
+    data_key: awslambda.function.local
+    args:
+      bucket_name: ${cfngin_bucket}
+      docker:
+        disabled: true
+      extend_gitignore:
+        - __init__.py
+      object_prefix: ${namespace}
+      runtime: ${local_python_runtime}
+      source_code: ./src/local
+  - path: runway.cfngin.hooks.awslambda.PythonFunction
+    data_key: awslambda.function.mysql
+    args:
+      bucket_name: ${cfngin_bucket}
+      docker:
+        extra_files:
+          - /usr/lib64/mysql/libmysqlclient.so.*
+        file: ./src/docker_mysql/Dockerfile
+        name: runway.cfngin.hooks.awslambda.mysql
+        pull: false
+      extend_gitignore:
+        - __init__.py
+        - Dockerfile
+        - Pipfile
+      object_prefix: ${namespace}
+      runtime: python3.9
+      source_code: ./src/docker_mysql
+      strip: false
+  - path: runway.cfngin.hooks.awslambda.PythonFunction
+    data_key: awslambda.function.xmlsec
+    args: &xmlsec_args
+      bucket_name: ${cfngin_bucket}
+      docker:
+        extra_files:
+          - /usr/lib64/libltdl.so.*
+          - /usr/lib64/libxml2.so.*
+          - /usr/lib64/libxmlsec1-openssl.so
+          - /usr/lib64/libxmlsec1.so.*
+          - /usr/lib64/libxslt.so.*
+        file: ./src/docker_xmlsec/Dockerfile
+        name: runway.cfngin.hooks.awslambda.xmlsec
+        pull: false
+      extend_gitignore:
+        - __init__.py
+        - '*.toml'
+        - Dockerfile
+      object_prefix: ${namespace}
+      runtime: python3.9
+      source_code: ./src/docker_xmlsec
+      strip: false
+  - path: runway.cfngin.hooks.awslambda.PythonLayer
+    data_key: awslambda.layer.xmlsec
+    args:
+      << : *xmlsec_args
+      compatible_runtimes:
+        - python3.9
+      extend_gitignore:
+        - __init__.py
+        - '*.toml'
+        - Dockerfile
+        - index.py
+  - path: runway.cfngin.hooks.awslambda.PythonFunction
+    data_key: awslambda.function.xmlsec-layer
+    args:
+      bucket_name: ${cfngin_bucket}
+      extend_gitignore:
+        - __init__.py
+      object_prefix: ${namespace}
+      runtime: python3.9
+      source_code: ./src/local_xmlsec_layer
+
+
+stacks:
+  - name: test-awslambda-docker
+    class_path: blueprints.LambdaFunction
+    variables:
+      AppName: ${namespace}-awslambda-docker
+      Code: ${awslambda.Code awslambda.function.docker}
+      PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+      Runtime: ${awslambda.Runtime awslambda.function.docker}
+  - name: test-awslambda-local
+    class_path: blueprints.LambdaFunction
+    variables:
+      AppName: ${namespace}-awslambda-local
+      Code: ${awslambda.Code awslambda.function.local}
+      PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+      Runtime: ${awslambda.Runtime awslambda.function.local}
+  - name: test-awslambda-mysql
+    class_path: blueprints.LambdaFunction
+    variables:
+      AppName: ${namespace}-awslambda-mysql
+      Code: ${awslambda.Code awslambda.function.mysql}
+      PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+      Runtime: ${awslambda.Runtime awslambda.function.mysql}
+  - name: test-awslambda-xmlsec
+    class_path: blueprints.LambdaFunction
+    variables:
+      AppName: ${namespace}-awslambda-xmlsec
+      Code: ${awslambda.Code awslambda.function.xmlsec}
+      PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+      Runtime: ${awslambda.Runtime awslambda.function.xmlsec}
+  - name: test-awslambda-xmlsec-layer
+    class_path: blueprints.LambdaFunction
+    variables:
+      AppName: ${namespace}-awslambda-xmlsec-layer
+      Code: ${awslambda.Code awslambda.function.xmlsec-layer}
+      EnvironmentVariables:
+        LD_LIBRARY_PATH: /opt/python/
+      LayerCompatibleRuntimes: ${awslambda.CompatibleRuntimes awslambda.layer.xmlsec}
+      LayerContent: ${awslambda.Content awslambda.layer.xmlsec}
+      PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+      Runtime: ${awslambda.Runtime awslambda.function.xmlsec-layer}
+
+
+pre_destroy:
+  - path: hooks.cleanup.s3_delete_prefix
+    args:
+      bucket_name: ${cfngin_bucket}
+      prefix: awslambda/functions/${namespace}/
+  - path: hooks.cleanup.s3_delete_prefix
+    args:
+      bucket_name: ${cfngin_bucket}
+      prefix: awslambda/layers/${namespace}/

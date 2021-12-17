@@ -143,6 +143,7 @@ test-functional: ## run function tests only
 	@if [ $${CI} ]; then \
 		echo "  using pytest-xdist"; \
 		poetry run pytest \
+			-m wip \
 			--dist loadfile \
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
@@ -152,6 +153,7 @@ test-functional: ## run function tests only
 	else \
 		echo "  not using pytest-xdist"; \
 		poetry run pytest \
+			-m wip \
 			--functional \
 			--log-cli-format "[%(levelname)s] %(message)s" \
 			--log-cli-level 15 \

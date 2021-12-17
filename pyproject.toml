@@ -115,6 +115,7 @@ extras = [
   "ecs",
   "iam",
   "kms",
+  "lambda",
   "route53",
   "s3",
   "ssm",
