@@ -210,6 +210,9 @@ Resources effected include the CloudFormation stack it creates, ACM certificate,
 aws_lambda.upload_lambda_functions
 ==================================
 
+.. deprecated:: 2.5.0
+  Replaced by ``awslambda`` hooks.
+
 .. rubric:: Description
 
 Build Lambda payloads from user configuration and upload them to S3 using the following process:

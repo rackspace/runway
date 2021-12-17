@@ -1065,6 +1065,10 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
                     )
 
     """
+    LOGGER.warning(
+        "runway.cfngin.hooks.aws_lambda.upload_lambda_functions is deprecated and "
+        "will be removed in a future release - see documentation for replacement"
+    )
     # TODO add better handling for misconfiguration (e.g. forgetting function names)
     # TODO support defining dockerize_pip options at the top level of args
     custom_bucket = cast(str, kwargs.get("bucket", ""))
