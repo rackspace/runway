@@ -13,7 +13,6 @@ if sys.version_info < (3, 8):  # 3.7
         """Backport of :meth:`shlex.join`."""
         return " ".join(shlex.quote(arg) for arg in split_command)
 
-
 else:
     from functools import cached_property
     from importlib.metadata import PackageNotFoundError, version

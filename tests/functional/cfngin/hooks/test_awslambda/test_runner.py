@@ -46,13 +46,10 @@ ENV_VARS = {
 }
 
 
-pytestmark = [
-    pytest.mark.wip,
-    pytest.mark.skipif(
-        not shutil.which("mysql_config"),
-        reason="mysql_config CLI from mysql OS package must be installed and in PATH",
-    ),
-]
+pytestmark = pytest.mark.skipif(
+    not shutil.which("mysql_config"),
+    reason="mysql_config CLI from mysql OS package must be installed and in PATH",
+)
 
 
 class AwslambdaStackOutputs(BaseModel):

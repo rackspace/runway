@@ -22,9 +22,8 @@ def invoke(
     assert (
         context.get_session()
         .client("lambda")
-        .invoke(FunctionName=function_name, InvocationType="RequestResponse")[
-            "StatusCode"
-        ]
+        .invoke(FunctionName=function_name, InvocationType="RequestResponse")
+        .get("StatusCode")
         == expected_status_code
     )
     LOGGER.info("%s returned %s", function_name, expected_status_code)
