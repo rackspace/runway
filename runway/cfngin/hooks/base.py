@@ -70,6 +70,7 @@ class Hook(CfnginHookProtocol):
         self.args.tags.update(context.tags)
         self.context = context
         self.provider = provider
+        # TODO BREAKING remove these from the primary base class
         self._deploy_action = HookDeployAction(self.context, self.provider)
         self._destroy_action = HookDestroyAction(self.context, self.provider)
 
@@ -246,6 +247,7 @@ class Hook(CfnginHookProtocol):
         return status
 
 
+# TODO BREAKING find a better place for this - can cause cyclic imports
 class HookDeployAction(deploy.Action):
     """Deploy action that can be used from hooks."""
 

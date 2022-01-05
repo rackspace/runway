@@ -58,12 +58,13 @@ python-hcl2 = "^2.0"
 pyyaml = ">5.4"
 requests = "*"
 send2trash = "*"
-sphinx = { version = "^3.5", optional = true }  # docs
-sphinx-github-changelog = { version = "^1.0", optional = true }  # docs
-sphinx-rtd-theme = { version = "^0.5", optional = true } # docs
-sphinx-tabs = { version = "^3.0", optional = true }  # docs
+sphinx = { version = "^4.3", optional = true }  # docs
+sphinx-github-changelog = { version = "^1.1", optional = true }  # docs
+sphinx-rtd-theme = { version = "^1.0", optional = true } # docs
+sphinx-tabs = { version = "^3.2", optional = true }  # docs
 sphinxcontrib-apidoc = { version = "^0.3", optional = true }  # docs
 sphinxcontrib-programoutput = { version = "^0.17", optional = true }  # docs
+tomli = ">=1.2.2"
 troposphere = ">=2.4, <4"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
@@ -99,6 +100,7 @@ pytest-sugar = "^0.9"  # pytest plugin
 pytest-xdist = "^2.2"  # pytest plugin
 semver = "^2.13"  # only used in .github/scripts/urlshortener
 testfixtures = "^4.10"  # TODO remove use of this dependency - was inherited
+tomli-w = "^0.4.0"
 
 [tool.poetry.dev-dependencies.boto3-stubs]
 extras = [
@@ -113,6 +115,7 @@ extras = [
   "ecs",
   "iam",
   "kms",
+  "lambda",
   "route53",
   "s3",
   "ssm",
@@ -344,6 +347,7 @@ exclude = [
 extraPaths = [
   "./.github/scripts/urlshortener",
 ]
+pythonPlatform = "All"
 pythonVersion = "3.8"
 reportDuplicateImport = "none"
 reportImportCycles = "none"

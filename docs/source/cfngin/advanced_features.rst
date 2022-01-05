@@ -11,8 +11,8 @@ Advanced features and detailed information for using Runway's CFNgin for CloudFo
    :maxdepth: 2
 
    blueprints
-   hooks
-   lookups
+   hooks/index
+   lookups/index
    persistent_graph
    remote_sources
    templates

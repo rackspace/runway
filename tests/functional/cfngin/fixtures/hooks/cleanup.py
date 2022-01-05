@@ -2,17 +2,34 @@
 from __future__ import annotations
 
 import logging
+import shutil
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from runway.core.providers.aws.s3 import Bucket
 
 if TYPE_CHECKING:
+    from _typeshed import StrPath
+
     from runway.context import CfnginContext
 
-LOGGER = logging.getLogger("runway.cfngin.hooks.custom.s3_cleanup")
+LOGGER = logging.getLogger("runway.cfngin.hooks.custom.cleanup")
 
 
-def delete_prefix(
+def local_delete(
+    context: CfnginContext,  # pylint: disable=unused-argument
+    *,
+    path: StrPath,
+    **_: Any,
+) -> bool:
+    """Delete local path."""
+    abs_path = Path(path).resolve()
+    LOGGER.info("deleting local path %s...", abs_path)
+    shutil.rmtree(abs_path, ignore_errors=True)
+    return True
+
+
+def s3_delete_prefix(
     context: CfnginContext,
     *,
     bucket_name: str,
@@ -20,7 +37,7 @@ def delete_prefix(
     prefix: str,
     **_: Any,
 ) -> bool:
-    """Delete all objects with prefix."""
+    """Delete all S3 Objects with prefix."""
     if not Bucket(context, bucket_name):
         LOGGER.warning("bucket '%s' does not exist or you do not have access to it")
         return True

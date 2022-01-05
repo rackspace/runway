@@ -175,6 +175,10 @@ jobs:
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install --extras docs -vv
+      - name: Install Ubuntu Dependencies
+        run: |
+          sudo apt update -y
+          sudo apt install -y default-libmysqlclient-dev libxml2-dev libxmlsec1-dev libxmlsec1-openssl pkg-config
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

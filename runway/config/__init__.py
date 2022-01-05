@@ -23,7 +23,7 @@ from typing import (
 import yaml
 
 from ..cfngin import exceptions
-from ..cfngin.lookups import register_lookup_handler
+from ..cfngin.lookups.registry import register_lookup_handler
 from ..cfngin.utils import SourceProcessor
 from ..exceptions import ConfigNotFound
 from ..utils import merge_dicts

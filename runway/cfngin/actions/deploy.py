@@ -13,7 +13,7 @@ from ..exceptions import (
     StackDidNotChange,
     StackDoesNotExist,
 )
-from ..hooks import utils
+from ..hooks.utils import handle_hooks as _handle_hooks
 from ..plan import Graph, Plan, Step
 from ..providers.base import Template
 from ..status import (
@@ -206,7 +206,7 @@ def handle_hooks(
 
     """
     if not outline and not dump and hooks:
-        utils.handle_hooks(stage=stage, hooks=hooks, provider=provider, context=context)
+        _handle_hooks(stage=stage, hooks=hooks, provider=provider, context=context)
 
 
 class Action(BaseAction):

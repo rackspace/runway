@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from .utils import DOC_SITE
 
@@ -56,6 +56,54 @@ class ConfigNotFound(RunwayError):
         else:
             self.message = f"config file not found at path {path}"
         super().__init__(self.path, self.looking_for)
+
+
+class DockerConnectionRefusedError(RunwayError):
+    """Docker connection refused.
+
+    This can be caused by a number of reasons:
+
+    - Docker is not installed.
+    - Docker service is not running.
+    - The current user does not have adequate permissions (e.g. not a member of
+      the ``docker`` group).
+
+    """
+
+    def __init__(self) -> None:
+        """Instantiate class."""
+        self.message = (
+            "Docker connection refused; install Docker, ensure it is running, "
+            "and ensure the current user has adequate permissions"
+        )
+        super().__init__()
+
+
+class DockerExecFailedError(RunwayError):
+    """Docker failed when trying to execute a command.
+
+    This can be used for ``docker container run``, ``docker container start``
+    and ``docker exec`` equivalents.
+
+    """
+
+    exit_code: int
+    """The ``StatusCode`` returned by Docker."""
+
+    def __init__(self, response: Dict[str, Any]) -> None:
+        """Instantiate class.
+
+        Args:
+            response: The return value of :meth:`docker.models.containers.Container.wait`,
+                Docker API's response as a Python dictionary.
+                This can contain important log information pertinant to troubleshooting
+                that may not streamed.
+
+        """
+        self.exit_code = response.get("StatusCode", 1)  # we can assume this will be > 0
+        error = response.get("Error") or {}  # value from dict could be NoneType
+        self.message = error.get("Message", "error message undefined")
+        super().__init__()
 
 
 class FailedLookup(RunwayError):
@@ -226,6 +274,29 @@ class OutputDoesNotExist(RunwayError):
 
         self.message = f"Output {output} does not exist on stack {stack_name}"
         super().__init__(*args, **kwargs)
+
+
+class RequiredTagNotFoundError(RunwayError):
+    """Required tag not found on resource."""
+
+    resource: str
+    """An ID or name to identify a resource."""
+
+    tag_key: str
+    """Key of the tag that could not be found."""
+
+    def __init__(self, resource: str, tag_key: str) -> None:
+        """Instantiate class.
+
+        Args:
+            resource: An ID or name to identify a resource.
+            tag_key: Key of the tag that could not be found.
+
+        """
+        self.resource = resource
+        self.tag_key = tag_key
+        self.message = f"required tag '{tag_key}' not found for {resource}"
+        super().__init__()
 
 
 class UnknownLookupType(RunwayError):

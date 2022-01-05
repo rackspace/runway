@@ -23,6 +23,17 @@ def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
     mocker.patch.dict(CFNGIN_LOOKUP_HANDLERS, {})
     handlers = [
         "ami",
+        "awslambda",
+        "awslambda.Code",
+        "awslambda.CodeSha256",
+        "awslambda.CompatibleArchitectures",
+        "awslambda.CompatibleRuntimes",
+        "awslambda.Content",
+        "awslambda.LicenseInfo",
+        "awslambda.Runtime",
+        "awslambda.S3Bucket",
+        "awslambda.S3Key",
+        "awslambda.S3ObjectVersion",
         "cfn",
         "default",
         "dynamodb",
