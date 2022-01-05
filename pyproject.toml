@@ -58,10 +58,10 @@ python-hcl2 = "^2.0"
 pyyaml = ">5.4"
 requests = "*"
 send2trash = "*"
-sphinx = { version = "^3.5", optional = true }  # docs
-sphinx-github-changelog = { version = "^1.0", optional = true }  # docs
-sphinx-rtd-theme = { version = "^0.5", optional = true } # docs
-sphinx-tabs = { version = "^3.0", optional = true }  # docs
+sphinx = { version = "^4.3", optional = true }  # docs
+sphinx-github-changelog = { version = "^1.1", optional = true }  # docs
+sphinx-rtd-theme = { version = "^1.0", optional = true } # docs
+sphinx-tabs = { version = "^3.2", optional = true }  # docs
 sphinxcontrib-apidoc = { version = "^0.3", optional = true }  # docs
 sphinxcontrib-programoutput = { version = "^0.17", optional = true }  # docs
 tomli = ">=1.2.2"

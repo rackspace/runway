@@ -5,7 +5,7 @@ minimum_pre_commit_version: 2.6.0
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.1.0
     hooks:
       - id: check-json
       - id: check-merge-conflict
@@ -67,6 +67,6 @@ repos:
           - flake8-print
           - flake8-use-fstring
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.27.1
+    rev: v0.30.0
     hooks:
       - id: markdownlint

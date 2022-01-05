@@ -41,11 +41,11 @@ extensions = [
 ]
 highlight_language = "default"
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),  # link to python docs
     "docker": (
         "https://docker-py.readthedocs.io/en/stable/",
         None,
     ),  # link to docker docs
+    "python": ("https://docs.python.org/3", None),  # link to python docs
 }
 language = None
 master_doc = "index"
@@ -60,7 +60,7 @@ rst_epilog = """
   :class:`~runway.cfngin.blueprints.base.Blueprint`
 
 .. |Dict| replace::
-  :data:`~typing.Dict`
+  :class:`~typing.Dict`
 
 .. |Protocol| replace::
   :class:`~typing.Protocol`
@@ -153,7 +153,8 @@ os.environ["SPHINX_APIDOC_OPTIONS"] = "members"
 
 # -- Options of sphinx.ext.autodoc -------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
-autoclass_content = "both"
+autoclass_content = "class"
+autodoc_class_signature = "separated"
 autodoc_default_options = {
     "inherited-members": "dict",  # show all inherited members
     "member-order": "bysource",
@@ -161,11 +162,8 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 autodoc_type_aliases = {
-    "Any": "typing.Any",
-    "ClassVar": "typing.ClassVar",
-    "Dict": "typing.Dict",
-    "List": "typing.List",
-    "Optional": "typing.Optional",
+    "DirectoryPath": "Path",
+    "FilePath": "Path",
 }
 autodoc_typehints = "signature"
 
