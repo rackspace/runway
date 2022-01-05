@@ -1,3 +1,5 @@
+.. _awslambda.PythonFunction hook:
+
 ########################
 awslambda.PythonFunction
 ########################

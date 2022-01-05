@@ -5,7 +5,7 @@ aws_lambda.upload_lambda_functions
 ##################################
 
 .. deprecated:: 2.5.0
-  Replaced by ``awslambda`` hooks.
+  Replaced by :ref:`awslambda.PythonFunction hook`.
 
 
 :Hook Path: ``runway.cfngin.hooks.aws_lambda.upload_lambda_functions``
