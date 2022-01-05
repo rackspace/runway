@@ -85,8 +85,7 @@ rst_epilog = """
 
 """
 rst_prolog = ""
-# GitHub PAT with "repo.public_repo" access provided by @ITProKyle
-changelog_github_token = os.getenv("SPHINX_GITHUB_CHANGELOG_TOKEN", "")
+
 source_suffix = {".rst": "restructuredtext"}
 templates_path = ["_templates"]  # template dir relative to this dir
 
@@ -151,6 +150,10 @@ epub_title = project
 # https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html#environment
 os.environ["SPHINX_APIDOC_OPTIONS"] = "members"
 
+# -- Options for sphinx-github-changelog -------------------------------------
+# GitHub PAT with "repo.public_repo" access provided by @ITProKyle
+changelog_github_token = os.getenv("SPHINX_GITHUB_CHANGELOG_TOKEN", "")
+
 # -- Options of sphinx.ext.autodoc -------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
 autoclass_content = "class"
@@ -162,8 +165,11 @@ autodoc_default_options = {
     "show-inheritance": True,
 }
 autodoc_type_aliases = {
+    "CfnginContext": "runway.context.CfnginContext",
     "DirectoryPath": "Path",
     "FilePath": "Path",
+    "RunwayConfig": "runway.config.RunwayConfig",
+    "RunwayContext": "runway.context.RunwayContext",
 }
 autodoc_typehints = "signature"
 
