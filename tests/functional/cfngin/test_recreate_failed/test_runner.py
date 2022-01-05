@@ -42,21 +42,26 @@ def test_deploy_bad_exit_code(deploy_bad_result: Result) -> None:
 @pytest.mark.order(after="test_deploy_bad_exit_code")
 def test_deploy_bad_log_messages(deploy_bad_result: Result, namespace: str) -> None:
     """Test deploy bad log messages."""
-    expected_lines = [
-        "cfngin.yml:deploy (in progress)",
-        "recreate-failed:submitted (creating new stack)",
-        "recreate-failed:submitted (rolling back new stack)",
-        f"{namespace}-recreate-failed:roll back reason: "
-        "The following resource(s) failed to create: [BrokenWaitCondition]. "
-        "Rollback requested by user.",
-        "recreate-failed:failed (rolled back new stack)",
-        "The following steps failed: recreate-failed",
-    ]
-    expected = "\n".join(f"[runway] {msg}" for msg in expected_lines)
-    assert expected in deploy_bad_result.stdout, (
-        "stdout does not match expected\n\nEXPECTED:\n"
-        f"{expected}\n\nSTDOUT:\n{deploy_bad_result.stdout}"
+    assert (
+        "[runway] cfngin.yml:deploy (in progress)\n"
+        "[runway] recreate-failed:submitted (creating new stack)\n"
+    ) in deploy_bad_result.stdout, (
+        f"stdout does not match expected\n\nSTDOUT:\n{deploy_bad_result.stdout}"
     )
+    # output may not have a "rolling back" msg - depends on API throttling
+    assert (
+        f"[runway] {namespace}-recreate-failed:roll back reason: "
+        "The following resource(s) failed to create: [BrokenWaitCondition]. "
+        "Rollback requested by user."
+    ) in deploy_bad_result.stdout, (
+        f"stdout does not match expected\n\nSTDOUT:\n{deploy_bad_result.stdout}"
+    )
+    # output may or may not have a "rolled back" or "failed (creating new stack)" msg
+    # depends on API throttling
+    assert (
+        "[runway] The following steps failed: recreate-failed"
+        in deploy_bad_result.stdout
+    ), f"stdout does not match expected\n\nSTDOUT:\n{deploy_bad_result.stdout}"
 
 
 @pytest.mark.order(after="test_deploy_bad_log_messages")
