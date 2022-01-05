@@ -77,7 +77,7 @@ class DockerDependencyInstaller:
 
         This is a low-level method that requires the user to implement error
         handling. It is recommended to use
-        :meth:`~awslambda.docker.DockerDependencyInstaller.from_project`
+        :meth:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.from_project`
         instead of instantiating this class directly.
 
         Args:
@@ -201,8 +201,8 @@ class DockerDependencyInstaller:
         """Build Docker image from Dockerfile.
 
         This method is exposed as a low-level interface.
-        :attr:`~awslambda.docker.DockerDependencyInstaller.image` should be
-        used in place for this for most cases.
+        :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.image`
+        should be used in place for this for most cases.
 
         Args:
             docker_file: Path to the Dockerfile to build. This path should be
@@ -276,11 +276,11 @@ class DockerDependencyInstaller:
 
         Commands are run as they are defined in the following cached properties:
 
-        - :attr:`~awslambda.docker.DockerDependencyInstaller.pre_install_commands`
-        - :attr:`~awslambda.docker.DockerDependencyInstaller.install_commands`
-        - :attr:`~awslambda.docker.DockerDependencyInstaller.post_install_commands`
+        - :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.pre_install_commands`
+        - :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.install_commands`
+        - :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.post_install_commands`
 
-        """
+        """  # noqa
         for cmd in self.pre_install_commands:
             self.run_command(cmd)
         for cmd in self.install_commands:
@@ -292,8 +292,8 @@ class DockerDependencyInstaller:
         """Pull a Docker image from a repository if it does not exist locally.
 
         This method is exposed as a low-level interface.
-        :attr:`~awslambda.docker.DockerDependencyInstaller.image` should be
-        used in place for this for most cases.
+        :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.image`
+        should be used in place for this for most cases.
 
         Args:
             name: Name of the Docker image including tag.

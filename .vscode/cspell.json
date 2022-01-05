@@ -61,6 +61,7 @@
     "words": [
         "abstractmethod",
         "ALGS",
+        "autoattribute",
         "certifi",
         "cmds",
         "codecov",
@@ -80,6 +81,7 @@
         "markexpr",
         "Ngin",
         "openid",
+        "Pipefile",
         "PYXMLSEC",
         "rglob",
         "runtimes",

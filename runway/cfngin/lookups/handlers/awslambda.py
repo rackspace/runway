@@ -1,25 +1,14 @@
-"""Dedicated lookup for use with :class:`~awslambda.base_classes.AwsLambdaHook` based hooks.
+"""Dedicated lookup for use with :class:`~runway.cfngin.hooks.awslambda.base_classes.AwsLambdaHook` based hooks.
 
-.. note::
-    To use this lookup during development, it must be manually registered in the
-    CFNgin configuration file. To simplify this, registering
-    :class:`awslambda_lookup.AwsLambdaLookup` registers all related lookups.
+To use this hook, there must be a
+:class:`~runway.cfngin.hooks.awslambda.base_classes.AwsLambdaHook` based hook defined
+in the :attr:`~cfngin.config.pre_deploy` section of the CFNgin configuration file.
+This hook must also define a :attr:`~cfngin.hook.data_key` that is unique within
+the CFNgin configuration file (it can be reused in other CFNgin configuration files).
+The :attr:`~cfngin.hook.data_key` is then passed to the lookup as it's input/query.
+This allows the lookup to function during a ``runway plan``.
 
-    .. code-block:: yaml
-      :caption: Example
-
-      lookups:
-        awslambda: awslambda_lookup.AwsLambdaLookup
-
-To use this hook, there must be a :class:`~awslambda.base_classes.AwsLambdaHook`
-based hook defined in the :attr:`~cfngin.config.pre_deploy` section of the CFNgin
-configuration file. This hook must also define a :attr:`~cfngin.hook.data_key`
-that is unique within the CFNgin configuration file (it can be reused in other
-CFNgin configuration files). The :attr:`~cfngin.hook.data_key` is then passed
-to the lookup as it's input/query. This allows the lookup to function during a
-``runway plan``.
-
-"""
+"""  # noqa
 from __future__ import annotations
 
 import logging
@@ -44,7 +33,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class AwsLambdaLookup(LookupHandler):
-    """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+    """Lookup for AwsLambdaHook responses."""
 
     TYPE_NAME: Final[Literal["awslambda"]] = "awslambda"
 
@@ -52,7 +41,7 @@ class AwsLambdaLookup(LookupHandler):
     def get_deployment_package_data(
         cls, context: CfnginContext, data_key: str
     ) -> AwsLambdaHookDeployResponse:
-        """Get the response of a :class:`~awslambda.base_classes.AwsLambdaHook` run.
+        """Get the response of an AwsLambdaHook run.
 
         Args:
             context: CFNgin context object.
@@ -60,9 +49,10 @@ class AwsLambdaLookup(LookupHandler):
                 Hook definition.
 
         Returns:
-            The :class:`~awslambda.base_classes.AwsLambdaHook` response parsed
-            into a data model. This will come from hook data if it exists or it
-            will be calculated and added to hook data for future use.
+            The :class:`~runway.cfngin.hooks.awslambda.base_classes.AwsLambdaHook`
+            response parsed into a data model.
+            This will come from hook data if it exists or it will be calculated
+            and added to hook data for future use.
 
         Raises:
             TypeError: The data stored in hook data does not align with the
@@ -152,11 +142,12 @@ class AwsLambdaLookup(LookupHandler):
     def init_hook_class(
         context: CfnginContext, hook_def: CfnginHookDefinitionModel
     ) -> AwsLambdaHook[Any]:
-        """Initialize :class:`~awslambda.base_classes.AwsLambdaHook` subclass instance.
+        """Initialize AwsLambdaHook subclass instance.
 
         Args:
             context: CFNgin context object.
-            hook_def: The :class:`~awslambda.base_classes.AwsLambdaHook` definition.
+            hook_def: The :class:`~runway.cfngin.hooks.awslambda.base_classes.AwsLambdaHook`
+                definition.
 
         Returns:
             The loaded AwsLambdaHook object.
@@ -180,7 +171,7 @@ class AwsLambdaLookup(LookupHandler):
         return cast("AwsLambdaHook[Any]", kls(context, **hook_def.args))
 
     class Code(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[Literal["awslambda.Code"]] = "awslambda.Code"
 
@@ -212,7 +203,7 @@ class AwsLambdaLookup(LookupHandler):
             )
 
     class CodeSha256(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[Literal["awslambda.CodeSha256"]] = "awslambda.CodeSha256"
 
@@ -238,7 +229,7 @@ class AwsLambdaLookup(LookupHandler):
             return AwsLambdaLookup.handle(value, context, *args, **kwargs).code_sha256
 
     class CompatibleArchitectures(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[
             Literal["awslambda.CompatibleArchitectures"]
@@ -272,7 +263,7 @@ class AwsLambdaLookup(LookupHandler):
             )
 
     class CompatibleRuntimes(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[
             Literal["awslambda.CompatibleRuntimes"]
@@ -306,7 +297,7 @@ class AwsLambdaLookup(LookupHandler):
             )
 
     class Content(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[Literal["awslambda.Content"]] = "awslambda.Content"
 
@@ -338,7 +329,7 @@ class AwsLambdaLookup(LookupHandler):
             )
 
     class LicenseInfo(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[Literal["awslambda.LicenseInfo"]] = "awslambda.LicenseInfo"
 
@@ -368,7 +359,7 @@ class AwsLambdaLookup(LookupHandler):
             )
 
     class Runtime(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[Literal["awslambda.Runtime"]] = "awslambda.Runtime"
 
@@ -394,7 +385,7 @@ class AwsLambdaLookup(LookupHandler):
             return AwsLambdaLookup.handle(value, context, *args, **kwargs).runtime
 
     class S3Bucket(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[Literal["awslambda.S3Bucket"]] = "awslambda.S3Bucket"
 
@@ -421,7 +412,7 @@ class AwsLambdaLookup(LookupHandler):
             return AwsLambdaLookup.handle(value, context, *args, **kwargs).bucket_name
 
     class S3Key(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[Literal["awslambda.S3Key"]] = "awslambda.S3Key"
 
@@ -448,7 +439,7 @@ class AwsLambdaLookup(LookupHandler):
             return AwsLambdaLookup.handle(value, context, *args, **kwargs).object_key
 
     class S3ObjectVersion(LookupHandler):
-        """Lookup for :class:`~awslambda.base_classes.AwsLambdaHook` responses."""
+        """Lookup for AwsLambdaHook responses."""
 
         TYPE_NAME: Final[
             Literal["awslambda.S3ObjectVersion"]

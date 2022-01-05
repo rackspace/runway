@@ -24,7 +24,7 @@ The syntax for a lookup is ``${<lookup-name> <query>::<arg-key>=<arg-value>}``.
 | ``<query>``               || The value the lookup will be looking for       |
 |                           |  (e.g. ``AWS_REGION``).                         |
 |                           || When using a lookup on a dictionary/mapping,   |
-|                           |  like  for the `var`_ lookup,                   |
+|                           |  like  for the :ref:`var lookup`,               |
 |                           || you can get nested values by providing the     |
 |                           |  full path to the value (e.g. ``ami.dev``).     |
 +---------------------------+-------------------------------------------------+

@@ -7,7 +7,7 @@ from typing_extensions import TypedDict
 
 
 class AwsLambdaHookDeployResponseTypedDict(TypedDict):
-    """Dict output of awslambda.models.response.AwsLambdaHookDeployResponse using aliases."""
+    """Dict output of :class:`runway.cfngin.hooks.awslambda.models.response.AwsLambdaHookDeployResponse` using aliases."""  # noqa
 
     CodeSha256: str
     Runtime: str

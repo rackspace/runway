@@ -163,7 +163,8 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
     compatible_runtimes: Optional[List[str]] = None
     """A list of compatible function runtimes.
-    Used for filtering with ``ListLayers`` and ``ListLayerVersions``.
+    When provided, the ``runtime`` being used to build the deployment package
+    must be included in the list or an error will be raised.
 
     Only used by Lambda Layers.
 

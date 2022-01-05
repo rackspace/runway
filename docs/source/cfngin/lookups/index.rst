@@ -9,6 +9,7 @@ Lookups
   While they  do share a similar base class and syntax, they exist in two different registries.
   Runway config files can't use CFNgin lookups just as the CFNgin config cannot use Runway lookups.
 
+
 Runway's CFNgin provides the ability to dynamically replace values in the config via a concept called lookups.
 A lookup is meant to take a value and convert it by calling out to another service or system.
 
@@ -16,6 +17,7 @@ A lookup is denoted in the config with the ``${<lookup type> <lookup input>}`` s
 
 Lookups are only resolved within :ref:`Variables <cfngin-variables>`.
 They can be nested in any part of a YAML data structure and within another lookup itself.
+
 
 .. note::
   If a lookup has a non-string return value, it can be the only lookup within a field.

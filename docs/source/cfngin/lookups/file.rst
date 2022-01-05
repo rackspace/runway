@@ -4,6 +4,7 @@ file
 
 :Query Syntax: ``<supported-codec>:<path>``
 
+
 The file_ lookup type allows the loading of arbitrary data from files on disk.
 The lookup additionally supports using a ``codec`` to manipulate or wrap the file contents prior to injecting it.
 The parameterized-b64 ``codec`` is particularly useful to allow the interpolation of CloudFormation parameters in a UserData attribute of an instance or launch configuration.
