@@ -48,7 +48,7 @@ formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
 igittigitt = ">=2.0.5"
 importlib-metadata = { version = "*", python = "<3.8" }
-jinja2 = "^2.7"  # used in runway.cfngin.blueprints.raw
+jinja2 = ">=2.7"  # used in runway.cfngin.blueprints.raw
 jsx-lexer = { version = "^1.0", optional = true }  # docs
 packaging = "*"  # component of setuptools needed for version compare
 pyOpenSSL = "*"  # For embedded hook & associated script usage
