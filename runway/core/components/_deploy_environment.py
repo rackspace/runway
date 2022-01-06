@@ -104,6 +104,8 @@ class DeployEnvironment(DelCachedPropMixin):
             return git.Repo(  # type: ignore
                 str(self.root_dir), search_parent_directories=True
             ).active_branch.name
+        except InvalidGitRepositoryError:
+            return None
         except TypeError:
             LOGGER.warning("Unable to retrieve the current git branch name!")
             LOGGER.warning(
@@ -115,8 +117,6 @@ class DeployEnvironment(DelCachedPropMixin):
                 'DEPLOY_ENVIRONMENT=dev") to bypass this error.'
             )
             sys.exit(1)
-        except InvalidGitRepositoryError:
-            return None
 
     @property
     def ci(self) -> bool:
