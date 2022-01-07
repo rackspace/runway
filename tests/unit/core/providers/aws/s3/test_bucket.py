@@ -7,6 +7,7 @@ import logging
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
+import pytest
 from mock import MagicMock
 
 from runway.core.providers.aws import BaseResponse
@@ -23,6 +24,31 @@ MODULE = "runway.core.providers.aws.s3._bucket"
 
 class TestBucket:
     """Test runway.core.providers.aws.s3._bucket.Bucket."""
+
+    @pytest.mark.parametrize(
+        "forbidden, not_found, expected",
+        [
+            (False, False, True),
+            (False, True, False),
+            (True, False, False),
+        ],
+    )
+    def test___bool__(
+        self,
+        expected: bool,
+        forbidden: bool,
+        mocker: MockerFixture,
+        not_found: bool,
+        runway_context: MockRunwayContext,
+    ) -> None:
+        """Test __bool__."""
+        response = BaseResponse()
+        if forbidden:
+            response.metadata.http_status_code = HTTPStatus.FORBIDDEN
+        elif not_found:
+            response.metadata.http_status_code = HTTPStatus.NOT_FOUND
+        mocker.patch.object(Bucket, "head", response)
+        assert Bucket(runway_context, "test-bucket").exists is expected
 
     def test_client(self) -> None:
         """Test client."""
@@ -170,37 +196,46 @@ class TestBucket:
             'did not modify versioning policy for bucket "test-bucket"; already enabled'
         ) in caplog.messages
 
+    @pytest.mark.parametrize(
+        "forbidden, not_found, expected",
+        [
+            (False, False, True),
+            (False, True, False),
+            (True, False, False),
+        ],
+    )
     def test_exists(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext
+        self,
+        expected: bool,
+        forbidden: bool,
+        mocker: MockerFixture,
+        not_found: bool,
+        runway_context: MockRunwayContext,
     ) -> None:
         """Test not_found."""
-        mock_head = mocker.patch.object(Bucket, "head", spec=BaseResponse())
-        bucket = Bucket(runway_context, "test-bucket")
+        response = BaseResponse()
+        if forbidden:
+            response.metadata.http_status_code = HTTPStatus.FORBIDDEN
+        elif not_found:
+            response.metadata.http_status_code = HTTPStatus.NOT_FOUND
+        mocker.patch.object(Bucket, "head", response)
+        assert Bucket(runway_context, "test-bucket").exists is expected
 
-        mock_head.metadata.not_found = True
-        assert not bucket.exists  # initial value
-
-        mock_head.metadata.not_found = False
-        assert not bucket.exists  # cached value
-        del bucket.not_found
-
-        assert bucket.exists  # updated value
-
+    @pytest.mark.parametrize("forbidden, expected", [(True, True), (False, False)])
     def test_forbidden(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext
+        self,
+        expected: bool,
+        forbidden: bool,
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
     ) -> None:
         """Test forbidden."""
-        mock_head = mocker.patch.object(Bucket, "head", spec=BaseResponse())
-        bucket = Bucket(runway_context, "test-bucket")
-
-        mock_head.metadata.forbidden = True
-        assert bucket.forbidden  # initial value
-
-        mock_head.metadata.forbidden = False
-        assert bucket.forbidden  # cached value
-        del bucket.forbidden
-
-        assert not bucket.forbidden  # updated value
+        response = BaseResponse()
+        response.metadata.http_status_code = (
+            HTTPStatus.FORBIDDEN if forbidden else HTTPStatus.OK
+        )
+        mocker.patch.object(Bucket, "head", response)
+        assert Bucket(runway_context, "test-bucket").forbidden is expected
 
     def test_format_bucket_path_uri(self) -> None:
         """Test format_bucket_path_uri."""
@@ -266,21 +301,21 @@ class TestBucket:
         stubber.assert_no_pending_responses()
         assert "received an error from AWS S3" in "\n".join(caplog.messages)
 
+    @pytest.mark.parametrize("not_found, expected", [(True, True), (False, False)])
     def test_not_found(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext
+        self,
+        expected: bool,
+        mocker: MockerFixture,
+        not_found: bool,
+        runway_context: MockRunwayContext,
     ) -> None:
         """Test not_found."""
-        mock_head = mocker.patch.object(Bucket, "head", spec=BaseResponse())
-        bucket = Bucket(runway_context, "test-bucket")
-
-        mock_head.metadata.not_found = True
-        assert bucket.not_found  # initial value
-
-        mock_head.metadata.not_found = False
-        assert bucket.not_found  # cached value
-        del bucket.not_found
-
-        assert not bucket.not_found  # updated value
+        response = BaseResponse()
+        response.metadata.http_status_code = (
+            HTTPStatus.NOT_FOUND if not_found else HTTPStatus.OK
+        )
+        mocker.patch.object(Bucket, "head", response)
+        assert Bucket(runway_context, "test-bucket").not_found is expected
 
     def test_sync_from_local(
         self, mocker: MockerFixture, runway_context: MockRunwayContext
