@@ -100,16 +100,16 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
 
     """
 
-    acmcert_arn: Optional[str] = Field(None, alias="staticsite_acmcert_arn")
+    acmcert_arn: Optional[str] = Field(default=None, alias="staticsite_acmcert_arn")
     additional_redirect_domains: List[str] = Field(
-        [], alias="staticsite_additional_redirect_domains"
+        default=[], alias="staticsite_additional_redirect_domains"
     )
-    aliases: List[str] = Field([], alias="staticsite_aliases")
-    auth_at_edge: bool = Field(False, alias="staticsite_auth_at_edge")
-    cf_disable: bool = Field(False, alias="staticsite_cf_disable")
-    compress: bool = Field(True, alias="staticsite_compress")
+    aliases: List[str] = Field(default=[], alias="staticsite_aliases")
+    auth_at_edge: bool = Field(default=False, alias="staticsite_auth_at_edge")
+    cf_disable: bool = Field(default=False, alias="staticsite_cf_disable")
+    compress: bool = Field(default=True, alias="staticsite_compress")
     cookie_settings: Dict[str, str] = Field(
-        {
+        default={
             "idToken": "Path=/; Secure; SameSite=Lax",
             "accessToken": "Path=/; Secure; SameSite=Lax",
             "refreshToken": "Path=/; Secure; SameSite=Lax",
@@ -117,13 +117,13 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         },
         alias="staticsite_cookie_settings",
     )
-    create_user_pool: bool = Field(False, alias="staticsite_create_user_pool")
+    create_user_pool: bool = Field(default=False, alias="staticsite_create_user_pool")
     custom_error_responses: List[RunwayStaticSiteCustomErrorResponseDataModel] = Field(
-        [], alias="staticsite_custom_error_responses"
+        default=[], alias="staticsite_custom_error_responses"
     )
-    enable_cf_logging: bool = Field(True, alias="staticsite_enable_cf_logging")
+    enable_cf_logging: bool = Field(default=True, alias="staticsite_enable_cf_logging")
     http_headers: Dict[str, str] = Field(
-        {
+        default={
             "Content-Security-Policy": "default-src https: 'unsafe-eval' 'unsafe-inline'; "
             "font-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; "
             "object-src 'none'; "
@@ -140,32 +140,46 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
     )
     lambda_function_associations: List[
         RunwayStaticSiteLambdaFunctionAssociationDataModel
-    ] = Field([], alias="staticsite_lambda_function_associations")
+    ] = Field(default=[], alias="staticsite_lambda_function_associations")
     namespace: str
-    non_spa: bool = Field(False, alias="staticsite_non_spa")
+    non_spa: bool = Field(default=False, alias="staticsite_non_spa")
     oauth_scopes: List[str] = Field(
-        ["phone", "email", "profile", "openid", "aws.cognito.signin.user.admin"],
+        default=[
+            "phone",
+            "email",
+            "profile",
+            "openid",
+            "aws.cognito.signin.user.admin",
+        ],
         alias="staticsite_oauth_scopes",
     )
     redirect_path_auth_refresh: str = Field(
-        "/refreshauth", alias="staticsite_redirect_path_auth_refresh"
+        default="/refreshauth", alias="staticsite_redirect_path_auth_refresh"
     )
     redirect_path_sign_in: str = Field(
-        "/parseauth", alias="staticsite_redirect_path_sign_in"
+        default="/parseauth", alias="staticsite_redirect_path_sign_in"
     )
-    redirect_path_sign_out: str = Field("/", alias="staticsite_redirect_path_sign_out")
-    required_group: Optional[str] = Field(None, alias="staticsite_required_group")
+    redirect_path_sign_out: str = Field(
+        default="/", alias="staticsite_redirect_path_sign_out"
+    )
+    required_group: Optional[str] = Field(
+        default=None, alias="staticsite_required_group"
+    )
     rewrite_directory_index: Optional[str] = Field(
-        None, alias="staticsite_rewrite_directory_index"
+        default=None, alias="staticsite_rewrite_directory_index"
     )
-    role_boundary_arn: Optional[str] = Field(None, alias="staticsite_role_boundary_arn")
-    service_role: Optional[str] = Field(None, alias="cloudformation_service_role")
-    sign_out_url: str = Field("/signout", alias="staticsite_sign_out_url")
+    role_boundary_arn: Optional[str] = Field(
+        default=None, alias="staticsite_role_boundary_arn"
+    )
+    service_role: Optional[str] = Field(
+        default=None, alias="cloudformation_service_role"
+    )
+    sign_out_url: str = Field(default="/signout", alias="staticsite_sign_out_url")
     supported_identity_providers: List[str] = Field(
-        ["COGNITO"], alias="staticsite_supported_identity_providers"
+        default=["COGNITO"], alias="staticsite_supported_identity_providers"
     )
-    user_pool_arn: Optional[str] = Field(None, alias="staticsite_user_pool_arn")
-    web_acl: Optional[str] = Field(None, alias="staticsite_web_acl")
+    user_pool_arn: Optional[str] = Field(default=None, alias="staticsite_user_pool_arn")
+    web_acl: Optional[str] = Field(default=None, alias="staticsite_web_acl")
 
     class Config(ConfigProperty.Config):
         """Model configuration."""

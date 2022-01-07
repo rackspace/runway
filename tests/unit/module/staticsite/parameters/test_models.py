@@ -29,7 +29,7 @@ class TestRunwayStaticSiteCustomErrorResponseDataModel:
     def test_init_extra(self) -> None:
         """Test init extra."""
         with pytest.raises(ValidationError):
-            RunwayStaticSiteCustomErrorResponseDataModel(invalid="val")
+            RunwayStaticSiteCustomErrorResponseDataModel(invalid="val")  # type: ignore
 
     def test_init(self) -> None:
         """Test init."""
@@ -52,7 +52,7 @@ class TestRunwayStaticSiteLambdaFunctionAssociationDataModel:
     def test_init_extra(self) -> None:
         """Test init extra."""
         with pytest.raises(ValidationError):
-            RunwayStaticSiteLambdaFunctionAssociationDataModel(invalid="val")
+            RunwayStaticSiteLambdaFunctionAssociationDataModel(invalid="val")  # type: ignore
 
     @pytest.mark.parametrize(
         "data",
@@ -85,9 +85,9 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         """Test _convert_comma_delimited_list."""
         obj = RunwayStaticSiteModuleParametersDataModel(
             namespace="test",
-            staticsite_additional_redirect_domains="redirect0,redirect1",
-            staticsite_aliases="test-alias",
-            staticsite_supported_identity_providers="id0, id1",
+            staticsite_additional_redirect_domains="redirect0,redirect1",  # type: ignore
+            staticsite_aliases="test-alias",  # type: ignore
+            staticsite_supported_identity_providers="id0, id1",  # type: ignore
         )
         assert obj.additional_redirect_domains == ["redirect0", "redirect1"]
         assert obj.aliases == ["test-alias"]
@@ -147,7 +147,9 @@ class TestRunwayStaticSiteModuleParametersDataModel:
 
     def test_init_extra(self) -> None:
         """Test init extra."""
-        obj = RunwayStaticSiteModuleParametersDataModel(namespace="test", invalid="val")
+        obj = RunwayStaticSiteModuleParametersDataModel(
+            namespace="test", invalid="val"  # type: ignore
+        )
         assert "invalid" not in obj.dict()
 
     def test_init_required(self) -> None:
@@ -189,7 +191,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
             "staticsite_user_pool_arn": "arn:aws:cognito:::pool/test",
             "staticsite_web_acl": "arn:aws::::acl/test",
         }
-        obj = RunwayStaticSiteModuleParametersDataModel(**data)
+        obj = RunwayStaticSiteModuleParametersDataModel(**data)  # type: ignore
         assert obj.acmcert_arn == data["staticsite_acmcert_arn"]
         assert (
             obj.additional_redirect_domains

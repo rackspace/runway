@@ -24,9 +24,9 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
 
     """
 
-    content_type: Optional[str]
+    content_type: Optional[str] = None
     content: Any = None
-    file: Optional[Path]
+    file: Optional[Path] = None
     name: str
 
     class Config(ConfigProperty.Config):
@@ -116,7 +116,7 @@ class RunwayStaticSiteSourceHashingDataModel(ConfigProperty):
     """
 
     directories: List[RunwayStaticSiteSourceHashingDirectoryDataModel] = [
-        RunwayStaticSiteSourceHashingDirectoryDataModel(path="./")
+        RunwayStaticSiteSourceHashingDirectoryDataModel(path="./")  # type: ignore
     ]
     enabled: bool = True
     parameter: Optional[str] = None

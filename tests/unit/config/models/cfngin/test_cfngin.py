@@ -43,22 +43,27 @@ class TestCfnginConfigDefinitionModel:
         dict_stack = {"stack-name": {"class_path": "something"}}
         list_stack = [{"class_path": "something", "name": "stack-name"}]
         assert (
-            CfnginConfigDefinitionModel(namespace="test", stacks=dict_stack).dict(
-                exclude_unset=True
-            )["stacks"]
+            CfnginConfigDefinitionModel(
+                namespace="test",
+                stacks=dict_stack,  # type: ignore
+            ).dict(exclude_unset=True)["stacks"]
             == list_stack
         )
         assert (
-            CfnginConfigDefinitionModel(namespace="test", stacks=list_stack).dict(
-                exclude_unset=True
-            )["stacks"]
+            CfnginConfigDefinitionModel(
+                namespace="test",
+                stacks=list_stack,  # type: ignore
+            ).dict(exclude_unset=True)["stacks"]
             == list_stack
         )
 
     def test_extra(self) -> None:
         """Test extra fields."""
         assert (
-            CfnginConfigDefinitionModel(common="something", namespace="test").namespace
+            CfnginConfigDefinitionModel(
+                common="something",  # type: ignore
+                namespace="test",
+            ).namespace
             == "test"
         )
 
@@ -95,7 +100,9 @@ class TestCfnginConfigDefinitionModel:
     def test_resolve_path_fields(self) -> None:
         """Test _resolve_path_fields."""
         obj = CfnginConfigDefinitionModel(
-            namespace="test", cfngin_cache_dir="./cache", sys_path="./something"
+            namespace="test",
+            cfngin_cache_dir="./cache",  # type: ignore
+            sys_path="./something",  # type: ignore
         )
         assert obj.cfngin_cache_dir.is_absolute()
         assert obj.sys_path.is_absolute()  # type: ignore
@@ -103,7 +110,7 @@ class TestCfnginConfigDefinitionModel:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            CfnginConfigDefinitionModel()
+            CfnginConfigDefinitionModel.parse_obj({})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("namespace",)
@@ -143,7 +150,10 @@ class TestCfnginHookDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            CfnginHookDefinitionModel(invalid="something", path="something")
+            CfnginHookDefinitionModel(
+                invalid="something",  # type: ignore
+                path="something",
+            )
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -161,7 +171,7 @@ class TestCfnginHookDefinitionModel:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            CfnginHookDefinitionModel()
+            CfnginHookDefinitionModel.parse_obj({})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("path",)
@@ -175,7 +185,9 @@ class TestCfnginStackDefinitionModel:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             CfnginStackDefinitionModel(
-                class_path="something", invalid="something", name="stack-name"
+                class_path="something",
+                invalid="something",  # type: ignore
+                name="stack-name",
             )
         errors = excinfo.value.errors()
         assert len(errors) == 1
@@ -205,7 +217,7 @@ class TestCfnginStackDefinitionModel:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            CfnginStackDefinitionModel()
+            CfnginStackDefinitionModel.parse_obj({})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("__root__",)
@@ -215,8 +227,8 @@ class TestCfnginStackDefinitionModel:
         """Test _resolve_path_fields."""
         obj = CfnginStackDefinitionModel(
             name="test-stack",
-            stack_policy_path="./policy.json",
-            template_path="./template.yml",
+            stack_policy_path="./policy.json",  # type: ignore
+            template_path="./template.yml",  # type: ignore
         )
         assert obj.stack_policy_path.is_absolute()  # type: ignore
         assert obj.template_path.is_absolute()  # type: ignore
@@ -224,7 +236,7 @@ class TestCfnginStackDefinitionModel:
     def test_required_fields_w_class_path(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            CfnginStackDefinitionModel(class_path="something")
+            CfnginStackDefinitionModel.parse_obj({"class_path": "something"})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("name",)
@@ -236,7 +248,7 @@ class TestCfnginStackDefinitionModel:
             CfnginStackDefinitionModel(
                 class_path="something",
                 name="stack-name",
-                template_path="./something.yml",
+                template_path="./something.yml",  # type: ignore
             )
         errors = excinfo.value.errors()
         assert len(errors) == 1
@@ -257,7 +269,7 @@ class TestCfnginStackDefinitionModel:
             enabled=enabled,
             locked=locked,
             name="test-stack",
-            template_path="./something.yml",
+            template_path="./something.yml",  # type: ignore
         )
 
     def test_validate_class_or_template_invalid(self) -> None:

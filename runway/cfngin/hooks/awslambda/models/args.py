@@ -203,7 +203,7 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
     """
 
-    license: Optional[str] = Field(None, max_length=256)
+    license: Optional[str] = Field(default=None, max_length=256)
     """The layer's software license. Can be any of the following:
 
     - A SPDX license identifier (e.g. ``Apache-2.0``).

@@ -56,7 +56,7 @@ class TestRunwayServerlessPromotezipOptionDataModel:
     def test_init_extra(self) -> None:
         """Test init with extra values."""
         with pytest.raises(ValidationError):
-            RunwayServerlessPromotezipOptionDataModel(invalid="something")
+            RunwayServerlessPromotezipOptionDataModel.parse_obj({"invalid": "val"})
 
     def test_init(self) -> None:
         """Test init."""

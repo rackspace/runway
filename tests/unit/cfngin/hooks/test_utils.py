@@ -37,9 +37,7 @@ class TestHooks(unittest.TestCase):
 
     def test_missing_required_hook(self) -> None:
         """Test missing required hook."""
-        hooks = [
-            CfnginHookDefinitionModel(**{"path": "not.a.real.path", "required": True})
-        ]
+        hooks = [CfnginHookDefinitionModel(path="not.a.real.path", required=True)]
         with self.assertRaises(ImportError):
             handle_hooks("missing", hooks, self.provider, self.context)
 
@@ -47,8 +45,8 @@ class TestHooks(unittest.TestCase):
         """Test missing required hook method."""
         with self.assertRaises(AttributeError):
             hooks = [
-                CfnginHookDefinitionModel.parse_obj(
-                    {"path": "runway.cfngin.hooks.blah", "required": True}
+                CfnginHookDefinitionModel(
+                    path="runway.cfngin.hooks.blah", required=True
                 )
             ]
             handle_hooks("missing", hooks, self.provider, self.context)
@@ -56,9 +54,7 @@ class TestHooks(unittest.TestCase):
     def test_missing_non_required_hook_method(self) -> None:
         """Test missing non required hook method."""
         hooks = [
-            CfnginHookDefinitionModel(
-                **{"path": "runway.cfngin.hooks.blah", "required": False}
-            )
+            CfnginHookDefinitionModel(path="runway.cfngin.hooks.blah", required=False)
         ]
         handle_hooks("missing", hooks, self.provider, self.context)
         self.assertTrue(HOOK_QUEUE.empty())
@@ -75,16 +71,12 @@ class TestHooks(unittest.TestCase):
         mock_load.side_effect = [mock_hook, MockHook]
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
-                    "required": True,
-                }
+                path="tests.unit.cfngin.hooks.test_utils.mock_hook",
+                required=True,
             ),
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.MockHook",
-                    "required": True,
-                }
+                path="tests.unit.cfngin.hooks.test_utils.MockHook",
+                required=True,
             ),
         ]
         handle_hooks("pre_deploy", hooks, self.provider, self.context)
@@ -101,11 +93,9 @@ class TestHooks(unittest.TestCase):
         """Test valid enabled hook."""
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
-                    "required": True,
-                    "enabled": True,
-                }
+                path="tests.unit.cfngin.hooks.test_utils.mock_hook",
+                required=True,
+                enabled=True,
             )
         ]
         handle_hooks("missing", hooks, self.provider, self.context)
@@ -118,11 +108,9 @@ class TestHooks(unittest.TestCase):
         """Test valid enabled false hook."""
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.mock_hook",
-                    "required": True,
-                    "enabled": False,
-                }
+                path="tests.unit.cfngin.hooks.test_utils.mock_hook",
+                required=True,
+                enabled=False,
             )
         ]
         handle_hooks("missing", hooks, self.provider, self.context)
@@ -132,10 +120,8 @@ class TestHooks(unittest.TestCase):
         """Test context provided to hook."""
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.context_hook",
-                    "required": True,
-                }
+                path="tests.unit.cfngin.hooks.test_utils.context_hook",
+                required=True,
             )
         ]
         handle_hooks("missing", hooks, self.provider, self.context)
@@ -144,30 +130,24 @@ class TestHooks(unittest.TestCase):
         """Test hook failure."""
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.fail_hook",
-                    "required": True,
-                }
+                path="tests.unit.cfngin.hooks.test_utils.fail_hook",
+                required=True,
             )
         ]
         with self.assertRaises(SystemExit):
             handle_hooks("fail", hooks, self.provider, self.context)
         hooks = [
-            CfnginHookDefinitionModel.parse_obj(
-                {
-                    "path": "tests.unit.cfngin.hooks.test_utils.exception_hook",
-                    "required": True,
-                }
+            CfnginHookDefinitionModel(
+                path="tests.unit.cfngin.hooks.test_utils.exception_hook",
+                required=True,
             )
         ]
         with self.assertRaises(Exception):  # noqa: B017
             handle_hooks("fail", hooks, self.provider, self.context)
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.exception_hook",
-                    "required": False,
-                }
+                path="tests.unit.cfngin.hooks.test_utils.exception_hook",
+                required=False,
             )
         ]
         # Should pass
@@ -177,14 +157,12 @@ class TestHooks(unittest.TestCase):
         """Test return data hook."""
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
-                    "data_key": "my_hook_results",
-                }
+                path="tests.unit.cfngin.hooks.test_utils.result_hook",
+                data_key="my_hook_results",
             ),
             # Shouldn't return data
             CfnginHookDefinitionModel(
-                **{"path": "tests.unit.cfngin.hooks.test_utils.context_hook"}
+                path="tests.unit.cfngin.hooks.test_utils.context_hook"
             ),
         ]
         handle_hooks("result", hooks, self.provider, self.context)
@@ -197,16 +175,12 @@ class TestHooks(unittest.TestCase):
         """Test return data hook duplicate key."""
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
-                    "data_key": "my_hook_results",
-                }
+                path="tests.unit.cfngin.hooks.test_utils.result_hook",
+                data_key="my_hook_results",
             ),
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.result_hook",
-                    "data_key": "my_hook_results",
-                }
+                path="tests.unit.cfngin.hooks.test_utils.result_hook",
+                data_key="my_hook_results",
             ),
         ]
 
@@ -217,11 +191,9 @@ class TestHooks(unittest.TestCase):
         """Test the resolution of lookups in hook args."""
         hooks = [
             CfnginHookDefinitionModel(
-                **{
-                    "path": "tests.unit.cfngin.hooks.test_utils.kwargs_hook",
-                    "data_key": "my_hook_results",
-                    "args": {"default_lookup": "${default env_var::default_value}"},
-                }
+                path="tests.unit.cfngin.hooks.test_utils.kwargs_hook",
+                data_key="my_hook_results",
+                args={"default_lookup": "${default env_var::default_value}"},
             )
         ]
         handle_hooks("lookups", hooks, self.provider, self.context)

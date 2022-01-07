@@ -107,7 +107,9 @@ class TestRunwayDeploymentDefinition:
             obj.modules = None  # type: ignore
         with pytest.raises(TypeError):
             obj.modules = [  # type: ignore
-                RunwayDeploymentDefinitionModel(name="test-01", regions=["us-east-1"])
+                RunwayDeploymentDefinitionModel(
+                    modules=[], name="test-01", regions=["us-east-1"]
+                )
             ]
 
     def test_models_setter_invalid_list_item(self) -> None:

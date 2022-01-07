@@ -30,7 +30,7 @@ class TestArgsDataModel:
 
     def test_field_defaults(self) -> None:
         """Test field values."""
-        obj = ArgsDataModel(name="test", type="String")
+        obj = ArgsDataModel(Name="test", Type="String")
         assert not obj.allowed_pattern
         assert not obj.data_type
         assert not obj.description
@@ -47,12 +47,16 @@ class TestArgsDataModel:
     def test_name_required(self) -> None:
         """Test name."""
         with pytest.raises(ValidationError, match="Name\n  field required"):
-            ArgsDataModel(type="String")
+            ArgsDataModel.parse_obj({"type": "String"})
 
     def test_policies_raise_type_error(self) -> None:
         """Test policies."""
         with pytest.raises(ValidationError, match="Policies"):
-            assert not ArgsDataModel(name="test", policies=True, type="String")
+            assert not ArgsDataModel(
+                Name="test",
+                Policies=True,  # type: ignore
+                Type="String",
+            )
 
     def test_policies_json(self) -> None:
         """Test policies."""
@@ -63,9 +67,14 @@ class TestArgsDataModel:
                 "Attributes": {"Timestamp": "2018-12-02T21:34:33.000Z"},
             }
         ]
-        assert ArgsDataModel(
-            name="test", policies=data, type="String"
-        ).policies == json.dumps(data)
+        assert (
+            ArgsDataModel(
+                Name="test",
+                Policies=data,  # type: ignore
+                Type="String",
+            ).policies
+            == json.dumps(data)
+        )
 
     def test_policies_string(self) -> None:
         """Test policies."""
@@ -78,33 +87,42 @@ class TestArgsDataModel:
                 }
             ]
         )
-        assert ArgsDataModel(name="test", policies=data, type="String").policies == data
+        assert ArgsDataModel(Name="test", Policies=data, Type="String").policies == data
 
     def test_tags_dict(self) -> None:
         """Test tags."""
-        assert ArgsDataModel(
-            name="test", tags={"tag-key": "tag-value"}, type="String"
-        ).tags == [TagDataModel(Key="tag-key", Value="tag-value")]
+        assert (
+            ArgsDataModel(
+                Name="test",
+                Tags={"tag-key": "tag-value"},  # type: ignore
+                Type="String",
+            ).tags
+            == [TagDataModel(Key="tag-key", Value="tag-value")]
+        )
 
     def test_tags_raise_type_error(self) -> None:
         """Test tags."""
         with pytest.raises(ValidationError, match="Tags"):
-            assert not ArgsDataModel(name="test", tags="", type="String")
+            assert not ArgsDataModel.parse_obj(
+                {"name": "test", "tags": "", "type": "String"}
+            )
 
     def test_tier_invalid(self) -> None:
         """Test tier."""
         with pytest.raises(ValidationError, match="Tier\n  unexpected value"):
-            ArgsDataModel(name="test", tier="invalid", type="String")
+            ArgsDataModel.parse_obj(
+                {"name": "test", "tier": "invalid", "type": "String"}
+            )
 
     def test_type_invalid(self) -> None:
         """Test name."""
         with pytest.raises(ValidationError, match="Type\n  unexpected value"):
-            ArgsDataModel(name="test", type="invalid")
+            ArgsDataModel.parse_obj({"name": "test", "type": "invalid"})
 
     def test_type_required(self) -> None:
         """Test name."""
         with pytest.raises(ValidationError, match="Type\n  field required"):
-            ArgsDataModel(name="test")
+            ArgsDataModel.parse_obj({"name": "test"})
 
 
 class TestParameter:

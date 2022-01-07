@@ -894,7 +894,6 @@ class TestServerlessOptions:
             RunwayServerlessModuleOptionsDataModel(
                 args=["--config", "something", "--unknown-arg", "value"],
                 extend_serverless_yml={},
-                promotezip={},
             )
         )
         assert obj.args == ["--config", "something", "--unknown-arg", "value"]

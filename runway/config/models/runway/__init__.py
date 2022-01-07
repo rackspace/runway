@@ -81,26 +81,26 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
     """Model for a Runway assume role definition."""
 
     arn: Optional[str] = Field(
-        None,
+        default=None,
         title="IAM Role ARN",
         description="The ARN of the AWS IAM role to be assumed. (supports lookups)",
     )
     duration: Union[int, str] = Field(
-        3600,
+        default=3600,
         description="The duration, in seconds, of the role session. (supports lookups)",
         ge=900,  # applies to int json schema only
         le=43_200,  # applies to int json schema only
         regex=RUNWAY_LOOKUP_STRING_REGEX,  # applies to str json schema only
     )
     post_deploy_env_revert: bool = Field(
-        False,
+        default=False,
         title="Post Deployment Environment Revert",
         description="Revert the credentials stored in environment variables to "
         "what they were prior to execution after the deployment finished processing. "
         "(supports lookups)",
     )
     session_name: str = Field(
-        "runway",
+        default="runway",
         description="An identifier for the assumed role session. (supports lookups)",
     )
 
@@ -182,19 +182,19 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
     """Model for a Runway deployment definition."""
 
     account_alias: Optional[str] = Field(
-        None,
+        default=None,
         description="Used to verify the currently assumed role or credentials. "
         "(supports lookups)",
         examples=["example-alias", "${var alias.${env DEPLOY_ENVIRONMENT}}"],
     )
     account_id: Optional[str] = Field(
-        None,
+        default=None,
         description="Used to verify the currently assumed role or credentials. "
         "(supports lookups)",
         examples=["123456789012", "${var id.${env DEPLOY_ENVIRONMENT}}"],
     )
     assume_role: Union[str, RunwayAssumeRoleDefinitionModel] = Field(
-        {},
+        default={},
         description="Assume a role when processing the deployment. (supports lookups)",
         examples=["arn:aws:iam::123456789012:role/name"]
         + cast(
@@ -202,7 +202,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         ),
     )
     env_vars: RunwayEnvVarsUnresolvedType = Field(
-        {},
+        default={},
         title="Environment Variables",
         description="Additional variables to add to the environment when "
         "processing the deployment. (supports lookups)",
@@ -215,7 +215,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         ],
     )
     environments: RunwayEnvironmentsUnresolvedType = Field(
-        {},
+        default={},
         description="Explicitly enable/disable the deployment for a specific "
         "deploy environment, AWS Account ID, and AWS Region combination. "
         "Can also be set as a static boolean value. (supports lookups)",
@@ -234,7 +234,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         ..., description="An array of modules to process as part of a deployment."
     )
     module_options: Union[Dict[str, Any], str] = Field(
-        {},
+        default={},
         description="Options that are passed directly to the modules within this deployment. "
         "(supports lookups)",
         examples=[
@@ -243,12 +243,12 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         ],
     )
     name: str = Field(
-        "unnamed_deployment",
+        default="unnamed_deployment",
         description="The name of the deployment to be displayed in logs and the "
         "interactive selection menu.",
     )
     parallel_regions: Union[List[str], str] = Field(
-        [],
+        default=[],
         description="An array of AWS Regions to process asynchronously. (supports lookups)",
         examples=[
             ["us-east-1", "us-west-2"],
@@ -256,7 +256,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         ],
     )
     parameters: Union[Dict[str, Any], str] = Field(
-        {},
+        default={},
         description="Used to pass variable values to modules in place of an "
         "environment configuration file. (supports lookups)",
         examples=[
@@ -265,7 +265,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         ],
     )
     regions: Union[List[str], str] = Field(
-        [],
+        default=[],
         description="An array of AWS Regions to process this deployment in. (supports lookups)",
         examples=[
             ["us-east-1", "us-west-2"],
@@ -371,11 +371,11 @@ class RunwayModuleDefinitionModel(ConfigProperty):
     """Model for a Runway module definition."""
 
     class_path: Optional[str] = Field(
-        None,
+        default=None,
         description="Import path to a custom Runway module class. (supports lookups)",
     )
     env_vars: RunwayEnvVarsUnresolvedType = Field(
-        {},
+        default={},
         title="Environment Variables",
         description="Additional variables to add to the environment when "
         "processing the deployment. (supports lookups)",
@@ -388,7 +388,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         ],
     )
     environments: RunwayEnvironmentsUnresolvedType = Field(
-        {},
+        default={},
         description="Explicitly enable/disable the deployment for a specific "
         "deploy environment, AWS Account ID, and AWS Region combination. "
         "Can also be set as a static boolean value. (supports lookups)",
@@ -404,15 +404,15 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         ],
     )
     name: str = Field(
-        "undefined",
+        default="undefined",
         description="The name of the module to be displayed in logs and the "
         "interactive selection menu.",
     )
     options: Union[Dict[str, Any], str] = Field(
-        {}, description="Module type specific options. (supports lookups)"
+        default={}, description="Module type specific options. (supports lookups)"
     )
     parameters: Union[Dict[str, Any], str] = Field(
-        {},
+        default={},
         description="Used to pass variable values to modules in place of an "
         "environment configuration file. (supports lookups)",
         examples=[
@@ -421,13 +421,13 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         ],
     )
     path: Optional[Union[str, Path]] = Field(
-        None,
+        default=None,
         description="Directory (relative to the Runway config file) containing IaC. "
         "(supports lookups)",
         examples=["./", "sampleapp-${env DEPLOY_ENVIRONMENT}.cfn", "sampleapp.sls"],
     )
     tags: List[str] = Field(
-        [],
+        default=[],
         description="Array of values to categorize the module which can be used "
         "with the CLI to quickly select a group of modules. "
         "This field is only used by the `--tag` CLI option.",
@@ -436,7 +436,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
     type: Optional[RunwayModuleTypeTypeDef] = None
     # needs to be last
     parallel: List[RunwayModuleDefinitionModel] = Field(
-        [],
+        default=[],
         description="Array of module definitions that can be executed asynchronously. "
         "Incompatible with class_path, path, and type.",
         examples=[[{"path": "sampleapp-01.cfn"}, {"path": "sampleapp-02.cfn"}]],
@@ -511,13 +511,13 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
     """Model for a Runway variable definition."""
 
     file_path: Optional[Path] = Field(
-        None,
+        default=None,
         title="Variables File Path",
         description="Explicit path to a variables file that will be loaded and "
         "merged with the variables defined here.",
     )
     sys_path: Path = Field(
-        "./",
+        default="./",
         description="Directory to use as the root of a relative 'file_path'. "
         "If not provided, the current working directory is used.",
     )
@@ -588,22 +588,22 @@ class RunwayConfigDefinitionModel(ConfigProperty):
     """Runway configuration definition model."""
 
     deployments: List[RunwayDeploymentDefinitionModel] = Field(
-        [], description="Array of Runway deployments definitions."
+        default=[], description="Array of Runway deployments definitions."
     )
     future: RunwayFutureDefinitionModel = RunwayFutureDefinitionModel()
     ignore_git_branch: bool = Field(
-        False,
+        default=False,
         description="Optionally exclude the git branch name when determining the "
         "current deploy environment.",
     )
     runway_version: Optional[RunwayVersionField] = Field(
-        ">1.10",
+        default=">1.10",
         description="Define the versions of Runway that can be used with this "
         "configuration file.",
         examples=['"<2.0.0"', '"==1.14.0"', '">=1.14.0,<2.0.0"'],
     )
     tests: List[RunwayTestDefinitionModel] = Field(
-        [],
+        default=[],
         description="Array of Runway test definitions that are executed with the 'test' command.",
     )
     variables: RunwayVariablesDefinitionModel = RunwayVariablesDefinitionModel()

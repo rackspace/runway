@@ -31,7 +31,7 @@ class TestRunwayAssumeRoleDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayAssumeRoleDefinitionModel(invalid="something")
+            RunwayAssumeRoleDefinitionModel.parse_obj({"invalid": "val"})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -110,22 +110,22 @@ class TestRunwayConfigDefinitionModel:
     def test_convert_runway_version(self) -> None:
         """Test _convert_runway_version."""
         assert RunwayConfigDefinitionModel(  # handle string
-            runway_version=">1.11.0"
+            runway_version=">1.11.0"  # type: ignore
         ).runway_version == SpecifierSet(">1.11.0", prereleases=True)
         assert RunwayConfigDefinitionModel(  # handle exact version
-            runway_version="1.11.0"
+            runway_version="1.11.0"  # type: ignore
         ).runway_version == SpecifierSet("==1.11.0", prereleases=True)
         assert RunwayConfigDefinitionModel(  # handle SpecifierSet
-            runway_version=SpecifierSet(">1.11.0")
+            runway_version=SpecifierSet(">1.11.0")  # type: ignore
         ).runway_version == SpecifierSet(">1.11.0", prereleases=True)
         assert RunwayConfigDefinitionModel(  # handle SpecifierSet
-            runway_version=SpecifierSet(">1.11.0", prereleases=True)
+            runway_version=SpecifierSet(">1.11.0", prereleases=True)  # type: ignore
         ).runway_version == SpecifierSet(">1.11.0", prereleases=True)
 
     def test_convert_runway_version_invalid(self) -> None:
         """Test _convert_runway_version invalid specifier set."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayConfigDefinitionModel(runway_version="=latest")
+            RunwayConfigDefinitionModel(runway_version="=latest")  # type: ignore
         assert (
             excinfo.value.errors()[0]["msg"]
             == "=latest is not a valid version specifier set"
@@ -134,7 +134,7 @@ class TestRunwayConfigDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayConfigDefinitionModel(invalid="something")
+            RunwayConfigDefinitionModel.parse_obj({"invalid": "val"})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -174,16 +174,18 @@ class TestRunwayDeploymentDefinitionModel:
     def test_convert_simple_module(self) -> None:
         """Test _convert_simple_module."""
         obj = RunwayDeploymentDefinitionModel(
-            modules=["sampleapp.cfn", {"path": "./"}], regions=["us-east-1"]
+            modules=["sampleapp.cfn", {"path": "./"}],  # type: ignore
+            regions=["us-east-1"],
         )
-        # assert obj.modules == [RunwayModuleDefinitionModel(path="sampleapp.cfn")]
         assert obj.modules[0].path == "sampleapp.cfn"
         assert obj.modules[1].path == "./"
 
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayDeploymentDefinitionModel(invalid="something", regions=["us-east-1"])
+            RunwayDeploymentDefinitionModel.parse_obj(
+                {"invalid": "val", "regions": ["us-east-1"]}
+            )
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -243,7 +245,7 @@ class TestRunwayDeploymentDefinitionModel:
             RunwayDeploymentDefinitionModel(
                 modules=[],
                 parallel_regions=["us-east-1"],
-                regions={"parallel": ["us-east-1"]},
+                regions={"parallel": ["us-east-1"]},  # type: ignore
             )
         with pytest.raises(ValidationError) as excinfo:
             RunwayDeploymentDefinitionModel(
@@ -264,7 +266,8 @@ class TestRunwayDeploymentDefinitionModel:
         assert obj1.parallel_regions == ["us-east-1"]
 
         obj2 = RunwayDeploymentDefinitionModel(
-            modules=[], regions={"parallel": ["us-east-1"]}
+            modules=[],
+            regions={"parallel": ["us-east-1"]},  # type: ignore
         )
         assert obj2.regions == []
         assert obj2.parallel_regions == ["us-east-1"]
@@ -276,7 +279,9 @@ class TestRunwayDeploymentRegionDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayDeploymentRegionDefinitionModel(invalid="something", parallel=[])
+            RunwayDeploymentRegionDefinitionModel.parse_obj(
+                {"invalid": "val", "parallel": []}
+            )
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -309,7 +314,7 @@ class TestRunwayFutureDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayFutureDefinitionModel(invalid="something")
+            RunwayFutureDefinitionModel.parse_obj({"invalid": "val"})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -322,7 +327,7 @@ class TestRunwayModuleDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayModuleDefinitionModel(invalid="something")
+            RunwayModuleDefinitionModel.parse_obj({"invalid": "val"})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -347,12 +352,13 @@ class TestRunwayModuleDefinitionModel:
         assert RunwayModuleDefinitionModel().name == "undefined"
         assert RunwayModuleDefinitionModel(name="test-name").name == "test-name"
         assert (
-            RunwayModuleDefinitionModel(parallel=[{"path": "./"}]).name
+            RunwayModuleDefinitionModel(parallel=[{"path": "./"}]).name  # type: ignore
             == "parallel_parent"
         )
         assert (
             RunwayModuleDefinitionModel(
-                name="something", parallel=[{"path": "./"}]
+                name="something",
+                parallel=[{"path": "./"}],  # type: ignore
             ).name
             == "something"
         )
@@ -361,24 +367,27 @@ class TestRunwayModuleDefinitionModel:
     def test_validate_path(self) -> None:
         """Test _validate_path."""
         assert RunwayModuleDefinitionModel().path == Path.cwd()
-        assert not RunwayModuleDefinitionModel(parallel=[{"path": "./"}]).path
+        assert not RunwayModuleDefinitionModel(parallel=[{"path": "./"}]).path  # type: ignore
         defined_path = Path("./sampleapp.cfn")
         assert RunwayModuleDefinitionModel(path=defined_path).path == defined_path
 
     def test_validate_parallel(self) -> None:
         """Test _validate_parallel."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayModuleDefinitionModel(path=Path.cwd(), parallel=["./"])
+            RunwayModuleDefinitionModel(
+                path=Path.cwd(),
+                parallel=["./"],  # type: ignore
+            )
         error = excinfo.value.errors()[0]
         assert error["loc"] == ("parallel",)
         assert error["msg"] == "only one of parallel or path can be defined"
 
         assert RunwayModuleDefinitionModel().parallel == []
-        assert RunwayModuleDefinitionModel(parallel=["./"]).parallel == [
+        assert RunwayModuleDefinitionModel(parallel=["./"]).parallel == [  # type: ignore
             RunwayModuleDefinitionModel(path="./")
         ]
         assert RunwayModuleDefinitionModel(
-            parallel=[{"name": "test", "path": "./"}]
+            parallel=[{"name": "test", "path": "./"}]  # type: ignore
         ).parallel == [RunwayModuleDefinitionModel(name="test", path="./")]
 
     @pytest.mark.parametrize(

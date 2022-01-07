@@ -117,7 +117,7 @@ class TestCfnLintRunwayTestArgs:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            CfnLintRunwayTestArgs(invalid="something")
+            CfnLintRunwayTestArgs.parse_obj({"invalid": "val"})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -154,7 +154,7 @@ class TestScriptRunwayTestArgs:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            ScriptRunwayTestArgs(invalid="something")
+            ScriptRunwayTestArgs.parse_obj({"invalid": "val"})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
