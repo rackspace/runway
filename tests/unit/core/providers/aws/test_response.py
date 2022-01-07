@@ -3,12 +3,7 @@
 # pyright: basic
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from runway.core.providers.aws import BaseResponse, ResponseError, ResponseMetadata
-
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
 
 MODULE = "runway.core.providers.aws._response"
 
@@ -16,28 +11,21 @@ MODULE = "runway.core.providers.aws._response"
 class TestBaseResponse:
     """Test runway.core.providers.aws._response.BaseResponse."""
 
-    def test_init(self, mocker: MockerFixture) -> None:
+    def test_init(self) -> None:
         """Test init and the attributes it sets."""
-        mock_error = mocker.patch(f"{MODULE}.ResponseError")
-        mock_metadata = mocker.patch(f"{MODULE}.ResponseMetadata")
         data = {"Error": {"Code": "something"}, "ResponseMetadata": {"HostId": "id"}}
         response = BaseResponse(**data.copy())
 
-        assert response.error == mock_error.return_value
-        assert response.metadata == mock_metadata.return_value
-        mock_error.assert_called_once_with(**data["Error"])
-        mock_metadata.assert_called_once_with(**data["ResponseMetadata"])
+        assert isinstance(response.error, ResponseError)
+        assert response.error.code == data["Error"]["Code"]
+        assert isinstance(response.metadata, ResponseMetadata)
+        assert response.metadata.host_id == data["ResponseMetadata"]["HostId"]
 
-    def test_init_default(self, mocker: MockerFixture) -> None:
+    def test_init_default(self) -> None:
         """Test init default values and the attributes it sets."""
-        mock_error = mocker.patch(f"{MODULE}.ResponseError")
-        mock_metadata = mocker.patch(f"{MODULE}.ResponseMetadata")
         response = BaseResponse()
-
-        assert response.error == mock_error.return_value
-        assert response.metadata == mock_metadata.return_value
-        mock_error.assert_called_once_with()
-        mock_metadata.assert_called_once_with()
+        assert response.error == ResponseError()
+        assert response.metadata == ResponseMetadata()
 
 
 class TestResponseError:
