@@ -47,11 +47,12 @@ class RunwayTerraformModuleOptionsDataModel(ConfigProperty):
 
     args: RunwayTerraformArgsDataModel = RunwayTerraformArgsDataModel()
     backend_config: RunwayTerraformBackendConfigDataModel = Field(
-        RunwayTerraformBackendConfigDataModel(), alias="terraform_backend_config"
+        default=RunwayTerraformBackendConfigDataModel(),
+        alias="terraform_backend_config",
     )
-    version: Optional[str] = Field(None, alias="terraform_version")
-    workspace: Optional[str] = Field(None, alias="terraform_workspace")
-    write_auto_tfvars: bool = Field(False, alias="terraform_write_auto_tfvars")
+    version: Optional[str] = Field(default=None, alias="terraform_version")
+    workspace: Optional[str] = Field(default=None, alias="terraform_workspace")
+    write_auto_tfvars: bool = Field(default=False, alias="terraform_write_auto_tfvars")
 
     class Config(ConfigProperty.Config):
         """Model configuration."""

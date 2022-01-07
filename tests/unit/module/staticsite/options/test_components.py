@@ -6,6 +6,7 @@ from __future__ import annotations
 from runway.module.staticsite.options.components import StaticSiteOptions
 from runway.module.staticsite.options.models import (
     RunwayStaticSiteModuleOptionsDataModel,
+    RunwayStaticSitePreBuildStepDataModel,
 )
 
 MODULE = "runway.module.staticsite.options.components"
@@ -19,7 +20,9 @@ class TestStaticSiteOptions:
         data = RunwayStaticSiteModuleOptionsDataModel(
             build_output="./dist",
             build_steps=["runway --help"],
-            pre_build_steps=[{"command": "runway --help"}],
+            pre_build_steps=[
+                RunwayStaticSitePreBuildStepDataModel(command="runway --help")
+            ],
         )
         obj = StaticSiteOptions(data=data)
         assert obj.build_output == data.build_output

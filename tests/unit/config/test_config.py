@@ -226,7 +226,9 @@ class TestCfnginConfig:
             == "rendered"
         )
         mock_source_processor.assert_called_with(
-            sources=CfnginPackageSourcesDefinitionModel(git=[{"uri": "something"}]),
+            sources=CfnginPackageSourcesDefinitionModel.parse_obj(
+                {"git": [{"uri": "something"}]}
+            ),
             cache_dir=None,
         )
         assert mock_source_processor.call_count == 2

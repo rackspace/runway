@@ -25,19 +25,21 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
     """
 
     branch: Optional[str] = Field(
-        None, title="Git Branch", examples=["ENV-dev", "ENV-prod", "master"]
+        default=None, title="Git Branch", examples=["ENV-dev", "ENV-prod", "master"]
     )
-    commit: Optional[str] = Field(None, title="Git Commit Hash")
+    commit: Optional[str] = Field(default=None, title="Git Commit Hash")
     configs: List[str] = Field(
-        [],
+        default=[],
         description="Array of paths relative to the root of the package source "
         "for configuration that should be merged into the current configuration file.",
     )
     paths: List[str] = Field(
-        [],
+        default=[],
         description="Array of paths relative to the root of the package source to add to $PATH.",
     )
-    tag: Optional[str] = Field(None, title="Git Tag", examples=["1.0.0", "v1.0.0"])
+    tag: Optional[str] = Field(
+        default=None, title="Git Tag", examples=["1.0.0", "v1.0.0"]
+    )
     uri: str = Field(
         ...,
         title="Git Repository URI",
@@ -77,12 +79,12 @@ class LocalCfnginPackageSourceDefinitionModel(ConfigProperty):
     """
 
     configs: List[str] = Field(
-        [],
+        default=[],
         description="Array of paths relative to the root of the package source "
         "for configuration that should be merged into the current configuration file.",
     )
     paths: List[str] = Field(
-        [],
+        default=[],
         description="Array of paths relative to the root of the package source to add to $PATH.",
     )
     source: str = Field(
@@ -119,22 +121,22 @@ class S3CfnginPackageSourceDefinitionModel(ConfigProperty):
 
     bucket: str = Field(..., title="AWS S3 Bucket Name")
     configs: List[str] = Field(
-        [],
+        default=[],
         description="Array of paths relative to the root of the package source "
         "for configuration that should be merged into the current configuration file.",
     )
     key: str = Field(..., title="AWS S3 Object Key")
     paths: List[str] = Field(
-        [],
+        default=[],
         description="Array of paths relative to the root of the package source to add to $PATH.",
     )
     requester_pays: bool = Field(
-        False,
+        default=False,
         description="Confirms that the requester knows that they will be charged "
         "for the request.",
     )
     use_latest: bool = Field(
-        True,
+        default=True,
         description="Update the local copy if the last modified date in AWS S3 changes.",
     )
 
@@ -161,21 +163,21 @@ class CfnginPackageSourcesDefinitionModel(ConfigProperty):
     """
 
     git: List[GitCfnginPackageSourceDefinitionModel] = Field(
-        [],
+        default=[],
         title="CFNgin Git Repository Package Source Definitions",
         description=GitCfnginPackageSourceDefinitionModel.Config.schema_extra[
             "description"
         ],
     )
     local: List[LocalCfnginPackageSourceDefinitionModel] = Field(
-        [],
+        default=[],
         title="CFNgin Local Package Source Definitions",
         description=LocalCfnginPackageSourceDefinitionModel.Config.schema_extra[
             "description"
         ],
     )
     s3: List[S3CfnginPackageSourceDefinitionModel] = Field(
-        [],
+        default=[],
         title="CFNgin S3 Package Source Definitions",
         description=S3CfnginPackageSourceDefinitionModel.Config.schema_extra[
             "description"

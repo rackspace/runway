@@ -20,13 +20,14 @@ class RunwayTestDefinitionModel(ConfigProperty):
     """Model for a Runway test definition."""
 
     args: Union[Dict[str, Any], ConfigProperty, str] = Field(
-        {},
+        default={},
         title="Arguments",
         description="Arguments to be passed to the test. Support varies by test type.",
     )
-    name: str = Field("test-name", description="Name of the test.")
+    name: str = Field(default="test-name", description="Name of the test.")
     required: Union[bool, str] = Field(
-        False, description="Whether the test must pass for subsequent tests to be run."
+        default=False,
+        description="Whether the test must pass for subsequent tests to be run.",
     )
     type: ValidRunwayTestTypeValues
 
@@ -69,7 +70,7 @@ class CfnLintRunwayTestArgs(ConfigProperty):
     """Model for the args of a cfn-lint test."""
 
     cli_args: Union[List[str], str] = Field(
-        [],
+        default=[],
         title="CLI Arguments",
         description="Array of arguments to pass to the cfn-lint CLI.",
     )
@@ -96,16 +97,17 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     """Model for a cfn-lint test definition."""
 
     args: CfnLintRunwayTestArgs = Field(
-        CfnLintRunwayTestArgs(),
+        default=CfnLintRunwayTestArgs(),
         title="Arguments",
         description="Arguments to be passed to the test.",
     )
-    name: str = Field("cfn-lint", description="Name of the test.")
+    name: str = Field(default="cfn-lint", description="Name of the test.")
     required: Union[bool, str] = Field(
-        False, description="Whether the test must pass for subsequent tests to be run."
+        default=False,
+        description="Whether the test must pass for subsequent tests to be run.",
     )
     type: Literal["cfn-lint"] = Field(
-        "cfn-lint", description="The type of test to run."
+        default="cfn-lint", description="The type of test to run."
     )
 
     class Config(RunwayTestDefinitionModel.Config):
@@ -121,7 +123,7 @@ class ScriptRunwayTestArgs(ConfigProperty):
     """Model for the args of a script test."""
 
     commands: Union[List[str], str] = Field(
-        [], description="Array of commands that will be run for this test."
+        default=[], description="Array of commands that will be run for this test."
     )
 
     class Config(ConfigProperty.Config):
@@ -146,15 +148,18 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     """Model for a script test definition."""
 
     args: ScriptRunwayTestArgs = Field(
-        ScriptRunwayTestArgs(),
+        default=ScriptRunwayTestArgs(),
         title="Arguments",
         description="Arguments to be passed to the test.",
     )
-    name: str = Field("script", description="Name of the test.")
+    name: str = Field(default="script", description="Name of the test.")
     required: Union[bool, str] = Field(
-        False, description="Whether the test must pass for subsequent tests to be run."
+        default=False,
+        description="Whether the test must pass for subsequent tests to be run.",
     )
-    type: Literal["script"] = Field("script", description="The type of test to run.")
+    type: Literal["script"] = Field(
+        default="script", description="The type of test to run."
+    )
 
     class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
@@ -168,12 +173,13 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
 class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
     """Model for a yamllint test definition."""
 
-    name: str = Field("yamllint", description="Name of the test.")
+    name: str = Field(default="yamllint", description="Name of the test.")
     required: Union[bool, str] = Field(
-        False, description="Whether the test must pass for subsequent tests to be run."
+        default=False,
+        description="Whether the test must pass for subsequent tests to be run.",
     )
     type: Literal["yamllint"] = Field(
-        "yamllint", description="The type of test to run."
+        default="yamllint", description="The type of test to run."
     )
 
     class Config(RunwayTestDefinitionModel.Config):

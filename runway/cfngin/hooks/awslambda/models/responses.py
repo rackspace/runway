@@ -28,7 +28,7 @@ class AwsLambdaHookDeployResponse(BaseModel):
     """
 
     compatible_architectures: Optional[List[str]] = Field(
-        None, alias="CompatibleArchitectures"
+        default=None, alias="CompatibleArchitectures"
     )
     """A list of compatible instruction set architectures.
     (https://docs.aws.amazon.com/lambda/latest/dg/foundation-arch.html)
@@ -36,14 +36,16 @@ class AwsLambdaHookDeployResponse(BaseModel):
 
     """
 
-    compatible_runtimes: Optional[List[str]] = Field(None, alias="CompatibleRuntimes")
+    compatible_runtimes: Optional[List[str]] = Field(
+        default=None, alias="CompatibleRuntimes"
+    )
     """A list of compatible function runtimes.
     Used for filtering with ``ListLayers`` and ``ListLayerVersions``.
     (alias ``CompatibleRuntimes``)
 
     """
 
-    license: Optional[str] = Field(None, alias="License")
+    license: Optional[str] = Field(default=None, alias="License")
     """The layer's software license (alias ``License``). Can be any of the following:
 
     - A SPDX license identifier (e.g. ``MIT``).
@@ -56,7 +58,7 @@ class AwsLambdaHookDeployResponse(BaseModel):
     object_key: str = Field(..., alias="S3Key")
     """Key (file path) of the deployment package S3 Object. (alias ``S3Key``)"""
 
-    object_version_id: Optional[str] = Field(None, alias="S3ObjectVersion")
+    object_version_id: Optional[str] = Field(default=None, alias="S3ObjectVersion")
     """The version ID of the deployment package S3 Object.
     This will only have a value if the S3 Bucket has versioning enabled.
     (alias ``S3ObjectVersion``)

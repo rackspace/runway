@@ -50,17 +50,18 @@ class CfnginHookDefinitionModel(ConfigProperty):
     """Model for a CFNgin hook definition."""
 
     args: Dict[str, Any] = Field(
-        {},
+        default={},
         title="Arguments",
         description="Arguments that will be passed to the hook. (supports lookups)",
     )
     data_key: Optional[str] = Field(
-        None, description="Key to use when storing the returned result of the hook."
+        default=None,
+        description="Key to use when storing the returned result of the hook.",
     )
-    enabled: bool = Field(True, description="Whether the hook will be run.")
+    enabled: bool = Field(default=True, description="Whether the hook will be run.")
     path: str = Field(..., description="Python importable path to the hook.")
     required: bool = Field(
-        True,
+        default=True,
         description="Whether to continue execution if the hook results in an error.",
     )
 
@@ -79,61 +80,66 @@ class CfnginStackDefinitionModel(ConfigProperty):
     """Model for a CFNgin stack definition."""
 
     class_path: Optional[str] = Field(
-        None,
+        default=None,
         title="Blueprint Class Path",
         description="Python importable path to a blueprint class.",
     )
     description: Optional[str] = Field(
-        None,
+        default=None,
         title="Stack Description",
         description="A description that will be applied to the stack in CloudFormation.",
     )
-    enabled: bool = Field(True, description="Whether the stack will be deployed.")
+    enabled: bool = Field(
+        default=True, description="Whether the stack will be deployed."
+    )
     in_progress_behavior: Optional[Literal["wait"]] = Field(
-        None,
+        default=None,
         title="Stack In Progress Behavior",
         description="The action to take when a stack's status is "
         "CREATE_IN_PROGRESS or UPDATE_IN_PROGRESS when trying to update it.",
     )
-    locked: bool = Field(False, description="Whether to limit updating of the stack.")
+    locked: bool = Field(
+        default=False, description="Whether to limit updating of the stack."
+    )
     name: str = Field(..., title="Stack Name", description="Name of the stack.")
     protected: bool = Field(
-        False,
+        default=False,
         description="Whether to force all updates to the stack to be performed interactively.",
     )
     required_by: List[str] = Field(
-        [], description="Array of stacks (by name) that require this stack."
+        default=[], description="Array of stacks (by name) that require this stack."
     )
     requires: List[str] = Field(
-        [], description="Array of stacks (by name) that this stack requires."
+        default=[], description="Array of stacks (by name) that this stack requires."
     )
     stack_name: Optional[str] = Field(
-        None,
+        default=None,
         title="Explicit Stack Name",
         description="Explicit name of the stack (namespace will still be prepended).",
     )
     stack_policy_path: Optional[Path] = Field(
-        None,
+        default=None,
         description="Path to a stack policy document that will be applied to the "
         "CloudFormation stack.",
     )
     tags: Dict[str, Any] = Field(
-        {}, description="Tags that will be applied to the CloudFormation stack."
+        default={}, description="Tags that will be applied to the CloudFormation stack."
     )
     template_path: Optional[Path] = Field(
-        None, description="Path to a JSON or YAML formatted CloudFormation Template."
+        default=None,
+        description="Path to a JSON or YAML formatted CloudFormation Template.",
     )
     termination_protection: bool = Field(
-        False,
+        default=False,
         description="Set the value of termination protection on the CloudFormation stack.",
     )
     timeout: Optional[int] = Field(
-        None,
+        default=None,
         description="The amount of time (in minutes) that can pass before the "
         "Stack status becomes CREATE_FAILED.",
     )
     variables: Dict[str, Any] = Field(
-        {},
+        default={},
         description="Parameter values that will be passed to the "
         "Blueprint/CloudFormation stack. (supports lookups)",
     )
@@ -199,32 +205,32 @@ class CfnginConfigDefinitionModel(ConfigProperty):
     """Model for a CFNgin config definition."""
 
     cfngin_bucket: Optional[str] = Field(
-        None,
+        default=None,
         title="CFNgin Bucket",
         description="Name of an AWS S3 bucket to use for caching CloudFormation templates. "
         "Set as an empty string to disable caching.",
     )
     cfngin_bucket_region: Optional[str] = Field(
-        None,
+        default=None,
         title="CFNgin Bucket Region",
         description="AWS Region where the CFNgin Bucket is located. "
         "If not provided, the current region is used.",
     )
     cfngin_cache_dir: Path = Field(
-        Path.cwd() / ".runway" / "cache",
+        default=Path.cwd() / ".runway" / "cache",
         title="CFNgin Cache Directory",
         description="Path to a local directory that CFNgin will use for local caching.",
     )
     log_formats: Dict[str, str] = Field(  # TODO create model
-        {}, description="Customize log message formatting by log level."
+        default={}, description="Customize log message formatting by log level."
     )
     lookups: Dict[str, str] = Field(
-        {},
+        default={},
         description="Mapping of custom lookup names to a python importable path "
         "for the class that will be used to resolve the lookups.",
     )
     mappings: Dict[str, Dict[str, Dict[str, Any]]] = Field(
-        {}, description="Mappings that will be appended to all stack templates."
+        default={}, description="Mappings that will be appended to all stack templates."
     )
     namespace: str = Field(
         ...,
@@ -232,39 +238,39 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         "within an AWS account.",
     )
     namespace_delimiter: str = Field(
-        "-",
+        default="-",
         description="Character used to separate the namespace and stack name "
         "when the namespace is prepended.",
     )
     package_sources: CfnginPackageSourcesDefinitionModel = Field(
-        CfnginPackageSourcesDefinitionModel(),
+        default=CfnginPackageSourcesDefinitionModel(),
         description=CfnginPackageSourcesDefinitionModel.Config.schema_extra[
             "description"
         ],
     )
     persistent_graph_key: Optional[str] = Field(
-        None,
+        default=None,
         description="Key for an AWS S3 object used to track a graph of stacks "
         "between executions.",
     )
     post_deploy: Union[
         List[CfnginHookDefinitionModel],  # final type after parsing
         Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
-    ] = Field([], title="Post Deploy Hooks")
+    ] = Field(default=[], title="Post Deploy Hooks")
     post_destroy: Union[
         List[CfnginHookDefinitionModel],  # final type after parsing
         Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
-    ] = Field([], title="Pre Destroy Hooks")
+    ] = Field(default=[], title="Pre Destroy Hooks")
     pre_deploy: Union[
         List[CfnginHookDefinitionModel],  # final type after parsing
         Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
-    ] = Field([], title="Pre Deploy Hooks")
+    ] = Field(default=[], title="Pre Deploy Hooks")
     pre_destroy: Union[
         List[CfnginHookDefinitionModel],  # final type after parsing
         Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
-    ] = Field([], title="Pre Destroy Hooks")
+    ] = Field(default=[], title="Pre Destroy Hooks")
     service_role: Optional[str] = Field(
-        None,
+        default=None,
         title="Service Role ARN",
         description="Specify an IAM Role for CloudFormation to use.",
     )
@@ -272,19 +278,20 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         List[CfnginStackDefinitionModel],  # final type after parsing
         Dict[str, CfnginStackDefinitionModel],  # recommended when writing config
     ] = Field(
-        [], description="Define CloudFormation stacks using a Blueprint or Template."
+        default=[],
+        description="Define CloudFormation stacks using a Blueprint or Template.",
     )
     sys_path: Optional[Path] = Field(
-        None,
+        default=None,
         title="sys.path",
         description="Path to append to $PATH. This is also the root of relative paths.",
     )
     tags: Optional[Dict[str, str]] = Field(
-        None,  # None is significant here
+        default=None,  # None is significant here
         description="Tags to try to apply to all resources created from this configuration file.",
     )
     template_indent: int = Field(
-        4,
+        default=4,
         description="Number of spaces per indentation level to use when "
         "rendering/outputting CloudFormation templates.",
     )

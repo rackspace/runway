@@ -60,20 +60,20 @@ class ArgsDataModel(BaseModel):
 
     """
 
-    allowed_pattern: Optional[str] = Field(None, alias="AllowedPattern")
+    allowed_pattern: Optional[str] = Field(default=None, alias="AllowedPattern")
     data_type: Optional[Literal["aws:ec2:image", "text"]] = Field(
-        None, alias="DataType"
+        default=None, alias="DataType"
     )
-    description: Optional[str] = Field(None, alias="Description")
+    description: Optional[str] = Field(default=None, alias="Description")
     force: bool = False
-    key_id: Optional[str] = Field(None, alias="KeyId")
+    key_id: Optional[str] = Field(default=None, alias="KeyId")
     name: str = Field(..., alias="Name")
-    overwrite: bool = Field(True, alias="Overwrite")
-    policies: Optional[str] = Field(None, alias="Policies")
-    tags: Optional[List[TagDataModel]] = Field(None, alias="Tags")
-    tier: ParameterTierType = Field("Standard", alias="Tier")
+    overwrite: bool = Field(default=True, alias="Overwrite")
+    policies: Optional[str] = Field(default=None, alias="Policies")
+    tags: Optional[List[TagDataModel]] = Field(default=None, alias="Tags")
+    tier: ParameterTierType = Field(default="Standard", alias="Tier")
     type: Literal["String", "StringList", "SecureString"] = Field(..., alias="Type")
-    value: Optional[str] = Field(None, alias="Value")
+    value: Optional[str] = Field(default=None, alias="Value")
 
     class Config:
         """Model configuration."""

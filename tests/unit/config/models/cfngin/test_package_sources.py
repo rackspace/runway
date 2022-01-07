@@ -20,7 +20,7 @@ class TestCfnginPackageSourcesDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            CfnginPackageSourcesDefinitionModel(invalid="something")
+            CfnginPackageSourcesDefinitionModel.parse_obj({"invalid": "val"})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -54,7 +54,10 @@ class TestGitCfnginPackageSourceDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            GitCfnginPackageSourceDefinitionModel(invalid="something", uri="something")
+            GitCfnginPackageSourceDefinitionModel(
+                invalid="something",  # type: ignore
+                uri="something",
+            )
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -73,7 +76,7 @@ class TestGitCfnginPackageSourceDefinitionModel:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            GitCfnginPackageSourceDefinitionModel()
+            GitCfnginPackageSourceDefinitionModel()  # type: ignore
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("uri",)
@@ -135,7 +138,8 @@ class TestLocalCfnginPackageSourceDefinitionModel:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             LocalCfnginPackageSourceDefinitionModel(
-                invalid="something", source="something"
+                invalid="something",  # type: ignore
+                source="something",
             )
         errors = excinfo.value.errors()
         assert len(errors) == 1
@@ -152,7 +156,7 @@ class TestLocalCfnginPackageSourceDefinitionModel:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            LocalCfnginPackageSourceDefinitionModel()
+            LocalCfnginPackageSourceDefinitionModel()  # type: ignore
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("source",)
@@ -166,7 +170,9 @@ class TestS3CfnginPackageSourceDefinitionModel:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             S3CfnginPackageSourceDefinitionModel(
-                bucket="something", key="something", invalid="something"
+                bucket="something",
+                key="something",
+                invalid="something",  # type: ignore
             )
         errors = excinfo.value.errors()
         assert len(errors) == 1
@@ -176,7 +182,7 @@ class TestS3CfnginPackageSourceDefinitionModel:
     def test_required_fields(self) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
-            S3CfnginPackageSourceDefinitionModel()
+            S3CfnginPackageSourceDefinitionModel()  # type: ignore
         errors = excinfo.value.errors()
         assert len(errors) == 2
         assert errors[0]["loc"] == ("bucket",)

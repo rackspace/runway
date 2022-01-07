@@ -24,7 +24,7 @@ class TestRunwayTerraformArgsDataModel:
     def test_init_extra(self) -> None:
         """Test init extra."""
         with pytest.raises(ValidationError):
-            RunwayTerraformArgsDataModel(invalid="val")
+            RunwayTerraformArgsDataModel.parse_obj({"invalid": "val"})
 
     def test_init(self) -> None:
         """Test init."""
@@ -59,7 +59,7 @@ class TestRunwayTerraformBackendConfigDataModel:
     def test_init_extra(self) -> None:
         """Test init extra."""
         with pytest.raises(ValidationError):
-            RunwayTerraformBackendConfigDataModel(invalid="val")
+            RunwayTerraformBackendConfigDataModel.parse_obj({"invalid": "val"})
 
     def test_init(self) -> None:
         """Test init."""
@@ -79,7 +79,7 @@ class TestRunwayTerraformModuleOptionsDataModel:
 
     def test_convert_args(self) -> None:
         """Test _convert_args."""
-        obj = RunwayTerraformModuleOptionsDataModel(args=["test"])
+        obj = RunwayTerraformModuleOptionsDataModel.parse_obj({"args": ["test"]})
         assert obj.args.apply == ["test"]
         assert not obj.args.init and isinstance(obj.args.init, list)
         assert not obj.args.plan and isinstance(obj.args.plan, list)
@@ -97,7 +97,7 @@ class TestRunwayTerraformModuleOptionsDataModel:
 
     def test_init_extra(self) -> None:
         """Test init extra."""
-        assert RunwayTerraformModuleOptionsDataModel(invalid="val")
+        assert RunwayTerraformModuleOptionsDataModel.parse_obj({"invalid": "val"})
 
     def test_init(self) -> None:
         """Test init."""

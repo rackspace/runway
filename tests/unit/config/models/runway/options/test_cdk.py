@@ -15,7 +15,7 @@ class TestRunwayCdkModuleOptionsDataModel:
 
     def test_init_extra(self) -> None:
         """Test init extra."""
-        obj = RunwayCdkModuleOptionsDataModel(invalid="val")
+        obj = RunwayCdkModuleOptionsDataModel.parse_obj({"invalid": "val"})
         assert "invalid" not in obj.dict()
 
     def test_init(self) -> None:

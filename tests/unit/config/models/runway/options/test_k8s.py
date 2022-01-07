@@ -22,7 +22,7 @@ class TestRunwayK8sModuleOptionsDataModel:
 
     def test_init_extra(self) -> None:
         """Test init extra."""
-        obj = RunwayK8sModuleOptionsDataModel(invalid="val")
+        obj = RunwayK8sModuleOptionsDataModel.parse_obj({"invalid": "val"})
         assert "invalid" not in obj.dict()
 
     def test_init(self, tmp_path: Path) -> None:
