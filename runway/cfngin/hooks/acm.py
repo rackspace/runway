@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type
 
 from botocore.exceptions import ClientError
 from troposphere import Ref
@@ -79,7 +79,7 @@ class Certificate(Hook):
 
     """
 
-    ARGS_PARSER = HookArgs
+    ARGS_PARSER: ClassVar[Type[HookArgs]] = HookArgs
 
     acm_client: ACMClient
     args: HookArgs

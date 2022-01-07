@@ -194,10 +194,13 @@ These can then be used to parse the values provided in the :attr:`~cfngin.hook.a
 
   """My hook."""
   import logging
-  from typing import Any, Dict, Optional
+  from typing import TYPE_CHECKING, Any, Dict, Optional
 
   from runway.utils import BaseModel
   from runway.cfngin.hooks.protocols import CfnginHookProtocol
+
+  if TYPE_CHECKING:
+      from ...context import CfnginContext
 
   LOGGER = logging.getLogger(__name__)
 
@@ -238,9 +241,19 @@ These can then be used to parse the values provided in the :attr:`~cfngin.hook.a
 
       args: MyClassArgs
 
-      def __init__(self, **kwargs: Any) -> None:
-          """Instantiate class."""
-          self.args = MyClassArgs.parse_obj(kwargs)
+      def __init__(self, context: CfnginContext, **kwargs: Any) -> None:
+          """Instantiate class.
+
+          Args:
+              context: Context instance. (passed in by CFNgin)
+              provider: Provider instance. (passed in by CFNgin)
+
+          """
+          kwargs.setdefault("tags", {})
+
+          self.args = self.ARGS_PARSER.parse_obj(kwargs)
+          self.args.tags.update(context.tags)
+          self.context = context
 
       def post_deploy(self) -> Optional[Dict[str, str]]:
           """Run during the **post_deploy** stage."""
