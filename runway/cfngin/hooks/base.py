@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union, cast
 
 from troposphere import Tags
 
@@ -45,7 +45,8 @@ class Hook(CfnginHookProtocol):
 
     """
 
-    ARGS_PARSER: Type[HookArgsBaseModel] = HookArgsBaseModel
+    ARGS_PARSER: ClassVar[Type[HookArgsBaseModel]] = HookArgsBaseModel
+    """Class used to parse arguments passed to the hook."""
 
     args: HookArgsBaseModel
     blueprint: Optional[Blueprint] = None

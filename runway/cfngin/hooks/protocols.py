@@ -77,6 +77,7 @@ class CfnginHookProtocol(Protocol):
     """
 
     args: CfnginHookArgsProtocol
+    """Arguments passed to the hook and parsed into an object."""
 
     @abstractmethod
     def __init__(  # pylint: disable=super-init-not-called
