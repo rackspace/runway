@@ -53,14 +53,10 @@ class Bucket(DelCachedPropMixin):
 
     @property
     def exists(self) -> bool:
-        """Check whether the bucket exists.
+        """Check whether the bucket exists and is accessible."""
+        return not self.forbidden and not self.not_found
 
-        Opposite of not_found.
-
-        """
-        return not self.not_found
-
-    @cached_property
+    @property
     def forbidden(self) -> bool:
         """Check whether access to the bucket is forbidden."""
         return self.head.metadata.forbidden
@@ -85,7 +81,7 @@ class Bucket(DelCachedPropMixin):
             )
             return BaseResponse.parse_obj(err.response)
 
-    @cached_property
+    @property
     def not_found(self) -> bool:
         """Check whether the bucket exists."""
         return self.head.metadata.not_found
@@ -120,7 +116,7 @@ class Bucket(DelCachedPropMixin):
                 {"LocationConstraint": self.client.meta.region_name}
             )
         LOGGER.debug("creating bucket: %s", json.dumps(kwargs))
-        self._del_cached_property("forbidden", "not_found", "head")
+        self._del_cached_property("head")
         return self.client.create_bucket(**kwargs)
 
     def enable_versioning(self) -> None:
@@ -239,3 +235,7 @@ class Bucket(DelCachedPropMixin):
             session=self.session,
             src=self.format_bucket_path_uri(prefix=prefix),
         ).run()
+
+    def __bool__(self) -> bool:
+        """Implement evaluation of instances as a bool."""
+        return self.exists
