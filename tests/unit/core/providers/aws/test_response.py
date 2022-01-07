@@ -3,12 +3,7 @@
 # pyright: basic
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from runway.core.providers.aws import BaseResponse, ResponseError, ResponseMetadata
-
-if TYPE_CHECKING:
-    from pytest_mock import MockerFixture
 
 MODULE = "runway.core.providers.aws._response"
 
@@ -16,7 +11,7 @@ MODULE = "runway.core.providers.aws._response"
 class TestBaseResponse:
     """Test runway.core.providers.aws._response.BaseResponse."""
 
-    def test_init(self, mocker: MockerFixture) -> None:
+    def test_init(self) -> None:
         """Test init and the attributes it sets."""
         data = {"Error": {"Code": "something"}, "ResponseMetadata": {"HostId": "id"}}
         response = BaseResponse(**data.copy())
@@ -26,7 +21,7 @@ class TestBaseResponse:
         assert isinstance(response.metadata, ResponseMetadata)
         assert response.metadata.host_id == data["ResponseMetadata"]["HostId"]
 
-    def test_init_default(self, mocker: MockerFixture) -> None:
+    def test_init_default(self) -> None:
         """Test init default values and the attributes it sets."""
         response = BaseResponse()
         assert response.error == ResponseError()
