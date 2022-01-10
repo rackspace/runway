@@ -1767,14 +1767,17 @@ dev = ["pre-commit", "tox", "pytest-asyncio"]
 
 [[package]]
 name = "pytest-order"
-version = "1.0.0"
+version = "1.0.1"
 description = "pytest plugin to run your tests in a specific order"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.dependencies]
-pytest = ">=5.0"
+pytest = [
+    {version = ">=5.0", markers = "python_version < \"3.10\""},
+    {version = ">=6.2.4", markers = "python_version >= \"3.10\""},
+]
 
 [[package]]
 name = "pytest-subprocess"
@@ -3153,8 +3156,8 @@ pytest-mock = [
     {file = "pytest_mock-3.6.1-py3-none-any.whl", hash = "sha256:30c2f2cc9759e76eee674b81ea28c9f0b94f8f0445a1b87762cadf774f0df7e3"},
 ]
 pytest-order = [
-    {file = "pytest-order-1.0.0.tar.gz", hash = "sha256:5997a262b31234eebb461f9a9ef24687bf732029b499845a4398b69edb5ac321"},
-    {file = "pytest_order-1.0.0-py3-none-any.whl", hash = "sha256:a4cdf12f4c83c76bdfd6e6088e2e157df7fdf91a9c3e3ca7d8809e8dabce0f4b"},
+    {file = "pytest-order-1.0.1.tar.gz", hash = "sha256:5dd6b929fbd7eaa6d0ee07586f65c623babb0afe72b4843c5f15055d6b3b1b1f"},
+    {file = "pytest_order-1.0.1-py3-none-any.whl", hash = "sha256:bbe6e63a8e23741ab3e810d458d1ea7317e797b70f9550512d77d6e9e8fd1bbb"},
 ]
 pytest-subprocess = [
     {file = "pytest-subprocess-1.3.2.tar.gz", hash = "sha256:0fff72a8789eb34e0a383def6a79de01eb7cf22f549bf0d6cd5177fb8a9c1da2"},
