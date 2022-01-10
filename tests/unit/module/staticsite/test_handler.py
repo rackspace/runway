@@ -294,3 +294,24 @@ class TestStaticSite:
         )
         assert not obj.plan()
         mock_setup_website_module.assert_called_once_with(command="plan")
+
+    @pytest.mark.parametrize(
+        "provided, expected", [("foo", "foo"), ("foo.bar", "foo-bar")]
+    )
+    def test_sanitized_name(
+        self,
+        expected: str,
+        provided: str,
+        runway_context: RunwayContext,
+        tmp_path: Path,
+    ) -> None:
+        """Test sanitized_name."""
+        assert (
+            StaticSite(
+                runway_context,
+                module_root=tmp_path,
+                name=provided,
+                parameters={"namespace": "test", "staticsite_auth_at_edge": False},
+            ).sanitized_name
+            == expected
+        )
