@@ -2240,7 +2240,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "troposphere"
-version = "3.2.1"
+version = "3.2.2"
 description = "AWS CloudFormation creation library"
 category = "main"
 optional = false
@@ -3349,8 +3349,8 @@ tomli-w = [
     {file = "tomli_w-0.4.0.tar.gz", hash = "sha256:47643abe03b628b6e214c38cf0816dca7b63888e503ec8580d251e331c0526b6"},
 ]
 troposphere = [
-    {file = "troposphere-3.2.1-py3-none-any.whl", hash = "sha256:96dc445186d7af6ae853e698f6b7d155c8e745283366a0b89381240ac8e26286"},
-    {file = "troposphere-3.2.1.tar.gz", hash = "sha256:9ada9a0734a224570ad54c2550b25bd60d63619ccc46a558498a3e46c5316f96"},
+    {file = "troposphere-3.2.2-py3-none-any.whl", hash = "sha256:e802b1e67eecd24f7e4762b0f4e1609568e87beecb791a85930376423404823b"},
+    {file = "troposphere-3.2.2.tar.gz", hash = "sha256:9d07338ed882928db9de9795beb8ee553e9618db20d782237ee4e4f52dfb52b2"},
 ]
 typed-ast = [
     {file = "typed_ast-1.5.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:5d8314c92414ce7481eee7ad42b353943679cf6f30237b5ecbf7d835519e1212"},
