@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 import yaml
 
 from ..._logging import PrefixAdaptor
+from ...compat import cached_property
 from ...utils import YamlDumper
 from ..base import RunwayModule
 from ..cloudformation import CloudFormation
@@ -79,6 +80,19 @@ class StaticSite(RunwayModule):
         self._ensure_valid_environment_config()
         self._ensure_cloudfront_with_auth_at_edge()
         self._ensure_correct_region_with_auth_at_edge()
+
+    @cached_property
+    def sanitized_name(self) -> str:
+        """Sanitized name safe to use in a CloudFormation Stack name.
+
+        Errors are usually caused here by a ``.`` in the name.
+        This unintelligently replaces ``.`` with ``-``.
+
+        If issues are still encountered, we can check against the regex of
+        ``(?=^.{1,128}$)^[a-zA-Z][-a-zA-Z0-9_]+$``.
+
+        """
+        return self.name.replace(".", "-").strip("-")
 
     def deploy(self) -> None:
         """Create website CFN module and run CFNgin.deploy."""
@@ -182,7 +196,9 @@ class StaticSite(RunwayModule):
 
         pre_destroy = [
             {
-                "args": {"bucket_name": f"${{rxref {self.name}-dependencies::{i}}}"},
+                "args": {
+                    "bucket_name": f"${{rxref {self.sanitized_name}-dependencies::{i}}}"
+                },
                 "path": "runway.cfngin.hooks.cleanup_s3.purge_bucket",
                 "required": True,
             }
@@ -197,7 +213,7 @@ class StaticSite(RunwayModule):
                         "args": {
                             "user_pool_arn": self.parameters.user_pool_arn,
                             "aliases": self.parameters.aliases,
-                            "stack_name": f"${{namespace}}-{self.name}-dependencies",
+                            "stack_name": f"${{namespace}}-{self.sanitized_name}-dependencies",
                         },
                         "data_key": "aae_callback_url_retriever",
                         "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
@@ -248,7 +264,7 @@ class StaticSite(RunwayModule):
             "pre_destroy": pre_destroy,
             "service_role": self.parameters.service_role,
             "stacks": {
-                f"{self.name}-dependencies": {
+                f"{self.sanitized_name}-dependencies": {
                     "class_path": "runway.blueprints.staticsite.dependencies.Dependencies",
                     "variables": self._get_dependencies_variables(),
                 }
@@ -277,8 +293,10 @@ class StaticSite(RunwayModule):
         """
         # Default parameter name matches build_staticsite hook
         if not self.options.source_hashing.parameter:
-            self.options.source_hashing.parameter = f"${{namespace}}-{self.name}-hash"
-        nonce_secret_param = f"${{namespace}}-{self.name}-nonce-secret"
+            self.options.source_hashing.parameter = (
+                f"${{namespace}}-{self.sanitized_name}-hash"
+            )
+        nonce_secret_param = f"${{namespace}}-{self.sanitized_name}-nonce-secret"
 
         build_staticsite_args: Dict[str, Any] = {
             # ensures yaml.safe_load will work by using JSON to convert objects
@@ -286,10 +304,10 @@ class StaticSite(RunwayModule):
         }
         build_staticsite_args[
             "artifact_bucket_rxref_lookup"
-        ] = f"{self.name}-dependencies::ArtifactsBucketName"
-        build_staticsite_args["options"]["namespace"] = "${namespace}"  # type: ignore
-        build_staticsite_args["options"]["name"] = self.name  # type: ignore
-        build_staticsite_args["options"]["path"] = os.path.join(  # type: ignore
+        ] = f"{self.sanitized_name}-dependencies::ArtifactsBucketName"
+        build_staticsite_args["options"]["namespace"] = "${namespace}"
+        build_staticsite_args["options"]["name"] = self.sanitized_name
+        build_staticsite_args["options"]["path"] = os.path.join(
             os.path.realpath(self.ctx.env.root_dir), self.path
         )
 
@@ -309,15 +327,15 @@ class StaticSite(RunwayModule):
         post_deploy = [
             {
                 "args": {
-                    "bucket_name": f"${{cfn ${{namespace}}-{self.name}.BucketName}}",
+                    "bucket_name": f"${{cfn ${{namespace}}-{self.sanitized_name}.BucketName}}",
                     "cf_disabled": site_stack_variables["DisableCloudFront"],
-                    "distribution_domain": f"${{cfn ${{namespace}}-{self.name}."
+                    "distribution_domain": f"${{cfn ${{namespace}}-{self.sanitized_name}."
                     "CFDistributionDomainName::default=undefined}",
-                    "distribution_id": f"${{cfn ${{namespace}}-{self.name}.CFDistributionId::"
-                    "default=undefined}",
+                    "distribution_id": f"${{cfn ${{namespace}}-{self.sanitized_name}"
+                    ".CFDistributionId::default=undefined}",
                     "extra_files": [i.dict() for i in self.options.extra_files],
-                    "website_url": f"${{cfn ${{namespace}}-{self.name}.BucketWebsiteURL::"
-                    "default=undefined}",
+                    "website_url": f"${{cfn ${{namespace}}-{self.sanitized_name}"
+                    ".BucketWebsiteURL::default=undefined}",
                 },
                 "path": "runway.cfngin.hooks.staticsite.upload_staticsite.sync",
                 "required": True,
@@ -326,7 +344,9 @@ class StaticSite(RunwayModule):
 
         pre_destroy = [
             {
-                "args": {"bucket_name": f"${{rxref {self.name}::BucketName}}"},
+                "args": {
+                    "bucket_name": f"${{rxref {self.sanitized_name}::BucketName}}"
+                },
                 "path": "runway.cfngin.hooks.cleanup_s3.purge_bucket",
                 "required": True,
             }
@@ -335,7 +355,7 @@ class StaticSite(RunwayModule):
         if self.parameters.rewrite_directory_index or self.parameters.auth_at_edge:
             pre_destroy.append(
                 {
-                    "args": {"stack_relative_name": self.name},
+                    "args": {"stack_relative_name": self.sanitized_name},
                     "path": "runway.cfngin.hooks.staticsite.cleanup.warn",
                     "required": False,
                 }
@@ -394,7 +414,7 @@ class StaticSite(RunwayModule):
                         "required": True,
                         "data_key": "client_updater",
                         "args": self._get_client_updater_variables(
-                            self.name, site_stack_variables
+                            self.sanitized_name, site_stack_variables
                         ),
                     },
                 )
@@ -418,7 +438,7 @@ class StaticSite(RunwayModule):
             "pre_destroy": pre_destroy,
             "service_role": self.parameters.service_role,
             "stacks": {
-                self.name: {
+                self.sanitized_name: {
                     "class_path": f"runway.blueprints.staticsite.{class_path}",
                     "variables": site_stack_variables,
                 }
@@ -450,7 +470,7 @@ class StaticSite(RunwayModule):
             "cfngin_bucket": "",
             "service_role": self.parameters.service_role,
             "stacks": {
-                f"{self.name}-cleanup": {
+                f"{self.sanitized_name}-cleanup": {
                     "template_path": os.path.join(
                         tempfile.gettempdir(), "thisfileisnotused.yaml"
                     ),
@@ -489,7 +509,7 @@ class StaticSite(RunwayModule):
         if self.parameters.enable_cf_logging:
             site_stack_variables[
                 "LogBucketName"
-            ] = f"${{rxref {self.name}-dependencies::AWSLogBucketName}}"
+            ] = f"${{rxref {self.sanitized_name}-dependencies::AWSLogBucketName}}"
 
         if self.parameters.auth_at_edge:
             self._ensure_auth_at_edge_requirements()
@@ -548,14 +568,14 @@ class StaticSite(RunwayModule):
         if self.parameters.create_user_pool:
             args[
                 "created_user_pool_id"
-            ] = f"${{rxref {self.name}-dependencies::AuthAtEdgeUserPoolId}}"
+            ] = f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeUserPoolId}}"
 
         return args
 
     def _get_domain_updater_variables(self) -> Dict[str, str]:
         return {
-            "client_id_output_lookup": f"{self.name}-dependencies::AuthAtEdgeClient",
-            "client_id": f"${{rxref {self.name}-dependencies::AuthAtEdgeClient}}",
+            "client_id_output_lookup": f"{self.sanitized_name}-dependencies::AuthAtEdgeClient",
+            "client_id": f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeClient}}",
         }
 
     def _get_lambda_config_variables(
@@ -565,8 +585,8 @@ class StaticSite(RunwayModule):
         required_group: Optional[str] = None,
     ) -> Dict[str, Any]:
         return {
-            "client_id": f"${{rxref {self.name}-dependencies::AuthAtEdgeClient}}",
-            "bucket": f"${{rxref {self.name}-dependencies::ArtifactsBucketName}}",
+            "client_id": f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeClient}}",
+            "bucket": f"${{rxref {self.sanitized_name}-dependencies::ArtifactsBucketName}}",
             "cookie_settings": site_stack_variables["CookieSettings"],
             "http_headers": site_stack_variables["HttpHeaders"],
             "nonce_signing_secret_param_name": nonce_secret_param,
@@ -584,7 +604,7 @@ class StaticSite(RunwayModule):
             "alternate_domains": [
                 add_url_scheme(x) for x in site_stack_variables["Aliases"]
             ],
-            "client_id": f"${{rxref {self.name}-dependencies::AuthAtEdgeClient}}",
+            "client_id": f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeClient}}",
             "distribution_domain": f"${{rxref {name}::CFDistributionDomainName}}",
             "oauth_scopes": site_stack_variables["OAuthScopes"],
             "redirect_path_sign_in": site_stack_variables["RedirectPathSignIn"],

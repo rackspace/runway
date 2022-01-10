@@ -65,7 +65,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         compress: Whether the CloudFront default cache behavior will automatically
             compress certain files.
         cookie_settings: The default cookie settings for retrieved tokens and
-            generated nonce’s.
+            generated nonce's.
         create_user_pool: Wether to create a User Pool for the Auth@Edge
             configuration.
         custom_error_responses: Define custom error responses.
@@ -75,8 +75,8 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
             Lambda@Edge associations with their pre-build function versions.
         namespace: The unique namespace for the deployment.
         non_spa: Wether this site is a single page application (SPA).
-        oauth_scopes: Scope is a mechanism in OAuth 2.0 to limit an application’s
-            access to a user’s account.
+        oauth_scopes: Scope is a mechanism in OAuth 2.0 to limit an application's
+            access to a user's account.
         redirect_path_auth_refresh: The path that a user is redirected to when
             their authorization tokens have expired (1 hour).
         redirect_path_sign_in: The path that a user is redirected to after sign-in.
