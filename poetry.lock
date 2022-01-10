@@ -1168,7 +1168,7 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "moto"
-version = "2.3.0"
+version = "2.3.1"
 description = "A library that allows your python tests to easily mock out the boto library"
 category = "dev"
 optional = false
@@ -2901,8 +2901,8 @@ mock = [
     {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
 ]
 moto = [
-    {file = "moto-2.3.0-py2.py3-none-any.whl", hash = "sha256:0a1913f8cfe1ea8a14bf7807de1e34df9731818dca70c91f3f42015c2d7a102c"},
-    {file = "moto-2.3.0.tar.gz", hash = "sha256:0d6a179622bb9d0cd8141bb33d78882039ce7400aca3a8c07ad6d00076b60c62"},
+    {file = "moto-2.3.1-py2.py3-none-any.whl", hash = "sha256:6c48e41aecc9ca390b655ee12d327c71dac837ffb33cad9571d9deb989ddfad4"},
+    {file = "moto-2.3.1.tar.gz", hash = "sha256:477e6a94c5e940c649c1276276afe6e041a068943a6969009dcca69aa1e7463a"},
 ]
 mypy-boto3 = [
     {file = "mypy-boto3-1.20.28.tar.gz", hash = "sha256:0654e8b6c4b435c5a00255fdb71ff97a4ab8d21d58269a96b72dd65753d3d551"},
