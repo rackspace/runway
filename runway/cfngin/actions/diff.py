@@ -149,6 +149,7 @@ def format_params_diff(parameter_diff: List[DictValue[Any, Any]]) -> str:
         "+++ New Parameters\n"
         "******************\n"
         + "\n".join(line for v in parameter_diff for line in v.changes())
+        + "\n"
     )
 
 
