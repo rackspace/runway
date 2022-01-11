@@ -1,14 +1,14 @@
 """Fake Docker API."""
 # cspell:disable
 # flake8: noqa=D103
-# pylint: disable=invalid-name,missing-docstring
+# pylint: disable=consider-using-f-string,invalid-name,missing-docstring
 from typing import Any, Callable, Dict, Tuple, Union
 
 from docker import constants
 
 from . import fake_stat
 
-CURRENT_VERSION = "v{0}".format(constants.DEFAULT_DOCKER_API_VERSION)
+CURRENT_VERSION = f"v{constants.DEFAULT_DOCKER_API_VERSION}"
 
 FAKE_CONTAINER_ID = "3cc2351ab11b"
 FAKE_IMAGE_ID = "e9aa60c60128"

@@ -1,5 +1,5 @@
 """Sign user out of Cognito and remove all Cookie Headers."""
-
+# pylint: disable=consider-using-f-string
 import logging
 from urllib.parse import urlencode
 

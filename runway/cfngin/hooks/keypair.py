@@ -200,8 +200,7 @@ def interactive_prompt(
     try:
         while True:
             action = get_raw_input(
-                'import or create keypair "%s"? (import/create/cancel) '
-                % (keypair_name,)
+                f'import or create keypair "{keypair_name}"? (import/create/cancel) '
             )
 
             if action.lower() == "cancel":

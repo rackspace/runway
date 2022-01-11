@@ -9,6 +9,7 @@ If a refresh token exists and it has expired (after 1 hour) do an automatic refr
 of the credentials by redirecting the user to the refresh agent.
 
 """
+# pylint: disable=consider-using-f-string
 import base64
 import datetime
 import hashlib

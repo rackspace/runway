@@ -309,7 +309,6 @@ notes = ["FIXME"]
 [tool.pylint.message_control]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#messages-control-options
 disable = [
-  "consider-using-f-string",  # TODO remove
   "line-too-long",  # flake8 overlap
   "missing-class-docstring",  # flake8 (pydocstyle) overlap
   "missing-function-docstring",  # flake8 (pydocstyle) overlap

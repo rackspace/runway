@@ -764,12 +764,7 @@ class Provider(BaseProvider):
     @staticmethod
     def _tail_print(event: StackEventTypeDef) -> None:
         print(  # noqa: T001
-            "%s %s %s"
-            % (
-                event.get("ResourceStatus"),
-                event.get("ResourceType"),
-                event.get("EventId"),
-            )
+            f'{event.get("ResourceStatus")} {event.get("ResourceType")} {event.get("EventId")}'
         )
 
     def get_delete_failed_status_reason(self, stack_name: str) -> Optional[str]:

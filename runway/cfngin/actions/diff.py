@@ -144,13 +144,11 @@ def format_params_diff(parameter_diff: List[DictValue[Any, Any]]) -> str:
         A formatted string that represents a parameter diff
 
     """
-    params_output = "\n".join(line for v in parameter_diff for line in v.changes())
     return (
-        """--- Old Parameters
-+++ New Parameters
-******************
-%s\n"""
-        % params_output
+        "--- Old Parameters\n"
+        "+++ New Parameters\n"
+        "******************\n"
+        + "\n".join(line for v in parameter_diff for line in v.changes())
     )
 
 

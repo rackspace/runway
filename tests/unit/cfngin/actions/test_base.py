@@ -296,12 +296,6 @@ class TestBaseAction(unittest.TestCase):
         ):
             self.assertEqual(
                 action.stack_template_url(blueprint),
-                "%s/%s/stack_templates/%s/%s-%s.json"
-                % (
-                    endpoint,
-                    "cfngin-mynamespace-us-east-1",
-                    "mynamespace-myblueprint",
-                    "myblueprint",
-                    MOCK_VERSION,
-                ),
+                f"{endpoint}/cfngin-{context.namespace}-{region}/stack_templates/"
+                f"{context.namespace}-{blueprint.name}/{blueprint.name}-{MOCK_VERSION}.json",
             )

@@ -163,16 +163,14 @@ class CfnginContext(BaseContext):
         if not self.bucket_name or not self.config.persistent_graph_key:
             return {}
 
+        key = (
+            self.config.persistent_graph_key + ".json"
+            if not self.config.persistent_graph_key.endswith(".json")
+            else self.config.persistent_graph_key
+        )
         return {
             "Bucket": self.bucket_name,
-            "Key": "persistent_graphs/{namespace}/{key}".format(  # noqa: FS002
-                namespace=self.config.namespace,
-                key=(
-                    self.config.persistent_graph_key + ".json"
-                    if not self.config.persistent_graph_key.endswith(".json")
-                    else self.config.persistent_graph_key
-                ),
-            ),
+            "Key": f"persistent_graphs/{self.config.namespace}/{key}",
         }
 
     @property

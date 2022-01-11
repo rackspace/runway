@@ -23,10 +23,9 @@ class ImageNotFound(Exception):
     def __init__(self, search_string: str) -> None:
         """Instantiate class."""
         self.search_string = search_string
-        message = ("Unable to find ec2 image with search string: {}").format(
-            search_string
+        super().__init__(
+            f"Unable to find ec2 image with search string: {search_string}"
         )
-        super().__init__(message)
 
 
 class AmiLookup(LookupHandler):

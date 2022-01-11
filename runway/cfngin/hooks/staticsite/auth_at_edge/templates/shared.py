@@ -1,4 +1,5 @@
 """Shared functionality for the Auth@Edge Lambda suite."""
+# pylint: disable=consider-using-f-string
 import base64
 import hmac
 import json
