@@ -35,6 +35,7 @@ clean: ## remove generated file from the project directory
 	rm -rf src/
 	rm -rf postinstall.js preuninstall.js .coverage .npmignore
 	find . -name ".runway" -type d -prune -exec rm -rf '{}' +
+	@make -C docs clean
 
 cov-report: ## display a report in the terminal of files missing coverage
 	@poetry run coverage report \
@@ -54,6 +55,12 @@ cov-xml: ## convert .coverage to coverage.xml for use with codecov
 
 create-tfenv-ver-file: ## create a tfenv version file using the latest version
 	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
+
+docs: ## delete current HTML docs & build fresh HTML docs
+	@make -C docs docs
+
+docs-changes: ## build HTML docs; only builds changes detected by Sphinx
+	@make -C docs html
 
 fix-black: ## automatically fix all black errors
 	@poetry run black .
@@ -103,6 +110,9 @@ npm-prep: version ## process that needs to be run before creating an npm package
 	cp package.json tmp/package.json
 	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
 	rm -rf tmp/package.json
+
+open-docs: ## open docs (HTML files must already exists)
+	@make -C docs open
 
 run-pre-commit: ## run pre-commit for all files
 	@poetry run pre-commit run -a
