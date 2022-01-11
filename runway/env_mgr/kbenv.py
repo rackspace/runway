@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import locale
 import logging
 import os
 import platform
@@ -211,7 +212,9 @@ class KBEnvManager(EnvManager):
         """
         file_path = file_path or self.version_file
         if file_path and file_path.is_file():
-            return file_path.read_text().strip()
+            return file_path.read_text(
+                encoding=locale.getpreferredencoding(do_setlocale=False)
+            ).strip()
         LOGGER.debug("file path not provided and version file could not be found")
         return None
 

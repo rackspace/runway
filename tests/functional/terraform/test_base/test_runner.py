@@ -7,6 +7,7 @@ Other tests should exist to test low-level interactions with Terraform.
 # pylint: disable=redefined-outer-name
 from __future__ import annotations
 
+import locale
 import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING, Generator, cast
@@ -31,7 +32,10 @@ CURRENT_DIR = Path(__file__).parent
 def tf_version(request: SubRequest) -> Generator[str, None, None]:
     """Set Terraform version."""
     file_path = CURRENT_DIR / TF_VERSION_FILENAME
-    file_path.write_text(cast(str, request.param) + "\n")
+    file_path.write_text(
+        cast(str, request.param) + "\n",
+        encoding=locale.getpreferredencoding(do_setlocale=False),
+    )
     yield cast(str, request.param)
     file_path.unlink(missing_ok=True)  # pylint: disable=unexpected-keyword-arg
 

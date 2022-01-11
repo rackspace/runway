@@ -1,4 +1,5 @@
 """``runway gen-sample k8s-cfn`` command."""
+import locale
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -37,18 +38,22 @@ def k8s_cfn_repo(ctx: click.Context, **_: Any) -> None:
     env = {"namespace": "test"}
 
     LOGGER.verbose("rendering master templates...")
+    encoding = locale.getpreferredencoding(do_setlocale=False)
     master_templates.mkdir()
     (master_templates / "k8s_iam.yaml").write_text(
-        to_yaml(Iam("test", CfnginContext(environment=env.copy())).to_json())
+        to_yaml(Iam("test", CfnginContext(environment=env.copy())).to_json()),
+        encoding=encoding,
     )
     (master_templates / "k8s_master.yaml").write_text(
-        to_yaml(Cluster("test", CfnginContext(environment=env.copy())).to_json())
+        to_yaml(Cluster("test", CfnginContext(environment=env.copy())).to_json()),
+        encoding=encoding,
     )
 
     LOGGER.verbose("rendering worker templates...")
     worker_templates.mkdir()
     (worker_templates / "k8s_workers.yaml").write_text(
-        to_yaml(NodeGroup("test", CfnginContext(environment=env.copy())).to_json())
+        to_yaml(NodeGroup("test", CfnginContext(environment=env.copy())).to_json()),
+        encoding=encoding,
     )
 
     LOGGER.success("Sample k8s infrastructure repo created at %s", dest)

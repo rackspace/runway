@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import locale
 import os.path
 import random
 import string
@@ -637,7 +638,11 @@ class TestProviderDefaultMode(unittest.TestCase):
         """Test create_stack, force changeset, termination protection."""
         stack_name = "fake_stack"
         template_path = Path("./tests/unit/cfngin/fixtures/cfn_template.yaml")
-        template = Template(body=template_path.read_text())
+        template = Template(
+            body=template_path.read_text(
+                encoding=locale.getpreferredencoding(do_setlocale=False)
+            )
+        )
         parameters: List[Any] = []
         tags: List[Any] = []
 

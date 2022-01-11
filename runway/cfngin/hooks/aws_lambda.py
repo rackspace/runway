@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import locale
 import logging
 import os
 import shutil
@@ -623,7 +624,10 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
                     '   runpy.run_module("pip", run_name="__main__")\n',
                 ]
             )
-            tmp_script.write_text(script_contents)
+            tmp_script.write_text(
+                script_contents,
+                encoding=locale.getpreferredencoding(do_setlocale=False),
+            )
             cmd = [sys.executable, "run-python", str(tmp_script)]
         else:
             if not _pip_has_no_color_option(pip_cmd[0]):

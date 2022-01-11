@@ -1,5 +1,6 @@
 """``runway new`` command."""
 # docs: file://./../../../docs/source/commands.rst
+import locale
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -40,7 +41,9 @@ def new(ctx: click.Context, **_: Any) -> None:
         )
         ctx.exit(1)
 
-    runway_yml.write_text(RUNWAY_YML)
+    runway_yml.write_text(
+        RUNWAY_YML, encoding=locale.getpreferredencoding(do_setlocale=False)
+    )
     LOGGER.success("runway.yml generated")
     LOGGER.notice(
         "See addition getting started information at "

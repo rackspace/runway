@@ -1,4 +1,5 @@
 """``runway gen-sample tf`` command."""
+import locale
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
@@ -28,6 +29,9 @@ def tf(ctx: click.Context, **_: Any) -> None:  # pylint: disable=invalid-name
     copy_sample(ctx, src, dest)
 
     if not (src / ".terraform-version").is_file():
-        (dest / ".terraform-version").write_text(get_latest_tf_version())
+        (dest / ".terraform-version").write_text(
+            get_latest_tf_version(),
+            encoding=locale.getpreferredencoding(do_setlocale=False),
+        )
 
     LOGGER.success("Sample Terraform app created at %s", dest)

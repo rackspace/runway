@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import locale
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -357,7 +358,9 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         return cast(
             "Model",
             cls.parse_raw(
-                path.read_text() if isinstance(path, Path) else Path(path).read_text(),
+                Path(path).read_text(
+                    encoding=locale.getpreferredencoding(do_setlocale=False)
+                ),
                 content_type=content_type,  # type: ignore
                 encoding=encoding,
                 proto=proto,  # type: ignore

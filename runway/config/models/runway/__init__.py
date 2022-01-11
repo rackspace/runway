@@ -2,6 +2,7 @@
 # pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
+import locale
 import logging
 from pathlib import Path
 from typing import (
@@ -643,7 +644,9 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         return cast(
             "Model",
             cls.parse_raw(
-                path.read_text() if isinstance(path, Path) else Path(path).read_text(),
+                Path(path).read_text(
+                    encoding=locale.getpreferredencoding(do_setlocale=False)
+                ),
                 content_type=content_type,  # type: ignore
                 encoding=encoding,
                 proto=proto,  # type: ignore

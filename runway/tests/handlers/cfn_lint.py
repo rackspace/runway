@@ -1,6 +1,7 @@
 """cfn-list test runner."""
 from __future__ import annotations
 
+import locale
 import logging
 import runpy
 import sys
@@ -44,7 +45,14 @@ class CfnLintHandler(TestHandler):
                 runpy.run_module("cfnlint", run_name="__main__")
         except SystemExit as err:  # this call will always result in SystemExit
             if err.code != 0:  # ignore zero exit codes but re-raise for non-zero
-                if not (yaml.safe_load(cfnlintrc.read_text()) or {}).get("templates"):
+                if not (
+                    yaml.safe_load(
+                        cfnlintrc.read_text(
+                            encoding=locale.getpreferredencoding(do_setlocale=False)
+                        )
+                    )
+                    or {}
+                ).get("templates"):
                     logger.warning(
                         'cfnlintrc is missing a "templates" '
                         "section which is required by cfn-lint"
