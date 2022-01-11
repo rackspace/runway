@@ -74,10 +74,9 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
                 err.variable.name,
             )
             regions = self._data.regions or self._data.parallel_regions
-        return "{name} - {modules} ({regions})".format(  # noqa: FS002
-            name=self.name,
-            modules=", ".join(module.name for module in self.modules),
-            regions=", ".join(regions if isinstance(regions, list) else [regions]),
+        return (
+            f"{self.name} - {', '.join(module.name for module in self.modules)} "
+            f"({', '.join(regions if isinstance(regions, list) else [regions])})"
         )
 
     @property

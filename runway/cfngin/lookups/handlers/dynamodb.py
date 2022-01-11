@@ -120,9 +120,7 @@ def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
             # the datatypes are pulled from the dynamodb docs
             if match.group(1) not in valid_dynamodb_datatypes:
                 raise ValueError(
-                    ("CFNgin does not support looking up the datatype: {}").format(
-                        str(match.group(1))
-                    )
+                    f"CFNgin does not support looking up the datatype: {match.group(1)}"
                 )
             match_val = cast(Literal["L", "M", "N", "S"], match.group(1))
             key = key.replace(match.group(0), "")
@@ -143,12 +141,9 @@ def _build_projection_expression(clean_table_keys: List[str]) -> str:
         str: A projection expression for the DynamoDB lookup.
 
     """
-    projection_expression = "".join(
-        ("{},").format(key) for key in clean_table_keys[:-1]
-    )
-
-    projection_expression += clean_table_keys[-1]
-    return projection_expression
+    projection_expression = ",".join(clean_table_keys[:-1])
+    projection_expression += f",{clean_table_keys[-1]}"
+    return projection_expression.strip(",")
 
 
 def _get_val_from_ddb_data(data: Dict[str, Any], keylist: List[Dict[str, str]]) -> Any:
