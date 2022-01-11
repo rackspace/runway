@@ -1,6 +1,7 @@
 """Output Runway configuration file schema."""
 from __future__ import annotations
 
+import locale
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional, cast
@@ -46,7 +47,9 @@ def runway(indent: int, output: Optional[str], **_: Any) -> None:
     content = RunwayConfigDefinitionModel.schema_json(indent=indent)
     if output:
         file_path = Path(output).absolute()
-        file_path.write_text(content + "\n")  # append empty line to end of file
+        file_path.write_text(  # append empty line to end of file
+            content + "\n", encoding=locale.getpreferredencoding(do_setlocale=False)
+        )
         LOGGER.success("output JSON schema to %s", file_path)
     else:
         click.echo(content)

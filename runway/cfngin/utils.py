@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import locale
 import logging
 import os
 import re
@@ -379,7 +380,9 @@ def read_value_from_path(value: str, *, root_path: Optional[Path] = None) -> str
             else:
                 read_path = root_path.parent / path
         if read_path.is_file():
-            return read_path.read_text()
+            return read_path.read_text(
+                encoding=locale.getpreferredencoding(do_setlocale=False)
+            )
         if read_path.is_dir():
             raise ValueError(
                 f"path must lead to a file not directory: {read_path.absolute()}"
