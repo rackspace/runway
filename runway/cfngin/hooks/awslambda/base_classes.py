@@ -147,7 +147,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar]):
 
     @cached_property
     def runtime(self) -> str:
-        """Runtime of the build system.
+        """runtime of the build system.
 
         Value should be a valid Lambda Function runtime
         (https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html).
@@ -162,7 +162,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar]):
 
     @cached_property
     def _runtime_from_docker(self) -> Optional[str]:
-        """Runtime from Docker if class can use Docker."""
+        """runtime from Docker if class can use Docker."""
         docker: Optional[DockerDependencyInstaller] = getattr(self, "docker", None)
         if not docker:
             return None
@@ -379,14 +379,14 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
     def _build_response_deploy(self) -> AwsLambdaHookDeployResponse:
         """Build response for deploy stage."""
         return AwsLambdaHookDeployResponse(
-            CodeSha256=self.deployment_package.code_sha256,
-            CompatibleArchitectures=self.deployment_package.compatible_architectures,
-            CompatibleRuntimes=self.deployment_package.compatible_runtimes,
-            License=self.deployment_package.license,
-            Runtime=self.deployment_package.runtime,
-            S3Bucket=self.deployment_package.bucket.name,
-            S3Key=self.deployment_package.object_key,
-            S3ObjectVersion=self.deployment_package.object_version_id,
+            bucket_name=self.deployment_package.bucket.name,
+            code_sha256=self.deployment_package.code_sha256,
+            compatible_architectures=self.deployment_package.compatible_architectures,
+            compatible_runtimes=self.deployment_package.compatible_runtimes,
+            license=self.deployment_package.license,
+            object_key=self.deployment_package.object_key,
+            object_version_id=self.deployment_package.object_version_id,
+            runtime=self.deployment_package.runtime,
         )
 
     def _build_response_destroy(self) -> Optional[BaseModel]:
@@ -397,25 +397,25 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
         """Build response for plan stage."""
         try:
             return AwsLambdaHookDeployResponse(
-                CodeSha256=self.deployment_package.code_sha256,
-                CompatibleArchitectures=self.deployment_package.compatible_architectures,
-                CompatibleRuntimes=self.deployment_package.compatible_runtimes,
-                License=self.deployment_package.license,
-                Runtime=self.deployment_package.runtime,
-                S3Bucket=self.deployment_package.bucket.name,
-                S3Key=self.deployment_package.object_key,
-                S3ObjectVersion=self.deployment_package.object_version_id,
+                bucket_name=self.deployment_package.bucket.name,
+                code_sha256=self.deployment_package.code_sha256,
+                compatible_architectures=self.deployment_package.compatible_architectures,
+                compatible_runtimes=self.deployment_package.compatible_runtimes,
+                license=self.deployment_package.license,
+                object_key=self.deployment_package.object_key,
+                object_version_id=self.deployment_package.object_version_id,
+                runtime=self.deployment_package.runtime,
             )
         except FileNotFoundError:
             return AwsLambdaHookDeployResponse(
-                CodeSha256="WILL CALCULATE WHEN BUILT",
-                CompatibleArchitectures=self.deployment_package.compatible_architectures,
-                CompatibleRuntimes=self.deployment_package.compatible_runtimes,
-                License=self.deployment_package.license,
-                Runtime=self.deployment_package.runtime,
-                S3Bucket=self.deployment_package.bucket.name,
-                S3Key=self.deployment_package.object_key,
-                S3ObjectVersion=self.deployment_package.object_version_id,
+                bucket_name=self.deployment_package.bucket.name,
+                code_sha256="WILL CALCULATE WHEN BUILT",
+                compatible_architectures=self.deployment_package.compatible_architectures,
+                compatible_runtimes=self.deployment_package.compatible_runtimes,
+                license=self.deployment_package.license,
+                object_key=self.deployment_package.object_key,
+                object_version_id=self.deployment_package.object_version_id,
+                runtime=self.deployment_package.runtime,
             )
 
     def cleanup(self) -> None:

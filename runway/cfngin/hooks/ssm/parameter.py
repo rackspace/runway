@@ -6,7 +6,7 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
-from pydantic import Extra, Field, validator
+from pydantic import Extra, validator
 from typing_extensions import Literal, TypedDict
 
 from ....compat import cached_property
@@ -60,26 +60,37 @@ class ArgsDataModel(BaseModel):
 
     """
 
-    allowed_pattern: Optional[str] = Field(default=None, alias="AllowedPattern")
-    data_type: Optional[Literal["aws:ec2:image", "text"]] = Field(
-        default=None, alias="DataType"
-    )
-    description: Optional[str] = Field(default=None, alias="Description")
+    allowed_pattern: Optional[str] = None
+    data_type: Optional[Literal["aws:ec2:image", "text"]] = None
+    description: Optional[str] = None
     force: bool = False
-    key_id: Optional[str] = Field(default=None, alias="KeyId")
-    name: str = Field(..., alias="Name")
-    overwrite: bool = Field(default=True, alias="Overwrite")
-    policies: Optional[str] = Field(default=None, alias="Policies")
-    tags: Optional[List[TagDataModel]] = Field(default=None, alias="Tags")
-    tier: ParameterTierType = Field(default="Standard", alias="Tier")
-    type: Literal["String", "StringList", "SecureString"] = Field(..., alias="Type")
-    value: Optional[str] = Field(default=None, alias="Value")
+    key_id: Optional[str] = None
+    name: str
+    overwrite: bool = True
+    policies: Optional[str] = None
+    tags: Optional[List[TagDataModel]] = None
+    tier: ParameterTierType = "Standard"
+    type: Literal["String", "StringList", "SecureString"]
+    value: Optional[str] = None
 
     class Config:
         """Model configuration."""
 
         allow_population_by_field_name = True
         extra = Extra.ignore
+        fields = {
+            "allowed_pattern": {"alias": "AllowedPattern"},
+            "data_type": {"alias": "DataType"},
+            "description": {"alias": "Description"},
+            "key_id": {"alias": "KeyId"},
+            "name": {"alias": "Name"},
+            "overwrite": {"alias": "Overwrite"},
+            "policies": {"alias": "Policies"},
+            "tags": {"alias": "Tags"},
+            "tier": {"alias": "Tier"},
+            "type": {"alias": "Type"},
+            "value": {"alias": "Value"},
+        }
 
     @validator("policies", allow_reuse=True, pre=True)
     def _convert_policies(cls, v: Union[List[Dict[str, Any]], str, Any]) -> str:

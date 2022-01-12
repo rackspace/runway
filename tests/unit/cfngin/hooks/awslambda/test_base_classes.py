@@ -60,12 +60,12 @@ class TestAwsLambdaHook:
         assert AwsLambdaHook(Mock()).build_response(
             "deploy"
         ) == AwsLambdaHookDeployResponse(
-            CodeSha256=deployment_package.code_sha256,
-            License="license",
-            Runtime=deployment_package.runtime,
-            S3Bucket=deployment_package.bucket.name,
-            S3Key=deployment_package.object_key,
-            S3ObjectVersion=deployment_package.object_version_id,
+            bucket_name=deployment_package.bucket.name,
+            code_sha256=deployment_package.code_sha256,
+            license="license",
+            object_key=deployment_package.object_key,
+            object_version_id=deployment_package.object_version_id,
+            runtime=deployment_package.runtime,
         )
 
     def test_build_response_destroy(self) -> None:
@@ -96,11 +96,11 @@ class TestAwsLambdaHook:
         assert AwsLambdaHook(Mock()).build_response(
             "plan"
         ) == AwsLambdaHookDeployResponse(
-            S3Bucket=deployment_package.bucket.name,
-            CodeSha256=deployment_package.code_sha256,
-            S3Key=deployment_package.object_key,
-            S3ObjectVersion=deployment_package.object_version_id,
-            Runtime=deployment_package.runtime,
+            bucket_name=deployment_package.bucket.name,
+            code_sha256=deployment_package.code_sha256,
+            object_key=deployment_package.object_key,
+            object_version_id=deployment_package.object_version_id,
+            runtime=deployment_package.runtime,
         )
 
     def test_build_response_plan_handle_file_not_found_error(

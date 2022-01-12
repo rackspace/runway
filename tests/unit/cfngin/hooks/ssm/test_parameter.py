@@ -30,7 +30,7 @@ class TestArgsDataModel:
 
     def test_field_defaults(self) -> None:
         """Test field values."""
-        obj = ArgsDataModel(Name="test", Type="String")
+        obj = ArgsDataModel(name="test", type="String")
         assert not obj.allowed_pattern
         assert not obj.data_type
         assert not obj.description
@@ -53,9 +53,9 @@ class TestArgsDataModel:
         """Test policies."""
         with pytest.raises(ValidationError, match="Policies"):
             assert not ArgsDataModel(
-                Name="test",
+                name="test",
                 Policies=True,  # type: ignore
-                Type="String",
+                type="String",
             )
 
     def test_policies_json(self) -> None:
@@ -69,9 +69,9 @@ class TestArgsDataModel:
         ]
         assert (
             ArgsDataModel(
-                Name="test",
+                name="test",
                 Policies=data,  # type: ignore
-                Type="String",
+                type="String",
             ).policies
             == json.dumps(data)
         )
@@ -87,17 +87,17 @@ class TestArgsDataModel:
                 }
             ]
         )
-        assert ArgsDataModel(Name="test", Policies=data, Type="String").policies == data
+        assert ArgsDataModel(name="test", policies=data, type="String").policies == data
 
     def test_tags_dict(self) -> None:
         """Test tags."""
         assert (
             ArgsDataModel(
-                Name="test",
-                Tags={"tag-key": "tag-value"},  # type: ignore
-                Type="String",
+                name="test",
+                tags={"tag-key": "tag-value"},  # type: ignore
+                type="String",
             ).tags
-            == [TagDataModel(Key="tag-key", Value="tag-value")]
+            == [TagDataModel(key="tag-key", value="tag-value")]
         )
 
     def test_tags_raise_type_error(self) -> None:

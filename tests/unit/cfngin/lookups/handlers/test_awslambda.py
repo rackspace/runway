@@ -32,14 +32,14 @@ QUERY = "test::foo=bar"
 def hook_data() -> AwsLambdaHookDeployResponse:
     """Fixture for hook response data."""
     return AwsLambdaHookDeployResponse(
-        CodeSha256="code_sha256",
-        CompatibleArchitectures=["compatible_architectures"],
-        CompatibleRuntimes=["compatible_runtimes"],
-        License="license",
-        Runtime="runtime",
-        S3Bucket="bucket_name",
-        S3Key="object_key",
-        S3ObjectVersion="object_version_id",
+        code_sha256="code_sha256",
+        compatible_architectures=["compatible_architectures"],
+        compatible_runtimes=["compatible_runtimes"],
+        license="license",
+        runtime="runtime",
+        bucket_name="bucket_name",
+        object_key="object_key",
+        object_version_id="object_version_id",
     )
 
 

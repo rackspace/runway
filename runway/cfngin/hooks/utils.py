@@ -33,14 +33,18 @@ class BlankBlueprint(Blueprint):
 class TagDataModel(BaseModel):
     """AWS Resource Tag data model."""
 
-    key: str = pydantic.Field(..., alias="Key")
-    value: str = pydantic.Field(..., alias="Value")
+    key: str
+    value: str
 
     class Config:
         """Model configuration."""
 
         allow_population_by_field_name = True
         extra = pydantic.Extra.forbid
+        fields = {
+            "key": {"alias": "Key"},
+            "value": {"alias": "Value"},
+        }
 
 
 def full_path(path: str) -> str:

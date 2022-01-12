@@ -15,11 +15,11 @@ class TestAwsLambdaHookDeployResponse:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
             AwsLambdaHookDeployResponse(
-                CodeSha256="sha256",
-                Runtime="test",
-                S3Bucket="test-bucket",
-                S3Key="key",
+                bucket_name="test-bucket",
+                code_sha256="sha256",
                 invalid=True,  # type: ignore
+                object_key="key",
+                runtime="test",
             )
         errors = excinfo.value.errors()
         assert len(errors) == 1
