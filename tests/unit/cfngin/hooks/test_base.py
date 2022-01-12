@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.hooks.base."""
-# pylint: disable=no-self-use,too-few-public-methods
+# pylint: disable=no-self-use
 # pyright: basic
 from __future__ import annotations
 

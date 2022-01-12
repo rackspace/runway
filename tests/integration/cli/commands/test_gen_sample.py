@@ -1,5 +1,4 @@
 """Test ``runway gen-sample`` command."""
-# pylint: disable=unused-argument
 from __future__ import annotations
 
 import logging

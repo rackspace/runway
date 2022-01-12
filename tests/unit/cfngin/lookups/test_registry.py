@@ -1,5 +1,4 @@
 """Tests for runway.cfngin.lookups.registry."""
-# pylint: disable=no-self-use
 # pyright: basic
 from __future__ import annotations
 

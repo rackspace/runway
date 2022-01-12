@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.actions.base."""
-# pylint: disable=no-self-use,protected-access,unused-argument
+# pylint: disable=no-self-use,protected-access
 # pyright: basic
 import unittest
 

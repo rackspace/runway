@@ -1,5 +1,4 @@
 """Python dependency compatability handling."""
-# pylint: disable=E
 import sys
 from typing import Iterable
 

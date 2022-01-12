@@ -194,9 +194,7 @@ class Action(deploy.Action):
         """Run against a step."""
         return self._diff_stack
 
-    def _diff_stack(  # pylint: disable=too-many-return-statements
-        self, stack: Stack, **_: Any
-    ) -> Status:
+    def _diff_stack(self, stack: Stack, **_: Any) -> Status:
         """Handle diffing a stack in CloudFormation vs our config."""
         if self.cancel.wait(0):
             return INTERRUPTED
@@ -300,10 +298,6 @@ class Action(deploy.Action):
             self.bucket_name = None
 
     def post_run(
-        self,
-        *,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
-        **__kwargs: Any,
+        self, *, dump: Union[bool, str] = False, outline: bool = False, **__kwargs: Any
     ) -> None:
         """Do nothing."""

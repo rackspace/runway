@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.models.responses."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=no-self-use
 from __future__ import annotations
 
 import pytest

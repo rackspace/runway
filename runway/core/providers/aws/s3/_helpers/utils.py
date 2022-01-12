@@ -170,7 +170,6 @@ class OnDoneFilteredSubscriber(BaseSubscriber):
     def _on_success(self, future: TransferFuture) -> None:
         """On success."""
 
-    # pylint: disable=invalid-name
     def _on_failure(self, future: TransferFuture, exception: Exception) -> None:
         """On failure."""
 
@@ -184,7 +183,6 @@ class DeleteSourceSubscriber(OnDoneFilteredSubscriber):
         except Exception as exc:  # pylint: disable=broad-except
             future.set_exception(exc)
 
-    # pylint: disable=no-self-use
     def _delete_source(self, future: TransferFuture) -> None:
         raise NotImplementedError("_delete_source()")
 
@@ -250,7 +248,7 @@ class DirectoryCreatorSubscriber(BaseSubscriber):
         try:
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
-        except OSError as exc:  # pylint: disable=broad-except
+        except OSError as exc:
             if exc.errno != errno.EEXIST:
                 raise CreateDirectoryError(
                     f"Could not create directory {dirname}: {exc}"
@@ -308,7 +306,6 @@ class PrintTask(NamedTuple):
 class ProvideCopyContentTypeSubscriber(BaseProvideContentTypeSubscriber):
     """Provide copy content type subscriber."""
 
-    # pylint: disable=no-self-use
     def _get_filename(self, future: TransferFuture) -> str:
         return future.meta.call_args.copy_source["Key"]
 
@@ -352,7 +349,6 @@ class ProvideSizeSubscriber(BaseSubscriber):
 class ProvideUploadContentTypeSubscriber(BaseProvideContentTypeSubscriber):
     """Provider upload content type subscriber."""
 
-    # pylint: disable=no-self-use
     def _get_filename(self, future: TransferFuture) -> str:
         return str(future.meta.call_args.fileobj)
 

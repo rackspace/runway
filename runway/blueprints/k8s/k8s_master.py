@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 """Module with k8s cluster resources."""
 import awacs.iam
-from awacs.aws import StringLike  # pylint: disable=no-name-in-module
-from awacs.aws import Allow, Condition, PolicyDocument, Statement
+from awacs.aws import Allow, Condition, PolicyDocument, Statement, StringLike
 from awacs.helpers.trust import make_simple_assume_policy
 from troposphere import Export, Join, Output, Sub, ec2, eks, iam
 

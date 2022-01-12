@@ -5,9 +5,9 @@ import sys
 from typing import Any, Dict, Optional
 
 if sys.version_info < (3, 8):
-    from typing_extensions import Literal, TypedDict  # type: ignore # pylint: disable=E
+    from typing_extensions import Literal, TypedDict  # type: ignore
 else:
-    from typing import Literal, TypedDict  # type: ignore # pylint: disable=E
+    from typing import Literal, TypedDict  # type: ignore
 
 
 class _LambdaResponeOptional(TypedDict, total=False):

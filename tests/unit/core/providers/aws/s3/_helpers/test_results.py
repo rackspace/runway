@@ -498,7 +498,7 @@ class TestNoProgressResultPrinter(BaseResultPrinterTest):
         transfer_type = "upload"
         src = "file"
         dest = "s3://mybucket/test-key"
-        mb = 1024 * 1024  # pylint: disable=invalid-name
+        mb = 1024 * 1024
         self.result_recorder.expected_files_transferred = 1
         self.result_recorder.files_transferred = 1
         self.result_recorder.expected_bytes_transferred = mb
@@ -600,7 +600,7 @@ class TestOnlyShowErrorsResultPrinter(BaseResultPrinterTest):
         transfer_type = "upload"
         src = "file"
         dest = "s3://mybucket/test-key"
-        mb = 1024 * 1024  # pylint: disable=invalid-name
+        mb = 1024 * 1024
         self.result_recorder.expected_files_transferred = 1
         self.result_recorder.files_transferred = 1
         self.result_recorder.expected_bytes_transferred = mb

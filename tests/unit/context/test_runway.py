@@ -1,5 +1,5 @@
 """Test runway.context._runway."""
-# pylint: disable=no-self-use,redefined-outer-name
+# pylint: disable=no-self-use
 # pyright: basic
 from __future__ import annotations
 

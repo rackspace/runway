@@ -142,8 +142,8 @@ class Action(BaseAction):
     def pre_run(
         self,
         *,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,
+        outline: bool = False,
         **__kwargs: Any,
     ) -> None:
         """Do nothing."""
@@ -151,8 +151,8 @@ class Action(BaseAction):
     def post_run(
         self,
         *,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,
+        outline: bool = False,
         **__kwargs: Any,
     ) -> None:
         """Do nothing."""

@@ -85,7 +85,7 @@ class UI(ContextManager["UI"]):
 
     def __enter__(self) -> UI:
         """Enter the context manager."""
-        self._lock.__enter__()  # pylint: disable=consider-using-with
+        self._lock.__enter__()
         return self
 
     def __exit__(

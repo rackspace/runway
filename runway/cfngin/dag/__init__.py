@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import collections
+import collections.abc
 import logging
 from copy import copy, deepcopy
 from threading import Thread
@@ -315,7 +316,7 @@ class DAG:
         for new_node in graph_dict:
             self.add_node(new_node)
         for ind_node, dep_nodes in graph_dict.items():
-            if not isinstance(dep_nodes, collections.Iterable):
+            if not isinstance(dep_nodes, collections.abc.Iterable):
                 raise TypeError(f"{ind_node}: dict values must be lists")
             for dep_node in dep_nodes:
                 self.add_edge(ind_node, dep_node)

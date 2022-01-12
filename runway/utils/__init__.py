@@ -43,12 +43,12 @@ from pydantic import BaseModel as _BaseModel
 from typing_extensions import Literal
 
 # make this importable for util as it was before
-from ..compat import cached_property  # noqa pylint: disable=unused-import
+from ..compat import cached_property  # noqa: F401
 
 # make this importable without defining __all__ yet.
 # more things need to be moved of this file before starting an explicit __all__.
-from ._file_hash import FileHash  # noqa pylint: disable=unused-import
-from ._version import Version  # noqa pylint: disable=unused-import
+from ._file_hash import FileHash  # noqa: F401
+from ._version import Version  # noqa: F401
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import OutputTypeDef

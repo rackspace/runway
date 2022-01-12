@@ -315,6 +315,7 @@ disable = [
   "missing-module-docstring",  # flake8 (pydocstyle) overlap
   "similarities",  # black overcomplicated this
   "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
+  "unused-import",  # flake8 overlap (F401)
 ]
 
 [tool.pylint.typecheck]

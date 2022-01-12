@@ -701,7 +701,6 @@ class UploadStreamRequestSubmitter(UploadRequestSubmitter):
             raise StdinMissingError()
         return NonSeekableStream(sys.stdin.buffer)
 
-    # pylint: disable=unused-argument
     def _format_local_path(self, path: Optional[AnyPath]) -> str:
         """Format local path."""
         return "-"
@@ -730,7 +729,6 @@ class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
             fileinfo.operation_name == "download" and self._config_params.is_stream
         )
 
-    # pylint: disable=unused-argument
     def _add_additional_subscribers(
         self, subscribers: List[BaseSubscriber], fileinfo: FileInfo
     ) -> None:
@@ -741,7 +739,6 @@ class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
         """Get file out."""
         return StdoutBytesWriter()
 
-    # pylint: disable=unused-argument
     def _format_local_path(self, path: Optional[AnyPath]) -> str:
         """Format local path."""
         return "-"
@@ -812,7 +809,6 @@ class LocalDeleteRequestSubmitter(BaseTransferRequestSubmitter):
         """
         return fileinfo.operation_name == "delete" and fileinfo.src_type == "local"
 
-    # pylint: disable=unused-argument
     def _submit_transfer_request(  # type: ignore
         self,
         fileinfo: FileInfo,

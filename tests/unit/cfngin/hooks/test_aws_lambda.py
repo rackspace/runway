@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.hooks.aws_lambda."""
-# pylint: disable=invalid-name,no-self-use
+# pylint: disable=no-self-use
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 # pyright: reportFunctionMemberAccess=none, reportOptionalMemberAccess=none
 # pyright: reportOptionalOperand=none
@@ -8,7 +8,7 @@ from __future__ import annotations
 import logging
 import os
 import os.path
-import random  # pylint: disable=syntax-error
+import random
 import sys
 import unittest
 from io import BytesIO as StringIO
@@ -618,8 +618,6 @@ class TestDockerizePip:
             docker_file = tmp_dir.write("Dockerfile", b"")
             dockerized_pip(os.getcwd(), client=client, docker_file=docker_file)
 
-            # for some reason, the current version of pylint does not see these methods
-            # pylint: disable=no-member
             client.api.build.assert_called_with(
                 path=tmp_dir.path, dockerfile="Dockerfile", forcerm=True
             )
@@ -641,8 +639,6 @@ class TestDockerizePip:
         image = "alpine"
         dockerized_pip(os.getcwd(), client=client, docker_image=image)
 
-        # for some reason, the current version of pylint does not see these methods
-        # pylint: disable=no-member
         client.api.create_container.assert_called_with(
             detach=True, image=image, command=self.command, host_config=self.host_config
         )
@@ -658,8 +654,6 @@ class TestDockerizePip:
         runtime = "python3.8"
         dockerized_pip(os.getcwd(), client=client, runtime=runtime)
 
-        # for some reason, the current version of pylint does not see these methods
-        # pylint: disable=no-member
         client.api.create_container.assert_called_with(
             detach=True,
             image="lambci/lambda:build-" + runtime,

@@ -101,7 +101,7 @@ class JwksClient:
         LOGGER.info("Fetching keys from %s", self.options.get("jwks_uri"))
 
         try:
-            # pylint: disable=consider-using-with,no-member
+            # pylint: disable=consider-using-with
             request_res = request.urlopen(self.options.get("jwks_uri"))
             data = json.loads(
                 request_res.read().decode(

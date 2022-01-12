@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.docker.image._push."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=no-self-use
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ def test_push(
     cfngin_context.hook_data["docker"] = docker_hook_data
     assert push(context=cfngin_context, **args.dict()) == docker_hook_data
     mock_from_cfngin_context.assert_called_once_with(cfngin_context)
-    docker_hook_data.client.api.push.assert_has_calls(  # pylint: disable=no-member
+    docker_hook_data.client.api.push.assert_has_calls(
         [call(args.repo, tag=args.tags[0]), call(args.repo, tag=args.tags[1])]
     )
     mock_update_context.assert_called_once_with(cfngin_context)

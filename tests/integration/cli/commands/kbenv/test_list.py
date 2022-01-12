@@ -1,5 +1,4 @@
 """Test ``runway kbenv list`` command."""
-# pylint: disable=unused-argument
 from __future__ import annotations
 
 import logging

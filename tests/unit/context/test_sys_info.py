@@ -1,5 +1,5 @@
 """Test runway.context.sys_info."""
-# pylint: disable=invalid-name,no-self-use,redefined-outer-name,unused-argument
+# pylint: disable=invalid-name,no-self-use,unused-argument
 # pyright: basic
 from __future__ import annotations
 

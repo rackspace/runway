@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import base64
 import logging
-from typing import TYPE_CHECKING, Any, Union  # pylint: disable=W
+from typing import TYPE_CHECKING, Any, Union
 
 from typing_extensions import Final, Literal
 

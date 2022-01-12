@@ -1,5 +1,4 @@
 """Click options."""
-# pylint: disable=invalid-name
 import click
 
 ci = click.option(

@@ -1,5 +1,5 @@
 """Test failed stack with dependency."""
-# pylint: disable=redefined-outer-name,unused-argument
+# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import shutil

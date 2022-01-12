@@ -265,7 +265,6 @@ class UploadResultSubscriber(BaseResultSubscriber):
 class UploadStreamResultSubscriber(UploadResultSubscriber):
     """Upload stream result subscriber."""
 
-    # pylint: disable=no-self-use,unused-argument
     def _get_src(self, fileobj: AnyPath) -> str:
         return "-"
 

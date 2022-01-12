@@ -217,7 +217,8 @@ def _calculate_hash(files: Iterable[str], root: str) -> str:
         file_path = os.path.join(root, file_name)
         file_hash.update((file_name + "\0").encode())
         with open(file_path, "rb") as file_:
-            for chunk in iter(lambda: file_.read(4096), ""):  # pylint: disable=W
+            # pylint: disable=cell-var-from-loop
+            for chunk in iter(lambda: file_.read(4096), ""):
                 if not chunk:
                     break
                 file_hash.update(chunk)
@@ -663,7 +664,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
     if sys.version_info.major < 3:
         remove_error = OSError
     else:
-        remove_error = PermissionError  # noqa pylint: disable=E
+        remove_error = PermissionError
     try:
         tmpdir.cleanup()
     except remove_error:
