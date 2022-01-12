@@ -1,5 +1,6 @@
 """Test runway.module.base."""
-# pylint: disable=no-self-use
+# pylint: disable=comparison-with-callable,no-self-use
+# comparison-with-callable is intermittent - possibly due to use of runway.compat?
 # pyright: basic
 from __future__ import annotations
 
