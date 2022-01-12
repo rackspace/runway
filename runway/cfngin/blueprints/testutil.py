@@ -174,7 +174,7 @@ class YamlDirTestGenerator:
                 blueprint.create_template()
                 self.assertRenderedBlueprint(blueprint)
 
-            def assertEqual(  # noqa pylint: disable=invalid-name
+            def assertEqual(  # noqa: N802
                 self, first: Any, second: Any, msg: Optional[str] = None
             ) -> None:
                 """Test that first and second are equal.

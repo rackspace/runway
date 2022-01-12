@@ -1,5 +1,4 @@
 """Test runway.core.providers.aws.s3._helpers.action_architecture."""
-# pylint: disable=no-self-use
 from __future__ import annotations
 
 import os

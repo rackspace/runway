@@ -1,5 +1,4 @@
 """Test runway.config.models.utils."""
-# pylint: disable=no-self-use
 # pyright: basic
 from pathlib import Path
 from typing import Any, Optional

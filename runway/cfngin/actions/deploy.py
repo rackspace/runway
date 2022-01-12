@@ -292,7 +292,7 @@ class Action(BaseAction):
 
         return param_list
 
-    def _destroy_stack(  # pylint: disable=too-many-return-statements
+    def _destroy_stack(
         self, stack: Stack, *, status: Optional[Status] = None, **_: Any
     ) -> Status:
         """Delete a CloudFormation stack.
@@ -344,9 +344,8 @@ class Action(BaseAction):
             return SkippedStatus(reason="canceled execution")
 
     # TODO refactor long if, elif, else block
-    def _launch_stack(  # pylint: disable=R
-        self, stack: Stack, *, status: Status, **_: Any
-    ) -> Status:
+    # pylint: disable=too-many-return-statements,too-many-branches,too-many-statements
+    def _launch_stack(self, stack: Stack, *, status: Status, **_: Any) -> Status:
         """Handle the creating or updating of a stack in CloudFormation.
 
         Also makes sure that we don't try to create or update a stack while
@@ -556,7 +555,7 @@ class Action(BaseAction):
 
         return Plan(context=self.context, description=self.DESCRIPTION, graph=graph)
 
-    def pre_run(  # pylint: disable=arguments-differ
+    def pre_run(
         self, *, dump: Union[bool, str] = False, outline: bool = False, **_: Any
     ) -> None:
         """Any steps that need to be taken prior to running the action."""
@@ -616,7 +615,7 @@ class Action(BaseAction):
         if isinstance(dump, str):
             plan.dump(directory=dump, context=self.context, provider=self.provider)
 
-    def post_run(  # pylint: disable=arguments-differ
+    def post_run(
         self, *, dump: Union[bool, str] = False, outline: bool = False, **_: Any
     ) -> None:
         """Any steps that need to be taken after running the action."""

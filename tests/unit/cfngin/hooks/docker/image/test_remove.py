@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.docker.image._remove."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=no-self-use
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
@@ -55,7 +55,6 @@ def test_remove(
         == docker_hook_data
     )
     mock_from_cfngin_context.assert_called_once_with(cfngin_context)
-    # pylint: disable=no-member
     docker_hook_data.client.api.remove_image.assert_has_calls(  # type: ignore
         [
             call(force=True, image=f"{args.repo}:{tag}", noprune=False)
@@ -83,7 +82,6 @@ def test_remove_image_not_found(
         DockerHookData, "update_context", return_value=docker_hook_data
     )
     cfngin_context.hook_data["docker"] = docker_hook_data
-    # pylint: disable=no-member
     docker_hook_data.client.api.remove_image.side_effect = ImageNotFound(  # type: ignore
         f"{args.repo}:latest"
     )

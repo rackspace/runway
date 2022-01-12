@@ -36,8 +36,6 @@ def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
 def destroy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     """Execute `runway destroy`."""
     yield cli_runner.invoke(cli, ["destroy"], env={"CI": "1"})
-    # pylint: disable=unexpected-keyword-arg
-    # (CURRENT_DIR / "cdk.out").unlink(missing_ok=True)
     shutil.rmtree(CURRENT_DIR / "cdk.out", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "node_modules", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)

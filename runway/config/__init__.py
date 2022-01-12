@@ -1,5 +1,4 @@
 """CFNgin config."""
-# pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
 import logging
@@ -263,7 +262,7 @@ class CfnginConfig(BaseConfig):
         return result
 
     @classmethod
-    def parse_file(  # pylint: disable=arguments-differ
+    def parse_file(
         cls,
         *,
         path: Optional[Path] = None,

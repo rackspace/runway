@@ -1,5 +1,5 @@
 """Test runway.core.utils."""
-# pylint: disable=no-self-use,protected-access,redefined-outer-name
+# pylint: disable=no-self-use
 from __future__ import annotations
 
 import pytest

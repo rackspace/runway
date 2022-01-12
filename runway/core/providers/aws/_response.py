@@ -1,5 +1,4 @@
 """Base class for AWS responses."""
-# pylint: disable=invalid-name
 from http import HTTPStatus
 from typing import Any, Dict
 

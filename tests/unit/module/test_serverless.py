@@ -1,5 +1,5 @@
 """Test runway.module.serverless."""
-# pylint: disable=no-self-use,unused-argument
+# pylint: disable=no-self-use
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
@@ -334,7 +334,6 @@ class TestServerless:
         tmp_path: Path,
     ) -> None:
         """Test gen_cmd."""
-        # pylint: disable=no-member
         mock_cmd = mocker.patch(
             "runway.module.serverless.generate_node_command", return_value=["success"]
         )

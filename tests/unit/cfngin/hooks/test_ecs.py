@@ -74,4 +74,5 @@ class TestECSHooks(unittest.TestCase):
 
             self.assertEqual(len(response.get("clusterArns", [""])), 0)
             with self.assertRaises(TypeError):
-                create_clusters(context=self.context)  # type: ignore pylint: disable=E
+                # pylint: disable=missing-kwoa
+                create_clusters(context=self.context)  # type: ignore

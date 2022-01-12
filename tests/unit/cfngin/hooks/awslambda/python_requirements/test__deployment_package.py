@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.python_requirements._deployment_package."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=no-self-use
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

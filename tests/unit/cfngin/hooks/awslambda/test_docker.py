@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.docker."""
-# pylint: disable=no-self-use,protected-access,redefined-outer-name
+# pylint: disable=no-self-use
 from __future__ import annotations
 
 import logging

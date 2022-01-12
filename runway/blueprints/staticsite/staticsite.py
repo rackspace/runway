@@ -34,7 +34,7 @@ from ...cfngin.blueprints.base import Blueprint
 from ...context import CfnginContext
 
 if TYPE_CHECKING:
-    from troposphere import Ref  # pylint: disable=ungrouped-imports
+    from troposphere import Ref
 
     from ...cfngin.blueprints.type_defs import BlueprintVariableTypeDef
 

@@ -73,7 +73,7 @@ class DockerImageBuildApiOptions(BaseModel):
     timout: Optional[int]
     use_config_proxy: bool
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         *,
         buildargs: Optional[Dict[str, Any]] = None,

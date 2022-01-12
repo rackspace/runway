@@ -1,5 +1,5 @@
 """Test runway.module.terraform."""
-# pylint: disable=no-self-use,protected-access,too-many-statements,unused-argument,too-many-lines
+# pylint: disable=no-self-use,too-many-statements,too-many-lines
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 

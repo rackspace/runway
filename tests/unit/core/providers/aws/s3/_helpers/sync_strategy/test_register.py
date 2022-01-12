@@ -1,5 +1,4 @@
 """Test runway.core.providers.aws.s3._helpers.sync_strategy.register."""
-# pylint: disable=no-self-use
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

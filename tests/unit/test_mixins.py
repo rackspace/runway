@@ -1,5 +1,5 @@
 """Test runway.mixins."""
-# pylint: disable=no-self-use,protected-access,unused-argument
+# pylint: disable=protected-access,unused-argument
 from __future__ import annotations
 
 import subprocess

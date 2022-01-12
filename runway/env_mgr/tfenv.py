@@ -48,8 +48,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 TF_VERSION_FILENAME = ".terraform-version"
 
 
-# Branch and local variable count will go down when py2 support is dropped
-def download_tf_release(  # noqa pylint: disable=too-many-locals,too-many-branches
+def download_tf_release(
     version: str,
     versions_dir: Path,
     command_suffix: str,

@@ -1,5 +1,4 @@
 """Runway test definition models."""
-# pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, List, Union, cast

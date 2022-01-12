@@ -1,5 +1,4 @@
 """CFNgin blueprint variable types."""
-# pylint: disable=invalid-name,len-as-condition
 from __future__ import annotations
 
 from typing import (
