@@ -21,6 +21,6 @@ jobs:
     if: github.repository == 'onicagroup/runway' && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
-      - uses: release-drafter/release-drafter@v5.15.0
+      - uses: release-drafter/release-drafter@v5.16.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
