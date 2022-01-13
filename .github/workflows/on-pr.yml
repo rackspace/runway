@@ -15,12 +15,3 @@ jobs:
           regex: ([a-z])+\/([a-zA-Z0-9\-\_])+
           allowed_prefixes: bugfix,chore,depend,dependabot,docs,feat,feature,fix,hotfix,maint,maintain,maintenance,release
           ignore: develop,master,release,v0_47_fixes
-  label-pr:
-    name: Label PR
-    # Skip running the job from forks.
-    if: github.repository == 'onicagroup/runway' && github.actor != 'dependabot[bot]'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: release-drafter/release-drafter@v5.15.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

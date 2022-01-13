@@ -2,6 +2,8 @@
 autolabeler:  # cspell:ignore autolabeler
   - label: bug
     branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
+  - label: changelog:skip
+    branch: [/^(dependabot)\/.*/]
   - label: cloudformation
     files:
       - '**/templates/*.json'
@@ -68,6 +70,8 @@ category-template: >-
   ### $TITLE
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 commitish: master  # cspell:ignore commitish
+exclude-contributors:
+  - dependabot
 exclude-labels:
   - changelog:skip
   - release

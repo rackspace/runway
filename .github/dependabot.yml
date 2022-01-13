@@ -3,10 +3,6 @@
 version: 2
 updates:
   - directory: /
-    labels:
-      - changelog:skip
-      - maintenance
-      - github_actions
     open-pull-requests-limit: 5
     package-ecosystem: github-actions
     schedule:
@@ -14,10 +10,6 @@ updates:
       time: "08:00"
       timezone: America/New_York
   - directory: /
-    labels:
-      - changelog:skip
-      - maintenance
-      - javascript
     open-pull-requests-limit: 5
     package-ecosystem: npm
     schedule:
@@ -25,11 +17,6 @@ updates:
       time: "08:00"
       timezone: America/New_York
   - directory: /
-    labels:
-      - changelog:skip
-      - dependencies
-      - poetry
-      - python
     open-pull-requests-limit: 10
     package-ecosystem: pip
     schedule:
