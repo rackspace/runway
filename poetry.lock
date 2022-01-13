@@ -546,7 +546,7 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.56.3"
+version = "0.56.4"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "main"
 optional = false
@@ -2519,8 +2519,8 @@ cfn-flip = [
     {file = "cfn_flip-1.3.0.tar.gz", hash = "sha256:003e02a089c35e1230ffd0e1bcfbbc4b12cc7d2deb2fcc6c4228ac9819307362"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.56.3.tar.gz", hash = "sha256:ce056cc54c3141b6da5f20066d14ac576a75ace1349a5994f772e12f2bcbfa57"},
-    {file = "cfn_lint-0.56.3-py3-none-any.whl", hash = "sha256:0fbd46cb98dd371e54d709468092643ba85d97ce09da2d849cc69b3e7dc82a2a"},
+    {file = "cfn-lint-0.56.4.tar.gz", hash = "sha256:a1d47c15e9ba1bb288d93acd05cabea4825a52a4076a148f3aaa23c241a53aa8"},
+    {file = "cfn_lint-0.56.4-py3-none-any.whl", hash = "sha256:0ba396f0f4d4e57046f616f08e78abf962146b7c7f0beba45567ad7fa1251ff9"},
 ]
 chardet = [
     {file = "chardet-4.0.0-py2.py3-none-any.whl", hash = "sha256:f864054d66fd9118f2e67044ac8981a54775ec5b67aed0441892edb553d21da5"},
