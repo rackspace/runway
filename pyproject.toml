@@ -86,7 +86,7 @@ mock = "^4.0"
 moto = { version = "^2.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }
 mypy-boto3 = "^1.16"  # importable boto3 type annotations
 pep8-naming = ">=0.12.1"  # flake8 plugin
-pipenv = "^2021.5"  # only used in tests
+pipenv = "^2022.1.8"  # only used in tests
 pre-commit = "^2.11"
 pydocstyle = ">=6.1.1"  # flake8 plugin
 pyinstaller = "^4.3"
