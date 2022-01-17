@@ -19,7 +19,7 @@ jobs:
     name: Label PR
     runs-on: ubuntu-latest
     steps:
-      - uses: release-drafter/release-drafter@v5.16.1
+      - uses: release-drafter/release-drafter@v5.17.5
         with:
           disable-releaser: true
         env:
