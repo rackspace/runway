@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import logging
+import platform
 import string
 from typing import TYPE_CHECKING, Any, Dict
 
@@ -54,6 +55,7 @@ class TestStaticSite:
         )
         assert obj.path == tmp_path
 
+    @pytest.mark.skipif(platform.system() == "Windows", reason="POSIX path required")
     def test_create_cleanup_yaml(
         self,
         expected_yaml: Path,

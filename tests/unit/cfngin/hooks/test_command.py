@@ -199,7 +199,7 @@ class TestCommandHook(unittest.TestCase):
         self.mock_process.stdout = None
         self.mock_process.stderr = None
 
-        with mock.patch.dict(os.environ, {"foo": "bar"}, clear=True):
+        with mock.patch.dict(os.environ, {"FOO": "bar"}, clear=True):
             results = self.run_hook(command=["foo"], env={"hello": "world"})
 
             self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
@@ -208,5 +208,5 @@ class TestCommandHook(unittest.TestCase):
                 stdin=mock.ANY,
                 stdout=None,
                 stderr=None,
-                env={"hello": "world", "foo": "bar"},
+                env={"hello": "world", "FOO": "bar"},
             )

@@ -2,23 +2,34 @@
 # pylint: disable=no-self-use
 from __future__ import annotations
 
+import os
+import platform
+from typing import TYPE_CHECKING
+
 import pytest
 
 from runway.core.providers.aws.s3._helpers.file_generator import FileStats
 from runway.core.providers.aws.s3._helpers.filters import Filter, FilterPattern
 from runway.core.providers.aws.s3._helpers.parameters import ParametersDataModel
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 class TestFilter:
     """Test Filter."""
 
-    def test_call_local(self) -> None:
+    def test_call_local(self, tmp_path: Path) -> None:
         """Test call."""
-        exclude_md = FileStats(src="/src/exclude/README.md", src_type="local", dest="")
-        include_md = FileStats(src="/src/include/README.md", src_type="local", dest="")
-        other_file = FileStats(src="/src/test.txt", src_type="local", dest="")
+        exclude_md = FileStats(
+            src=tmp_path / "exclude/README.md", src_type="local", dest=""
+        )
+        include_md = FileStats(
+            src=tmp_path / "include/README.md", src_type="local", dest=""
+        )
+        other_file = FileStats(src=tmp_path / "/test.txt", src_type="local", dest="")
         params = ParametersDataModel(
-            src="/src",
+            src=str(tmp_path),
             dest="s3://dest/",
             dir_op=True,
             exclude=["*/*.md"],
@@ -49,10 +60,10 @@ class TestFilter:
         assert other_file in result
         assert len(result) == 2
 
-    def test_parse_params(self) -> None:
+    def test_parse_params(self, tmp_path: Path) -> None:
         """Test parse_params."""
         params = ParametersDataModel(
-            src="/src",
+            src=str(tmp_path),
             dest="s3://dest/",
             dir_op=True,
             exclude=["exclude/*"],
@@ -61,8 +72,8 @@ class TestFilter:
         result = Filter.parse_params(params)
         assert isinstance(result, Filter)
         assert result.patterns == [
-            FilterPattern("exclude", "/src/exclude/*"),
-            FilterPattern("include", "/src/include/*"),
+            FilterPattern("exclude", f"{tmp_path}{os.sep}exclude/*"),
+            FilterPattern("include", f"{tmp_path}{os.sep}include/*"),
         ]
         assert result.dest_patterns == [
             FilterPattern("exclude", "dest/exclude/*"),
@@ -89,6 +100,25 @@ class TestFilter:
             ("/tmp/dir/test.txt", False, "/tmp/dir"),
         ],
     )
+    @pytest.mark.skipif(platform.system() == "Windows", reason="POSIX paths")
     def test_parse_rootdir(self, dir_op: bool, expected: str, path: str) -> None:
         """Test parse_rootdir."""
+        assert Filter.parse_rootdir(path, dir_op) == expected
+
+    @pytest.mark.parametrize(
+        "path, dir_op, expected",
+        [
+            ("s3://bucket", True, "bucket/"),
+            ("s3://bucket/", False, "bucket/"),
+            ("s3://bucket/prefix/key.txt", False, "bucket/prefix"),
+            ("s3://bucket/prefix/", False, "bucket/prefix/"),
+            ("/tmp", True, "C:\\tmp"),
+            ("/tmp/", False, "C:\\tmp"),
+            ("/tmp", False, "C:\\"),
+            ("/tmp/dir/test.txt", False, "C:\\tmp\\dir"),
+        ],
+    )
+    @pytest.mark.skipif(platform.system() != "Windows", reason="Windows paths")
+    def test_parse_rootdir_win(self, dir_op: bool, expected: str, path: str) -> None:
+        """Test parse_rootdir for Windows."""
         assert Filter.parse_rootdir(path, dir_op) == expected
