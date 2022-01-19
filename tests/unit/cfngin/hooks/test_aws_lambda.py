@@ -782,7 +782,7 @@ class TestHandleRequirements:
             expected_text.append("")
             assert requirements_txt.read_text() == "\n\n".join(expected_text)
         else:
-            assert requirements_txt.read_text() == "\n".join(expected_text)
+            assert requirements_txt.read_text() == "\n".join(expected_text) + "\n"
 
     def test_frozen_pipenv(
         self, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch, tmp_path: Path
@@ -838,7 +838,7 @@ class TestHandleRequirements:
             expected_text.append("")
             assert requirements_txt.read_text() == "\n\n".join(expected_text)
         else:
-            assert requirements_txt.read_text() == "\n".join(expected_text)
+            assert requirements_txt.read_text() == "\n".join(expected_text) + "\n"
 
     def test_raise_not_implimented(self) -> None:
         """Test NotImplimentedError is raised when no requirements file."""
