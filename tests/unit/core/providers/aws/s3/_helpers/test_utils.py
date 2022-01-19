@@ -6,6 +6,7 @@ import datetime
 import errno
 import ntpath
 import os
+import platform
 import posixpath
 import time
 from io import BytesIO
@@ -987,6 +988,9 @@ def test_human_readable_to_bytes_raise_value_error() -> None:
     assert str(excinfo.value) == "Invalid size value: test"
 
 
+@pytest.mark.skipif(
+    platform.system() == "Windows", reason="crashes xdist worker on Windows"
+)
 def test_relative_path_handle_value_error(
     mocker: MockerFixture, tmp_path: Path
 ) -> None:
