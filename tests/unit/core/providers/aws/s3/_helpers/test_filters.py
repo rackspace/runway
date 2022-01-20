@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import platform
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import pytest
 
@@ -12,8 +12,7 @@ from runway.core.providers.aws.s3._helpers.file_generator import FileStats
 from runway.core.providers.aws.s3._helpers.filters import Filter, FilterPattern
 from runway.core.providers.aws.s3._helpers.parameters import ParametersDataModel
 
-if TYPE_CHECKING:
-    from pathlib import Path
+CWD = Path.cwd()
 
 
 class TestFilter:
@@ -112,10 +111,10 @@ class TestFilter:
             ("s3://bucket/", False, "bucket/"),
             ("s3://bucket/prefix/key.txt", False, "bucket/prefix"),
             ("s3://bucket/prefix/", False, "bucket/prefix/"),
-            ("/tmp", True, "C:\\tmp"),
-            ("/tmp/", False, "C:\\tmp"),
-            ("/tmp", False, "C:\\"),
-            ("/tmp/dir/test.txt", False, "C:\\tmp\\dir"),
+            ("/tmp", True, f"{CWD.drive}\\tmp"),
+            ("/tmp/", False, f"{CWD.drive}\\tmp"),
+            ("/tmp", False, f"{CWD.drive}\\"),
+            ("/tmp/dir/test.txt", False, f"{CWD.drive}\\tmp\\dir"),
         ],
     )
     @pytest.mark.skipif(platform.system() != "Windows", reason="Windows paths")
