@@ -44,7 +44,7 @@
         "--rcfile=pyproject.toml"
     ],
     "python.linting.pylintEnabled": true,
-    "python.pythonPath": "${workspaceFolder}/.venv/bin/python",
+    "python.pythonPath": "${workspaceFolder}/.venv/",
     "python.testing.pytestArgs": [
         "tests",
         "--no-cov"

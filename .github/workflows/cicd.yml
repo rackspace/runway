@@ -192,7 +192,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8]
-        os: [ubuntu-18.04]
+        os: [ubuntu-18.04, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
       # populating AWS creds with fake values
@@ -223,6 +223,13 @@ jobs:
       - run: poetry install --extras docs -vv
       - name: Install Node Dependencies
         run: make npm-install
+      - name: Configure Pagefile  # avoid MemoryError during tests
+        if: runner.os == 'Windows'
+        uses: al-cheb/configure-pagefile-action@v1.2  # cspell:ignore cheb
+        with:
+          minimum-size: 16GB
+          maximum-size: 16GB
+          disk-root: 'C:'
       - name: Run Integration & Unit Tests
         # assertions assume linux so some fail when run on windows
         run: make test cov-xml

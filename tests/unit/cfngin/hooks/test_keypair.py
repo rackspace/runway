@@ -3,6 +3,7 @@
 # pyright: basic
 from __future__ import annotations
 
+import os
 import sys
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Iterator, NamedTuple, Tuple
@@ -166,7 +167,9 @@ def test_create_in_ssm(
 
     ssm = boto3.client("ssm")
     param = ssm.get_parameter(Name="param", WithDecryption=True).get("Parameter", {})
-    assert param.get("Value") == ssh_key.private_key.decode("ascii")
+    assert param.get("Value", "").replace("\n", "") == ssh_key.private_key.decode(
+        "ascii"
+    ).replace(os.linesep, "")
     assert param.get("Type") == "SecureString"
 
     params = ssm.describe_parameters().get("Parameters", [])

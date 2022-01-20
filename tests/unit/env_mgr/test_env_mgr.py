@@ -112,15 +112,20 @@ class TestEnvManager:
         version = "1.0.0"
         version_dir = tmp_path / version
 
+        bin_name = "foo" + obj.command_suffix
+
         if exists:
             version_dir.mkdir()
             (version_dir / "foo").touch()
             assert obj.uninstall(version)
-            assert f"uninstalling foo {version} from {tmp_path}..." in caplog.messages
-            assert f"uninstalled foo {version}" in caplog.messages
+            assert (
+                f"uninstalling {bin_name} {version} from {tmp_path}..."
+                in caplog.messages
+            )
+            assert f"uninstalled {bin_name} {version}" in caplog.messages
         else:
             assert not obj.uninstall(version)
-            assert f"foo {version} not installed"
+            assert f"{bin_name} {version} not installed" in caplog.messages
 
     def test_version_file(self) -> None:
         """Test version_file."""

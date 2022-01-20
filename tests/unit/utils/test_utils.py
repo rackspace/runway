@@ -10,6 +10,7 @@ import logging
 import os
 import string
 import sys
+from copy import deepcopy
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -336,15 +337,15 @@ def test_ensure_string_raise_type_error(provided: Any) -> None:
 def test_environ() -> None:
     """Test environ."""
     orig_expected = dict(os.environ)
-    override = {"TEST_PARAM": "override", "new_param": "value"}
-    override_expected = dict(orig_expected)
+    override = {"TEST_PARAM": "override", "NEW_PARAM": "value"}
+    override_expected = deepcopy(orig_expected)
     override_expected.update(override)
 
-    assert os.environ == orig_expected, "validate original value"
+    assert dict(os.environ) == orig_expected, "validate original value"
 
     with environ(override):
-        assert os.environ == override_expected, "validate override"
-        assert os.environ.pop("new_param") == "value"
+        assert dict(os.environ) == override_expected, "validate override"
+        assert os.environ.pop("NEW_PARAM") == "value"
 
     assert os.environ == orig_expected, "validate value returned to original"
 

@@ -1,6 +1,7 @@
 """Test runway.config.models.cfngin.__init__."""
 # pylint: disable=no-self-use
 # pyright: basic
+import platform
 from pathlib import Path
 
 import pytest
@@ -97,6 +98,11 @@ class TestCfnginConfigDefinitionModel:
         obj = CfnginConfigDefinitionModel.parse_file(config_yml)
         assert obj.namespace == "test"
 
+    @pytest.mark.skipif(
+        platform.system() == "Windows",
+        reason="known bug where non-absolute path is returned from `.resolve()` on Windows "
+        "- https://bugs.python.org/issue38671",
+    )
     def test_resolve_path_fields(self) -> None:
         """Test _resolve_path_fields."""
         obj = CfnginConfigDefinitionModel(
@@ -223,6 +229,11 @@ class TestCfnginStackDefinitionModel:
         assert errors[0]["loc"] == ("__root__",)
         assert errors[0]["msg"] == "either class_path or template_path must be defined"
 
+    @pytest.mark.skipif(
+        platform.system() == "Windows",
+        reason="known bug where non-absolute path is returned from `.resolve()` on Windows "
+        "- https://bugs.python.org/issue38671",
+    )
     def test_resolve_path_fields(self) -> None:
         """Test _resolve_path_fields."""
         obj = CfnginStackDefinitionModel(
