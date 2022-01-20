@@ -227,7 +227,9 @@ jobs:
         if: runner.os == 'windows-latest'
         uses: al-cheb/configure-pagefile-action@v1.2
         with:
-          minimum-size: 8
+          minimum-size: 16GB
+          maximum-size: 16GB
+          disk-root: 'C:'
       - name: Run Integration & Unit Tests
         # assertions assume linux so some fail when run on windows
         run: make test cov-xml
