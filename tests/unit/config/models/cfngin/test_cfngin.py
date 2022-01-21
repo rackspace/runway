@@ -73,7 +73,7 @@ class TestCfnginConfigDefinitionModel:
         obj = CfnginConfigDefinitionModel(namespace="test")
         assert not obj.cfngin_bucket
         assert not obj.cfngin_bucket_region
-        assert obj.cfngin_cache_dir == Path.cwd() / ".runway" / "cache"
+        assert not obj.cfngin_cache_dir
         assert obj.log_formats == {}
         assert obj.lookups == {}
         assert obj.mappings == {}
@@ -110,8 +110,8 @@ class TestCfnginConfigDefinitionModel:
             cfngin_cache_dir="./cache",  # type: ignore
             sys_path="./something",  # type: ignore
         )
-        assert obj.cfngin_cache_dir.is_absolute()
-        assert obj.sys_path.is_absolute()  # type: ignore
+        assert obj.cfngin_cache_dir and obj.cfngin_cache_dir.is_absolute()
+        assert obj.sys_path and obj.sys_path.is_absolute()
 
     def test_required_fields(self) -> None:
         """Test required fields."""

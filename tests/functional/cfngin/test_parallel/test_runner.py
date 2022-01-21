@@ -27,6 +27,7 @@ def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
 def destroy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     """Execute `runway destroy`."""
     yield cli_runner.invoke(cli, ["destroy"], env={"CI": "1"})
+    shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "child-01.cfn" / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "child-02.cfn" / ".runway", ignore_errors=True)
 

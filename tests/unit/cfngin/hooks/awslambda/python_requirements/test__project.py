@@ -493,11 +493,10 @@ class TestPythonProject:
 
     def test_tmp_requirements_txt(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test tmp_requirements_txt."""
-        mocker.patch(f"{MODULE}.BASE_WORK_DIR", tmp_path)
         source_code = mocker.patch.object(
             PythonProject, "source_code", Mock(md5_hash="hash")
         )
         assert (
-            PythonProject(Mock(), Mock()).tmp_requirements_txt
+            PythonProject(Mock(), Mock(work_dir=tmp_path)).tmp_requirements_txt
             == tmp_path / f"{source_code.md5_hash}.requirements.txt"
         )

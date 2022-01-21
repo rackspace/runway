@@ -72,7 +72,6 @@ class CliContext:
         """Runway config."""
         config = RunwayConfig.parse_file(file_path=self.runway_config_path)
         self.env.ignore_git_branch = config.ignore_git_branch
-        # self.env.root_dir = self.runway_config_path.parent
         return config
 
     @cached_property
@@ -99,6 +98,8 @@ class CliContext:
     ) -> RunwayContext:
         """Get a Runway context object.
 
+        Uses the location of the config file to set the working directory for Runway.
+
         Args:
             deploy_environment: Object representing the current deploy environment.
 
@@ -106,7 +107,10 @@ class CliContext:
             RunwayContext
 
         """
-        return RunwayContext(deploy_environment=deploy_environment or self.env)
+        return RunwayContext(
+            deploy_environment=deploy_environment or self.env,
+            work_dir=self.runway_config_path.parent / ".runway",
+        )
 
     def __getitem__(self, key: str) -> Any:
         """Implement evaluation of self[key].

@@ -183,7 +183,7 @@ def runway_config() -> MockRunwayConfig:
 
 
 @pytest.fixture(scope="function")
-def runway_context(request: FixtureRequest) -> MockRunwayContext:
+def runway_context(request: FixtureRequest, tmp_path: Path) -> MockRunwayContext:
     """Create a mock Runway context object."""
     env_vars = {
         "AWS_REGION": getattr(
@@ -206,4 +206,5 @@ def runway_context(request: FixtureRequest) -> MockRunwayContext:
     return MockRunwayContext(
         command="test",
         deploy_environment=DeployEnvironment(environ=env_vars, explicit_name="test"),
+        work_dir=tmp_path / ".runway",
     )

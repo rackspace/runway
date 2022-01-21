@@ -13,7 +13,6 @@ from typing_extensions import TypedDict
 
 from runway.config.components.runway import RunwayModuleDefinition
 from runway.config.models.runway import RunwayModuleDefinitionModel
-from runway.constants import DEFAULT_CACHE_DIR
 from runway.core.components._module_path import ModulePath
 
 if TYPE_CHECKING:
@@ -162,47 +161,62 @@ class TestModulePath:
 
     @pytest.mark.parametrize("test", deepcopy(TESTS))
     def test_arguments(
-        self, deploy_environment: DeployEnvironment, test: TypeDefTestDefinition
+        self,
+        deploy_environment: DeployEnvironment,
+        test: TypeDefTestDefinition,
+        tmp_path: Path,
     ) -> None:
         """Test arguments."""
         assert (
             ModulePath(
-                test["definition"], deploy_environment=deploy_environment
+                test["definition"],
+                cache_dir=tmp_path,
+                deploy_environment=deploy_environment,
             ).arguments
             == test["expected"]["arguments"]
         )
 
     @pytest.mark.parametrize("test", deepcopy(TESTS))
     def test_location(
-        self, deploy_environment: DeployEnvironment, test: TypeDefTestDefinition
+        self,
+        deploy_environment: DeployEnvironment,
+        test: TypeDefTestDefinition,
+        tmp_path: Path,
     ) -> None:
         """Test location."""
         assert (
             ModulePath(
-                test["definition"], deploy_environment=deploy_environment
+                test["definition"],
+                cache_dir=tmp_path,
+                deploy_environment=deploy_environment,
             ).location
             == test["expected"]["location"]
         )
 
     @pytest.mark.parametrize("test", deepcopy(TESTS))
     def test_metadata(
-        self, deploy_environment: DeployEnvironment, test: TypeDefTestDefinition
+        self,
+        deploy_environment: DeployEnvironment,
+        test: TypeDefTestDefinition,
+        tmp_path: Path,
     ) -> None:
         """Test metadata."""
         assert ModulePath(
-            test["definition"], deploy_environment=deploy_environment
+            test["definition"],
+            cache_dir=tmp_path,
+            deploy_environment=deploy_environment,
         ).metadata == {
             "arguments": test["expected"]["arguments"],
-            "cache_dir": DEFAULT_CACHE_DIR,
+            "cache_dir": tmp_path,
             "location": test["expected"]["location"],
             "source": test["expected"]["source"],
             "uri": test["expected"]["uri"],
         }
 
-    def test_module_root_not_implimented(self) -> None:
+    def test_module_root_not_implimented(self, tmp_path: Path) -> None:
         """Test module_root NotImplimentedError."""
         with pytest.raises(NotImplementedError):
-            assert not ModulePath("invalid::something").module_root
+            assert not ModulePath("invalid::something", cache_dir=tmp_path).module_root
 
     @pytest.mark.parametrize("test", deepcopy(TESTS))
     def test_module_root(
@@ -210,10 +224,15 @@ class TestModulePath:
         deploy_environment: DeployEnvironment,
         mocker: MockerFixture,
         test: TypeDefTestDefinition,
+        tmp_path: Path,
     ) -> None:
         """Test module_root."""
         mocker.patch.object(ModulePath, "REMOTE_SOURCE_HANDLERS", {"git": MagicMock()})
-        obj = ModulePath(test["definition"], deploy_environment=deploy_environment)
+        obj = ModulePath(
+            test["definition"],
+            cache_dir=tmp_path,
+            deploy_environment=deploy_environment,
+        )
         if isinstance(test["definition"], (type(None), Path)):
             assert obj.module_root == test["definition"] or Path.cwd()
         elif test["expected"]["source"] == "local":
@@ -237,27 +256,45 @@ class TestModulePath:
 
     @pytest.mark.parametrize("test", deepcopy(TESTS))
     def test_source(
-        self, deploy_environment: DeployEnvironment, test: TypeDefTestDefinition
+        self,
+        deploy_environment: DeployEnvironment,
+        test: TypeDefTestDefinition,
+        tmp_path: Path,
     ) -> None:
         """Test source."""
         assert (
-            ModulePath(test["definition"], deploy_environment=deploy_environment).source
+            ModulePath(
+                test["definition"],
+                cache_dir=tmp_path,
+                deploy_environment=deploy_environment,
+            ).source
             == test["expected"]["source"]
         )
 
     @pytest.mark.parametrize("test", deepcopy(TESTS))
     def test_uri(
-        self, deploy_environment: DeployEnvironment, test: TypeDefTestDefinition
+        self,
+        deploy_environment: DeployEnvironment,
+        test: TypeDefTestDefinition,
+        tmp_path: Path,
     ) -> None:
         """Test uri."""
         assert (
-            ModulePath(test["definition"], deploy_environment=deploy_environment).uri
+            ModulePath(
+                test["definition"],
+                cache_dir=tmp_path,
+                deploy_environment=deploy_environment,
+            ).uri
             == test["expected"]["uri"]
         )
 
-    def test_parse_obj_none(self, deploy_environment: DeployEnvironment) -> None:
+    def test_parse_obj_none(
+        self, deploy_environment: DeployEnvironment, tmp_path: Path
+    ) -> None:
         """Test parse_obj None."""
-        obj = ModulePath.parse_obj(None, deploy_environment=deploy_environment)
+        obj = ModulePath.parse_obj(
+            None, cache_dir=tmp_path, deploy_environment=deploy_environment
+        )
         assert obj.definition == Path.cwd()
         assert obj.env == deploy_environment
 
@@ -265,7 +302,9 @@ class TestModulePath:
         self, deploy_environment: DeployEnvironment, tmp_path: Path
     ) -> None:
         """Test parse_obj Path."""
-        obj = ModulePath.parse_obj(tmp_path, deploy_environment=deploy_environment)
+        obj = ModulePath.parse_obj(
+            tmp_path, cache_dir=tmp_path, deploy_environment=deploy_environment
+        )
         assert obj.definition == tmp_path
         assert obj.env == deploy_environment
 
@@ -274,21 +313,29 @@ class TestModulePath:
     ) -> None:
         """Test parse_obj Runway config objects."""
         model = RunwayModuleDefinitionModel(path=tmp_path)
-        obj0 = ModulePath.parse_obj(model, deploy_environment=deploy_environment)
+        obj0 = ModulePath.parse_obj(
+            model, cache_dir=tmp_path, deploy_environment=deploy_environment
+        )
         assert obj0.definition == model.path
         assert obj0.env == deploy_environment
         module = RunwayModuleDefinition(model)
-        obj1 = ModulePath.parse_obj(module, deploy_environment=deploy_environment)
+        obj1 = ModulePath.parse_obj(
+            module, cache_dir=tmp_path, deploy_environment=deploy_environment
+        )
         assert obj1.definition == model.path
         assert obj1.env == deploy_environment
 
-    def test_parse_obj_str(self, deploy_environment: DeployEnvironment) -> None:
+    def test_parse_obj_str(
+        self, deploy_environment: DeployEnvironment, tmp_path: Path
+    ) -> None:
         """Test parse_obj str."""
-        obj = ModulePath.parse_obj("./test", deploy_environment=deploy_environment)
+        obj = ModulePath.parse_obj(
+            "./test", cache_dir=tmp_path, deploy_environment=deploy_environment
+        )
         assert obj.definition == "./test"
         assert obj.env == deploy_environment
 
-    def test_parse_obj_type_error(self) -> None:
+    def test_parse_obj_type_error(self, tmp_path: Path) -> None:
         """Test parse_obj TypeError."""
         with pytest.raises(TypeError):
-            assert not ModulePath.parse_obj({})  # type: ignore
+            assert not ModulePath.parse_obj({}, cache_dir=tmp_path)  # type: ignore

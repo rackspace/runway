@@ -16,7 +16,6 @@ from .....dependency_managers import (
     PoetryNotFoundError,
 )
 from ..base_classes import Project
-from ..constants import BASE_WORK_DIR
 from ..models.args import PythonHookArgs
 from . import PythonDockerDependencyInstaller
 
@@ -164,7 +163,7 @@ class PythonProject(Project[PythonHookArgs]):
         This path is only used when exporting from another format.
 
         """
-        return BASE_WORK_DIR / f"{self.source_code.md5_hash}.requirements.txt"
+        return self.ctx.work_dir / f"{self.source_code.md5_hash}.requirements.txt"
 
     def cleanup(self) -> None:
         """Cleanup temporary files after the build process has run."""

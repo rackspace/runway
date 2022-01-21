@@ -94,6 +94,7 @@ class CfnginContext(BaseContext):
         logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
         parameters: Optional[MutableMapping[str, Any]] = None,
         stack_names: Optional[List[str]] = None,
+        work_dir: Optional[Path] = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -107,6 +108,7 @@ class CfnginContext(BaseContext):
             parameters: Parameters passed from Runway or read from a file.
             stack_names: A list of stack_names to operate on. If not passed,
                 all stacks defined in the config will be operated on.
+            work_dir: Working directory used by Runway.
 
         """
         self.config_path = config_path or Path.cwd()
@@ -116,6 +118,7 @@ class CfnginContext(BaseContext):
                 self.config_path.name.split(".")[0],
                 logger if isinstance(logger, RunwayLogger) else LOGGER,
             ),
+            work_dir=work_dir or self.config_path / ".runway",
         )
         self._persistent_graph_lock_code = None
         self._persistent_graph = None
@@ -347,6 +350,7 @@ class CfnginContext(BaseContext):
             logger=self.logger,
             parameters=self.parameters,
             stack_name=self.stack_names,
+            work_dir=self.work_dir,
         )
 
     def get_fqn(self, name: Optional[str] = None) -> str:

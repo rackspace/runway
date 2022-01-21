@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from runway.constants import DEFAULT_CACHE_DIR
 from runway.sources.source import Source
 
 if TYPE_CHECKING:
@@ -20,16 +19,16 @@ LOGGER = logging.getLogger("runway")
 class TestSource:
     """Tests for the Source type object."""
 
-    def test_fetch_not_implemented(self) -> None:
+    def test_fetch_not_implemented(self, tmp_path: Path) -> None:
         """#fetch: By default a not implemented error should be thrown."""
-        source = Source()
+        source = Source(cache_dir=tmp_path)
         with pytest.raises(NotImplementedError):
             source.fetch()
 
-    def test_when_no_cache_dir_parameter_in_config(self) -> None:
+    def test_when_no_cache_dir_parameter_in_config(self, tmp_path: Path) -> None:
         """The default when no cache_dir is passed in the config."""
-        source = Source()
-        assert source.cache_dir == DEFAULT_CACHE_DIR
+        source = Source(cache_dir=tmp_path)
+        assert source.cache_dir == tmp_path
 
     def test_a_cache_directory_is_created(self, cd_tmp_path: Path) -> None:
         """Ensure a cache directory is created."""

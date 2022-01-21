@@ -119,6 +119,7 @@ class MockCFNginContext(CfnginContext):
         force_stacks: Optional[List[str]] = None,
         region: Optional[str] = "us-east-1",
         stack_names: Optional[List[str]] = None,
+        work_dir: Optional[Path] = None,
         **_: Any,
     ) -> None:
         """Instantiate class."""
@@ -135,6 +136,7 @@ class MockCFNginContext(CfnginContext):
             force_stacks=force_stacks,
             parameters=parameters,
             stack_names=stack_names,
+            work_dir=work_dir,
         )
 
     def add_stubber(self, service_name: str, region: Optional[str] = None) -> Stubber:
@@ -210,12 +212,15 @@ class MockRunwayContext(RunwayContext):
         *,
         command: Optional[RunwayActionTypeDef] = None,
         deploy_environment: Any = None,
+        work_dir: Optional[Path] = None,
         **_: Any,
     ) -> None:
         """Instantiate class."""
         if not deploy_environment:
             deploy_environment = DeployEnvironment(environ={}, explicit_name="test")
-        super().__init__(command=command, deploy_environment=deploy_environment)
+        super().__init__(
+            command=command, deploy_environment=deploy_environment, work_dir=work_dir
+        )
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
         self._use_concurrent = True

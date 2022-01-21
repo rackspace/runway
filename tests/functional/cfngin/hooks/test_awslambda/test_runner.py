@@ -14,7 +14,6 @@ import pytest
 from pydantic import root_validator
 
 from runway._cli import cli
-from runway.cfngin.hooks.awslambda.constants import BASE_WORK_DIR
 from runway.compat import cached_property
 from runway.utils import BaseModel
 
@@ -156,18 +155,6 @@ def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     (DOCKER_XMLSEC_DIR / "poetry.lock").unlink(missing_ok=True)
     for subdir in [DOCKER_MYSQL_DIR, DOCKER_XMLSEC_DIR]:
         shutil.rmtree(subdir / ".venv", ignore_errors=True)
-    # TODO fix how this dir is determined
-    for pattern in [
-        "docker.*",
-        "docker_mysql.*",
-        "docker_xmlsec.*",
-        "local.*",
-        "local_xmlsec_layer.*",
-    ]:
-        for match in BASE_WORK_DIR.rglob(pattern):
-            shutil.rmtree(match, ignore_errors=True)
-    for match in BASE_WORK_DIR.rglob("*.txt"):
-        match.unlink()
 
 
 @pytest.mark.order("first")
