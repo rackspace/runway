@@ -416,8 +416,10 @@ class CfnginConfig(BaseConfig):
             sources=CfnginPackageSourcesDefinitionModel.parse_obj(
                 config.get("package_sources", {})  # type: ignore
             ),
-            cache_dir=config.get(
-                "cfngin_cache_dir", (work_dir or Path().cwd() / ".runway") / "cache"
+            cache_dir=Path(
+                config.get(
+                    "cfngin_cache_dir", (work_dir or Path().cwd() / ".runway") / "cache"
+                )
             ),
         )
         processor.get_package_sources()
