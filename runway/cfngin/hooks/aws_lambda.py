@@ -39,7 +39,6 @@ from docker.models.images import Image
 from troposphere.awslambda import Code
 from typing_extensions import Literal, TypedDict
 
-from ...constants import DOT_RUNWAY_DIR
 from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
 from ..utils import ensure_s3_bucket
 
@@ -546,6 +545,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
     python_path: Optional[str] = None,
     requirements_files: Dict[str, bool],
     use_pipenv: bool = False,
+    work_dir: Path,
     **kwargs: Any,
 ) -> Tuple[bytes, str]:
     """Create zip file in memory with package dependencies.
@@ -567,6 +567,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
             installed and executable using ``-m`` if provided.
         requirements_files: Map of requirement file names and whether they exist.
         use_pipenv: Whether to use pipenv to export a Pipfile as requirements.txt.
+        work_dir: Working direcotry.
 
     Returns:
         Content of the ZIP file as a byte string and calculated hash of all the files
@@ -574,16 +575,15 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
     """
     kwargs.setdefault("pipenv_timeout", 300)
 
-    temp_root = DOT_RUNWAY_DIR
-    if not temp_root.is_dir():
-        temp_root.mkdir(parents=True)
+    if not work_dir.is_dir():
+        work_dir.mkdir(parents=True)
 
     # exclude potential virtual environments in the package
     excludes = excludes or []
     excludes.append(".venv/")
 
     # pylint: disable=consider-using-with
-    tmpdir = tempfile.TemporaryDirectory(prefix="cfngin", dir=temp_root)
+    tmpdir = tempfile.TemporaryDirectory(prefix="cfngin", dir=work_dir)
     tmp_req = os.path.join(tmpdir.name, "requirements.txt")
     copydir(package_root, tmpdir.name, includes, excludes, follow_symlinks)
     tmp_req = handle_requirements(
@@ -820,6 +820,7 @@ def _upload_function(
     follow_symlinks: bool,
     payload_acl: ObjectCannedACLType,
     sys_path: str,
+    work_dir: Path,
 ) -> Code:
     """Build a Lambda payload from user configuration and uploads it to S3.
 
@@ -836,6 +837,7 @@ def _upload_function(
         payload_acl: The canned S3 object ACL to be applied to the
             uploaded payload
         sys_path: Path that all actions are relative to.
+        work_dir: Working directory used by the hook.
 
     Returns:
         CloudFormation AWS Lambda Code object, pointing to the uploaded object in S3.
@@ -870,6 +872,7 @@ def _upload_function(
             excludes=excludes,
             follow_symlinks=follow_symlinks,
             requirements_files=requirements_files,
+            work_dir=work_dir,
             **options,
         )
     else:
@@ -1131,6 +1134,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
             follow_symlinks,
             payload_acl,
             str(sys_path),
+            work_dir=context.work_dir,
         )
 
     return results

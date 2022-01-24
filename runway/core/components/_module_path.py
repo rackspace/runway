@@ -12,7 +12,6 @@ from typing_extensions import TypedDict
 from ...compat import cached_property
 from ...config.components.runway import RunwayModuleDefinition
 from ...config.models.runway import RunwayModuleDefinitionModel
-from ...constants import DEFAULT_CACHE_DIR
 from ...sources.git import Git
 from ._deploy_environment import DeployEnvironment
 
@@ -44,7 +43,7 @@ class ModulePath:
         self,
         definition: Optional[Union[Path, str]] = None,
         *,
-        cache_dir: Path = DEFAULT_CACHE_DIR,
+        cache_dir: Path,
         deploy_environment: Optional[DeployEnvironment] = None,
     ) -> None:
         """Instantiate class.
@@ -145,12 +144,14 @@ class ModulePath:
             Union[Path, RunwayModuleDefinition, RunwayModuleDefinitionModel, str]
         ],
         *,
+        cache_dir: Path,
         deploy_environment: Optional[DeployEnvironment] = None,
     ) -> ModulePath:
         """Parse object.
 
         Args:
             obj: Object to parse.
+            cache_dir: Directory to use for caching if needed.
             deploy_environment: Current deploy environment object.
 
         Raises:
@@ -158,9 +159,17 @@ class ModulePath:
 
         """
         if isinstance(obj, (RunwayModuleDefinition, RunwayModuleDefinitionModel)):
-            return cls(definition=obj.path, deploy_environment=deploy_environment)
+            return cls(
+                cache_dir=cache_dir,
+                definition=obj.path,
+                deploy_environment=deploy_environment,
+            )
         if isinstance(obj, (type(None), Path, str)):
-            return cls(definition=obj, deploy_environment=deploy_environment)
+            return cls(
+                cache_dir=cache_dir,
+                definition=obj,
+                deploy_environment=deploy_environment,
+            )
         raise TypeError(
             f"object type {type(obj)}; expected pathlib.Path, "
             "RunwayModuleDefinition, RunwayModuleDefinitionModel, or str"

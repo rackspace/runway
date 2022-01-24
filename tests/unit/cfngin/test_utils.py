@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import logging
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, cast
@@ -259,6 +261,16 @@ def test_read_value_from_path_root_path_file(tmp_path: Path) -> None:
 class TestUtil(unittest.TestCase):
     """Tests for runway.cfngin.utils."""
 
+    tmp_path: Path
+
+    def setUp(self) -> None:
+        """Set up test case."""
+        self.tmp_path = Path(tempfile.mkdtemp())
+
+    def tearDown(self) -> None:
+        """Tear down test case."""
+        shutil.rmtree(self.tmp_path, ignore_errors=True)
+
     def test_cf_safe_name(self) -> None:
         """Test cf safe name."""
         tests = (("abc-def", "AbcDef"), ("GhI", "GhI"), ("jKlm.noP", "JKlmNoP"))
@@ -363,7 +375,7 @@ Outputs:
             "create_cache_directories",
             new=mock_create_cache_directories,
         ):
-            sp = SourceProcessor(sources={})  # type: ignore
+            sp = SourceProcessor(cache_dir=self.tmp_path, sources={})  # type: ignore
 
             self.assertEqual(
                 sp.sanitize_git_path("git@github.com:foo/bar.git"),

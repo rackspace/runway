@@ -15,7 +15,6 @@ from pydantic import ValidationError
 from runway.config.models.runway.options.serverless import (
     RunwayServerlessModuleOptionsDataModel,
 )
-from runway.constants import DOT_RUNWAY_DIR
 from runway.module.serverless import (
     Serverless,
     ServerlessArtifact,
@@ -101,7 +100,9 @@ class TestServerless:
             options={"promotezip": {"bucketname": "test-bucket"}},
         )
         assert not obj._deploy_package()  # pylint: disable=protected-access
-        tempfile_temporary_directory.assert_called_once_with(dir=DOT_RUNWAY_DIR)
+        tempfile_temporary_directory.assert_called_once_with(
+            dir=runway_context.work_dir
+        )
         sls_print.assert_called_once()
         artifact_class.assert_called_once_with(
             runway_context,

@@ -582,19 +582,15 @@ class SourceProcessor:
     def __init__(
         self,
         sources: CfnginPackageSourcesDefinitionModel,
-        cache_dir: Optional[Path] = None,
+        cache_dir: Path,
     ) -> None:
         """Process a config's defined package sources.
 
         Args:
-            sources: Package sources from CFNgin config
-                dictionary.
-            cache_dir: Path where remote sources will be
-                cached.
+            sources: Package sources from CFNgin config dictionary.
+            cache_dir: Path where remote sources will be cached.
 
         """
-        if not cache_dir:
-            cache_dir = Path.cwd() / ".runway" / "cache"
         self.cache_dir = cache_dir
         self.package_cache_dir = cache_dir / "packages"
         self.sources = sources

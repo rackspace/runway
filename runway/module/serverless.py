@@ -20,7 +20,6 @@ from ..compat import cached_property
 from ..config.models.runway.options.serverless import (
     RunwayServerlessModuleOptionsDataModel,
 )
-from ..constants import DOT_RUNWAY_DIR
 from ..s3_utils import does_s3_object_exist, download, upload
 from ..utils import YamlDumper, merge_dicts
 from .base import ModuleOptions, RunwayModuleNpm
@@ -308,7 +307,7 @@ class Serverless(RunwayModuleNpm):
     def _deploy_package(self) -> None:
         """Deploy Serverless package."""
         if self.options.promotezip.bucketname:
-            with tempfile.TemporaryDirectory(dir=DOT_RUNWAY_DIR) as tmp_dir:
+            with tempfile.TemporaryDirectory(dir=self.ctx.work_dir) as tmp_dir:
                 artifact = ServerlessArtifact(
                     self.ctx,
                     self.sls_print(),

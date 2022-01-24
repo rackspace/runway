@@ -131,10 +131,10 @@ class TestCfnginConfig:
         mock_parse_raw = MagicMock(return_value=None)
         monkeypatch.setattr(CfnginConfig, "find_config_file", mock_find_config_file)
         monkeypatch.setattr(CfnginConfig, "parse_raw", mock_parse_raw)
-        assert not CfnginConfig.parse_file(path=tmp_path)
+        assert not CfnginConfig.parse_file(path=tmp_path, work_dir=tmp_path)
         mock_find_config_file.assert_called_once_with(tmp_path)
         mock_parse_raw.assert_called_once_with(
-            file_path.read_text(), path=file_path, parameters={}
+            file_path.read_text(), path=file_path, parameters={}, work_dir=tmp_path
         )
 
     def test_parse_file_find_config_file_value_error(
@@ -163,7 +163,7 @@ class TestCfnginConfig:
         )
         assert CfnginConfig.parse_obj({}).namespace == "success"
 
-    def test_parse_raw(self, monkeypatch: MonkeyPatch) -> None:
+    def test_parse_raw(self, monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
         """Test parse_raw."""
         mock_resolve_raw_data = MagicMock()
         mock_parse_obj = MagicMock()
@@ -180,17 +180,28 @@ class TestCfnginConfig:
         mock_parse_obj.return_value = data
         mock_process_package_sources.return_value = data_str
 
-        assert CfnginConfig.parse_raw(data_str, skip_package_sources=True) == data
+        assert (
+            CfnginConfig.parse_raw(
+                data_str, skip_package_sources=True, work_dir=tmp_path
+            )
+            == data
+        )
         mock_resolve_raw_data.assert_called_once_with(yaml.dump(data), parameters={})
         mock_parse_obj.assert_called_once_with(data)
         mock_process_package_sources.assert_not_called()
 
-        assert CfnginConfig.parse_raw(data_str, parameters={"key": "val"}) == data
+        assert (
+            CfnginConfig.parse_raw(
+                data_str, parameters={"key": "val"}, work_dir=tmp_path
+            )
+            == data
+        )
         mock_resolve_raw_data.assert_called_with(
-            yaml.dump(data), parameters={"key": "val"}
+            yaml.dump(data),
+            parameters={"key": "val"},
         )
         mock_process_package_sources.assert_called_once_with(
-            data_str, parameters={"key": "val"}
+            data_str, parameters={"key": "val"}, work_dir=tmp_path
         )
         assert mock_parse_obj.call_count == 2
 
@@ -209,11 +220,14 @@ class TestCfnginConfig:
         other_config = tmp_path / "other_config.yml"
         other_config.write_text(merge_data)
         assert (
-            CfnginConfig.process_package_sources(raw_data, parameters={"key": "val"})
+            CfnginConfig.process_package_sources(
+                raw_data, parameters={"key": "val"}, work_dir=tmp_path
+            )
             == raw_data
         )
         mock_source_processor.assert_called_once_with(
-            sources=CfnginPackageSourcesDefinitionModel(), cache_dir=None
+            sources=CfnginPackageSourcesDefinitionModel(),
+            cache_dir=tmp_path / "cache",
         )
         mock_source_processor.get_package_sources.assert_called_once_with()
         mock_resolve_raw_data.assert_not_called()
@@ -222,14 +236,16 @@ class TestCfnginConfig:
         raw_data = yaml.dump(data)
         mock_source_processor.configs_to_merge = [str(other_config.resolve())]
         assert (
-            CfnginConfig.process_package_sources(raw_data, parameters={"key": "val"})
+            CfnginConfig.process_package_sources(
+                raw_data, parameters={"key": "val"}, work_dir=tmp_path
+            )
             == "rendered"
         )
         mock_source_processor.assert_called_with(
             sources=CfnginPackageSourcesDefinitionModel.parse_obj(
                 {"git": [{"uri": "something"}]}
             ),
-            cache_dir=None,
+            cache_dir=tmp_path / "cache",
         )
         assert mock_source_processor.call_count == 2
         expected = data.copy()

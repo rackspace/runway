@@ -8,8 +8,6 @@ import logging
 from pathlib import Path
 from typing import Any, Union
 
-from ..constants import DEFAULT_CACHE_DIR
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -30,7 +28,7 @@ class Source:
 
     cache_dir: Path
 
-    def __init__(self, *, cache_dir: Union[Path, str] = DEFAULT_CACHE_DIR, **_: Any):
+    def __init__(self, *, cache_dir: Union[Path, str], **_: Any):
         """Source.
 
         Args:

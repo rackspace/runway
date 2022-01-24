@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 import boto3
@@ -25,14 +26,23 @@ class BaseContext(DelCachedPropMixin):
     """Base class for context objects."""
 
     env: DeployEnvironment
+    """Object containing information about the environment being deployed to."""
+
     logger: Union[PrefixAdaptor, RunwayLogger]
+    """Custom logger."""
+
     sys_info: SystemInfo
+    """Information about the current system being used to run Runway."""
+
+    work_dir: Path
+    """Working directory used by Runway. Should always be a directory named ``.runway``."""
 
     def __init__(
         self,
         *,
         deploy_environment: DeployEnvironment,
         logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
+        work_dir: Optional[Path] = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -40,11 +50,13 @@ class BaseContext(DelCachedPropMixin):
         Args:
             deploy_environment: The current deploy environment.
             logger: Custom logger.
+            work_dir: Working directory used by Runway.
 
         """
         self.env = deploy_environment
         self.logger = logger
         self.sys_info = SystemInfo()
+        self.work_dir = work_dir or Path.cwd() / ".runway"
 
     @property
     def boto3_credentials(self) -> Boto3CredentialsTypeDef:

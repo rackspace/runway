@@ -11,6 +11,8 @@ from ..core.components import DeployEnvironment
 from ._base import BaseContext
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from .._logging import PrefixAdaptor, RunwayLogger
     from ..core.type_defs import RunwayActionTypeDef
 
@@ -21,8 +23,7 @@ class RunwayContext(BaseContext):
     """Runway context object."""
 
     command: Optional[RunwayActionTypeDef]
-    env: DeployEnvironment
-    logger: Union[PrefixAdaptor, RunwayLogger]
+    """Runway command/action being run."""
 
     def __init__(
         self,
@@ -30,6 +31,7 @@ class RunwayContext(BaseContext):
         command: Optional[RunwayActionTypeDef] = None,
         deploy_environment: Optional[DeployEnvironment] = None,
         logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
+        work_dir: Optional[Path] = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -38,10 +40,13 @@ class RunwayContext(BaseContext):
             command: Runway command/action being run.
             deploy_environment: The current deploy environment.
             logger: Custom logger.
+            work_dir: Working directory used by Runway.
 
         """
         super().__init__(
-            deploy_environment=deploy_environment or DeployEnvironment(), logger=logger
+            deploy_environment=deploy_environment or DeployEnvironment(),
+            logger=logger,
+            work_dir=work_dir,
         )
         self.command = command
         self._inject_profile_credentials()
@@ -88,7 +93,10 @@ class RunwayContext(BaseContext):
     def copy(self) -> RunwayContext:
         """Copy the contents of this object into a new instance."""
         return self.__class__(
-            command=self.command, deploy_environment=self.env.copy(), logger=self.logger
+            command=self.command,
+            deploy_environment=self.env.copy(),
+            logger=self.logger,
+            work_dir=self.work_dir,
         )
 
     def echo_detected_environment(self) -> None:

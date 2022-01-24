@@ -21,7 +21,6 @@ from typing_extensions import Literal
 
 from ....compat import cached_property
 from ..protocols import CfnginHookProtocol
-from .constants import BASE_WORK_DIR
 from .exceptions import RuntimeMismatchError
 from .models.args import AwsLambdaHookArgs
 from .models.responses import AwsLambdaHookDeployResponse
@@ -69,7 +68,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar]):
     def build_directory(self) -> Path:
         """Directory being used to build deployment package."""
         result = (
-            BASE_WORK_DIR
+            self.ctx.work_dir
             / f"{self.source_code.root_directory.name}.{self.source_code.md5_hash}"
         )
         result.mkdir(exist_ok=True, parents=True)
@@ -90,7 +89,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar]):
         cache_dir = (
             self.args.cache_dir
             if self.args.cache_dir
-            else BASE_WORK_DIR / self.DEFAULT_CACHE_DIR_NAME
+            else self.ctx.work_dir / self.DEFAULT_CACHE_DIR_NAME
         )
         cache_dir.mkdir(exist_ok=True, parents=True)
         return cache_dir

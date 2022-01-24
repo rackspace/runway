@@ -141,58 +141,99 @@ class CfnginConfig(BaseConfig):
     """
 
     EXCLUDE_REGEX = r"runway(\..*)?\.(yml|yaml)"
-    EXCLUDE_LIST = ["bitbucket-pipelines.yml", "buildspec.yml", "docker-compose.yml"]
+    """Regex for file names to exclude when looking for config files."""
 
-    #: Bucket to use for CFNgin resources. (e.g. CloudFormation templates).
-    #: May be an empty string.
+    EXCLUDE_LIST = ["bitbucket-pipelines.yml", "buildspec.yml", "docker-compose.yml"]
+    """Explicit files names to ignore when looking for config files."""
+
     cfngin_bucket: Optional[str]
-    #: Explicit region to use for :attr:`CfnginConfig.cfngin_bucket`
+    """Bucket to use for CFNgin resources. (e.g. CloudFormation templates).
+    May be an empty string.
+    """
+
     cfngin_bucket_region: Optional[str]
     """Explicit region to use for :attr:`CfnginConfig.cfngin_bucket`"""
-    cfngin_cache_dir: Path  #: Local directory to use for caching.
-    log_formats: Dict[str, str]  #: Custom formatting for log messages.
-    lookups: Dict[str, str]  #: Register custom lookups.
-    mappings: Dict[  #: Mappings that will be added to all stacks.
-        str, Dict[str, Dict[str, Any]]
-    ]
-    namespace: str  #: Namespace to prepend to everything.
-    # Character used to separate :attr:`CfnginConfig.namespace` and anything it prepends.
+
+    cfngin_cache_dir: Path
+    """Local directory to use for caching."""
+
+    log_formats: Dict[str, str]
+    """Custom formatting for log messages."""
+
+    lookups: Dict[str, str]
+    """Register custom lookups."""
+
+    mappings: Dict[str, Dict[str, Dict[str, Any]]]
+    """Mappings that will be added to all stacks."""
+
+    namespace: str
+    """Namespace to prepend to everything."""
+
     namespace_delimiter: str
-    package_sources: CfnginPackageSourcesDefinitionModel  #: Remote source locations.
-    persistent_graph_key: Optional[  #: S3 object key were the persistent graph is stored.
-        str
-    ] = None
-    post_deploy: List[CfnginHookDefinitionModel]  #: Hooks to run after a deploy action.
-    post_destroy: List[  #: Hooks to run after a destroy action.
-        CfnginHookDefinitionModel
-    ]
-    pre_deploy: List[CfnginHookDefinitionModel]  #: Hooks to run before a deploy action.
-    pre_destroy: List[  #: Hooks to run before a destroy action.
-        CfnginHookDefinitionModel
-    ]
-    service_role: Optional[str]  #: IAM role for CloudFormation to use.
-    stacks: List[CfnginStackDefinitionModel]  #: Stacks to be processed.
-    sys_path: Optional[Path]  #: Relative or absolute path to use as the work directory.
-    tags: Optional[Dict[str, str]]  #: Tags to apply to all resources.
-    template_indent: int  #: Spaces to use per-indent level when outputing a template to json.
+    """Character used to separate :attr:`CfnginConfig.namespace` and anything it prepends."""
+
+    package_sources: CfnginPackageSourcesDefinitionModel
+    """Remote source locations."""
+
+    persistent_graph_key: Optional[str] = None
+    """S3 object key were the persistent graph is stored."""
+
+    post_deploy: List[CfnginHookDefinitionModel]
+    """Hooks to run after a deploy action."""
+
+    post_destroy: List[CfnginHookDefinitionModel]
+    """Hooks to run after a destroy action."""
+
+    pre_deploy: List[CfnginHookDefinitionModel]
+    """Hooks to run before a deploy action."""
+
+    pre_destroy: List[CfnginHookDefinitionModel]
+    """Hooks to run before a destroy action."""
+
+    service_role: Optional[str]
+    """IAM role for CloudFormation to use."""
+
+    stacks: List[CfnginStackDefinitionModel]
+    """Stacks to be processed."""
+
+    sys_path: Optional[Path]
+    """Relative or absolute path to use as the work directory."""
+
+    tags: Optional[Dict[str, str]]
+    """Tags to apply to all resources."""
+
+    template_indent: int
+    """Spaces to use per-indent level when outputing a template to json."""
 
     _data: CfnginConfigDefinitionModel
 
     def __init__(
-        self, data: CfnginConfigDefinitionModel, *, path: Optional[Path] = None
+        self,
+        data: CfnginConfigDefinitionModel,
+        *,
+        path: Optional[Path] = None,
+        work_dir: Optional[Path] = None,
     ) -> None:
         """Instantiate class.
 
         Args:
             data: The data model of the config file.
             path: Path to the config file.
+            work_dir: Working directory.
 
         """
         super().__init__(data, path=path)
 
         self.cfngin_bucket = self._data.cfngin_bucket
         self.cfngin_bucket_region = self._data.cfngin_bucket_region
-        self.cfngin_cache_dir = self._data.cfngin_cache_dir
+        if self._data.cfngin_cache_dir:
+            self.cfngin_cache_dir = self._data.cfngin_cache_dir
+        elif work_dir:
+            self.cfngin_cache_dir = work_dir / "cache"
+        elif path:
+            self.cfngin_cache_dir = path.parent / ".runway" / "cache"
+        else:
+            self.cfngin_cache_dir = Path().cwd() / ".runway" / "cache"
         self.log_formats = self._data.log_formats
         self.lookups = self._data.lookups
         self.mappings = self._data.mappings
@@ -268,6 +309,7 @@ class CfnginConfig(BaseConfig):
         path: Optional[Path] = None,
         file_path: Optional[Path] = None,
         parameters: Optional[MutableMapping[str, Any]] = None,
+        work_dir: Optional[Path] = None,
         **kwargs: Any,
     ) -> CfnginConfig:
         """Parse a YAML file to create a config object.
@@ -276,6 +318,7 @@ class CfnginConfig(BaseConfig):
             path: The path to search for a config file.
             file_path: Exact path to a file to parse.
             parameters: Values to use when resolving a raw config.
+            work_dir: Explicit working directory.
 
         Raises:
             ConfigNotFound: Provided config file was not found.
@@ -288,6 +331,7 @@ class CfnginConfig(BaseConfig):
                 file_path.read_text(),
                 path=file_path,
                 parameters=parameters or {},
+                work_dir=work_dir,
                 **kwargs,
             )
         if path:
@@ -295,20 +339,28 @@ class CfnginConfig(BaseConfig):
             if len(found) > 1:
                 raise ValueError(f"more than one config files found: {found}")
             return cls.parse_file(
-                file_path=found[0], parameters=parameters or {}, **kwargs
+                file_path=found[0],
+                parameters=parameters or {},
+                work_dir=work_dir,
+                **kwargs,
             )
         raise ValueError("must provide path or file_path")
 
     @classmethod
-    def parse_obj(cls, obj: Any, *, path: Optional[Path] = None) -> CfnginConfig:
+    def parse_obj(
+        cls, obj: Any, *, path: Optional[Path] = None, work_dir: Optional[Path] = None
+    ) -> CfnginConfig:
         """Parse a python object.
 
         Args:
             obj: A python object to parse as a CFNgin config.
             path: The path to the config file that was parsed into the object.
+            work_dir: Working directory.
 
         """
-        return cls(CfnginConfigDefinitionModel.parse_obj(obj), path=path)
+        return cls(
+            CfnginConfigDefinitionModel.parse_obj(obj), path=path, work_dir=work_dir
+        )
 
     @classmethod
     def parse_raw(
@@ -318,6 +370,7 @@ class CfnginConfig(BaseConfig):
         parameters: Optional[MutableMapping[str, Any]] = None,
         path: Optional[Path] = None,
         skip_package_sources: bool = False,
+        work_dir: Optional[Path] = None,
     ) -> CfnginConfig:
         """Parse raw data.
 
@@ -326,6 +379,7 @@ class CfnginConfig(BaseConfig):
             parameters: Values to use when resolving a raw config.
             path: The path to search for a config file.
             skip_package_sources: Skip processing package sources.
+            work_dir: Explicit working directory.
 
         """
         if not parameters:
@@ -334,19 +388,27 @@ class CfnginConfig(BaseConfig):
         if skip_package_sources:
             return cls.parse_obj(yaml.safe_load(pre_rendered))
         config_dict = yaml.safe_load(
-            cls.process_package_sources(pre_rendered, parameters=parameters)
+            cls.process_package_sources(
+                pre_rendered, parameters=parameters, work_dir=work_dir
+            )
         )
         return cls.parse_obj(config_dict, path=path)
 
     @classmethod
     def process_package_sources(
-        cls, raw_data: str, *, parameters: Optional[MutableMapping[str, Any]] = None
+        cls,
+        raw_data: str,
+        *,
+        parameters: Optional[MutableMapping[str, Any]] = None,
+        work_dir: Optional[Path] = None,
     ) -> str:
         """Process the package sources defined in a rendered config.
 
         Args:
             raw_data: Raw configuration data.
+            cache_dir: Directory to use when caching remote sources.
             parameters: Values to use when resolving a raw config.
+            work_dir: Explicit working directory.
 
         """
         config = yaml.safe_load(raw_data) or {}
@@ -354,7 +416,11 @@ class CfnginConfig(BaseConfig):
             sources=CfnginPackageSourcesDefinitionModel.parse_obj(
                 config.get("package_sources", {})  # type: ignore
             ),
-            cache_dir=config.get("cfngin_cache_dir"),
+            cache_dir=Path(
+                config.get(
+                    "cfngin_cache_dir", (work_dir or Path().cwd() / ".runway") / "cache"
+                )
+            ),
         )
         processor.get_package_sources()
         if processor.configs_to_merge:

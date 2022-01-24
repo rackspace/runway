@@ -198,10 +198,9 @@ class TestProject:
         mocker.patch.object(
             Project, "source_code", Mock(md5_hash="hash", root_directory=tmp_path)
         )
-        mocker.patch(f"{MODULE}.BASE_WORK_DIR", tmp_path)
         expected = tmp_path / f"{tmp_path.name}.hash"
 
-        obj = Project(Mock(), Mock())
+        obj = Project(Mock(), Mock(work_dir=tmp_path))
         assert obj.build_directory == expected
         assert expected.is_dir()
 
@@ -220,7 +219,6 @@ class TestProject:
 
     def test_cache_dir_default(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test cache_dir default."""
-        mocker.patch(f"{MODULE}.BASE_WORK_DIR", tmp_path)
         cache_dir = tmp_path / Project.DEFAULT_CACHE_DIR_NAME
         cache_dir.mkdir()
         args = AwsLambdaHookArgs(
@@ -229,7 +227,7 @@ class TestProject:
             source_code=tmp_path,
             use_cache=True,
         )
-        assert Project(args, Mock()).cache_dir == cache_dir
+        assert Project(args, Mock(work_dir=tmp_path)).cache_dir == cache_dir
 
     def test_cache_dir_disabled(self, tmp_path: Path) -> None:
         """Test cache_dir disabled."""

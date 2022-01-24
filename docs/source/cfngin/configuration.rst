@@ -176,14 +176,18 @@ Top-Level Fields
 
   .. attribute:: cfngin_cache_dir
     :type: Optional[str]
-    :value: ./.runway/cache
+    :value: ./.runway/
 
     Path to a local directory that CFNgin will use for local caching.
+
+    If provided, the cache location is relative to the CFNgin configuration file.
+
+    If NOT provided, the cache location is relative to the ``runway.yaml``/``runway.yml`` file and is shared between all Runway modules.
 
     .. rubric:: Example
     .. code-block:: yaml
 
-        cfngin_cache_dir: ./.runway/cache
+        cfngin_cache_dir: ./.runway
 
   .. attribute:: log_formats
     :type: Optional[Dict[str, str]]

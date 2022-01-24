@@ -265,7 +265,11 @@ class CFNgin:
             validate: Validate the loaded config.
 
         """
-        return CfnginConfig.parse_file(file_path=file_path, parameters=self.parameters)
+        return CfnginConfig.parse_file(
+            file_path=file_path,
+            parameters=self.parameters,
+            work_dir=self.__ctx.work_dir,
+        )
 
     def _get_context(self, config: CfnginConfig, config_path: Path) -> CfnginContext:
         """Initialize a CFNgin context object.
@@ -282,6 +286,7 @@ class CFNgin:
             force_stacks=[],  # placeholder
             parameters=self.parameters,
             stack_names=[],  # placeholder
+            work_dir=self.__ctx.work_dir,
         )
 
     def _get_provider_builder(

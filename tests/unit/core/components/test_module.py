@@ -173,7 +173,9 @@ class TestModule:
 
         assert mod.path == "module-path"
         mock_path.parse_obj.assert_called_once_with(
-            mod.definition, deploy_environment=mod.ctx.env
+            mod.definition,
+            cache_dir=runway_context.work_dir / "cache",
+            deploy_environment=mod.ctx.env,
         )
 
     def test_payload_with_deployment(

@@ -217,8 +217,8 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         description="AWS Region where the CFNgin Bucket is located. "
         "If not provided, the current region is used.",
     )
-    cfngin_cache_dir: Path = Field(
-        default=Path.cwd() / ".runway" / "cache",
+    cfngin_cache_dir: Optional[Path] = Field(
+        default=None,
         title="CFNgin Cache Directory",
         description="Path to a local directory that CFNgin will use for local caching.",
     )

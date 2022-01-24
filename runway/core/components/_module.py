@@ -126,7 +126,11 @@ class Module:
     @cached_property
     def path(self) -> ModulePath:  # lazy load the path
         """Return resolve module path."""
-        return ModulePath.parse_obj(self.definition, deploy_environment=self.ctx.env)
+        return ModulePath.parse_obj(
+            self.definition,
+            cache_dir=self.ctx.work_dir / "cache",
+            deploy_environment=self.ctx.env,
+        )
 
     @cached_property
     def payload(self) -> Dict[str, Any]:  # lazy load the payload
