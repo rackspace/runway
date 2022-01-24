@@ -26,10 +26,10 @@
         "**/.mypy_cache": true,
         "**/.pytest_cache": true,
         "**/.runway": true,
-        "**/.runway_cache": true,
         "**/.serverless": true,
         "**/.svn": true,
         "**/CVS": true,
+        "**/Thumbs.db": true,
         "**/__pycache__": true
     },
     "files.insertFinalNewline": true,
