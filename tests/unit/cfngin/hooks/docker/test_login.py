@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
-from mock import MagicMock
+import pytest
 
 from runway.cfngin.hooks.docker import login
 from runway.cfngin.hooks.docker._login import LoginArgs
@@ -49,72 +49,54 @@ def test_login(
 class TestLoginArgs:
     """Test runway.cfngin.hooks.docker._login.LoginArgs."""
 
-    def test_determine_registry(self) -> None:
-        """Test determine_registry."""
-        assert (
-            LoginArgs.determine_registry(context=None, ecr=True, registry="something")
-            == "something"
-        )
-
-    def test_determine_registry_ecr(self, mocker: MockerFixture) -> None:
-        """Test determine_registry ecr."""
-        registry = ElasticContainerRegistry(
-            account_id="123456012", aws_region="us-east-1"
-        )
-        mocker.patch(
-            MODULE + ".ElasticContainerRegistry",
-            parse_obj=MagicMock(return_value=registry),
+    def test__set_ecr(self, mocker: MockerFixture) -> None:
+        """Test _set_ecr."""
+        expected = ElasticContainerRegistry(alias="foobar")
+        mock_parse_obj = mocker.patch.object(
+            ElasticContainerRegistry, "parse_obj", return_value=expected
         )
         assert (
-            LoginArgs.determine_registry(context=None, ecr=True, registry=None)
-            == registry.fqn
+            LoginArgs.parse_obj(
+                {"ecr": expected.dict(), "password": "", "username": ""}
+            ).ecr
+            == expected
+        )
+        mock_parse_obj.assert_called_once_with({"context": None, **expected.dict()})
+
+    @pytest.mark.parametrize(
+        "ecr, registry, expected",
+        [
+            (None, "something", "something"),
+            (None, None, None),
+            (ElasticContainerRegistry(alias="foobar"), "something", "something"),
+            (
+                ElasticContainerRegistry(alias="foobar"),
+                None,
+                ElasticContainerRegistry.PUBLIC_URI_TEMPLATE.format(
+                    registry_alias="foobar"
+                ),
+            ),
+        ],
+    )
+    def test__set_registry(
+        self,
+        ecr: Optional[ElasticContainerRegistry],
+        expected: Optional[str],
+        registry: Optional[str],
+    ) -> None:
+        """Test _set_registry."""
+        assert (
+            LoginArgs(ecr=ecr, password="", registry=registry, username="").registry
+            == expected
         )
 
-    def test_init_default(self) -> None:
-        """Test init defalt."""
+    def test_field_defaults(self) -> None:
+        """Test field defalts."""
         args = {"password": "p@ssword", "username": "test-user"}
         obj = LoginArgs.parse_obj(deepcopy(args))
         assert not obj.dockercfg_path
+        assert not obj.ecr
         assert not obj.email
         assert obj.password == args["password"]
         assert not obj.registry
-        assert obj.username == args["username"]
-
-    def test_init_ecr(self, mocker: MockerFixture) -> None:
-        """Test init ecr."""
-        context = MagicMock()
-        registry = ElasticContainerRegistry(
-            account_id="123456012", aws_region="us-east-1"
-        )
-        mock_determine_registry = mocker.patch.object(
-            LoginArgs, "determine_registry", return_value=registry.fqn
-        )
-        args = {
-            "ecr": {"account_id": "123456012", "aws_region": "us-east-1"},
-            "password": "p@ssword",
-        }
-        obj = LoginArgs.parse_obj(deepcopy(args), context=context)
-        mock_determine_registry.assert_called_once_with(
-            context=context, ecr=args["ecr"], registry=None
-        )
-        assert not obj.dockercfg_path
-        assert not obj.email
-        assert obj.password == args["password"]
-        assert obj.registry == registry.fqn
-        assert obj.username == "AWS"
-
-    def test_init_other_registry(self) -> None:
-        """Test init with "other" registry."""
-        args = {
-            "dockercfg_path": "./.docker/config.json",
-            "email": "user@test.com",
-            "password": "p@ssword",
-            "username": "test-user",
-            "registry": "dkr.test.com",
-        }
-        obj = LoginArgs.parse_obj(deepcopy(args))
-        assert obj.dockercfg_path == args["dockercfg_path"]
-        assert obj.email == args["email"]
-        assert obj.password == args["password"]
-        assert obj.registry == args["registry"]
         assert obj.username == args["username"]

@@ -1,4 +1,4 @@
-.PHONY: build  clean help install lint list release test version
+.PHONY: build clean docs help install lint list release test version
 
 SHELL := /bin/bash
 

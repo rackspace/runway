@@ -3,6 +3,7 @@
 Replicates the functionality of the ``docker image build`` CLI command.
 
 """
+# pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
 import logging
@@ -20,8 +21,14 @@ from typing import (
 )
 
 from docker.models.images import Image
+from pydantic import DirectoryPath, Field, validator
 
-from ..data_models import BaseModel, DockerImage, ElasticContainerRegistryRepository
+from .....utils import BaseModel
+from ..data_models import (
+    DockerImage,
+    ElasticContainerRegistry,
+    ElasticContainerRegistryRepository,
+)
 from ..hook_data import DockerHookData
 
 if TYPE_CHECKING:
@@ -31,218 +38,151 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class DockerImageBuildApiOptions(BaseModel):
-    """Options for controlling Docker.
+    """Options for controlling Docker."""
 
-    Attributes:
-        buildargs: Dict of build-time variables that will be passed to Docker.
-        custom_context: Whether to use custom context when providing a file object.
-        extra_hosts: Extra hosts to add to `/etc/hosts` in the build containers.
-            Defined as a mapping of hostmane to IP address.
-        forcerm: Always remove intermediate containers, even after unsuccessful builds.
-        isolation: Isolation technology used during build.
-        network_mode: Network mode for the run commands during build.
-        nocache: Whether to use cache.
-        platform: Set platform if server is multi-platform capable.
-            Uses format ``os[/arch[/variant]]``.
-        pull: Whether to download any updates to the FROM image in the Dockerfile.
-        rm: Whether to remove intermediate containers.
-        squash: Whether to squash the resulting image layers into a single layer.
-        tag: Optional name and tag to apply to the base image when it is built.
-        target: Name of the build-stage to build in a multi-stage Dockerfile.
-        timeout: HTTP timeout.
-        use_config_proxy: If ``True`` and if the Docker client configuration file
-            (``~/.docker/config.json`` by default) contains a proxy configuration,
-            the corresponding environment variables will be set in the container
-            being built.
+    buildargs: Dict[str, Any] = {}
+    """Dict of build-time variables that will be passed to Docker."""
+
+    custom_context: bool = False
+    """Whether to use custom context when providing a file object."""
+
+    extra_hosts: Dict[str, str] = {}
+    """Extra hosts to add to `/etc/hosts` in the build containers.
+    Defined as a mapping of hostmane to IP address.
 
     """
 
-    buildargs: Dict[str, Any]
-    custom_context: bool
-    extra_hosts: Optional[Dict[str, str]]
-    forcerm: bool
-    isolation: Optional[str]
-    network_mode: Optional[str]
-    nocache: bool
-    platform: Optional[str]
-    pull: bool
-    rm: bool
-    squash: bool
-    tag: Optional[str]
-    target: Optional[str]
-    timout: Optional[int]
-    use_config_proxy: bool
+    forcerm: bool = False
+    """Always remove intermediate containers, even after unsuccessful builds."""
 
-    def __init__(
-        self,
-        *,
-        buildargs: Optional[Dict[str, Any]] = None,
-        custom_context: bool = False,
-        extra_hosts: Optional[Dict[str, Any]] = None,
-        forcerm: bool = False,
-        isolation: Optional[str] = None,
-        network_mode: Optional[str] = None,
-        nocache: bool = False,
-        platform: Optional[str] = None,
-        pull: bool = False,
-        rm: bool = True,  # pylint: disable=invalid-name
-        squash: bool = False,
-        tag: Optional[str] = None,
-        target: Optional[str] = None,
-        timeout: Optional[int] = None,
-        use_config_proxy: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        """Instantiate class.
+    isolation: Optional[str] = None
+    """Isolation technology used during build."""
 
-        Args:
-            buildargs: Dict of build-time variables that will be passed to Docker.
-            custom_context: Whether to use custom context when providing a file object.
-            extra_hosts: Extra hosts to add to `/etc/hosts` in the build containers.
-                Defined as a mapping of hostmane to IP address.
-            forcerm: Always remove intermediate containers, even after unsuccessful builds.
-            isolation: Isolation technology used during build.
-            network_mode: Network mode for the run commands during build.
-            nocache: Whether to use cache.
-            platform: Set platform if server is multi-platform capable.
-                Uses format ``os[/arch[/variant]]``.
-            pull: Whether to download any updates to the FROM image in the Dockerfile.
-            rm: Whether to remove intermediate containers.
-            squash: Whether to squash the resulting image layers into a single layer.
-            tag: Optional name and tag to apply to the base image when it is built.
-            target: Name of the build-stage to build in a multi-stage Dockerfile.
-            timeout: HTTP timeout.
-            use_config_proxy: If ``True`` and if the Docker client configuration file
-                (``~/.docker/config.json`` by default) contains a proxy configuration,
-                the corresponding environment variables will be set in the container
-                being built.
+    network_mode: Optional[str] = None
+    """Network mode for the run commands during build."""
 
-        """
-        super().__init__(**kwargs)
-        self.buildargs = self._validate_dict(buildargs)
-        self.custom_context = self._validate_bool(custom_context)
-        self.extra_hosts = self._validate_dict(extra_hosts, optional=True)
-        self.forcerm = self._validate_bool(forcerm)
-        self.isolation = self._validate_str(isolation, optional=True)
-        self.network_mode = self._validate_str(network_mode, optional=True)
-        self.nocache = self._validate_bool(nocache)
-        self.platform = self._validate_str(platform, optional=True)
-        self.pull = self._validate_bool(pull)
-        self.rm = self._validate_bool(rm)  # pylint: disable=invalid-name
-        self.squash = self._validate_bool(squash)
-        self.tag = self._validate_str(tag, optional=True)
-        self.target = self._validate_str(target, optional=True)
-        self.timeout = self._validate_int(timeout, optional=True)
-        self.use_config_proxy = self._validate_bool(use_config_proxy)
+    nocache: bool = False
+    """Whether to use cache."""
+
+    platform: Optional[str] = None
+    """Set platform if server is multi-platform capable.
+    Uses format ``os[/arch[/variant]]``.
+
+    """
+
+    pull: bool = False
+    """Whether to download any updates to the FROM image in the Dockerfile."""
+
+    rm: bool = True
+    """Whether to remove intermediate containers."""
+
+    squash: bool = False
+    """Whether to squash the resulting image layers into a single layer."""
+
+    tag: Optional[str] = None
+    """Optional name and tag to apply to the base image when it is built."""
+
+    target: Optional[str] = None
+    """Name of the build-stage to build in a multi-stage Dockerfile."""
+
+    timeout: Optional[int] = None
+    """HTTP timeout."""
+
+    use_config_proxy: bool = False
+    """If ``True`` and if the Docker client configuration file
+    (``~/.docker/config.json`` by default) contains a proxy configuration,
+    the corresponding environment variables will be set in the container
+    being built.
+
+    """
 
 
 class ImageBuildArgs(BaseModel):
-    """Args passed to image.build.
+    """Args passed to image.build."""
 
-    Attributes:
-        docker: Options for ``docker image build``.
-        dockerfile: Path within the build context to the Dockerfile.
-        ecr_repo: AWS Elastic Container Registry repository information.
-            Providing this will automatically construct the repo URI.
-            If provided, do not provide ``repo``.
+    _ctx: Optional[CfnginContext] = Field(default=None, alias="context", export=False)
 
-            If using a private registry, only ``repo_name`` is required.
-            If using a public registry, ``repo_name`` and ``registry_alias``.
-        path: Path to the directory containing the Dockerfile.
-        repo: URI of a non Docker Hub repository where the image will be stored.
-        tags: List of tags to apply to the image.
+    ecr_repo: Optional[ElasticContainerRegistryRepository] = None  # depends on _ctx
+    """AWS Elastic Container Registry repository information.
+    Providing this will automatically construct the repo URI.
+    If provided, do not provide ``repo``.
+
+    If using a private registry, only ``repo_name`` is required.
+    If using a public registry, ``repo_name`` and ``registry_alias``.
 
     """
 
-    docker: DockerImageBuildApiOptions
-    dockerfile: str
-    path: Path
-    repo: Optional[str]
-    tags: List[str]
+    path: DirectoryPath = Path.cwd()
+    """Path to the directory containing the Dockerfile."""
 
-    def __init__(
-        self,
-        *,
-        context: Optional[CfnginContext] = None,
-        docker: Optional[Dict[str, Any]] = None,
-        dockerfile: str = "./Dockerfile",
-        ecr_repo: Optional[Dict[str, Optional[str]]] = None,
-        path: Optional[Union[Path, str]] = None,
-        repo: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        **_: Any,
-    ) -> None:
-        """Instantiate class.
+    dockerfile: str = "Dockerfile"  # depends on path for validation
+    """Path within the build context to the Dockerfile."""
 
-        Args:
-            context: CFNgin context object.
-            docker: Options for ``docker image build``.
-            dockerfile: Path within the build context to the Dockerfile.
-            ecr_repo: AWS Elastic Container Registry repository information.
-                Providing this will automatically create the repo URI.
-                If provided, do not provide ``repo``.
-            path: Path to the directory containing the Dockerfile.
-            repo: URI of a non Docker Hub repository where the image will be stored.
-                If providing one of the other repo values, leave this value empty.
-            tags: List of tags to apply to the image. If not provided, ``["latest"]``
-                will be used.
+    repo: Optional[str] = None  # depends on ecr_repo
+    """URI of a non Docker Hub repository where the image will be stored."""
 
-        """
-        super().__init__(context=context)
-        docker = docker or {}
-        self.path = self._validate_path(path or Path.cwd(), must_exist=True)
-        self.dockerfile = self._validate_dockerfile(self.path, dockerfile)
-        self.repo = self.determine_repo(
-            context=context,
-            ecr_repo=self._validate_dict(ecr_repo, optional=True),
-            repo=self._validate_str(repo, optional=True),
-        )
-        self.tags = cast(
-            List[str], self._validate_list_str(tags or ["latest"], required=True)
-        )
+    docker: DockerImageBuildApiOptions = DockerImageBuildApiOptions()  # depends on repo
+    """Options for ``docker image build``."""
 
-        if self.repo:
-            docker.setdefault("tag", self.repo)
-        self.docker = DockerImageBuildApiOptions.parse_obj(docker)
+    tags: List[str] = ["latest"]
+    """List of tags to apply to the image."""
 
-    @classmethod
-    def _validate_dockerfile(cls, path: Path, dockerfile: str) -> str:
-        """Validate Dockerfile."""
-        if path.is_file():
-            if path.name.endswith("Dockerfile"):
-                raise ValueError(
-                    cls.__name__ + ".path should not reference the Dockerfile directly"
-                    " but the directory containing the Dockerfile"
-                )
-            return dockerfile
-        fq_dockerfile = path / dockerfile
-        if not fq_dockerfile.is_file():
-            raise ValueError(
-                f"Dockerfile does not exist at path provided: {fq_dockerfile}"
-            )
-        return dockerfile
-
-    @staticmethod
-    def determine_repo(
-        context: Optional[CfnginContext] = None,
-        ecr_repo: Optional[Dict[str, Optional[str]]] = None,
-        repo: Optional[str] = None,
-    ) -> Optional[str]:
-        """Determine repo URI.
-
-        Args:
-            context: CFNgin context.
-            ecr_repo: AWS Elastic Container Registry options.
-            repo: URI of a non Docker Hub repository.
-
-        """
+    @validator("docker", pre=True, always=True, allow_reuse=True)
+    def _set_docker(
+        cls,
+        v: Union[Dict[str, Any], DockerImageBuildApiOptions, Any],
+        values: Dict[str, Any],
+    ) -> Any:
+        """Set the value of ``docker``."""
+        repo = values["repo"]
         if repo:
-            return repo
-        if ecr_repo:
+            if isinstance(v, dict):
+                v.setdefault("tag", repo)
+            elif isinstance(v, DockerImageBuildApiOptions) and not v.tag:
+                v.tag = repo
+        return v
+
+    @validator("ecr_repo", pre=True, allow_reuse=True)
+    def _set_ecr_repo(cls, v: Any, values: Dict[str, Any]) -> Any:
+        """Set the value of ``ecr_repo``."""
+        if v and isinstance(v, dict):
             return ElasticContainerRegistryRepository.parse_obj(
-                ecr_repo, context=context
-            ).fqn
+                {
+                    "repo_name": v.get("repo_name"),
+                    "registry": ElasticContainerRegistry.parse_obj(
+                        {
+                            "account_id": v.get("account_id"),
+                            "alias": v.get("registry_alias"),
+                            "aws_region": v.get("aws_region"),
+                            "context": values.get("context"),
+                        }
+                    ),
+                }
+            )
+        return v
+
+    @validator("repo", pre=True, always=True, allow_reuse=True)
+    def _set_repo(cls, v: Optional[str], values: Dict[str, Any]) -> Optional[str]:
+        """Set the value of ``repo``."""
+        if v:
+            return v
+
+        ecr_repo: Optional[ElasticContainerRegistryRepository] = values.get("ecr_repo")
+        if ecr_repo:
+            return ecr_repo.fqn
+
         return None
+
+    @validator("dockerfile", pre=True, always=True, allow_reuse=True)
+    def _validate_dockerfile(cls, v: Any, values: Dict[str, Any]) -> Any:
+        """Validate ``dockerfile``."""
+        path: Path = values["path"]
+        dockerfile = path / v
+        if not dockerfile.is_file():
+            raise ValueError(
+                f"Dockerfile does not exist at path provided: {dockerfile}"
+            )
+        return v
 
 
 def build(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
@@ -253,8 +193,7 @@ def build(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     kwargs are parsed by :class:`~runway.cfngin.hooks.docker.image.ImageBuildArgs`.
 
     """
-    kwargs.pop("provider", None)  # not needed
-    args = ImageBuildArgs.parse_obj(kwargs, context=context)
+    args = ImageBuildArgs.parse_obj({"context": context, **kwargs})
     docker_hook_data = DockerHookData.from_cfngin_context(context)
     image, logs = cast(
         Tuple[Image, Iterator[Dict[str, str]]],
