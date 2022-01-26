@@ -3,12 +3,20 @@
 Replicates the functionality of the ``docker image push`` CLI command.
 
 """
+# pylint: disable=no-self-argument,no-self-use
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from ..data_models import BaseModel, DockerImage, ElasticContainerRegistryRepository
+from pydantic import Field, validator
+
+from .....utils import BaseModel
+from ..data_models import (
+    DockerImage,
+    ElasticContainerRegistry,
+    ElasticContainerRegistryRepository,
+)
 from ..hook_data import DockerHookData
 
 if TYPE_CHECKING:
@@ -18,73 +26,75 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class ImagePushArgs(BaseModel):
-    """Args passed to image.push.
+    """Args passed to image.push."""
 
-    Attributes:
-        repo: URI of a non Docker Hub repository where the image will be stored.
-        tags: List of tags to push.
+    _ctx: Optional[CfnginContext] = Field(default=None, alias="context", export=False)
+
+    ecr_repo: Optional[ElasticContainerRegistryRepository] = None  # depends on _ctx
+    """AWS Elastic Container Registry repository information.
+    Providing this will automatically construct the repo URI.
+    If provided, do not provide ``repo``.
+
+    If using a private registry, only ``repo_name`` is required.
+    If using a public registry, ``repo_name`` and ``registry_alias``.
 
     """
 
-    repo: Optional[str]
-    tags: List[str]
+    image: Optional[DockerImage] = None
+    """Image to push."""
 
-    def __init__(
-        self,
-        *,
-        ecr_repo: Optional[Dict[str, Any]] = None,
-        image: Optional[DockerImage] = None,
-        repo: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        **kwargs: Any,
-    ) -> None:
-        """Instantiate class.
+    repo: Optional[str] = None  # depends on ecr_repo & image
+    """URI of a non Docker Hub repository where the image will be stored."""
 
-        Args:
-            ecr_repo: AWS Elastic Container Registry repository information.
-                Providing this will automatically create the repo URI.
-                If provided, do not provide ``repo``.
-            image: Image to push.
-            repo: URI of a non Docker Hub repository where the image will be stored.
-                If providing one of the other repo values, leave this value empty.
-            tags: List of tags to push.
+    tags: List[str] = []  # depends on image
+    """List of tags to push."""
 
-        """
-        super().__init__(**kwargs)
-        self.repo = self.determine_repo(
-            context=self._ctx, ecr_repo=ecr_repo, image=image, repo=repo
-        )
-        if image and not tags:
-            tags = image.tags
-        self.tags = cast(
-            List[str], self._validate_list_str(tags or ["latest"], required=True)
-        )
-
-    @staticmethod
-    def determine_repo(
-        context: Optional[CfnginContext] = None,
-        ecr_repo: Optional[Dict[str, Optional[str]]] = None,
-        image: Optional[DockerImage] = None,
-        repo: Optional[str] = None,
-    ) -> Optional[str]:
-        """Determine repo URI.
-
-        Args:
-            context: CFNgin context.
-            ecr_repo: AWS Elastic Container Registry options.
-            image: Docker image object.
-            repo: URI of a non Docker Hub repository.
-
-        """
-        if repo:
-            return repo
-        if isinstance(image, DockerImage):
-            return image.repo
-        if ecr_repo:
+    @validator("ecr_repo", pre=True, allow_reuse=True)
+    def _set_ecr_repo(cls, v: Any, values: Dict[str, Any]) -> Any:
+        """Set the value of ``ecr_repo``."""
+        if v and isinstance(v, dict):
             return ElasticContainerRegistryRepository.parse_obj(
-                ecr_repo, context=context
-            ).fqn
+                {
+                    "repo_name": v.get("repo_name"),
+                    "registry": ElasticContainerRegistry.parse_obj(
+                        {
+                            "account_id": v.get("account_id"),
+                            "alias": v.get("registry_alias"),
+                            "aws_region": v.get("aws_region"),
+                            "context": values.get("context"),
+                        }
+                    ),
+                }
+            )
+        return v
+
+    @validator("repo", pre=True, always=True, allow_reuse=True)
+    def _set_repo(cls, v: Optional[str], values: Dict[str, Any]) -> Optional[str]:
+        """Set the value of ``repo``."""
+        if v:
+            return v
+
+        image: Optional[DockerImage] = values.get("image")
+        if image:
+            return image.repo
+
+        ecr_repo: Optional[ElasticContainerRegistryRepository] = values.get("ecr_repo")
+        if ecr_repo:
+            return ecr_repo.fqn
+
         return None
+
+    @validator("tags", pre=True, always=True, allow_reuse=True)
+    def _set_tags(cls, v: List[str], values: Dict[str, Any]) -> List[str]:
+        """Set the value of ``tags``."""
+        if v:
+            return v
+
+        image: Optional[DockerImage] = values.get("image")
+        if image:
+            return image.tags
+
+        return ["latest"]
 
 
 def push(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
@@ -95,8 +105,7 @@ def push(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     kwargs are parsed by :class:`~runway.cfngin.hooks.docker.image.ImagePushArgs`.
 
     """
-    kwargs.pop("provider", None)  # not needed
-    args = ImagePushArgs.parse_obj(kwargs, context=context)
+    args = ImagePushArgs.parse_obj({"context": context, **kwargs})
     docker_hook_data = DockerHookData.from_cfngin_context(context)
     LOGGER.info("pushing image %s...", args.repo)
     for tag in args.tags:

@@ -5,10 +5,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mock import MagicMock, call
+from docker.models.images import Image
+from mock import call
 
 from runway.cfngin.hooks.docker.data_models import (
     DockerImage,
+    ElasticContainerRegistry,
     ElasticContainerRegistryRepository,
 )
 from runway.cfngin.hooks.docker.hook_data import DockerHookData
@@ -52,81 +54,49 @@ def test_push(
 class TestImagePushArgs:
     """Test runway.cfngin.hooks.docker.image._push.ImagePushArgs."""
 
-    def test_determine_repo(self) -> None:
-        """Test determine_repo."""
-        assert (
-            ImagePushArgs.determine_repo(
-                context=None, ecr_repo={"key": "val"}, image=None, repo="something"
-            )
-            == "something"
-        )
+    def test__set_ecr_repo_from_dict(self) -> None:
+        """Test _set_ecr_repo from Dict."""
+        args = {
+            "repo_name": "foo",
+            "account_id": "123",
+            "registry_alias": "bar",
+            "aws_region": "us-west-2",
+        }
+        obj = ImagePushArgs.parse_obj({"ecr_repo": args})
+        assert obj.ecr_repo
+        assert obj.ecr_repo.name == args["repo_name"]
+        assert obj.ecr_repo.registry.account_id == args["account_id"]
+        assert obj.ecr_repo.registry.alias == args["registry_alias"]
+        assert obj.ecr_repo.registry.region == args["aws_region"]
 
-    def test_determine_repo_ecr(self, mocker: MockerFixture) -> None:
-        """Test determine_repo ecr."""
+    def test__set_repo(self) -> None:
+        """Test _set_repo."""
+        assert ImagePushArgs(repo="something").repo == "something"
+        assert not ImagePushArgs().repo
+
+    def test__set_repo_ecr(self) -> None:
+        """Test _set_repo ECR."""
         repo = ElasticContainerRegistryRepository(
-            account_id="123456012", aws_region="us-east-1", repo_name="test"
+            repo_name="test",
+            registry=ElasticContainerRegistry(
+                account_id="123456789012", aws_region="us-east-1"
+            ),
         )
-        mocker.patch(
-            MODULE + ".ElasticContainerRegistryRepository",
-            parse_obj=MagicMock(return_value=repo),
-        )
-        assert (
-            ImagePushArgs.determine_repo(
-                context=None,
-                ecr_repo={
-                    "repo_name": repo.name,
-                    "account_id": repo.registry.account_id,
-                    "aws_region": repo.registry.region,
-                },
-                image=None,
-                repo=None,
-            )
-            == repo.fqn
-        )
+        assert ImagePushArgs(ecr_repo=repo).repo == repo.fqn
 
-    def test_determine_repo_image(self) -> None:
-        """Test determine_repo Image."""
-        repo = "dkr.test.com/image"
-        mock_image = MagicMock(spec=DockerImage, repo=repo)
-        assert (
-            ImagePushArgs.determine_repo(
-                context=None, ecr_repo={"key": "val"}, image=mock_image, repo=None
-            )
-            == repo
-        )
+    def test__set_repo_image(self, mocker: MockerFixture) -> None:
+        """Test _set_repo image."""
+        mocker.patch.object(Image, "reload")
+        image = DockerImage(image=Image({"RepoTags": ["foo:latest"]}))
+        assert ImagePushArgs(image=image).repo == image.repo
 
-    def test_determine_repo_none(self) -> None:
-        """Test determine_repo None."""
-        assert not ImagePushArgs.determine_repo(
-            context=None, ecr_repo={}, image=None, repo=None
-        )
+    def test__set_tags(self) -> None:
+        """Test _set_tags."""
+        assert ImagePushArgs(tags=["foo"]).tags == ["foo"]
+        assert ImagePushArgs().tags == ["latest"]
 
-    def test_init_default(self, mocker: MockerFixture) -> None:
-        """Test init default values."""
-        mock_determine_repo = mocker.patch.object(
-            ImagePushArgs, "determine_repo", return_value="dkr.test.com/image"
-        )
-        obj = ImagePushArgs()
-        mock_determine_repo.assert_called_once_with(
-            context=None, ecr_repo=None, image=None, repo=None
-        )
-        assert obj.repo == mock_determine_repo.return_value
-        assert obj.tags == ["latest"]
-
-    def test_init_image(self, mocker: MockerFixture) -> None:
-        """Test init Image."""
-        repo = "dkr.test.com/image"
-        tags = ["latest", "oldest"]
-        mock_image = MagicMock(spec=DockerImage, repo=repo, tags=tags)
-        mock_determine_repo = mocker.patch.object(
-            ImagePushArgs, "determine_repo", return_value=repo
-        )
-        obj = ImagePushArgs(image=mock_image)
-        mock_determine_repo.assert_called_once_with(
-            context=None, ecr_repo=None, image=mock_image, repo=None
-        )
-        assert obj.repo == repo
-        assert obj.tags == tags
-
-        # ensure tags are not overwritten if provided
-        assert ImagePushArgs(image=mock_image, tags=["oldest"]).tags == ["oldest"]
+    def test__set_tags_image(self, mocker: MockerFixture) -> None:
+        """Test _set_tags image."""
+        mocker.patch.object(Image, "reload")
+        image = DockerImage(image=Image({"RepoTags": ["foo:bar"]}))
+        assert ImagePushArgs(image=image).tags == image.tags
