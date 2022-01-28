@@ -82,7 +82,7 @@ def _get_cert_arn_from_response(
         ]["Arn"]
     return (
         cast("UploadServerCertificateResponseTypeDef", result)
-        .get("ServerCertificateMetadata", {})
+        .get("ServerCertificateMetadata", {"Arn": ""})
         .get("Arn", "")
     )
 

@@ -165,7 +165,9 @@ class SOARecord:
     def __init__(self, record: ResourceRecordSetTypeDef) -> None:
         """Instantiate class."""
         self.name = record["Name"]
-        self.text = SOARecordText(record.get("ResourceRecords", [{}])[0]["Value"])
+        self.text = SOARecordText(
+            record.get("ResourceRecords", [{"Value": ""}])[0]["Value"]
+        )
         self.ttl = record.get("TTL", 0)
 
 

@@ -154,7 +154,7 @@ def should_use_docker(dockerize_pip: DockerizePipArgTypeDef = None) -> bool:
         if dockerize_pip == "non-linux" and not sys.platform.startswith("linux"):
             return True
         try:
-            return strtobool(dockerize_pip)
+            return bool(strtobool(dockerize_pip))
         except ValueError:
             pass
     return False

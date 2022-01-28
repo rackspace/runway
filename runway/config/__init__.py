@@ -468,7 +468,7 @@ class RunwayConfig(BaseConfig):
     future: RunwayFutureDefinitionModel
     ignore_git_branch: bool
     runway_version: Optional[SpecifierSet]
-    tests: List[RunwayTestDefinition]
+    tests: List[RunwayTestDefinition[Any]]
     variables: RunwayVariablesDefinition
 
     _data: RunwayConfigDefinitionModel

@@ -99,7 +99,7 @@ class AuthAtEdge(StaticSite):
         if self.directory_index_specified:
             index_rewrite = self._get_index_rewrite_role_function_and_version()
             lambda_function_associations = self.get_directory_index_lambda_association(
-                lambda_function_associations, index_rewrite.get("version", "")
+                lambda_function_associations, index_rewrite["version"]
             )
 
         # Auth@Edge Lambdas

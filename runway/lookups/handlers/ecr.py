@@ -27,7 +27,7 @@ class EcrLookup(LookupHandler):
     def get_login_password(client: ECRClient) -> str:
         """Get a password to login to ECR registry."""
         auth = client.get_authorization_token().get("authorizationData", [None])[0]
-        if not auth:
+        if not auth or "authorizationToken" not in auth:
             raise ValueError("get_authorization_token did not return authorizationData")
         auth_token = base64.b64decode(auth["authorizationToken"]).decode()
         _, password = auth_token.split(":")

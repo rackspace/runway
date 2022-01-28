@@ -200,7 +200,7 @@ class CfnginContext(BaseContext):
                 t["Key"]: t["Value"]
                 for t in self.s3_client.get_object_tagging(
                     **self.persistent_graph_location
-                ).get("TagSet", {})
+                ).get("TagSet", [])
             }
         except self.s3_client.exceptions.NoSuchKey:
             self.logger.debug(
