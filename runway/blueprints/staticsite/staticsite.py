@@ -43,7 +43,7 @@ LOGGER = logging.getLogger("runway")
 IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
 
 
-class _IndexRewriteFunctionInfoTypeDef(TypedDict, total=False):
+class _IndexRewriteFunctionInfoTypeDef(TypedDict):
 
     function: awslambda.Function
     role: iam.Role
@@ -168,7 +168,7 @@ class StaticSite(Blueprint):
                 index_rewrite = self._get_index_rewrite_role_function_and_version()
                 lambda_function_associations = (
                     self.get_directory_index_lambda_association(
-                        lambda_function_associations, index_rewrite.get("version", "")
+                        lambda_function_associations, index_rewrite["version"]
                     )
                 )
 
@@ -608,19 +608,14 @@ class StaticSite(Blueprint):
     def _get_index_rewrite_role_function_and_version(
         self,
     ) -> _IndexRewriteFunctionInfoTypeDef:
-        res: _IndexRewriteFunctionInfoTypeDef = {
-            "role": self.add_lambda_execution_role(
-                "CFDirectoryIndexRewriteRole", "CFDirectoryIndexRewrite"
-            )
-        }
-
-        res["function"] = self.add_cloudfront_directory_index_rewrite(
-            res.get("role", "")
+        role = self.add_lambda_execution_role(
+            "CFDirectoryIndexRewriteRole", "CFDirectoryIndexRewrite"
         )
-        res["version"] = self.add_cloudfront_directory_index_rewrite_version(
-            res.get("function", "")
+        function = self.add_cloudfront_directory_index_rewrite(role)
+        version = self.add_cloudfront_directory_index_rewrite_version(function)
+        return _IndexRewriteFunctionInfoTypeDef(
+            function=function, role=role, version=version
         )
-        return res
 
 
 # Helper section to enable easy blueprint -> template generation

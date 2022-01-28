@@ -1,7 +1,7 @@
 """Runway config test definition."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Generic, Tuple, TypeVar, Union
 
 from ....variables import Variable
 from ...models.runway import (
@@ -21,7 +21,16 @@ if TYPE_CHECKING:
     from ...models.base import ConfigProperty
 
 
-class RunwayTestDefinition(ConfigComponentDefinition):
+_DataModel = TypeVar(
+    "_DataModel",
+    CfnLintRunwayTestDefinitionModel,
+    RunwayTestDefinitionModel,
+    ScriptRunwayTestDefinitionModel,
+    YamlLintRunwayTestDefinitionModel,
+)
+
+
+class RunwayTestDefinition(Generic[_DataModel], ConfigComponentDefinition):
     """Runway test definition."""
 
     args: Union[Dict[str, Any], ConfigProperty]
@@ -32,11 +41,15 @@ class RunwayTestDefinition(ConfigComponentDefinition):
     _data: RunwayTestDefinitionModel
     _supports_vars: Tuple[str, ...] = ("args", "required")
 
-    def __init__(self, data: RunwayTestDefinitionModel) -> None:
+    def __init__(self, data: _DataModel) -> None:
         """Instantiate class."""
         super().__init__(data)
 
-    def __new__(cls, data: RunwayTestDefinitionModel) -> RunwayTestDefinition:
+    # error present on python3.7
+    def __new__(  # pylint: disable=arguments-differ
+        cls,
+        data: _DataModel,
+    ) -> RunwayTestDefinition[_DataModel]:
         """Create a new instance of a class.
 
         Returns:
@@ -72,7 +85,7 @@ class RunwayTestDefinition(ConfigComponentDefinition):
         )
 
     @classmethod
-    def parse_obj(cls, obj: Any) -> RunwayTestDefinition:
+    def parse_obj(cls, obj: Any) -> RunwayTestDefinition[_DataModel]:
         """Parse a python object into this class.
 
         Args:
@@ -82,7 +95,9 @@ class RunwayTestDefinition(ConfigComponentDefinition):
         return cls(RunwayTestDefinitionModel.parse_obj(obj))
 
 
-class CfnLintRunwayTestDefinition(RunwayTestDefinition):
+class CfnLintRunwayTestDefinition(
+    RunwayTestDefinition[CfnLintRunwayTestDefinitionModel]
+):
     """Runway cfn-lint test definition."""
 
     args: CfnLintRunwayTestArgs
@@ -103,7 +118,7 @@ class CfnLintRunwayTestDefinition(RunwayTestDefinition):
         return cls(CfnLintRunwayTestDefinitionModel.parse_obj(obj))
 
 
-class ScriptRunwayTestDefinition(RunwayTestDefinition):
+class ScriptRunwayTestDefinition(RunwayTestDefinition[ScriptRunwayTestDefinitionModel]):
     """Runway script test definition."""
 
     args: ScriptRunwayTestArgs
@@ -124,7 +139,9 @@ class ScriptRunwayTestDefinition(RunwayTestDefinition):
         return cls(ScriptRunwayTestDefinitionModel.parse_obj(obj))
 
 
-class YamlLintRunwayTestDefinition(RunwayTestDefinition):
+class YamlLintRunwayTestDefinition(
+    RunwayTestDefinition[YamlLintRunwayTestDefinitionModel]
+):
     """Runway yamllint test definition."""
 
     type: Literal["yamllint"] = "yamllint"

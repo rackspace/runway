@@ -6,7 +6,7 @@ import os
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import boto3
 from boto3.s3.transfer import S3Transfer  # type: ignore
@@ -97,7 +97,9 @@ def build(
 
     context_dict["hash"] = get_hash_of_files(
         root_path=Path(options["path"]),
-        directories=options.get("source_hashing", {}).get("directories"),
+        directories=options.get("source_hashing", {"directories": None}).get(
+            "directories"
+        ),
     )
     LOGGER.debug("application hash: %s", context_dict["hash"])
 
@@ -111,7 +113,7 @@ def build(
 
         try:
             old_parameter_value = ssm_client.get_parameter(
-                Name=context_dict["hash_tracking_parameter"]
+                Name=cast(str, context_dict["hash_tracking_parameter"])
             )["Parameter"]["Value"]
         except ssm_client.exceptions.ParameterNotFound:
             old_parameter_value = None

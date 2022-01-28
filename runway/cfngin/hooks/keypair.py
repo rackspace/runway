@@ -36,7 +36,7 @@ def get_existing_key_pair(ec2: EC2Client, keypair_name: str) -> Optional[KeyPair
     """Get existing keypair."""
     resp = ec2.describe_key_pairs()
     keypair = next(
-        (kp for kp in resp.get("KeyPairs", {}) if kp.get("KeyName") == keypair_name),
+        (kp for kp in resp.get("KeyPairs", []) if kp.get("KeyName") == keypair_name),
         None,
     )
 
