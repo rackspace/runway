@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
-    from pytest_subprocess.core import FakePopen
+    from pytest_subprocess.fake_popen import FakePopen
 
     from runway.context import RunwayContext
     from runway.module.cdk import CdkCommandTypeDef
