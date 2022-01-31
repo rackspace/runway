@@ -11,6 +11,7 @@ from runway._logging import LogLevels
 from runway.cfngin.actions.init import Action
 from runway.cfngin.exceptions import CfnginBucketAccessDenied
 from runway.config.models.cfngin import CfnginStackDefinitionModel
+from runway.core.providers.aws.s3 import Bucket
 
 if TYPE_CHECKING:
     from pytest import LogCaptureFixture
@@ -97,7 +98,7 @@ class TestAction:
         mocker.patch.object(cfngin_context, "copy", return_value=cfngin_context)
         mocker.patch.object(cfngin_context, "get_stack", return_value=None)
         mocker.patch.object(
-            Action, "cfngin_bucket", Mock(exists=False, forbidden=False)
+            Action, "cfngin_bucket", Mock(exists=False, forbidden=False, spec=Bucket)
         )
         obj = Action(cfngin_context, provider_builder, cancel)
         assert not obj.run(concurrency=3, tail=True, upload_disabled=False)
@@ -127,7 +128,7 @@ class TestAction:
         mocker.patch.object(cfngin_context, "get_stack", return_value=None)
         mocker.patch.object(cfngin_context, "s3_client", return_value=Mock())
         mocker.patch.object(
-            Action, "cfngin_bucket", Mock(exists=False, forbidden=False)
+            Action, "cfngin_bucket", Mock(exists=False, forbidden=False, spec=Bucket)
         )
         cfngin_context.bucket_region = "ca-central-1"
         obj = Action(cfngin_context, provider_builder, cancel)
@@ -153,8 +154,11 @@ class TestAction:
         """Test run."""
         caplog.set_level(LogLevels.INFO, logger=MODULE)
         cfngin_bucket = mocker.patch.object(
-            Action, "cfngin_bucket", Mock(exists=True, forbidden=False, name="name")
+            Action,
+            "cfngin_bucket",
+            Mock(exists=True, forbidden=False, spec=Bucket),
         )
+        cfngin_bucket.name = "name"
         assert not Action(cfngin_context).run()
         assert f"cfngin_bucket {cfngin_bucket.name} already exists" in caplog.messages
 
@@ -162,9 +166,12 @@ class TestAction:
         self, cfngin_context: CfnginContext, mocker: MockerFixture
     ) -> None:
         """Test run."""
-        mocker.patch.object(
-            Action, "cfngin_bucket", Mock(forbidden=True, name="cfngin_bucket.name")
+        cfngin_bucket = mocker.patch.object(
+            Action,
+            "cfngin_bucket",
+            Mock(forbidden=True, spec=Bucket),
         )
+        cfngin_bucket.name = "cfngin_bucket.name"
         with pytest.raises(CfnginBucketAccessDenied, match="cfngin_bucket.name"):
             assert Action(cfngin_context).run()
 
@@ -182,7 +189,7 @@ class TestAction:
         mocker.patch.object(cfngin_context, "copy", return_value=cfngin_context)
         get_stack = mocker.patch.object(cfngin_context, "get_stack", return_value=True)
         mocker.patch.object(
-            Action, "cfngin_bucket", Mock(exists=False, forbidden=False)
+            Action, "cfngin_bucket", Mock(exists=False, forbidden=False, spec=Bucket)
         )
         assert not Action(cfngin_context, provider_builder, cancel).run()
         get_stack.assert_called_once_with("cfngin-bucket")

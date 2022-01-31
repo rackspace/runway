@@ -106,7 +106,8 @@ class Action(BaseAction):
             CfnginBucketAccessDenied: Could not head cfngin_bucket.
 
         """
-        if not self.cfngin_bucket:
+        # attr can be falsy but still be Bucket so need to check type
+        if not isinstance(self.cfngin_bucket, Bucket):
             LOGGER.info("skipped; cfngin_bucket not defined")
             return
         if self.cfngin_bucket.forbidden:
