@@ -25,7 +25,7 @@ from runway.module.serverless import (
 if TYPE_CHECKING:
     from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
-    from pytest_subprocess.core import FakeProcess
+    from pytest_subprocess.fake_process import FakeProcess
 
     from runway.type_defs import AnyPathConstrained
 
