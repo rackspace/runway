@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Optional
 
 import pytest
 from botocore.exceptions import ClientError
-from mock import MagicMock, patch
+from mock import MagicMock, Mock, patch
 
 from runway.cfngin.actions.diff import (
     Action,
@@ -18,13 +18,15 @@ from runway.cfngin.actions.diff import (
     diff_dictionaries,
     diff_parameters,
 )
+from runway.cfngin.exceptions import StackDoesNotExist
 from runway.cfngin.providers.aws.default import Provider
 from runway.cfngin.status import SkippedStatus
 
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture, MonkeyPatch
+    from pytest import LogCaptureFixture
+    from pytest_mock import MockerFixture
 
     from ...factories import MockCFNginContext
 
@@ -82,11 +84,14 @@ class TestAction:
 
         assert action.bucket_name == bucket_name
 
-    def test_diff_stack_validationerror_template_too_large(
+    @pytest.mark.parametrize("stack_not_exist", [False, True])
+    def test__diff_stack_validationerror_template_too_large(
         self,
         caplog: LogCaptureFixture,
         cfngin_context: MockCFNginContext,
-        monkeypatch: MonkeyPatch,
+        mocker: MockerFixture,
+        provider_get_stack: MagicMock,
+        stack_not_exist: bool,
     ) -> None:
         """Test _diff_stack ValidationError - template too large."""
         caplog.set_level(logging.ERROR)
@@ -94,8 +99,12 @@ class TestAction:
         cfngin_context.add_stubber("cloudformation")
         cfngin_context.config.cfngin_bucket = ""
         expected = SkippedStatus("cfngin_bucket: existing bucket required")
-        provider = Provider(cfngin_context.get_session())  # type: ignore
-        mock_get_stack_changes = MagicMock(
+        mock_build_parameters = mocker.patch.object(
+            Action, "build_parameters", return_value=[]
+        )
+        mock_get_stack_changes = mocker.patch.object(
+            Provider,
+            "get_stack_changes",
             side_effect=ClientError(
                 {
                     "Error": {
@@ -104,22 +113,29 @@ class TestAction:
                     }
                 },
                 "create_change_set",
-            )
+            ),
         )
-        monkeypatch.setattr(provider, "get_stack_changes", mock_get_stack_changes)
-        stack = MagicMock()
-        stack.region = cfngin_context.env.aws_region
-        stack.name = "test-stack"
-        stack.fqn = "test-stack"
-        stack.blueprint.rendered = "{}"
-        stack.locked = False
-        stack.status = None
+        provider = Provider(cfngin_context.get_session())  # type: ignore
+        stack = MagicMock(
+            blueprint=Mock(rendered="{}"),
+            fqn="test-stack",
+            locked=False,
+            region=cfngin_context.env.aws_region,
+            status=None,
+        )
+        stack.name = "stack"
+
+        if stack_not_exist:
+            provider_get_stack.side_effect = StackDoesNotExist("test-stack")
 
         result = Action(
             context=cfngin_context,
             provider_builder=MockProviderBuilder(provider=provider),
             cancel=MockThreadingEvent(),  # type: ignore
         )._diff_stack(stack)
+        mock_build_parameters.assert_called_once_with(
+            stack, None if stack_not_exist else provider_get_stack.return_value
+        )
         mock_get_stack_changes.assert_called_once()
         assert result == expected
 
