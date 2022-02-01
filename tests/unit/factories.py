@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Tup
 
 import boto3
 import yaml
-from botocore.client import BaseClient
 from botocore.stub import Stubber
 from mock import MagicMock
 from packaging.specifiers import SpecifierSet
@@ -18,6 +17,9 @@ from runway.utils import MutableMap
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from boto3.resources.base import ServiceResource
+    from botocore.client import BaseClient
 
     from runway.config import CfnginConfig
     from runway.core.type_defs import RunwayActionTypeDef
@@ -100,6 +102,13 @@ class MockBoto3Session:
         stubber = Stubber(client)  # type: ignore
         self._clients[key] = client  # type: ignore
         return client, stubber  # type: ignore
+
+    def resource(self, service_name: str, **kwargs: Any) -> ServiceResource:
+        """Return a stubbed resource."""
+        kwargs.setdefault("region_name", self.region_name)
+        resource: ServiceResource = boto3.resource(service_name, **kwargs)  # type: ignore
+        resource.meta.client = self._clients[f"{service_name}.{kwargs['region_name']}"]
+        return resource
 
     def service(self, service_name: str, region_name: Optional[str] = None) -> None:
         """Not implimented."""
