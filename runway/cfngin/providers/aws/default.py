@@ -1503,8 +1503,10 @@ class Provider(BaseProvider):
             # handling for orphaned changeset temp stacks
             if self.get_stack_status(stack_details) == self.REVIEW_STATUS:
                 raise exceptions.StackDoesNotExist(stack.fqn)
-            _old_template, old_params = self.get_stack_info(stack_details)
-            old_template: Dict[str, Any] = parse_cloudformation_template(_old_template)
+            old_template_raw, old_params = self.get_stack_info(stack_details)
+            old_template: Dict[str, Any] = parse_cloudformation_template(
+                old_template_raw
+            )
             change_type = "UPDATE"
         except exceptions.StackDoesNotExist:
             old_params: Dict[str, Union[List[str], str]] = {}

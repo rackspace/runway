@@ -211,8 +211,13 @@ class Action(deploy.Action):
         tags = deploy.build_stack_tags(stack)
 
         try:
+            provider_stack = provider.get_stack(stack.fqn)
+        except exceptions.StackDoesNotExist:
+            provider_stack = None
+
+        try:
             stack.resolve(self.context, provider)
-            parameters = self.build_parameters(stack)
+            parameters = self.build_parameters(stack, provider_stack)
             outputs = provider.get_stack_changes(
                 stack, self._template(stack.blueprint), parameters, tags
             )
