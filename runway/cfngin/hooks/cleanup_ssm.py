@@ -4,22 +4,30 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
+from ...utils import BaseModel
+
 if TYPE_CHECKING:
     from ...context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
-def delete_param(context: CfnginContext, *, parameter_name: str, **_: Any) -> bool:
+class DeleteParamHookArgs(BaseModel):
+    """Hook arguments for ``delete_param``."""
+
+    parameter_name: str
+    """Name of the bucket to purge."""
+
+
+def delete_param(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
     """Delete SSM parameter."""
-    if not parameter_name:
-        raise ValueError("Must specify `parameter_name` for delete_param hook.")
+    args = DeleteParamHookArgs.parse_obj(kwargs)
 
     session = context.get_session()
     ssm_client = session.client("ssm")
 
     try:
-        ssm_client.delete_parameter(Name=parameter_name)
+        ssm_client.delete_parameter(Name=args.parameter_name)
     except ssm_client.exceptions.ParameterNotFound:
-        LOGGER.info('parameter "%s" does not exist', parameter_name)
+        LOGGER.info('parameter "%s" does not exist', args.parameter_name)
     return True
