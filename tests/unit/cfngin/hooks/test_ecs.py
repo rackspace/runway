@@ -1,78 +1,66 @@
 """Tests for runway.cfngin.hooks.ecs."""
 # pyright: basic
-import unittest
+from __future__ import annotations
 
-import boto3
-from moto import mock_ecs
-from testfixtures import LogCapture
+from typing import TYPE_CHECKING
 
+import pytest
+
+from runway._logging import LogLevels
 from runway.cfngin.hooks.ecs import create_clusters
 
-from ..factories import mock_context, mock_provider
+if TYPE_CHECKING:
+    from mypy_boto3_ecs.type_defs import ClusterTypeDef
+    from pytest import LogCaptureFixture
 
-REGION = "us-east-1"
+    from ...factories import MockCFNginContext
+
+MODULE = "runway.cfngin.hooks.ecs"
 
 
-class TestECSHooks(unittest.TestCase):
-    """Tests for runway.cfngin.hooks.ecs."""
+@pytest.mark.wip
+def test_create_clusters(
+    caplog: LogCaptureFixture, cfngin_context: MockCFNginContext
+) -> None:
+    """Test create_clusters."""
+    caplog.set_level(LogLevels.DEBUG, MODULE)
+    stub = cfngin_context.add_stubber("ecs")
+    clusters: dict[str, ClusterTypeDef] = {
+        "foo": {"clusterName": "foo"},
+        "bar": {"clusterName": "bar"},
+    }
 
-    def setUp(self) -> None:
-        """Run before tests."""
-        self.provider = mock_provider(region=REGION)
-        self.context = mock_context(namespace="fake")
+    stub.add_response(
+        "create_cluster", {"cluster": clusters["foo"]}, {"clusterName": "foo"}
+    )
+    stub.add_response(
+        "create_cluster", {"cluster": clusters["bar"]}, {"clusterName": "bar"}
+    )
 
-    def test_create_single_cluster(self) -> None:
-        """Test create single cluster."""
-        with mock_ecs():
-            logger = "runway.cfngin.hooks.ecs"
-            client = boto3.client("ecs", region_name=REGION)
-            response = client.list_clusters()
+    with stub:
+        assert create_clusters(cfngin_context, clusters=list(clusters)) == {
+            "clusters": {k: {"cluster": v} for k, v in clusters.items()}
+        }
+    stub.assert_no_pending_responses()
 
-            self.assertEqual(len(response.get("clusterArns", [""])), 0)
-            with LogCapture(logger) as logs:
-                cluster = "test-cluster"
-                self.assertTrue(
-                    create_clusters(
-                        provider=self.provider, context=self.context, clusters=cluster
-                    )
-                )
+    for cluster in clusters:
+        assert f"creating ECS cluster: {cluster}" in caplog.messages
 
-                logs.check((logger, "DEBUG", f"creating ECS cluster: {cluster}"))
 
-            response = client.list_clusters()
-            self.assertEqual(len(response.get("clusterArns", [])), 1)
+@pytest.mark.wip
+def test_create_clusters_str(cfngin_context: MockCFNginContext) -> None:
+    """Test create_clusters with ``clusters`` provided as str."""
+    stub = cfngin_context.add_stubber("ecs")
+    cluster_name = "foo"
 
-    def test_create_multiple_clusters(self) -> None:
-        """Test create multiple clusters."""
-        with mock_ecs():
-            clusters = ("test-cluster0", "test-cluster1")
-            logger = "runway.cfngin.hooks.ecs"
-            client = boto3.client("ecs", region_name=REGION)
-            response = client.list_clusters()
+    stub.add_response(
+        "create_cluster",
+        {"cluster": {"clusterName": cluster_name}},
+        {"clusterName": cluster_name},
+    )
 
-            self.assertEqual(len(response.get("clusterArns", [""])), 0)
-            for cluster in clusters:
-                with LogCapture(logger) as logs:
-                    self.assertTrue(
-                        create_clusters(
-                            provider=self.provider,
-                            context=self.context,
-                            clusters=cluster,
-                        )
-                    )
-
-                    logs.check((logger, "DEBUG", f"creating ECS cluster: {cluster}"))
-
-            response = client.list_clusters()
-            self.assertEqual(len(response.get("clusterArns", [])), 2)
-
-    def test_fail_create_cluster(self) -> None:
-        """Test fail create cluster."""
-        with mock_ecs():
-            client = boto3.client("ecs", region_name=REGION)
-            response = client.list_clusters()
-
-            self.assertEqual(len(response.get("clusterArns", [""])), 0)
-            with self.assertRaises(TypeError):
-                # pylint: disable=missing-kwoa
-                create_clusters(context=self.context)  # type: ignore
+    with stub:
+        assert create_clusters(cfngin_context, clusters=cluster_name) == {
+            "clusters": {cluster_name: {"cluster": {"clusterName": cluster_name}}}
+        }
+    stub.assert_no_pending_responses()
