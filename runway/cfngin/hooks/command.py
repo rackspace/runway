@@ -1,14 +1,49 @@
 """Command hook."""
 import logging
 import os
-from subprocess import PIPE, Popen
+import subprocess
 from typing import Any, Dict, List, Optional, Union
 
 from typing_extensions import TypedDict
 
+from ...utils import BaseModel
 from ..exceptions import ImproperlyConfigured
 
 LOGGER = logging.getLogger(__name__)
+
+
+class RunCommandHookArgs(BaseModel):
+    """Hook arguments for ``run_command``."""
+
+    capture: bool = False
+    """If enabled, capture the command's stdout and stderr, and return them in the hook result."""
+
+    command: Union[str, List[str]]
+    """Command(s) to run."""
+
+    env: Optional[Dict[str, str]] = None
+    """Dictionary of environment variable overrides for the command context.
+    Will be merged with the current environment.
+
+    """
+
+    ignore_status: bool = False
+    """Don't fail the hook if the command returns a non-zero status."""
+
+    interactive: bool = False
+    """If enabled, allow the command to interact with stdin.
+    Otherwise, stdin will be set to the null device.
+
+    """
+
+    quiet: bool = False
+    """Redirect the command's stdout and stderr to the null device, silencing all output.
+    Should not be enabled if ``capture`` is also enabled.
+
+    """
+
+    stdin: Optional[str] = None
+    """String to send to the stdin of the command. Implicitly disables ``interactive``."""
 
 
 class RunCommandResponseTypeDef(TypedDict, total=False):
@@ -19,36 +54,10 @@ class RunCommandResponseTypeDef(TypedDict, total=False):
     stdout: str
 
 
-def run_command(
-    *,
-    command: Union[str, List[str]],
-    capture: bool = False,
-    interactive: bool = False,
-    ignore_status: bool = False,
-    quiet: bool = False,
-    stdin: Optional[str] = None,
-    env: Optional[Dict[str, str]] = None,
-    **kwargs: Any,
-) -> RunCommandResponseTypeDef:
+def run_command(*__args: Any, **kwargs: Any) -> RunCommandResponseTypeDef:
     """Run a custom command as a hook.
 
-    Args:
-        command: Command(s) to run.
-        capture: If enabled, capture the command's stdout and stderr,
-            and return them in the hook result.
-        interactive: If enabled, allow the command to interact with
-            stdin. Otherwise, stdin will be set to the null device.
-        ignore_status: Don't fail the hook if the command returns a
-            non-zero status.
-        quiet: Redirect the command's stdout and stderr to the null device,
-            silencing all output. Should not be enabled if ``capture`` is also
-            enabled.
-        stdin: String to send to the stdin of the command. Implicitly disables
-            ``interactive``.
-        env: Dictionary of environment variable overrides for the command context.
-            Will be merged with the current environment.
-
-    Additional keyword arguments passed to the function will be forwarded to the
+    Arguments not parsed by the data model will be forwarded to the
     ``subprocess.Popen`` function. Interesting ones include: ``cwd`` and ``shell``.
 
     Examples:
@@ -80,61 +89,67 @@ def run_command(
                     shell: true
 
     """
+    args = RunCommandHookArgs.parse_obj(kwargs)
+
+    # remove parsed args from kwargs
+    for field in RunCommandHookArgs.__fields__:
+        kwargs.pop(field, None)
+
     # remove unneeded args from kwargs
     kwargs.pop("context", None)
     kwargs.pop("provider", None)
 
-    if quiet and capture:
+    if args.quiet and args.capture:
         raise ImproperlyConfigured(
             __name__ + ".run_command",
             ValueError("Cannot enable `quiet` and `capture` options simultaneously"),
         )
 
     with open(os.devnull, "wb") as devnull:
-        if quiet:
+        if args.quiet:
             out_err_type = devnull
-        elif capture:
-            out_err_type = PIPE
+        elif args.capture:
+            out_err_type = subprocess.PIPE
         else:
             out_err_type = None
 
-        if interactive:
+        if args.interactive:
             in_type = None
-        elif stdin:
-            in_type = PIPE
+        elif args.stdin:
+            in_type = subprocess.PIPE
         else:
             in_type = devnull
 
-        if env:
+        if args.env:
             full_env = os.environ.copy()
-            full_env.update(env)
-            env = full_env
+            full_env.update(args.env)
+            args.env = full_env
 
-        LOGGER.info("running command: %s", command)
+        LOGGER.info("running command: %s", args.command)
 
-        with Popen(
-            command,
+        with subprocess.Popen(
+            args.command,
             stdin=in_type,
             stdout=out_err_type,
             stderr=out_err_type,
-            env=env,
+            env=args.env,
             **kwargs,
         ) as proc:
             try:
-                out, err = proc.communicate(stdin)
+                out, err = proc.communicate(args.stdin)
                 status = proc.wait()
 
-                if status == 0 or ignore_status:
+                if status == 0 or args.ignore_status:
                     return {"returncode": proc.returncode, "stdout": out, "stderr": err}
 
                 # Don't print the command line again if we already did earlier
-                if LOGGER.isEnabledFor(logging.INFO):
+                if LOGGER.isEnabledFor(logging.INFO):  # cov: ignore
                     LOGGER.warning("command failed with returncode %d", status)
                 else:
                     LOGGER.warning(
-                        "command failed with returncode %d: %s", status, command
+                        "command failed with returncode %d: %s", status, args.command
                     )
 
                 return {}
-            except Exception:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except  # cov: ignore
                 return {}

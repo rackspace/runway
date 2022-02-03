@@ -1,212 +1,98 @@
 """Tests for runway.cfngin.hooks.command."""
-from __future__ import annotations
-
 # pylint: disable=no-self-use
 # pyright: basic
-import os
-import unittest
-from subprocess import PIPE
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ContextManager,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    Union,
-)
+from __future__ import annotations
 
-import mock
+from typing import TYPE_CHECKING
 
+import pytest
+
+from runway.cfngin.exceptions import ImproperlyConfigured
 from runway.cfngin.hooks.command import run_command
-from runway.config import CfnginConfig
-from runway.context import CfnginContext
-
-from ..factories import mock_provider
 
 if TYPE_CHECKING:
-    from types import TracebackType
+    from pytest_subprocess import FakeProcess
 
 
-class MockProcess(ContextManager["MockProcess"]):
-    """Mock process."""
-
-    def __init__(
-        self,
-        returncode: int = 0,
-        stdout: Optional[str] = "",
-        stderr: Optional[str] = "",
-    ) -> None:
-        """Instantiate class."""
-        self.returncode = returncode
-        self.stdout = stdout
-        self.stderr = stderr
-        self.stdin = None
-
-    def communicate(self, stdin: str) -> Tuple[Optional[str], Optional[str]]:
-        """Communicate with process."""
-        self.stdin = stdin
-        return (self.stdout, self.stderr)
-
-    def wait(self) -> int:
-        """Wait for process."""
-        return self.returncode
-
-    def kill(self) -> None:
-        """Kill process."""
-        return
-
-    def __enter__(self) -> MockProcess:
-        """Enter the context manager."""
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        """Exit the context manager."""
+def test_run_command(fake_process: FakeProcess) -> None:
+    """Test run_command."""
+    fake_process.register_subprocess(["foo"], returncode=0)
+    assert run_command(command=["foo"]) == {
+        "returncode": 0,
+        "stderr": None,
+        "stdout": None,
+    }
 
 
-class TestCommandHook(unittest.TestCase):
-    """Tests for runway.cfngin.hooks.command."""
+def test_run_command_capture(fake_process: FakeProcess) -> None:
+    """Test run_command with ``capture``."""
+    fake_process.register_subprocess(
+        ["foo"], returncode=0, stderr="bar", stdout="foobar"
+    )
+    assert run_command(command=["foo"], capture=True) == {
+        "returncode": 0,
+        "stderr": b"bar",  # for some reason, pytest-subprocess returns these as bytes
+        "stdout": b"foobar",
+    }
 
-    def setUp(self) -> None:
-        """Run before tests."""
-        self.context = CfnginContext(
-            config=CfnginConfig.parse_obj(
-                {"namespace": "test", "cfngin_bucket": "test"}
-            )
-        )
-        self.provider = mock_provider(region="us-east-1")
 
-        self.mock_process = MockProcess()
-        self.popen_mock = mock.patch(
-            "runway.cfngin.hooks.command.Popen", return_value=self.mock_process
-        ).start()
+def test_run_command_env(fake_process: FakeProcess) -> None:
+    """Test run_command with ``env``."""
+    fake_process.register_subprocess(["foo"], returncode=0)
+    assert run_command(command=["foo"], env={"TEST": "bar"}) == {
+        "returncode": 0,
+        "stderr": None,
+        "stdout": None,
+    }
 
-    def tearDown(self) -> None:
-        """Run after tests."""
-        self.popen_mock.stop()
 
-    def run_hook(self, *, command: Union[str, List[str]], **kwargs: Any) -> Any:
-        """Run hook."""
-        real_kwargs = {
-            "context": self.context,
-        }
-        real_kwargs.update(kwargs)
-        return run_command(command=command, **real_kwargs)
+def test_run_command_fail(fake_process: FakeProcess) -> None:
+    """Test run_command non-zero exit code."""
+    fake_process.register_subprocess(["foo"], returncode=1)
+    assert not run_command(command=["foo"])
 
-    def test_command_ok(self) -> None:
-        """Test command ok."""
-        self.mock_process.returncode = 0
-        self.mock_process.stdout = None
-        self.mock_process.stderr = None
 
-        results = self.run_hook(command=["foo"])
+def test_run_command_interactive(fake_process: FakeProcess) -> None:
+    """Test run_command with ``interactive``."""
+    fake_process.register_subprocess(["foo"], returncode=0)
+    assert run_command(command=["foo"], interactive=True) == {
+        "returncode": 0,
+        "stderr": None,
+        "stdout": None,
+    }
 
-        self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
-        self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=mock.ANY, stdout=None, stderr=None, env=None
-        )
 
-    def test_command_fail(self) -> None:
-        """Test command fail."""
-        self.mock_process.returncode = 1
-        self.mock_process.stdout = None
-        self.mock_process.stderr = None
+def test_run_command_ignore_status(fake_process: FakeProcess) -> None:
+    """Test run_command with ``ignore_status``."""
+    fake_process.register_subprocess(["foo"], returncode=1)
+    assert run_command(command=["foo"], ignore_status=True) == {
+        "returncode": 1,
+        "stderr": None,
+        "stdout": None,
+    }
 
-        results = self.run_hook(command=["foo"])
 
-        self.assertEqual(results, {})
-        self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=mock.ANY, stdout=None, stderr=None, env=None
-        )
+def test_run_command_quiet(fake_process: FakeProcess) -> None:
+    """Test run_command with ``quiet``."""
+    fake_process.register_subprocess(["foo"], returncode=0, stderr="", stdout="")
+    assert run_command(command=["foo"], quiet=True) == {
+        "returncode": 0,
+        "stderr": None,
+        "stdout": None,
+    }
 
-    def test_command_ignore_status(self) -> None:
-        """Test command ignore status."""
-        self.mock_process.returncode = 1
-        self.mock_process.stdout = None
-        self.mock_process.stderr = None
 
-        results = self.run_hook(command=["foo"], ignore_status=True)
+def test_run_command_raise_improperly_configured() -> None:
+    """Test run_command raise ``ImproperlyConfigured``."""
+    with pytest.raises(ImproperlyConfigured):
+        run_command(command=["foo"], capture=True, quiet=True)
 
-        self.assertEqual(results, {"returncode": 1, "stdout": None, "stderr": None})
-        self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=mock.ANY, stdout=None, stderr=None, env=None
-        )
 
-    def test_command_quiet(self) -> None:
-        """Test command quiet."""
-        self.mock_process.returncode = 0
-        self.mock_process.stdout = None
-        self.mock_process.stderr = None
-
-        results = self.run_hook(command=["foo"], quiet=True)
-        self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
-
-        self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=mock.ANY, stdout=mock.ANY, stderr=mock.ANY, env=None
-        )
-
-    def test_command_interactive(self) -> None:
-        """Test command interactive."""
-        self.mock_process.returncode = 0
-        self.mock_process.stdout = None
-        self.mock_process.stderr = None
-
-        results = self.run_hook(command=["foo"], interactive=True)
-        self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
-
-        self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=None, stdout=None, stderr=None, env=None
-        )
-
-    def test_command_input(self) -> None:
-        """Test command input."""
-        self.mock_process.returncode = 0
-        self.mock_process.stdout = None
-        self.mock_process.stderr = None
-
-        results = self.run_hook(command=["foo"], stdin="hello world")
-        self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
-
-        self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=PIPE, stdout=None, stderr=None, env=None
-        )
-        self.assertEqual(self.mock_process.stdin, "hello world")
-
-    def test_command_capture(self) -> None:
-        """Test command capture."""
-        self.mock_process.returncode = 0
-        self.mock_process.stdout = "hello"
-        self.mock_process.stderr = "world"
-
-        results = self.run_hook(command=["foo"], capture=True)
-        self.assertEqual(
-            results, {"returncode": 0, "stdout": "hello", "stderr": "world"}
-        )
-
-        self.popen_mock.assert_called_once_with(
-            ["foo"], stdin=mock.ANY, stdout=PIPE, stderr=PIPE, env=None
-        )
-
-    def test_command_env(self) -> None:
-        """Test command env."""
-        self.mock_process.returncode = 0
-        self.mock_process.stdout = None
-        self.mock_process.stderr = None
-
-        with mock.patch.dict(os.environ, {"FOO": "bar"}, clear=True):
-            results = self.run_hook(command=["foo"], env={"hello": "world"})
-
-            self.assertEqual(results, {"returncode": 0, "stdout": None, "stderr": None})
-            self.popen_mock.assert_called_once_with(
-                ["foo"],
-                stdin=mock.ANY,
-                stdout=None,
-                stderr=None,
-                env={"hello": "world", "FOO": "bar"},
-            )
+def test_run_command_stdin(fake_process: FakeProcess) -> None:
+    """Test run_command with ``stdin``."""
+    fake_process.register_subprocess(["foo"], returncode=0)
+    assert run_command(command=["foo"], stdin="bar") == {
+        "returncode": 0,
+        "stderr": None,
+        "stdout": None,
+    }
