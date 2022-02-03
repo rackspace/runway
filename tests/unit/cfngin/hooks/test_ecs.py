@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pytest
-
 from runway._logging import LogLevels
 from runway.cfngin.hooks.ecs import create_clusters
 
@@ -18,7 +16,6 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.ecs"
 
 
-@pytest.mark.wip
 def test_create_clusters(
     caplog: LogCaptureFixture, cfngin_context: MockCFNginContext
 ) -> None:
@@ -47,7 +44,6 @@ def test_create_clusters(
         assert f"creating ECS cluster: {cluster}" in caplog.messages
 
 
-@pytest.mark.wip
 def test_create_clusters_str(cfngin_context: MockCFNginContext) -> None:
     """Test create_clusters with ``clusters`` provided as str."""
     stub = cfngin_context.add_stubber("ecs")
