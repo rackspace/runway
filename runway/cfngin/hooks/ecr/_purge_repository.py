@@ -4,6 +4,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List
 
+from ....utils import BaseModel
+
 if TYPE_CHECKING:
     from mypy_boto3_ecr.client import ECRClient
     from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef
@@ -11,6 +13,13 @@ if TYPE_CHECKING:
     from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
+
+
+class HookArgs(BaseModel):
+    """Hook arguments for ``purge_repository``."""
+
+    repository_name: str
+    """Name of the repository to purge."""
 
 
 def delete_ecr_images(
@@ -63,22 +72,20 @@ def list_ecr_images(
 
 
 def purge_repository(
-    context: CfnginContext,
-    repository_name: str,
-    **_: Any,
+    context: CfnginContext, *__args: Any, **kwargs: Any
 ) -> Dict[str, str]:
     """Purge all images from an ECR repository.
 
     Args:
         context: CFNgin context object.
-        repository_name: Name of the repository to purge.
 
     """
+    args = HookArgs.parse_obj(kwargs)
     client = context.get_session().client("ecr")
-    image_ids = list_ecr_images(client, repository_name=repository_name)
+    image_ids = list_ecr_images(client, repository_name=args.repository_name)
     if not image_ids:
-        LOGGER.info("no images found in repository %s", repository_name)
+        LOGGER.info("no images found in repository %s", args.repository_name)
         return {"status": "skipped"}
-    delete_ecr_images(client, image_ids=image_ids, repository_name=repository_name)
+    delete_ecr_images(client, image_ids=image_ids, repository_name=args.repository_name)
     LOGGER.info("purged all images from repository")
     return {"status": "success"}

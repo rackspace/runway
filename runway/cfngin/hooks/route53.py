@@ -17,7 +17,7 @@ class CreateDomainHookArgs(BaseModel):
     """Hook arguments for ``create_domain``."""
 
     domain: str
-    """Domain name for the Route 53 hosted zone to be created.."""
+    """Domain name for the Route 53 hosted zone to be created."""
 
 
 def create_domain(
