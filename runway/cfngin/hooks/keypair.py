@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 from botocore.exceptions import ClientError
 from typing_extensions import Literal, TypedDict
 
+from ...utils import BaseModel
 from ..ui import get_raw_input
 
 if TYPE_CHECKING:
@@ -21,6 +22,31 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 KEYPAIR_LOG_MESSAGE = "keypair %s (%s) %s"
+
+
+class EnsureKeypairExistsHookArgs(BaseModel):
+    """Hook arguments for ``ensure_keypair_exists``."""
+
+    keypair: str
+    """Name of the key pair to ensure exists."""
+
+    public_key_path: Optional[str] = None
+    """Path to a public key file to be imported instead of generating a new key.
+    Incompatible with the SSM options, as the private key will not be available for storing.
+
+    """
+
+    ssm_key_id: Optional[str] = None
+    """ID of a KMS key to encrypt the SSM parameter with.
+    If omitted, the default key will be used.
+
+    """
+
+    ssm_parameter_name: Optional[str] = None
+    """Path to an SSM store parameter to receive the generated private key
+    instead of importing it or storing it locally.
+
+    """
 
 
 class KeyPairInfo(TypedDict, total=False):
@@ -220,31 +246,16 @@ def interactive_prompt(
 
 
 def ensure_keypair_exists(
-    context: CfnginContext,
-    *,
-    keypair: str,
-    public_key_path: Optional[str] = None,
-    ssm_key_id: Optional[str] = None,
-    ssm_parameter_name: Optional[str] = None,
-    **_: Any,
+    context: CfnginContext, *__args: Any, **kwargs: Any
 ) -> KeyPairInfo:
     """Ensure a specific keypair exists within AWS.
 
     If the key doesn't exist, upload it.
 
-    Args:
-        context: Context instance. (passed in by CFNgin)
-        keypair: Name of the key pair to create
-        public_key_path: Path to a public key file to be imported instead of
-            generating a new key. Incompatible with the SSM options, as the
-            private key will not be available for storing.
-        ssm_key_id: ID of a KMS key to encrypt the SSM parameter with.
-            If omitted, the default key will be used.
-        ssm_parameter_name: Path to an SSM store parameter to receive the
-            generated private key, instead of importing it or storing it locally.
-
     """
-    if public_key_path and ssm_parameter_name:
+    args = EnsureKeypairExistsHookArgs.parse_obj(kwargs)
+
+    if args.public_key_path and args.ssm_parameter_name:
         LOGGER.error(
             "public_key_path and ssm_parameter_name cannot be "
             "specified at the same time"
@@ -254,27 +265,27 @@ def ensure_keypair_exists(
     session = context.get_session()
     ec2 = session.client("ec2")
 
-    keypair_info = get_existing_key_pair(ec2, keypair)
+    keypair_info = get_existing_key_pair(ec2, args.keypair)
     if keypair_info:
         return keypair_info
 
-    if public_key_path:
+    if args.public_key_path:
         keypair_info = create_key_pair_from_public_key_file(
-            ec2, keypair, Path(public_key_path)
+            ec2, args.keypair, Path(args.public_key_path)
         )
-    elif ssm_parameter_name:
+    elif args.ssm_parameter_name:
         ssm = session.client("ssm")
         keypair_info = create_key_pair_in_ssm(
-            ec2, ssm, keypair, ssm_parameter_name, ssm_key_id
+            ec2, ssm, args.keypair, args.ssm_parameter_name, args.ssm_key_id
         )
     else:
-        action, path = interactive_prompt(keypair)
+        action, path = interactive_prompt(args.keypair)
         if action == "import" and path:
             keypair_info = create_key_pair_from_public_key_file(
-                ec2, keypair, Path(path)
+                ec2, args.keypair, Path(path)
             )
         elif action == "create" and path:
-            keypair_info = create_key_pair_local(ec2, keypair, Path(path))
+            keypair_info = create_key_pair_local(ec2, args.keypair, Path(path))
         else:
             LOGGER.error("no action to find keypair or path not provided")
 
