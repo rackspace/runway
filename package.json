@@ -60,6 +60,6 @@
   },
   "devDependencies": {
     "cspell": "^5.18.4",
-    "pyright": "^1.1.217"
+    "pyright": "^1.1.219"
   }
 }
