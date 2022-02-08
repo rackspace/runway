@@ -16,10 +16,11 @@ REGION = "us-east-1"
 
 
 class TestAMILookup:
-    """Tests for runway.cfngin.lookups.handlers.ami.ImageNotFound."""
+    """Tests for runway.cfngin.lookups.handlers.ami.AmiLookup."""
 
     def test_basic_lookup_single_image(self, cfngin_context: MockCFNginContext) -> None:
         """Test basic lookup single image."""
+        executable_users = ["123456789012", "234567890123"]
         stubber = cfngin_context.add_stubber("ec2")
         image_id = "ami-fffccc111"
         stubber.add_response(
@@ -37,12 +38,18 @@ class TestAMILookup:
                     }
                 ]
             },
+            {
+                "ExecutableUsers": executable_users,
+                "Filters": [],
+                "Owners": ["self"],
+            },
         )
 
         with stubber:
             assert (
                 AmiLookup.handle(
-                    value=r"owners:self name_regex:Fake\sImage\s\d",
+                    value=f"owners:self executable_users:{','.join(executable_users)} "
+                    r"name_regex:Fake\sImage\s\d",
                     context=cfngin_context,
                 )
                 == image_id
@@ -67,12 +74,13 @@ class TestAMILookup:
                     }
                 ]
             },
+            {"Filters": [], "Owners": ["amazon"]},
         )
 
         with stubber:
             assert (
                 AmiLookup.handle(
-                    value=r"us-west-1@owners:self name_regex:Fake\sImage\s\d",
+                    value=r"us-west-1@owners:amazon name_regex:Fake\sImage\s\d",
                     context=cfngin_context,
                 )
                 == image_id
@@ -118,6 +126,7 @@ class TestAMILookup:
                     },
                 ]
             },
+            {"Filters": [], "Owners": ["self"]},
         )
 
         with stubber:
@@ -159,6 +168,7 @@ class TestAMILookup:
                     },
                 ]
             },
+            {"Filters": [], "Owners": ["self"]},
         )
 
         with stubber:

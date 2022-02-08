@@ -1,18 +1,50 @@
 """AMI lookup."""
+# pylint: disable=no-self-argument,no-self-use
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import operator
 import re
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
+from pydantic import validator
 from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
+from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
+
+
+class ArgsDataModel(BaseModel):
+    """Arguments data model.
+
+    Any other arguments specified are sent as filters to the AWS API.
+    For example, ``architecture:x86_64`` will add a filter.
+
+    """
+
+    executable_users: Optional[List[str]] = None
+    """List of executable users."""
+
+    owners: List[str]
+    """At least one owner is required.
+
+    Should be ``amazon``, ``self``, or an AWS account ID.
+
+    """
+
+    region: Optional[str] = None
+    """AWS region."""
+
+    @validator("executable_users", "owners", allow_reuse=True, pre=True)
+    def _convert_str_to_list(cls, v: Union[List[str], str]) -> List[str]:
+        """Convert str to list."""
+        if isinstance(v, str):
+            return v.split(",")
+        return v  # cov: ignore
 
 
 class ImageNotFound(Exception):
@@ -33,6 +65,33 @@ class AmiLookup(LookupHandler):
 
     TYPE_NAME: Final[Literal["ami"]] = "ami"
     """Name that the Lookup is registered as."""
+
+    @classmethod
+    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+        """Parse the value passed to the lookup.
+
+        This overrides the default parseing to account for special requirements.
+
+        Args:
+            value: The raw value passed to a lookup.
+
+        Returns:
+            The lookup query and a dict of arguments
+
+        """
+        raw_value = read_value_from_path(value)
+        args: Dict[str, str] = {}
+
+        if "@" in raw_value:
+            args["region"], raw_value = raw_value.split("@", 1)
+
+        # now find any other arguments that can be filters
+        matches = re.findall(r"([0-9a-zA-z_-]+:[^\s$]+)", raw_value)
+        for match in matches:
+            k, v = match.split(":", 1)
+            args[k] = v
+
+        return args.pop("name_regex"), args
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ
@@ -56,53 +115,24 @@ class AmiLookup(LookupHandler):
             You can also optionally specify the region in which to perform the
             AMI lookup.
 
-            Valid arguments:
-
-            owners (comma delimited) REQUIRED ONCE:
-                aws_account_id | amazon | self
-
-            name_regex (a regex) REQUIRED ONCE:
-                e.g. ``my-ubuntu-server-[0-9]+``
-
-            executable_users (comma delimited) OPTIONAL ONCE:
-                aws_account_id | amazon | self
-
-            Any other arguments specified are sent as filters to the aws api
-            For example, ``architecture:x86_64`` will add a filter
-
         """  # noqa
-        value = read_value_from_path(value)
+        query, raw_args = cls.parse(value)
+        args = ArgsDataModel.parse_obj(raw_args)
+        ec2 = context.get_session(region=args.region).client("ec2")
 
-        region = None
-        if "@" in value:
-            region, value = value.split("@", 1)
-
-        ec2 = context.get_session(region=region).client("ec2")
-
-        values: Dict[str, Any] = {}
-        describe_args: Dict[str, Any] = {}
-
-        # now find any other arguments that can be filters
-        matches = re.findall(r"([0-9a-zA-z_-]+:[^\s$]+)", value)
-        for match in matches:
-            k, v = match.split(":", 1)
-            values[k] = v
-
-        if not values.get("owners"):
-            raise Exception("'owners' value required when using ami")
-        owners = values.pop("owners").split(",")
-        describe_args["Owners"] = owners
-
-        if not values.get("name_regex"):
-            raise Exception("'name_regex' value required when using ami")
-        name_regex = values.pop("name_regex")
-
-        if values.get("executable_users"):
-            executable_users = values.pop("executable_users").split(",")
-            describe_args["ExecutableUsers"] = executable_users
-
-        filters = [{"Name": k, "Values": v.split(",")} for k, v in values.items()]
-        describe_args["Filters"] = filters
+        describe_args: Dict[str, Any] = {
+            "Filters": [
+                {"Name": key, "Values": val.split(",") if val else val}
+                for key, val in {
+                    k: v
+                    for k, v in raw_args.items()
+                    if k not in ArgsDataModel.__fields__
+                }.items()
+            ],
+            "Owners": args.owners,
+        }
+        if args.executable_users:
+            describe_args["ExecutableUsers"] = args.executable_users
 
         result = ec2.describe_images(**describe_args)
 
@@ -113,10 +143,7 @@ class AmiLookup(LookupHandler):
         )
         for image in images:
             # sometimes we get ARI/AKI in response - these don't have a 'Name'
-            if (
-                re.match(f"^{name_regex}$", image.get("Name", ""))
-                and "ImageId" in image
-            ):
+            if re.match(f"^{query}$", image.get("Name", "")) and "ImageId" in image:
                 return image["ImageId"]
 
         raise ImageNotFound(value)
