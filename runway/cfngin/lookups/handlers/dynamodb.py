@@ -3,16 +3,85 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, cast
 
 from botocore.exceptions import ClientError
 from typing_extensions import Final, Literal, TypedDict
 
 from ....lookups.handlers.base import LookupHandler
+from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
+
+
+_QUERY_PATTERN = r"""(?x)  # <table_name>@<partition_key>:<partition_key_value>.<attribute>
+^(?P<table_name>[a-zA-Z0-9\-_\.]{3,255})  # name of the DynamoDB Table
+@  # delimiter
+(?P<partition_key>\S*)  # partition/primary key
+:  # delimiter
+(?P<partition_key_value>[^\.]*)  # value of partition/primary key
+\.  # delimiter
+(?P<attribute>.*)$  # attribute to get
+"""
+"""Lookup query pattern minus region argument.
+
+.. note::
+    This pattern and/or it's variable will likely change in a future release so it
+    should not be consumed directly by any external code.
+
+"""
+
+
+class ArgsDataModel(BaseModel):
+    """Arguments data model."""
+
+    region: Optional[str] = None
+    """AWS region."""
+
+
+class QueryDataModel(BaseModel):
+    """Arguments data model."""
+
+    attribute: str
+    """The attribute to be returned by this lookup.
+    Supports additional syntax to retrieve a nested value.
+
+    """
+
+    partition_key: str
+    """The DynamoDB Table's partition key."""
+
+    partition_key_value: str
+    """The value of the partition key to query the database."""
+
+    table_name: str
+    """Name of the DynamoDB Table to query."""
+
+    @property
+    def item_key(self) -> Dict[str, Dict[Literal["B", "N", "S"], Any]]:
+        """Value to pass to boto3 ``.get_item()`` call as the ``Key`` argument.
+
+        Raises:
+            ValueError: The value of ``partition_key_value`` doesn't match the
+                required regex and so it can't be parsed.
+
+        """
+        pattern = re.compile(r"^(?P<value>[^\[]+)\[?(?P<data_type>[BNS]+)?]?$")
+        match = pattern.search(self.partition_key_value)
+        if not match:
+            raise ValueError(
+                f"Partition key value '{self.partition_key_value}' "
+                f"doesn't match regex: {pattern.pattern}"
+            )
+        return {
+            self.partition_key: {
+                cast(
+                    Literal["B", "N", "S"], match.groupdict("S")["data_type"]
+                ): match.group("value")
+            }
+        }
 
 
 class DynamodbLookup(LookupHandler):
@@ -22,6 +91,53 @@ class DynamodbLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
+    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+        """Parse the value passed to the lookup.
+
+        This overrides the default parseing to account for special requirements.
+
+        Args:
+            value: The raw value passed to a lookup.
+
+        Returns:
+            The lookup query and a dict of arguments
+
+        Raises:
+            ValueError: The value provided does not appear to contain the name of
+                a DynamoDB Table. The name of a Table is required.
+
+        """
+        raw_value = read_value_from_path(value)
+        args: Dict[str, str] = {}
+
+        if "@" not in raw_value:
+            raise ValueError(
+                f"'{raw_value}' missing delimiter for DynamoDB Table name:\n{_QUERY_PATTERN}"
+            )
+
+        table_info, table_keys = raw_value.split("@", 1)
+        if ":" in table_info:
+            args["region"], table_info = table_info.split(":", 1)
+
+        return "@".join([table_info, table_keys]), args
+
+    @classmethod
+    def parse_query(cls, value: str) -> QueryDataModel:
+        """Parse query string to extract. Does not support arguments in ``value``.
+
+        Raises:
+            ValueError: The argument provided does not match the expected format defined
+                with a regex pattern.
+
+        """
+        # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html
+        pattern = re.compile(_QUERY_PATTERN)
+        match = pattern.search(value)
+        if not match:
+            raise ValueError(f"Query '{value}' doesn't match regex:\n{pattern.pattern}")
+        return QueryDataModel.parse_obj(match.groupdict())
+
+    @classmethod
     def handle(  # pylint: disable=arguments-differ
         cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
     ) -> Any:
@@ -29,64 +145,50 @@ class DynamodbLookup(LookupHandler):
 
         Args:
             value: Parameter(s) given to this lookup.
-                ``[<region>:]<tablename>@<primarypartionkey>:<keyvalue>.<keyvalue>...``
+                ``[<region>:]<tablename>@<partionkey>:<keyvalue>.<keyvalue>...``
             context: Context instance.
+
+        Raises:
+            ValueError: The value provided to the lookup resulted in an error.
 
         .. note:: The region is optional, and defaults to the environment's
                   ``AWS_DEFAULT_REGION`` if not specified.
 
         """
-        value = read_value_from_path(value)
-        table_info = None
-        table_keys = None
-        region = None
-        table_name = None
-        if "@" not in value:
-            raise ValueError("Please make sure to include a tablename")
+        raw_query, raw_args = cls.parse(value)
+        query = cls.parse_query(raw_query)
+        args = ArgsDataModel.parse_obj(raw_args)
 
-        table_info, table_keys = value.split("@", 1)
-        if ":" in table_info:
-            region, table_name = table_info.split(":", 1)
-        else:
-            table_name = table_info
-        if not table_name:
-            raise ValueError("Please make sure to include a DynamoDB table name")
-
-        table_lookup, table_keys = table_keys.split(":", 1)
-
-        table_keys = table_keys.split(".")
+        table_keys = query.attribute.split(".")
 
         key_dict = _lookup_key_parse(table_keys)
-        new_keys = key_dict["new_keys"]
-        clean_table_keys = key_dict["clean_table_keys"]
 
-        projection_expression = _build_projection_expression(clean_table_keys)
-
-        # lookup the data from DynamoDB
-        dynamodb = context.get_session(region=region).client("dynamodb")
+        dynamodb = context.get_session(region=args.region).client("dynamodb")
         try:
             response = dynamodb.get_item(
-                TableName=table_name,
-                Key={table_lookup: new_keys[0]},
-                ProjectionExpression=projection_expression,
+                TableName=query.table_name,
+                Key=query.item_key,
+                ProjectionExpression=",".join(
+                    [query.partition_key, *key_dict["clean_table_keys"]]
+                ),
             )
+        except dynamodb.exceptions.ResourceNotFoundException as exc:
+            raise ValueError(
+                f"Can't find the DynamoDB table: {query.table_name}"
+            ) from exc
         except ClientError as exc:
-            if exc.response["Error"]["Code"] == "ResourceNotFoundException":
-                raise ValueError(
-                    f"Cannot find the DynamoDB table: {table_name}"
-                ) from exc
             if exc.response["Error"]["Code"] == "ValidationException":
                 raise ValueError(
-                    f"No DynamoDB record matched the partition key: {table_lookup}"
+                    f"No DynamoDB record matched the partition key: {query.partition_key}"
                 ) from exc
             raise ValueError(
-                f"The DynamoDB lookup {value} had an error: {exc}"
+                f"The DynamoDB lookup '{value}' encountered an error: {exc}"
             ) from exc
         # find and return the key from the dynamo data returned
         if "Item" in response:
-            return _get_val_from_ddb_data(response["Item"], new_keys[1:])
+            return _get_val_from_ddb_data(response["Item"], key_dict["new_keys"])
         raise ValueError(
-            f"The DynamoDB record could not be found using the following key: {new_keys[0]}"
+            f"The DynamoDB record could not be found using the following: {query.item_key}"
         )
 
 
@@ -105,7 +207,10 @@ def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
 
     Returns:
         Includes a dict of lookup types with data types ('new_keys')
-        and a list of the lookups with without ('clean_table_keys')
+        and a list of the lookups without ('clean_table_keys')
+
+    Raises:
+        ValueError: DynamoDB data type is not supported.
 
     """
     # we need to parse the key lookup passed in
@@ -120,7 +225,7 @@ def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
             # the datatypes are pulled from the dynamodb docs
             if match.group(1) not in valid_dynamodb_datatypes:
                 raise ValueError(
-                    f"CFNgin does not support looking up the datatype: {match.group(1)}"
+                    f"CFNgin does not support looking up the data type: {match.group(1)}"
                 )
             match_val = cast(Literal["L", "M", "N", "S"], match.group(1))
             key = key.replace(match.group(0), "")
@@ -129,21 +234,6 @@ def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
             new_keys.append({"S": key})
         clean_table_keys.append(key)
     return {"new_keys": new_keys, "clean_table_keys": clean_table_keys}
-
-
-def _build_projection_expression(clean_table_keys: List[str]) -> str:
-    """Return a projection expression for the DynamoDB lookup.
-
-    Args:
-        clean_table_keys: Keys without the data types attached.
-
-    Returns:
-        str: A projection expression for the DynamoDB lookup.
-
-    """
-    projection_expression = ",".join(clean_table_keys[:-1])
-    projection_expression += f",{clean_table_keys[-1]}"
-    return projection_expression.strip(",")
 
 
 def _get_val_from_ddb_data(data: Dict[str, Any], keylist: List[Dict[str, str]]) -> Any:
