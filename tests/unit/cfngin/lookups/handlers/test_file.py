@@ -1,21 +1,21 @@
 """Tests for runway.cfngin.lookups.handlers.file."""
 # pylint: disable=no-self-use
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
+from __future__ import annotations
+
 import base64
 import json
-import unittest
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import mock
+import pytest
 import yaml
-from troposphere import Base64, GenericHelperFn, Join
+from pydantic import ValidationError
+from troposphere import Base64, Join
 
-from runway.cfngin.lookups.handlers.file import (
-    FileLookup,
-    json_codec,
-    parameterized_codec,
-    yaml_codec,
-)
+from runway.cfngin.lookups.handlers.file import CODECS, ArgsDataModel, FileLookup
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def to_template_dict(obj: Any) -> Any:
@@ -29,200 +29,177 @@ def to_template_dict(obj: Any) -> Any:
     return obj
 
 
-class TestFileTranslator(unittest.TestCase):
-    """Tests for runway.cfngin.lookups.handlers.file.FileLookup."""
+def assert_template_dicts(obj1: Any, obj2: Any) -> None:
+    """Assert two template dicts are equal."""
+    assert to_template_dict(obj1) == to_template_dict(obj2)
 
-    @staticmethod
-    def assertTemplateEqual(  # noqa: N802 pylint: disable=invalid-name
-        left: Any, right: Any
-    ) -> None:
-        """Assert that two codec results are equivalent.
 
-        Convert both sides to their template representations, since Troposphere
-        objects are not natively comparable.
+class TestArgsDataModel:
+    """Test ArgsDataModel."""
 
-        """
-        return to_template_dict(left) == to_template_dict(right)
+    def test__validate_supported_codec_raise_value_error(self) -> None:
+        """Test _validate_supported_codec raise ValueError."""
+        with pytest.raises(ValidationError) as excinfo:
+            ArgsDataModel(codec="foo")
+        assert excinfo.value.errors() == [
+            {
+                "loc": ("codec",),
+                "msg": f"Codec 'foo' must be one of: {', '.join(CODECS)}",
+                "type": "value_error",
+            }
+        ]
 
-    def test_parameterized_codec_b64(self) -> None:
-        """Test parameterized codec b64."""
-        expected = Base64(Join("", ["Test ", {"Ref": "Interpolation"}, " Here"]))
-        out = parameterized_codec("Test {{Interpolation}} Here", True)
-        self.assertEqual(Base64, out.__class__)
-        self.assertTemplateEqual(expected, out)
 
-    def test_parameterized_codec_plain(self) -> None:
-        """Test parameterized codec plain."""
-        expected = Join("", ["Test ", {"Ref": "Interpolation"}, " Here"])
-        out = parameterized_codec("Test {{Interpolation}} Here", False)
-        self.assertEqual(GenericHelperFn, out.__class__)
-        self.assertTemplateEqual(expected, out)
+class TestFileLookup:
+    """Test FileLookup."""
 
-    def test_parameterized_codec_plain_no_interpolation(self) -> None:
-        """Test parameterized codec plain no interpolation."""
-        expected = "Test Without Interpolation Here"
-        out = parameterized_codec("Test Without Interpolation Here", False)
-        self.assertEqual(GenericHelperFn, out.__class__)
-        self.assertTemplateEqual(expected, out)
+    def test_handle_base64(self, tmp_path: Path) -> None:
+        """Test handle base64."""
+        data = "foobar"
+        expected = base64.b64encode(data.encode("utf-8")).decode("utf-8")
+        tmp_file = tmp_path / "test"
+        tmp_file.write_text(data, encoding="utf-8")
 
-    def test_yaml_codec_raw(self) -> None:
-        """Test yaml codec raw."""
-        structured = {"Test": [1, None, "unicode ✓", {"some": "obj"}]}
-        # Note: must use safe_dump, since regular dump adds !python/unicode
-        # tags, which we don't want, or we can't be sure we're correctly
-        # loading string as unicode.
-        raw = yaml.safe_dump(structured)
+        assert FileLookup.handle(f"base64:file://{tmp_file}") == expected
+        assert FileLookup.handle(f"base64:{data}") == expected
 
-        out = yaml_codec(raw, parameterized=False)
-        self.assertEqual(structured, out)
+    def test_handle_json(self, tmp_path: Path) -> None:
+        """Test handle json."""
+        expected = {"foo": "bar", "foobar": [1, None]}
+        data = json.dumps(expected)
+        tmp_file = tmp_path / "test"
+        tmp_file.write_text(data, encoding="utf-8")
 
-    def test_yaml_codec_parameterized(self) -> None:
-        """Test yaml codec parameterized."""
-        processed = {"Test": Join("", ["Test ", {"Ref": "Interpolation"}, " Here"])}
-        structured = {"Test": "Test {{Interpolation}} Here"}
-        raw = yaml.safe_dump(structured)
+        assert FileLookup.handle(f"json:file://{tmp_file}") == expected
+        assert FileLookup.handle(f"json:{data}") == expected
 
-        out = yaml_codec(raw, parameterized=True)
-        self.assertTemplateEqual(processed, out)
+    def test_handle_json_parameterized(self, tmp_path: Path) -> None:
+        """Test handle json-parameterized."""
+        expected = {
+            "foo": ["bar", Join("", ["", {"Ref": "fooParam"}, ""])],
+            "bar": {
+                "foobar": Join("", ["", {"Ref": "foobarParam"}, ""]),
+                "barfoo": 1,
+            },
+        }
+        data = json.dumps(
+            {
+                "foo": ["bar", "{{fooParam}}"],
+                "bar": {"foobar": "{{foobarParam}}", "barfoo": 1},
+            }
+        )
+        tmp_file = tmp_path / "test"
+        tmp_file.write_text(data, encoding="utf-8")
 
-    def test_json_codec_raw(self) -> None:
-        """Test json codec raw."""
-        structured = {"Test": [1, None, "str", {"some": "obj"}]}
-        raw = json.dumps(structured)
+        assert_template_dicts(
+            FileLookup.handle(f"json-parameterized:file://{tmp_file}"), expected
+        )
+        assert_template_dicts(FileLookup.handle(f"json-parameterized:{data}"), expected)
 
-        out = json_codec(raw, parameterized=False)
-        self.assertEqual(structured, out)
-
-    def test_json_codec_parameterized(self) -> None:
-        """Test json codec parameterized."""
-        processed = {"Test": Join("", ["Test ", {"Ref": "Interpolation"}, " Here"])}
-        structured = {"Test": "Test {{Interpolation}} Here"}
-        raw = json.dumps(structured)
-
-        out = json_codec(raw, parameterized=True)
-        self.assertTemplateEqual(processed, out)
-
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.file.read_value_from_path", return_value=""
+    @pytest.mark.parametrize(
+        "data, expected",
+        [
+            (
+                "Test {{Interpolation}} Here",
+                Join("", ["Test ", {"Ref": "Interpolation"}, " Here"]),
+            ),
+            ("Test Without Interpolation Here", "Test Without Interpolation Here"),
+        ],
     )
-    def test_file_loaded(self, content_mock: mock.MagicMock) -> None:
-        """Test file loaded."""
-        FileLookup.handle("plain:file://tmp/test")
-        content_mock.assert_called_with("file://tmp/test")
+    def test_handle_parameterized(
+        self, data: str, expected: Any, tmp_path: Path
+    ) -> None:
+        """Test handle parameterized."""
+        tmp_file = tmp_path / "test"
+        tmp_file.write_text(data, encoding="utf-8")
 
-    @mock.patch(
-        "runway.cfngin.lookups.handlers.file.read_value_from_path",
-        return_value="Hello, world",
+        assert_template_dicts(
+            FileLookup.handle(f"parameterized:file://{tmp_file}"), expected
+        )
+        assert_template_dicts(FileLookup.handle(f"parameterized:{data}"), expected)
+
+    @pytest.mark.parametrize(
+        "data, expected",
+        [
+            (
+                "Test {{Interpolation}} Here",
+                Base64(Join("", ["Test ", {"Ref": "Interpolation"}, " Here"])),
+            ),
+            (
+                "Test Without Interpolation Here",
+                Base64("Test Without Interpolation Here"),
+            ),
+        ],
     )
-    def test_handler_plain(self, _: mock.MagicMock) -> None:
-        """Test handler plain."""
-        out = FileLookup.handle("plain:file://tmp/test")
-        self.assertEqual("Hello, world", out)
-
-    @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
-    def test_handler_b64(self, content_mock: mock.MagicMock) -> None:
-        """Test handler b64."""
-        plain = "Hello, world"
-        encoded = base64.b64encode(plain.encode("utf8")).decode("utf-8")
-
-        content_mock.return_value = plain
-        out = FileLookup.handle("base64:file://tmp/test")
-        self.assertEqual(encoded, out)
-
-    @mock.patch("runway.cfngin.lookups.handlers.file.parameterized_codec")
-    @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
-    def test_handler_parameterized(
-        self, content_mock: mock.MagicMock, codec_mock: mock.MagicMock
+    def test_handle_parameterized_b64(
+        self, data: str, expected: Base64, tmp_path: Path
     ) -> None:
-        """Test handler parameterized."""
-        result = mock.Mock()
-        codec_mock.return_value = result
+        """Test handle parameterized-b64."""
+        tmp_file = tmp_path / "test"
+        tmp_file.write_text(data, encoding="utf-8")
 
-        out = FileLookup.handle("parameterized:file://tmp/test")
-        codec_mock.assert_called_once_with(content_mock.return_value, False)
+        assert_template_dicts(
+            FileLookup.handle(f"parameterized-b64:file://{tmp_file}"), expected
+        )
+        assert_template_dicts(FileLookup.handle(f"parameterized-b64:{data}"), expected)
 
-        self.assertEqual(result, out)
+    def test_handle_plain(self, tmp_path: Path) -> None:
+        """Test handle plain."""
+        expected = "foobar"
+        tmp_file = tmp_path / "test"
+        tmp_file.write_text(expected, encoding="utf-8")
 
-    @mock.patch("runway.cfngin.lookups.handlers.file.parameterized_codec")
-    @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
-    def test_handler_parameterized_b64(
-        self, content_mock: mock.MagicMock, codec_mock: mock.MagicMock
-    ) -> None:
-        """Test handler parameterized b64."""
-        result = mock.Mock()
-        codec_mock.return_value = result
+        assert FileLookup.handle(f"plain:file://{tmp_file}") == expected
+        assert FileLookup.handle(f"plain:{expected}") == expected
 
-        out = FileLookup.handle("parameterized-b64:file://tmp/test")
-        codec_mock.assert_called_once_with(content_mock.return_value, True)
+    def test_handle_raise_validation_error(self) -> None:
+        """Test handle raise ValidationError."""
+        with pytest.raises(ValidationError) as excinfo:
+            FileLookup.handle("foo:bar")
+        assert excinfo.value.errors() == [
+            {
+                "loc": ("codec",),
+                "msg": f"Codec 'foo' must be one of: {', '.join(CODECS)}",
+                "type": "value_error",
+            }
+        ]
 
-        self.assertEqual(result, out)
-
-    @mock.patch("runway.cfngin.lookups.handlers.file.yaml_codec")
-    @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
-    def test_handler_yaml(
-        self, content_mock: mock.MagicMock, codec_mock: mock.MagicMock
-    ) -> None:
-        """Test handler yaml."""
-        result = mock.Mock()
-        codec_mock.return_value = result
-
-        out = FileLookup.handle("yaml:file://tmp/test")
-        codec_mock.assert_called_once_with(
-            content_mock.return_value, parameterized=False
+    def test_handle_raise_value_error(self) -> None:
+        """Test handle raise ValueError."""
+        with pytest.raises(ValueError) as excinfo:
+            FileLookup.handle("foo")
+        assert (
+            str(excinfo.value) == "Query 'foo' doesn't match regex: "
+            "^(?P<codec>[base64|json|json-parameterized|parameterized|"
+            "parameterized-b64|plain|yaml|yaml-parameterized]:.+$)"
         )
 
-        self.assertEqual(result, out)
+    def test_handle_yaml(self, tmp_path: Path) -> None:
+        """Test handle yaml."""
+        expected = {"foo": "bar", "foobar": [1, None]}
+        data = yaml.dump(expected)
+        tmp_file = tmp_path / "test"
+        tmp_file.write_text(data, encoding="utf-8")
 
-    @mock.patch("runway.cfngin.lookups.handlers.file.yaml_codec")
-    @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
-    def test_handler_yaml_parameterized(
-        self, content_mock: mock.MagicMock, codec_mock: mock.MagicMock
-    ) -> None:
-        """Test handler yaml parameterized."""
-        result = mock.Mock()
-        codec_mock.return_value = result
+        assert FileLookup.handle(f"yaml:file://{tmp_file}") == expected
+        assert FileLookup.handle(f"yaml:{data}") == expected
 
-        out = FileLookup.handle("yaml-parameterized:file://tmp/test")
-        codec_mock.assert_called_once_with(
-            content_mock.return_value, parameterized=True
+    def test_handle_yaml_parameterized(self, tmp_path: Path) -> None:
+        """Test handle yaml-parameterized."""
+        expected = {
+            "foo": ["bar", Join("", ["", {"Ref": "fooParam"}, ""])],
+            "bar": {"foobar": Join("", ["", {"Ref": "foobarParam"}, ""]), "barfoo": 1},
+        }
+        data = yaml.dump(
+            {
+                "foo": ["bar", "{{fooParam}}"],
+                "bar": {"foobar": "{{foobarParam}}", "barfoo": 1},
+            }
         )
+        tmp_file = tmp_path / "test"
+        tmp_file.write_text(data, encoding="utf-8")
 
-        self.assertEqual(result, out)
-
-    @mock.patch("runway.cfngin.lookups.handlers.file.json_codec")
-    @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
-    def test_handler_json(
-        self, content_mock: mock.MagicMock, codec_mock: mock.MagicMock
-    ) -> None:
-        """Test handler json."""
-        result = mock.Mock()
-        codec_mock.return_value = result
-
-        out = FileLookup.handle("json:file://tmp/test")
-        codec_mock.assert_called_once_with(
-            content_mock.return_value, parameterized=False
+        assert_template_dicts(
+            FileLookup.handle(f"yaml-parameterized:file://{tmp_file}"), expected
         )
-
-        self.assertEqual(result, out)
-
-    @mock.patch("runway.cfngin.lookups.handlers.file.json_codec")
-    @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
-    def test_handler_json_parameterized(
-        self, content_mock: mock.MagicMock, codec_mock: mock.MagicMock
-    ) -> None:
-        """Test handler json parameterized."""
-        result = mock.Mock()
-        codec_mock.return_value = result
-
-        out = FileLookup.handle("json-parameterized:file://tmp/test")
-        codec_mock.assert_called_once_with(
-            content_mock.return_value, parameterized=True
-        )
-
-        self.assertEqual(result, out)
-
-    @mock.patch("runway.cfngin.lookups.handlers.file.read_value_from_path")
-    def test_unknown_codec(self, _: mock.MagicMock) -> None:
-        """Test unknown codec."""
-        with self.assertRaises(KeyError):
-            FileLookup.handle("bad:file://tmp/test")
+        assert_template_dicts(FileLookup.handle(f"yaml-parameterized:{data}"), expected)

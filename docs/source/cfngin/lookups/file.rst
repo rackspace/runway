@@ -2,12 +2,20 @@
 file
 ####
 
-:Query Syntax: ``<supported-codec>:<path>``
+:Query Syntax: ``<supported-codec>:<data>``
 
 
-The file_ lookup type allows the loading of arbitrary data from files on disk.
-The lookup additionally supports using a ``codec`` to manipulate or wrap the file contents prior to injecting it.
-The parameterized-b64 ``codec`` is particularly useful to allow the interpolation of CloudFormation parameters in a UserData attribute of an instance or launch configuration.
+The file_ lookup type allows the loading of arbitrary data from files.
+The lookup additionally supports using a **codec** to parse and/or manipulate the file contents prior to returning it.
+The ``parameterized-b64`` codec is particularly useful to allow the interpolation of CloudFormation parameters in a UserData attribute of an instance or launch configuration.
+
+If the file can be read locally, the ``<data>`` portion of the query should look something like ``file://./path/to/file``.
+The ``file://`` prefix tells CFNgin that it needs to open the file located at the provide path and read it's contents before continuing.
+For a relative path, it will be relative to the current working directory (usually the root of the CFNgin module being processed).
+
+If ``<data>`` is not prefixed with ``file://``, it will be treated as the contents of the file.
+This enables lookups to be chained together to retrieve data and still take advantage of a codec to further parse and/or manipulate it as needed.
+For example, the value of an SSM Parameter can be parsed as ``json-parameterized`` before it is returned by the lookup with the following ``${file json-parameterized:${ssm /parameter/name}}``.
 
 
 
@@ -18,7 +26,7 @@ Supported Codecs
 - **plain** - Load the contents of the file untouched. This is the only codec that should be used
   with raw Cloudformation templates (the other codecs are intended for blueprints).
 - **base64** - Encode the plain text file at the given path with base64 prior
-  to returning it
+  to returning it.
 - **parameterized** - The same as plain, but additionally supports
   referencing CloudFormation parameters to create userdata that's
   supplemented with information from the template, as is commonly needed
@@ -34,7 +42,7 @@ Supported Codecs
 
   .. code-block:: yaml
 
-    UserData: ${file parameterized:/path/to/file}
+    UserData: ${file parameterized:file://path/to/file}
 
   resulting in the UserData parameter being defined as:
 
@@ -54,10 +62,9 @@ Supported Codecs
     }
 
 - **parameterized-b64** - The same as parameterized, with the results additionally
-  wrapped in ``{ "Fn::Base64": ... }`` , which is what you actually need for
-  EC2 UserData.
+  wrapped in ``{ "Fn::Base64": ... }``, which can be used as EC2 UserData.
 
-  When using parameterized-b64 for UserData, you should use a local parameter defined as such.
+  When using parameterized-b64 for UserData, you should use a parameter defined as such.
 
   .. code-block:: python
 
@@ -69,7 +76,7 @@ Supported Codecs
         "default": Ref("AWS::NoValue")
     }
 
-  and then assign UserData in a LaunchConfiguration or Instance to ``self.variables["UserData"]``.
+  Then set UserData in a LaunchConfiguration or Instance to ``self.variables["UserData"]``.
   Note that we use AWSHelperFn as the type because the parameterized-b64 codec returns either a Base64 or a GenericHelperFn troposphere object.
 
 - **json** - Decode the file as JSON and return the resulting object.
