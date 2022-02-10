@@ -1,5 +1,5 @@
 """File lookup."""
-# pylint: disable=arguments-differ
+# pylint: disable=arguments-differ,no-self-argument,no-self-use
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
@@ -7,23 +7,39 @@ import base64
 import collections.abc
 import json
 import re
-from typing import Any, Callable, Dict, List, Mapping, Sequence, Union, overload
+from typing import Any, Callable, Dict, List, Mapping, Sequence, Tuple, Union, overload
 
 import yaml
+from pydantic import validator
 from troposphere import Base64, GenericHelperFn
 from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
+from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 _PARAMETER_PATTERN = re.compile(r"{{([::|\w]+)}}")
 
-ParameterizedObjectTypeDef = Union[bytes, str, Mapping[str, Any], Sequence[Any], Any]
+ParameterizedObjectTypeDef = Union[str, Mapping[str, Any], Sequence[Any], Any]
 ParameterizedObjectReturnTypeDef = Union[
     Dict[str, "ParameterizedObjectReturnTypeDef"],
     GenericHelperFn,
     List["ParameterizedObjectReturnTypeDef"],
 ]
+
+
+class ArgsDataModel(BaseModel):
+    """Arguments data model."""
+
+    codec: str
+    """Codec that will be used to parse and/or manipulate the data."""
+
+    @validator("codec", allow_reuse=True)
+    def _validate_supported_codec(cls, v: str) -> str:
+        """Validate that the selected codec is supported."""
+        if v in CODECS:
+            return v
+        raise ValueError(f"Codec '{v}' must be one of: {', '.join(CODECS)}")
 
 
 class FileLookup(LookupHandler):
@@ -33,133 +49,37 @@ class FileLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(cls, value: str, **_: Any) -> Any:
-        r"""Translate a filename into the file contents.
+    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+        """Parse the value passed to the lookup.
+
+        This overrides the default parseing to account for special requirements.
 
         Args:
-            value: Parameter(s) given to this lookup.
+            value: The raw value passed to a lookup.
 
-        Fields should use the following format::
+        Returns:
+            The lookup query and a dict of arguments
 
-            <codec>:<path>
-
-        Example::
-
-            # We've written a file to /some/path:
-            $ echo "hello there" > /some/path
-
-            # With CFNgin we would reference the contents of this file with the
-            # following
-            conf_key: ${file plain:file://some/path}
-
-            # The above would resolve to
-            conf_key: hello there
-
-            # Or, if we used wanted a base64 encoded copy of the file data
-            conf_key: ${file base64:file://some/path}
-
-            # The above would resolve to
-            conf_key: aGVsbG8gdGhlcmUK
-
-        Supported codecs:
-
-        **plain**
-            Plain Text
-
-        **base64**
-            Encode the plain text file at the given path with base64 prior to
-            returning it.
-
-        **parameterized**
-            The same as plain, but additionally supports referencing template
-            parameters to create userdata that's supplemented with information
-            from the template, as is commonly needed in EC2 UserData.
-            For example, given a template parameter of BucketName, the file
-            could contain the following text::
-
-                #!/bin/sh
-                aws s3 sync s3://{{BucketName}}/somepath /somepath
-
-            Then you could use something like this in the YAML config
-            file::
-
-                UserData: ${file parameterized:/path/to/file}
-
-            Resulting in the UserData parameter being defined as::
-
-                { "Fn::Join" : ["", [
-                    "#!/bin/sh\\naws s3 sync s3://",
-                    {"Ref" : "BucketName"},
-                    "/somepath /somepath"
-                ]] }
-
-        **parameterized-b64**
-            The same as parameterized, with the results additionally wrapped
-            in ``{ "Fn::Base64": ... }`` , which is what you actually need
-            for EC2 UserData.
-
-            When using parameterized-b64 for UserData, you should use a
-            variable defined as such:
-
-            .. code-block:: python
-
-                from troposphere import AWSHelperFn
-
-                "UserData": {
-                    "type": AWSHelperFn,
-                    "description": "Instance user data",
-                    "default": Ref("AWS::NoValue")
-                }
-
-            Then assign UserData in a LaunchConfiguration or Instance to
-            ``self.variables["UserData"]``. Note that we use AWSHelperFn
-            as the type because the parameterized-b64 codec returns either a
-            Base64 or a GenericHelperFn troposphere object.
-
-        **json**
-            Decode the file as JSON and return the resulting object
-
-        **json-parameterized**
-            Same as ``json``, but applying templating rules from
-            ``parameterized`` to every object *value*. Note that
-            object *keys* are not modified. Example (an external
-            PolicyDocument)::
-
-                    {
-                        "Version": "2012-10-17",
-                        "Statement": [
-                            {
-                                "Effect": "Allow",
-                                "Action": [
-                                    "some:Action"
-                                ],
-                                "Resource": "{{MyResource}}"
-                            }
-                        ]
-                    }
-
-        **yaml**
-            Decode the file as YAML and return the resulting object.
-            All strings are returned as ``unicode`` even in Python 2.
-
-        **yaml-parameterized**
-            Same as ``json-parameterized``, but using YAML. Example::
-
-                Version: 2012-10-17
-                Statement:
-                  - Effect: Allow
-                    Action:
-                      - "some:Action"
-                    Resource: "{{MyResource}}"
+        Raises:
+            ValueError: The value provided does not match the expected regex.
 
         """
+        args: Dict[str, str] = {}
         try:
-            codec, path = value.split(":", 1)
+            args["codec"], data_or_path = value.split(":", 1)
         except ValueError:
-            raise TypeError(
-                f'File value must be of the format "<codec>:<path>" (got {value})'
+            raise ValueError(
+                f"Query '{value}' doesn't match regex: "
+                fr"^(?P<codec>[{'|'.join(CODECS)}]:.+$)"
             ) from None
-        return CODECS[codec](read_value_from_path(path))
+        return read_value_from_path(data_or_path), args
+
+    @classmethod
+    def handle(cls, value: str, **_: Any) -> Any:
+        """Translate a filename into the file contents."""
+        data, raw_args = cls.parse(value)
+        args = ArgsDataModel.parse_obj(raw_args)
+        return CODECS[args.codec](data)
 
 
 def _parameterize_string(raw: str) -> GenericHelperFn:
@@ -192,18 +112,16 @@ def _parameterize_string(raw: str) -> GenericHelperFn:
 
 
 @overload
-def parameterized_codec(
-    raw: Union[bytes, str], b64: Literal[False] = ...
-) -> GenericHelperFn:
+def parameterized_codec(raw: str, b64: Literal[False] = ...) -> GenericHelperFn:
     ...
 
 
 @overload
-def parameterized_codec(raw: Union[bytes, str], b64: Literal[True] = ...) -> Base64:
+def parameterized_codec(raw: str, b64: Literal[True] = ...) -> Base64:
     ...
 
 
-def parameterized_codec(raw: Union[bytes, str], b64: bool = False) -> Any:
+def parameterized_codec(raw: str, b64: bool = False) -> Any:
     """Parameterize a string, possibly encoding it as Base64 afterwards.
 
     Args:
@@ -215,11 +133,7 @@ def parameterized_codec(raw: Union[bytes, str], b64: bool = False) -> Any:
         CloudFormation template.
 
     """
-    if isinstance(raw, bytes):
-        raw = raw.decode("utf-8")
-
     result = _parameterize_string(raw)
-
     # Note, since we want a raw JSON object (not a string) output in the
     # template, we wrap the result in GenericHelperFn (not needed if we're
     # using Base64)
@@ -249,8 +163,6 @@ def _parameterize_obj(
     Parametrizes all values of a Mapping, all items of a Sequence, an
     unicode string, or pass other objects through unmodified.
 
-    Byte strings will be interpreted as UTF-8.
-
     Args:
         obj: Data to parameterize.
 
@@ -260,8 +172,6 @@ def _parameterize_obj(
         and strings possibly replaced by compositions of function calls.
 
     """
-    if isinstance(obj, bytes):
-        return _parameterize_string(obj.decode("utf8"))
     if isinstance(obj, str):
         return _parameterize_string(obj)
     if isinstance(obj, collections.abc.Mapping):
@@ -271,17 +181,9 @@ def _parameterize_obj(
     return obj
 
 
-class SafeUnicodeLoader(yaml.SafeLoader):
-    """Safe unicode loader."""
-
-    def construct_yaml_str(self, node: Any) -> Any:
-        """Construct yaml str."""
-        return self.construct_scalar(node)
-
-
 def yaml_codec(raw: str, parameterized: bool = False) -> Any:
     """YAML codec."""
-    data = yaml.load(raw, Loader=SafeUnicodeLoader)
+    data = yaml.load(raw, Loader=yaml.SafeLoader)
     return _parameterize_obj(data) if parameterized else data
 
 
@@ -291,13 +193,13 @@ def json_codec(raw: str, parameterized: bool = False) -> Any:
     return _parameterize_obj(data) if parameterized else data
 
 
-CODECS: Dict[str, Callable[..., Any]] = {
-    "plain": lambda x: x,
+CODECS: Dict[str, Callable[[str], Any]] = {
     "base64": lambda x: base64.b64encode(x.encode("utf8")).decode("utf-8"),
-    "parameterized": lambda x: parameterized_codec(x, False),
-    "parameterized-b64": lambda x: parameterized_codec(x, True),
-    "yaml": lambda x: yaml_codec(x, parameterized=False),
-    "yaml-parameterized": lambda x: yaml_codec(x, parameterized=True),
     "json": lambda x: json_codec(x, parameterized=False),
     "json-parameterized": lambda x: json_codec(x, parameterized=True),
+    "parameterized": lambda x: parameterized_codec(x, False),
+    "parameterized-b64": lambda x: parameterized_codec(x, True),
+    "plain": lambda x: x,
+    "yaml": lambda x: yaml_codec(x, parameterized=False),
+    "yaml-parameterized": lambda x: yaml_codec(x, parameterized=True),
 }
