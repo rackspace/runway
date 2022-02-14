@@ -31,8 +31,10 @@ if six.PY3:
 
 else:
     file_type = file
+
     class HTTPHeaders(Message):
         def __iter__(self): ...
+
     def unquote_str(value, encoding=...): ...
     def set_socket_timeout(http_response, timeout):
         """Set the timeout of the socket from an HTTPResponse.

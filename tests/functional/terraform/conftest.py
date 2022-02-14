@@ -25,7 +25,7 @@ def local_backend(
     """Copy local_backend.tf into the test directory."""
     file_name = "local_backend.tf"
     og_file = fixture_dir / file_name
-    new_file = Path(request.fspath).parent / file_name
+    new_file = request.path.parent / file_name
     shutil.copy(og_file, new_file)
     yield new_file
     new_file.unlink()
@@ -36,7 +36,7 @@ def no_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, 
     """Copy no_backend.tf into the test directory."""
     file_name = "no_backend.tf"
     og_file = fixture_dir / file_name
-    new_file = Path(request.fspath).parent / file_name
+    new_file = request.path.parent / file_name
     shutil.copy(og_file, new_file)
     yield new_file
     new_file.unlink()
@@ -47,7 +47,7 @@ def s3_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, 
     """Copy s3_backend.tf into the test directory."""
     file_name = "s3_backend.tf"
     og_file = fixture_dir / file_name
-    new_file = Path(request.fspath).parent / file_name
+    new_file = request.path.parent / file_name
     shutil.copy(og_file, new_file)
     yield new_file
     new_file.unlink()

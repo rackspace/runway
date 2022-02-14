@@ -62,7 +62,7 @@ class ModulePath:
     def arguments(self) -> Dict[str, str]:
         """Remote source arguments."""
         if isinstance(self.definition, str):
-            match = re.match(fr"^.*{self.ARGS_REGEX}", self.definition)
+            match = re.match(rf"^.*{self.ARGS_REGEX}", self.definition)
             if match:
                 return {
                     k: ",".join(v) for k, v in parse_qs(match.group("args")).items()
@@ -78,8 +78,8 @@ class ModulePath:
                 or "::" not in self.definition
             ):
                 return re.sub(self.ARGS_REGEX, "", self.definition)
-            no_src = re.sub(fr"^{self.SOURCE_REGEX}", "", self.definition)
-            no_uri = re.sub(fr"^{self.URI_REGEX}", "", no_src)
+            no_src = re.sub(rf"^{self.SOURCE_REGEX}", "", self.definition)
+            no_uri = re.sub(rf"^{self.URI_REGEX}", "", no_src)
             match = re.search(r"//(?P<location>[^\?\n]*)", no_uri)
             if match:
                 return match.group("location")
@@ -109,7 +109,7 @@ class ModulePath:
     def source(self) -> str:
         """Source of the module."""
         if isinstance(self.definition, str):
-            match = re.match(fr"^{self.SOURCE_REGEX}.*$", self.definition)
+            match = re.match(rf"^{self.SOURCE_REGEX}.*$", self.definition)
             if match:
                 return match.group("source")
         return "local"
@@ -118,7 +118,7 @@ class ModulePath:
     def uri(self) -> str:
         """Remote source URI."""
         if isinstance(self.definition, str):
-            match = re.match(fr"^{self.SOURCE_REGEX}{self.URI_REGEX}", self.definition)
+            match = re.match(rf"^{self.SOURCE_REGEX}{self.URI_REGEX}", self.definition)
             if match:
                 return match.group("uri")
         return ""

@@ -244,15 +244,12 @@ class TestQueryDataModel:
     )
     def test_item_key(self, expected: Dict[str, Any], value: str) -> None:
         """Test item_key."""
-        assert (
-            QueryDataModel(
-                attribute="",
-                partition_key="TestKey",
-                partition_key_value=value,
-                table_name="",
-            ).item_key
-            == {"TestKey": expected}
-        )
+        assert QueryDataModel(
+            attribute="",
+            partition_key="TestKey",
+            partition_key_value=value,
+            table_name="",
+        ).item_key == {"TestKey": expected}
 
     def test_item_key_no_match(self) -> None:
         """Test item_key."""

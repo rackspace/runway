@@ -654,21 +654,18 @@ class TestServerlessArtifact:
         get_hash_of_files = mocker.patch(
             f"{MODULE}.get_hash_of_files", Mock(return_value="hash")
         )
-        assert (
-            ServerlessArtifact(
-                runway_context,
-                {
-                    "functions": {
-                        "func0": {"handler": "src/func0/handler.entry"},
-                        "func1": {"handler": "src/func1/handler.entry"},
-                    },
-                    "service": service,
+        assert ServerlessArtifact(
+            runway_context,
+            {
+                "functions": {
+                    "func0": {"handler": "src/func0/handler.entry"},
+                    "func1": {"handler": "src/func1/handler.entry"},
                 },
-                package_path=tmp_path / "package",
-                path=tmp_path,
-            ).source_hash
-            == {service_name: get_hash_of_files.return_value}
-        )
+                "service": service,
+            },
+            package_path=tmp_path / "package",
+            path=tmp_path,
+        ).source_hash == {service_name: get_hash_of_files.return_value}
         get_hash_of_files.assert_called_once_with(
             tmp_path, [{"path": "src/func0"}, {"path": "src/func1"}]
         )
@@ -688,22 +685,19 @@ class TestServerlessArtifact:
         get_hash_of_files = mocker.patch(
             f"{MODULE}.get_hash_of_files", Mock(side_effect=["hash0", "hash1"])
         )
-        assert (
-            ServerlessArtifact(
-                runway_context,
-                {
-                    "functions": {
-                        "func0": {"handler": "src/func0/handler.entry"},
-                        "func1": {"handler": "src/func1/handler.entry"},
-                    },
-                    "package": {"individually": True},
-                    "service": service,
+        assert ServerlessArtifact(
+            runway_context,
+            {
+                "functions": {
+                    "func0": {"handler": "src/func0/handler.entry"},
+                    "func1": {"handler": "src/func1/handler.entry"},
                 },
-                package_path=tmp_path / "package",
-                path=tmp_path,
-            ).source_hash
-            == {"func0": "hash0", "func1": "hash1"}
-        )
+                "package": {"individually": True},
+                "service": service,
+            },
+            package_path=tmp_path / "package",
+            path=tmp_path,
+        ).source_hash == {"func0": "hash0", "func1": "hash1"}
         get_hash_of_files.assert_has_calls(
             [
                 call(tmp_path / "src/func0"),

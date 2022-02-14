@@ -70,7 +70,7 @@ class FileLookup(LookupHandler):
         except ValueError:
             raise ValueError(
                 f"Query '{value}' doesn't match regex: "
-                fr"^(?P<codec>[{'|'.join(CODECS)}]:.+$)"
+                rf"^(?P<codec>[{'|'.join(CODECS)}]:.+$)"
             ) from None
         return read_value_from_path(data_or_path), args
 

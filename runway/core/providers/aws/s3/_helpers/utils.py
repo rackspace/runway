@@ -53,16 +53,16 @@ EPOCH_TIME = datetime(1970, 1, 1, tzinfo=tzutc())
 HUMANIZE_SUFFIXES = ("KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
 # Maximum object size allowed in S3.
 # See: http://docs.aws.amazon.com/AmazonS3/latest/dev/qfacts.html
-MAX_UPLOAD_SIZE = 5 * (1024 ** 4)
+MAX_UPLOAD_SIZE = 5 * (1024**4)
 SIZE_SUFFIX = {
     "kb": 1024,
-    "mb": 1024 ** 2,
-    "gb": 1024 ** 3,
-    "tb": 1024 ** 4,
+    "mb": 1024**2,
+    "gb": 1024**3,
+    "tb": 1024**4,
     "kib": 1024,
-    "mib": 1024 ** 2,
-    "gib": 1024 ** 3,
-    "tib": 1024 ** 4,
+    "mib": 1024**2,
+    "gib": 1024**3,
+    "tib": 1024**4,
 }
 
 _S3_ACCESSPOINT_TO_BUCKET_KEY_REGEX = re.compile(

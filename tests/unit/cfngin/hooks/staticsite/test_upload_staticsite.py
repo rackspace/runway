@@ -330,14 +330,11 @@ def test_sync_extra_files_hash_updated(cfngin_context: MockCFNginContext) -> Non
     )
 
     with s3_stub as s3_stub, ssm_stub as ssm_stub:
-        assert (
-            sync_extra_files(
-                cfngin_context,
-                "bucket",
-                extra_files=[extra],
-                hash_tracking_parameter="hash_name",
-            )
-            == ["test"]
-        )
+        assert sync_extra_files(
+            cfngin_context,
+            "bucket",
+            extra_files=[extra],
+            hash_tracking_parameter="hash_name",
+        ) == ["test"]
         s3_stub.assert_no_pending_responses()
         ssm_stub.assert_no_pending_responses()
