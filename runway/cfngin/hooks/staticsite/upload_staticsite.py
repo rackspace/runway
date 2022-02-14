@@ -7,16 +7,16 @@ import logging
 import os
 import time
 from operator import itemgetter
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
 
 import yaml
-from typing_extensions import TypedDict
 
 from ....core.providers.aws.s3 import Bucket
+from ....module.staticsite.options.models import RunwayStaticSiteExtraFileDataModel
+from ....utils import JsonEncoder
+from ..base import HookArgsBaseModel
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from boto3.session import Session
 
     from ....context import CfnginContext
@@ -24,13 +24,29 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class ExtraFileTypeDef(TypedDict, total=False):
-    """Type definition for extra_files item."""
+class HookArgs(HookArgsBaseModel):
+    """Hook arguments."""
 
-    content_type: Optional[str]
-    content: Union[Dict[str, Any], List[Any], str, Any]
-    file: Optional[Union[Path, str]]
-    name: str
+    bucket_name: str
+    """S3 bucket name."""
+
+    cf_disabled: bool = False
+    """Disable the use of CloudFront."""
+
+    distribution_domain: str = "undefined"
+    """Domain of the CloudFront distribution."""
+
+    distribution_id: str = "undefined"
+    """CloudFront distribution ID."""
+
+    distribution_path: str = "/*"
+    """Path in the CloudFront distribution to invalidate."""
+
+    extra_files: List[RunwayStaticSiteExtraFileDataModel] = []
+    """Extra files to sync to the S3 bucket."""
+
+    website_url: Optional[str] = None
+    """S3 bucket website URL."""
 
 
 def get_archives_to_prune(
@@ -57,40 +73,24 @@ def get_archives_to_prune(
     return [i["Key"] for i in archives[:-15] if i["Key"] not in files_to_skip]
 
 
-def sync(
-    context: CfnginContext,
-    *,
-    bucket_name: str,
-    cf_disabled: bool = False,
-    distribution_domain: str = "undefined",
-    distribution_id: str = "undefined",
-    distribution_path: str = "/*",
-    extra_files: Optional[List[ExtraFileTypeDef]] = None,
-    website_url: Optional[str] = None,
-    **_: Any,
-) -> bool:
+def sync(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
     """Sync static website to S3 bucket.
+
+    Arguments parsed by :class:`~runway.cfngin.hooks.staticsite.upload_staticsite.HookArgs`.
 
     Args:
         context: The context instance.
-        bucket_name: S3 bucket name.
-        cf_disabled: Disable the use of CloudFront.
-        distribution_domain: Domain of the CloudFront distribution.
-        distribution_id: CloudFront distribution ID.
-        distribution_path: Path in the CloudFront distribution to invalidate.
-        extra_files: Extra files to sync to the S3 bucket.
-        website_url: S3 bucket website URL.
 
     """
-    extra_files = extra_files or []
+    args = HookArgs.parse_obj(kwargs)
     session = context.get_session()
     build_context = context.hook_data["staticsite"]
     invalidate_cache = False
 
     synced_extra_files = sync_extra_files(
         context,
-        bucket_name,
-        extra_files,
+        args.bucket_name,
+        args.extra_files,
         hash_tracking_parameter=build_context.get("hash_tracking_parameter"),
     )
 
@@ -100,22 +100,22 @@ def sync(
     if build_context["deploy_is_current"]:
         LOGGER.info("skipped upload; latest version already deployed")
     else:
-        bucket = Bucket(context, bucket_name)
+        bucket = Bucket(context, args.bucket_name)
         bucket.sync_from_local(
             build_context["app_directory"],
             delete=True,
-            exclude=[f["name"] for f in extra_files if "name" in f],
+            exclude=[f.name for f in args.extra_files if f.name],
         )
         invalidate_cache = True
 
-    if cf_disabled:
-        LOGGER.info("STATIC WEBSITE URL: %s", website_url)
+    if args.cf_disabled:
+        LOGGER.info("STATIC WEBSITE URL: %s", args.website_url)
     elif invalidate_cache:
         invalidate_distribution(
             session,
-            identifier=distribution_id,
-            domain=distribution_domain,
-            path=distribution_path,
+            identifier=args.distribution_id,
+            domain=args.distribution_domain,
+            path=args.distribution_path,
         )
 
     LOGGER.info("sync complete")
@@ -241,7 +241,7 @@ def auto_detect_content_type(filename: Optional[str]) -> Optional[str]:
     return None
 
 
-def get_content_type(extra_file: ExtraFileTypeDef) -> Optional[str]:
+def get_content_type(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]:
     """Return the content type of the file.
 
     Args:
@@ -252,12 +252,10 @@ def get_content_type(extra_file: ExtraFileTypeDef) -> Optional[str]:
         that is returned, otherways it is auto detected based on the name.
 
     """
-    return extra_file.get(
-        "content_type", auto_detect_content_type(extra_file.get("name"))
-    )
+    return extra_file.content_type or auto_detect_content_type(extra_file.name)
 
 
-def get_content(extra_file: ExtraFileTypeDef) -> Optional[str]:
+def get_content(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]:
     """Get serialized content based on content_type.
 
     Args:
@@ -267,28 +265,27 @@ def get_content(extra_file: ExtraFileTypeDef) -> Optional[str]:
         Serialized content based on the content_type.
 
     """
-    content_type = extra_file.get("content_type")
-    content = extra_file.get("content")
+    if extra_file.content:
+        if isinstance(extra_file.content, (dict, list)):
+            if extra_file.content_type == "application/json":
+                return json.dumps(extra_file.content)
 
-    if content:
-        if isinstance(content, (dict, list)):
-            if content_type == "application/json":
-                return json.dumps(content)
-
-            if content_type == "text/yaml":
-                return yaml.safe_dump(content)
+            if extra_file.content_type == "text/yaml":
+                return yaml.safe_dump(extra_file.content)
 
             raise ValueError(
                 '"content_type" must be json or yaml if "content" is not a string'
             )
 
-        if not isinstance(content, str):
-            raise TypeError(f"unsupported content: {type(content)}")
+        if not isinstance(extra_file.content, str):
+            raise TypeError(f"unsupported content: {type(extra_file.content)}")
 
-    return cast(Optional[str], content)
+    return cast(Optional[str], extra_file.content)
 
 
-def calculate_hash_of_extra_files(extra_files: List[ExtraFileTypeDef]) -> str:
+def calculate_hash_of_extra_files(
+    extra_files: List[RunwayStaticSiteExtraFileDataModel],
+) -> str:
     """Return a hash of all of the given extra files.
 
     All attributes of the extra file object are included when hashing:
@@ -303,20 +300,19 @@ def calculate_hash_of_extra_files(extra_files: List[ExtraFileTypeDef]) -> str:
     """
     file_hash = hashlib.md5()
 
-    for extra_file in sorted(extra_files, key=lambda extra_file: extra_file["name"]):  # type: ignore  # noqa
-        file_name = extra_file.get("name", "")
-        file_hash.update((file_name + "\0").encode())
+    for extra_file in sorted(extra_files, key=lambda extra_file: extra_file.name):
+        file_hash.update((extra_file.name + "\0").encode())
 
-        if "content_type" in extra_file and extra_file["content_type"]:
-            file_hash.update((extra_file["content_type"] + "\0").encode())
+        if extra_file.content_type:
+            file_hash.update((extra_file.content_type + "\0").encode())
 
-        if "content" in extra_file and extra_file["content"]:
-            LOGGER.debug("hashing content: %s", file_name)
-            file_hash.update((cast(str, extra_file["content"]) + "\0").encode())
+        if extra_file.content:
+            LOGGER.debug("hashing content: %s", extra_file.name)
+            file_hash.update((cast(str, extra_file.content) + "\0").encode())
 
-        if "file" in extra_file and extra_file["file"]:
-            with open(cast("Path", extra_file["file"]), "rb") as f:
-                LOGGER.debug("hashing file: %s", extra_file["file"])
+        if extra_file.file:
+            with open(extra_file.file, "rb") as f:
+                LOGGER.debug("hashing file: %s", extra_file.file)
                 for chunk in iter(
                     lambda: f.read(4096), ""  # pylint: disable=cell-var-from-loop
                 ):
@@ -369,7 +365,7 @@ def set_ssm_value(
 def sync_extra_files(
     context: CfnginContext,
     bucket: str,
-    extra_files: List[ExtraFileTypeDef],
+    extra_files: List[RunwayStaticSiteExtraFileDataModel],
     **kwargs: Any,
 ) -> List[str]:
     """Sync static website extra files to S3 bucket.
@@ -380,7 +376,7 @@ def sync_extra_files(
         extra_files: List of files and file content that should be uploaded.
 
     """
-    LOGGER.debug("extra_files to sync: %s", json.dumps(extra_files))
+    LOGGER.debug("extra_files to sync: %s", json.dumps(extra_files, cls=JsonEncoder))
 
     if not extra_files:
         return []
@@ -394,9 +390,8 @@ def sync_extra_files(
 
     # serialize content based on content type
     for extra_file in extra_files:
-        filename = extra_file.get("name")
-        extra_file["content_type"] = get_content_type(extra_file)
-        extra_file["content"] = get_content(extra_file)
+        extra_file.content_type = get_content_type(extra_file)
+        extra_file.content = get_content(extra_file)
 
     # calculate a hash of the extra_files
     if hash_param:
@@ -414,36 +409,36 @@ def sync_extra_files(
             return []
 
     for extra_file in extra_files:
-        filename = extra_file.get("name", "")
-        content_type = extra_file.get("content_type")
-        content = extra_file.get("content", "")
-        source = extra_file.get("file")
-
-        if content:
-            LOGGER.info("uploading extra file: %s", filename)
+        if extra_file.content:
+            LOGGER.info("uploading extra file: %s", extra_file.name)
 
             s3_client.put_object(
                 Bucket=bucket,
-                Key=filename,
-                Body=cast(str, content).encode(),
-                ContentType=cast(str, content_type),
+                Key=extra_file.name,
+                Body=str(extra_file.content).encode(),
+                ContentType=cast(str, extra_file.content_type),
             )
 
-            uploaded.append(filename)
+            uploaded.append(extra_file.name)
 
-        if source:
-            LOGGER.info("uploading extra file: %s as %s ", source, filename)
+        if extra_file.file:
+            LOGGER.info(
+                "uploading extra file: %s as %s ", extra_file.file, extra_file.name
+            )
 
             extra_args = None
 
-            if content_type:
-                extra_args = {"ContentType": content_type}
+            if extra_file.content_type:
+                extra_args = {"ContentType": extra_file.content_type}
 
             s3_client.upload_file(
-                Bucket=bucket, ExtraArgs=extra_args, Filename=str(source), Key=filename
+                Bucket=bucket,
+                ExtraArgs=extra_args,
+                Filename=str(extra_file.file),
+                Key=extra_file.name,
             )
 
-            uploaded.append(filename)
+            uploaded.append(extra_file.name)
 
     if hash_new:
         LOGGER.info(

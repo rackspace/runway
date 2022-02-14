@@ -12,6 +12,7 @@ from tempfile import mkstemp
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from ... import aws_lambda
+from ...base import HookArgsBaseModel
 
 if TYPE_CHECKING:
     from .....context import CfnginContext
@@ -24,21 +25,46 @@ FUNCTIONS = ["check_auth", "refresh_auth", "parse_auth", "sign_out", "http_heade
 LOGGER = logging.getLogger(__name__)
 
 
-def write(  # pylint: disable=too-many-locals
-    context: CfnginContext,
-    *,
-    bucket: str,
-    client_id: str,
-    cookie_settings: Dict[str, Any],
-    http_headers: Dict[str, Any],
-    nonce_signing_secret_param_name: str,
-    oauth_scopes: List[str],
-    provider: Provider,
-    redirect_path_refresh: str,
-    redirect_path_sign_in: str,
-    redirect_path_sign_out: str,
-    required_group: Optional[str] = None,
-    **_: Any,
+class HookArgs(HookArgsBaseModel):
+    """Hook arguments."""
+
+    bucket: str
+    """S3 bucket name."""
+
+    client_id: str
+    """The ID of the Cognito User Pool Client."""
+
+    cookie_settings: Dict[str, Any]
+    """The settings for our customized cookies."""
+
+    http_headers: Dict[str, Any]
+    """The additional headers added to our requests."""
+
+    nonce_signing_secret_param_name: str
+    """SSM param name to store nonce signing secret."""
+
+    oauth_scopes: List[str]
+    """The validation scopes for our OAuth requests."""
+
+    redirect_path_refresh: str
+    """The URL path for authorization refresh redirect (Correlates to the refresh auth lambda)."""
+
+    redirect_path_sign_in: str
+    """The URL path to be redirected to after sign in (Correlates to the parse auth lambda)."""
+
+    redirect_path_sign_out: str
+    """The URL path to be redirected to after sign out (Correlates to the root to
+    be asked to resigning).
+
+    """
+
+    required_group: Optional[str] = None
+    """Optional User Pool group to which access should be restricted."""
+
+
+# pylint: disable=too-many-locals
+def write(
+    context: CfnginContext, provider: Provider, *__args: Any, **kwargs: Any
 ) -> Dict[str, Any]:
     """Writes/Uploads the configured lambdas for Auth@Edge.
 
@@ -50,40 +76,22 @@ def write(  # pylint: disable=too-many-locals
     temporary folder is then used with the CFNgin awsLambda hook to build
     the functions.
 
-    Args:
-        context: The CFNgin context.
-        bucket: S3 bucket name.
-        client_id: The ID of the Cognito User Pool Client.
-        cookie_settings: The settings for our customized cookies.
-        http_headers: The additional headers added to our requests.
-        nonce_signing_secret_param_name: SSM param name to store nonce
-            signing secret.
-        oauth_scopes: The validation scopes for our OAuth requests.
-        provider: The CFNgin provider.
-        redirect_path_refresh: The URL path for authorization refresh
-            redirect (Correlates to the refresh auth lambda).
-        redirect_path_sign_in: The URL path to be redirected to after
-            sign in (Correlates to the parse auth lambda).
-        redirect_path_sign_out: The URL path to be redirected to after
-            sign out (Correlates to the root to be asked to resigning).
-        required_group: Optional User Pool group to which access should be
-            restricted.
-
     """
     cognito_domain = context.hook_data["aae_domain_updater"].get("domain")
+    args = HookArgs.parse_obj(kwargs)
     config = {
-        "client_id": client_id,
+        "client_id": args.client_id,
         "cognito_auth_domain": cognito_domain,
-        "cookie_settings": cookie_settings,
-        "http_headers": http_headers,
-        "oauth_scopes": oauth_scopes,
-        "redirect_path_auth_refresh": redirect_path_refresh,
-        "redirect_path_sign_in": redirect_path_sign_in,
-        "redirect_path_sign_out": redirect_path_sign_out,
-        "required_group": required_group,
+        "cookie_settings": args.cookie_settings,
+        "http_headers": args.http_headers,
+        "oauth_scopes": args.oauth_scopes,
+        "redirect_path_auth_refresh": args.redirect_path_refresh,
+        "redirect_path_sign_in": args.redirect_path_sign_in,
+        "redirect_path_sign_out": args.redirect_path_sign_out,
+        "required_group": args.required_group,
         "user_pool_id": context.hook_data["aae_user_pool_id_retriever"]["id"],
         "nonce_signing_secret": get_nonce_signing_secret(
-            nonce_signing_secret_param_name, context
+            args.nonce_signing_secret_param_name, context
         ),
     }
 
@@ -137,7 +145,7 @@ def write(  # pylint: disable=too-many-locals
             lamb = aws_lambda.upload_lambda_functions(
                 context,
                 provider,
-                bucket=bucket,
+                bucket=args.bucket,
                 functions={
                     handler: {
                         "path": dirpath,

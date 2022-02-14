@@ -54,11 +54,9 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
         cls, values: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Validate that content or file is provided."""
-        content = values.get("content")
-        file_val = values.get("file")
-        if content and file_val:
+        if all(i in values and values[i] for i in ["content", "file"]):
             raise ValueError("only one of content or file can be provided")
-        if not (content or file_val):
+        if not any(i in values for i in ["content", "file"]):
             raise ValueError("one of content or file must be provided")
         return values
 

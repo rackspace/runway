@@ -4,12 +4,22 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, List
 
+from ..base import HookArgsBaseModel
+
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import OutputTypeDef
 
     from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
+REPLICATED_FUNCTION_OUTPUTS = [
+    "LambdaCheckAuthArn",
+    "LambdaHttpHeadersArn",
+    "LambdaParseAuthArn",
+    "LambdaRefreshAuthArn",
+    "LambdaSignOutArn",
+    "LambdaCFDirectoryIndexRewriteArn",
+]
 STACK_STATUSES_TO_IGNORE = [
     "ROLLBACK_IN_PROGRESS",
     "ROLLBACK_FAILED",
@@ -23,17 +33,17 @@ STACK_STATUSES_TO_IGNORE = [
 ]
 
 
+class HookArgs(HookArgsBaseModel):
+    """Hook arguments."""
+
+    stack_relative_name: str
+    """Name of the CloudFormation Stack as defined in the config file (no namespace)."""
+
+
 def get_replicated_function_names(outputs: List[OutputTypeDef]) -> List[str]:
     """Extract replicated function names from CFN outputs."""
     function_names: List[str] = []
-    for i in [
-        "LambdaCheckAuthArn",
-        "LambdaHttpHeadersArn",
-        "LambdaParseAuthArn",
-        "LambdaRefreshAuthArn",
-        "LambdaSignOutArn",
-        "LambdaCFDirectoryIndexRewriteArn",
-    ]:
+    for i in REPLICATED_FUNCTION_OUTPUTS:
         function_arn = next(
             (
                 output.get("OutputValue")
@@ -47,21 +57,23 @@ def get_replicated_function_names(outputs: List[OutputTypeDef]) -> List[str]:
     return function_names
 
 
-def warn(context: CfnginContext, *, stack_relative_name: str, **_: Any) -> bool:
+def warn(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
     """Notify the user of Lambda functions to delete.
+
+    Arguments parsed by :class:`~runway.cfngin.hooks.staticsite.cleanup.HookArgs`.
 
     Args:
         context: The context instance.
-        stack_relative_name (str): CFNgin stack name with Functions.
 
     """
-    site_stack_name = (
-        context.namespace + context.namespace_delimiter + stack_relative_name
-    )
-    session = context.get_session()
-    cfn_client = session.client("cloudformation")
+    args = HookArgs.parse_obj(kwargs)
+    cfn_client = context.get_session().client("cloudformation")
     try:
-        describe_response = cfn_client.describe_stacks(StackName=site_stack_name)
+        describe_response = cfn_client.describe_stacks(
+            StackName=context.namespace
+            + context.namespace_delimiter
+            + args.stack_relative_name
+        )
         stack = next(
             x
             for x in describe_response.get("Stacks", [])
