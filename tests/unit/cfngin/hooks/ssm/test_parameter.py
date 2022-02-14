@@ -67,14 +67,11 @@ class TestArgsDataModel:
                 "Attributes": {"Timestamp": "2018-12-02T21:34:33.000Z"},
             }
         ]
-        assert (
-            ArgsDataModel(
-                name="test",
-                Policies=data,  # type: ignore
-                type="String",
-            ).policies
-            == json.dumps(data)
-        )
+        assert ArgsDataModel(
+            name="test",
+            Policies=data,  # type: ignore
+            type="String",
+        ).policies == json.dumps(data)
 
     def test_policies_string(self) -> None:
         """Test policies."""
@@ -91,14 +88,11 @@ class TestArgsDataModel:
 
     def test_tags_dict(self) -> None:
         """Test tags."""
-        assert (
-            ArgsDataModel(
-                name="test",
-                tags={"tag-key": "tag-value"},  # type: ignore
-                type="String",
-            ).tags
-            == [TagDataModel(key="tag-key", value="tag-value")]
-        )
+        assert ArgsDataModel(
+            name="test",
+            tags={"tag-key": "tag-value"},  # type: ignore
+            type="String",
+        ).tags == [TagDataModel(key="tag-key", value="tag-value")]
 
     def test_tags_raise_type_error(self) -> None:
         """Test tags."""

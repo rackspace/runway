@@ -31,7 +31,7 @@ class Broken(Blueprint):
                 "BrokenWaitCondition",
                 Handle=Ref("BrokenDummy"),
                 # Timeout is made deliberately large so CF rejects it
-                Timeout=2 ** 32,
+                Timeout=2**32,
                 Count=0,
             )
         )

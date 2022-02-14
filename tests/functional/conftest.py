@@ -31,7 +31,7 @@ def pytest_ignore_collect(path: Any, config: Config) -> bool:
 @pytest.fixture(autouse=True, scope="module")
 def cd_test_dir(request: SubRequest) -> Generator[Path, None, None]:
     """Change directory to test directory."""
-    test_dir = Path(request.fspath).parent
+    test_dir = request.path.parent
     original_wd = Path.cwd()
     try:
         os.chdir(test_dir)
@@ -61,7 +61,7 @@ def cfngin_config(
         runway_context, variables=runway_config.variables
     )
     return CfnginConfig.parse_file(
-        path=Path(request.fspath).parent / "cfngin.yml",
+        path=request.path.parent / "cfngin.yml",
         parameters=runway_config.deployments[0].parameters,
     )
 

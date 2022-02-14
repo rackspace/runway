@@ -658,7 +658,7 @@ class TestResultPrinter(BaseResultPrinterTest):
     def test_error_while_progress(self, caplog: LogCaptureFixture) -> None:
         """Test error."""
         caplog.set_level(LogLevels.ERROR, "runway.core.providers.aws.s3")
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_bytes_transferred = 20 * mb
         self.result_recorder.expected_files_transferred = 4
         self.result_recorder.final_expected_files_transferred = 4
@@ -700,7 +700,7 @@ class TestResultPrinter(BaseResultPrinterTest):
         transfer_type = "upload"
         src = "file"
         dest = "s3://mybucket/test-key"
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_files_transferred = 1
         self.result_recorder.files_transferred = 1
         self.result_recorder.expected_bytes_transferred = mb
@@ -820,7 +820,7 @@ class TestResultPrinter(BaseResultPrinterTest):
         transfer_type = "upload"
         src = "file"
         dest = "s3://mybucket/test-key"
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_files_transferred = 4
         self.result_recorder.files_transferred = 1
         self.result_recorder.expected_bytes_transferred = 4 * mb
@@ -847,7 +847,7 @@ class TestResultPrinter(BaseResultPrinterTest):
             out_file=shared_file,
             error_file=shared_file,
         )
-        mb = 1024 ** 2
+        mb = 1024**2
         progress_result = self.get_progress_result()
         self.result_recorder.expected_bytes_transferred = 20 * mb
         self.result_recorder.expected_files_transferred = 4
@@ -890,7 +890,7 @@ class TestResultPrinter(BaseResultPrinterTest):
         transfer_type = "upload"
         src = "file"
         dest = "s3://mybucket/test-key"
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_files_transferred = 1
         self.result_recorder.files_transferred = 1
         self.result_recorder.expected_bytes_transferred = mb
@@ -920,7 +920,7 @@ class TestResultPrinter(BaseResultPrinterTest):
 
     def test_get_progress_result(self) -> None:
         """Test get_progress_result."""
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_bytes_transferred = 20 * mb
         self.result_recorder.expected_files_transferred = 4
         self.result_recorder.final_expected_files_transferred = 4
@@ -961,7 +961,7 @@ class TestResultPrinter(BaseResultPrinterTest):
 
     def test_get_progress_result_still_calculating_totals(self) -> None:
         """Test get_progress_result."""
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_bytes_transferred = 20 * mb
         self.result_recorder.expected_files_transferred = 4
         self.result_recorder.bytes_transferred = mb
@@ -976,7 +976,7 @@ class TestResultPrinter(BaseResultPrinterTest):
 
     def test_get_progress_result_then_more_progress(self) -> None:
         """Test get_progress_result."""
-        mb = 1024 ** 2
+        mb = 1024**2
         progress_result = self.get_progress_result()
         self.result_recorder.expected_bytes_transferred = 20 * mb
         self.result_recorder.expected_files_transferred = 4
@@ -997,7 +997,7 @@ class TestResultPrinter(BaseResultPrinterTest):
 
     def test_get_progress_result_transfer_speed_reporting(self) -> None:
         """Test get_progress_result."""
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_bytes_transferred = 20 * mb
         self.result_recorder.expected_files_transferred = 4
         self.result_recorder.final_expected_files_transferred = 4
@@ -1044,7 +1044,7 @@ class TestResultPrinter(BaseResultPrinterTest):
         transfer_type = "upload"
         src = "file"
         dest = "s3://mybucket/test-key"
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_files_transferred = 1
         self.result_recorder.files_transferred = 1
         self.result_recorder.expected_bytes_transferred = mb
@@ -1134,7 +1134,7 @@ class TestResultPrinter(BaseResultPrinterTest):
         transfer_type = "upload"
         src = "file"
         dest = "s3://mybucket/test-key"
-        mb = 1024 ** 2
+        mb = 1024**2
         self.result_recorder.expected_files_transferred = 4
         self.result_recorder.files_transferred = 1
         self.result_recorder.expected_bytes_transferred = 4 * mb
@@ -1150,7 +1150,7 @@ class TestResultPrinter(BaseResultPrinterTest):
     def test_success_with_progress(self, caplog: LogCaptureFixture) -> None:
         """Test success with progress."""
         caplog.set_level(LogLevels.NOTICE, "runway.core.providers.aws.s3")
-        mb = 1024 ** 2
+        mb = 1024**2
         progress_result = self.get_progress_result()
         self.result_recorder.expected_bytes_transferred = 20 * mb
         self.result_recorder.expected_files_transferred = 4
@@ -1203,7 +1203,7 @@ class TestResultPrinter(BaseResultPrinterTest):
             out_file=shared_file,
             error_file=shared_file,
         )
-        mb = 1024 ** 2
+        mb = 1024**2
         progress_result = self.get_progress_result()
         self.result_recorder.expected_bytes_transferred = 20 * mb
         self.result_recorder.expected_files_transferred = 4

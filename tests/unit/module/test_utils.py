@@ -98,15 +98,12 @@ def test_generate_node_command_npx_package(
 ) -> None:
     """Test generate_node_command."""
     mock_which = mocker.patch(f"{MODULE}.which", return_value=True)
-    assert (
-        generate_node_command(
-            command="cdk",
-            command_opts=["--context", "key=val"],
-            package="aws-cdk",
-            path=tmp_path,
-        )
-        == [NPX_BIN, "--package", "aws-cdk", "cdk", "--context", "key=val"]
-    )
+    assert generate_node_command(
+        command="cdk",
+        command_opts=["--context", "key=val"],
+        package="aws-cdk",
+        path=tmp_path,
+    ) == [NPX_BIN, "--package", "aws-cdk", "cdk", "--context", "key=val"]
     mock_which.assert_called_once_with(NPX_BIN)
 
 

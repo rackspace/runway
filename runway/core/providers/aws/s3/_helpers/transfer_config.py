@@ -29,8 +29,8 @@ DEFAULTS: TransferConfigDict = {
     "max_bandwidth": None,
     "max_concurrent_requests": 10,
     "max_queue_size": 1000,
-    "multipart_chunksize": 8 * (1024 ** 2),
-    "multipart_threshold": 8 * (1024 ** 2),
+    "multipart_chunksize": 8 * (1024**2),
+    "multipart_threshold": 8 * (1024**2),
 }
 
 

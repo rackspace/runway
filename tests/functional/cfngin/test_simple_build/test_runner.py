@@ -30,7 +30,7 @@ def cfngin_config(
         runway_context, variables=runway_config.variables
     )
     return CfnginConfig.parse_file(
-        path=Path(request.fspath).parent / "simple-build.cfn" / "cfngin.yml",
+        path=request.path.parent / "simple-build.cfn" / "cfngin.yml",
         parameters=runway_config.deployments[0].parameters,
     )
 

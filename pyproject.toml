@@ -71,9 +71,9 @@ urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to u
 yamllint = "*"
 
 [tool.poetry.dev-dependencies]
-black = "^21.6b0"
-coverage = { version = "^5.5", extras = ["toml"] }
-doc8 = "^0.8"  # for linting with vscode rst extension
+black = ">=22.1"
+coverage = { version = ">=6.3", extras = ["toml"] }
+doc8 = ">=0.10"  # for linting with vscode rst extension
 dunamai = "^1.5"
 flake8 = ">=4.0.1"
 flake8-bugbear = ">=21.9.2"  # flake8 plugin
@@ -81,26 +81,26 @@ flake8-comprehensions = ">=3.7.0"  # flake8 plugin
 flake8-docstrings = ">=1.6"  # flake8 plugin
 flake8-print = ">=4.0.0"  # flake8 plugin
 flake8-use-fstring = ">=1.3"  # flake8 plugin
-isort = "^5.8"
-mock = "^4.0"
-moto = { version = "^2.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }
+isort = ">=5.10"
+mock = ">=4.0"
+moto = { version = ">=3.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }
 mypy-boto3 = "^1.16"  # importable boto3 type annotations
 pep8-naming = ">=0.12.1"  # flake8 plugin
 pipenv = "^2022.1.8"  # only used in tests
-pre-commit = "^2.11"
+pre-commit = ">=2.14"
 pydocstyle = ">=6.1.1"  # flake8 plugin
 pyinstaller = "^4.3"
-pylint = "^2.8"
-pytest = "^6.2"
-pytest-cov = "^2.10"  # pytest plugin
-pytest-mock = "^3.5"  # pytest plugin
-pytest-order = "^1"  # pytest plugin
-pytest-subprocess = "^1.0"  # pytest plugin
-pytest-sugar = "^0.9"  # pytest plugin
-pytest-xdist = "^2.2"  # pytest plugin
+pylint = ">=2.12"
+pytest = ">=7.0"
+pytest-cov = ">=3.0"  # pytest plugin
+pytest-mock = ">=3.7"  # pytest plugin
+pytest-order = ">=1"  # pytest plugin
+pytest-subprocess = ">=1.4"  # pytest plugin
+pytest-sugar = ">=0.9"  # pytest plugin
+pytest-xdist = ">=2.5"  # pytest plugin
 semver = "^2.13"  # only used in .github/scripts/urlshortener
 testfixtures = "^4.10"  # TODO remove use of this dependency - was inherited
-tomli-w = "^0.4.0"
+tomli-w = ">=1.0"
 
 [tool.poetry.dev-dependencies.boto3-stubs]
 extras = [
@@ -142,7 +142,7 @@ runway = "runway._cli.main:cli"
 "Bug Tracker" = "https://github.com/onicagroup/runway/issues"
 
 [build-system]
-requires = ["poetry_core>=1.0.3"]
+requires = ["poetry_core>=1.0.7"]
 build-backend = "poetry.core.masonry.api"
 
 
@@ -186,7 +186,7 @@ show_missing = true
 
 [tool.coverage.run]
 concurrency = [
-  "multiprocess",
+  "multiprocessing",
   "thread",
 ]
 omit = [
@@ -337,6 +337,7 @@ exclude = [
   "**/.venv",
   "**/docs",
   "**/node_modules",
+  "**/quickstarts",
   "**/typings",
   "**/runway/aws_sso_botocore",
   "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",

@@ -28,7 +28,7 @@ class TestRuntimeConfig:
         """Test build_config."""
         assert (
             RuntimeConfig.build_config(max_bandwidth="1MB/s")["max_bandwidth"]
-            == 1024 ** 2
+            == 1024**2
         )
 
     def test_build_config_human_readable_sizes_converted_to_bytes(self) -> None:
@@ -54,7 +54,7 @@ class TestRuntimeConfig:
         """Test build_config."""
         config = {
             "max_concurrent_requests": 20,
-            "multipart_threshold": 64 * (1024 ** 2),
+            "multipart_threshold": 64 * (1024**2),
         }
         result = RuntimeConfig.build_config(**config)
         assert result["max_concurrent_requests"] == config["max_concurrent_requests"]
@@ -100,7 +100,7 @@ def test_create_transfer_config_from_runtime_config() -> None:
     """Test create_transfer_config_from_runtime_config."""
     runtime_config = {
         "invalid": 0,
-        "max_bandwidth": 1024 ** 2,
+        "max_bandwidth": 1024**2,
         "max_concurrent_requests": 3,
         "max_queue_size": 4,
         "multipart_chunksize": 2,
