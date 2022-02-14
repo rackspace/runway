@@ -136,6 +136,8 @@ class JsonEncoder(json.JSONEncoder):
             return float(o)
         if isinstance(o, (datetime.datetime, datetime.date)):
             return o.isoformat()
+        if isinstance(o, _BaseModel):
+            return o.dict()
         return super().default(o)
 
 

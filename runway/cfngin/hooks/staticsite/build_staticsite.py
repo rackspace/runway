@@ -6,15 +6,17 @@ import os
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import boto3
 from boto3.s3.transfer import S3Transfer  # type: ignore
 from typing_extensions import TypedDict
 
+from ....module.staticsite.options.models import RunwayStaticSiteSourceHashingDataModel
 from ....s3_utils import does_s3_object_exist, download_and_extract_to_mkdtemp
 from ....utils import change_dir, run_commands
 from ...lookups.handlers.rxref import RxrefLookup
+from ..base import HookArgsBaseModel
 from .utils import get_hash_of_files
 
 if TYPE_CHECKING:
@@ -22,6 +24,43 @@ if TYPE_CHECKING:
     from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
+
+
+class HookArgsOptions(HookArgsBaseModel):
+    """Hook arguments ``options`` block."""
+
+    build_output: Optional[str] = None
+    """Path were the build static site will be stored locally before upload."""
+
+    build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]] = []
+    """Steps to execute to build the static site."""
+
+    name: str = "undefined"
+    """Static site name."""
+
+    namespace: str
+    """Namespace of the static site."""
+
+    path: str
+    """Working directory/path to the static site's source code."""
+
+    pre_build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]] = []
+    """Steps to run before building the static site."""
+
+    source_hashing: RunwayStaticSiteSourceHashingDataModel = (
+        RunwayStaticSiteSourceHashingDataModel()
+    )
+    """Settings for tracking the hash of the source code between runs."""
+
+
+class HookArgs(HookArgsBaseModel):
+    """Hook arguments."""
+
+    artifact_bucket_rxref_lookup: str
+    """Query for ``RxrefLookup`` to get artifact bucket."""
+
+    options: HookArgsOptions
+    """Hook ``options`` block."""
 
 
 def zip_and_upload(
@@ -45,58 +84,53 @@ def zip_and_upload(
     os.remove(temp_file)
 
 
-_RequiredOptionsArgTypeDef = TypedDict(
-    "OptionsArgTypeDef", name=str, namespace=str, path=str
-)
-
-
-class _OptionalOptionsArgTypeDef(TypedDict, total=False):
-    """Optional OptionsArgTypeDef fields."""
+class OptionsArgTypeDef(TypedDict, total=False):
+    """Options argument type definition."""
 
     build_output: str
     build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+    name: str
+    namespace: str
+    path: str
     pre_build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
-
-
-class OptionsArgTypeDef(_OptionalOptionsArgTypeDef, _RequiredOptionsArgTypeDef):
-    """Options argument type definition."""
 
 
 def build(
     context: CfnginContext,
     provider: Provider,
     *,
-    artifact_bucket_rxref_lookup: str,
     options: Optional[OptionsArgTypeDef] = None,
-    **_: Any,
+    **kwargs: Any,
 ) -> Dict[str, Any]:
-    """Build static site."""
+    """Build static site.
+
+    Arguments parsed by :class:`~runway.cfngin.hooks.staticsite.build_staticsite.HookArgs`.
+
+    """
+    options = options or {}
+    options.setdefault("namespace", context.namespace)
+    options.setdefault("path", str(context.config_path))
+    args = HookArgs.parse_obj({"options": options, **kwargs})
     session = context.get_session()
-    options = options or {
-        "name": "undefined",
-        "namespace": context.namespace,
-        "path": str(context.config_path),
-    }
+
     context_dict: Dict[str, Any] = {
-        "artifact_key_prefix": f"{options['namespace']}-{options['name']}-"
+        "artifact_key_prefix": f"{args.options.namespace}-{args.options.name}-"
     }
 
-    default_param_name = f"{context_dict['artifact_key_prefix']}hash"
-
-    if "build_output" in options:
-        build_output = os.path.join(options["path"], options["build_output"])
+    if args.options.build_output:
+        build_output = os.path.join(args.options.path, args.options.build_output)
     else:
-        build_output = options["path"]
+        build_output = args.options.path
 
     context_dict["artifact_bucket_name"] = RxrefLookup.handle(
-        artifact_bucket_rxref_lookup, provider=provider, context=context
+        args.artifact_bucket_rxref_lookup, provider=provider, context=context
     )
 
-    if "pre_build_steps" in options and options["pre_build_steps"]:
-        run_commands(options["pre_build_steps"], options["path"])
+    if args.options.pre_build_steps:
+        run_commands(args.options.pre_build_steps, args.options.path)
 
     context_dict["hash"] = get_hash_of_files(
-        root_path=Path(options["path"]),
+        root_path=Path(args.options.path),
         directories=options.get("source_hashing", {"directories": None}).get(
             "directories"
         ),
@@ -104,16 +138,17 @@ def build(
     LOGGER.debug("application hash: %s", context_dict["hash"])
 
     # Now determine if the current staticsite has already been deployed
-    if options.get("source_hashing", {}).get("enabled", True):
-        context_dict["hash_tracking_parameter"] = options.get("source_hashing", {}).get(
-            "parameter", default_param_name
+    if args.options.source_hashing.enabled:
+        context_dict["hash_tracking_parameter"] = (
+            args.options.source_hashing.parameter
+            or f"{context_dict['artifact_key_prefix']}hash"
         )
 
         ssm_client = session.client("ssm")
 
         try:
             old_parameter_value = ssm_client.get_parameter(
-                Name=cast(str, context_dict["hash_tracking_parameter"])
+                Name=context_dict["hash_tracking_parameter"]
             )["Parameter"]["Value"]
         except ssm_client.exceptions.ParameterNotFound:
             old_parameter_value = None
@@ -145,9 +180,9 @@ def build(
             session,
         )
     else:
-        if "build_steps" in options and options["build_steps"]:
+        if args.options.build_steps:
             LOGGER.info("build steps (in progress)")
-            run_commands(options["build_steps"], options["path"])
+            run_commands(args.options.build_steps, args.options.path)
             LOGGER.info("build steps (complete)")
         zip_and_upload(
             build_output,

@@ -9,19 +9,25 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
+from ...base import HookArgsBaseModel
+
 if TYPE_CHECKING:
     from .....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
-def get(
-    context: CfnginContext,
-    *,
-    stack_name: str,
-    user_pool_arn: Optional[str] = None,
-    **_: Any,
-) -> Dict[str, Any]:
+class HookArgs(HookArgsBaseModel):
+    """Hook arguments."""
+
+    stack_name: str
+    """The name of the stack to check against."""
+
+    user_pool_arn: Optional[str] = None
+    """The ARN of the User Pool to check for a client."""
+
+
+def get(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, Any]:
     """Retrieve the callback URLs for User Pool Client Creation.
 
     When the User Pool is created a Callback URL is required. During a post
@@ -30,12 +36,14 @@ def get(
     already exists that the URLs for that client are used to prevent any
     interuption of service during deploy.
 
+    Arguments parsed by
+    :class:`~runway.cfngin.hooks.staticsite.auth_at_edge.callback_url_retriever.HookArgs`.
+
     Args:
         context: The context instance.
-        stack_name: The name of the stack to check against.
-        user_pool_arn: The ARN of the User Pool to check for a client.
 
     """
+    args = HookArgs.parse_obj(kwargs)
     session = context.get_session()
     cloudformation_client = session.client("cloudformation")
     cognito_client = session.client("cognito-idp")
@@ -43,12 +51,12 @@ def get(
     context_dict = {"callback_urls": ["https://example.org"]}
     try:
         # Return the current stack if one exists
-        stack_desc = cloudformation_client.describe_stacks(StackName=stack_name)
+        stack_desc = cloudformation_client.describe_stacks(StackName=args.stack_name)
         # Get the client_id from the outputs
         outputs = stack_desc["Stacks"][0]["Outputs"]
 
-        if user_pool_arn:
-            user_pool_id = user_pool_arn.split("/")[-1:][0]
+        if args.user_pool_arn:
+            user_pool_id = args.user_pool_arn.split("/")[-1:][0]
         else:
             user_pool_id = [
                 o["OutputValue"]
