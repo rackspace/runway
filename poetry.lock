@@ -1781,7 +1781,7 @@ pytest = [
 
 [[package]]
 name = "pytest-subprocess"
-version = "1.4.0"
+version = "1.4.1"
 description = "A plugin to fake subprocess for pytest"
 category = "dev"
 optional = false
@@ -3160,8 +3160,8 @@ pytest-order = [
     {file = "pytest_order-1.0.1-py3-none-any.whl", hash = "sha256:bbe6e63a8e23741ab3e810d458d1ea7317e797b70f9550512d77d6e9e8fd1bbb"},
 ]
 pytest-subprocess = [
-    {file = "pytest-subprocess-1.4.0.tar.gz", hash = "sha256:1dbd77fc386fc272c52efeefda27f3868348b53eb63b78ec5cbda821cda458fc"},
-    {file = "pytest_subprocess-1.4.0-py3-none-any.whl", hash = "sha256:c5d871d61bb35242965da166f235c0cc49362a5abd905dfc9269036e7ac30bb5"},
+    {file = "pytest-subprocess-1.4.1.tar.gz", hash = "sha256:8a5061319133c72ab53e02adc144ac32a7418834c6b909a2161ab691ba4e9564"},
+    {file = "pytest_subprocess-1.4.1-py3-none-any.whl", hash = "sha256:903667a6dc1ac75f4f27bd620e5728017fa5e119718f6cec71740f2610889571"},
 ]
 pytest-sugar = [
     {file = "pytest-sugar-0.9.4.tar.gz", hash = "sha256:b1b2186b0a72aada6859bea2a5764145e3aaa2c1cfbb23c3a19b5f7b697563d3"},
