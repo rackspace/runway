@@ -18,16 +18,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class LoginArgs(BaseModel):
-    """Args passed to the docker.login hook.
-
-    Attributes:
-        dockercfg_path: Path to a non-default Docker config file.
-        email: The email for the registry account.
-        password: The plaintext password for the registry account.
-        registry: URI of the registry to login to.
-        username: The registry username.
-
-    """
+    """Args passed to the docker.login hook."""
 
     _ctx: Optional[CfnginContext] = Field(default=None, alias="context", exclude=True)
 
