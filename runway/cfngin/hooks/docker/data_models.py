@@ -25,15 +25,7 @@ ECR_REPO_FQN_TEMPLATE = (
 
 
 class ElasticContainerRegistry(BaseModel):
-    """AWS Elastic Container Registry.
-
-    Attributes:
-        account_id: AWS account ID that owns the registry being logged into.
-        alias: If it is a public repository, the alias of the repository.
-        public: Whether the repository is public.
-        region: AWS region where the registry is located.
-
-    """
+    """AWS Elastic Container Registry."""
 
     PUBLIC_URI_TEMPLATE: ClassVar[str] = "public.ecr.aws/{registry_alias}/"
     URI_TEMPLATE: ClassVar[str] = "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/"
