@@ -54,7 +54,7 @@ def register_lookup_handler(
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     LOGGER.error(
         'lookup "%s" uses an unsupported format; to learn how to write '
-        "lookups visit %s/page/cfngin/lookups.html#writing-a-custom-lookup",
+        "lookups visit %s/page/cfngin/lookups/index.html#writing-a-custom-lookup",
         lookup_type,
         DOC_SITE,
     )
