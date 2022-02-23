@@ -2375,7 +2375,7 @@ docs = ["dunamai", "jsx-lexer", "sphinx", "sphinx-github-changelog", "sphinx-rtd
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7, <4"
-content-hash = "96dd3858194afc6701861969c4b3cf94d48cd62a47d705a26d7273a80cda68be"
+content-hash = "575e6cbea3ac6ca3944186e15f0cf358c64336cff9b51ce7482ae9b0df870a61"
 
 [metadata.files]
 alabaster = [
