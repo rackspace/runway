@@ -55,7 +55,7 @@ packaging = "*"  # component of setuptools needed for version compare
 pyOpenSSL = "*"  # For embedded hook & associated script usage
 pydantic = "^1.4"
 pyhcl = "^0.4"  # does not support HCL2, possibly move to extras_require in the future
-python-hcl2 = "^2.0"
+python-hcl2 = ">=3.0.3"
 pyyaml = ">5.4"
 requests = "*"
 send2trash = "*"
