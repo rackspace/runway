@@ -90,7 +90,7 @@ def test_get_latest_tf_version(mocker: MockerFixture) -> None:
     "parser, expected",
     [
         (hcl, {"terraform": {"backend": {"s3": {"bucket": "name"}}}}),
-        (hcl2, {"terraform": [{"backend": [{"s3": {"bucket": ["name"]}}]}]}),
+        (hcl2, {"terraform": [{"backend": [{"s3": {"bucket": "name"}}]}]}),
     ],
 )
 def test_load_terraform_module(
