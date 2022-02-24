@@ -4,7 +4,7 @@
 random.string
 #############
 
-:Query Syntax: ``<desired-length>``
+:Query Syntax: ``<desired-length>[::<arg>=<arg-val>, ...]``
 
 
 Generate a random string of the given length.

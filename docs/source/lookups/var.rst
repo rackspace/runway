@@ -5,7 +5,7 @@
 var
 ###
 
-:Query Syntax: ``<variable-name>``
+:Query Syntax: ``<variable-name>[::<arg>=<arg-val>, ...]``
 
 
 Retrieve a variable from the variables file or definition.

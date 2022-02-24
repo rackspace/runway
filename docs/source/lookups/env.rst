@@ -5,7 +5,7 @@
 env
 ###
 
-:Query Syntax: ``<variable-name>``
+:Query Syntax: ``<variable-name>[::<arg>=<arg-val>, ...]``
 
 
 Retrieve a value from an environment variable.

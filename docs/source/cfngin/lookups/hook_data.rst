@@ -4,7 +4,7 @@
 hook_data
 #########
 
-:Query Syntax: ``<hook.data_key>``
+:Query Syntax: ``<hook.data_key>[::<arg>=<arg-val>, ...]``
 
 
 When using hooks, you can have the hook store results in the :attr:`CfnginContext.hook_data <runway.context.CfnginContext.hook_data>` dictionary on the context by setting :attr:`~cfngin.hook.data_key` in the :class:`~cfngin.hook` config.

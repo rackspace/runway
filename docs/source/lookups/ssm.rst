@@ -5,7 +5,7 @@
 ssm
 ###
 
-:Query Syntax: ``<parameter>``
+:Query Syntax: ``<parameter>[::<arg>=<arg-val>, ...]``
 
 
 Retrieve a value from SSM Parameter Store.
@@ -27,7 +27,12 @@ Arguments
 
 This Lookup supports all :ref:`Common Lookup Arguments`.
 
-.. rubric:: Example
+
+
+*******
+Example
+*******
+
 .. code-block:: yaml
 
   deployment:
