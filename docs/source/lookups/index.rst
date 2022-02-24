@@ -7,7 +7,7 @@ Lookups
 Runway Lookups allow the use of variables within the Runway config file.
 These variables can then be passed along to :ref:`deployments <runway-deployment>`, :ref:`modules <runway-module>` and :ref:`tests <runway-test>`.
 
-The syntax for a lookup is ``${<lookup-name> <query>::<arg-key>=<arg-value>}``.
+The syntax for a lookup is ``${<lookup-name> <query>::<arg>=<arg-val>}``.
 
 +---------------------------+-------------------------------------------------+
 | Component                 | Description                                     |
@@ -31,7 +31,7 @@ The syntax for a lookup is ``${<lookup-name> <query>::<arg-key>=<arg-value>}``.
 | ``::``                    | The separator between a query and optional      |
 |                           | arguments.                                      |
 +---------------------------+-------------------------------------------------+
-| ``<arg-key>=<arg-value>`` || An argument passed to a lookup.                |
+| ``<arg>=<arg-val>``       || An argument passed to a lookup.                |
 |                           || Multiple arguments can be passed to a lookup   |
 |                           |  by separating them with a                      |
 |                           || comma (``,``).                                 |

@@ -9,7 +9,7 @@ cfn
   This means that it must have been deployed using another Runway module, deployed from a config that is run before the one using it, deployed manually, or deployed in the same config using :attr:`~cfngin.stack.required`/:attr:`~cfngin.stack.required_by` to specify a dependency between the Stacks.
 
 
-:Query Syntax: ``<stack-name>.<output-name>``
+:Query Syntax: ``<stack-name>.<output-name>[::<arg>=<arg-val>, ...]``
 
 
 Retrieve a value from CloudFormation Stack Outputs.

@@ -10,7 +10,7 @@ cfn
   This means that the Stack must have been deployed by another module, run before the one using this Lookup, or it must have been created external to Runway.
 
 
-:Query Syntax: ``<stack-name>.<output-name>``
+:Query Syntax: ``<stack-name>.<output-name>[::<arg>=<arg-val>, ...]``
 
 
 Retrieve a value from CloudFormation Stack Outputs.
