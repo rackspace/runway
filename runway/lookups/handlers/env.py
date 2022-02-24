@@ -2,14 +2,14 @@
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Union
 
 from typing_extensions import Final, Literal
 
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from ...context import RunwayContext
+    from ...context import CfnginContext, RunwayContext
 
 
 class EnvLookup(LookupHandler):
@@ -20,7 +20,11 @@ class EnvLookup(LookupHandler):
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: RunwayContext, *__args: Any, **__kwargs: Any
+        cls,
+        value: str,
+        context: Union[CfnginContext, RunwayContext],
+        *__args: Any,
+        **__kwargs: Any,
     ) -> Any:
         """Retrieve an environment variable.
 

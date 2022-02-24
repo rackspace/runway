@@ -7,6 +7,7 @@ from typing import Dict, Type, Union, cast
 from ...lookups.handlers.base import LookupHandler
 from ...lookups.handlers.cfn import CfnLookup
 from ...lookups.handlers.ecr import EcrLookup
+from ...lookups.handlers.env import EnvLookup
 from ...lookups.handlers.random_string import RandomStringLookup
 from ...lookups.handlers.ssm import SsmLookup
 from ...utils import DOC_SITE, load_object_from_string
@@ -104,6 +105,7 @@ register_lookup_handler(CfnLookup.TYPE_NAME, CfnLookup)
 register_lookup_handler(DefaultLookup.TYPE_NAME, DefaultLookup)
 register_lookup_handler(DynamodbLookup.TYPE_NAME, DynamodbLookup)
 register_lookup_handler(EcrLookup.TYPE_NAME, EcrLookup)
+register_lookup_handler(EnvLookup.TYPE_NAME, EnvLookup)
 register_lookup_handler(EnvvarLookup.TYPE_NAME, EnvvarLookup)
 register_lookup_handler(FileLookup.TYPE_NAME, FileLookup)
 register_lookup_handler(HookDataLookup.TYPE_NAME, HookDataLookup)

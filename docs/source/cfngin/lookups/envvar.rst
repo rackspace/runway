@@ -2,6 +2,10 @@
 envvar
 ######
 
+.. deprecated:: 2.7.0
+  Replaced by :ref:`CFNgin cfn lookup`
+
+
 :Query Syntax: ``<variable-name>``
 
 

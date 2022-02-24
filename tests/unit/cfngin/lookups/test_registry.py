@@ -37,6 +37,7 @@ def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
         "default",
         "dynamodb",
         "ecr",
+        "env",
         "envvar",
         "file",
         "hook_data",
