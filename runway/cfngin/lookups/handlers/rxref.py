@@ -2,28 +2,49 @@
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+import logging
+from typing import TYPE_CHECKING, Any, Dict, Tuple
 
 from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
-from .output import deconstruct
+from ....lookups.handlers.cfn import CfnLookup
+from ....utils import DOC_SITE
+from .output import OutputQuery, deconstruct
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
     from ...providers.aws.default import Provider
 
+LOGGER = logging.getLogger(__name__)
+
 
 class RxrefLookup(LookupHandler):
     """Rxref lookup."""
 
+    DEPRECATION_MSG = (
+        'lookup query syntax "<relative-stack-name>::<OutputName>" has been deprecated; '
+        "to learn how to use the new lookup query syntax visit "
+        f"{DOC_SITE}/page/cfngin/lookups/rxref.html"
+    )
     TYPE_NAME: Final[Literal["rxref"]] = "rxref"
     """Name that the Lookup is registered as."""
 
     @classmethod
+    def legacy_parse(cls, value: str) -> Tuple[OutputQuery, Dict[str, str]]:
+        """Retain support for legacy lookup syntax.
+
+        Format of value:
+            <relative-stack-name>::<OutputName>
+
+        """
+        LOGGER.warning("${rxref %s}: %s", value, cls.DEPRECATION_MSG)
+        return deconstruct(value), {}
+
+    @classmethod
     def handle(  # pylint: disable=arguments-differ
         cls, value: str, context: CfnginContext, provider: Provider, **_: Any
-    ) -> str:
+    ) -> Any:
         """Fetch an output from the designated stack in the current namespace.
 
         The ``output`` lookup supports fetching outputs from stacks created
@@ -33,16 +54,22 @@ class RxrefLookup(LookupHandler):
         :class:`runway.context.CfnginContext` to expand the fqn of the stack.
 
         Args:
-            value: Parameter(s) given to this lookup. `<stack_name>::<output_name>``
+            value: Parameter(s) given to this lookup. `"<relative-stack-name>.<OutputName>``
             context: Context instance.
             provider: Provider instance.
 
-        Example:
-            ::
-
-                conf_value: ${rxref relative-stack-name::SomeOutputName}
-
         """
-        decon = deconstruct(value)
-        stack_fqn = context.get_fqn(decon.stack_name)
-        return provider.get_output(stack_fqn, decon.output_name)
+        try:
+            raw_query, _args = cls.parse(value)
+            query = OutputQuery(*raw_query.split("."))
+            colon_split = value.split("::", 1)
+            raw_args = colon_split[1] if len(colon_split) > 1 else ""
+        except ValueError:
+            query, _args = cls.legacy_parse(value)
+            raw_args = ""
+        stack_fqn = context.get_fqn(query.stack_name)
+        return CfnLookup.handle(
+            f"{stack_fqn}.{query.output_name}" + (f"::{raw_args}" if raw_args else ""),
+            context=context,
+            provider=provider,
+        )
