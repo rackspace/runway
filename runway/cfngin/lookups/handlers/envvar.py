@@ -46,7 +46,7 @@ class EnvvarLookup(LookupHandler):
                 conf_key: ENV_VALUE
 
         """
-        LOGGER.warning(f"${{envvar {value}}}: {cls.DEPRECATION_MSG}: ${{env {value}}}")
+        LOGGER.warning("${envvar %s}: %s: ${env %s}", value, cls.DEPRECATION_MSG, value)
         value = read_value_from_path(value)
 
         try:
