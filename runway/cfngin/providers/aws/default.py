@@ -1594,7 +1594,7 @@ class Provider(BaseProvider):
         for (
             output_name,
             output_params,
-        ) in stack.blueprint.get_output_definitions().items():
+        ) in stack.blueprint.output_definitions.items():
             if output_name not in self._outputs[stack.fqn]:
                 self._outputs[stack.fqn][
                     output_name

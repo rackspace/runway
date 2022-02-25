@@ -149,6 +149,7 @@ def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     """Execute `runway deploy` with `runway destory` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env=ENV_VARS)
     assert cli_runner.invoke(cli, ["destroy"], env=ENV_VARS).exit_code == 0
+    shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "sample_app" / ".runway", ignore_errors=True)
     # remove .venv/ & *.lock from source code directories - more important for local testing
     (DOCKER_MYSQL_DIR / "Pipfile.lock").unlink(missing_ok=True)

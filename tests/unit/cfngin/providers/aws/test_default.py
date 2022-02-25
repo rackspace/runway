@@ -125,8 +125,8 @@ def generate_stack_object(
         outputs = {"FakeOutput": {"Value": {"Ref": "FakeResource"}}}
     mock_stack.name = stack_name
     mock_stack.fqn = stack_name
-    mock_stack.blueprint = MagicMock(["get_output_definitions"])
-    mock_stack.blueprint.get_output_definitions = MagicMock(return_value=outputs)
+    mock_stack.blueprint = MagicMock(["output_definitions"])
+    mock_stack.blueprint.output_definitions = outputs
     return mock_stack
 
 
