@@ -42,7 +42,7 @@ class SplitLookup(LookupHandler):
             (``PublicSubnets``, ``PrivateSubnets``) that are comma separated,
             so you could use this in your config::
 
-                Subnets: ${split ,::${output vpc::PrivateSubnets}}
+                Subnets: ${split ,::${output vpc.PrivateSubnets}}
 
         """
         try:

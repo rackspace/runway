@@ -9,4 +9,4 @@ stacks:
   - name: locked-stack-bastion
     class_path: blueprints.Dummy
     variables:
-      StringVariable: ${output locked-stack-vpc::DummyId}
+      StringVariable: ${output locked-stack-vpc.DummyId}

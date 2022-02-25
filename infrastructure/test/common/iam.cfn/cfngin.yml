@@ -20,16 +20,16 @@ stacks:
     variables:
       <<: *DenyAssumeRoleNotResources
       ApprovedPermissionBoundaries:
-        - ${output test-runner-boundary::Policy}
+        - ${output test-runner-boundary.Policy}
   - name: deploy-user
     class_path: blueprints.AdminUser
     variables:
-      PermissionsBoundary: ${output admin-prevent-privilege-escalation::PolicyArn}
+      PermissionsBoundary: ${output admin-prevent-privilege-escalation.PolicyArn}
       UserName: ${namespace}-gh-action-deploy
   - name: test-runner-user
     class_path: blueprints.TestRunnerUser
     variables:
       DenyAssumeRoleNotResources:
         - arn:aws:iam::${test_alt_account_id}:role/${namespace}-gh-action-runner
-      PermissionsBoundary: ${output test-runner-boundary::PolicyArn}
+      PermissionsBoundary: ${output test-runner-boundary.PolicyArn}
       UserName: ${namespace}-gh-action-runner

@@ -69,11 +69,11 @@ def mock_context(
 
 
 def generate_definition(
-    base_name: str, stack_id: Any, **overrides: Any
+    base_name: str, stack_id: Any = None, **overrides: Any
 ) -> CfnginStackDefinitionModel:
     """Generate definitions."""
     definition: Dict[str, Any] = {
-        "name": f"{base_name}.{stack_id}",
+        "name": f"{base_name}-{stack_id}" if stack_id else base_name,
         "class_path": f"tests.unit.cfngin.fixtures.mock_blueprints.{base_name.upper()}",
         "requires": [],
     }

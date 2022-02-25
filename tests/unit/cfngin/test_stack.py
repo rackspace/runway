@@ -53,11 +53,11 @@ class TestStack(unittest.TestCase):
             variables={
                 "Var1": "${noop fakeStack3::FakeOutput}",
                 "Var2": (
-                    "some.template.value:${output fakeStack2::FakeOutput}:"
-                    "${output fakeStack::FakeOutput}"
+                    "some.template.value:${output fakeStack2.FakeOutput}:"
+                    "${output fakeStack.FakeOutput}"
                 ),
-                "Var3": "${output fakeStack::FakeOutput},"
-                "${output fakeStack2::FakeOutput}",
+                "Var3": "${output fakeStack.FakeOutput},"
+                "${output fakeStack2.FakeOutput}",
             },
             requires=["fakeStack"],
         )
@@ -71,7 +71,7 @@ class TestStack(unittest.TestCase):
         definition = generate_definition(
             base_name="vpc",
             stack_id=1,
-            variables={"Var1": "${output vpc.1::FakeOutput}"},
+            variables={"Var1": "${output vpc-1.FakeOutput}"},
         )
         stack = Stack(definition=definition, context=self.context)
         with self.assertRaises(ValueError):
@@ -82,7 +82,7 @@ class TestStack(unittest.TestCase):
         definition = generate_definition(
             base_name="vpc",
             stack_id=1,
-            variables={"Param1": "${output fakeStack::FakeOutput}"},
+            variables={"Param1": "${output fakeStack.FakeOutput}"},
         )
         stack = Stack(definition=definition, context=self.context)
         # pylint: disable=protected-access

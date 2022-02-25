@@ -15,18 +15,18 @@ stacks:
     class_path: blueprints.AdminPreventPrivilegeEscalation
     variables:
       ApprovedPermissionBoundaries:
-        - ${output test-runner-boundary::Policy}
+        - ${output test-runner-boundary.Policy}
   - name: deploy-role
     class_path: blueprints.AdminRole
     variables:
       CrossAccountAccessAccountIds:
         - ${test_account_id}
-      PermissionsBoundary: ${output admin-prevent-privilege-escalation::PolicyArn}
+      PermissionsBoundary: ${output admin-prevent-privilege-escalation.PolicyArn}
       RoleName: ${namespace}-gh-action-deploy
   - name: test-runner-role
     class_path: blueprints.AdminRole
     variables:
       CrossAccountAccessAccountIds:
         - ${test_account_id}
-      PermissionsBoundary: ${output test-runner-boundary::PolicyArn}
+      PermissionsBoundary: ${output test-runner-boundary.PolicyArn}
       RoleName: ${namespace}-gh-action-runner

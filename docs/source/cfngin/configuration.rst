@@ -823,7 +823,7 @@ To do so, use the :ref:`output lookup` in the :attr:`~cfngin.stack.variables` on
 
 .. code-block:: yaml
 
-  MyParameter: ${output OtherStack::OutputName}
+  MyParameter: ${output OtherStack.OutputName}
 
 For more information see :ref:`Lookups <cfngin-lookups>`.
 
@@ -843,7 +843,7 @@ If the **vpc** stack provides an Output called **VpcId**, you can reference it e
       class_path: blueprints.asg.AutoscalingGroup
       variables:
         DomainName: *domain
-        VpcId: ${output vpc::VpcId} # gets the VpcId Output from the vpc stack
+        VpcId: ${output vpc.VpcId} # gets the VpcId Output from the vpc stack
 
 Doing this creates an implicit dependency from the **webservers** stack to the **vpc** stack, which will cause CFNgin to submit the **vpc** stack, and then wait until it is complete until it submits the **webservers** stack.
 This would be the same as adding **vpc** to the :attr:`~cfngin.stack.requires` field of the **webservers** stack.
