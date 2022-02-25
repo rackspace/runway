@@ -146,7 +146,7 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v1.4.4
+      - uses: actions/setup-node@v3
         if: steps.check_distance.outcome == 'success'
         with:
           always-auth: true

@@ -135,7 +135,7 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v1.4.4
+      - uses: actions/setup-node@v3
         with:
           always-auth: true
           node-version: ${{ env.NODE_VERSION }}
@@ -204,7 +204,7 @@ jobs:
         python-version: [3.7]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/setup-node@v1.4.4
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
