@@ -127,10 +127,10 @@ class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
                     "arn:aws:cloudformation:*:${AWS::AccountId}:stack/"
                     f"{self.namespace}-*"
                 ),
-                f"arn:aws:s3:::${self.namespace}",
-                f"arn:aws:s3:::${self.namespace}/*",
-                f"arn:aws:s3:::${self.namespace}-*",
-                f"arn:aws:s3:::${self.namespace}-*/*",
+                f"arn:aws:s3:::{self.namespace}",
+                f"arn:aws:s3:::{self.namespace}/*",
+                f"arn:aws:s3:::{self.namespace}-*",
+                f"arn:aws:s3:::{self.namespace}-*/*",
             ],
         )
 
