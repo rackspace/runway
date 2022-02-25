@@ -129,7 +129,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
                 Action("account", "*"),
                 Action("aws-portal", "*"),
                 Action("ce", "*"),
-                Action("cur", ""),
+                Action("cur", "*"),
                 Action("savingsplans", "*"),
             ],
             Effect=Deny,

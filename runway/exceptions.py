@@ -21,6 +21,7 @@ class RunwayError(Exception):
     """Base class for custom exceptions raised by Runway."""
 
     message: str
+    """Error message."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Instantiate class."""
@@ -259,7 +260,11 @@ class NpmNotFound(RunwayError):
 class OutputDoesNotExist(RunwayError):
     """Raised when a specific stack output does not exist."""
 
-    message: str
+    output: str
+    """Name of the CloudFormation Stack's Output that does not exist."""
+
+    stack_name: str
+    """Name of a CloudFormation Stack."""
 
     def __init__(self, stack_name: str, output: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.

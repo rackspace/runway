@@ -2,17 +2,22 @@
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
+import logging
 import re
-from typing import TYPE_CHECKING, Any, NamedTuple, Set
+from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Set, Tuple
 
 from typing_extensions import Final, Literal
 
+from ....exceptions import OutputDoesNotExist
 from ....lookups.handlers.base import LookupHandler
+from ....utils import DOC_SITE
 from ...exceptions import StackDoesNotExist
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
     from ....variables import VariableValue
+
+LOGGER = logging.getLogger(__name__)
 
 
 class OutputQuery(NamedTuple):
@@ -25,8 +30,24 @@ class OutputQuery(NamedTuple):
 class OutputLookup(LookupHandler):
     """AWS CloudFormation Output lookup."""
 
+    DEPRECATION_MSG = (
+        'lookup query syntax "<relative-stack-name>::<OutputName>" has been deprecated; '
+        "to learn how to use the new lookup query syntax visit "
+        f"{DOC_SITE}/page/cfngin/lookups/output.html"
+    )
     TYPE_NAME: Final[Literal["output"]] = "output"
     """Name that the Lookup is registered as."""
+
+    @classmethod
+    def legacy_parse(cls, value: str) -> Tuple[OutputQuery, Dict[str, str]]:
+        """Retain support for legacy lookup syntax.
+
+        Format of value:
+            <relative-stack-name>::<OutputName>
+
+        """
+        LOGGER.warning("${output %s}: %s", value, cls.DEPRECATION_MSG)
+        return deconstruct(value), {}
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ
@@ -36,21 +57,40 @@ class OutputLookup(LookupHandler):
 
         Args:
             value: Parameter(s) given to this lookup.
-                ``<stack_name>::<output_name>``
+                ``<relative-stack-name>.<OutputName>``
             context: Context instance.
 
         Returns:
             Output from the specified stack.
 
         Raises:
+            OutputDoesNotExist: Output not found for Stack.
             StackDoesNotExist: Stack not found for the name provided.
 
         """
-        decon = deconstruct(value)
-        stack = context.get_stack(decon.stack_name)
-        if stack:
-            return stack.outputs[decon.output_name]
-        raise StackDoesNotExist(context.get_fqn(decon.stack_name))
+        try:
+            raw_query, args = cls.parse(value)
+            query = OutputQuery(*raw_query.split("."))
+        except ValueError:
+            query, args = cls.legacy_parse(value)
+
+        stack = context.get_stack(query.stack_name)
+        if not stack:
+            if "default" in args:
+                return cls.format_results(args["default"], **args)
+            raise StackDoesNotExist(context.get_fqn(query.stack_name))
+
+        if "default" in args:  # handle falsy default
+            return cls.format_results(
+                stack.outputs.get(query.output_name, args["default"]), **args
+            )
+
+        try:
+            return cls.format_results(stack.outputs[query.output_name], **args)
+        except KeyError:
+            raise OutputDoesNotExist(
+                stack_name=context.get_fqn(query.stack_name), output=query.output_name
+            ) from None
 
     @classmethod
     def dependencies(cls, lookup_query: VariableValue) -> Set[str]:
@@ -71,11 +111,11 @@ class OutputLookup(LookupHandler):
             if not data_item.resolved:
                 # We encountered an unresolved substitution.
                 # StackName is calculated dynamically based on context:
-                #  e.g. ${output ${default var::source}::name}
+                #  e.g. ${output ${default var::source}.name}
                 # Stop here
                 return set()
             stack_name += data_item.value
-            match = re.search(r"::", stack_name)
+            match = re.search(r"(::|\.)", stack_name)
             if match:
                 stack_name = stack_name[0 : match.start()]
                 return {stack_name}
@@ -86,7 +126,7 @@ class OutputLookup(LookupHandler):
         return set()
 
 
-def deconstruct(value: str) -> OutputQuery:
+def deconstruct(value: str) -> OutputQuery:  # TODO remove in next major release
     """Deconstruct the value."""
     try:
         stack_name, output_name = value.split("::")

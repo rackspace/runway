@@ -178,7 +178,7 @@ class TestPlan(unittest.TestCase):
         graph = Graph.from_steps([Step(vpc, fn=None), Step(bastion, fn=None)])
         plan = Plan(description="Test", graph=graph)
 
-        self.assertEqual(plan.graph.to_dict(), {"bastion.1": {"vpc.1"}, "vpc.1": set()})
+        self.assertEqual(plan.graph.to_dict(), {"bastion-1": {"vpc-1"}, "vpc-1": set()})
 
     def test_plan_reverse(self) -> None:
         """Test plan reverse."""
@@ -192,8 +192,8 @@ class TestPlan(unittest.TestCase):
 
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
-        self.assertEqual(set(), result_graph_dict.get("bastion.1"))
-        self.assertEqual({"bastion.1"}, result_graph_dict.get("vpc.1"))
+        self.assertEqual(set(), result_graph_dict.get("bastion-1"))
+        self.assertEqual({"bastion-1"}, result_graph_dict.get("vpc-1"))
 
     def test_plan_targeted(self) -> None:
         """Test plan targeted."""
@@ -245,17 +245,17 @@ class TestPlan(unittest.TestCase):
         plan.execute(walk)
 
         # the order these are appended changes between python2/3
-        self.assertIn("namespace-vpc.1", calls)
-        self.assertIn("namespace-bastion.1", calls)
-        self.assertIn("namespace-removed.1", calls)
+        self.assertIn("namespace-vpc-1", calls)
+        self.assertIn("namespace-bastion-1", calls)
+        self.assertIn("namespace-removed-1", calls)
         context.put_persistent_graph.assert_called()
 
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = context.persistent_graph.to_dict()  # type: ignore
         self.assertEqual(2, len(result_graph_dict))
-        self.assertEqual(set(), result_graph_dict.get("vpc.1"))
-        self.assertEqual({"vpc.1"}, result_graph_dict.get("bastion.1"))
-        self.assertIsNone(result_graph_dict.get("namespace-removed.1"))
+        self.assertEqual(set(), result_graph_dict.get("vpc-1"))
+        self.assertEqual({"vpc-1"}, result_graph_dict.get("bastion-1"))
+        self.assertIsNone(result_graph_dict.get("namespace-removed-1"))
 
     def test_execute_plan_no_persist(self) -> None:
         """Test execute plan with no persistent graph."""
@@ -280,7 +280,7 @@ class TestPlan(unittest.TestCase):
 
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc.1", "namespace-bastion.1"])
+        self.assertEqual(calls, ["namespace-vpc-1", "namespace-bastion-1"])
         context.put_persistent_graph.assert_not_called()
 
     def test_execute_plan_locked(self) -> None:
@@ -307,7 +307,7 @@ class TestPlan(unittest.TestCase):
         plan = Plan(description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc.1", "namespace-bastion.1"])
+        self.assertEqual(calls, ["namespace-vpc-1", "namespace-bastion-1"])
 
     def test_execute_plan_filtered(self) -> None:
         """Test execute plan filtered."""
@@ -329,12 +329,12 @@ class TestPlan(unittest.TestCase):
 
         context = mock.MagicMock()
         context.persistent_graph_locked = False
-        context.stack_names = ["db.1"]
+        context.stack_names = ["db-1"]
         graph = Graph.from_steps([Step(vpc, fn=fn), Step(db, fn=fn), Step(app, fn=fn)])
         plan = Plan(context=context, description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc.1", "namespace-db.1"])
+        self.assertEqual(calls, ["namespace-vpc-1", "namespace-db-1"])
 
     def test_execute_plan_exception(self) -> None:
         """Test execute plan exception."""
@@ -361,7 +361,7 @@ class TestPlan(unittest.TestCase):
         with self.assertRaises(PlanFailed):
             plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc.1"])
+        self.assertEqual(calls, ["namespace-vpc-1"])
         self.assertEqual(vpc_step.status, FAILED)
 
     def test_execute_plan_skipped(self) -> None:
@@ -387,7 +387,7 @@ class TestPlan(unittest.TestCase):
         plan = Plan(description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc.1", "namespace-bastion.1"])
+        self.assertEqual(calls, ["namespace-vpc-1", "namespace-bastion-1"])
 
     def test_execute_plan_failed(self) -> None:
         """Test execute plan failed."""
@@ -417,7 +417,7 @@ class TestPlan(unittest.TestCase):
 
         calls.sort()
 
-        self.assertEqual(calls, ["namespace-db.1", "namespace-vpc.1"])
+        self.assertEqual(calls, ["namespace-db-1", "namespace-vpc-1"])
 
     def test_execute_plan_cancelled(self) -> None:
         """Test execute plan cancelled."""
@@ -442,7 +442,7 @@ class TestPlan(unittest.TestCase):
         plan = Plan(description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc.1", "namespace-bastion.1"])
+        self.assertEqual(calls, ["namespace-vpc-1", "namespace-bastion-1"])
 
     def test_execute_plan_graph_locked(self) -> None:
         """Test execute plan with locked persistent graph."""
@@ -456,16 +456,16 @@ class TestPlan(unittest.TestCase):
     def test_build_graph_missing_dependency(self) -> None:
         """Test build graph missing dependency."""
         bastion = Stack(
-            definition=generate_definition("bastion", 1, requires=["vpc.1"]),
+            definition=generate_definition("bastion", 1, requires=["vpc-1"]),
             context=self.context,
         )
 
         with self.assertRaises(GraphError) as expected:
             Graph.from_steps([Step(bastion)])
         message_starts = (
-            "Error detected when adding 'vpc.1' as a dependency of 'bastion.1':"
+            "Error detected when adding 'vpc-1' as a dependency of 'bastion-1':"
         )
-        message_contains = "dependent node vpc.1 does not exist"
+        message_contains = "dependent node vpc-1 does not exist"
         self.assertTrue(str(expected.exception).startswith(message_starts))
         self.assertTrue(message_contains in str(expected.exception))
 
@@ -473,19 +473,19 @@ class TestPlan(unittest.TestCase):
         """Test build graph cyclic dependencies."""
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         db = Stack(
-            definition=generate_definition("db", 1, requires=["app.1"]),
+            definition=generate_definition("db", 1, requires=["app-1"]),
             context=self.context,
         )
         app = Stack(
-            definition=generate_definition("app", 1, requires=["db.1"]),
+            definition=generate_definition("app", 1, requires=["db-1"]),
             context=self.context,
         )
 
         with self.assertRaises(GraphError) as expected:
             Graph.from_steps([Step(vpc), Step(db), Step(app)])
         message = (
-            "Error detected when adding 'db.1' "
-            "as a dependency of 'app.1': graph is "
+            "Error detected when adding 'db-1' "
+            "as a dependency of 'app-1': graph is "
             "not acyclic"
         )
         self.assertEqual(str(expected.exception), message)

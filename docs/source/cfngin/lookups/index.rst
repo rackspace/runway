@@ -24,7 +24,7 @@ They can be nested in any part of a YAML data structure and within another looku
 
   e.g. if ``custom`` returns a list, this would raise an exception::
 
-    Variable: ${custom something}, ${output otherStack::Output}
+    Variable: ${custom something}, ${output otherStack.Output}
 
   This is valid::
 
@@ -40,11 +40,11 @@ For example, given the following:
       class_path: some.stack.blueprint.Blueprint
       variables:
         Roles:
-          - ${output otherStack::IAMRole}
+          - ${output otherStack.IAMRole}
         Values:
           Env:
-            Custom: ${custom ${output otherStack::Output}}
-            DBUrl: postgres://${output dbStack::User}@${output dbStack::HostName}
+            Custom: ${custom ${output otherStack.Output}}
+            DBUrl: postgres://${output dbStack.User}@${output dbStack.HostName}
 
 The |Blueprint| would have access to the following resolved variables dictionary:
 

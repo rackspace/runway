@@ -182,14 +182,14 @@ class TestBuildAction(
                 {
                     "name": "bastion",
                     "template_path": ".",
-                    "variables": {"test": "${output vpc::something}"},
+                    "variables": {"test": "${output vpc.something}"},
                 },
                 {
                     "name": "db",
                     "template_path": ".",
                     "variables": {
-                        "test": "${output vpc::something}",
-                        "else": "${output bastion::something}",
+                        "test": "${output vpc.something}",
+                        "else": "${output bastion.something}",
                     },
                 },
                 {"name": "other", "template_path": ".", "variables": {}},
