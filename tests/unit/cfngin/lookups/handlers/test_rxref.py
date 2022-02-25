@@ -1,33 +1,62 @@
 """Tests for runway.cfngin.lookups.handlers.rxref."""
-# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
-import unittest
+# pylint: disable=no-self-use,protected-access
+from __future__ import annotations
 
-from mock import MagicMock
+from typing import TYPE_CHECKING
 
+import pytest
+from mock import Mock
+
+from runway._logging import LogLevels
 from runway.cfngin.lookups.handlers.rxref import RxrefLookup
-from runway.config import CfnginConfig
-from runway.context import CfnginContext
+
+if TYPE_CHECKING:
+    from pytest import LogCaptureFixture
+    from pytest_mock import MockerFixture
+
+    from ....factories import MockCFNginContext
+
+MODULE = "runway.cfngin.lookups.handlers.rxref"
 
 
-class TestRxrefHandler(unittest.TestCase):
+class TestRxrefLookup:
     """Tests for runway.cfngin.lookups.handlers.rxref.RxrefLookup."""
 
-    def setUp(self) -> None:
-        """Run before tests."""
-        self.provider = MagicMock()
-        self.context = CfnginContext(config=CfnginConfig.parse_obj({"namespace": "ns"}))
-
-    def test_rxref_handler(self) -> None:
-        """Test rxref handler."""
-        self.provider.get_output.return_value = "Test Output"
-
-        value = RxrefLookup.handle(
-            "fully-qualified-stack-name::SomeOutput",
-            provider=self.provider,
-            context=self.context,
+    @pytest.mark.parametrize(
+        "provided, expected",
+        [
+            ("stack-name::Output", "namespace-stack-name.Output"),
+            ("stack-name.Output", "namespace-stack-name.Output"),
+            (
+                "stack-name.Output::default=bar",
+                "namespace-stack-name.Output::default=bar",
+            ),
+        ],
+    )
+    def test_handle(
+        self,
+        cfngin_context: MockCFNginContext,
+        expected: str,
+        mocker: MockerFixture,
+        provided: str,
+    ) -> None:
+        """Test handle."""
+        cfngin_context.config.namespace = "namespace"
+        cfn = mocker.patch(f"{MODULE}.CfnLookup")
+        cfn.handle.return_value = "success"
+        provider = Mock(name="provider")
+        assert RxrefLookup.handle(provided, context=cfngin_context, provider=provider)
+        cfn.handle.assert_called_once_with(
+            expected, context=cfngin_context, provider=provider
         )
-        self.assertEqual(value, "Test Output")
 
-        args = self.provider.get_output.call_args
-        self.assertEqual(args[0][0], "ns-fully-qualified-stack-name")
-        self.assertEqual(args[0][1], "SomeOutput")
+    def test_legacy_parse(
+        self, caplog: LogCaptureFixture, mocker: MockerFixture
+    ) -> None:
+        """Test legacy_parse."""
+        query = "foo"
+        caplog.set_level(LogLevels.WARNING, MODULE)
+        deconstruct = mocker.patch(f"{MODULE}.deconstruct", return_value="success")
+        assert RxrefLookup.legacy_parse(query) == (deconstruct.return_value, {})
+        deconstruct.assert_called_once_with(query)
+        assert f"${{rxref {query}}}: {RxrefLookup.DEPRECATION_MSG}" in caplog.messages
