@@ -46,7 +46,7 @@ class OutputLookup(LookupHandler):
             <relative-stack-name>::<OutputName>
 
         """
-        LOGGER.warning("${output %s}: %s", value, cls.DEPRECATION_MSG)
+        LOGGER.warning("${%s %s}: %s", cls.TYPE_NAME, value, cls.DEPRECATION_MSG)
         return deconstruct(value), {}
 
     @classmethod

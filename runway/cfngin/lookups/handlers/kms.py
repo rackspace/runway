@@ -3,22 +3,44 @@
 from __future__ import annotations
 
 import codecs
-from typing import TYPE_CHECKING, Any, BinaryIO, Union, cast
+import logging
+from typing import TYPE_CHECKING, Any, BinaryIO, Dict, Tuple, Union, cast
 
 from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
+from ....utils import DOC_SITE
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
 
+LOGGER = logging.getLogger(__name__)
+
 
 class KmsLookup(LookupHandler):
     """AWS KMS lookup."""
 
+    DEPRECATION_MSG = (
+        'lookup query syntax "<region>@<encrypted-blob>" has been deprecated; '
+        "to learn how to use the new lookup query syntax visit "
+        f"{DOC_SITE}/page/cfngin/lookups/kms.html"
+    )
     TYPE_NAME: Final[Literal["kms"]] = "kms"
     """Name that the Lookup is registered as."""
+
+    @classmethod
+    def legacy_parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+        """Retain support for legacy lookup syntax.
+
+        Format of value::
+
+            <region>@<encrypted-blob>
+
+        """
+        LOGGER.warning("${%s %s}: %s", cls.TYPE_NAME, value, cls.DEPRECATION_MSG)
+        region, value = read_value_from_path(value).split("@", 1)
+        return value, {"region": region}
 
     @classmethod
     def handle(  # pylint: disable=arguments-differ
@@ -30,57 +52,20 @@ class KmsLookup(LookupHandler):
             value: Parameter(s) given to this lookup.
             context: Context instance.
 
-        ``value`` should be in the following format:
-
-            [<region>@]<base64 encrypted value>
-
-        .. note: The region is optional, and defaults to the environment's
-                 ``AWS_DEFAULT_REGION`` if not specified.
-
-        Example:
-            ::
-
-                # We use the aws cli to get the encrypted value for the string
-                # "PASSWORD" using the master key called "myKey" in
-                # us-east-1
-                $ aws --region us-east-1 kms encrypt --key-id alias/myKey \
-                        --plaintext "PASSWORD" --output text --query CiphertextBlob
-
-                CiD6bC8t2Y<...encrypted blob...>
-
-                # With CFNgin we would reference the encrypted value like:
-                conf_key: ${kms us-east-1@CiD6bC8t2Y<...encrypted blob...>}
-
-            You can optionally store the encrypted value in a file, ie::
-
-                kms_value.txt
-                us-east-1@CiD6bC8t2Y<...encrypted blob...>
-
-            and reference it within CFNgin (NOTE: the path should be relative
-            to the CFNgin config file)::
-
-                conf_key: ${kms file://kms_value.txt}
-
-                # Both of the above would resolve to
-                conf_key: PASSWORD
-
         """
-        value = read_value_from_path(value)
-
-        region = None
         if "@" in value:
-            region, value = value.split("@", 1)
+            query, args = cls.legacy_parse(value)
+        else:
+            query, args = cls.parse(value)
 
-        kms = context.get_session(region=region).client("kms")
+        kms = context.get_session(region=args.get("region")).client("kms")
 
-        # get raw but still encrypted value from base64 version.
-        decoded = codecs.decode(value.encode(), "base64")
-
-        # decrypt and return the plain text raw value.
         decrypted = cast(
             Union[BinaryIO, bytes],
-            kms.decrypt(CiphertextBlob=decoded).get("Plaintext", b""),
+            kms.decrypt(CiphertextBlob=codecs.decode(query.encode(), "base64")).get(
+                "Plaintext", b""
+            ),
         )
         if isinstance(decrypted, bytes):
-            return decrypted.decode()
-        return decrypted.read().decode()
+            return cls.format_results(decrypted.decode(), **args)
+        return cls.format_results(decrypted.read().decode(), **args)

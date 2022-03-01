@@ -38,7 +38,7 @@ class RxrefLookup(LookupHandler):
             <relative-stack-name>::<OutputName>
 
         """
-        LOGGER.warning("${rxref %s}: %s", value, cls.DEPRECATION_MSG)
+        LOGGER.warning("${%s %s}: %s", cls.TYPE_NAME, value, cls.DEPRECATION_MSG)
         return deconstruct(value), {}
 
     @classmethod
