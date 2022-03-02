@@ -30,7 +30,7 @@ jobs:
       infra-test: ${{ steps.filter.outputs.infrastructure-test }}
       infra-test-alt: ${{ steps.filter.outputs.infrastructure-test-alt }}
     steps:
-      - uses: actions/checkout@v2  # not needed for pull_request
+      - uses: actions/checkout@v3  # not needed for pull_request
         if: |
           github.event_name == 'push'
       - uses: dorny/paths-filter@v2  # cspell:ignore dorny
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2.3.2
+        uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         id: setup-python
         with:
@@ -99,7 +99,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: test
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2.3.2
+        uses: actions/checkout@v3
       - name: Install Node
         uses: actions/setup-node@v3
         with:
@@ -129,7 +129,7 @@ jobs:
       matrix:
         python-version: [3.8]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
         id: setup-python
         with:
@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2.3.2
+        uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -200,7 +200,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: test
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v2.3.2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Install Node
@@ -244,7 +244,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v2.3.2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v3
