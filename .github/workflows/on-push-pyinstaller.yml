@@ -174,19 +174,19 @@ jobs:
       - run: poetry install --extras docs -vv
       - name: Download Artifacts (macOS)
         if: steps.check_distance.outcome == 'success'
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefolder-macos-10.15
           path: artifacts
       - name: Download Artifacts (ubuntu)
         if: steps.check_distance.outcome == 'success'
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefolder-ubuntu-18.04
           path: artifacts
       - name: Download Artifacts (windows)
         if: steps.check_distance.outcome == 'success'
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefolder-windows-latest
           path: artifacts

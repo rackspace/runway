@@ -160,17 +160,17 @@ jobs:
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install --extras docs -vv
       - name: Download Artifacts (macOS)
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefolder-macos-10.15
           path: artifacts
       - name: Download Artifacts (ubuntu)
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefolder-ubuntu-18.04
           path: artifacts
       - name: Download Artifacts (windows)
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefolder-windows-latest
           path: artifacts
@@ -209,7 +209,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
       - name: Download Artifact
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: npm-pack
           path: artifacts
@@ -265,7 +265,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Download Distribution Artifact
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pypi-dist
           path: dist
@@ -304,17 +304,17 @@ jobs:
         with:
           python-version: 3.8
       - name: Download Artifacts (macOS)
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefile-macos-10.15
           path: artifacts
       - name: Download Artifacts (ubuntu)
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefile-ubuntu-18.04
           path: artifacts
       - name: Download Artifacts (windows)
-        uses: actions/download-artifact@v2.1.0
+        uses: actions/download-artifact@v3
         with:
           name: pyinstaller-onefile-windows-latest
           path: artifacts
