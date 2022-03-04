@@ -64,7 +64,7 @@ jobs:
       - name: Run Build
         run: make build-pyinstaller-file
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: pyinstaller-onefile-${{ matrix.os }}
           path: artifacts
@@ -114,7 +114,7 @@ jobs:
       - name: Run Build
         run: make build-pyinstaller-folder
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: pyinstaller-onefolder-${{ matrix.os }}
           path: artifacts
@@ -207,7 +207,7 @@ jobs:
         run: echo "A pre-production version was not published because the current commit is tagged for release."
       - name: Upload Artifacts
         if: steps.check_distance.outcome == 'success'
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: npm-pack
           path: artifacts
