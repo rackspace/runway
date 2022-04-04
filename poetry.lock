@@ -1154,7 +1154,7 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "moto"
-version = "3.0.5"
+version = "3.1.4"
 description = "A library that allows your python tests to easily mock out the boto library"
 category = "dev"
 optional = false
@@ -1186,6 +1186,7 @@ batch = ["docker (>=2.5.1)"]
 cloudformation = ["docker (>=2.5.1)", "PyYAML (>=5.1)", "cfn-lint (>=0.4.0)"]
 cognitoidp = ["python-jose[cryptography] (>=3.1.0,<4.0.0)", "ecdsa (!=0.15)"]
 ds = ["sshpubkeys (>=3.1.0)"]
+dynamodb = ["docker (>=2.5.1)"]
 dynamodb2 = ["docker (>=2.5.1)"]
 dynamodbstreams = ["docker (>=2.5.1)"]
 ec2 = ["sshpubkeys (>=3.1.0)"]
@@ -2866,8 +2867,8 @@ mock = [
     {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
 ]
 moto = [
-    {file = "moto-3.0.5-py2.py3-none-any.whl", hash = "sha256:077dd5b96267bbb81fc7677b6d5cc3099ca99a371bd7e90932b6d3ff997106c6"},
-    {file = "moto-3.0.5.tar.gz", hash = "sha256:85f2ece0ad0305aa13a39139ce648ab3afe1c04cb32ac1db8d5e5e9117d4d10e"},
+    {file = "moto-3.1.4-py2.py3-none-any.whl", hash = "sha256:0fcc81ac08c4f00b13cf207e2e0e1216bc5b7513c375edbbfd0b18faa1c14616"},
+    {file = "moto-3.1.4.tar.gz", hash = "sha256:c420ceaac58145ff4ee10f66b824c9e19f32fa61bf25a3975abeb4e44253d635"},
 ]
 mypy-boto3 = [
     {file = "mypy-boto3-1.21.8.tar.gz", hash = "sha256:79009389b209976698bf4b36cf4f5cc081f4771dbf92b53b17f65df81487a315"},
