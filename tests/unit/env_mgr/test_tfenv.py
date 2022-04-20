@@ -70,8 +70,8 @@ def test_get_available_tf_versions(mocker: MockerFixture) -> None:
     mock_requests.get.return_value = MagicMock(text=json.dumps(response))
     assert get_available_tf_versions() == ["0.12.0"]
     assert get_available_tf_versions(include_prerelease=True) == [
-        "0.12.0-beta",
         "0.12.0",
+        "0.12.0-beta",
     ]
 
 

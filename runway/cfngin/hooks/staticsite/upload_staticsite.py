@@ -300,7 +300,7 @@ def calculate_hash_of_extra_files(
     """
     file_hash = hashlib.md5()
 
-    for extra_file in sorted(extra_files, key=lambda extra_file: extra_file.name):
+    for extra_file in sorted(extra_files, key=lambda x: x.name):
         file_hash.update((extra_file.name + "\0").encode())
 
         if extra_file.content_type:
