@@ -13,7 +13,6 @@ import subprocess
 import sys
 import tempfile
 import zipfile
-from distutils.version import LooseVersion
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -31,6 +30,7 @@ from urllib.request import urlretrieve
 import hcl
 import hcl2
 import requests
+from packaging.version import LegacyVersion
 from typing_extensions import Final
 
 from ..compat import cached_property
@@ -114,7 +114,7 @@ def get_available_tf_versions(include_prerelease: bool = False) -> List[str]:
     )["terraform"]
     tf_versions = sorted(
         [k for k, _v in tf_releases["versions"].items()],  # descending
-        key=LooseVersion,
+        key=LegacyVersion,
         reverse=True,
     )
     if include_prerelease:
