@@ -1199,15 +1199,15 @@ xray = ["aws-xray-sdk (>=0.93,!=0.96)", "setuptools"]
 
 [[package]]
 name = "mypy-boto3"
-version = "1.21.8"
-description = "Type annotations for boto3 1.21.8 master module generated with mypy-boto3-builder 7.1.2"
+version = "1.21.46"
+description = "Type annotations for boto3 1.21.46 master module generated with mypy-boto3-builder 7.5.9"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 
 [package.dependencies]
 boto3 = "*"
-typing-extensions = {version = "*", markers = "python_version < \"3.9\""}
+typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-acm"
@@ -2870,8 +2870,8 @@ moto = [
     {file = "moto-3.0.5.tar.gz", hash = "sha256:85f2ece0ad0305aa13a39139ce648ab3afe1c04cb32ac1db8d5e5e9117d4d10e"},
 ]
 mypy-boto3 = [
-    {file = "mypy-boto3-1.21.8.tar.gz", hash = "sha256:79009389b209976698bf4b36cf4f5cc081f4771dbf92b53b17f65df81487a315"},
-    {file = "mypy_boto3-1.21.8-py3-none-any.whl", hash = "sha256:b65857938fc95ec9ac3dca614704f4383d399bffa046cb6c28017eaa10fc20d0"},
+    {file = "mypy-boto3-1.21.46.tar.gz", hash = "sha256:c259f2fec223d3711d8dcf033f29dbd4988e46a7b845593a703102c683620e1c"},
+    {file = "mypy_boto3-1.21.46-py3-none-any.whl", hash = "sha256:17a426cc3e3627d3e84346e395fac57be0b9b0a2aa737c5518e7ec48c4a8bcfc"},
 ]
 mypy-boto3-acm = [
     {file = "mypy-boto3-acm-1.21.0.tar.gz", hash = "sha256:2d6489ca071f3731f2cb2f9391c3b8cc4a1d0fa6ed7bfe8701085b1c2a54fc81"},
