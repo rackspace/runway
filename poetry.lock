@@ -698,7 +698,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [[package]]
 name = "dunamai"
-version = "1.9.0"
+version = "1.12.0"
 description = "Dynamic version generation"
 category = "main"
 optional = false
@@ -2635,8 +2635,8 @@ docutils = [
     {file = "docutils-0.16.tar.gz", hash = "sha256:c2de3a60e9e7d07be26b7f2b00ca0309c207e06c100f9cc2a94931fc75a478fc"},
 ]
 dunamai = [
-    {file = "dunamai-1.9.0-py3-none-any.whl", hash = "sha256:89213a9c1176313cdfda7091a15c6d94be8c17b25e57a8c1e2ecf10d902b25d2"},
-    {file = "dunamai-1.9.0.tar.gz", hash = "sha256:284dc9acbd3d6b749440332e46164f64b207c56eaf4af412d856cf9f08978932"},
+    {file = "dunamai-1.12.0-py3-none-any.whl", hash = "sha256:00b9c1ef58d4950204f76c20f84afe7a28d095f77feaa8512dbb172035415e61"},
+    {file = "dunamai-1.12.0.tar.gz", hash = "sha256:fac4f09e2b8a105bd01f8c50450fea5aa489a6c439c949950a65f0dd388b0d20"},
 ]
 ecdsa = [
     {file = "ecdsa-0.17.0-py2.py3-none-any.whl", hash = "sha256:5cf31d5b33743abe0dfc28999036c849a69d548f994b535e527ee3cb7f3ef676"},
