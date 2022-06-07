@@ -46,7 +46,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install make sed
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.4
         id: cache
         with:
           path: .venv
@@ -97,7 +97,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install make sed
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.4
         id: cache
         with:
           path: .venv
@@ -150,7 +150,7 @@ jobs:
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed tree -y
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.4
         id: cache
         with:
           path: .venv
@@ -238,7 +238,7 @@ jobs:
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.4
         id: cache
         with:
           path: .venv
@@ -274,7 +274,7 @@ jobs:
         with:
           python-version: 3.8
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.4
         id: cache
         with:
           path: .venv
@@ -341,7 +341,7 @@ jobs:
         with:
           python-version: 3.8
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.4
         id: cache
         with:
           path: .venv
