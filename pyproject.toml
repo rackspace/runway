@@ -29,7 +29,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7, <4"
+python = ">=3.7, <3.11"
 
 # dependencies needed for building docs are included here.
 # they are marked as "optional" and are installed as the extra "docs".
@@ -90,7 +90,7 @@ pep8-naming = ">=0.12.1"  # flake8 plugin
 pipenv = "^2022.1.8"  # only used in tests
 pre-commit = ">=2.14"
 pydocstyle = ">=6.1.1"  # flake8 plugin
-pyinstaller = "^4.3"
+pyinstaller = "^4.6"
 pylint = ">=2.12"
 pytest = ">=7.0"
 pytest-cov = ">=3.0"  # pytest plugin

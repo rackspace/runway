@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "args": [
+                "plan"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/tmp/samplerepo/",
+            "env": {
+                "DEPLOY_ENVIRONMENT": "dev"
+            },
+            "justMyCode": true,
+            "name": "Runway: Plan",
+            "program": "${workspaceFolder}/.venv/bin/runway",
+            "request": "launch",
+            "type": "python"
+        },
+        {
+            "args": [
+                "deploy"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/tmp/samplerepo/",
+            "env": {
+                "DEPLOY_ENVIRONMENT": "dev"
+            },
+            "justMyCode": true,
+            "name": "Runway: Deploy",
+            "program": "${workspaceFolder}/.venv/bin/runway",
+            "request": "launch",
+            "type": "python"
+        }
+    ],
+    "version": "0.2.0"
+}
