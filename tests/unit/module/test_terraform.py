@@ -204,13 +204,28 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         """Test env_file."""
         obj = Terraform(runway_context, module_root=tmp_path)
 
+        # Test with var_file_directory set
         if isinstance(filename, list):
             for name in filename:
                 (tmp_path / name).touch()
         else:
             (tmp_path / filename).touch()
         if expected:
-            assert obj.env_file == ["-var-file=" + expected]
+            # assert obj.env_file == ["-var-file=" + expected]
+            assert obj.env_file == [f"-var-file={str(tmp_path)}/{expected}"]
+        else:
+            assert not obj.env_file
+
+        # Test with var_file_directory set
+        obj.options.var_file_directory = "test-var-file-directory"
+        (tmp_path / f"{obj.options.var_file_directory}").mkdir()
+        if isinstance(filename, list):
+            for name in filename:
+                (tmp_path / f"{obj.options.var_file_directory}/{name}").touch()
+        else:
+            (tmp_path / f"{obj.options.var_file_directory}/{filename}").touch()
+        if expected:
+            assert obj.env_file == [f"-var-file={str(tmp_path)}/{expected}"]
         else:
             assert not obj.env_file
 

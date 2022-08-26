@@ -47,6 +47,20 @@
             "program": "${workspaceFolder}/.venv/bin/runway",
             "request": "launch",
             "type": "python"
+        },
+        {
+            "args": [
+                "--dist=loadfile",
+                "--integration",
+                "--numprocesses=auto"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": false,
+            "name": "Pytest",
+            "program": "${workspaceFolder}/.venv/bin/pytest",
+            "request": "launch",
+            "type": "python"
         }
     ],
     "version": "0.2.0"
