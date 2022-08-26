@@ -2,7 +2,8 @@
     "configurations": [
         {
             "args": [
-                "plan"
+                "plan",
+                "--debug"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/tmp/samplerepo/",
@@ -17,7 +18,8 @@
         },
         {
             "args": [
-                "deploy"
+                "deploy",
+                "--debug"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/tmp/samplerepo/",
@@ -26,6 +28,22 @@
             },
             "justMyCode": true,
             "name": "Runway: Deploy",
+            "program": "${workspaceFolder}/.venv/bin/runway",
+            "request": "launch",
+            "type": "python"
+        },
+        {
+            "args": [
+                "destroy",
+                "--debug"
+            ],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/tmp/samplerepo/",
+            "env": {
+                "DEPLOY_ENVIRONMENT": "dev"
+            },
+            "justMyCode": true,
+            "name": "Runway: Destroy",
             "program": "${workspaceFolder}/.venv/bin/runway",
             "request": "launch",
             "type": "python"

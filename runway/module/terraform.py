@@ -155,9 +155,12 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         for name in gen_workspace_tfvars_files(
             self.ctx.env.name, self.ctx.env.aws_region
         ):
-            test_path = self.path / name
+            if self.options.var_file_directory:
+                test_path = self.path / self.options.var_file_directory / name
+            else:
+                test_path = self.path / name
             if test_path.is_file():
-                result.append("-var-file=" + test_path.name)
+                result.append("-var-file=" + str(test_path))
                 break  # stop looking if one is found
         return result
 
@@ -603,6 +606,7 @@ class TerraformOptions(ModuleOptions):
         self.data = data
         self.env = deploy_environment
         self.path = path or Path.cwd()
+        self.var_file_directory = data.var_file_directory
         self.version = data.version
         self.workspace = data.workspace or deploy_environment.name
         self.write_auto_tfvars = data.write_auto_tfvars
@@ -610,10 +614,14 @@ class TerraformOptions(ModuleOptions):
     @cached_property
     def backend_config(self) -> TerraformBackendConfig:
         """Backend configuration options."""
+        if self.var_file_directory:
+            path = self.path / self.var_file_directory
+        else:
+            path = self.path
         return TerraformBackendConfig.parse_obj(
             deploy_environment=self.env,
             obj=self.data.backend_config or {},
-            path=self.path,
+            path=path,
         )
 
     @classmethod
@@ -678,7 +686,7 @@ class TerraformBackendConfig(ModuleOptions):
         if not result:
             if self.config_file:
                 LOGGER.verbose("using backend config file: %s", self.config_file.name)
-                return [f"-backend-config={self.config_file.name}"]
+                return [f"-backend-config={self.config_file}"]
             LOGGER.info(
                 "backend file not found -- looking for one " "of: %s",
                 ", ".join(
