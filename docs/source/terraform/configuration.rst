@@ -51,6 +51,19 @@ Options specific to Terraform Modules.
   .. versionchanged:: 1.11.0
     Added support for any *key: value*.
 
+.. data:: terraform_var_file_directory
+  :type: Optional[str]
+  :value: None
+  :noindex:
+
+  String containing a subdirectory within the module directory that contains `.tfvars` files for use on backend and during deployment.
+
+  .. rubric:: Example
+  .. code-block:: yaml
+
+    options:
+      terraform_var_file_directory: subdirectory-containing-tfvars-files
+
 .. data:: terraform_version
   :type: Optional[str]
   :value: None
