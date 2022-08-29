@@ -204,14 +204,13 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         """Test env_file."""
         obj = Terraform(runway_context, module_root=tmp_path)
 
-        # Test with var_file_directory set
+        # Test without var_file_directory set
         if isinstance(filename, list):
             for name in filename:
                 (tmp_path / name).touch()
         else:
             (tmp_path / filename).touch()
         if expected:
-            # assert obj.env_file == ["-var-file=" + expected]
             assert obj.env_file == [f"-var-file={str(tmp_path)}/{expected}"]
         else:
             assert not obj.env_file
@@ -1037,7 +1036,7 @@ class TestTerraformBackendConfig:
         obj = TerraformBackendConfig.parse_obj(
             deploy_environment=runway_context.env, obj={}, path=tmp_path
         )
-        assert obj.init_args == [f"-backend-config={config_file.name}"]
+        assert obj.init_args == [f"-backend-config={config_file}"]
         assert "using backend config file: backend.hcl" in caplog.messages
 
     def test_gen_backend_filenames(self) -> None:
