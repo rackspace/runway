@@ -607,6 +607,7 @@ class TerraformOptions(ModuleOptions):
         self.env = deploy_environment
         self.path = path or Path.cwd()
         self.var_file_directory = data.var_file_directory
+        self.backend_file_directory = data.backend_file_directory
         self.version = data.version
         self.workspace = data.workspace or deploy_environment.name
         self.write_auto_tfvars = data.write_auto_tfvars
@@ -614,8 +615,8 @@ class TerraformOptions(ModuleOptions):
     @cached_property
     def backend_config(self) -> TerraformBackendConfig:
         """Backend configuration options."""
-        if self.var_file_directory:
-            path = self.path / self.var_file_directory
+        if self.backend_file_directory:
+            path = self.path / self.backend_file_directory
         else:
             path = self.path
         return TerraformBackendConfig.parse_obj(

@@ -53,6 +53,9 @@ class RunwayTerraformModuleOptionsDataModel(ConfigProperty):
     var_file_directory: Optional[str] = Field(
         default=None, alias="terraform_var_file_directory"
     )
+    backend_file_directory: Optional[str] = Field(
+        default=None, alias="terraform_backend_file_directory"
+    )
     version: Optional[str] = Field(default=None, alias="terraform_version")
     workspace: Optional[str] = Field(default=None, alias="terraform_workspace")
     write_auto_tfvars: bool = Field(default=False, alias="terraform_write_auto_tfvars")

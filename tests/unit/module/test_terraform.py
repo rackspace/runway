@@ -871,6 +871,30 @@ class TestTerraformOptions:
         assert obj.backend_config == "success"
 
     @pytest.mark.parametrize(
+        "directory, expected",
+        [
+            ("backend-file-directory", "backend-file-directory"),
+        ],
+    )
+    def test_backend_config_with_custom_directory(
+        self,
+        directory: Optional[str],
+        expected: Optional[str],
+        mocker: MockerFixture,
+        runway_context: MockRunwayContext,
+        tmp_path: Path,
+    ) -> None:
+        """Test backend_config with custom directory."""
+        mocker.patch.object(TerraformBackendConfig, "parse_obj", return_value="success")
+        obj = TerraformOptions.parse_obj(
+            deploy_environment=runway_context.env,
+            obj={"terraform_backend_file_directory": directory},
+            path=tmp_path,
+        )
+        assert obj.backend_config == "success"
+        assert obj.backend_file_directory == expected
+
+    @pytest.mark.parametrize(
         "config",
         [
             ({"args": ["-key=val"]}),
@@ -915,6 +939,8 @@ class TestTerraformOptions:
                 }
             ),
             ({"terraform_version": "0.11.6"}),
+            ({"terraform_backend_file_directory": "backend-file-directory"}),
+            ({"terraform_var_file_directory": "var-file-directory"}),
             (
                 {
                     "args": {
@@ -927,6 +953,8 @@ class TestTerraformOptions:
                         "dynamodb_table": "bar",
                         "region": "us-west-2",
                     },
+                    "terraform_backend_file_directory": "backend-file-directory",
+                    "terraform_var_file_directory": "var-file-directory",
                     "terraform_version": "0.11.6",
                 }
             ),
@@ -949,6 +977,10 @@ class TestTerraformOptions:
             assert obj.args.init == config["args"].get("init", [])
             assert obj.args.plan == config["args"].get("plan", [])
         assert obj.version == config.get("terraform_version")
+        assert obj.backend_file_directory == config.get(
+            "terraform_backend_file_directory"
+        )
+        assert obj.var_file_directory == config.get("terraform_var_file_directory")
 
 
 class TestTerraformBackendConfig:
