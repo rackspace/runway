@@ -52,14 +52,14 @@ def update_env_vars_with_tf_var_values(
     for key, val in tf_vars.items():
         if isinstance(val, dict):
             value = ", ".join(
-                nestedkey + ' = "' + nestedval + '"'
+                nestedkey + ' = "' + str(nestedval) + '"'
                 for (nestedkey, nestedval) in val.items()
             )
             os_env_vars[f"TF_VAR_{key}"] = f"{{ {value} }}"
         elif isinstance(val, list):
-            os_env_vars[f"TF_VAR_{key}"] = json.dumps(val)
+            os_env_vars[f"TF_VAR_{key}"] = str(json.dumps(val))
         else:
-            os_env_vars[f"TF_VAR_{key}"] = val
+            os_env_vars[f"TF_VAR_{key}"] = str(val)
     return os_env_vars
 
 
