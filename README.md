@@ -10,7 +10,7 @@
 
 Runway is a lightweight integration app designed to ease management of infrastructure tools.
 
-Its main goals are to encourage GitOps best-practices, avoid convoluted Makefiles/scripts (enabling identical deployments from a workstation or CI job), and enable developers/admins to use the best tool for any given job.
+Its main goals are to encourage GitOps best-practices, avoid convoluted Makefiles/scripts (enabling identical deployments from a workstation or CI job), and enable developers/admins to use the best tool for any given job. TEST
 
 
 ## Features
