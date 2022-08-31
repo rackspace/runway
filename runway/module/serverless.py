@@ -177,10 +177,24 @@ class Serverless(RunwayModuleNpm):
         """
         args = [command] + self.cli_args + self.options.args
         args.extend(args_list or [])
-        if self.ctx.no_color and "--no-color" not in args:
-            args.append("--no-color")
         if command not in ["remove", "package", "print"] and self.ctx.is_noninteractive:
             args.append("--conceal")  # hide secrets from serverless output
+
+        # Serverless is no longer happy using "--no-color" arg.
+        # It was never natively supported by the app, only by an
+        # upstream dependency called "chalk" that it uses. Later
+        # versions of Serverless now break with "--no-color"
+        # defined. This update disables Serverless color in a way
+        # now recommended by the devs, see the following issue:
+        # https://github.com/serverless/serverless/issues/11142
+        if self.ctx.no_color:
+            return generate_node_command(
+                command="FORCE_COLOR=0 sls",
+                command_opts=args,
+                path=self.path,
+                logger=self.logger,
+            )
+
         return generate_node_command(
             command="sls", command_opts=args, path=self.path, logger=self.logger
         )
@@ -288,7 +302,7 @@ class Serverless(RunwayModuleNpm):
         ) as proc:
             with cast(IO[str], proc.stdout):
                 for line in cast(IO[str], proc.stdout):
-                    print(line, end="")  # noqa: T001
+                    print(line, end="")  # noqa: T201,T001
                     if re.search(r"Stack '.*' does not exist", line):
                         stack_missing = True
         if proc.wait() != 0 and not stack_missing:
