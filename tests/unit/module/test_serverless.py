@@ -361,12 +361,14 @@ class TestServerless:
 
         obj.ctx.env.vars["CI"] = "1"
         mocker.patch.object(runway_context, "no_color", True)
-        expected_opts.append("--no-color")
         if command not in ["remove", "print"]:
             expected_opts.append("--conceal")
         assert obj.gen_cmd(command, args_list=["--extra-arg"]) == ["success"]
         mock_cmd.assert_called_once_with(
-            command="sls", command_opts=expected_opts, logger=obj.logger, path=tmp_path
+            command="FORCE_COLOR=0 sls",
+            command_opts=expected_opts,
+            logger=obj.logger,
+            path=tmp_path,
         )
 
     def test_init(
