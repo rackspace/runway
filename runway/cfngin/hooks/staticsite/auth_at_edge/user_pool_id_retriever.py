@@ -1,6 +1,6 @@
 """Retrieve the ID of the Cognito User Pool."""
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from ...base import HookArgsBaseModel
 
@@ -10,10 +10,10 @@ LOGGER = logging.getLogger(__name__)
 class HookArgs(HookArgsBaseModel):
     """Hook arguments."""
 
-    created_user_pool_id: str
+    created_user_pool_id: Optional[str] = None
     """The ID of the created Cognito User Pool."""
 
-    user_pool_arn: str
+    user_pool_arn: Optional[str] = None
     """The ARN of the supplied User pool."""
 
 
