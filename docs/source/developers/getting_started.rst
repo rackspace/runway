@@ -14,7 +14,7 @@ Before getting started, `fork this repo`_ and `clone your fork`_.
 Development Environment
 ***********************
 
-This project includes an optional `VSCode Dev Container <https://code.visualstudio.com/docs/remote/containers>`__. This is an Ubuntu 22.04 image that will launch with operating system pre-reqs already installed and VSCode configured for Python debugging. It's not required to use this for development work, but does provide an easy and consistent way to get started.
+This project includes an optional `VSCode Dev Container <https://code.visualstudio.com/docs/remote/containers>`__. This is an Ubuntu 22.04 image that will launch with operating system pre-requisites already installed and VSCode configured for Python debugging. It's not required to use this for development work, but does provide an easy and consistent way to get started.
 
 This project uses `poetry <https://python-poetry.org/>`__ to create Python virtual environment. This must be installed on your system before setting up your dev environment.
 
