@@ -185,7 +185,7 @@ class Serverless(RunwayModuleNpm):
         # upstream dependency called "chalk" that it uses. Later
         # versions of Serverless now break with "--no-color"
         # defined. This update disables Serverless color in a way
-        # now recommended by the devs, see the following issue:
+        # now recommended by the developers, see the following issue:
         # https://github.com/serverless/serverless/issues/11142
         if self.ctx.no_color:
             return generate_node_command(
