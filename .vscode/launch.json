@@ -2,8 +2,7 @@
     "configurations": [
         {
             "args": [
-                "plan",
-                "--debug"
+                "plan"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/tmp/samplerepo/",
@@ -18,8 +17,7 @@
         },
         {
             "args": [
-                "deploy",
-                "--debug"
+                "deploy"
             ],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/tmp/samplerepo/",
@@ -29,36 +27,6 @@
             "justMyCode": true,
             "name": "Runway: Deploy",
             "program": "${workspaceFolder}/.venv/bin/runway",
-            "request": "launch",
-            "type": "python"
-        },
-        {
-            "args": [
-                "destroy",
-                "--debug"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}/tmp/samplerepo/",
-            "env": {
-                "DEPLOY_ENVIRONMENT": "dev"
-            },
-            "justMyCode": true,
-            "name": "Runway: Destroy",
-            "program": "${workspaceFolder}/.venv/bin/runway",
-            "request": "launch",
-            "type": "python"
-        },
-        {
-            "args": [
-                "--dist=loadfile",
-                "--integration",
-                "--numprocesses=auto"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "justMyCode": false,
-            "name": "Pytest",
-            "program": "${workspaceFolder}/.venv/bin/pytest",
             "request": "launch",
             "type": "python"
         }
