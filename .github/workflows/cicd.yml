@@ -144,7 +144,7 @@ jobs:
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install --extras docs -vv
-      - uses: pre-commit/action@v2.0.3
+      - uses: pre-commit/action@v3.0.0
   test-functional:
     name: Functional Tests
     needs: deploy-test-infrastructure
