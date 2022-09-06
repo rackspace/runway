@@ -52,7 +52,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install make sed
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.8
         id: cache
         with:
           path: .venv
@@ -102,7 +102,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: choco install make sed
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.8
         id: cache
         with:
           path: .venv
@@ -163,7 +163,7 @@ jobs:
         if: steps.check_distance.outcome == 'success'
         run: sudo apt-get update && sudo apt-get install sed tree -y
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3.0.8
         id: cache
         with:
           path: .venv
