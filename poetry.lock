@@ -534,17 +534,17 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.63.2"
+version = "0.64.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "main"
 optional = false
-python-versions = ">=3.6, <=4.0, !=4.0"
+python-versions = ">=3.7, <=4.0, !=4.0"
 
 [package.dependencies]
 aws-sam-translator = ">=1.50.0"
 jschema-to-python = ">=1.2.3,<1.3.0"
 jsonpatch = "*"
-jsonschema = ">=3.0,<4.0"
+jsonschema = ">=3.0,<5"
 junit-xml = ">=1.9,<2.0"
 networkx = ">=2.4,<3.0"
 pyyaml = ">5.4"
@@ -2539,8 +2539,8 @@ cfn-flip = [
     {file = "cfn_flip-1.3.0.tar.gz", hash = "sha256:003e02a089c35e1230ffd0e1bcfbbc4b12cc7d2deb2fcc6c4228ac9819307362"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.63.2.tar.gz", hash = "sha256:e8232c78edc8bb3e40da37db43bffde6ba542dedd26b6bb3c6911e22133737a1"},
-    {file = "cfn_lint-0.63.2-py3-none-any.whl", hash = "sha256:57cbc38068b72e3559917adb1ea11452d879fd23c482ae64ac186b90939f8e8a"},
+    {file = "cfn-lint-0.64.1.tar.gz", hash = "sha256:419ca43b39df49cfe6938e4241a8f4742e2773f5302642e5bb30b63ff867321e"},
+    {file = "cfn_lint-0.64.1-py3-none-any.whl", hash = "sha256:a32a9f24d9cb4ab0dcbf579916345520f8bf493bdbf13da1e33ac0d7c5cd90f8"},
 ]
 charset-normalizer = [
     {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
