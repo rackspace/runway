@@ -1828,7 +1828,7 @@ six = ">=1.5"
 
 [[package]]
 name = "python-hcl2"
-version = "3.0.4"
+version = "3.0.5"
 description = "A parser for HCL2"
 category = "main"
 optional = false
@@ -3165,7 +3165,7 @@ python-dateutil = [
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
 ]
 python-hcl2 = [
-    {file = "python-hcl2-3.0.4.tar.gz", hash = "sha256:a300dbe2918271e6cd7ce4e7afa360eb2dbb226ee790b8e32a2a317586df8334"},
+    {file = "python-hcl2-3.0.5.tar.gz", hash = "sha256:f8beff86346c6f42ccad75d6d2af4a33981802b6a000de881cc93b649f49ed1c"},
 ]
 pytz = [
     {file = "pytz-2021.3-py2.py3-none-any.whl", hash = "sha256:3672058bc3453457b622aab7a1c3bfd5ab0bdae451512f6cf25f64ed37f5b87c"},
