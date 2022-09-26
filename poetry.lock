@@ -821,6 +821,37 @@ dev = ["coverage (>=4.0.0,<5.0.0)", "flake8-builtins", "flake8-commas", "flake8-
 test = ["coverage (>=4.0.0,<5.0.0)", "flake8-builtins", "flake8-commas", "flake8-fixme", "flake8-print", "flake8-quotes", "flake8-todo", "pytest (>=4)", "pytest-cov (>=2)"]
 
 [[package]]
+name = "Flask"
+version = "2.1.3"
+description = "A simple framework for building complex web applications."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+click = ">=8.0"
+importlib-metadata = {version = ">=3.6.0", markers = "python_version < \"3.10\""}
+itsdangerous = ">=2.0"
+Jinja2 = ">=3.0"
+Werkzeug = ">=2.0"
+
+[package.extras]
+async = ["asgiref (>=3.2)"]
+dotenv = ["python-dotenv"]
+
+[[package]]
+name = "Flask-Cors"
+version = "3.0.10"
+description = "A Flask extension adding a decorator for CORS support"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Flask = ">=0.9"
+Six = "*"
+
+[[package]]
 name = "formic2"
 version = "1.0.3"
 description = "An implementation of Apache Ant FileSet and Globs"
@@ -950,6 +981,14 @@ colors = ["colorama (>=0.4.3,<0.5.0)"]
 pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
 plugins = ["setuptools"]
 requirements_deprecated_finder = ["pip-api", "pipreqs"]
+
+[[package]]
+name = "itsdangerous"
+version = "2.1.2"
+description = "Safely pass data to untrusted environments and back."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
 
 [[package]]
 name = "jinja2"
@@ -1136,7 +1175,7 @@ test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
 name = "moto"
-version = "3.0.5"
+version = "4.0.5"
 description = "A library that allows your python tests to easily mock out the boto library"
 category = "dev"
 optional = false
@@ -1146,6 +1185,8 @@ python-versions = ">=3.6"
 boto3 = ">=1.9.201"
 botocore = ">=1.12.201"
 cryptography = ">=3.3.1"
+flask = "<2.2.0"
+flask-cors = "*"
 importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 Jinja2 = ">=2.10.1"
 MarkupSafe = "!=2.0.0a1"
@@ -1153,29 +1194,32 @@ python-dateutil = ">=2.1,<3.0.0"
 pytz = "*"
 PyYAML = {version = ">=5.1", optional = true, markers = "extra == \"s3\""}
 requests = ">=2.5"
-responses = ">=0.9.0"
+responses = ">=0.13.0"
 sshpubkeys = {version = ">=3.1.0", optional = true, markers = "extra == \"ec2\""}
-werkzeug = "*"
+werkzeug = ">=0.5,<2.2.0"
 xmltodict = "*"
 
 [package.extras]
-all = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.4.0)", "docker (>=2.5.1)", "ecdsa (!=0.15)", "graphql-core", "idna (>=2.5,<4)", "jsondiff (>=1.1.2)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
-apigateway = ["PyYAML (>=5.1)", "ecdsa (!=0.15)", "python-jose[cryptography] (>=3.1.0,<4.0.0)"]
+all = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.4.0)", "docker (>=2.5.1)", "ecdsa (!=0.15)", "graphql-core", "idna (>=2.5,<4)", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.2.8)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
+apigateway = ["PyYAML (>=5.1)", "ecdsa (!=0.15)", "openapi-spec-validator (>=0.2.8)", "python-jose[cryptography] (>=3.1.0,<4.0.0)"]
 apigatewayv2 = ["PyYAML (>=5.1)"]
 appsync = ["graphql-core"]
 awslambda = ["docker (>=2.5.1)"]
 batch = ["docker (>=2.5.1)"]
-cloudformation = ["PyYAML (>=5.1)", "cfn-lint (>=0.4.0)", "docker (>=2.5.1)"]
+cloudformation = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.4.0)", "docker (>=2.5.1)", "ecdsa (!=0.15)", "graphql-core", "idna (>=2.5,<4)", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.2.8)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
 cognitoidp = ["ecdsa (!=0.15)", "python-jose[cryptography] (>=3.1.0,<4.0.0)"]
 ds = ["sshpubkeys (>=3.1.0)"]
+dynamodb = ["docker (>=2.5.1)"]
 dynamodb2 = ["docker (>=2.5.1)"]
 dynamodbstreams = ["docker (>=2.5.1)"]
+ebs = ["sshpubkeys (>=3.1.0)"]
 ec2 = ["sshpubkeys (>=3.1.0)"]
 efs = ["sshpubkeys (>=3.1.0)"]
+glue = ["pyparsing (>=3.0.7)"]
 iotdata = ["jsondiff (>=1.1.2)"]
 route53resolver = ["sshpubkeys (>=3.1.0)"]
 s3 = ["PyYAML (>=5.1)"]
-server = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.4.0)", "docker (>=2.5.1)", "ecdsa (!=0.15)", "flask", "flask-cors", "graphql-core", "idna (>=2.5,<4)", "jsondiff (>=1.1.2)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
+server = ["PyYAML (>=5.1)", "aws-xray-sdk (>=0.93,!=0.96)", "cfn-lint (>=0.4.0)", "docker (>=2.5.1)", "ecdsa (!=0.15)", "graphql-core", "idna (>=2.5,<4)", "jsondiff (>=1.1.2)", "openapi-spec-validator (>=0.2.8)", "pyparsing (>=3.0.7)", "python-jose[cryptography] (>=3.1.0,<4.0.0)", "setuptools", "sshpubkeys (>=3.1.0)"]
 ssm = ["PyYAML (>=5.1)", "dataclasses"]
 xray = ["aws-xray-sdk (>=0.93,!=0.96)", "setuptools"]
 
@@ -2537,11 +2581,6 @@ charset-normalizer = [
 ]
 cli-exit-tools = [
     {file = "cli_exit_tools-1.2.1-py3-none-any.whl", hash = "sha256:d9f0ca9972a15a6bea753d9675dc5fe30d75ded3b95238880480a1ac615d1dec"},
-    {file = "cli_exit_tools-1.2.1-py3.10.egg", hash = "sha256:aac576c75c8de81c2d7aee1d54220f8fdd975f846f68b174bf4efd27fe9c44e7"},
-    {file = "cli_exit_tools-1.2.1-py3.6.egg", hash = "sha256:2c94832cf1243981f36740c5431445a7e36044956ca888fd2cacb33f6d88903a"},
-    {file = "cli_exit_tools-1.2.1-py3.7.egg", hash = "sha256:5676361fb45551ddf2b4f34453bb4f8d3d516a7b722caaa1bca0c286fb4c1ef6"},
-    {file = "cli_exit_tools-1.2.1-py3.8.egg", hash = "sha256:705df17bbfe2bbe8ab9cb2f8a4e7d4abd0c7d72f6a4c53b38a7b85a4933d7de7"},
-    {file = "cli_exit_tools-1.2.1-py3.9.egg", hash = "sha256:892b8cc3967768bb1d4baf28ec9464756cb4bc8ff16a760b13c2ad0747ff512a"},
     {file = "cli_exit_tools-1.2.1.tar.gz", hash = "sha256:bd5e587127c65c6731a9f9b87671ca10d2c76fefabd0fdb73bebae0524e42776"},
 ]
 click = [
@@ -2685,6 +2724,14 @@ flake8-print = [
 flake8-use-fstring = [
     {file = "flake8-use-fstring-1.4.tar.gz", hash = "sha256:6550bf722585eb97dffa8343b0f1c372101f5c4ab5b07ebf0edd1c79880cdd39"},
 ]
+Flask = [
+    {file = "Flask-2.1.3-py3-none-any.whl", hash = "sha256:9013281a7402ad527f8fd56375164f3aa021ecfaff89bfe3825346c24f87e04c"},
+    {file = "Flask-2.1.3.tar.gz", hash = "sha256:15972e5017df0575c3d6c090ba168b6db90259e620ac8d7ea813a396bad5b6cb"},
+]
+Flask-Cors = [
+    {file = "Flask-Cors-3.0.10.tar.gz", hash = "sha256:b60839393f3b84a0f3746f6cdca56c1ad7426aa738b70d6c61375857823181de"},
+    {file = "Flask_Cors-3.0.10-py2.py3-none-any.whl", hash = "sha256:74efc975af1194fc7891ff5cd85b0f7478be4f7f59fe158102e91abb72bb4438"},
+]
 formic2 = [
     {file = "formic2-1.0.3-py2-none-any.whl", hash = "sha256:94abc00d86403585ad4991dd59a66cadbc9a49143e965e20319d1e44ef030a87"},
     {file = "formic2-1.0.3-py3-none-any.whl", hash = "sha256:0897c188b7d182525de12bc9c0c1472b88856a9d87884f7c38717f8393366c61"},
@@ -2732,6 +2779,10 @@ iniconfig = [
 isort = [
     {file = "isort-5.10.1-py3-none-any.whl", hash = "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7"},
     {file = "isort-5.10.1.tar.gz", hash = "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"},
+]
+itsdangerous = [
+    {file = "itsdangerous-2.1.2-py3-none-any.whl", hash = "sha256:2c2349112351b88699d8d4b6b075022c0808887cb7ad10069318a8b0bc88db44"},
+    {file = "itsdangerous-2.1.2.tar.gz", hash = "sha256:5dbbc68b317e5e42f327f9021763545dc3fc3bfe22e6deb96aaf1fc38874156a"},
 ]
 jinja2 = [
     {file = "Jinja2-3.0.3-py3-none-any.whl", hash = "sha256:077ce6014f7b40d03b47d1f1ca4b0fc8328a692bd284016f806ed0eaca390ad8"},
@@ -2812,11 +2863,6 @@ lazy-object-proxy = [
 ]
 lib-detect-testenv = [
     {file = "lib_detect_testenv-2.0.0-py3-none-any.whl", hash = "sha256:7720133d49d2982bdd617aa18c07e4958711df45d5ed13720b4a8cb57fc71bc2"},
-    {file = "lib_detect_testenv-2.0.0-py3.10.egg", hash = "sha256:dbe812defff90e84ca91625b9e79794d6732bd65407e41012a9dfb0aed63e290"},
-    {file = "lib_detect_testenv-2.0.0-py3.6.egg", hash = "sha256:88ccd9ae2133e9e42bcac9b0ae4ca15aecae3d316cf127b7f98b1a236babe0fc"},
-    {file = "lib_detect_testenv-2.0.0-py3.7.egg", hash = "sha256:d95d72c15c59dd9321cc58ce8cc7a377cbcea0eedc246e98e45df9cc05fe90ff"},
-    {file = "lib_detect_testenv-2.0.0-py3.8.egg", hash = "sha256:fc08544f49bf005a212d66a3166bb1789c2a8ad0505d2c9150f6c9b17ab39625"},
-    {file = "lib_detect_testenv-2.0.0-py3.9.egg", hash = "sha256:f53b1261bcda1be76806f880ddcc6c0c3e77eb02b5e14367be6da29041ba9c54"},
     {file = "lib_detect_testenv-2.0.0.tar.gz", hash = "sha256:7fb4f0a6da4707f4c72f31f7420dfeb27b2dd17ab7f85f628f77466025a3e223"},
 ]
 macholib = [
@@ -2874,8 +2920,8 @@ mock = [
     {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
 ]
 moto = [
-    {file = "moto-3.0.5-py2.py3-none-any.whl", hash = "sha256:077dd5b96267bbb81fc7677b6d5cc3099ca99a371bd7e90932b6d3ff997106c6"},
-    {file = "moto-3.0.5.tar.gz", hash = "sha256:85f2ece0ad0305aa13a39139ce648ab3afe1c04cb32ac1db8d5e5e9117d4d10e"},
+    {file = "moto-4.0.5-py3-none-any.whl", hash = "sha256:1a8640fc53516a2dea5831be8c35b6017d315acb1f395a94b53ef43cd150d2bd"},
+    {file = "moto-4.0.5.tar.gz", hash = "sha256:81312005827902ef88003aec0f92c79761e94e1e478994d18b56100ff020a511"},
 ]
 mypy-boto3 = [
     {file = "mypy-boto3-1.24.70.tar.gz", hash = "sha256:5af1b35c423f99db4ec22d5d6534186727e6221dda9b9d087287851084b0b882"},
@@ -3083,8 +3129,6 @@ pyparsing = [
     {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
 ]
 pyreadline = [
-    {file = "pyreadline-2.1.win-amd64.exe", hash = "sha256:9ce5fa65b8992dfa373bddc5b6e0864ead8f291c94fbfec05fbd5c836162e67b"},
-    {file = "pyreadline-2.1.win32.exe", hash = "sha256:65540c21bfe14405a3a77e4c085ecfce88724743a4ead47c66b84defcf82c32e"},
     {file = "pyreadline-2.1.zip", hash = "sha256:4530592fc2e85b25b1a9f79664433da09237c1a270e4d78ea5aa3a2c7229e2d1"},
 ]
 pyreadline3 = [
