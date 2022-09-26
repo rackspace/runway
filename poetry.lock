@@ -1437,30 +1437,21 @@ python-versions = ">=3.7"
 flake8 = ">=3.9.1"
 
 [[package]]
-name = "pip"
-version = "22.2.2"
-description = "The PyPA recommended tool for installing Python packages."
+name = "pipenv"
+version = "2022.9.24"
+description = "Python Development Workflow for Humans."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
-[[package]]
-name = "pipenv"
-version = "2022.1.8"
-description = "Python Development Workflow for Humans."
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-
 [package.dependencies]
 certifi = "*"
-pip = ">=18.0"
 setuptools = ">=36.2.1"
 virtualenv = "*"
 virtualenv-clone = ">=0.2.5"
 
 [package.extras]
-dev = ["black", "bs4", "flake8 (>=3.3.0,<4.0)", "invoke", "parver", "sphinx", "towncrier", "twine"]
+dev = ["black", "bs4", "flake8 (>=3.3.0,<4.0)", "invoke", "parver", "sphinx", "towncrier"]
 tests = ["flaky", "mock", "pytest (>=5.0)", "pytest-timeout", "pytest-xdist"]
 
 [[package]]
@@ -2537,11 +2528,6 @@ charset-normalizer = [
 ]
 cli-exit-tools = [
     {file = "cli_exit_tools-1.2.1-py3-none-any.whl", hash = "sha256:d9f0ca9972a15a6bea753d9675dc5fe30d75ded3b95238880480a1ac615d1dec"},
-    {file = "cli_exit_tools-1.2.1-py3.10.egg", hash = "sha256:aac576c75c8de81c2d7aee1d54220f8fdd975f846f68b174bf4efd27fe9c44e7"},
-    {file = "cli_exit_tools-1.2.1-py3.6.egg", hash = "sha256:2c94832cf1243981f36740c5431445a7e36044956ca888fd2cacb33f6d88903a"},
-    {file = "cli_exit_tools-1.2.1-py3.7.egg", hash = "sha256:5676361fb45551ddf2b4f34453bb4f8d3d516a7b722caaa1bca0c286fb4c1ef6"},
-    {file = "cli_exit_tools-1.2.1-py3.8.egg", hash = "sha256:705df17bbfe2bbe8ab9cb2f8a4e7d4abd0c7d72f6a4c53b38a7b85a4933d7de7"},
-    {file = "cli_exit_tools-1.2.1-py3.9.egg", hash = "sha256:892b8cc3967768bb1d4baf28ec9464756cb4bc8ff16a760b13c2ad0747ff512a"},
     {file = "cli_exit_tools-1.2.1.tar.gz", hash = "sha256:bd5e587127c65c6731a9f9b87671ca10d2c76fefabd0fdb73bebae0524e42776"},
 ]
 click = [
@@ -2812,11 +2798,6 @@ lazy-object-proxy = [
 ]
 lib-detect-testenv = [
     {file = "lib_detect_testenv-2.0.0-py3-none-any.whl", hash = "sha256:7720133d49d2982bdd617aa18c07e4958711df45d5ed13720b4a8cb57fc71bc2"},
-    {file = "lib_detect_testenv-2.0.0-py3.10.egg", hash = "sha256:dbe812defff90e84ca91625b9e79794d6732bd65407e41012a9dfb0aed63e290"},
-    {file = "lib_detect_testenv-2.0.0-py3.6.egg", hash = "sha256:88ccd9ae2133e9e42bcac9b0ae4ca15aecae3d316cf127b7f98b1a236babe0fc"},
-    {file = "lib_detect_testenv-2.0.0-py3.7.egg", hash = "sha256:d95d72c15c59dd9321cc58ce8cc7a377cbcea0eedc246e98e45df9cc05fe90ff"},
-    {file = "lib_detect_testenv-2.0.0-py3.8.egg", hash = "sha256:fc08544f49bf005a212d66a3166bb1789c2a8ad0505d2c9150f6c9b17ab39625"},
-    {file = "lib_detect_testenv-2.0.0-py3.9.egg", hash = "sha256:f53b1261bcda1be76806f880ddcc6c0c3e77eb02b5e14367be6da29041ba9c54"},
     {file = "lib_detect_testenv-2.0.0.tar.gz", hash = "sha256:7fb4f0a6da4707f4c72f31f7420dfeb27b2dd17ab7f85f628f77466025a3e223"},
 ]
 macholib = [
@@ -2972,13 +2953,9 @@ pep8-naming = [
     {file = "pep8-naming-0.13.2.tar.gz", hash = "sha256:93eef62f525fd12a6f8c98f4dcc17fa70baae2f37fa1f73bec00e3e44392fa48"},
     {file = "pep8_naming-0.13.2-py3-none-any.whl", hash = "sha256:59e29e55c478db69cffbe14ab24b5bd2cd615c0413edf790d47d3fb7ba9a4e23"},
 ]
-pip = [
-    {file = "pip-22.2.2-py3-none-any.whl", hash = "sha256:b61a374b5bc40a6e982426aede40c9b5a08ff20e640f5b56977f4f91fed1e39a"},
-    {file = "pip-22.2.2.tar.gz", hash = "sha256:3fd1929db052f056d7a998439176d3333fa1b3f6c1ad881de1885c0717608a4b"},
-]
 pipenv = [
-    {file = "pipenv-2022.1.8-py2.py3-none-any.whl", hash = "sha256:3b80b4512934b9d8e8ce12c988394642ff96bb697680e5b092e59af503178327"},
-    {file = "pipenv-2022.1.8.tar.gz", hash = "sha256:f84d7119239b22ab2ac2b8fbc7d619d83cf41135206d72a17c4f151cda529fd0"},
+    {file = "pipenv-2022.9.24-py2.py3-none-any.whl", hash = "sha256:22dd3601ab86b2d1caa36a422c4ec6505e2484e71e3b733554c3c3bb8dbe9606"},
+    {file = "pipenv-2022.9.24.tar.gz", hash = "sha256:d682375d6a6edd2f1ed2f76085b7191de149ff8381bce6c1aaf7f55061b04457"},
 ]
 platformdirs = [
     {file = "platformdirs-2.5.1-py3-none-any.whl", hash = "sha256:bcae7cab893c2d310a711b70b24efb93334febe65f8de776ee320b517471e227"},
@@ -3083,8 +3060,6 @@ pyparsing = [
     {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
 ]
 pyreadline = [
-    {file = "pyreadline-2.1.win-amd64.exe", hash = "sha256:9ce5fa65b8992dfa373bddc5b6e0864ead8f291c94fbfec05fbd5c836162e67b"},
-    {file = "pyreadline-2.1.win32.exe", hash = "sha256:65540c21bfe14405a3a77e4c085ecfce88724743a4ead47c66b84defcf82c32e"},
     {file = "pyreadline-2.1.zip", hash = "sha256:4530592fc2e85b25b1a9f79664433da09237c1a270e4d78ea5aa3a2c7229e2d1"},
 ]
 pyreadline3 = [
