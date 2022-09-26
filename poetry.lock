@@ -113,14 +113,14 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.24.70"
+version = "1.24.80"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.70,<1.28.0"
+botocore = ">=1.27.80,<1.28.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -459,7 +459,7 @@ xray = ["mypy-boto3-xray (>=1.21.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.70"
+version = "1.27.80"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -2444,16 +2444,16 @@ black = [
     {file = "black-22.1.0.tar.gz", hash = "sha256:a7c0192d35635f6fc1174be575cb7915e92e5dd629ee79fdaf0dcfa41a80afb5"},
 ]
 boto3 = [
-    {file = "boto3-1.24.70-py3-none-any.whl", hash = "sha256:bb69ebe7c484305568b1aaed664db3d09716dc93235e41f23538f99ea4f3addc"},
-    {file = "boto3-1.24.70.tar.gz", hash = "sha256:abac9c7e54212ee68c2a311812a498ece2c43f98d1302f099128a9fe45cf37c5"},
+    {file = "boto3-1.24.80-py3-none-any.whl", hash = "sha256:0c5732a78f75ff3e2692e6ed1765c5c9d4960ba0e8b0694066864b86f9537350"},
+    {file = "boto3-1.24.80.tar.gz", hash = "sha256:c686295e7829cf54127f7ab9c20088cc7b2a7d24768fcf355aebffa65879e2c9"},
 ]
 boto3-stubs = [
     {file = "boto3-stubs-1.21.8.tar.gz", hash = "sha256:10717743763d0d2a5f8052b52cbf9f0085537e6662bbf3fa8c0f5d07a59b1d47"},
     {file = "boto3_stubs-1.21.8-py3-none-any.whl", hash = "sha256:567e3939692ca3c83b3c02f1c8b55bd5c1cbce2301ff80f75473c0a813cd18b1"},
 ]
 botocore = [
-    {file = "botocore-1.27.70-py3-none-any.whl", hash = "sha256:c0a014b4dfd7ffe739393034aa6e70e73f3a1b22c7667a59858259b341bf5082"},
-    {file = "botocore-1.27.70.tar.gz", hash = "sha256:2ad5be6ca322a549f858d245237358ed300f7347096caacbb29c013e10663d34"},
+    {file = "botocore-1.27.80-py3-none-any.whl", hash = "sha256:412145ab8b9ec2ee3c9ecf43e06f9fe0fc03cc645add8314327e69e58be78cab"},
+    {file = "botocore-1.27.80.tar.gz", hash = "sha256:0f8b937c41e7ea92c5374e83d54c006d99d9f9fa203175fbfb1ded74c28e9759"},
 ]
 botocore-stubs = [
     {file = "botocore-stubs-1.24.5.tar.gz", hash = "sha256:c529ae79feee73a0e1a76ae8f594206c4dfe4abeb81bea0adc73669ee8910859"},
@@ -2537,11 +2537,6 @@ charset-normalizer = [
 ]
 cli-exit-tools = [
     {file = "cli_exit_tools-1.2.1-py3-none-any.whl", hash = "sha256:d9f0ca9972a15a6bea753d9675dc5fe30d75ded3b95238880480a1ac615d1dec"},
-    {file = "cli_exit_tools-1.2.1-py3.10.egg", hash = "sha256:aac576c75c8de81c2d7aee1d54220f8fdd975f846f68b174bf4efd27fe9c44e7"},
-    {file = "cli_exit_tools-1.2.1-py3.6.egg", hash = "sha256:2c94832cf1243981f36740c5431445a7e36044956ca888fd2cacb33f6d88903a"},
-    {file = "cli_exit_tools-1.2.1-py3.7.egg", hash = "sha256:5676361fb45551ddf2b4f34453bb4f8d3d516a7b722caaa1bca0c286fb4c1ef6"},
-    {file = "cli_exit_tools-1.2.1-py3.8.egg", hash = "sha256:705df17bbfe2bbe8ab9cb2f8a4e7d4abd0c7d72f6a4c53b38a7b85a4933d7de7"},
-    {file = "cli_exit_tools-1.2.1-py3.9.egg", hash = "sha256:892b8cc3967768bb1d4baf28ec9464756cb4bc8ff16a760b13c2ad0747ff512a"},
     {file = "cli_exit_tools-1.2.1.tar.gz", hash = "sha256:bd5e587127c65c6731a9f9b87671ca10d2c76fefabd0fdb73bebae0524e42776"},
 ]
 click = [
@@ -2812,11 +2807,6 @@ lazy-object-proxy = [
 ]
 lib-detect-testenv = [
     {file = "lib_detect_testenv-2.0.0-py3-none-any.whl", hash = "sha256:7720133d49d2982bdd617aa18c07e4958711df45d5ed13720b4a8cb57fc71bc2"},
-    {file = "lib_detect_testenv-2.0.0-py3.10.egg", hash = "sha256:dbe812defff90e84ca91625b9e79794d6732bd65407e41012a9dfb0aed63e290"},
-    {file = "lib_detect_testenv-2.0.0-py3.6.egg", hash = "sha256:88ccd9ae2133e9e42bcac9b0ae4ca15aecae3d316cf127b7f98b1a236babe0fc"},
-    {file = "lib_detect_testenv-2.0.0-py3.7.egg", hash = "sha256:d95d72c15c59dd9321cc58ce8cc7a377cbcea0eedc246e98e45df9cc05fe90ff"},
-    {file = "lib_detect_testenv-2.0.0-py3.8.egg", hash = "sha256:fc08544f49bf005a212d66a3166bb1789c2a8ad0505d2c9150f6c9b17ab39625"},
-    {file = "lib_detect_testenv-2.0.0-py3.9.egg", hash = "sha256:f53b1261bcda1be76806f880ddcc6c0c3e77eb02b5e14367be6da29041ba9c54"},
     {file = "lib_detect_testenv-2.0.0.tar.gz", hash = "sha256:7fb4f0a6da4707f4c72f31f7420dfeb27b2dd17ab7f85f628f77466025a3e223"},
 ]
 macholib = [
@@ -3083,8 +3073,6 @@ pyparsing = [
     {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
 ]
 pyreadline = [
-    {file = "pyreadline-2.1.win-amd64.exe", hash = "sha256:9ce5fa65b8992dfa373bddc5b6e0864ead8f291c94fbfec05fbd5c836162e67b"},
-    {file = "pyreadline-2.1.win32.exe", hash = "sha256:65540c21bfe14405a3a77e4c085ecfce88724743a4ead47c66b84defcf82c32e"},
     {file = "pyreadline-2.1.zip", hash = "sha256:4530592fc2e85b25b1a9f79664433da09237c1a270e4d78ea5aa3a2c7229e2d1"},
 ]
 pyreadline3 = [
