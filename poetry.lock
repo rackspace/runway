@@ -1774,7 +1774,7 @@ test = ["Pygments (>=2.0)", "anyio", "coverage", "docutils (>=0.12)", "pytest (>
 
 [[package]]
 name = "pytest-sugar"
-version = "0.9.4"
+version = "0.9.5"
 description = "pytest-sugar is a plugin for pytest that changes the default look and feel of pytest (e.g. progressbar, show tests that fail instantly)."
 category = "dev"
 optional = false
@@ -2537,11 +2537,6 @@ charset-normalizer = [
 ]
 cli-exit-tools = [
     {file = "cli_exit_tools-1.2.1-py3-none-any.whl", hash = "sha256:d9f0ca9972a15a6bea753d9675dc5fe30d75ded3b95238880480a1ac615d1dec"},
-    {file = "cli_exit_tools-1.2.1-py3.10.egg", hash = "sha256:aac576c75c8de81c2d7aee1d54220f8fdd975f846f68b174bf4efd27fe9c44e7"},
-    {file = "cli_exit_tools-1.2.1-py3.6.egg", hash = "sha256:2c94832cf1243981f36740c5431445a7e36044956ca888fd2cacb33f6d88903a"},
-    {file = "cli_exit_tools-1.2.1-py3.7.egg", hash = "sha256:5676361fb45551ddf2b4f34453bb4f8d3d516a7b722caaa1bca0c286fb4c1ef6"},
-    {file = "cli_exit_tools-1.2.1-py3.8.egg", hash = "sha256:705df17bbfe2bbe8ab9cb2f8a4e7d4abd0c7d72f6a4c53b38a7b85a4933d7de7"},
-    {file = "cli_exit_tools-1.2.1-py3.9.egg", hash = "sha256:892b8cc3967768bb1d4baf28ec9464756cb4bc8ff16a760b13c2ad0747ff512a"},
     {file = "cli_exit_tools-1.2.1.tar.gz", hash = "sha256:bd5e587127c65c6731a9f9b87671ca10d2c76fefabd0fdb73bebae0524e42776"},
 ]
 click = [
@@ -2812,11 +2807,6 @@ lazy-object-proxy = [
 ]
 lib-detect-testenv = [
     {file = "lib_detect_testenv-2.0.0-py3-none-any.whl", hash = "sha256:7720133d49d2982bdd617aa18c07e4958711df45d5ed13720b4a8cb57fc71bc2"},
-    {file = "lib_detect_testenv-2.0.0-py3.10.egg", hash = "sha256:dbe812defff90e84ca91625b9e79794d6732bd65407e41012a9dfb0aed63e290"},
-    {file = "lib_detect_testenv-2.0.0-py3.6.egg", hash = "sha256:88ccd9ae2133e9e42bcac9b0ae4ca15aecae3d316cf127b7f98b1a236babe0fc"},
-    {file = "lib_detect_testenv-2.0.0-py3.7.egg", hash = "sha256:d95d72c15c59dd9321cc58ce8cc7a377cbcea0eedc246e98e45df9cc05fe90ff"},
-    {file = "lib_detect_testenv-2.0.0-py3.8.egg", hash = "sha256:fc08544f49bf005a212d66a3166bb1789c2a8ad0505d2c9150f6c9b17ab39625"},
-    {file = "lib_detect_testenv-2.0.0-py3.9.egg", hash = "sha256:f53b1261bcda1be76806f880ddcc6c0c3e77eb02b5e14367be6da29041ba9c54"},
     {file = "lib_detect_testenv-2.0.0.tar.gz", hash = "sha256:7fb4f0a6da4707f4c72f31f7420dfeb27b2dd17ab7f85f628f77466025a3e223"},
 ]
 macholib = [
@@ -3083,8 +3073,6 @@ pyparsing = [
     {file = "pyparsing-3.0.7.tar.gz", hash = "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"},
 ]
 pyreadline = [
-    {file = "pyreadline-2.1.win-amd64.exe", hash = "sha256:9ce5fa65b8992dfa373bddc5b6e0864ead8f291c94fbfec05fbd5c836162e67b"},
-    {file = "pyreadline-2.1.win32.exe", hash = "sha256:65540c21bfe14405a3a77e4c085ecfce88724743a4ead47c66b84defcf82c32e"},
     {file = "pyreadline-2.1.zip", hash = "sha256:4530592fc2e85b25b1a9f79664433da09237c1a270e4d78ea5aa3a2c7229e2d1"},
 ]
 pyreadline3 = [
@@ -3139,7 +3127,8 @@ pytest-subprocess = [
     {file = "pytest_subprocess-1.4.1-py3-none-any.whl", hash = "sha256:903667a6dc1ac75f4f27bd620e5728017fa5e119718f6cec71740f2610889571"},
 ]
 pytest-sugar = [
-    {file = "pytest-sugar-0.9.4.tar.gz", hash = "sha256:b1b2186b0a72aada6859bea2a5764145e3aaa2c1cfbb23c3a19b5f7b697563d3"},
+    {file = "pytest-sugar-0.9.5.tar.gz", hash = "sha256:eea78b6f15b635277d3d90280cd386d8feea1cab0f9be75947a626e8b02b477d"},
+    {file = "pytest_sugar-0.9.5-py2.py3-none-any.whl", hash = "sha256:3da42de32ce4e1e95b448d61c92804433f5d4058c0a765096991c2e93d5a289f"},
 ]
 pytest-xdist = [
     {file = "pytest-xdist-2.5.0.tar.gz", hash = "sha256:4580deca3ff04ddb2ac53eba39d76cb5dd5edeac050cb6fbc768b0dd712b4edf"},
