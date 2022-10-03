@@ -534,7 +534,7 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.65.1"
+version = "0.66.0"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "main"
 optional = false
@@ -2527,8 +2527,8 @@ cfn-flip = [
     {file = "cfn_flip-1.3.0.tar.gz", hash = "sha256:003e02a089c35e1230ffd0e1bcfbbc4b12cc7d2deb2fcc6c4228ac9819307362"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.65.1.tar.gz", hash = "sha256:51f6ec52af87e7a44b586f889c538182b710375d644a7eb548bfe268bc393adb"},
-    {file = "cfn_lint-0.65.1-py3-none-any.whl", hash = "sha256:f8c90398b6e8cca8cf8227c5cd84c222adee433f888cee42ecd3a627f26ec019"},
+    {file = "cfn-lint-0.66.0.tar.gz", hash = "sha256:d786da1199575e7fff4e156185365bb5f93fb4a7d678cabcfe804fa00ed8a06f"},
+    {file = "cfn_lint-0.66.0-py3-none-any.whl", hash = "sha256:a702c72ab62ff7b776d98ed402db01eed4671e56cee83a214995479dd08d9eb5"},
 ]
 charset-normalizer = [
     {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
