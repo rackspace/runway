@@ -1436,30 +1436,21 @@ python-versions = ">=3.7"
 flake8 = ">=3.9.1"
 
 [[package]]
-name = "pip"
-version = "22.2.2"
-description = "The PyPA recommended tool for installing Python packages."
+name = "pipenv"
+version = "2022.10.10"
+description = "Python Development Workflow for Humans."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
-[[package]]
-name = "pipenv"
-version = "2022.1.8"
-description = "Python Development Workflow for Humans."
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-
 [package.dependencies]
 certifi = "*"
-pip = ">=18.0"
 setuptools = ">=36.2.1"
 virtualenv = "*"
 virtualenv-clone = ">=0.2.5"
 
 [package.extras]
-dev = ["black", "bs4", "flake8 (>=3.3.0,<4.0)", "invoke", "parver", "sphinx", "towncrier", "twine"]
+dev = ["black", "bs4", "flake8 (>=3.3.0,<4.0)", "invoke", "parver", "sphinx", "towncrier"]
 tests = ["flaky", "mock", "pytest (>=5.0)", "pytest-timeout", "pytest-xdist"]
 
 [[package]]
@@ -2967,13 +2958,9 @@ pep8-naming = [
     {file = "pep8-naming-0.13.2.tar.gz", hash = "sha256:93eef62f525fd12a6f8c98f4dcc17fa70baae2f37fa1f73bec00e3e44392fa48"},
     {file = "pep8_naming-0.13.2-py3-none-any.whl", hash = "sha256:59e29e55c478db69cffbe14ab24b5bd2cd615c0413edf790d47d3fb7ba9a4e23"},
 ]
-pip = [
-    {file = "pip-22.2.2-py3-none-any.whl", hash = "sha256:b61a374b5bc40a6e982426aede40c9b5a08ff20e640f5b56977f4f91fed1e39a"},
-    {file = "pip-22.2.2.tar.gz", hash = "sha256:3fd1929db052f056d7a998439176d3333fa1b3f6c1ad881de1885c0717608a4b"},
-]
 pipenv = [
-    {file = "pipenv-2022.1.8-py2.py3-none-any.whl", hash = "sha256:3b80b4512934b9d8e8ce12c988394642ff96bb697680e5b092e59af503178327"},
-    {file = "pipenv-2022.1.8.tar.gz", hash = "sha256:f84d7119239b22ab2ac2b8fbc7d619d83cf41135206d72a17c4f151cda529fd0"},
+    {file = "pipenv-2022.10.10-py2.py3-none-any.whl", hash = "sha256:a1aebda494024328631e8e258572d4250bffc426dff0dfaa6599f138e8823f81"},
+    {file = "pipenv-2022.10.10.tar.gz", hash = "sha256:29019b7991b37bb6d3e574ef1a8dc40ed7c783fa8067445e3f247119322b5c3a"},
 ]
 platformdirs = [
     {file = "platformdirs-2.5.1-py3-none-any.whl", hash = "sha256:bcae7cab893c2d310a711b70b24efb93334febe65f8de776ee320b517471e227"},
