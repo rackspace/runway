@@ -17,10 +17,11 @@ env:
   AWS_DEFAULT_OUTPUT: json
   AWS_DEFAULT_REGION: us-east-1
   AWS_MAX_ATTEMPTS: 20  # retry attempts for AWS API calls
-  AWS_RETRY_MODE: standard  # defaults to "legacy"; this handles more errors
+  AWS_RETRY_MODE: adaptive  # defaults to "legacy"; this handles more errors
   NODE_VERSION: '16'
   PYTEST_ADDOPTS: --color=yes
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
+  PIPENV_IGNORE_VIRTUALENVS: '1'
 
 
 jobs:
@@ -67,7 +68,7 @@ jobs:
         with:
           python-version: 3.8
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -109,7 +110,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -135,7 +136,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -166,7 +167,7 @@ jobs:
         with:
           python-version: 3.8
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -212,7 +213,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -259,7 +260,7 @@ jobs:
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
