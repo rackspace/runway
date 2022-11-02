@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       # https://github.com/release-drafter/release-drafter
-      - uses: release-drafter/release-drafter@v5.18.1
+      - uses: release-drafter/release-drafter@v5.21.0
         env:
           # Using a PAT here will allow releases to trigger a build/release but
           # we're just using the actions token for the time being since we

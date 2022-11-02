@@ -302,7 +302,7 @@ class Serverless(RunwayModuleNpm):
         ) as proc:
             with cast(IO[str], proc.stdout):
                 for line in cast(IO[str], proc.stdout):
-                    print(line, end="")  # noqa: T001
+                    print(line, end="")  # noqa: T201
                     if re.search(r"Stack '.*' does not exist", line):
                         stack_missing = True
         if proc.wait() != 0 and not stack_missing:

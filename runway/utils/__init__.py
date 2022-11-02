@@ -520,7 +520,7 @@ def ensure_file_is_executable(path: str) -> None:
     if platform.system() != "Windows" and (
         not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]
     ):
-        print(f"Error: File {path} is not executable")  # noqa: T001
+        print(f"Error: File {path} is not executable")  # noqa: T201
         sys.exit(1)
 
 
@@ -801,7 +801,7 @@ def run_commands(
             try:
                 check_call(command_list, env=env)
             except FileNotFoundError:
-                print(failed_to_find_error, file=sys.stderr)  # noqa: T001
+                print(failed_to_find_error, file=sys.stderr)  # noqa: T201
                 sys.exit(1)
 
 

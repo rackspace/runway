@@ -763,7 +763,7 @@ class Provider(BaseProvider):
 
     @staticmethod
     def _tail_print(event: StackEventTypeDef) -> None:
-        print(  # noqa: T001
+        print(  # noqa: T201
             f'{event.get("ResourceStatus")} {event.get("ResourceType")} {event.get("EventId")}'
         )
 

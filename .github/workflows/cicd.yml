@@ -63,7 +63,7 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         id: setup-python
         with:
           python-version: 3.8
@@ -105,7 +105,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -131,7 +131,7 @@ jobs:
         python-version: [3.8]
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -145,7 +145,7 @@ jobs:
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install --extras docs -vv
-      - uses: pre-commit/action@v2.0.3
+      - uses: pre-commit/action@v3.0.0
   test-functional:
     name: Functional Tests
     needs: deploy-test-infrastructure
@@ -162,7 +162,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         id: setup-python
         with:
           python-version: 3.8
@@ -208,7 +208,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -235,7 +235,7 @@ jobs:
         # assertions assume linux so some fail when run on windows
         run: make test cov-xml
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v2.1.0
+        uses: codecov/codecov-action@v3.1.1
         with:
           fail_ci_if_error: true
   build-pypi:
@@ -248,7 +248,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         id: setup-python
         with:
           python-version: 3.8
