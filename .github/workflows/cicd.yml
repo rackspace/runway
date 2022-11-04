@@ -165,7 +165,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 9
+          python-version: 3.9
       - uses: Gr1N/setup-poetry@v7
       - uses: actions/cache@v3
         id: cache
