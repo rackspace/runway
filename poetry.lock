@@ -1445,7 +1445,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "pipenv"
-version = "2021.11.23"
+version = "2022.1.8"
 description = "Python Development Workflow for Humans."
 category = "dev"
 optional = false
