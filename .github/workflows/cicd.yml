@@ -66,7 +66,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       - uses: Gr1N/setup-poetry@v7
       - uses: actions/cache@v3
         id: cache
@@ -92,7 +92,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
       # populating AWS creds with fake values
@@ -128,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8]
+        python-version: [3.9]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -165,7 +165,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 9
       - uses: Gr1N/setup-poetry@v7
       - uses: actions/cache@v3
         id: cache
@@ -193,7 +193,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
       # populating AWS creds with fake values
@@ -251,7 +251,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
       - name: Remove broken apt repos (ubuntu)
