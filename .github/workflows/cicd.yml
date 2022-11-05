@@ -1,17 +1,14 @@
 name: CI/CD
 
-
 on:
   pull_request:  # any pull request
   push:
     branches:
       - master
 
-
 defaults:
   run:
     shell: bash
-
 
 env:
   AWS_DEFAULT_OUTPUT: json
@@ -91,7 +88,8 @@ jobs:
     name: Lint Python
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        #python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
@@ -192,7 +190,8 @@ jobs:
     name: Test Python
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        #python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
