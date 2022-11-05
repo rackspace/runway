@@ -88,8 +88,8 @@ jobs:
     name: Lint Python
     strategy:
       matrix:
-        #python-version: [3.7, 3.8, 3.9]
-        python-version: [3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
+        #python-version: [3.8, 3.9]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
@@ -190,8 +190,8 @@ jobs:
     name: Test Python
     strategy:
       matrix:
-        #python-version: [3.7, 3.8, 3.9]
-        python-version: [3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9]
+        #python-version: [3.8, 3.9]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
