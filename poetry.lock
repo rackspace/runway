@@ -41,7 +41,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 dev = ["cloudpickle", "coverage[toml] (>=5.0.2)", "furo", "hypothesis", "mypy", "pre-commit", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "six", "sphinx", "sphinx-notfound-page", "zope.interface"]
 docs = ["furo", "sphinx", "sphinx-notfound-page", "zope.interface"]
 tests = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "six", "zope.interface"]
-tests_no_zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "six"]
+tests-no-zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "six"]
 
 [[package]]
 name = "awacs"
@@ -56,7 +56,7 @@ typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.8\""
 
 [[package]]
 name = "aws-sam-translator"
-version = "1.51.0"
+version = "1.53.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 category = "main"
 optional = false
@@ -534,14 +534,14 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.65.1"
+version = "0.70.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 category = "main"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 
 [package.dependencies]
-aws-sam-translator = ">=1.51.0"
+aws-sam-translator = ">=1.53.0"
 jschema-to-python = ">=1.2.3,<1.3.0"
 jsonpatch = "*"
 jsonschema = ">=3.0,<5"
@@ -559,7 +559,7 @@ optional = false
 python-versions = ">=3.5.0"
 
 [package.extras]
-unicode_backport = ["unicodedata2"]
+unicode-backport = ["unicodedata2"]
 
 [[package]]
 name = "cli-exit-tools"
@@ -946,9 +946,9 @@ python-versions = ">=3.6.1,<4.0"
 
 [package.extras]
 colors = ["colorama (>=0.4.3,<0.5.0)"]
-pipfile_deprecated_finder = ["pipreqs", "requirementslib"]
+pipfile-deprecated-finder = ["pipreqs", "requirementslib"]
 plugins = ["setuptools"]
-requirements_deprecated_finder = ["pip-api", "pipreqs"]
+requirements-deprecated-finder = ["pip-api", "pipreqs"]
 
 [[package]]
 name = "jinja2"
@@ -1010,7 +1010,7 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 [package.extras]
 docs = ["jaraco.packaging (>=3.2)", "rst.linker (>=1.9)", "sphinx"]
 testing = ["ecdsa", "enum34", "feedparser", "jsonlib", "numpy", "pandas", "pymongo", "pytest (>=3.5,!=3.7.3)", "pytest-black-multipy", "pytest-checkdocs (>=1.2.3)", "pytest-cov", "pytest-flake8", "scikit-learn", "sqlalchemy"]
-"testing.libs" = ["demjson", "simplejson", "ujson", "yajl"]
+testing-libs = ["demjson", "simplejson", "ujson", "yajl"]
 
 [[package]]
 name = "jsonpointer"
@@ -1037,7 +1037,7 @@ six = ">=1.11.0"
 
 [package.extras]
 format = ["idna", "jsonpointer (>1.13)", "rfc3987", "strict-rfc3339", "webcolors"]
-format_nongpl = ["idna", "jsonpointer (>1.13)", "rfc3339-validator", "rfc3986-validator (>0.1.0)", "webcolors"]
+format-nongpl = ["idna", "jsonpointer (>1.13)", "rfc3339-validator", "rfc3986-validator (>0.1.0)", "webcolors"]
 
 [[package]]
 name = "jsx-lexer"
@@ -1602,7 +1602,7 @@ setuptools = "*"
 
 [package.extras]
 encryption = ["tinyaes (>=1.0.0)"]
-hook_testing = ["execnet (>=1.5.0)", "psutil", "pytest (>=2.7.3)"]
+hook-testing = ["execnet (>=1.5.0)", "psutil", "pytest (>=2.7.3)"]
 
 [[package]]
 name = "pyinstaller-hooks-contrib"
@@ -1751,8 +1751,8 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 pytest = [
-    {version = ">=6.2.4", markers = "python_version >= \"3.10\""},
     {version = ">=5.0", markers = "python_version < \"3.10\""},
+    {version = ">=6.2.4", markers = "python_version >= \"3.10\""},
 ]
 
 [[package]]
@@ -1872,7 +1872,7 @@ urllib3 = ">=1.21.1,<1.27"
 
 [package.extras]
 socks = ["PySocks (>=1.5.6,!=1.5.7)"]
-use_chardet_on_py3 = ["chardet (>=3.0.2,<6)"]
+use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "responses"
@@ -2060,7 +2060,7 @@ pygments = "*"
 sphinx = ">=2,<6"
 
 [package.extras]
-code_style = ["pre-commit (==2.13.0)"]
+code-style = ["pre-commit (==2.13.0)"]
 testing = ["bs4", "coverage", "pygments", "pytest (>=7.1,<8)", "pytest-cov", "pytest-regressions", "rinohtype", "sphinx-testing"]
 
 [[package]]
@@ -2405,9 +2405,9 @@ awacs = [
     {file = "awacs-2.2.0.tar.gz", hash = "sha256:cd64501f18c7a20992292aa7bd02c909da229643a5274ee9d3494df94e3a5a45"},
 ]
 aws-sam-translator = [
-    {file = "aws-sam-translator-1.51.0.tar.gz", hash = "sha256:4c39d78dd92a8d4b46b5b02dc74e6f0ef8713109ebc8910aec234c3b18649ffb"},
-    {file = "aws_sam_translator-1.51.0-py2-none-any.whl", hash = "sha256:6f990c6a8f0e0f660aa49b073af9fc82bef2935c1b8c4552d71cff87eb2f8233"},
-    {file = "aws_sam_translator-1.51.0-py3-none-any.whl", hash = "sha256:f0f09f95fcc0c5e699603b9b1daa86307b94920b0823c423ed2ff1eb1cac497f"},
+    {file = "aws-sam-translator-1.53.0.tar.gz", hash = "sha256:392ed4f5fb08f72cb68a8800f0bc278d2a3b6609bd1ac66bfcdeaaa94cdc18e5"},
+    {file = "aws_sam_translator-1.53.0-py2-none-any.whl", hash = "sha256:85252646cf123642d08442137b60445e69e30bfd2f8b663b1202b20ab3782b10"},
+    {file = "aws_sam_translator-1.53.0-py3-none-any.whl", hash = "sha256:84d780ad82f1a176e2f5d4c397749d1e71214cc97ee7cccd50f823fd7c7e7cdf"},
 ]
 babel = [
     {file = "Babel-2.9.1-py2.py3-none-any.whl", hash = "sha256:ab49e12b91d937cd11f0b67cb259a57ab4ad2b59ac7a3b41d6c06c0ac5b0def9"},
@@ -2527,8 +2527,8 @@ cfn-flip = [
     {file = "cfn_flip-1.3.0.tar.gz", hash = "sha256:003e02a089c35e1230ffd0e1bcfbbc4b12cc7d2deb2fcc6c4228ac9819307362"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.65.1.tar.gz", hash = "sha256:51f6ec52af87e7a44b586f889c538182b710375d644a7eb548bfe268bc393adb"},
-    {file = "cfn_lint-0.65.1-py3-none-any.whl", hash = "sha256:f8c90398b6e8cca8cf8227c5cd84c222adee433f888cee42ecd3a627f26ec019"},
+    {file = "cfn-lint-0.70.1.tar.gz", hash = "sha256:41ed63d2397c48043129860ae6a2e4b076c745a5a1ec41ae7f4a238b776ee9a5"},
+    {file = "cfn_lint-0.70.1-py3-none-any.whl", hash = "sha256:b506a74119cf8ecc03e05d4dc0c03100f25a74d509a3b0a1c35226e5657045e2"},
 ]
 charset-normalizer = [
     {file = "charset-normalizer-2.0.12.tar.gz", hash = "sha256:2857e29ff0d34db842cd7ca3230549d1a697f96ee6d3fb071cfa6c7393832597"},
