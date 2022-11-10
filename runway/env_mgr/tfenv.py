@@ -230,8 +230,8 @@ class TFEnvManager(EnvManager):
                 result = load_terraform_module(hcl, self.path).get(
                     "terraform", cast(Dict[str, Any], {})
                 )
-            except HclParserError as exc:
-                LOGGER.warning(exc)
+            except HclParserError as exc2:
+                LOGGER.warning(exc2)
                 # return an empty dict if we can't parse HCL
                 # let Terraform decide if it's actually valid
                 result = {}

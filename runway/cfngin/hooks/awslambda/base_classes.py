@@ -36,24 +36,26 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
-_AwsLambdaHookArgsTypeVar = TypeVar(
-    "_AwsLambdaHookArgsTypeVar", bound=AwsLambdaHookArgs, covariant=True
+_AwsLambdaHookArgsTypeVar_co = TypeVar(
+    "_AwsLambdaHookArgsTypeVar_co", bound=AwsLambdaHookArgs, covariant=True
 )
 
 
-class Project(Generic[_AwsLambdaHookArgsTypeVar]):
+class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
     """Project continaing source code for an AWS Lambda Function."""
 
     DEFAULT_CACHE_DIR_NAME: ClassVar[str] = "cache"
     """Name of the default cache directory."""
 
-    args: _AwsLambdaHookArgsTypeVar
+    args: _AwsLambdaHookArgsTypeVar_co
     """Parsed hook arguments."""
 
     ctx: CfnginContext
     """CFNgin context object."""
 
-    def __init__(self, args: _AwsLambdaHookArgsTypeVar, context: CfnginContext) -> None:
+    def __init__(
+        self, args: _AwsLambdaHookArgsTypeVar_co, context: CfnginContext
+    ) -> None:
         """Instantiate class.
 
         Args:

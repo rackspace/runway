@@ -259,9 +259,9 @@ def generate_cookie_headers(
     ] = f"{tokens.get('refresh_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("refreshToken"))
     )
-
+    cookies_iter = cookies  # type: ignore
     if event == "sign_out":
-        for key in cookies:
+        for key in cookies_iter:
             cookies[key] = expire_cookie(cookies[key])
     elif event == "refresh_failed":
         cookies[cookie_names["refresh_token_key"]] = expire_cookie(

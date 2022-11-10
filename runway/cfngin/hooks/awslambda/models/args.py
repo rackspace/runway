@@ -33,7 +33,8 @@ class DockerOptions(BaseModel):
     """
 
     extra_files: List[str] = []
-    """List of absolute file paths within the Docker container to copy into the deployment package.
+    """List of absolute file paths within the Docker container to copy into the
+    deployment package.
 
     Some Python packages require extra OS libraries (``*.so``) files at runtime.
     These files need to be included in the deployment package for the Lambda Function to run.

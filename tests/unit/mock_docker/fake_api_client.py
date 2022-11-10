@@ -13,7 +13,9 @@ from . import fake_api
 class CopyReturnMagicMock(mock.MagicMock):
     """A MagicMock which deep copies every return value."""
 
-    def _mock_call(self, *args: Any, **kwargs: Any) -> Any:
+    def _mock_call(  # pylint: disable=arguments-differ
+        self, *args: Any, **kwargs: Any
+    ) -> Any:
         ret = super()._mock_call(*args, **kwargs)  # type: ignore
         if isinstance(ret, (dict, list)):
             ret = copy.deepcopy(ret)  # type: ignore

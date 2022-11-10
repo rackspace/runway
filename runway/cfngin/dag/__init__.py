@@ -265,7 +265,8 @@ class DAG:
         """
         nodes = [node]
         nodes_seen: Set[str] = set()
-        for node__ in nodes:
+        nodes_iter = nodes
+        for node__ in nodes_iter:
             downstreams = self.downstream(node__)
             for downstream_node in downstreams:
                 if downstream_node not in nodes_seen:

@@ -624,7 +624,7 @@ class TestDeploymentPackage:
 
         obj = DeploymentPackage(project)
         obj.archive_file.write_text("foobar")
-        response: PutObjectOutputTypeDef = {
+        response: PutObjectOutputTypeDef = {  # type: ignore
             "BucketKeyEnabled": False,
             "ETag": "string",
             "Expiration": "string",
@@ -647,7 +647,7 @@ class TestDeploymentPackage:
         stubber = cast("Stubber", project.ctx.add_stubber("s3"))  # type: ignore
         stubber.add_response(
             "put_object",
-            response,
+            response,  # type: ignore
             {
                 "Body": obj.archive_file.read_bytes(),
                 "Bucket": project.args.bucket_name,
