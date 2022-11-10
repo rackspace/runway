@@ -71,7 +71,7 @@ typing_extensions = "*"  # only really needed for < 3.8 but can still be used in
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
 yamllint = "*"
 pipenv = "2022.1.8"
-moto = "3.1.8"
+moto = "3.0.5"
 
 [tool.poetry.dev-dependencies]
 black = ">=22.1"
