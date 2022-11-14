@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 import logging
-from distutils.util import strtobool
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -32,6 +31,11 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 TransformToTypeLiteral = Literal["bool", "str"]
+
+
+def str2bool(v):  # type: ignore
+    """Return boolean value of string."""
+    return v.lower() in ("yes", "true", "t", "1", "on")
 
 
 class LookupHandler:
@@ -292,7 +296,7 @@ class LookupHandler:
         if isinstance(value, bool):
             return value
         if isinstance(value, str):
-            return bool(strtobool(value))
+            return bool(str2bool(value))
         raise TypeError(
             f"Value must be a string or bool to use transform=bool. Got type {type(value)}."
         )

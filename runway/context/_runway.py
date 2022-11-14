@@ -3,8 +3,9 @@ from __future__ import annotations
 
 import logging
 import sys
-from distutils.util import strtobool
 from typing import TYPE_CHECKING, Any, Optional, Union, cast
+
+from str2bool import str2bool as strtobool  # type: ignore
 
 from ..compat import cached_property
 from ..core.components import DeployEnvironment

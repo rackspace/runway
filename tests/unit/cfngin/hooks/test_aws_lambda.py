@@ -22,7 +22,9 @@ import pytest
 from botocore.exceptions import ClientError
 from mock import ANY, MagicMock, patch
 from moto import mock_s3
-from testfixtures import ShouldRaise, TempDirectory, compare
+from testfixtures.comparison import compare
+from testfixtures.shouldraise import ShouldRaise
+from testfixtures.tempdirectory import TempDirectory
 from troposphere.awslambda import Code
 
 from runway.cfngin.exceptions import InvalidDockerizePipConfiguration

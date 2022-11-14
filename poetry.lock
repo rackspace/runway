@@ -2220,6 +2220,14 @@ importlib-metadata = {version = ">=1.7.0", markers = "python_version < \"3.8\""}
 pbr = ">=2.0.0,<2.1.0 || >2.1.0"
 
 [[package]]
+name = "str2bool"
+version = "1.1"
+description = "Convert string to boolean"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "termcolor"
 version = "2.1.0"
 description = "ANSI color formatting for output in terminal"
@@ -2232,15 +2240,16 @@ tests = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "testfixtures"
-version = "4.14.3"
+version = "7.0.3"
 description = "A collection of helpers and mock objects for unit tests and doc tests."
-category = "dev"
+category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=3.6"
 
 [package.extras]
-build = ["pkginfo", "setuptools-git", "sphinx", "twine", "wheel"]
-test = ["coveralls", "django", "manuel", "mock", "nose", "nose-cov", "nose-fixes", "zope.component"]
+build = ["setuptools-git", "twine", "wheel"]
+docs = ["django", "furo", "sphinx", "sybil (>=3)", "twisted", "zope.component"]
+test = ["django", "mypy", "pytest (>=3.6)", "pytest-cov", "pytest-django", "sybil (>=3)", "twisted", "zope.component"]
 
 [[package]]
 name = "toml"
@@ -2445,7 +2454,7 @@ docs = ["dunamai", "jsx-lexer", "sphinx", "sphinx-github-changelog", "sphinx-rtd
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7, <4"
-content-hash = "8e0469d46e6b0b54e1803e1d2186f8b1b883a66505f3355b9845377a86b6a5ca"
+content-hash = "1ec16f97b0b39d1778f0d0f90b7cde7e05d716b2fda439afb9995ebd395e044c"
 
 [metadata.files]
 alabaster = [
@@ -3370,13 +3379,16 @@ stevedore = [
     {file = "stevedore-3.5.2-py3-none-any.whl", hash = "sha256:fa2630e3d0ad3e22d4914aff2501445815b9a4467a6edc49387c667a38faf5bf"},
     {file = "stevedore-3.5.2.tar.gz", hash = "sha256:cf99f41fc0d5a4f185ca4d3d42b03be9011b0a1ec1a4ea1a282be1b4b306dcc2"},
 ]
+str2bool = [
+    {file = "str2bool-1.1.zip", hash = "sha256:dbc3c917dca831904bce8568f6fb1f91435fcffc2ec4a46d62c9aa08d7cf77c3"},
+]
 termcolor = [
     {file = "termcolor-2.1.0-py3-none-any.whl", hash = "sha256:91dd04fdf661b89d7169cefd35f609b19ca931eb033687eaa647cef1ff177c49"},
     {file = "termcolor-2.1.0.tar.gz", hash = "sha256:b80df54667ce4f48c03fe35df194f052dc27a541ebbf2544e4d6b47b5d6949c4"},
 ]
 testfixtures = [
-    {file = "testfixtures-4.14.3-py2.py3-none-any.whl", hash = "sha256:f9ab6face00b0b3284ced1e46acf0d715d1c5988f3826dc49e71d5fa522a2f7f"},
-    {file = "testfixtures-4.14.3.tar.gz", hash = "sha256:c505e92d3c679ce4001a990327e99275ce657a16cd40b54423c7e24c6fdf0b2f"},
+    {file = "testfixtures-7.0.3-py3-none-any.whl", hash = "sha256:8e21110ccea169745c839699b5718370906f59100bb291aed46e3a7b5ae28435"},
+    {file = "testfixtures-7.0.3.tar.gz", hash = "sha256:942bc751d45068658e11277f213ce1868476e141ea4240da0fb6712ae6f96401"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
