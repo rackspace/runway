@@ -70,6 +70,10 @@ troposphere = ">=2.4, <4"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
 yamllint = "*"
+pipenv = "2022.1.8"
+moto = "3.0.5"
+testfixtures = "^7.0.3"
+str2bool = "^1.1"
 
 [tool.poetry.dev-dependencies]
 black = ">=22.1"
@@ -100,7 +104,7 @@ pytest-subprocess = ">=1.4"  # pytest plugin
 pytest-sugar = ">=0.9"  # pytest plugin
 pytest-xdist = ">=2.5"  # pytest plugin
 semver = "^2.13"  # only used in .github/scripts/urlshortener
-testfixtures = "^4.10"  # TODO remove use of this dependency - was inherited
+testfixtures = "^7.0.3"  # TODO remove use of this dependency - was inherited
 tomli-w = ">=1.0"
 
 [tool.poetry.dev-dependencies.boto3-stubs]

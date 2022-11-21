@@ -1,26 +1,24 @@
 name: CI/CD
 
-
 on:
   pull_request:  # any pull request
   push:
     branches:
       - master
 
-
 defaults:
   run:
     shell: bash
-
 
 env:
   AWS_DEFAULT_OUTPUT: json
   AWS_DEFAULT_REGION: us-east-1
   AWS_MAX_ATTEMPTS: 20  # retry attempts for AWS API calls
-  AWS_RETRY_MODE: standard  # defaults to "legacy"; this handles more errors
+  AWS_RETRY_MODE: adaptive  # defaults to "legacy"; this handles more errors
   NODE_VERSION: '16'
   PYTEST_ADDOPTS: --color=yes
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
+  PIPENV_IGNORE_VIRTUALENVS: '1'
 
 
 jobs:
@@ -65,9 +63,9 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v3.0.8
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -91,7 +89,8 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
-        os: [ubuntu-18.04, windows-latest]
+        #python-version: [3.8, 3.9]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
       # populating AWS creds with fake values
@@ -109,7 +108,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v3.0.8
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -135,7 +134,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v3.0.8
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -164,9 +163,9 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v3.0.8
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -192,7 +191,8 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
-        os: [ubuntu-18.04, windows-latest]
+        #python-version: [3.8, 3.9]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
       # populating AWS creds with fake values
@@ -212,7 +212,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v3.0.8
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv
@@ -250,7 +250,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
       - name: Remove broken apt repos (ubuntu)
@@ -259,7 +259,7 @@ jobs:
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
       - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v3.0.8
+      - uses: actions/cache@v3
         id: cache
         with:
           path: .venv

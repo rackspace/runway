@@ -20,10 +20,11 @@ from troposphere import BaseAWSObject
 if TYPE_CHECKING:
     from typing_extensions import Literal
 
-_TroposphereType = TypeVar("_TroposphereType", bound=BaseAWSObject)
+TroposphereT = TypeVar("TroposphereT", bound=BaseAWSObject)
+# https://github.com/PyCQA/pylint/issues/6003
 
 
-class TroposphereType(Generic[_TroposphereType]):
+class TroposphereType(Generic[TroposphereT]):
     """Represents a Troposphere type.
 
     :class:`Troposphere` will convert the value provided to the variable to
@@ -44,7 +45,7 @@ class TroposphereType(Generic[_TroposphereType]):
 
     def __init__(
         self,
-        defined_type: Type[_TroposphereType],
+        defined_type: Type[TroposphereT],
         *,
         many: bool = False,
         optional: bool = False,
@@ -76,7 +77,7 @@ class TroposphereType(Generic[_TroposphereType]):
         self._validate = validate
 
     @staticmethod
-    def _validate_type(defined_type: Type[_TroposphereType]) -> None:
+    def _validate_type(defined_type: Type[TroposphereT]) -> None:
         if not hasattr(defined_type, "from_dict"):
             raise ValueError("Type must have `from_dict` attribute")
 
@@ -86,11 +87,11 @@ class TroposphereType(Generic[_TroposphereType]):
         return str(getattr(self._type, "resource_name", None) or self._type.__name__)
 
     @overload
-    def create(self, value: Dict[str, Any]) -> _TroposphereType:
+    def create(self, value: Dict[str, Any]) -> TroposphereT:
         ...
 
     @overload
-    def create(self, value: List[Dict[str, Any]]) -> List[_TroposphereType]:
+    def create(self, value: List[Dict[str, Any]]) -> List[TroposphereT]:
         ...
 
     @overload
@@ -99,7 +100,7 @@ class TroposphereType(Generic[_TroposphereType]):
 
     def create(
         self, value: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]
-    ) -> Optional[Union[_TroposphereType, List[_TroposphereType]]]:
+    ) -> Optional[Union[TroposphereT, List[TroposphereT]]]:
         """Create the troposphere type from the value.
 
         Args:

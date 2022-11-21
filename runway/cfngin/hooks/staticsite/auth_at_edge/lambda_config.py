@@ -7,7 +7,6 @@ import re
 import secrets
 import shutil
 import tempfile
-from distutils.dir_util import copy_tree
 from tempfile import mkstemp
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
@@ -122,7 +121,7 @@ def write(
 
             # Copy the template code for the specific Lambda function
             # to the temporary folder
-            copy_tree(
+            shutil.copytree(
                 os.path.join(os.path.dirname(__file__), "templates", handler), dirpath
             )
 

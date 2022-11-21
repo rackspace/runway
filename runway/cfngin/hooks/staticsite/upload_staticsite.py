@@ -426,17 +426,24 @@ def sync_extra_files(
                 "uploading extra file: %s as %s ", extra_file.file, extra_file.name
             )
 
-            extra_args = None
+            extra_args = ""
 
             if extra_file.content_type:
                 extra_args = {"ContentType": extra_file.content_type}
 
-            s3_client.upload_file(
-                Bucket=bucket,
-                ExtraArgs=extra_args,
-                Filename=str(extra_file.file),
-                Key=extra_file.name,
-            )
+            if extra_args:
+                s3_client.upload_file(
+                    Bucket=bucket,
+                    ExtraArgs=extra_args,
+                    Filename=str(extra_file.file),
+                    Key=extra_file.name,
+                )
+            if not extra_args:
+                s3_client.upload_file(
+                    Bucket=bucket,
+                    Filename=str(extra_file.file),
+                    Key=extra_file.name,
+                )
 
             uploaded.append(extra_file.name)
 

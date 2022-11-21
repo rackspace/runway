@@ -12,7 +12,6 @@ import stat
 import subprocess
 import sys
 import tempfile
-from distutils.util import strtobool
 from io import BytesIO as StringIO
 from pathlib import Path
 from shutil import copyfile
@@ -154,10 +153,15 @@ def should_use_docker(dockerize_pip: DockerizePipArgTypeDef = None) -> bool:
         if dockerize_pip == "non-linux" and not sys.platform.startswith("linux"):
             return True
         try:
-            return bool(strtobool(dockerize_pip))
+            return bool(str2bool(dockerize_pip))
         except ValueError:
             pass
     return False
+
+
+def str2bool(v):  # type: ignore
+    """Return boolean value of string."""
+    return v.lower() in ("yes", "true", "t", "1", "on")
 
 
 def _zip_files(files: Iterable[str], root: str) -> Tuple[bytes, str]:
