@@ -225,7 +225,7 @@ jobs:
         run: make npm-install
       - name: Configure Pagefile  # avoid MemoryError during tests
         if: runner.os == 'Windows'
-        uses: al-cheb/configure-pagefile-action@v1.2  # cspell:ignore cheb
+        uses: al-cheb/configure-pagefile-action@v1.3  # cspell:ignore cheb
         with:
           minimum-size: 16GB
           maximum-size: 16GB
