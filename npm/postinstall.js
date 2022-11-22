@@ -7,7 +7,7 @@ const tar = require('tar');
 // e.g. '../..' for 'runway'; '../../..' for `@onica/runway', etc
 let pathTraversal = '..'
 for (var i = 0; i < process.env.npm_package_name.split("/").length; i++) {
-    pathTraversal += '/..'
+  pathTraversal += '/..'
 }
 
 const basepath = `${path.resolve(process.cwd(), pathTraversal)}/node_modules`; // goes to the top level node_modules
@@ -87,12 +87,23 @@ fs.mkdir(`${moduleDir}/runway`, { recursive: true }, (err, data) => {
     } else {
       // determine correct bin path to use based on global/local install
       if (process.env.npm_config_global) {
-        binPath = path.resolve(process.env.APPDATA, './npm/runway.bat');
+        binPath = path.resolve(process.env.APPDATA, './npm');
+
+        // If using Node Version Manager (NVM), add the BAT file to a different directory
+        if (!fs.existsSync(binPath) && fs.existsSync(path.resolve(process.env.APPDATA, './nvm'))) {
+          binPath = path.resolve(process.env.APPDATA, './nvm');
+        }
       } else {
-        fs.mkdirSync(`${basepath}/.bin`, { recursive: true });
-        binPath = `${basepath}/.bin/runway.bat`;
+        binPath = path.resolve(basepath, './.bin');
       }
+
+      if (!fs.existsSync(binPath)) {
+        fs.mkdirSync(binPath, { recursive: true });
+      }
+
       // symlink does not work for windows so we need to use a bat file
+      binPath = path.resolve(binPath, 'runway.bat');
+
       // this will overwrite the file if it already exists so no fancy error handling needed
       fs.writeFile(binPath, `@"${moduleDir}/runway/runway-cli.exe" %*`, (err, data) => {
         if (err) throw err;
