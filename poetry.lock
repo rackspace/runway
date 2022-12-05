@@ -2240,7 +2240,7 @@ tests = ["pytest", "pytest-cov"]
 
 [[package]]
 name = "testfixtures"
-version = "7.0.3"
+version = "7.0.4"
 description = "A collection of helpers and mock objects for unit tests and doc tests."
 category = "main"
 optional = false
@@ -3387,8 +3387,8 @@ termcolor = [
     {file = "termcolor-2.1.0.tar.gz", hash = "sha256:b80df54667ce4f48c03fe35df194f052dc27a541ebbf2544e4d6b47b5d6949c4"},
 ]
 testfixtures = [
-    {file = "testfixtures-7.0.3-py3-none-any.whl", hash = "sha256:8e21110ccea169745c839699b5718370906f59100bb291aed46e3a7b5ae28435"},
-    {file = "testfixtures-7.0.3.tar.gz", hash = "sha256:942bc751d45068658e11277f213ce1868476e141ea4240da0fb6712ae6f96401"},
+    {file = "testfixtures-7.0.4-py3-none-any.whl", hash = "sha256:a857169443478986dd74b1d6141bd34a9b04e395a7d4ee54fb0b81c353861765"},
+    {file = "testfixtures-7.0.4.tar.gz", hash = "sha256:c526aa8978c1002f059f152c4ade3758c4a12418dfab2b29754ae6230caf3d04"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
