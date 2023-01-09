@@ -30,7 +30,7 @@ from urllib.request import urlretrieve
 import hcl
 import hcl2
 import requests
-from packaging.version import LegacyVersion
+from packaging.version import InvalidVersion
 from typing_extensions import Final
 
 from ..compat import cached_property
@@ -112,11 +112,22 @@ def get_available_tf_versions(include_prerelease: bool = False) -> List[str]:
     tf_releases = json.loads(
         requests.get("https://releases.hashicorp.com/index.json").text
     )["terraform"]
+
+    # Remove versions that don't align with
+    # PEP440 (https://peps.python.org/pep-0440/)
+    for k, _v in list(tf_releases["versions"].items()):
+        try:
+            Version(k)
+        except InvalidVersion:
+            LOGGER.debug("InvalidVersion found, skipping %s. ", k)
+            del tf_releases["versions"][k]
+
     tf_versions = sorted(
         [k for k, _v in tf_releases["versions"].items()],  # descending
-        key=LegacyVersion,
+        key=Version,
         reverse=True,
     )
+
     if include_prerelease:
         return [i for i in tf_versions if i]
     return [i for i in tf_versions if i and "-" not in i]
