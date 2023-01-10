@@ -888,7 +888,7 @@ class TestTerraformOptions:
                         "bucket": "foo",
                         "dynamodb_table": "bar",
                         "region": "us-west-2",
-                        "workspace_key_prefix": "myprefix",
+                        "workspace_key_prefix": "foobar",
                     }
                 }
             ),
