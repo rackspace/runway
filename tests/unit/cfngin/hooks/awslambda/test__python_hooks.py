@@ -106,7 +106,7 @@ class TestPythonFunction:
             "deployment_package",
             Mock(upload=Mock(side_effect=Exception)),
         )
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Exception"):
             assert PythonFunction(Mock(), **args.dict()).pre_deploy()
         deployment_package.upload.assert_called_once_with()
         build_response.assert_not_called()
