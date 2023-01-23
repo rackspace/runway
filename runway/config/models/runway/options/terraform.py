@@ -29,6 +29,7 @@ class RunwayTerraformBackendConfigDataModel(ConfigProperty):
     bucket: Optional[str] = None
     dynamodb_table: Optional[str] = None
     region: Optional[str] = None
+    workspace_key_prefix: Optional[str] = None
 
     class Config(ConfigProperty.Config):
         """Model configuration."""

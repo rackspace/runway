@@ -884,6 +884,16 @@ class TestTerraformOptions:
             ),
             (
                 {
+                    "terraform_backend_config": {
+                        "bucket": "foo",
+                        "dynamodb_table": "bar",
+                        "region": "us-west-2",
+                        "workspace_key_prefix": "foobar",
+                    }
+                }
+            ),
+            (
+                {
                     "terraform_backend_config": {"region": "us-west-2"},
                     "terraform_backend_cfn_outputs": {
                         "bucket": "foo",
