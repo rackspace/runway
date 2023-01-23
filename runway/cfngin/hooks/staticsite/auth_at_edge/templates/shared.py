@@ -70,7 +70,7 @@ def extract_and_parse_cookies(headers, client_id, cookie_compatibility="amplify"
     """Extract and parse the Cognito cookies from the headers.
 
     Args:
-         headers (Dict[str, str]): The request/response headers in
+        headers (Dict[str, str]): The request/response headers in
             dictionary format.
         client_id (str): The Cognito UserPool Client ID.
         cookie_compatibility (str): "amplify" or "elasticsearch".
