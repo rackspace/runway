@@ -1716,14 +1716,14 @@ xray = ["aws-xray-sdk (>=0.93,!=0.96)", "setuptools"]
 
 [[package]]
 name = "mypy-boto3"
-version = "1.26.14"
-description = "Type annotations for boto3 1.26.14 master module generated with mypy-boto3-builder 7.11.11"
+version = "1.26.89"
+description = "Type annotations for boto3 1.26.89 master module generated with mypy-boto3-builder 7.12.5"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-1.26.14.tar.gz", hash = "sha256:86f61ed780e392ebef4a2b48f7bfc86575fd6bb08ed8a70670839d571093fbd9"},
-    {file = "mypy_boto3-1.26.14-py3-none-any.whl", hash = "sha256:5c4c3cc7e4da9fa8005b709ec93e59d47d35510dd4412e117c3b227d6bbeb389"},
+    {file = "mypy-boto3-1.26.89.tar.gz", hash = "sha256:c2f17d7f48bce88605490eaefe974093f4867d67ebf0cb1745a99a61668a7a37"},
+    {file = "mypy_boto3-1.26.89-py3-none-any.whl", hash = "sha256:ba35775489cbd0962ee23a5166664a515e2c248b95d5eac8adec1e111be7d100"},
 ]
 
 [package.dependencies]
