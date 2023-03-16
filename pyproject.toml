@@ -228,7 +228,7 @@ skip = [
 [tool.pylint.basic]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#basic-checker
 attr-rgx = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
-attr-name-hint = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
+# attr-name-hint = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
 good-names = [
   "_",
   "a",
@@ -321,6 +321,9 @@ disable = [
   "similarities",  # black overcomplicated this
   "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
   "unused-import",  # flake8 overlap (F401)
+  "unnecessary-dunder-call",
+  "broad-exception-raised",
+  "missing-timeout"
 ]
 
 [tool.pylint.typecheck]

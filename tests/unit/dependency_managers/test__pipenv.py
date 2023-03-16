@@ -1,5 +1,5 @@
 """Test runway.dependency_manager._pipenv."""
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 import logging

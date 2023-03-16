@@ -1,5 +1,5 @@
 """Tests for lookup handler for env."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 """Test runway.utils._file_hash."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

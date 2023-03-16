@@ -1,5 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.utils."""
-# pylint: disable=no-self-use,too-many-lines
+# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import datetime

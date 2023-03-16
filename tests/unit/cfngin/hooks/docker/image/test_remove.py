@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.docker.image._remove."""
-# pylint: disable=no-self-use
+
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 """Test runway.dependency_managers._poetry."""
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 import subprocess

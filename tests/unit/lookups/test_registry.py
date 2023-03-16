@@ -1,5 +1,5 @@
 """Tests for lookup registry and common lookup functionality."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

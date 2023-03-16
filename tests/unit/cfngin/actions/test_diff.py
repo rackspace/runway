@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.actions.diff."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=protected-access
 # pyright: basic
 from __future__ import annotations
 

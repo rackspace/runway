@@ -1,5 +1,5 @@
 """Test runway.config.models.runway._builtin_tests."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from typing import Optional
 

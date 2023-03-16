@@ -70,7 +70,6 @@ class CfnginBucket(Blueprint):
         )
         return bucket
 
-    # pylint: disable=no-self-use
     @cached_property
     def bucket_encryption(self) -> Union[AWSHelperFn, s3.BucketEncryption]:
         """CFNgin bucket encryption.
@@ -102,7 +101,6 @@ class CfnginBucket(Blueprint):
         )
         return If(condition, self.variables["BucketName"].ref, NoValue)
 
-    # pylint: disable=no-self-use
     @cached_property
     def bucket_tags(self) -> Tags:
         """CFNgin bucket tags.

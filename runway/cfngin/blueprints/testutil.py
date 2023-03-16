@@ -126,7 +126,7 @@ class YamlDirTestGenerator:
         return "test_*.yaml"
 
     # pylint incorrectly detects this
-    def test_generator(  # pylint: disable=no-self-use
+    def test_generator(
         self,
     ) -> Iterator[BlueprintTestCase]:
         """Test generator."""

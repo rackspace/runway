@@ -1,5 +1,5 @@
 """Test runway.module.staticsite.options.models."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

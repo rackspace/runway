@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.docker.data_models."""
-# pylint: disable=no-self-use,protected-access,redefined-outer-name
+# pylint: disable=protected-access,redefined-outer-name
 # pyright: basic
 from __future__ import annotations
 

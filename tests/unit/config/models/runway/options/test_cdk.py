@@ -1,5 +1,5 @@
 """Test runway.config.models.runway.options.cdk."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from runway.config.models.runway.options.cdk import RunwayCdkModuleOptionsDataModel
 

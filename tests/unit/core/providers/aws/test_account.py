@@ -1,5 +1,5 @@
 """Test runway.core.providers.aws._account."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

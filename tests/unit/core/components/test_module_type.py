@@ -1,5 +1,5 @@
 """Test runway.core.components._module_type."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.docker.image._push."""
-# pylint: disable=no-self-use,no-member
+# pylint: disable=no-member
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.deployment_package."""
-# pylint: disable=no-self-use,protected-access,redefined-outer-name,unused-argument
+# pylint: disable=protected-access,redefined-outer-name,unused-argument
 # pylint: disable=too-many-lines
 from __future__ import annotations
 
@@ -70,8 +70,8 @@ class TestDeploymentPackage:
 
     def test__build_fix_file_permissions(self, project: ProjectTypeAlias) -> None:
         """Test _build_fix_file_permissions."""
-        file0 = Mock(external_attr=(0o777 << 16))
-        file1 = Mock(external_attr=(0o755 << 16))
+        file0 = Mock(external_attr=0o777 << 16)
+        file1 = Mock(external_attr=0o755 << 16)
         archive_file = Mock(filelist=[file0, file1])
 
         obj = DeploymentPackage(project)

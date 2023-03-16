@@ -3,7 +3,7 @@
 https://aws.amazon.com/premiumsupport/knowledge-center/iam-permission-boundaries/
 
 """
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Union

@@ -102,7 +102,7 @@ class EnvManager(DelCachedPropMixin):
         return self.versions_dir / self._bin_name
 
     @cached_property
-    def command_suffix(self) -> str:  # pylint: disable=no-self-use
+    def command_suffix(self) -> str:
         """Return command suffix based on platform.system."""
         if platform.system() == "Windows":
             return ".exe"

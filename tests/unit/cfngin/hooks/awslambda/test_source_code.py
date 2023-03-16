@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.source_code."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=protected-access
 from __future__ import annotations
 
 from pathlib import Path

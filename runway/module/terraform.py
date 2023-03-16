@@ -680,7 +680,7 @@ class TerraformBackendConfig(ModuleOptions):
                 LOGGER.verbose("using backend config file: %s", self.config_file.name)
                 return [f"-backend-config={self.config_file.name}"]
             LOGGER.info(
-                "backend file not found -- looking for one " "of: %s",
+                "backend file not found -- looking for one of: %s",
                 ", ".join(
                     self.gen_backend_filenames(self.env.name, self.env.aws_region)
                 ),

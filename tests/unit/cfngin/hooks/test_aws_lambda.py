@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.hooks.aws_lambda."""
-# pylint: disable=no-self-use
+
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 # pyright: reportFunctionMemberAccess=none, reportOptionalMemberAccess=none
 # pyright: reportOptionalOperand=none

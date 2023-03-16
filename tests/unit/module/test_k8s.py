@@ -1,5 +1,5 @@
 """Test runway.module.k8s."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 
