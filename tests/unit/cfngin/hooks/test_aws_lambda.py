@@ -347,7 +347,6 @@ class TestLambdaHooks(unittest.TestCase):
         with self.temp_directory_with_files() as temp_dir, ShouldRaise(
             RuntimeError(msg)
         ):
-
             results = self.run_hook(
                 functions={
                     "MyFunction": {"path": temp_dir.path + "/f1", "exclude": ["**"]}
