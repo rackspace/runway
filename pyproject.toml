@@ -321,7 +321,6 @@ disable = [
   "similarities",  # black overcomplicated this
   "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
   "unused-import",  # flake8 overlap (F401)
-  "unnecessary-dunder-call",
   "broad-exception-raised",
   "missing-timeout"
 ]

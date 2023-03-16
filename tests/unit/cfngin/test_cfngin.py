@@ -1,5 +1,5 @@
 """Tests for runway.cfngin entry point."""
-# pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name, unnecessary-dunder-call
 from __future__ import annotations
 
 import shutil
