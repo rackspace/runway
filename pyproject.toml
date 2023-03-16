@@ -348,6 +348,7 @@ exclude = [
   "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
   "**/runway/templates/cdk-py",
   "**/tests/functional/cfngin/test_aws_lambda_hook/lambda_src",
+  "**/tests/unit"
 ]
 extraPaths = [
   "./.github/scripts/urlshortener",
