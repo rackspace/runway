@@ -252,8 +252,8 @@ class TestRunway:
         test_handlers["fail_system_exit_0"].handle.assert_called_with(
             obj.tests[1].name, obj.tests[1].args
         )
-        obj.tests[0].__call__(runway_context, variables=runway_config.variables)
-        obj.tests[1].__call__(runway_context, variables=runway_config.variables)
+        obj.tests[0](runway_context, variables=runway_config.variables)
+        obj.tests[1](runway_context, variables=runway_config.variables)
 
         obj.tests = [  # type: ignore
             MagicMock(type="fail_system_exit_1", required=False),
