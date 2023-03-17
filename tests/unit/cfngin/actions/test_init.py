@@ -1,5 +1,5 @@
 """Test runway.cfngin.actions.init."""
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

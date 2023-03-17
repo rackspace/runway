@@ -668,7 +668,7 @@ def flatten_path_lists(
     env_dict: Dict[str, Any], env_root: Optional[str] = None
 ) -> Dict[str, Any]:
     """Join paths in environment dict down to strings."""
-    for (key, val) in env_dict.items():
+    for key, val in env_dict.items():
         # Lists are presumed to be path components and will be turned back
         # to strings
         if isinstance(val, list):

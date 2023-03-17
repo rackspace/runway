@@ -1,5 +1,5 @@
 """Shared functionality for the Auth@Edge Lambda suite."""
-# pylint: disable=consider-using-f-string
+# pylint: disable=consider-using-f-string, inconsistent-return-statements
 import base64
 import hmac
 import json

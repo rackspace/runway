@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.hooks.acm."""
-# pylint: disable=no-self-use,protected-access,unused-argument
+# pylint: disable=protected-access,unused-argument
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 # pyright: reportUnknownLambdaType=none
 from __future__ import annotations

@@ -1,5 +1,5 @@
 """Test runway.config.components.runway._variables_def."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from pathlib import Path
 

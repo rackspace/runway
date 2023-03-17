@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.utils."""
-# pylint: disable=unused-argument,invalid-name
+# pylint: disable=unused-argument,invalid-name, broad-exception-raised
 # pyright: basic
 from __future__ import annotations
 

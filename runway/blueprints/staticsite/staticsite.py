@@ -44,7 +44,6 @@ IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
 
 
 class _IndexRewriteFunctionInfoTypeDef(TypedDict):
-
     function: awslambda.Function
     role: iam.Role
     version: awslambda.Version

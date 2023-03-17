@@ -18,7 +18,6 @@ from docker.models.volumes import VolumeCollection
 from typing_extensions import TypedDict
 
 class _DockerClientFromEnvKwargs(TypedDict, total=False):
-
     assert_hostname: int
     credstore_env: Dict[Any, Any]
     environment: Dict[Any, Any]

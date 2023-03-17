@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.docker.hook_data."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

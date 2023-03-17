@@ -170,7 +170,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
         return False
 
     @cached_property
-    def gitignore_filter(  # pylint: disable=no-self-use
+    def gitignore_filter(
         self,
     ) -> Optional[igittigitt.IgnoreParser]:
         """Filter to use when zipping dependencies.

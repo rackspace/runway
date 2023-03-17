@@ -200,7 +200,7 @@ class SSOCredentialFetcher(CachedCredentialFetcher):
         argument_hash = sha1(args.encode("utf-8")).hexdigest()
         return self._make_file_safe(argument_hash)
 
-    def _parse_timestamp(self, timestamp_ms):  # pylint: disable=no-self-use
+    def _parse_timestamp(self, timestamp_ms):
         """Parse timestamp."""
         # fromtimestamp expects seconds so: milliseconds / 1000 = seconds
         timestamp_seconds = timestamp_ms / 1000.0

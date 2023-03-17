@@ -149,7 +149,7 @@ class DockerDependencyInstaller:
         raise ValueError("docker.file, docker.image, or runtime is required")
 
     @cached_property  # pylint error is python3.7 only
-    def install_commands(self) -> List[str]:  # pylint: disable=no-self-use
+    def install_commands(self) -> List[str]:
         """Commands to run to install dependencies."""
         return []
 
@@ -187,7 +187,7 @@ class DockerDependencyInstaller:
         return cmds
 
     @cached_property  # pylint error is python3.7 only
-    def runtime(self) -> Optional[str]:  # pylint: disable=no-self-use
+    def runtime(self) -> Optional[str]:
         """AWS Lambda runtime determined from the Docker container."""
         return None
 

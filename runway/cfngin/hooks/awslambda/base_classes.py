@@ -142,7 +142,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         return getattr(self.args, "license", None)
 
     @cached_property  # pylint error is python3.7 only
-    def metadata_files(self) -> Tuple[Path, ...]:  # pylint: disable=no-self-use
+    def metadata_files(self) -> Tuple[Path, ...]:
         """Project metadata files (e.g. ``project.json``, ``pyproject.toml``)."""
         return ()
 
@@ -269,7 +269,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         raise NotImplementedError
 
     @cached_property  # pylint error is python3.7 only
-    def supported_metadata_files(self) -> Set[str]:  # pylint: disable=no-self-use
+    def supported_metadata_files(self) -> Set[str]:
         """Names of all supported metadata files.
 
         Returns:

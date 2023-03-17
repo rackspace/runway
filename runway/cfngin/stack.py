@@ -173,7 +173,7 @@ class Stack:
                 kwargs["raw_template_path"] = self.definition.template_path
             else:
                 raise AttributeError(
-                    "Stack does not have a defined class or " "template path."
+                    "Stack does not have a defined class or template path."
                 )
 
             self._blueprint = cast(

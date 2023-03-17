@@ -1,5 +1,5 @@
 """Test runway.cfngin.exceptions."""
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 from pathlib import Path

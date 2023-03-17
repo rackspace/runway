@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.hook_data."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=protected-access
 # pyright: basic
 from __future__ import annotations
 
@@ -39,7 +39,8 @@ class TestHookDataLookup:
         )
         var_nested = Variable(
             "test",
-            "${hook_data fake_hook.bad." "result::default=something,load=json,get=key}",
+            "${hook_data fake_hook.bad."
+            + "result::default=something,load=json,get=key}",
             variable_type="cfngin",
         )
         var_top.resolve(cfngin_context)
@@ -70,7 +71,7 @@ class TestHookDataLookup:
         )
         var_bucket = Variable(
             "test",
-            "${hook_data lambda.my_function::" "load=troposphere,get=S3Bucket}",
+            "${hook_data lambda.my_function::" + "load=troposphere,get=S3Bucket}",
             variable_type="cfngin",
         )
         var_key = Variable(

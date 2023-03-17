@@ -1,5 +1,5 @@
 """AMI lookup."""
-# pylint: disable=no-self-argument,no-self-use
+# pylint: disable=no-self-argument
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 

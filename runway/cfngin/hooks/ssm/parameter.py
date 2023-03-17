@@ -1,5 +1,5 @@
 """AWS SSM Parameter Store hooks."""
-# pylint: disable=no-self-argument,no-self-use
+# pylint: disable=no-self-argument
 from __future__ import annotations
 
 import json

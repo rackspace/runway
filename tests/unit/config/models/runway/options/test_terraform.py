@@ -1,5 +1,5 @@
 """Test runway.config.models.runway.options.terraform."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 import pytest
 from pydantic import ValidationError

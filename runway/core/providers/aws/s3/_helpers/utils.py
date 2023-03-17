@@ -786,7 +786,7 @@ def guess_content_type(filename: AnyPath) -> Optional[str]:
         return mimetypes.guess_type(str(filename))[0]
     except UnicodeDecodeError:
         LOGGER.debug(
-            "Unable to guess content type for %s due to " "UnicodeDecodeError: ",
+            "Unable to guess content type for %s due to UnicodeDecodeError: ",
             filename,
             exc_info=True,
         )

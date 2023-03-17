@@ -1,5 +1,5 @@
 """Runway Terraform Module options."""
-# pylint: disable=no-self-argument,no-self-use
+# pylint: disable=no-self-argument
 from __future__ import annotations
 
 from typing import Dict, List, Optional, Union

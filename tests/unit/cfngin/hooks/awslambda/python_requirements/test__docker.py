@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.python_requirements._docker."""
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 import logging

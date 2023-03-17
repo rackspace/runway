@@ -1,5 +1,5 @@
 """Test runway.config.components.runway._module_def."""
-# pylint: disable=no-self-use,protected-access
+# pylint: disable=protected-access
 # pyright: basic
 from pathlib import Path
 from typing import Any, Dict

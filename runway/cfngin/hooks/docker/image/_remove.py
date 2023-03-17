@@ -3,7 +3,7 @@
 Replicates the functionality of the ``docker image remove`` CLI command.
 
 """
-# pylint: disable=no-self-argument,no-self-use
+# pylint: disable=no-self-argument
 from __future__ import annotations
 
 import logging

@@ -128,7 +128,6 @@ class BaseSync:
             raise ValueError("src_file and dest_file must not be None")
         return src_file.size == dest_file.size
 
-    # pylint: disable=no-self-use
     def compare_time(
         self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
     ) -> bool:
