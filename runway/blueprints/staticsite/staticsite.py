@@ -353,7 +353,16 @@ class StaticSite(Blueprint):
         bucket = self.template.add_resource(
             s3.Bucket(
                 "Bucket",
-                AccessControl=(s3.Private if self.cf_enabled else s3.PublicRead),
+                # PublicAccessBlockConfiguration=s3.PublicAccessBlockConfiguration(
+                # )
+                PublicAccessBlockConfiguration=(
+                    s3.PublicAccessBlockConfiguration(BlockPublicAcls="true")
+                    if self.cf_enabled
+                    else s3.PublicAccessBlockConfiguration(BlockPublicAcls="false")
+                ),
+                OwnershipControls=s3.OwnershipControls(
+                    Rules=[s3.OwnershipControlsRule(ObjectOwnership="ObjectWriter")]
+                ),
                 LifecycleConfiguration=s3.LifecycleConfiguration(
                     Rules=[
                         s3.LifecycleRule(

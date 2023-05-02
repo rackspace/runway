@@ -122,7 +122,9 @@ def write(
             # Copy the template code for the specific Lambda function
             # to the temporary folder
             shutil.copytree(
-                os.path.join(os.path.dirname(__file__), "templates", handler), dirpath
+                os.path.join(os.path.dirname(__file__), "templates", handler),
+                dirpath,
+                dirs_exist_ok=True,
             )
 
             # Save our dynamic configuration shared file to the
