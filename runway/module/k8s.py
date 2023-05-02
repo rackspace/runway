@@ -51,6 +51,11 @@ KubectlCommandTypeDef = Literal[
 class K8s(RunwayModule):
     """Kubectl Runway Module."""
 
+    DEPRECATION_MSG = (
+        "Kubectl Runway module support has been deprecated and "
+        "may be removed in the next major release."
+    )
+
     options: K8sOptions
 
     def __init__(
@@ -95,6 +100,7 @@ class K8s(RunwayModule):
         )
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
+        LOGGER.warning("%s:%s", self.name, self.DEPRECATION_MSG)
 
     @cached_property
     def kbenv(self) -> KBEnvManager:
