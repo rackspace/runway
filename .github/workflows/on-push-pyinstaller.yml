@@ -22,7 +22,7 @@ jobs:
     name: Pyinstaller "One File" Build
     strategy:
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
+        os: [macos-10.15, ubuntu-20.04, windows-latest]
         python-version: [3.8]
     runs-on: ${{ matrix.os }}
     env:
@@ -72,7 +72,7 @@ jobs:
     name: Pyinstaller "One Folder" Build
     strategy:
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
+        os: [macos-10.15, ubuntu-20.04, windows-latest]
         python-version: [3.8]
     runs-on: ${{ matrix.os }}
     env:
@@ -129,7 +129,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-18.04]
+        os: [ubuntu-20.04]
         python-version: [3.8]
     runs-on: ${{ matrix.os }}
     steps:
