@@ -366,3 +366,18 @@ jobs:
             --table-region $TABLE_REGION \
             --version $VERSION \
             --latest
+  notify-on-publish:
+    name: Notify
+    needs:
+      - publish-npm
+      - publish-pypi
+      - update-urlshortener
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@v1.0.8
+        if: always()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          overwrite: '{title: `New Runway release available!`}'
