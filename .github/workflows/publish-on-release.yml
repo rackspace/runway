@@ -16,8 +16,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
-        python-version: [3.7]
+        os: [macos-10.15, ubuntu-20.04, windows-latest]
+        python-version: [3.8]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -67,8 +67,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
-        python-version: [3.7]
+        os: [macos-10.15, ubuntu-20.04, windows-latest]
+        python-version: [3.8]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -123,8 +123,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
+        os: [ubuntu-20.04]
+        python-version: [3.8]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repo (complete)
@@ -167,7 +167,7 @@ jobs:
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-ubuntu-18.04
+          name: pyinstaller-onefolder-ubuntu-20.04
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v3
@@ -200,8 +200,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
+        os: [ubuntu-20.04]
+        python-version: [3.8]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/setup-node@v3
@@ -311,7 +311,7 @@ jobs:
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefile-ubuntu-18.04
+          name: pyinstaller-onefile-ubuntu-20.04
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v3
