@@ -21,7 +21,7 @@ CURRENT_DIR = Path(__file__).parent
 
 @pytest.fixture(
     autouse=True,
-    params=["0.11.15", "0.12.31", "0.13.7", "0.14.11", "0.15.5"],
+    params=["0.13.7", "0.14.11", "0.15.5", "1.4.6"],
     scope="module",
 )
 def tf_version(request: SubRequest) -> Generator[str, None, None]:
