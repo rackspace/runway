@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-10.15, ubuntu-20.04, windows-latest]
+        os: [macos-12, ubuntu-20.04, windows-latest]
         python-version: [3.8]
     runs-on: ${{ matrix.os }}
     env:
@@ -67,7 +67,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-10.15, ubuntu-20.04, windows-latest]
+        os: [macos-12, ubuntu-20.04, windows-latest]
         python-version: [3.8]
     runs-on: ${{ matrix.os }}
     env:
@@ -162,7 +162,7 @@ jobs:
       - name: Download Artifacts (macOS)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-macos-10.15
+          name: pyinstaller-onefolder-macos-12
           path: artifacts
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
@@ -306,7 +306,7 @@ jobs:
       - name: Download Artifacts (macOS)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefile-macos-10.15
+          name: pyinstaller-onefile-macos-12
           path: artifacts
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
