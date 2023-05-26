@@ -18,7 +18,7 @@ class PolicyType(AWSObject):
 class Policy(AWSProperty):
     props = ...
 
-PolicyProperty = Policy
+# PolicyProperty = Policy
 
 class Group(AWSObject):
     resource_type = ...
