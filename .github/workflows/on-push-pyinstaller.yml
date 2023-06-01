@@ -182,7 +182,7 @@ jobs:
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-ubuntu-18.04
+          name: pyinstaller-onefolder-ubuntu-20.04
           path: artifacts
       - name: Download Artifacts (windows)
         if: steps.check_distance.outcome == 'success'
