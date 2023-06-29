@@ -4,6 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-mysqlclient = "*"
+mysqlclient = "==2.1.1"
 
 [dev-packages]
