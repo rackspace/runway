@@ -72,13 +72,13 @@ files = [
 
 [[package]]
 name = "aws-sam-translator"
-version = "1.68.0"
+version = "1.71.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "aws-sam-translator-1.68.0.tar.gz", hash = "sha256:d12a7bb3909142d32458f76818cb96a5ebc5f50fbd5943301d552679a893afcc"},
-    {file = "aws_sam_translator-1.68.0-py3-none-any.whl", hash = "sha256:557d8080c9e6c1c609bfe806ea9545f7ea34144e2466c0ddc801806c2c05afdc"},
+    {file = "aws-sam-translator-1.71.0.tar.gz", hash = "sha256:a3ea80aeb116d7978b26ac916d2a5a24d012b742bf28262b17769c4b886e8fba"},
+    {file = "aws_sam_translator-1.71.0-py3-none-any.whl", hash = "sha256:17fb87c8137d8d49e7a978396b2b3b279211819dee44618415aab1e99c2cb659"},
 ]
 
 [package.dependencies]
@@ -713,20 +713,20 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.77.9"
+version = "0.78.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "cfn-lint-0.77.9.tar.gz", hash = "sha256:7c1e631b723b521234d92d4081934291b256dba28d723ddb7ff105215fe40020"},
-    {file = "cfn_lint-0.77.9-py3-none-any.whl", hash = "sha256:f95b503f7465ee1f2f89ddf32289ea03a517f08c366bb8e6a5d6773a11e5a1aa"},
+    {file = "cfn-lint-0.78.1.tar.gz", hash = "sha256:46118362b2e13b79ba3ae6b3c28b7df5fcd437c06f5bcc3384d13a2defdb7d06"},
+    {file = "cfn_lint-0.78.1-py3-none-any.whl", hash = "sha256:2dacb19d5f70c0d49f466302507707cfa4914f65b8fc9310ae3771a273cec044"},
 ]
 
 [package.dependencies]
-aws-sam-translator = ">=1.68.0"
+aws-sam-translator = ">=1.70.0"
 jschema-to-python = ">=1.2.3,<1.3.0"
 jsonpatch = "*"
-jsonschema = ">=3.0,<5"
+jsonschema = ">=3.0,<4.18"
 junit-xml = ">=1.9,<2.0"
 networkx = ">=2.4,<4"
 pyyaml = ">5.4"
