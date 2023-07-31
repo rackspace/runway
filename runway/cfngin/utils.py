@@ -550,7 +550,30 @@ class TarExtractor(Extractor):
     def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with tarfile.open(self.archive, "r:") as tar:
-            tar.extractall(path=destination)
+            # tar.extractall(path=destination)
+            #
+            # Implementing fix suggested by Trellix for
+            # CVE-2007-4559.
+            def is_within_directory(directory: Path | str, target: str) -> bool:
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                return prefix == abs_directory
+
+            def safe_extract(
+                tar: tarfile.TarFile,
+                path: Path | str = ".",
+                members: list[tarfile.TarInfo] | None = None,
+                *,
+                numeric_owner: bool = False,
+            ):
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+                tar.extractall(path, members, numeric_owner=numeric_owner)
+
+            safe_extract(tar, path=destination)
 
 
 class TarGzipExtractor(Extractor):
@@ -561,7 +584,30 @@ class TarGzipExtractor(Extractor):
     def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with tarfile.open(self.archive, "r:gz") as tar:
-            tar.extractall(path=destination)
+            # tar.extractall(path=destination)
+            #
+            # Implementing fix suggested by Trellix for
+            # CVE-2007-4559.
+            def is_within_directory(directory: Path | str, target: str) -> bool:
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                return prefix == abs_directory
+
+            def safe_extract(
+                tar: tarfile.TarFile,
+                path: Path | str = ".",
+                members: list[tarfile.TarInfo] | None = None,
+                *,
+                numeric_owner: bool = False,
+            ):
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+                tar.extractall(path, members, numeric_owner=numeric_owner)
+
+            safe_extract(tar, path=destination)
 
 
 class ZipExtractor(Extractor):
