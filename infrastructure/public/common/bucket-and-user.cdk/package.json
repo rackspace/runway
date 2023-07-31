@@ -10,7 +10,7 @@
     "devDependencies": {
         "@types/node": "8.10.40",
         "@types/source-map-support": "^0.5.0",
-        "aws-cdk": "^1.15.0",
+        "aws-cdk": "^1.203.0",
         "aws-sdk": "^2.561.0",
         "prompt": "^1.0.0",
         "ts-node": "^8.1.0",
@@ -18,9 +18,9 @@
         "typescript": "^3.3.3333"
     },
     "dependencies": {
-        "@aws-cdk/aws-iam": "^1.15.0",
-        "@aws-cdk/aws-s3": "^1.15.0",
-        "@aws-cdk/core": "^1.15.0",
+        "@aws-cdk/aws-iam": "^1.204.0",
+        "@aws-cdk/aws-s3": "^1.204.0",
+        "@aws-cdk/core": "^1.204.0",
         "source-map-support": "^0.5.9"
     }
 }
