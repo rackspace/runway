@@ -546,8 +546,8 @@ def safe_tar_extract(
 ):
     """Safely extract the contents of a tar file to a specified directory.
 
-    This code is modified from a PR provided to Runway repo by
-    Trellix to address CVE-2007-4559.
+    This code is modified from a PR provided to Runway project
+    to address CVE-2007-4559.
 
     Args:
         tar (TarFile): The tar file object that will be extracted.
