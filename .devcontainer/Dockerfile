@@ -34,14 +34,8 @@ ADD --chown=vscode:vscode files/.bash_completion /home/vscode/.bash_completion
 RUN mkdir /home/vscode/.bash_completion.d/
 
 # Setup AWS CLI
-RUN pip3 install --user awscli
+RUN pip3 install --user awscli poetry==1.5.1
 RUN echo "complete -C '/home/vscode/.local/bin/aws_completer' aws" >> ~/.bashrc
-
-# Setup Poetry
-RUN bash -c "curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python - \
-    && echo 'export PATH=$HOME/.local/bin:\$PATH' >> ~/.bashrc"
-RUN bash -c "export PATH=$HOME/.local/bin:\$PATH \
-    && poetry completions bash > ~/.bash_completion.d/poetry.bash-completion"
 
 # Setup OS_NAME var for runway builds from this dev container
 RUN echo "export OS_NAME=ubuntu-20.04" >> ~/.bashrc
