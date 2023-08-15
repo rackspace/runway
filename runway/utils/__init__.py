@@ -378,8 +378,9 @@ class SafeHaven(ContextManager["SafeHaven"]):
         self.__os_environ = dict(os.environ)
         self.__sys_argv = list(sys.argv)
         # deepcopy can't pickle sys.modules and dict()/.copy() are not safe
-        # pylint: disable=unnecessary-comprehension
-        self.__sys_modules = {k: v for k, v in sys.modules.items()}
+        self.__sys_modules = {}
+        for k, v in sys.modules.items():
+            self.__sys_modules[k] = v
         self.__sys_path = list(sys.path)
         # more informative origin for log statements
         self.logger = logging.getLogger("runway." + self.__class__.__name__)
