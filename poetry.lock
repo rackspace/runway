@@ -1318,13 +1318,13 @@ files = [
 
 [[package]]
 name = "igittigitt"
-version = "2.1.2"
+version = "2.1.4"
 description = "A spec-compliant gitignore parser for Python"
 optional = false
-python-versions = ">=3.6.0"
+python-versions = ">=3.8.0"
 files = [
-    {file = "igittigitt-2.1.2-py3-none-any.whl", hash = "sha256:6ce86ebbd6a3bdb4ceba5171216c21f40400c8816575332b4320aa63d86f7e5a"},
-    {file = "igittigitt-2.1.2.tar.gz", hash = "sha256:e9830e43704343fc561ebcbb73633d64277f52364bd58c4df8d6e8eb6ef2a07e"},
+    {file = "igittigitt-2.1.4-py3-none-any.whl", hash = "sha256:79c48999be429de95dd4829b312667a7150cbb02bdb1424dfe081316d737ec92"},
+    {file = "igittigitt-2.1.4.tar.gz", hash = "sha256:9278d55de8852dca57fddb04a8a02edba6b4a9d9a5ac0fb6b2c32c919724807b"},
 ]
 
 [package.dependencies]
@@ -1333,6 +1333,9 @@ cli-exit-tools = "*"
 click = "*"
 lib-detect-testenv = "*"
 wcmatch = "*"
+
+[package.extras]
+test = ["black", "codecov", "coloredlogs", "coverage", "flake8", "mypy", "pytest", "pytest-cov", "pytest-runner", "readme-renderer"]
 
 [[package]]
 name = "imagesize"
