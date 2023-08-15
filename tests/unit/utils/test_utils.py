@@ -247,8 +247,9 @@ class TestSafeHaven:
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
 
-        # pylint: disable=unnecessary-comprehension
-        orig_val = {k: v for k, v in sys.modules.items()}
+        orig_val = {}
+        for k, v in sys.modules.items():
+            orig_val[k] = v
         expected_logs = ["entering a safe haven...", "resetting sys.modules..."]
 
         with SafeHaven() as obj:
