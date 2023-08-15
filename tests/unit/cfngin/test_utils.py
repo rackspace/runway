@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import logging
+import os
 import shutil
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -28,9 +30,11 @@ from runway.cfngin.utils import (
     ensure_s3_bucket,
     get_client_region,
     get_s3_endpoint,
+    is_within_directory,
     parse_cloudformation_template,
     read_value_from_path,
     s3_bucket_location_constraint,
+    safe_tar_extract,
     yaml_to_ordered_dict,
 )
 from runway.config.models.cfngin import GitCfnginPackageSourceDefinitionModel
@@ -267,6 +271,19 @@ class TestUtil(unittest.TestCase):
         """Set up test case."""
         self.tmp_path = Path(tempfile.mkdtemp())
 
+        # Set up files for testing tar file extraction
+        self.tar_file = Path("test_tar_file.tar")
+        test_tar_file1 = self.tmp_path / "file1.txt"
+        test_tar_file1.write_text("Content of file1")
+        test_tar_subdir = self.tmp_path / "subdir"
+        test_tar_subdir.mkdir()
+        test_tar_file2 = test_tar_subdir / "file2.txt"
+        test_tar_file2.write_text("Content of file2")
+
+        # Create a tar file using the temporary directory
+        with tarfile.open(self.tmp_path / self.tar_file, "w") as tar:
+            tar.add(self.tmp_path, arcname=os.path.basename(self.tmp_path))
+
     def tearDown(self) -> None:
         """Tear down test case."""
         shutil.rmtree(self.tmp_path, ignore_errors=True)
@@ -357,6 +374,41 @@ Outputs:
             },
         }
         self.assertEqual(parse_cloudformation_template(template), parsed_template)
+
+    def test_is_within_directory(self):
+        """Test is within directory."""
+        directory = Path("my_directory")
+
+        # Assert if the target is within the directory.
+        target = "my_directory/sub_directory/file.txt"
+        self.assertTrue(is_within_directory(directory, target))
+
+        # Assert if the target is NOT within the directory.
+        target = "other_directory/file.txt"
+        self.assertFalse(is_within_directory(directory, target))
+
+        # Assert if the target is the directory.
+        target = "my_directory"
+        self.assertTrue(is_within_directory(directory, target))
+
+    def test_safe_tar_extract_all_within(self):
+        """Test when all tar file contents are within the specified directory."""
+        path = self.tmp_path / "my_directory"
+        with tarfile.open(self.tmp_path / self.tar_file, "r") as tar:
+            self.assertIsNone(safe_tar_extract(tar, path))
+
+    def test_safe_tar_extract_path_traversal(self):
+        """Test when a tar file tries to go outside the specified area."""
+        with tarfile.open(self.tmp_path / self.tar_file, "r") as tar:
+            for member in tar.getmembers():
+                member.name = f"../{member.name}"
+
+            path = self.tmp_path / "my_directory"
+            with self.assertRaises(Exception) as context:
+                safe_tar_extract(tar, path)
+            self.assertEqual(
+                str(context.exception), "Attempted Path Traversal in Tar File"
+            )
 
     def test_extractors(self):
         """Test extractors."""

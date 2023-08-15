@@ -3,7 +3,7 @@ configValidationMode: error
 
 custom:
   environment: ${opt:stage}
-  namespace: ${env:RUNWAY_TEST_NAMESPACE, "${env:USER, "user"}-local"}
+  namespace: ${env:RUNWAY_TEST_NAMESPACE, "${env:USER, 'user'}-local"}
   region: ${opt:region}
 
 package:
@@ -16,7 +16,7 @@ provider:
       name: ${self:custom.namespace}-${self:custom.environment}-sls-promotezip-role
       permissionsBoundary: ${cf:runway-test-infrastructure-test-runner-boundary.PolicyArn}
   lambdaHashingVersion: "20201221"
-  runtime: nodejs12.x
+  runtime: nodejs16.x
   stackName: ${self:custom.namespace}-${self:custom.environment}-sls-promotezip
 
 functions:

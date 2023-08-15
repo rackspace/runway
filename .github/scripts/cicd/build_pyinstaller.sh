@@ -6,12 +6,12 @@ set -ev
 
 if [ "$OS_NAME" == "ubuntu-20.04" ]; then
     LOCAL_OS_NAME="linux"
-elif [ "$OS_NAME" == "macos-10.15" ]; then
+elif [ "$OS_NAME" == "macos-12" ]; then
     LOCAL_OS_NAME="osx"
 elif [ "$OS_NAME" == "windows-latest" ]; then
     LOCAL_OS_NAME="windows"
 else
-    echo 'Environment variable "OS_NAME" must be one of ["ubuntu-20.04", "macos-10.15", "windows-latest"]'
+    echo 'Environment variable "OS_NAME" must be one of ["ubuntu-20.04", "macos-12", "windows-latest"]'
     exit 1
 fi
 
