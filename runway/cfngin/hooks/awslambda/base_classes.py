@@ -42,7 +42,7 @@ _AwsLambdaHookArgsTypeVar_co = TypeVar(
 
 
 class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
-    """Project continaing source code for an AWS Lambda Function."""
+    """Project containing source code for an AWS Lambda Function."""
 
     DEFAULT_CACHE_DIR_NAME: ClassVar[str] = "cache"
     """Name of the default cache directory."""
@@ -261,7 +261,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         distinguish project language. The value of this property should reflect
         the project/dependency management tool used within the project.
 
-        The value of this property should be calculated without initalizing
+        The value of this property should be calculated without initializing
         other properties (e.g. ``source_code``) except for ``project_root``
         so that it can be used in their initialization process.
 

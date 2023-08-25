@@ -8,7 +8,15 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends curl git make pkg-config bash-completion \
     python3-virtualenv python3-pip python3-venv python3-dev \
-    software-properties-common npm binutils
+    software-properties-common binutils
+
+# Setup Apt for newer versions of NodeJS
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - &&\
+    sudo apt-get install -y nodejs
+
+# Install nodejs
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends nodejs
 
 # Add additional python options
 RUN sudo add-apt-repository ppa:deadsnakes/ppa

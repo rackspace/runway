@@ -378,7 +378,7 @@ class ServerlessArtifact:
         Args:
             context: Runway context object.
             config: Rendered Serverless config file.
-            logger: Logger this object will log to. If not probided, the logger
+            logger: Logger this object will log to. If not provided, the logger
                 in the local module will be used.
             package_path: Local path to the artifact directory.
             path: Root directory of the Serverless project.

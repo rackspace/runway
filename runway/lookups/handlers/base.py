@@ -153,8 +153,8 @@ class LookupHandler:
     def _parse_args(cls, args: str) -> Dict[str, str]:
         """Convert a string into an args dict.
 
-        Each arg should be seporated by  ``,``. The key and value should
-        be seporated by ``=``. Any leading or following spaces are stripped.
+        Each arg should be separated by  ``,``. The key and value should
+        be separated by ``=``. Any leading or following spaces are stripped.
 
         Args:
             args: A string containing arguments to be parsed. (e.g.
@@ -220,7 +220,7 @@ class LookupHandler:
         """Load a Troposphere resource into a MutableMap.
 
         Args:
-            value: Troposphere resource to contvert to a MutableMap for parsing.
+            value: Troposphere resource to convert to a MutableMap for parsing.
 
         """
         if not isinstance(value, BaseAWSObject):

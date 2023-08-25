@@ -18,7 +18,7 @@ TYPE_NAME = "bootstrap_value"
 class HookArgs(BaseModel):
     """Hook arguments.
 
-    Attributs:
+    Attributes:
         bootstrap: Value to return during bootstrap.
         post_bootstrap: Value to return post-bootstrap.
 

@@ -71,7 +71,7 @@ FORMATTERS = {
 
 
 class Action(BaseAction):
-    """Responsible for outputing a graph for the current CFNgin config."""
+    """Responsible for outputting a graph for the current CFNgin config."""
 
     DESCRIPTION = "Print graph"
     NAME = "graph"
@@ -99,7 +99,7 @@ class Action(BaseAction):
         if self.context.persistent_graph:
             graph = merge_graphs(self.context.persistent_graph, graph)
         if kwargs.get("reduce"):
-            # This will performa a transitive reduction on the underlying
+            # This will perform a a transitive reduction on the underlying
             # graph, producing less edges. Mostly useful for the "dot" format,
             # when converting to PNG, so it creates a prettier/cleaner
             # dependency graph.

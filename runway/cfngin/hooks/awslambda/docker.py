@@ -120,7 +120,7 @@ class DockerDependencyInstaller:
         return mounts
 
     @cached_property
-    def environmet_variables(self) -> Dict[str, str]:
+    def environment_variables(self) -> Dict[str, str]:
         """Environment variables to pass to the Docker container.
 
         This is a subset of the environment variables stored in the context
@@ -330,7 +330,7 @@ class DockerDependencyInstaller:
         container = self.client.containers.create(
             command=command,
             detach=True,
-            environment=self.environmet_variables,
+            environment=self.environment_variables,
             image=self.image,
             mounts=self.bind_mounts,
             working_dir=self.PROJECT_DIR,

@@ -161,7 +161,7 @@ def diff_parameters(
     If there are no changes, we return an empty list.
 
     Args:
-        old_params: old paramters
+        old_params: old parameters
         new_params: new parameters
 
     Returns:

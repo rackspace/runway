@@ -125,7 +125,7 @@ class CliContext:
             Attribute: If attribute does not exist on this object.
 
         """
-        # ignore coverage for standard implimentation
+        # ignore coverage for standard implementation
         return getattr(self, key)  # cov: ignore
 
     def __setitem__(self, key: str, value: Any) -> None:
@@ -136,7 +136,7 @@ class CliContext:
             value: Value of a key/attribute.
 
         """
-        # ignore coverage for standard implimentation
+        # ignore coverage for standard implementation
         setattr(self, key, value)  # cov: ignore
 
     def __delitem__(self, key: str) -> None:
@@ -146,22 +146,22 @@ class CliContext:
             key: Attribute name to remove from the object.
 
         """
-        # ignore coverage for standard implimentation
+        # ignore coverage for standard implementation
         delattr(self, key)  # cov: ignore
 
     def __len__(self) -> int:
         """Implement the built-in function len()."""
-        # ignore coverage for standard implimentation
+        # ignore coverage for standard implementation
         return len(self.__dict__)  # cov: ignore
 
     def __iter__(self) -> Iterator[str]:
         """Return iterator object that can iterate over all attributes."""
-        # ignore coverage for standard implimentation
+        # ignore coverage for standard implementation
         return iter(self.__dict__)  # cov: ignore
 
     def __str__(self) -> str:
         """Return string representation of the object."""
-        # ignore coverage for standard implimentation
+        # ignore coverage for standard implementation
         return f"CliContext({self.__dict__})"  # cov: ignore
 
 

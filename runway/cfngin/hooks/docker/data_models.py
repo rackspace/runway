@@ -1,6 +1,6 @@
 """Hook data models.
 
-These are makeshift data models for use until Runway v2 is realeased and pydantic
+These are makeshift data models for use until Runway v2 is released and pydantic
 can be used.
 
 """

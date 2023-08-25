@@ -153,7 +153,7 @@ class CfnginStackDefinitionModel(ConfigProperty):
 
         @staticmethod
         def schema_extra(schema: Dict[str, Any]) -> None:  # type: ignore
-            """Processess the schema after it has been generated.
+            """Process the schema after it has been generated.
 
             Schema is modified in place. Return value is ignored.
 

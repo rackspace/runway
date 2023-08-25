@@ -13,12 +13,14 @@ from typing import Tuple
 from typing_extensions import Literal, TypedDict
 
 SupportedPathType = Literal["local", "s3"]
-FormatedPathDetails = TypedDict("FormatedPathDetails", path=str, type=SupportedPathType)
+FormattedPathDetails = TypedDict(
+    "FormattedPathDetails", path=str, type=SupportedPathType
+)
 FormatPathResult = TypedDict(
-    "FormatedPaths",
-    dest=FormatedPathDetails,
+    "FormattedPaths",
+    dest=FormattedPathDetails,
     dir_op=bool,
-    src=FormatedPathDetails,
+    src=FormattedPathDetails,
     use_src_name=bool,
 )
 
@@ -48,11 +50,11 @@ class FormatPath:
         """Format the path of local files.
 
         Returns whether the destination will keep its own name or take the
-        source's name along with the editted path.
+        source's name along with the edited path.
 
         Formatting Rules:
             1. If a destination file is taking on a source name, it must end
-               with the appropriate operating system seperator
+               with the appropriate operating system separator
 
         General Options:
             1. If the operation is on a directory, the destination file will
@@ -60,11 +62,11 @@ class FormatPath:
             2. If the path of the destination exists and is a directory it
                will always use the name of the source file.
             3. If the destination path ends with the appropriate operating
-               system seperator but is not an existing directory, the
+               system separator but is not an existing directory, the
                appropriate directories will be made and the file will use the
                source's name.
             4. If the destination path does not end with the appropriate
-               operating system seperator and is not an existing directory, the
+               operating system separator and is not an existing directory, the
                appropriate directories will be created and the file name will
                be of the one provided.
 

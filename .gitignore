@@ -3,6 +3,7 @@
 *.egg-info
 *.pyc
 *.pyo
+.Trash-*
 .cache
 .coverage
 .eggs

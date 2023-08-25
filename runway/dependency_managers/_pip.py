@@ -130,7 +130,7 @@ class Pip(DependencyManager):
             cache_dir: Store the cache data in the provided directory.
             extend_args: Optional list of extra arguments to pass to ``pip install``.
                 This value will not be parsed or sanitized in any way - it will
-                be used as is. It is the user's responsability to ensure that
+                be used as is. It is the user's responsibility to ensure that
                 there are no overlapping arguments between this list and the
                 arguments that are automatically generated.
             no_cache_dir: Disable the cache.

@@ -203,7 +203,7 @@ class CfnginConfig(BaseConfig):
     """Tags to apply to all resources."""
 
     template_indent: int
-    """Spaces to use per-indent level when outputing a template to json."""
+    """Spaces to use per-indent level when outputting a template to json."""
 
     _data: CfnginConfigDefinitionModel
 

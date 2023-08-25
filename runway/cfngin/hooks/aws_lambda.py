@@ -571,7 +571,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
             installed and executable using ``-m`` if provided.
         requirements_files: Map of requirement file names and whether they exist.
         use_pipenv: Whether to use pipenv to export a Pipfile as requirements.txt.
-        work_dir: Working direcotry.
+        work_dir: Working directory.
 
     Returns:
         Content of the ZIP file as a byte string and calculated hash of all the files

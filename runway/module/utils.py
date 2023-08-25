@@ -74,7 +74,7 @@ def generate_node_command(
     return cmd_list
 
 
-# type hint quated b/c pylint 2.11.1 raises unsubscriptable-object
+# type hint b/c pylint 2.11.1 raises unsubscriptable-object
 def run_module_command(
     cmd_list: List[str],
     env_vars: Dict[str, str],

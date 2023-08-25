@@ -10,13 +10,13 @@ else:
     from typing import Literal, TypedDict  # type: ignore
 
 
-class _LambdaResponeOptional(TypedDict, total=False):
+class _LambdaResponseOptional(TypedDict, total=False):
     """Optional fields for a Lambda Response."""
 
     error: LambdaError
 
 
-class _LambdaResponeRequired(TypedDict):
+class _LambdaResponseRequired(TypedDict):
     """Required fields for a Lambda Response."""
 
     code: int
@@ -25,7 +25,7 @@ class _LambdaResponeRequired(TypedDict):
     status: Literal["error", "success"]
 
 
-class LambdaResponse(_LambdaResponeRequired, _LambdaResponeOptional):
+class LambdaResponse(_LambdaResponseRequired, _LambdaResponseOptional):
     """Response from Lambda Function."""
 
 

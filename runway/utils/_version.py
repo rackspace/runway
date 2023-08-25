@@ -5,7 +5,7 @@ import packaging.version
 
 
 class Version(packaging.version.Version):
-    """Customize packagining.version.Version."""
+    """Customize packaging.version.Version."""
 
     def __init__(self, version: str) -> None:
         """Instantiate class.

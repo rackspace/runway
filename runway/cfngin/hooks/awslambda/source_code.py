@@ -29,7 +29,7 @@ class SourceCode:
     project_root: Path
     """Top-level directory containing the project metadata files and source code root directory.
     The value can be the same as ``root_directory``.
-    If it is not, it must be a parent of ``root_direcotry``.
+    If it is not, it must be a parent of ``root_directory``.
 
     """
 

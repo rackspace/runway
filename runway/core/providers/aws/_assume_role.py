@@ -85,7 +85,7 @@ class AssumeRole(ContextManager["AssumeRole"]):
         sts_client = self.ctx.get_session().client("sts")
         LOGGER.info("assuming role %s...", self.role_arn)
         response = sts_client.assume_role(**self._kwargs)
-        LOGGER.debug("sts.assume_role respsone: %s", response)
+        LOGGER.debug("sts.assume_role response: %s", response)
         if "Credentials" in response:
             self.assumed_role_user.update(
                 response.get("AssumedRoleUser", cast("AssumedRoleUserTypeDef", {}))

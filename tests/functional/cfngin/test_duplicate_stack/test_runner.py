@@ -18,7 +18,7 @@ CURRENT_DIR = Path(__file__).parent
 
 @pytest.fixture(scope="module")
 def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
 

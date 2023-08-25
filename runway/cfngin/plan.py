@@ -1,4 +1,4 @@
-"""CFNgin plan, plan componenets, and functions for interacting with a plan."""
+"""CFNgin plan, plan components, and functions for interacting with a plan."""
 from __future__ import annotations
 
 import json
@@ -368,7 +368,7 @@ class Graph:
         self.dag = dag or DAG()
 
     def add_step(
-        self, step: Step, add_dependencies: bool = False, add_dependants: bool = False
+        self, step: Step, add_dependencies: bool = False, add_dependents: bool = False
     ) -> None:
         """Add a step to the graph.
 
@@ -376,7 +376,7 @@ class Graph:
             step: The step to be added.
             add_dependencies: Connect steps that need to be completed before this
                 step.
-            add_dependants: Connect steps that require this step.
+            add_dependents: Connect steps that require this step.
 
         """
         self.steps[step.name] = step
@@ -386,12 +386,12 @@ class Graph:
             for dep in step.requires:
                 self.connect(step.name, dep)
 
-        if add_dependants:
+        if add_dependents:
             for parent in step.required_by:
                 self.connect(parent, step.name)
 
     def add_step_if_not_exists(
-        self, step: Step, add_dependencies: bool = False, add_dependants: bool = False
+        self, step: Step, add_dependencies: bool = False, add_dependents: bool = False
     ) -> None:
         """Try to add a step to the graph.
 
@@ -401,7 +401,7 @@ class Graph:
             step: The step to be added.
             add_dependencies: Connect steps that need to be completed before this
                 step.
-            add_dependants: Connect steps that require this step.
+            add_dependents: Connect steps that require this step.
 
         """
         if self.steps.get(step.name):
@@ -417,7 +417,7 @@ class Graph:
                 except GraphError:
                     continue
 
-        if add_dependants:
+        if add_dependents:
             for parent in step.required_by:
                 try:
                     self.connect(parent, step.name)
@@ -533,7 +533,7 @@ class Graph:
         return self.dag.graph
 
     def dumps(self, indent: Optional[int] = None) -> str:
-        """Output the graph as a json seralized string for storage.
+        """Output the graph as a json serialized string for storage.
 
         Args:
             indent: Number of spaces for each indentation.
@@ -764,7 +764,7 @@ class Plan:
                     )
                 elif fn_name == "_launch_stack":
                     self.context.persistent_graph.add_step_if_not_exists(
-                        step, add_dependencies=True, add_dependants=True
+                        step, add_dependencies=True, add_dependents=True
                     )
                     LOGGER.debug("added step '%s' to the persistent graph", step.name)
                 else:

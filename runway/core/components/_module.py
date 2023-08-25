@@ -351,7 +351,7 @@ def validate_environment(
         logger: Logger to log messages to.
 
     Returns:
-        Booleon value of whether to deploy or not.
+        Boolean value of whether to deploy or not.
 
     """
     if isinstance(env_def, bool) or not env_def:
