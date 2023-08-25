@@ -53,7 +53,7 @@ class Source:
         """Sanitize a Source directory path string.
 
         Arguments:
-            uri: The uniform resource identifier when targetting a remote resource.
+            uri: The uniform resource identifier when targeting a remote resource.
 
         """
         for i in ["@", "/", ":"]:

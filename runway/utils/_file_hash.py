@@ -75,7 +75,7 @@ class FileHash:
 
         """
         with open(file_path, "rb") as stream:
-            # python 3.7 compatable version of `while chunk := buf.read(read_size):`
+            # python 3.7 compatible version of `while chunk := buf.read(read_size):`
             chunk = stream.read(self.chunk_size)  # seed chunk with initial value
             while chunk:
                 self._hash.update(chunk)

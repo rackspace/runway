@@ -47,13 +47,13 @@ class TestPythonDockerDependencyInstaller:
             ),
         ]
 
-    def test_environmet_variables(self) -> None:
-        """Test environmet_variables."""
+    def test_environment_variables(self) -> None:
+        """Test environment_variables."""
         expected = {"DOCKER_SETTINGS": "something", "PIP_SETTINGS": "foobar"}
         env_vars = {"FOO": "BAR", "PATH": "/dev/null", **expected}
         ctx = Mock(env=Mock(vars=env_vars))
         obj = PythonDockerDependencyInstaller(Mock(ctx=ctx), client=Mock())
-        assert obj.environmet_variables == expected
+        assert obj.environment_variables == expected
 
     @pytest.mark.parametrize(
         "pipenv, poetry", [(False, False), (False, True), (True, False), (True, True)]

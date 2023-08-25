@@ -85,7 +85,7 @@ class RunwayStaticSiteSourceHashingDirectoryDataModel(ConfigProperty):
     """Model for Runway static site Module source_hashing.directory option item.
 
     Attributes:
-        exclusions: List of gitignore formmated globs to ignore when calculating
+        exclusions: List of gitignore formatted globs to ignore when calculating
             the hash.
         path: Path to files to include in the hash.
 

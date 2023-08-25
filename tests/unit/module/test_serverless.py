@@ -231,7 +231,7 @@ class TestServerless:
         """Test env_file.
 
         Testing the precedence of each path, create the files in order from
-        lowerst to highest. After creating the file, the property's value
+        lowest to highest. After creating the file, the property's value
         is checked then cleared since the value is cached after the first
         time it is resolved.
 

@@ -91,7 +91,7 @@ class TestLoginArgs:
         )
 
     def test_field_defaults(self) -> None:
-        """Test field defalts."""
+        """Test field defaults."""
         args = {"password": "p@ssword", "username": "test-user"}
         obj = LoginArgs.parse_obj(deepcopy(args))
         assert not obj.dockercfg_path

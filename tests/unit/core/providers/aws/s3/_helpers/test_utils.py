@@ -25,8 +25,8 @@ from s3transfer.compat import seekable
 from s3transfer.futures import TransferFuture
 
 from runway.core.providers.aws.s3._helpers.format_path import (
-    FormatedPathDetails,
     FormatPathResult,
+    FormattedPathDetails,
 )
 from runway.core.providers.aws.s3._helpers.utils import (
     BaseProvideContentTypeSubscriber,
@@ -840,9 +840,9 @@ def test_find_dest_path_comp_key_locals3_dir(tmp_path: Path) -> None:
     """Test find_dest_path_comp_key."""
     dest = "test-bucket/prefix/"
     files = FormatPathResult(
-        dest=FormatedPathDetails(path="test-bucket/prefix/", type="s3"),
+        dest=FormattedPathDetails(path="test-bucket/prefix/", type="s3"),
         dir_op=True,
-        src=FormatedPathDetails(path=f"{tmp_path}{os.sep}", type="local"),
+        src=FormattedPathDetails(path=f"{tmp_path}{os.sep}", type="local"),
         use_src_name=True,
     )
     src_path = tmp_path / "something"
@@ -858,9 +858,9 @@ def test_find_dest_path_comp_key_locals3_file(tmp_path: Path) -> None:
     file_path = "something/test.txt"
     src_path = tmp_path / file_path
     files = FormatPathResult(
-        dest=FormatedPathDetails(path=dest, type="s3"),
+        dest=FormattedPathDetails(path=dest, type="s3"),
         dir_op=True,
-        src=FormatedPathDetails(path=f"{tmp_path}{os.sep}", type="local"),
+        src=FormattedPathDetails(path=f"{tmp_path}{os.sep}", type="local"),
         use_src_name=True,
     )
     dest_path, compare_key = find_dest_path_comp_key(files, src_path)
@@ -874,9 +874,9 @@ def test_find_dest_path_comp_key_locals3_file_no_dir_op(tmp_path: Path) -> None:
     file_path = "something/test.txt"
     src_path = tmp_path / file_path
     files = FormatPathResult(
-        dest=FormatedPathDetails(path=dest + file_path, type="s3"),
+        dest=FormattedPathDetails(path=dest + file_path, type="s3"),
         dir_op=False,
-        src=FormatedPathDetails(path=str(src_path), type="local"),
+        src=FormattedPathDetails(path=str(src_path), type="local"),
         use_src_name=False,
     )
     dest_path, compare_key = find_dest_path_comp_key(files, None)

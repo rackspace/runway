@@ -167,7 +167,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         if self.parameters or self.env_file:
             return False
         self.logger.info(
-            "skipped; tfvars file for this environmet/region not found "
+            "skipped; tfvars file for this environment/region not found "
             "and no parameters provided -- looking for one of: %s",
             ", ".join(
                 gen_workspace_tfvars_files(self.ctx.env.name, self.ctx.env.aws_region)
@@ -177,7 +177,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
 
     @cached_property
     def tfenv(self) -> TFEnvManager:
-        """Terraform environmet manager."""
+        """Terraform environment manager."""
         return TFEnvManager(self.path)
 
     @cached_property
@@ -218,7 +218,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         """Remove .terraform excluding the plugins directly.
 
         This step is crucial for allowing Runway to deploy to multiple regions
-        or deploy environments without promping the user for input.
+        or deploy environments without prompting the user for input.
 
         The plugins directory is retained to improve performance when they
         are used by subsequent runs.
@@ -410,7 +410,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
     def _terraform_destroy_legacy(self) -> None:
         """Execute ``terraform destroy -force`` command.
 
-        Compatible with Terrafrom <0.12.0.
+        Compatible with Terraform <0.12.0.
 
         """
         return run_module_command(
@@ -579,7 +579,7 @@ class TerraformOptions(ModuleOptions):
         data: Options parsed into a data model.
         env: Current deploy environment.
         path: Module path.
-        version: String continaing a Terraform version.
+        version: String containing a Terraform version.
         write_auto_tfvars: Optionally write parameters to a tfvars file instead
             of updating variables.
 

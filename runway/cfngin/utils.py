@@ -474,7 +474,7 @@ def ensure_s3_bucket(
             if response.get("MFADelete", "Disabled") != "Disabled":
                 LOGGER.warning(
                     'MFADelete must be disabled on bucket "%s" when using '
-                    "persistent graphs to allow for propper management of "
+                    "persistent graphs to allow for proper management of "
                     "the graphs",
                     bucket_name,
                 )

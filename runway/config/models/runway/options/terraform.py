@@ -10,7 +10,7 @@ from ...base import ConfigProperty
 
 
 class RunwayTerraformArgsDataModel(ConfigProperty):
-    """Modelf for Runway Terraform Module args option."""
+    """Model for Runway Terraform Module args option."""
 
     apply: List[str] = []
     init: List[str] = []

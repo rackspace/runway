@@ -300,7 +300,7 @@ class YamlLoader:
         Args:
             root: Root directory.
             load_class: Class to use with load method.
-            load_type: Contolls how content is passed to the load_class.
+            load_type: Controls how content is passed to the load_class.
 
         """
         self.load_class = load_class

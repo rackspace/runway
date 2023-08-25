@@ -68,12 +68,12 @@ class TestPersistentGraphLocked:
             (
                 None,
                 None,
-                "Persistant graph is locked. This action requires the graph to "
+                "Persistent graph is locked. This action requires the graph to "
                 "be unlocked to be executed.",
             ),
             ("message", None, "message"),
             ("message", "reason", "message"),
-            (None, "reason", "Persistant graph is locked. reason"),
+            (None, "reason", "Persistent graph is locked. reason"),
         ],
     )
     def test___init__(
@@ -93,12 +93,12 @@ class TestPersistentGraphUnlocked:
             (
                 None,
                 None,
-                "Persistant graph is unlocked. This action requires the graph to "
+                "Persistent graph is unlocked. This action requires the graph to "
                 "be locked to be executed.",
             ),
             ("message", None, "message"),
             ("message", "reason", "message"),
-            (None, "reason", "Persistant graph is unlocked. reason"),
+            (None, "reason", "Persistent graph is unlocked. reason"),
         ],
     )
     def test___init__(

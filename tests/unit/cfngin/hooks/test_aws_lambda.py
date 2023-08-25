@@ -493,7 +493,7 @@ class TestLambdaHooks(unittest.TestCase):
 
     @mock_s3
     def test_follow_symlink_false(self) -> None:
-        """Testing if syminks are present and not followed."""
+        """Testing if symlinks are present and not followed."""
         with self.temp_directory_with_files() as temp_dir1:
             root1 = temp_dir1.path
             with self.temp_directory_with_files() as temp_dir2:

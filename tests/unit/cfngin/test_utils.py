@@ -174,7 +174,7 @@ def test_ensure_s3_bucket_persist_graph_mfa_delete(caplog: LogCaptureFixture) ->
     stubber.assert_no_pending_responses()
     assert (
         'MFADelete must be disabled on bucket "test-bucket" when using persistent '
-        "graphs to allow for propper management of the graphs"
+        "graphs to allow for proper management of the graphs"
         in "\n".join(caplog.messages)
     )
 
@@ -222,7 +222,7 @@ def test_read_value_from_path_abs(tmp_path: Path) -> None:
 
 
 def test_read_value_from_path_dir(tmp_path: Path) -> None:
-    """Test read_value_from_path direcory."""
+    """Test read_value_from_path directory."""
     with pytest.raises(ValueError):
         read_value_from_path(f"file://{tmp_path.absolute()}")
 

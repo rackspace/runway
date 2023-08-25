@@ -298,7 +298,7 @@ class Blueprint(DelCachedPropMixin):
     Attributes:
         VARIABLES: Class variable that defines the values that can be passed
             from CFNgin to the template. These definition include metadata used
-            to validate the provided value and to propegate the variable to the
+            to validate the provided value and to propagate the variable to the
             resulting CloudFormation template.
         context: CFNgin context object.
         description: The description of the CloudFormation template that will

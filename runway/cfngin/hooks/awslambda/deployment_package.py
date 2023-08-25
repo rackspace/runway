@@ -59,7 +59,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
 
     When interacting with subclass of this instance, it is recommended to
     only call the methods defined within this parent class. This ensures
-    compatability with the S3 object class that can be returned.
+    compatibility with the S3 object class that can be returned.
 
     """
 

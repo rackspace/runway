@@ -48,7 +48,7 @@ class DockerImageBuildApiOptions(BaseModel):
 
     extra_hosts: Dict[str, str] = {}
     """Extra hosts to add to `/etc/hosts` in the build containers.
-    Defined as a mapping of hostmane to IP address.
+    Defined as a mapping of hostname to IP address.
 
     """
 

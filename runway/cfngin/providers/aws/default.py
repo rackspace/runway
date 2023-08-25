@@ -82,7 +82,7 @@ DEFAULT_CAPABILITIES = ["CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
 
 
 def get_cloudformation_client(session: boto3.Session) -> CloudFormationClient:
-    """Get CloudFormaiton boto3 client."""
+    """Get CloudFormation boto3 client."""
     config = Config(retries={"max_attempts": MAX_ATTEMPTS})
     return session.client("cloudformation", config=config)
 
@@ -1488,7 +1488,7 @@ class Provider(BaseProvider):
 
         Args:
             stack: The stack to get changes.
-            template: A Template object to compaired to.
+            template: A Template object to compared to.
             parameters: A list of dictionaries that defines the parameter list
                 to be applied to the Cloudformation stack.
             tags: A list of dictionaries that defines the tags that should be

@@ -605,7 +605,7 @@ class VariableValueLiteral(Generic[_LiteralValue], VariableValue):
 
 
 class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
-    """A concatinated variable values."""
+    """A concatenated variable values."""
 
     def __init__(
         self,
@@ -643,7 +643,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or flatten
-        nested concatentations.
+        nested concatenations.
 
         """
         concat: List[VariableValue] = []

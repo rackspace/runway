@@ -494,7 +494,7 @@ class TestDownloadRequestSubmitter(BaseTransferRequestSubmitterTest):
         for i, actual_subscriber in enumerate(actual_subscribers):
             assert isinstance(actual_subscriber, ref_subscribers[i])
 
-    def test_submit_allow_double_dots_no_excape(self) -> None:
+    def test_submit_allow_double_dots_no_escape(self) -> None:
         """Test submit."""
         self.config_params["dryrun"] = True
         fileinfo = self.create_file_info("a/../foo.txt")

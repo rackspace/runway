@@ -39,7 +39,7 @@ class ParametersDataModel(BaseModel):
         only_show_errors: Whether or not to only show errors while running.
         page_size: Number of objects to list per call.
         quiet: Don't output anything.
-        paths_type: Concatinated path types for source and destination.
+        paths_type: Concatenated path types for source and destination.
         size_only: When comparing files/objects, only consider size.
         storage_class: S3 storage class.
 

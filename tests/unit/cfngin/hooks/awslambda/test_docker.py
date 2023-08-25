@@ -147,13 +147,13 @@ class TestDockerDependencyInstaller:
                 client=Mock(images=Mock(build=Mock(side_effect=DockerException))),
             ).build_image(tmp_path / "Dockerfile")
 
-    def test_environmet_variables(self) -> None:
-        """Test environmet_variables."""
+    def test_environment_variables(self) -> None:
+        """Test environment_variables."""
         expected = {"DOCKER_SETTINGS": "something"}
         env_vars = {"FOO": "BAR", "PATH": "/dev/null", **expected}
         ctx = Mock(env=Mock(vars=env_vars))
         obj = DockerDependencyInstaller(Mock(ctx=ctx), client=Mock())
-        assert obj.environmet_variables == expected
+        assert obj.environment_variables == expected
 
     def test_from_project(self, mocker: MockerFixture) -> None:
         """Test from_project."""
@@ -481,8 +481,8 @@ class TestDockerDependencyInstaller:
         bind_mounts = mocker.patch.object(
             DockerDependencyInstaller, "bind_mounts", ["mount"]
         )
-        environmet_variables = mocker.patch.object(
-            DockerDependencyInstaller, "environmet_variables", {"foo": "bar"}
+        environment_variables = mocker.patch.object(
+            DockerDependencyInstaller, "environment_variables", {"foo": "bar"}
         )
         image = mocker.patch.object(DockerDependencyInstaller, "image", "image")
 
@@ -495,7 +495,7 @@ class TestDockerDependencyInstaller:
         mock_create.assert_called_once_with(
             command=command,
             detach=True,
-            environment=environmet_variables,
+            environment=environment_variables,
             image=image,
             mounts=bind_mounts,
             working_dir=DockerDependencyInstaller.PROJECT_DIR,
@@ -525,7 +525,7 @@ class TestDockerDependencyInstaller:
         )
         mocker.patch.object(DockerDependencyInstaller, "bind_mounts", ["mount"])
         mocker.patch.object(
-            DockerDependencyInstaller, "environmet_variables", {"foo": "bar"}
+            DockerDependencyInstaller, "environment_variables", {"foo": "bar"}
         )
         mocker.patch.object(DockerDependencyInstaller, "image", "image")
         with pytest.raises(DockerExecFailedError) as excinfo:
@@ -553,7 +553,7 @@ class TestDockerDependencyInstaller:
         )
         mocker.patch.object(DockerDependencyInstaller, "bind_mounts", ["mount"])
         mocker.patch.object(
-            DockerDependencyInstaller, "environmet_variables", {"foo": "bar"}
+            DockerDependencyInstaller, "environment_variables", {"foo": "bar"}
         )
         mocker.patch.object(DockerDependencyInstaller, "image", "image")
 

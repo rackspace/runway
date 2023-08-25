@@ -16,7 +16,7 @@ from mock import MagicMock
 from runway.cfngin.exceptions import (
     PersistentGraphCannotLock,
     PersistentGraphCannotUnlock,
-    PersistentGraphLockCodeMissmatch,
+    PersistentGraphLockCodeMismatch,
     PersistentGraphLocked,
     PersistentGraphUnlocked,
 )
@@ -489,7 +489,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         mocker.patch.object(CfnginContext, "persistent_graph_lock_code", "0")
         obj = CfnginContext()
         obj.persistent_graph = Graph.from_dict(self.persist_graph_raw, context=obj)
-        with pytest.raises(PersistentGraphLockCodeMissmatch):
+        with pytest.raises(PersistentGraphLockCodeMismatch):
             obj.put_persistent_graph("123")
 
     def test_put_persistent_graph_not_locked(self, mocker: MockerFixture) -> None:

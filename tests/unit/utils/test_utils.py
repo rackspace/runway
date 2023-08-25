@@ -263,7 +263,7 @@ class TestSafeHaven:
         assert caplog.messages[-1] == "leaving the safe haven..."
 
     def test_sys_modules_exclude(self, monkeypatch: MonkeyPatch) -> None:
-        """Test sys.modules interations with excluded module."""
+        """Test sys.modules interactions with excluded module."""
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
 
         module = "tests.unit.fixtures.mock_hooks"

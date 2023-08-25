@@ -249,7 +249,7 @@ def get_content_type(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional
 
     Returns:
         The content type of the extra file. If 'content_type' is provided then
-        that is returned, otherways it is auto detected based on the name.
+        that is returned, otherwise it is auto detected based on the name.
 
     """
     return extra_file.content_type or auto_detect_content_type(extra_file.name)

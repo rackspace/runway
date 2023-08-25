@@ -18,7 +18,7 @@ CURRENT_DIR = Path(__file__).parent
 
 @pytest.fixture(scope="module")
 def deploy_promotezip_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(
         cli,
         ["deploy", "--tag", "sls"],
@@ -28,7 +28,7 @@ def deploy_promotezip_result(cli_runner: CliRunner) -> Generator[Result, None, N
 
 @pytest.fixture(scope="module")
 def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
 
 
@@ -83,11 +83,11 @@ def test_deploy_promotezip_log_messages(deploy_promotezip_result: Result) -> Non
 
 @pytest.mark.order(after="test_deploy_promotezip_log_messages")
 def test_destroy_promotezip_exit_code(destroy_promotezip_result: Result) -> None:
-    """Test destory exit code."""
+    """Test destroy exit code."""
     assert destroy_promotezip_result.exit_code == 0
 
 
 @pytest.mark.order("last")
 def test_destroy_exit_code(destroy_result: Result) -> None:
-    """Test destory exit code."""
+    """Test destroy exit code."""
     assert destroy_result.exit_code == 0

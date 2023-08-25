@@ -170,7 +170,7 @@ class FileGenerator:
             operation_name: Name of the operation being executed.
             follow_symlinks: If symlinks should be followed.
             page_size: Number of items per page.
-            result_queue: Queue used for outputing results.
+            result_queue: Queue used for outputting results.
             request_parameters: Parameters provided with the request.
 
         """
@@ -249,14 +249,14 @@ class FileGenerator:
 
     @staticmethod
     def normalize_sort(names: List[str], os_sep: str, character: str) -> None:
-        """Ensure that the same path seperator is used when sorting.
+        """Ensure that the same path separator is used when sorting.
 
         On Windows, the path operator is a backslash as opposed to a forward slash
         which can lead to differences in sorting between S3 and a Windows machine.
 
         Args:
             names: List of file names.
-            os_sep: OS seperator.
+            os_sep: OS separator.
             character: Character that will be used to replace the os_sep.
 
         """

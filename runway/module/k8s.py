@@ -104,7 +104,7 @@ class K8s(RunwayModule):
 
     @cached_property
     def kbenv(self) -> KBEnvManager:
-        """Kubectl environmet manager."""
+        """Kubectl environment manager."""
         return KBEnvManager(self.path, overlay_path=self.options.overlay_path)
 
     @cached_property
@@ -292,7 +292,7 @@ class K8sOptions(ModuleOptions):
     def gen_overlay_dirs(environment: str, region: str) -> List[str]:
         """Generate possible overlay directories.
 
-        Prefers more explicit direcory name but falls back to environmet name only.
+        Prefers more explicit directory name but falls back to environment name only.
 
         Args:
             environment: Current deploy environment.

@@ -52,19 +52,19 @@ def main_session() -> boto3.Session:
 
 @pytest.fixture(scope="module")
 def variables() -> Dict[str, Any]:
-    """Contents of ruinway.variables.yml."""
+    """Contents of runway.variables.yml."""
     return yaml.safe_load((CURRENT_DIR / "runway.variables.yml").read_bytes())
 
 
 @pytest.fixture(scope="module")
 def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--debug"], env={"CI": "1"})
 
 
 @pytest.fixture(scope="module")
 def destroy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["destroy"], env={"CI": "1"})
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
 

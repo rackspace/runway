@@ -44,7 +44,7 @@ def tf_version(request: SubRequest) -> Generator[str, None, None]:
 def deploy_result(
     cli_runner: CliRunner, no_backend: Path  # pylint: disable=unused-argument
 ) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     destroy_result = cli_runner.invoke(cli, ["destroy"], env={"CI": "1"})
     # cleanup files

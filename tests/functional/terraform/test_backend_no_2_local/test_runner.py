@@ -41,7 +41,7 @@ def deploy_local_backend_result(
     local_backend: Path,
     tf_version: str,
 ) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     assert (CURRENT_DIR / "terraform.tfstate.d").exists()
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     # cleanup files
@@ -58,7 +58,7 @@ def deploy_no_backend_result(
     no_backend: Path,
     tf_version: str,
 ) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
 
 

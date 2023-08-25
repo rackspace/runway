@@ -182,7 +182,7 @@ class CFNNumber(CFNType):
     """An integer or float.
 
     AWS CloudFormation validates the parameter value as a number; however,
-    whenyou use the parameter elsewhere in your template (for example, by using
+    when you use the parameter elsewhere in your template (for example, by using
     the Ref intrinsic function), the parameter value becomes a string.
 
     """

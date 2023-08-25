@@ -11,5 +11,8 @@
 				"ms-python.python"
 			]
 		}
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	}
 }

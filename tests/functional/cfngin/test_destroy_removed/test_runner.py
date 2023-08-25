@@ -18,7 +18,7 @@ CURRENT_DIR = Path(__file__).parent
 
 @pytest.fixture(scope="module")
 def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     assert cli_runner.invoke(cli, ["destroy"], env={"CI": "1"}).exit_code == 0
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
@@ -44,7 +44,7 @@ def test_deploy_log_messages(deploy_result: Result, namespace: str) -> None:
 
     """
     assert (
-        "00-bootstrap:persistant graph object does not exist in s3; creating one now..."
+        "00-bootstrap:persistent graph object does not exist in s3; creating one now..."
         in deploy_result.stdout
     )
     assert (
@@ -77,7 +77,7 @@ def test_deploy_log_messages(deploy_result: Result, namespace: str) -> None:
 
 @pytest.mark.order(after="test_deploy_log_messages")
 def test_destroy_exit_code(destroy_result: Result) -> None:
-    """Test destory exit code."""
+    """Test destroy exit code."""
     assert destroy_result.exit_code == 0
 
 
