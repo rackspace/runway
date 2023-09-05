@@ -32,7 +32,7 @@ jobs:
       PIP_NO_BINARY: pydantic
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -82,7 +82,7 @@ jobs:
       PIP_NO_BINARY: pydantic
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -134,7 +134,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - id: check_distance
