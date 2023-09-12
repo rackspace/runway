@@ -75,7 +75,7 @@ jobs:
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install --extras docs -vv
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.DEPLOY_AWS_SECRET_ACCESS_KEY }}
@@ -179,7 +179,7 @@ jobs:
           sudo apt update -y
           sudo apt install -y default-libmysqlclient-dev libxml2-dev libxmlsec1-dev libxmlsec1-openssl pkg-config
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.TEST_RUNNER_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.TEST_RUNNER_AWS_SECRET_ACCESS_KEY }}
