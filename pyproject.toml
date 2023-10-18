@@ -7,7 +7,7 @@ authors = [
   "Onica Group LLC <opensource@onica.com>",
 ]
 maintainers = [
-  "Kyle Finley <kyle@finley.sh>",
+  "Kyle Finley <kyle@finley.sh>", "Sam Fakhreddine <sam.fakhreddine@rackspace.com>"
 ]
 readme = "README.md"
 homepage = "https://github.com/onicagroup/runway"
@@ -29,7 +29,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8, <4"
+python = ">=3.8, <3.12"
 
 # dependencies needed for building docs are included here.
 # they are marked as "optional" and are installed as the extra "docs".
@@ -286,7 +286,7 @@ min-public-methods = 0
 
 [tool.pylint.format]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#format-checker
-max-line-length = 100
+max-line-length = 120
 max-module-lines = 1000
 
 [tool.pylint.imports]
