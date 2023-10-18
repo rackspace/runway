@@ -37,7 +37,7 @@ class ModulePath:
     ARGS_REGEX: ClassVar[str] = r"(\?)(?P<args>.*)$"
     REMOTE_SOURCE_HANDLERS: ClassVar[Dict[str, Type[Source]]] = {"git": Git}
     SOURCE_REGEX: ClassVar[str] = r"(?P<source>[a-z]+)(\:\:)"
-    URI_REGEX: ClassVar[str] = r"(?P<uri>[a-z]+://[a-zA-Z0-9\./]+?(?=//|\?|$))"
+    URI_REGEX: ClassVar[str] = r"(?P<uri>[a-z]+://[a-zA-Z0-9\./-]+?(?=//|\?|$))"
 
     def __init__(
         self,
