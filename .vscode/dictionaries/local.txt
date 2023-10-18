@@ -279,7 +279,7 @@ somepath
 sourcer
 sphinxcontrib
 sssz
-strtobool
+str2bool
 stubber
 stubbers
 subcmd
