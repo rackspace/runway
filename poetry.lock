@@ -3239,13 +3239,14 @@ files = [
 pbr = ">=2.0.0,<2.1.0 || >2.1.0"
 
 [[package]]
-name = "str2bool"
-version = "1.1"
-description = "Convert string to boolean"
+name = "str2bool3"
+version = "1.0.2"
+description = "Convert string to boolean (Forked from SymonSoft/str2bool)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "str2bool-1.1.zip", hash = "sha256:dbc3c917dca831904bce8568f6fb1f91435fcffc2ec4a46d62c9aa08d7cf77c3"},
+    {file = "str2bool3-1.0.2-py3-none-any.whl", hash = "sha256:18d3fac572fc7372cc14ef0b7d39c6c8fb9d5f3c23a8666d99e4c692e2782334"},
+    {file = "str2bool3-1.0.2.tar.gz", hash = "sha256:7ec7b97d1a4646f7e62a58a98052c1df3a6ed22cae18e8b44dd9529c2faf7e2d"},
 ]
 
 [[package]]
@@ -3617,4 +3618,4 @@ docs = ["dunamai", "jsx-lexer", "sphinx", "sphinx-github-changelog", "sphinx-rtd
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8, <3.12"
-content-hash = "36ca0cb4685dffc5a813fbb06c0df8d422fbd4f4b3212f71fae8f27eada89dea"
+content-hash = "ca9f0ef9573385ff56b8d0b4b1877c267286531eb466b291ab8690868775be9c"

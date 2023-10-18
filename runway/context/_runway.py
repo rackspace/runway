@@ -5,7 +5,7 @@ import logging
 import sys
 from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
-from str2bool import str2bool as strtobool  # type: ignore
+from str2bool3 import str2bool as strtobool  # type: ignore
 
 from ..compat import cached_property
 from ..core.components import DeployEnvironment
