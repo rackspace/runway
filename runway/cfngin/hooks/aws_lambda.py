@@ -159,9 +159,9 @@ def should_use_docker(dockerize_pip: DockerizePipArgTypeDef = None) -> bool:
     return False
 
 
-def str2bool(v):  # type: ignore
+def str2bool(v: str):
     """Return boolean value of string."""
-    return v.lower() in ("yes", "true", "t", "1", "on")
+    return v.lower() in ("yes", "true", "t", "1", "on", "y")
 
 
 def _zip_files(files: Iterable[str], root: str) -> Tuple[bytes, str]:

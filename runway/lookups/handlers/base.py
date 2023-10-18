@@ -33,9 +33,9 @@ LOGGER = logging.getLogger(__name__)
 TransformToTypeLiteral = Literal["bool", "str"]
 
 
-def str2bool(v):  # type: ignore
+def str2bool(v: str):
     """Return boolean value of string."""
-    return v.lower() in ("yes", "true", "t", "1", "on")
+    return v.lower() in ("yes", "true", "t", "1", "on", "y")
 
 
 class LookupHandler:

@@ -3239,17 +3239,6 @@ files = [
 pbr = ">=2.0.0,<2.1.0 || >2.1.0"
 
 [[package]]
-name = "str2bool3"
-version = "1.0.2"
-description = "Convert string to boolean (Forked from SymonSoft/str2bool)"
-optional = false
-python-versions = "*"
-files = [
-    {file = "str2bool3-1.0.2-py3-none-any.whl", hash = "sha256:18d3fac572fc7372cc14ef0b7d39c6c8fb9d5f3c23a8666d99e4c692e2782334"},
-    {file = "str2bool3-1.0.2.tar.gz", hash = "sha256:7ec7b97d1a4646f7e62a58a98052c1df3a6ed22cae18e8b44dd9529c2faf7e2d"},
-]
-
-[[package]]
 name = "sympy"
 version = "1.11.1"
 description = "Computer algebra system (CAS) in Python"
