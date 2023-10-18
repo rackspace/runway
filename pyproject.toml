@@ -73,7 +73,7 @@ yamllint = "*"
 pipenv = "2022.1.8"
 moto = "3.0.5"
 testfixtures = "^7.0.3"
-str2bool = "^1.1"
+str2bool3 = "*"
 
 [tool.poetry.dev-dependencies]
 black = ">=22.1"
