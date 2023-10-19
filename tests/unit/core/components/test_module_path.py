@@ -38,6 +38,15 @@ TypeDefTestDefinition = TypedDict(
 
 TESTS: List[TypeDefTestDefinition] = [
     {
+        "definition": "git::git://github.com/onicagroup/foo/foo-bar.git",
+        "expected": {
+            "location": "./",
+            "arguments": {},
+            "source": "git",
+            "uri": "git://github.com/onicagroup/foo/foo-bar.git",
+        },
+    },
+    {
         "definition": "git::git://github.com/onicagroup/foo/bar.git",
         "expected": {
             "location": "./",
