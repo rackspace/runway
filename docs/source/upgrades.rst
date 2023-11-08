@@ -30,7 +30,7 @@ You may need to update your Runway config file structure depending on how old of
         post_deploy_env_revert: true
         prod: arn:aws:iam::123412341234:role/my-deployment-role
       environments:
-        prod-ops:
+        prod:
           namespace: my-account
           environment: prod
 
