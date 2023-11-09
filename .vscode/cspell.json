@@ -213,6 +213,10 @@
         "autodetected",
         "addoption",
         "domparator",
-        "Fakhreddine"
+        "Fakhreddine",
+        "SPHINXAUTOBUILD",
+        "autobuild",
+        "SPHINXAUTOBUILDPORT",
+        "ssmstore"
     ]
 }
