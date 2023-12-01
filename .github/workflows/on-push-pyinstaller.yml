@@ -22,8 +22,8 @@ jobs:
     name: Pyinstaller "One File" Build
     strategy:
       matrix:
-        os: [macos-12, ubuntu-20.04, windows-latest]
-        python-version: [3.8]
+        os: [macos-12, ubuntu-latest, windows-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -72,8 +72,8 @@ jobs:
     name: Pyinstaller "One Folder" Build
     strategy:
       matrix:
-        os: [macos-12, ubuntu-20.04, windows-latest]
-        python-version: [3.8]
+        os: [macos-12, ubuntu-latest, windows-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -129,8 +129,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04]
-        python-version: [3.8]
+        os: [ubuntu-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repo (complete)
@@ -182,7 +182,7 @@ jobs:
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-ubuntu-20.04
+          name: pyinstaller-onefolder-ubuntu-22.04
           path: artifacts
       - name: Download Artifacts (windows)
         if: steps.check_distance.outcome == 'success'

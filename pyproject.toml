@@ -20,16 +20,17 @@ classifiers = [
   "Natural Language :: English",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
 ]
 packages = [
   { include = "runway" },
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8, <4"
+python = ">=3.9, <3.13"
 
 # dependencies needed for building docs are included here.
 # they are marked as "optional" and are installed as the extra "docs".
@@ -355,7 +356,7 @@ extraPaths = [
   "./.github/scripts/urlshortener",
 ]
 pythonPlatform = "All"
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 reportDuplicateImport = "none"
 reportImportCycles = "none"
 reportIncompatibleMethodOverride = "warning"

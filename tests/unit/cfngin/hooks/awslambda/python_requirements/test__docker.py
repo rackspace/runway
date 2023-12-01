@@ -128,9 +128,9 @@ class TestPythonDockerDependencyInstaller:
     @pytest.mark.parametrize(
         "version, expected",
         [
+            (Version("3.11.0"), "python3.11"),
             (Version("3.10.0"), "python3.10"),
             (Version("3.9.7"), "python3.9"),
-            (Version("3.8.4"), "python3.8"),
             (None, None),
         ],
     )

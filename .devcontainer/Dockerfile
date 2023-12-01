@@ -23,8 +23,8 @@ RUN sudo add-apt-repository ppa:deadsnakes/ppa
 
 # Install Python 3.10, 3.8, and 3.9
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends python3.10 python3.10-venv python3.10-dev \
-    python3.8 python3.8-venv python3.8-dev \
+    && apt-get -y install --no-install-recommends python3.11 python3.11-venv python3.11-dev \
+    python3.10 python3.10-venv python3.10-dev \
     python3.9 python3.9-venv python3.9-dev
 
 
@@ -46,4 +46,4 @@ RUN pip3 install --user awscli poetry==1.5.1
 RUN echo "complete -C '/home/vscode/.local/bin/aws_completer' aws" >> ~/.bashrc
 
 # Setup OS_NAME var for runway builds from this dev container
-RUN echo "export OS_NAME=ubuntu-20.04" >> ~/.bashrc
+RUN echo "export OS_NAME=ubuntu-22.04" >> ~/.bashrc

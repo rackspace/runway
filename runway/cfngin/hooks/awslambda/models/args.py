@@ -174,8 +174,8 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
         args:
           compatible_runtimes:
-            - python3.8
             - python3.9
+            - python3.10
 
     """
 

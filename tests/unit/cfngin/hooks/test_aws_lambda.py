@@ -655,7 +655,7 @@ class TestDockerizePip:
     def test_with_runtime(self) -> None:
         """Test with runtime provided."""
         client = make_fake_client()
-        runtime = "python3.8"
+        runtime = "python3.9"
         dockerized_pip(os.getcwd(), client=client, runtime=runtime)
 
         client.api.create_container.assert_called_with(

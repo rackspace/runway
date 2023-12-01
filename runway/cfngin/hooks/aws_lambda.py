@@ -56,16 +56,7 @@ ZIP_PERMS_MASK = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
 LOGGER = logging.getLogger(__name__)
 
 # list from python tags of https://hub.docker.com/r/lambci/lambda/tags
-SUPPORTED_RUNTIMES = [
-    # Python 2.7 reached end-of-life on January 1st, 2020.
-    # However, the Python 2.7 runtime is still supported and is not scheduled
-    # to be deprecated at this time.
-    # https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html
-    "python2.7",
-    "python3.6",
-    "python3.7",
-    "python3.8",
-]
+SUPPORTED_RUNTIMES = ["python3.7", "python3.8", "python3.9", "python3.10", "python3.11"]
 
 DockerizePipArgTypeDef = Optional[
     Union[
@@ -1048,7 +1039,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
                       path: ./lambda_functions
                       dockerize_pip: non-linux
                       use_pipenv: true
-                      runtime: python3.8
+                      runtime: python3.9
                       include:
                         - '*.py'
                         - '*.txt'
