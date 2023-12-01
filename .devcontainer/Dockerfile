@@ -46,4 +46,4 @@ RUN pip3 install --user awscli poetry==1.5.1
 RUN echo "complete -C '/home/vscode/.local/bin/aws_completer' aws" >> ~/.bashrc
 
 # Setup OS_NAME var for runway builds from this dev container
-RUN echo "export OS_NAME=ubuntu-22.04" >> ~/.bashrc
+RUN echo "export OS_NAME=ubuntu-latest" >> ~/.bashrc
