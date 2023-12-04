@@ -33,7 +33,7 @@ def test_deploy_exit_code(deploy_result: Result) -> None:
 def test_deploy_log_messages_docker(deploy_result: Result) -> None:
     """Test deploy log messages."""
     assert (
-        'using docker image "lambci/lambda:build-python3.9" to build deployment package...'
+        'using docker image "lambci/lambda:build-python3.8" to build deployment package...'
         in deploy_result.stdout
     )
 

@@ -1,7 +1,7 @@
 """Runway logging."""
 import logging
 from enum import IntEnum
-from typing import Any, MutableMapping, Text, Tuple, Union
+from typing import Any, MutableMapping, Tuple, Union
 
 
 class LogLevels(IntEnum):
@@ -23,7 +23,7 @@ class LogLevels(IntEnum):
         return value in cls._value2member_map_  # pylint: disable=no-member
 
 
-class PrefixAdaptor(logging.LoggerAdapter):
+class PrefixAdaptor(logging.LoggerAdapter[Any]):
     """LoggerAdapter that adds prefixes to messages.
 
     Example:
@@ -73,7 +73,7 @@ class PrefixAdaptor(logging.LoggerAdapter):
         """
         return self.prefix_template.format(prefix=self.prefix, msg=msg), kwargs
 
-    def setLevel(self, level: Union[int, Text]) -> None:  # noqa
+    def setLevel(self, level: Union[int, str]) -> None:  # noqa
         """Set the specified level on the underlying logger.
 
         Python 2 backport.
@@ -103,7 +103,7 @@ class PrefixAdaptor(logging.LoggerAdapter):
 class RunwayLogger(logging.Logger):
     """Extend built-in logger with additional levels."""
 
-    def __init__(self, name: str, level: Union[int, Text] = logging.NOTSET) -> None:
+    def __init__(self, name: str, level: Union[int, str] = logging.NOTSET) -> None:
         """Instantiate the class.
 
         Args:
