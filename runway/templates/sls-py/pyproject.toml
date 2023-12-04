@@ -6,7 +6,7 @@ authors = ["Onica Group LLC <opensource@onica.com>"]
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 
 pyyaml = "^5.1"
 
