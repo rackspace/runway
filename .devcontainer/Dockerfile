@@ -21,7 +21,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # Add additional python options
 RUN sudo add-apt-repository ppa:deadsnakes/ppa
 
-# Install Python 3.10, 3.8, and 3.9
+# Install Python 3.11, 3.10, and 3.9
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends python3.11 python3.11-venv python3.11-dev \
     python3.10 python3.10-venv python3.10-dev \

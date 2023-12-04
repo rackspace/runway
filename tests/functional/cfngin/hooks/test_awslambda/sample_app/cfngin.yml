@@ -14,7 +14,7 @@ pre_deploy:
         - __init__.py
         - requirements.txt
       object_prefix: ${namespace}
-      runtime: python3.8
+      runtime: python3.9
       source_code: ./src/docker
   - path: runway.cfngin.hooks.awslambda.PythonFunction
     data_key: awslambda.function.local
@@ -42,7 +42,7 @@ pre_deploy:
         - Dockerfile
         - Pipfile
       object_prefix: ${namespace}
-      runtime: python3.8
+      runtime: python3.9
       source_code: ./src/docker_mysql
       strip: false
   - path: runway.cfngin.hooks.awslambda.PythonFunction
@@ -64,7 +64,7 @@ pre_deploy:
         - '*.toml'
         - Dockerfile
       object_prefix: ${namespace}
-      runtime: python3.8
+      runtime: python3.9
       source_code: ./src/docker_xmlsec
       strip: false
   - path: runway.cfngin.hooks.awslambda.PythonLayer
@@ -72,7 +72,7 @@ pre_deploy:
     args:
       << : *xmlsec_args
       compatible_runtimes:
-        - python3.8
+        - python3.9
       extend_gitignore:
         - __init__.py
         - '*.toml'
@@ -85,7 +85,7 @@ pre_deploy:
       extend_gitignore:
         - __init__.py
       object_prefix: ${namespace}
-      runtime: python3.8
+      runtime: python3.9
       source_code: ./src/local_xmlsec_layer
 
 

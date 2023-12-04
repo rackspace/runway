@@ -56,7 +56,7 @@ ZIP_PERMS_MASK = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
 LOGGER = logging.getLogger(__name__)
 
 # list from python tags of https://hub.docker.com/r/lambci/lambda/tags
-SUPPORTED_RUNTIMES = ["python3.7", "python3.8"]
+SUPPORTED_RUNTIMES = ["python3.8", "python3.9"]
 
 DockerizePipArgTypeDef = Optional[
     Union[
@@ -1039,7 +1039,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
                       path: ./lambda_functions
                       dockerize_pip: non-linux
                       use_pipenv: true
-                      runtime: python3.8
+                      runtime: python3.9
                       include:
                         - '*.py'
                         - '*.txt'

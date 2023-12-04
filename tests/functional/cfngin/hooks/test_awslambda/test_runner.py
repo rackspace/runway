@@ -180,7 +180,7 @@ def test_docker(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-docker",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.9")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
@@ -216,7 +216,7 @@ def test_mysql(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-mysql",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.9")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
@@ -233,7 +233,7 @@ def test_xmlsec(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-xmlsec",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.9")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
@@ -252,7 +252,7 @@ def test_xmlsec_layer(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-xmlsec-layer",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.9")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
