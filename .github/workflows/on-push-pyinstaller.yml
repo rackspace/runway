@@ -51,6 +51,8 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
+      - name: Install Pyinstaller
+        run: pip install pyinstaller==5.13.0
       - uses: Gr1N/setup-poetry@v8
       - uses: actions/cache@v3.0.11
         id: cache
@@ -101,6 +103,8 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
+      - name: Install Pyinstaller
+        run: pip install pyinstaller==5.13.0
       - uses: Gr1N/setup-poetry@v8
       - uses: actions/cache@v3.0.11
         id: cache
