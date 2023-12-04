@@ -465,7 +465,7 @@ class TestPythonProject:
         )
         with pytest.raises(RuntimeMismatchError) as excinfo:
             assert not PythonProject(args, Mock()).runtime
-        assert excinfo.value.detected_runtime == "python3.9"
+        assert excinfo.value.detected_runtime == "python3.8"
         assert excinfo.value.expected_runtime == args.runtime
 
     @pytest.mark.parametrize(
