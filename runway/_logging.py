@@ -23,7 +23,8 @@ class LogLevels(IntEnum):
         return value in cls._value2member_map_  # pylint: disable=no-member
 
 
-class PrefixAdaptor(logging.LoggerAdapter[Any]):
+# Issue with this version of LoggerAdapter https://github.com/python/typeshed/issues/7855
+class PrefixAdaptor(logging.LoggerAdapter):  # type: ignore
     """LoggerAdapter that adds prefixes to messages.
 
     Example:
