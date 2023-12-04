@@ -144,8 +144,8 @@ Example
       args:
         bucket_name: ${bucket_name}
         compatible_runtimes:
-          - python3.8
           - python3.9
+          - python3.10
         docker:
           disabled: true
         extend_gitignore:
@@ -156,7 +156,7 @@ Example
         extend_pip_args:
           - '--proxy'
           - '[user:passwd@]proxy.server:port'
-        runtime: python3.8
+        runtime: python3.9
         slim: false
         source_code: ./src/example-function
     - path: runway.cfngin.hooks.awslambda.PythonLayer

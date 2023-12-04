@@ -71,7 +71,7 @@ The two data sources are merged by iterating over their content and combining th
   functions:
     example:
       handler: handler.example
-      runtime: python3.8
+      runtime: python3.9
       memorySize: 512
 
 .. code-block:: yaml
@@ -98,7 +98,7 @@ The two data sources are merged by iterating over their content and combining th
   functions:
     example:
       handler: handler.example
-      runtime: python3.8
+      runtime: python3.9
       memorySize: 1024
     resources:
       Resources:

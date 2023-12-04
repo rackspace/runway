@@ -187,7 +187,7 @@ Example
             path: ./lambda_functions
             dockerize_pip: non-linux
             use_pipenv: true
-            runtime: python3.8
+            runtime: python3.9
             include:
               - '*.py'
               - '*.txt'
@@ -221,6 +221,6 @@ Example
                   Code=code,
                   Handler="my_function.handler",
                   Role="...",
-                  Runtime="python3.8",
+                  Runtime="python3.9",
               )
           )

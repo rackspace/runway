@@ -16,8 +16,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-12, ubuntu-20.04, windows-latest]
-        python-version: [3.8]
+        os: [macos-12, ubuntu-latest, windows-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -67,8 +67,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-12, ubuntu-20.04, windows-latest]
-        python-version: [3.8]
+        os: [macos-12, ubuntu-latest, windows-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -123,8 +123,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-20.04]
-        python-version: [3.8]
+        os: [ubuntu-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repo (complete)
@@ -167,7 +167,7 @@ jobs:
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-ubuntu-20.04
+          name: pyinstaller-onefolder-ubuntu-22.04
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v3
@@ -200,8 +200,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-20.04]
-        python-version: [3.8]
+        os: [ubuntu-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/setup-node@v4
@@ -229,7 +229,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
       - name: Remove broken apt repos (ubuntu)
@@ -272,7 +272,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       - uses: Gr1N/setup-poetry@v8
       - uses: actions/cache@v3.0.11
         id: cache
@@ -302,7 +302,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Download Artifacts (macOS)
         uses: actions/download-artifact@v3
         with:
@@ -311,7 +311,7 @@ jobs:
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefile-ubuntu-20.04
+          name: pyinstaller-onefile-ubuntu-22.04
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v3
@@ -339,7 +339,7 @@ jobs:
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       - uses: Gr1N/setup-poetry@v8
       - uses: actions/cache@v3.0.11
         id: cache

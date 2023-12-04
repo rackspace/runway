@@ -53,7 +53,7 @@ def project(cfngin_context: CfnginContext, tmp_path: Path) -> ProjectTypeAlias:
     """Mock project object."""
     args = AwsLambdaHookArgs(
         bucket_name="test-bucket",
-        runtime="foobar3.9",
+        runtime="foobar3.8",
         source_code=tmp_path,
     )
     return MockProject(args, cfngin_context)
