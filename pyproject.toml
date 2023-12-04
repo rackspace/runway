@@ -30,7 +30,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9, <4"
+python = ">=3.9, <3.13"
 
 # dependencies needed for building docs are included here.
 # they are marked as "optional" and are installed as the extra "docs".
@@ -75,7 +75,7 @@ pipenv = "2022.1.8"
 moto = "3.0.5"
 testfixtures = "^7.0.3"
 wheel = "^0.42.0"
-pyinstaller = "4.5.1"
+pyinstaller = "^6.2.0"
 
 [tool.poetry.dev-dependencies]
 black = ">=22.1"
