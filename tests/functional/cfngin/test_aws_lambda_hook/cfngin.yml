@@ -14,7 +14,7 @@ pre_deploy:
         dockerize:
           dockerize_pip: true
           use_pipenv: true
-          runtime: python3.9
+          runtime: python3.8
           path: ./lambda_src/dockerize_src
           include:
             - '*.py'
@@ -22,7 +22,7 @@ pre_deploy:
             - '*.pyc'
         nondockerize:
             path: ./lambda_src/nondockerize_src
-            runtime: python3.9
+            runtime: python3.8
             include:
               - '*.py'
             exclude:
