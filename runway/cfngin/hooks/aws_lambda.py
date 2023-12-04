@@ -1039,7 +1039,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
                       path: ./lambda_functions
                       dockerize_pip: non-linux
                       use_pipenv: true
-                      runtime: python3.9
+                      runtime: python3.8
                       include:
                         - '*.py'
                         - '*.txt'

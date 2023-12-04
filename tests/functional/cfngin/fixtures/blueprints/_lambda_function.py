@@ -48,7 +48,7 @@ class LambdaFunction(Blueprint):
         "Runtime": {
             "type": CFNString,
             "description": "Runtime of the Lambda Function.",
-            "default": "python3.9",
+            "default": "python3.8",
         },
     }
 
