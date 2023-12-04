@@ -56,7 +56,7 @@ ZIP_PERMS_MASK = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
 LOGGER = logging.getLogger(__name__)
 
 # list from python tags of https://hub.docker.com/r/lambci/lambda/tags
-SUPPORTED_RUNTIMES = ["python3.8", "python3.9"]
+SUPPORTED_RUNTIMES = ["python3.7", "python3.8"]
 
 DockerizePipArgTypeDef = Optional[
     Union[
