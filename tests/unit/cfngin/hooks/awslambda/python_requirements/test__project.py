@@ -439,9 +439,9 @@ class TestPythonProject:
         """Test runtime from pip."""
         mocker.patch.object(PythonProject, "docker", None)
         mocker.patch.object(
-            PythonProject, "pip", Mock(python_version=Mock(major="3", minor="9"))
+            PythonProject, "pip", Mock(python_version=Mock(major="3", minor="8"))
         )
-        assert PythonProject(Mock(runtime=None), Mock()).runtime == "python3.9"
+        assert PythonProject(Mock(runtime=None), Mock()).runtime == "python3.8"
 
     def test_runtime_raise_runtime_mismatch_error_docker(
         self, mocker: MockerFixture
@@ -461,7 +461,7 @@ class TestPythonProject:
         args = Mock(runtime="bar")
         mocker.patch.object(PythonProject, "docker", None)
         mocker.patch.object(
-            PythonProject, "pip", Mock(python_version=Mock(major="3", minor="9"))
+            PythonProject, "pip", Mock(python_version=Mock(major="3", minor="8"))
         )
         with pytest.raises(RuntimeMismatchError) as excinfo:
             assert not PythonProject(args, Mock()).runtime
