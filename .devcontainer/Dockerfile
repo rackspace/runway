@@ -11,7 +11,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     software-properties-common binutils
 
 # Setup Apt for newer versions of NodeJS
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - &&\
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash - && \
     sudo apt-get install -y nodejs
 
 # Install nodejs
