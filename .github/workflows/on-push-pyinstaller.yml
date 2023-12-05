@@ -124,7 +124,7 @@ jobs:
     needs:
       - build-pyinstaller-onefolder
     env:
-      NODE_VERSION: 12
+      NODE_VERSION: 18
       NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
       fail-fast: false
