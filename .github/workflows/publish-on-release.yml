@@ -167,7 +167,7 @@ jobs:
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-ubuntu-22.04
+          name: pyinstaller-onefolder-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v3
@@ -311,7 +311,7 @@ jobs:
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefile-ubuntu-22.04
+          name: pyinstaller-onefile-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v3
