@@ -41,6 +41,11 @@ CdkCommandTypeDef = Literal[
 class CloudDevelopmentKit(RunwayModuleNpm):
     """CDK Runway Module."""
 
+    DEPRECATION_MSG = (
+        "CDK Runway module support has been deprecated and "
+        "may be removed in the next major release."
+    )
+
     options: CloudDevelopmentKitOptions
 
     def __init__(
@@ -83,6 +88,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
         )
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
+        LOGGER.warning("%s:%s", self.name, self.DEPRECATION_MSG)
 
     @cached_property
     def cli_args(self) -> List[str]:

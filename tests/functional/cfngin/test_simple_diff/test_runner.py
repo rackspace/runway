@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="module")
 def initial_deploy(cli_runner: CliRunner) -> Generator[None, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     assert cli_runner.invoke(cli, ["deploy"], env={"CI": "1"}).exit_code == 0
     yield
     assert cli_runner.invoke(cli, ["destroy"], env={"CI": "1"}).exit_code == 0

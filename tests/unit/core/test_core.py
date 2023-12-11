@@ -1,5 +1,5 @@
 """Test runway.core."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 
@@ -252,12 +252,8 @@ class TestRunway:
         test_handlers["fail_system_exit_0"].handle.assert_called_with(
             obj.tests[1].name, obj.tests[1].args
         )
-        obj.tests[0].resolve.called_once_with(
-            runway_context, variables=runway_config.variables
-        )
-        obj.tests[1].resolve.called_once_with(
-            runway_context, variables=runway_config.variables
-        )
+        obj.tests[0](runway_context, variables=runway_config.variables)
+        obj.tests[1](runway_context, variables=runway_config.variables)
 
         obj.tests = [  # type: ignore
             MagicMock(type="fail_system_exit_1", required=False),

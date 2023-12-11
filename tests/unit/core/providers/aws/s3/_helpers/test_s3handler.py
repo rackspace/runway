@@ -1,5 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.s3handler."""
-# pylint: disable=no-self-use,redefined-outer-name,too-many-lines
+# pylint: disable=redefined-outer-name,too-many-lines
 from __future__ import annotations
 
 from pathlib import Path
@@ -494,7 +494,7 @@ class TestDownloadRequestSubmitter(BaseTransferRequestSubmitterTest):
         for i, actual_subscriber in enumerate(actual_subscribers):
             assert isinstance(actual_subscriber, ref_subscribers[i])
 
-    def test_submit_allow_double_dots_no_excape(self) -> None:
+    def test_submit_allow_double_dots_no_escape(self) -> None:
         """Test submit."""
         self.config_params["dryrun"] = True
         fileinfo = self.create_file_info("a/../foo.txt")

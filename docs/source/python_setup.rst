@@ -24,13 +24,13 @@ Perform the following to install/configure Python & package management tools.
             - Leave all Optional Features selected, and click Next
             - On the Advanced Options page change the following options and click Install:
                 - Check the ``Install for all users`` and ``Add Python to environment variables`` options.
-                - Change the install location to ``C:\Python37`` (updating ``Python37`` to the appropriate directory for the installed version, e.g. ``Python38`` for Python 3.8)
+                - Change the install location to ``C:\Python37`` (updating ``Python37`` to the appropriate directory for the installed version, e.g. ``Python39`` for Python 3.9)
             - At the ``Setup was successful`` screen, click ``Disable path length limit`` and then close the setup program.
         - Edit the Path environment variable for your user:
             - In the Start Menu, start typing ``environment variables`` and select ``Edit environment variables for your account``.
             - In the User variables for your username, select ``Path`` and click ``Edit...``
             - Append ``%USERPROFILE%\AppData\Roaming\Python\Python37\Scripts`` & ``%USERPROFILE%\.local\bin`` to the current Variable values and click Ok
-                - Change ``Python37`` to the appropriate directory for the installed version (e.g. ``Python38`` for Python 3.8)
+                - Change ``Python37`` to the appropriate directory for the installed version (e.g. ``Python39`` for Python 3.9)
                 - In Windows Server 2016, the value is shown in a single line -- add it with semicolons::
 
                     %USERPROFILE%\AppData\Roaming\Python\Python37\Scripts;%USERPROFILE%\.local\bin;

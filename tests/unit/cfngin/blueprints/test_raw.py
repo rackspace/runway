@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.blueprints.raw."""
-# pylint: disable=no-self-use,unused-argument
+# pylint: disable=unused-argument
 # pyright: basic
 from __future__ import annotations
 

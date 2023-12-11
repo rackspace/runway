@@ -16,8 +16,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
-        python-version: [3.7]
+        os: [macos-12, ubuntu-latest, windows-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -26,10 +26,10 @@ jobs:
       PIP_NO_BINARY: pydantic
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -45,8 +45,8 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -67,8 +67,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
-        python-version: [3.7]
+        os: [macos-12, ubuntu-latest, windows-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -77,10 +77,10 @@ jobs:
       PIP_NO_BINARY: pydantic
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -96,8 +96,8 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -118,24 +118,24 @@ jobs:
     needs:
       - build-pyinstaller-onefolder
     env:
-      NODE_VERSION: 12
+      NODE_VERSION: 18
       NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
+        os: [ubuntu-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           always-auth: true
           node-version: ${{ env.NODE_VERSION }}
@@ -149,8 +149,8 @@ jobs:
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed tree -y
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -162,12 +162,12 @@ jobs:
       - name: Download Artifacts (macOS)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-macos-10.15
+          name: pyinstaller-onefolder-macos-12
           path: artifacts
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-ubuntu-18.04
+          name: pyinstaller-onefolder-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v3
@@ -194,17 +194,17 @@ jobs:
       - build-npm
     env:
       CI: true
-      NODE_VERSION: 12
+      NODE_VERSION: 18
       NPM_PACKAGE_NAME: '@onica/runway'
       NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
+        os: [ubuntu-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
@@ -223,13 +223,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
       - name: Remove broken apt repos (ubuntu)
@@ -237,8 +237,8 @@ jobs:
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -261,7 +261,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Download Distribution Artifact
@@ -269,12 +269,12 @@ jobs:
         with:
           name: pypi-dist
           path: dist
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
-          python-version: 3.8
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+          python-version: 3.9
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -299,19 +299,19 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
-          python-version: 3.8
+          python-version: 3.9
       - name: Download Artifacts (macOS)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefile-macos-10.15
+          name: pyinstaller-onefile-macos-12
           path: artifacts
       - name: Download Artifacts (ubuntu)
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefile-ubuntu-18.04
+          name: pyinstaller-onefile-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
         uses: actions/download-artifact@v3
@@ -335,13 +335,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
-          python-version: 3.8
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+          python-version: 3.9
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -351,7 +351,7 @@ jobs:
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install --extras docs -vv
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.aws_access_key }}
           aws-secret-access-key: ${{ secrets.aws_secret_key }}
@@ -366,3 +366,20 @@ jobs:
             --table-region $TABLE_REGION \
             --version $VERSION \
             --latest
+  notify-on-publish:
+    name: Notify
+    needs:
+      - publish-npm
+      - publish-pypi
+      - update-urlshortener
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@v1.0.8
+        if: always()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}

@@ -1,5 +1,5 @@
 """Shared functionality for the Auth@Edge Lambda suite."""
-# pylint: disable=consider-using-f-string
+# pylint: disable=consider-using-f-string, inconsistent-return-statements
 import base64
 import hmac
 import json
@@ -70,7 +70,7 @@ def extract_and_parse_cookies(headers, client_id, cookie_compatibility="amplify"
     """Extract and parse the Cognito cookies from the headers.
 
     Args:
-         headers (Dict[str, str]): The request/response headers in
+        headers (Dict[str, str]): The request/response headers in
             dictionary format.
         client_id (str): The Cognito UserPool Client ID.
         cookie_compatibility (str): "amplify" or "elasticsearch".
@@ -259,9 +259,9 @@ def generate_cookie_headers(
     ] = f"{tokens.get('refresh_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("refreshToken"))
     )
-
+    cookies_iter = cookies  # type: ignore
     if event == "sign_out":
-        for key in cookies:
+        for key in cookies_iter:
             cookies[key] = expire_cookie(cookies[key])
     elif event == "refresh_failed":
         cookies[cookie_names["refresh_token_key"]] = expire_cookie(

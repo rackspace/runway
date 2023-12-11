@@ -22,8 +22,8 @@ jobs:
     name: Pyinstaller "One File" Build
     strategy:
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
-        python-version: [3.7]
+        os: [macos-12, ubuntu-latest, windows-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -32,10 +32,10 @@ jobs:
       PIP_NO_BINARY: pydantic
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -51,8 +51,8 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -72,8 +72,8 @@ jobs:
     name: Pyinstaller "One Folder" Build
     strategy:
       matrix:
-        os: [macos-10.15, ubuntu-18.04, windows-latest]
-        python-version: [3.7]
+        os: [macos-12, ubuntu-latest, windows-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     env:
       OS_NAME: ${{ matrix.os }}
@@ -82,10 +82,10 @@ jobs:
       PIP_NO_BINARY: pydantic
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -101,8 +101,8 @@ jobs:
       - name: Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -124,17 +124,17 @@ jobs:
     needs:
       - build-pyinstaller-onefolder
     env:
-      NODE_VERSION: 12
+      NODE_VERSION: 18
       NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-18.04]
-        python-version: [3.7]
+        os: [ubuntu-latest]
+        python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout Repo (complete)
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - id: check_distance
@@ -142,11 +142,11 @@ jobs:
         continue-on-error: true
         run: bash ./check_distance_from_tag.sh
         working-directory: .github/scripts/cicd
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         if: steps.check_distance.outcome == 'success'
         with:
           always-auth: true
@@ -162,8 +162,8 @@ jobs:
       - name: Install Dependencies (ubuntu)
         if: steps.check_distance.outcome == 'success'
         run: sudo apt-get update && sudo apt-get install sed tree -y
-      - uses: Gr1N/setup-poetry@v7
-      - uses: actions/cache@v2.1.7
+      - uses: Gr1N/setup-poetry@v8
+      - uses: actions/cache@v3.0.11
         id: cache
         with:
           path: .venv
@@ -176,13 +176,13 @@ jobs:
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-macos-10.15
+          name: pyinstaller-onefolder-macos-12
           path: artifacts
       - name: Download Artifacts (ubuntu)
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v3
         with:
-          name: pyinstaller-onefolder-ubuntu-18.04
+          name: pyinstaller-onefolder-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
         if: steps.check_distance.outcome == 'success'

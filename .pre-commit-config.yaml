@@ -2,7 +2,7 @@ minimum_pre_commit_version: 2.6.0
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v4.3.0
     hooks:
       - id: check-json
       - id: check-merge-conflict
@@ -45,7 +45,7 @@ repos:
             buildspec.yml
           )$
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
+    rev: 5.12.0
     hooks:
       - id: isort
   - repo: https://github.com/psf/black
@@ -61,7 +61,7 @@ repos:
         additional_dependencies:
           - flake8-bugbear
           - flake8-docstrings
-          - flake8-print==4.0.0
+          - flake8-print==5.0.0
           - flake8-use-fstring
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.31.1

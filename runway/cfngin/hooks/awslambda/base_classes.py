@@ -36,24 +36,26 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
-_AwsLambdaHookArgsTypeVar = TypeVar(
-    "_AwsLambdaHookArgsTypeVar", bound=AwsLambdaHookArgs, covariant=True
+_AwsLambdaHookArgsTypeVar_co = TypeVar(
+    "_AwsLambdaHookArgsTypeVar_co", bound=AwsLambdaHookArgs, covariant=True
 )
 
 
-class Project(Generic[_AwsLambdaHookArgsTypeVar]):
-    """Project continaing source code for an AWS Lambda Function."""
+class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
+    """Project containing source code for an AWS Lambda Function."""
 
     DEFAULT_CACHE_DIR_NAME: ClassVar[str] = "cache"
     """Name of the default cache directory."""
 
-    args: _AwsLambdaHookArgsTypeVar
+    args: _AwsLambdaHookArgsTypeVar_co
     """Parsed hook arguments."""
 
     ctx: CfnginContext
     """CFNgin context object."""
 
-    def __init__(self, args: _AwsLambdaHookArgsTypeVar, context: CfnginContext) -> None:
+    def __init__(
+        self, args: _AwsLambdaHookArgsTypeVar_co, context: CfnginContext
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -140,7 +142,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar]):
         return getattr(self.args, "license", None)
 
     @cached_property  # pylint error is python3.7 only
-    def metadata_files(self) -> Tuple[Path, ...]:  # pylint: disable=no-self-use
+    def metadata_files(self) -> Tuple[Path, ...]:
         """Project metadata files (e.g. ``project.json``, ``pyproject.toml``)."""
         return ()
 
@@ -259,7 +261,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar]):
         distinguish project language. The value of this property should reflect
         the project/dependency management tool used within the project.
 
-        The value of this property should be calculated without initalizing
+        The value of this property should be calculated without initializing
         other properties (e.g. ``source_code``) except for ``project_root``
         so that it can be used in their initialization process.
 
@@ -267,7 +269,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar]):
         raise NotImplementedError
 
     @cached_property  # pylint error is python3.7 only
-    def supported_metadata_files(self) -> Set[str]:  # pylint: disable=no-self-use
+    def supported_metadata_files(self) -> Set[str]:
         """Names of all supported metadata files.
 
         Returns:

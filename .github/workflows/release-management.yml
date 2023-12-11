@@ -9,10 +9,10 @@ on:
 jobs:
   update_draft_release:
     name: Draft release
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       # https://github.com/release-drafter/release-drafter
-      - uses: release-drafter/release-drafter@v5.18.1
+      - uses: release-drafter/release-drafter@v5.25.0
         env:
           # Using a PAT here will allow releases to trigger a build/release but
           # we're just using the actions token for the time being since we

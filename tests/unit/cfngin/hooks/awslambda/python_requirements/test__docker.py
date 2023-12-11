@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.python_requirements._docker."""
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 import logging
@@ -47,13 +47,13 @@ class TestPythonDockerDependencyInstaller:
             ),
         ]
 
-    def test_environmet_variables(self) -> None:
-        """Test environmet_variables."""
+    def test_environment_variables(self) -> None:
+        """Test environment_variables."""
         expected = {"DOCKER_SETTINGS": "something", "PIP_SETTINGS": "foobar"}
         env_vars = {"FOO": "BAR", "PATH": "/dev/null", **expected}
         ctx = Mock(env=Mock(vars=env_vars))
         obj = PythonDockerDependencyInstaller(Mock(ctx=ctx), client=Mock())
-        assert obj.environmet_variables == expected
+        assert obj.environment_variables == expected
 
     @pytest.mark.parametrize(
         "pipenv, poetry", [(False, False), (False, True), (True, False), (True, True)]
@@ -128,6 +128,7 @@ class TestPythonDockerDependencyInstaller:
     @pytest.mark.parametrize(
         "version, expected",
         [
+            (Version("3.11.0"), "python3.11"),
             (Version("3.10.0"), "python3.10"),
             (Version("3.9.7"), "python3.9"),
             (Version("3.8.4"), "python3.8"),

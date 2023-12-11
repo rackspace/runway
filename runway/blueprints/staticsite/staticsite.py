@@ -44,7 +44,6 @@ IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
 
 
 class _IndexRewriteFunctionInfoTypeDef(TypedDict):
-
     function: awslambda.Function
     role: iam.Role
     version: awslambda.Version
@@ -354,7 +353,16 @@ class StaticSite(Blueprint):
         bucket = self.template.add_resource(
             s3.Bucket(
                 "Bucket",
-                AccessControl=(s3.Private if self.cf_enabled else s3.PublicRead),
+                # PublicAccessBlockConfiguration=s3.PublicAccessBlockConfiguration(
+                # )
+                PublicAccessBlockConfiguration=(
+                    s3.PublicAccessBlockConfiguration(BlockPublicAcls="true")
+                    if self.cf_enabled
+                    else s3.PublicAccessBlockConfiguration(BlockPublicAcls="false")
+                ),
+                OwnershipControls=s3.OwnershipControls(
+                    Rules=[s3.OwnershipControlsRule(ObjectOwnership="ObjectWriter")]
+                ),
                 LifecycleConfiguration=s3.LifecycleConfiguration(
                     Rules=[
                         s3.LifecycleRule(
@@ -621,6 +629,6 @@ class StaticSite(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    print(  # noqa: T001
+    print(  # noqa: T201
         StaticSite("test", CfnginContext(parameters={"namespace": "test"})).to_json()
     )

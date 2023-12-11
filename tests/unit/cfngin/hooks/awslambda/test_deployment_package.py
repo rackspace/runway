@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.deployment_package."""
-# pylint: disable=no-self-use,protected-access,redefined-outer-name,unused-argument
+# pylint: disable=protected-access,redefined-outer-name,unused-argument
 # pylint: disable=too-many-lines
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ def project(cfngin_context: CfnginContext, tmp_path: Path) -> ProjectTypeAlias:
     """Mock project object."""
     args = AwsLambdaHookArgs(
         bucket_name="test-bucket",
-        runtime="foobar3.9",
+        runtime="foobar3.8",
         source_code=tmp_path,
     )
     return MockProject(args, cfngin_context)
@@ -70,8 +70,8 @@ class TestDeploymentPackage:
 
     def test__build_fix_file_permissions(self, project: ProjectTypeAlias) -> None:
         """Test _build_fix_file_permissions."""
-        file0 = Mock(external_attr=(0o777 << 16))
-        file1 = Mock(external_attr=(0o755 << 16))
+        file0 = Mock(external_attr=0o777 << 16)
+        file1 = Mock(external_attr=0o755 << 16)
         archive_file = Mock(filelist=[file0, file1])
 
         obj = DeploymentPackage(project)
@@ -624,7 +624,7 @@ class TestDeploymentPackage:
 
         obj = DeploymentPackage(project)
         obj.archive_file.write_text("foobar")
-        response: PutObjectOutputTypeDef = {
+        response: PutObjectOutputTypeDef = {  # type: ignore
             "BucketKeyEnabled": False,
             "ETag": "string",
             "Expiration": "string",
@@ -647,7 +647,7 @@ class TestDeploymentPackage:
         stubber = cast("Stubber", project.ctx.add_stubber("s3"))  # type: ignore
         stubber.add_response(
             "put_object",
-            response,
+            response,  # type: ignore
             {
                 "Body": obj.archive_file.read_bytes(),
                 "Bucket": project.args.bucket_name,

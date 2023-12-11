@@ -1,10 +1,10 @@
 """Hook data models.
 
-These are makeshift data models for use until Runway v2 is realeased and pydantic
+These are makeshift data models for use until Runway v2 is released and pydantic
 can be used.
 
 """
-# pylint: disable=no-self-argument,no-self-use
+# pylint: disable=no-self-argument
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, cast

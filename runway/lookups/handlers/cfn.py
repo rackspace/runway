@@ -112,7 +112,7 @@ class CfnLookup(LookupHandler):
             ) from exc
 
         try:
-            # dict is not perserved in mock call so it must be a copy of
+            # dict is not preserved in mock call so it must be a copy of
             # args for testing to function correctly
             if cls.should_use_provider(args.copy(), provider):
                 # this will only happen when used from cfngin

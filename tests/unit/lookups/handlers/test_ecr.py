@@ -1,5 +1,5 @@
 """Test runway.lookups.handlers.ecr."""
-# pylint: disable=no-self-use,redefined-outer-name
+# pylint: disable=redefined-outer-name
 # pyright: basic
 from __future__ import annotations
 

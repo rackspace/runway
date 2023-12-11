@@ -1,4 +1,4 @@
-"""Add all configured (CloudFront compatable) headers to origin response."""
+"""Add all configured (CloudFront compatible) headers to origin response."""
 from shared import as_cloud_front_headers, get_config  # pylint: disable=import-error
 
 CONFIG = get_config()

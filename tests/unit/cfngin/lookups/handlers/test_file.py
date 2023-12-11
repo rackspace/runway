@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.file."""
-# pylint: disable=no-self-use
+
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 from __future__ import annotations
 

@@ -18,7 +18,7 @@ CURRENT_DIR = Path(__file__).parent
 
 @pytest.fixture(scope="module")
 def deploy_bad_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "bad"], env={"CI": "1"})
     assert (
         cli_runner.invoke(cli, ["destroy", "--tag", "good"], env={"CI": "1"}).exit_code
@@ -29,7 +29,7 @@ def deploy_bad_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
 
 @pytest.fixture(scope="module")
 def deploy_good_result(cli_runner: CliRunner) -> Result:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     return cli_runner.invoke(cli, ["deploy", "--tag", "good"], env={"CI": "1"})
 
 

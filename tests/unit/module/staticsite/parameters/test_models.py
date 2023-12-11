@@ -1,5 +1,5 @@
 """Test runway.module.staticsite.parameters.models."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from typing import Any, Dict, cast
 

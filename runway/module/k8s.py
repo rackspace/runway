@@ -51,6 +51,11 @@ KubectlCommandTypeDef = Literal[
 class K8s(RunwayModule):
     """Kubectl Runway Module."""
 
+    DEPRECATION_MSG = (
+        "Kubectl Runway module support has been deprecated and "
+        "may be removed in the next major release."
+    )
+
     options: K8sOptions
 
     def __init__(
@@ -95,10 +100,11 @@ class K8s(RunwayModule):
         )
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
+        LOGGER.warning("%s:%s", self.name, self.DEPRECATION_MSG)
 
     @cached_property
     def kbenv(self) -> KBEnvManager:
-        """Kubectl environmet manager."""
+        """Kubectl environment manager."""
         return KBEnvManager(self.path, overlay_path=self.options.overlay_path)
 
     @cached_property
@@ -286,7 +292,7 @@ class K8sOptions(ModuleOptions):
     def gen_overlay_dirs(environment: str, region: str) -> List[str]:
         """Generate possible overlay directories.
 
-        Prefers more explicit direcory name but falls back to environmet name only.
+        Prefers more explicit directory name but falls back to environment name only.
 
         Args:
             environment: Current deploy environment.

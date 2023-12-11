@@ -1,5 +1,5 @@
 """Test runway.cfngin.blueprints.cfngin_bucket."""
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 import sys
-from distutils.util import strtobool
 from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 from ..compat import cached_property
@@ -17,6 +16,11 @@ if TYPE_CHECKING:
     from ..core.type_defs import RunwayActionTypeDef
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
+
+
+def str2bool(v: str):
+    """Return boolean value of string."""
+    return v.lower() in ("yes", "true", "t", "1", "on", "y")
 
 
 class RunwayContext(BaseContext):
@@ -64,7 +68,7 @@ class RunwayContext(BaseContext):
                 # catch False
                 return not colorize
             if colorize and isinstance(colorize, str):  # type: ignore
-                return not strtobool(colorize)
+                return not str2bool(colorize)
         except ValueError:
             pass  # likely invalid RUNWAY_COLORIZE value
         return not sys.stdout.isatty()

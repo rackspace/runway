@@ -23,7 +23,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class BlankBlueprint(Blueprint):
-    """Blueprint that can be built programatically."""
+    """Blueprint that can be built programmatically."""
 
     def create_template(self) -> None:
         """Create template without raising NotImplementedError."""

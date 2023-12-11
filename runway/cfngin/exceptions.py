@@ -154,7 +154,7 @@ class GraphError(CfnginError):
 
 
 class ImproperlyConfigured(CfnginError):
-    """Raised when a componenet is improperly configured."""
+    """Raised when a component is improperly configured."""
 
     message: str
 
@@ -364,11 +364,11 @@ class PersistentGraphLocked(CfnginError):
                 reason
                 or "This action requires the graph to be unlocked to be executed."
             )
-            self.message = f"Persistant graph is locked. {reason}"
+            self.message = f"Persistent graph is locked. {reason}"
         super().__init__()
 
 
-class PersistentGraphLockCodeMissmatch(CfnginError):
+class PersistentGraphLockCodeMismatch(CfnginError):
     """Raised when the provided persistent graph lock code does not match.
 
     The code used to unlock the persistent graph must match the s3 object lock
@@ -406,7 +406,7 @@ class PersistentGraphUnlocked(CfnginError):
             reason = (
                 reason or "This action requires the graph to be locked to be executed."
             )
-            self.message = f"Persistant graph is unlocked. {reason}"
+            self.message = f"Persistent graph is unlocked. {reason}"
         super().__init__()
 
 

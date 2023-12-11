@@ -1,5 +1,5 @@
 """Argument data models."""
-# pylint: disable=no-self-argument,no-self-use
+# pylint: disable=no-self-argument
 from __future__ import annotations
 
 from pathlib import Path
@@ -33,7 +33,8 @@ class DockerOptions(BaseModel):
     """
 
     extra_files: List[str] = []
-    """List of absolute file paths within the Docker container to copy into the deployment package.
+    """List of absolute file paths within the Docker container to copy into the
+    deployment package.
 
     Some Python packages require extra OS libraries (``*.so``) files at runtime.
     These files need to be included in the deployment package for the Lambda Function to run.
@@ -173,8 +174,8 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
         args:
           compatible_runtimes:
-            - python3.8
             - python3.9
+            - python3.10
 
     """
 

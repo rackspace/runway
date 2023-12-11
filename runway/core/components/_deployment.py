@@ -212,7 +212,7 @@ class Deployment:
                 )
                 sys.exit(1)
             self.logger.info(
-                "verified current AWS account matches required " 'account id "%s"',
+                "verified current AWS account matches required " + 'account id "%s"',
                 self.definition.account_id,
             )
         if self.definition.account_alias:

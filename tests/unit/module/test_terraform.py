@@ -1,5 +1,5 @@
 """Test runway.module.terraform."""
-# pylint: disable=no-self-use,too-many-statements,too-many-lines
+# pylint: disable=too-many-statements,too-many-lines
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
@@ -917,6 +917,16 @@ class TestTerraformOptions:
                         "bucket": "foo",
                         "dynamodb_table": "bar",
                         "region": "us-west-2",
+                    }
+                }
+            ),
+            (
+                {
+                    "terraform_backend_config": {
+                        "bucket": "foo",
+                        "dynamodb_table": "bar",
+                        "region": "us-west-2",
+                        "workspace_key_prefix": "foobar",
                     }
                 }
             ),

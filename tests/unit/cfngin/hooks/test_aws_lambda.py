@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.hooks.aws_lambda."""
-# pylint: disable=no-self-use
+
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 # pyright: reportFunctionMemberAccess=none, reportOptionalMemberAccess=none
 # pyright: reportOptionalOperand=none
@@ -22,7 +22,9 @@ import pytest
 from botocore.exceptions import ClientError
 from mock import ANY, MagicMock, patch
 from moto import mock_s3
-from testfixtures import ShouldRaise, TempDirectory, compare
+from testfixtures.comparison import compare
+from testfixtures.shouldraise import ShouldRaise
+from testfixtures.tempdirectory import TempDirectory
 from troposphere.awslambda import Code
 
 from runway.cfngin.exceptions import InvalidDockerizePipConfiguration
@@ -345,7 +347,6 @@ class TestLambdaHooks(unittest.TestCase):
         with self.temp_directory_with_files() as temp_dir, ShouldRaise(
             RuntimeError(msg)
         ):
-
             results = self.run_hook(
                 functions={
                     "MyFunction": {"path": temp_dir.path + "/f1", "exclude": ["**"]}
@@ -492,7 +493,7 @@ class TestLambdaHooks(unittest.TestCase):
 
     @mock_s3
     def test_follow_symlink_false(self) -> None:
-        """Testing if syminks are present and not followed."""
+        """Testing if symlinks are present and not followed."""
         with self.temp_directory_with_files() as temp_dir1:
             root1 = temp_dir1.path
             with self.temp_directory_with_files() as temp_dir2:
@@ -780,7 +781,7 @@ class TestHandleRequirements:
         ]
         if platform.system() == "Windows":
             expected_text.append("")
-            assert requirements_txt.read_text() == "\n\n".join(expected_text)
+            assert requirements_txt.read_text() == "\n".join(expected_text)
         else:
             assert requirements_txt.read_text() == "\n".join(expected_text) + "\n"
 
@@ -836,7 +837,7 @@ class TestHandleRequirements:
         ]
         if platform.system() == "Windows":
             expected_text.append("")
-            assert requirements_txt.read_text() == "\n\n".join(expected_text)
+            assert requirements_txt.read_text() == "\n".join(expected_text)
         else:
             assert requirements_txt.read_text() == "\n".join(expected_text) + "\n"
 

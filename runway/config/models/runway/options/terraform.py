@@ -1,5 +1,5 @@
 """Runway Terraform Module options."""
-# pylint: disable=no-self-argument,no-self-use
+# pylint: disable=no-self-argument
 from __future__ import annotations
 
 from typing import Dict, List, Optional, Union
@@ -10,7 +10,7 @@ from ...base import ConfigProperty
 
 
 class RunwayTerraformArgsDataModel(ConfigProperty):
-    """Modelf for Runway Terraform Module args option."""
+    """Model for Runway Terraform Module args option."""
 
     apply: List[str] = []
     init: List[str] = []
@@ -29,6 +29,7 @@ class RunwayTerraformBackendConfigDataModel(ConfigProperty):
     bucket: Optional[str] = None
     dynamodb_table: Optional[str] = None
     region: Optional[str] = None
+    workspace_key_prefix: Optional[str] = None
 
     class Config(ConfigProperty.Config):
         """Model configuration."""

@@ -1,5 +1,5 @@
 """Test runway.config."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

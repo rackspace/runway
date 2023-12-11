@@ -7,7 +7,7 @@ authors = [
   "Onica Group LLC <opensource@onica.com>",
 ]
 maintainers = [
-  "Kyle Finley <kyle@finley.sh>",
+  "Kyle Finley <kyle@finley.sh>", "Sam Fakhreddine <sam.fakhreddine@rackspace.com>"
 ]
 readme = "README.md"
 homepage = "https://github.com/onicagroup/runway"
@@ -20,16 +20,17 @@ classifiers = [
   "Natural Language :: English",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
 ]
 packages = [
   { include = "runway" },
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.7, <4"
+python = ">=3.9, <3.13"
 
 # dependencies needed for building docs are included here.
 # they are marked as "optional" and are installed as the extra "docs".
@@ -66,10 +67,15 @@ sphinx-tabs = { version = "^3.2", optional = true }  # docs
 sphinxcontrib-apidoc = { version = "^0.3", optional = true }  # docs
 sphinxcontrib-programoutput = { version = "^0.17", optional = true }  # docs
 tomli = ">=1.2.2"
-troposphere = ">=2.4, <4"
+troposphere = ">=2.4, <5"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
 yamllint = "*"
+pipenv = "2022.1.8"
+moto = "3.0.5"
+testfixtures = "^7.0.3"
+wheel = "^0.42.0"
+pyinstaller = "^6.2.0"
 
 [tool.poetry.dev-dependencies]
 black = ">=22.1"
@@ -82,7 +88,7 @@ flake8-comprehensions = ">=3.7.0"  # flake8 plugin
 flake8-docstrings = ">=1.6"  # flake8 plugin
 flake8-print = ">=4.0.0"  # flake8 plugin
 flake8-use-fstring = ">=1.3"  # flake8 plugin
-isort = ">=5.10"
+isort = ">=5.12"
 mock = ">=4.0"
 moto = { version = ">=3.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }
 mypy-boto3 = "^1.16"  # importable boto3 type annotations
@@ -90,7 +96,6 @@ pep8-naming = ">=0.12.1"  # flake8 plugin
 pipenv = "^2022.1.8"  # only used in tests
 pre-commit = ">=2.14"
 pydocstyle = ">=6.1.1"  # flake8 plugin
-pyinstaller = "^4.3"
 pylint = ">=2.12"
 pytest = ">=7.0"
 pytest-cov = ">=3.0"  # pytest plugin
@@ -100,7 +105,7 @@ pytest-subprocess = ">=1.4"  # pytest plugin
 pytest-sugar = ">=0.9"  # pytest plugin
 pytest-xdist = ">=2.5"  # pytest plugin
 semver = "^2.13"  # only used in .github/scripts/urlshortener
-testfixtures = "^4.10"  # TODO remove use of this dependency - was inherited
+testfixtures = "^7.0.3"  # TODO remove use of this dependency - was inherited
 tomli-w = ">=1.0"
 
 [tool.poetry.dev-dependencies.boto3-stubs]
@@ -167,7 +172,7 @@ force-exclude = '''
 '''
 include = '\.pyi?$'
 line-length = 88
-target-version = ["py37", "py38", "py39"]
+target-version = ["py38", "py39"]
 
 
 [tool.coverage.report]
@@ -224,7 +229,7 @@ skip = [
 [tool.pylint.basic]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#basic-checker
 attr-rgx = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
-attr-name-hint = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
+# attr-name-hint = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
 good-names = [
   "_",
   "a",
@@ -282,7 +287,7 @@ min-public-methods = 0
 
 [tool.pylint.format]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#format-checker
-max-line-length = 100
+max-line-length = 120
 max-module-lines = 1000
 
 [tool.pylint.imports]
@@ -317,6 +322,8 @@ disable = [
   "similarities",  # black overcomplicated this
   "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
   "unused-import",  # flake8 overlap (F401)
+  "broad-exception-raised",
+  "missing-timeout"
 ]
 
 [tool.pylint.typecheck]
@@ -344,12 +351,13 @@ exclude = [
   "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
   "**/runway/templates/cdk-py",
   "**/tests/functional/cfngin/test_aws_lambda_hook/lambda_src",
+  "**/tests/unit"
 ]
 extraPaths = [
   "./.github/scripts/urlshortener",
 ]
 pythonPlatform = "All"
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 reportDuplicateImport = "none"
 reportImportCycles = "none"
 reportIncompatibleMethodOverride = "warning"

@@ -378,8 +378,9 @@ class SafeHaven(ContextManager["SafeHaven"]):
         self.__os_environ = dict(os.environ)
         self.__sys_argv = list(sys.argv)
         # deepcopy can't pickle sys.modules and dict()/.copy() are not safe
-        # pylint: disable=unnecessary-comprehension
-        self.__sys_modules = {k: v for k, v in sys.modules.items()}
+        self.__sys_modules = {}
+        for k, v in sys.modules.items():
+            self.__sys_modules[k] = v
         self.__sys_path = list(sys.path)
         # more informative origin for log statements
         self.logger = logging.getLogger("runway." + self.__class__.__name__)
@@ -520,7 +521,7 @@ def ensure_file_is_executable(path: str) -> None:
     if platform.system() != "Windows" and (
         not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]
     ):
-        print(f"Error: File {path} is not executable")  # noqa: T001
+        print(f"Error: File {path} is not executable")  # noqa: T201
         sys.exit(1)
 
 
@@ -668,7 +669,7 @@ def flatten_path_lists(
     env_dict: Dict[str, Any], env_root: Optional[str] = None
 ) -> Dict[str, Any]:
     """Join paths in environment dict down to strings."""
-    for (key, val) in env_dict.items():
+    for key, val in env_dict.items():
         # Lists are presumed to be path components and will be turned back
         # to strings
         if isinstance(val, list):
@@ -801,7 +802,7 @@ def run_commands(
             try:
                 check_call(command_list, env=env)
             except FileNotFoundError:
-                print(failed_to_find_error, file=sys.stderr)  # noqa: T001
+                print(failed_to_find_error, file=sys.stderr)  # noqa: T201
                 sys.exit(1)
 
 

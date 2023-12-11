@@ -14,6 +14,7 @@ Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudForm
   :hidden:
 
   installation
+  upgrades
   getting_started
   quickstart/index
   commands

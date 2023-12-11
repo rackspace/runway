@@ -1,5 +1,5 @@
 """Tests for the Source type object."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 

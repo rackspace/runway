@@ -1,5 +1,5 @@
 """Test runway.cfngin.hooks.awslambda._python_hooks."""
-# pylint: disable=no-self-use,redefined-outer-name
+# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -24,7 +24,7 @@ def args(tmp_path: Path) -> PythonHookArgs:
     """Fixture for creating default function args."""
     return PythonHookArgs(
         bucket_name="test-bucket",
-        runtime="python3.9",
+        runtime="python3.8",
         source_code=tmp_path,
     )
 
@@ -106,7 +106,7 @@ class TestPythonFunction:
             "deployment_package",
             Mock(upload=Mock(side_effect=Exception)),
         )
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match=""):
             assert PythonFunction(Mock(), **args.dict()).pre_deploy()
         deployment_package.upload.assert_called_once_with()
         build_response.assert_not_called()

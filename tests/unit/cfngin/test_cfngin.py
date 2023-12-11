@@ -1,5 +1,5 @@
 """Tests for runway.cfngin entry point."""
-# pylint: disable=no-self-use,redefined-outer-name
+# pylint: disable=redefined-outer-name, unnecessary-dunder-call
 from __future__ import annotations
 
 import shutil
@@ -131,7 +131,7 @@ class TestCFNgin:
         assert not cfngin.tail
 
         assert mock_action.call_count == 2
-        mock_instance.execute.has_calls(
+        mock_instance.__call__(
             [{"concurrency": 0, "tail": False}, {"concurrency": 0, "tail": False}]
         )
         patch_safehaven.assert_has_calls(

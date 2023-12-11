@@ -257,7 +257,6 @@ class UploadResultSubscriber(BaseResultSubscriber):
         dest = "s3://" + call_args.bucket + "/" + call_args.key
         return src, dest
 
-    # pylint: disable=no-self-use
     def _get_src(self, fileobj: AnyPath) -> str:
         return relative_path(fileobj)
 
@@ -280,7 +279,6 @@ class DownloadResultSubscriber(BaseResultSubscriber):
         dest = self._get_dest(call_args.fileobj)
         return src, dest
 
-    # pylint: disable=no-self-use
     def _get_dest(self, fileobj: AnyPath) -> str:
         return relative_path(fileobj)
 
@@ -415,7 +413,7 @@ class ResultRecorder(BaseResultHandler):
         # gets created that the timestamp on the progress result is less
         # than the timestamp of when the result processor actually
         # processes that initial queued result. So this will avoid
-        # negative progress being displayed or zero division occuring.
+        # negative progress being displayed or zero division occurring.
         if result.timestamp > self.start_time:
             self.bytes_transfer_speed = self.bytes_transferred / (
                 result.timestamp - self.start_time

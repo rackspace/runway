@@ -1,5 +1,5 @@
 """Test runway.config.models.runway.__init__."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from pathlib import Path
 from typing import Any, Dict

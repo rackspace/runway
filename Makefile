@@ -2,6 +2,7 @@
 
 SHELL := /bin/bash
 
+
 help: ## show this message
 	@IFS=$$'\n' ; \
 	help_lines=(`fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##/:/'`); \
@@ -17,6 +18,7 @@ help: ## show this message
 		printf '\033[0m'; \
 		printf "%s\n" $$help_info; \
 	done
+
 
 build: clean create-tfenv-ver-file version ## build the PyPi release
 	poetry build
@@ -124,7 +126,7 @@ setup-npm: npm-ci ## install node dependencies with npm
 setup-poetry: ## setup python virtual environment
 	@poetry install \
 		--extras docs \
-		--remove-untracked
+		--sync
 
 setup-pre-commit: ## install pre-commit git hooks
 	@poetry run pre-commit install

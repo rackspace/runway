@@ -474,7 +474,7 @@ def ensure_s3_bucket(
             if response.get("MFADelete", "Disabled") != "Disabled":
                 LOGGER.warning(
                     'MFADelete must be disabled on bucket "%s" when using '
-                    "persistent graphs to allow for propper management of "
+                    "persistent graphs to allow for proper management of "
                     "the graphs",
                     bucket_name,
                 )
@@ -518,6 +518,54 @@ def parse_cloudformation_template(template: str) -> Dict[str, Any]:
     return yaml_parse(template)
 
 
+def is_within_directory(directory: Path | str, target: str) -> bool:
+    """Check if file is in directory.
+
+    Determines if the provided path is within a specific directory or its subdirectories.
+
+    Args:
+        directory (Union[Path, str]): Path of the directory we're checking.
+        target (str): Path of the file we're checking for containment.
+
+    Returns:
+        bool: True if the target is in the directory or subdirectories, False otherwise.
+
+    """
+    abs_directory = os.path.abspath(directory)
+    abs_target = os.path.abspath(target)
+    prefix = os.path.commonprefix([abs_directory, abs_target])
+    return prefix == abs_directory
+
+
+def safe_tar_extract(
+    tar: tarfile.TarFile,
+    path: Path | str = ".",
+    members: list[tarfile.TarInfo] | None = None,
+    *,
+    numeric_owner: bool = False,
+):
+    """Safely extract the contents of a tar file to a specified directory.
+
+    This code is modified from a PR provided to Runway project
+    to address CVE-2007-4559.
+
+    Args:
+        tar (TarFile): The tar file object that will be extracted.
+        path (Union[Path, str], optional): The directory to extract the tar into.
+        members (List[TarInfo] | None, optional): List of TarInfo objects to extract.
+        numeric_owner (bool, optional): Enable usage of owner and group IDs when extracting.
+
+    Raises:
+        Exception: If any tar file tries to go outside the specified area.
+
+    """
+    for member in tar.getmembers():
+        member_path = os.path.join(path, member.name)
+        if not is_within_directory(path, member_path):
+            raise Exception("Attempted Path Traversal in Tar File")
+    tar.extractall(path, members, numeric_owner=numeric_owner)
+
+
 class Extractor:
     """Base class for extractors."""
 
@@ -550,7 +598,7 @@ class TarExtractor(Extractor):
     def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with tarfile.open(self.archive, "r:") as tar:
-            tar.extractall(path=destination)
+            safe_tar_extract(tar, path=destination)
 
 
 class TarGzipExtractor(Extractor):
@@ -561,7 +609,7 @@ class TarGzipExtractor(Extractor):
     def extract(self, destination: Path) -> None:
         """Extract the archive."""
         with tarfile.open(self.archive, "r:gz") as tar:
-            tar.extractall(path=destination)
+            safe_tar_extract(tar, path=destination)
 
 
 class ZipExtractor(Extractor):

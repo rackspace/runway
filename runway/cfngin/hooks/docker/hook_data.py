@@ -19,7 +19,7 @@ class DockerHookData(MutableMap):
     image: Optional["DockerImage"] = None
 
     @cached_property
-    def client(self) -> DockerClient:  # pylint: disable=no-self-use
+    def client(self) -> DockerClient:
         """Docker client."""
         return DockerClient.from_env()
 

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict
 
 import awacs.sts
 from awacs.aws import Deny, PolicyDocument, Statement
-from troposphere.iam import PolicyProperty
+from troposphere.iam import Policy
 
 from .admin_user import AdminUser
 
@@ -27,7 +27,7 @@ class TestRunnerUser(AdminUser):
         self.template.set_description("Test runner user")
         self.template.set_version("2010-09-09")
         self.user.Policies = [
-            PolicyProperty(
+            Policy(
                 PolicyDocument=PolicyDocument(
                     Statement=[
                         Statement(

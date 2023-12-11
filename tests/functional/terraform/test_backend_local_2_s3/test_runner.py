@@ -32,7 +32,7 @@ def tf_state_bucket(cli_runner: CliRunner) -> Iterator[None]:
 
 @pytest.fixture(
     autouse=True,
-    params=["0.11.15", "0.12.31", "0.13.7", "0.14.11", "0.15.5"],
+    params=["0.13.7", "0.14.11", "0.15.5", "1.4.6"],
     scope="module",
 )
 def tf_version(request: SubRequest) -> Iterator[str]:
@@ -50,7 +50,7 @@ def tf_version(request: SubRequest) -> Iterator[str]:
 def deploy_local_backend_result(
     cli_runner: CliRunner, local_backend: Path
 ) -> Iterator[Result]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "local"], env={"CI": "1"})
 
 
@@ -58,7 +58,7 @@ def deploy_local_backend_result(
 def deploy_s3_backend_result(
     cli_runner: CliRunner, s3_backend: Path
 ) -> Iterator[Result]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "test"], env={"CI": "1"})
     # cleanup files
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)

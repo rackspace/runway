@@ -1,5 +1,5 @@
 """Test runway.env_mgr.kbenv."""
-# pylint: disable=no-self-use
+
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 

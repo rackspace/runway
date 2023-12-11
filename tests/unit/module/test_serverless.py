@@ -1,5 +1,5 @@
 """Test runway.module.serverless."""
-# pylint: disable=no-self-use
+
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
@@ -231,7 +231,7 @@ class TestServerless:
         """Test env_file.
 
         Testing the precedence of each path, create the files in order from
-        lowerst to highest. After creating the file, the property's value
+        lowest to highest. After creating the file, the property's value
         is checked then cleared since the value is cached after the first
         time it is resolved.
 
@@ -361,12 +361,14 @@ class TestServerless:
 
         obj.ctx.env.vars["CI"] = "1"
         mocker.patch.object(runway_context, "no_color", True)
-        expected_opts.append("--no-color")
         if command not in ["remove", "print"]:
             expected_opts.append("--conceal")
         assert obj.gen_cmd(command, args_list=["--extra-arg"]) == ["success"]
         mock_cmd.assert_called_once_with(
-            command="sls", command_opts=expected_opts, logger=obj.logger, path=tmp_path
+            command="FORCE_COLOR=0 sls",
+            command_opts=expected_opts,
+            logger=obj.logger,
+            path=tmp_path,
         )
 
     def test_init(

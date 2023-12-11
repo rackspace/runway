@@ -36,7 +36,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
         title = "Runway static site Module extra_files option item."
 
     @root_validator
-    def _autofill_content_type(  # pylint: disable=no-self-argument,no-self-use
+    def _autofill_content_type(  # pylint: disable=no-self-argument
         cls, values: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Attempt to fill content_type if not provided."""
@@ -50,7 +50,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
         return values
 
     @root_validator(pre=True)
-    def _validate_content_or_file(  # pylint: disable=no-self-argument,no-self-use
+    def _validate_content_or_file(  # pylint: disable=no-self-argument
         cls, values: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Validate that content or file is provided."""
@@ -85,7 +85,7 @@ class RunwayStaticSiteSourceHashingDirectoryDataModel(ConfigProperty):
     """Model for Runway static site Module source_hashing.directory option item.
 
     Attributes:
-        exclusions: List of gitignore formmated globs to ignore when calculating
+        exclusions: List of gitignore formatted globs to ignore when calculating
             the hash.
         path: Path to files to include in the hash.
 

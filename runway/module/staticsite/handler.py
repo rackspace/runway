@@ -31,6 +31,11 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 class StaticSite(RunwayModule):
     """Static website Runway Module."""
 
+    DEPRECATION_MSG = (
+        "Static website Runway module support has been deprecated and "
+        "may be removed in the next major release."
+    )
+
     options: StaticSiteOptions
     parameters: RunwayStaticSiteModuleParametersDataModel
 
@@ -77,6 +82,7 @@ class StaticSite(RunwayModule):
         )
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
+        LOGGER.warning("%s:%s", self.name, self.DEPRECATION_MSG)
         self._ensure_valid_environment_config()
         self._ensure_cloudfront_with_auth_at_edge()
         self._ensure_correct_region_with_auth_at_edge()

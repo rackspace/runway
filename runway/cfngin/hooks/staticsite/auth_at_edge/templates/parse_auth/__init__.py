@@ -202,9 +202,9 @@ def handler(event, _context):
                         **CONFIG.get("cloud_front_headers", {}),
                     },
                 }
-            except Exception as err:  # pylint: disable=broad-except
+            except Exception as err2:  # pylint: disable=broad-except
                 LOGGER.debug("Id token not valid")
-                LOGGER.debug(err)
+                LOGGER.debug(err2)
 
         if isinstance(err, RequiresConfirmationError):
             html_params = [

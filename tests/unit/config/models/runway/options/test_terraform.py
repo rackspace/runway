@@ -1,5 +1,5 @@
 """Test runway.config.models.runway.options.terraform."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 import pytest
 from pydantic import ValidationError
@@ -46,6 +46,9 @@ class TestRunwayTerraformBackendConfigDataModel:
         assert RunwayTerraformBackendConfigDataModel(
             bucket="test", dynamodb_table="test"
         )
+        assert RunwayTerraformBackendConfigDataModel(
+            bucket="test", dynamodb_table="test", workspace_key_prefix="state"
+        )
         assert not RunwayTerraformBackendConfigDataModel(region="us-east-1")
         assert not RunwayTerraformBackendConfigDataModel()
 
@@ -67,11 +70,13 @@ class TestRunwayTerraformBackendConfigDataModel:
             "bucket": "test-bucket",
             "dynamodb_table": "test-table",
             "region": "us-east-1",
+            "workspace_key_prefix": "workspace_prefix",
         }
         obj = RunwayTerraformBackendConfigDataModel.parse_obj(data)
         assert obj.bucket == data["bucket"]
         assert obj.dynamodb_table == data["dynamodb_table"]
         assert obj.region == data["region"]
+        assert obj.workspace_key_prefix == data["workspace_key_prefix"]
 
 
 class TestRunwayTerraformModuleOptionsDataModel:

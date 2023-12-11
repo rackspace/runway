@@ -1,5 +1,5 @@
 """Test runway.lookups.handlers.ssm."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ def get_parameter_response(
 def get_parameter_request(
     name: str, decrypt: bool = True
 ) -> Dict[str, Union[bool, str]]:
-    """Generate the expected request paramters for ssm.get_parameter."""
+    """Generate the expected request parameters for ssm.get_parameter."""
     return {"Name": name, "WithDecryption": decrypt}
 
 

@@ -97,7 +97,7 @@ class DockerExecFailedError(RunwayError):
         Args:
             response: The return value of :meth:`docker.models.containers.Container.wait`,
                 Docker API's response as a Python dictionary.
-                This can contain important log information pertinant to troubleshooting
+                This can contain important log information pertinent to troubleshooting
                 that may not streamed.
 
         """
@@ -112,7 +112,7 @@ class FailedLookup(RunwayError):
 
     Should be caught by error handling and
     :class:`runway.cfngin.exceptions.FailedVariableLookup` raised instead to
-    construct a propper error message.
+    construct a proper error message.
 
     """
 
@@ -197,9 +197,9 @@ class HclParserError(RunwayError):
 
 
 class InvalidLookupConcatenation(RunwayError):
-    """Invalid return value for a concatinated (chained) lookup.
+    """Invalid return value for a concatenated (chained) lookup.
 
-    The return value must be a string when lookups are concatinated.
+    The return value must be a string when lookups are concatenated.
 
     """
 
@@ -350,7 +350,7 @@ class UnresolvedVariableValue(RunwayError):
 
     Should be caught by error handling and
     :class:`runway.cfngin.exceptions.UnresolvedVariable` raised instead to
-    construct a propper error message.
+    construct a proper error message.
 
     """
 

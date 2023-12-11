@@ -74,7 +74,7 @@ def generate_node_command(
     return cmd_list
 
 
-# type hint quated b/c pylint 2.11.1 raises unsubscriptable-object
+# type hint b/c pylint 2.11.1 raises unsubscriptable-object
 def run_module_command(
     cmd_list: List[str],
     env_vars: Dict[str, str],
@@ -90,6 +90,7 @@ def run_module_command(
             and the resulting exit code will be passed to ``sys.exit()``.
             If false, the error will not be caught within this function.
             logger: Optionally, supply a logger to use.
+        logger: A specific logger to use when logging the constructed command.
 
     """
     logger.debug("running command: %s", " ".join(cmd_list))

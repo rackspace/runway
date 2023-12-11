@@ -1,5 +1,5 @@
 """Tests for runway.cfngin.hooks.acm."""
-# pylint: disable=no-self-use,protected-access,unused-argument
+# pylint: disable=protected-access,unused-argument
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 # pyright: reportUnknownLambdaType=none
 from __future__ import annotations
@@ -353,10 +353,10 @@ class TestCertificate:
             ("FAILED", "SUCCESS"),
         ],
     )
-    def test_get_validation_record_status_missmatch(
+    def test_get_validation_record_status_mismatch(
         self, cfngin_context: MockCFNginContext, check: str, found: str
     ) -> None:
-        """Test get get_validation_record with a missmatched record status."""
+        """Test get get_validation_record with a mismatched record status."""
         # setup context
         acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
         cfngin_context.add_stubber("route53", "us-east-1")
@@ -809,10 +809,10 @@ class TestCertificate:
 
         assert not cert.deploy()
 
-    def test_destory(
+    def test_destroy(
         self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
     ) -> None:
-        """Test destory."""
+        """Test destroy."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
         cfngin_context.add_stubber("route53", "us-east-1")
@@ -836,10 +836,10 @@ class TestCertificate:
             cert.remove_validation_records.call_count == 1  # type: ignore
         )
 
-    def test_destory_aws_errors(
+    def test_destroy_aws_errors(
         self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
     ) -> None:
-        """Test destory with errors from AWS."""
+        """Test destroy with errors from AWS."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
         cfngin_context.add_stubber("route53", "us-east-1")
@@ -872,7 +872,7 @@ class TestCertificate:
     def test_destroy_raise_client_error(
         self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
     ) -> None:
-        """Test destory with ClientError raised."""
+        """Test destroy with ClientError raised."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
         cfngin_context.add_stubber("route53", "us-east-1")
@@ -891,7 +891,7 @@ class TestCertificate:
         monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)
 
         def raise_stack_not_exist(_records: Any) -> NoReturn:
-            """Raise ClientError mimicing stack not existing."""
+            """Raise ClientError mimicking stack not existing."""
             raise build_client_error(f"Stack with id {cert.stack.fqn} does not exist")
 
         def raise_other(_records: Any) -> NoReturn:

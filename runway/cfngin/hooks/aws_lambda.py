@@ -12,7 +12,6 @@ import stat
 import subprocess
 import sys
 import tempfile
-from distutils.util import strtobool
 from io import BytesIO as StringIO
 from pathlib import Path
 from shutil import copyfile
@@ -57,16 +56,7 @@ ZIP_PERMS_MASK = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
 LOGGER = logging.getLogger(__name__)
 
 # list from python tags of https://hub.docker.com/r/lambci/lambda/tags
-SUPPORTED_RUNTIMES = [
-    # Python 2.7 reached end-of-life on January 1st, 2020.
-    # However, the Python 2.7 runtime is still supported and is not scheduled
-    # to be deprecated at this time.
-    # https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html
-    "python2.7",
-    "python3.6",
-    "python3.7",
-    "python3.8",
-]
+SUPPORTED_RUNTIMES = ["python3.7", "python3.8"]
 
 DockerizePipArgTypeDef = Optional[
     Union[
@@ -154,10 +144,15 @@ def should_use_docker(dockerize_pip: DockerizePipArgTypeDef = None) -> bool:
         if dockerize_pip == "non-linux" and not sys.platform.startswith("linux"):
             return True
         try:
-            return bool(strtobool(dockerize_pip))
+            return bool(str2bool(dockerize_pip))
         except ValueError:
             pass
     return False
+
+
+def str2bool(v: str):
+    """Return boolean value of string."""
+    return v.lower() in ("yes", "true", "t", "1", "on", "y")
 
 
 def _zip_files(files: Iterable[str], root: str) -> Tuple[bytes, str]:
@@ -567,7 +562,7 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
             installed and executable using ``-m`` if provided.
         requirements_files: Map of requirement file names and whether they exist.
         use_pipenv: Whether to use pipenv to export a Pipfile as requirements.txt.
-        work_dir: Working direcotry.
+        work_dir: Working directory.
 
     Returns:
         Content of the ZIP file as a byte string and calculated hash of all the files
@@ -1044,7 +1039,7 @@ def upload_lambda_functions(context: CfnginContext, provider: Provider, **kwargs
                       path: ./lambda_functions
                       dockerize_pip: non-linux
                       use_pipenv: true
-                      runtime: python3.8
+                      runtime: python3.9
                       include:
                         - '*.py'
                         - '*.txt'

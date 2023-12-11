@@ -53,7 +53,7 @@ def intrinsics_multi_constructor(  # pylint: disable=unused-argument
 
     else:
         # Value of this node is an mapping (ex: {foo: bar})
-        value = cast(MutableMapping[Any, Any], loader.construct_mapping(node))
+        value = cast(MutableMapping[Any, Any], loader.construct_mapping(node))  # type: ignore
 
     return {cfntag: value}
 

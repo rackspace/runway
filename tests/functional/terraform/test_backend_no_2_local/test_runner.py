@@ -21,7 +21,7 @@ CURRENT_DIR = Path(__file__).parent
 
 @pytest.fixture(
     autouse=True,
-    params=["0.11.15", "0.12.31", "0.13.7", "0.14.11", "0.15.5"],
+    params=["0.13.7", "0.14.11", "0.15.5", "1.4.6"],
     scope="module",
 )
 def tf_version(request: SubRequest) -> Generator[str, None, None]:
@@ -41,7 +41,7 @@ def deploy_local_backend_result(
     local_backend: Path,
     tf_version: str,
 ) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     assert (CURRENT_DIR / "terraform.tfstate.d").exists()
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     # cleanup files
@@ -58,7 +58,7 @@ def deploy_no_backend_result(
     no_backend: Path,
     tf_version: str,
 ) -> Generator[Result, None, None]:
-    """Execute `runway deploy` with `runway destory` as a cleanup step."""
+    """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
 
 

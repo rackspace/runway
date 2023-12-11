@@ -1,5 +1,5 @@
 """File lookup."""
-# pylint: disable=arguments-differ,no-self-argument,no-self-use
+# pylint: disable=arguments-differ,no-self-argument
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ class FileLookup(LookupHandler):
     def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
         """Parse the value passed to the lookup.
 
-        This overrides the default parseing to account for special requirements.
+        This overrides the default parsing to account for special requirements.
 
         Args:
             value: The raw value passed to a lookup.

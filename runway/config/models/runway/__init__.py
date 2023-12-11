@@ -1,5 +1,5 @@
 """Runway config models."""
-# pylint: disable=no-self-argument,no-self-use
+# pylint: disable=no-self-argument
 from __future__ import annotations
 
 import locale
@@ -283,7 +283,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
 
         @staticmethod
         def schema_extra(schema: Dict[str, Any]) -> None:  # type: ignore
-            """Processess the schema after it has been generated.
+            """Process the schema after it has been generated.
 
             Schema is modified in place. Return value is ignored.
 

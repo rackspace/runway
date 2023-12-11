@@ -31,7 +31,7 @@ deployments:
 @options.verbose
 @click.pass_context
 def new(ctx: click.Context, **_: Any) -> None:
-    """Create an example runway.yml file in the currect directory."""
+    """Create an example runway.yml file in the correct directory."""
     runway_yml = Path.cwd() / "runway.yml"
 
     LOGGER.verbose("checking for preexisting runway.yml file...")

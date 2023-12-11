@@ -83,7 +83,7 @@ class ConfigComponentDefinition(ABC):
     def _register_variable(self, var_name: str, var_value: Any) -> None:
         """Register a variable.
 
-        Called while instantiating the class, this is responsible for initalizing
+        Called while instantiating the class, this is responsible for initializing
         fields that support variables.
 
         It can be overridden by subclasses to alter how the variable are initialized.

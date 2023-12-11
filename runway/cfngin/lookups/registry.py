@@ -50,7 +50,7 @@ def register_lookup_handler(
         if issubclass(handler, LookupHandler):
             CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
             return
-    # Hander is a not a new-style handler
+    # Handler is a not a new-style handler
     except Exception:  # pylint: disable=broad-except
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     LOGGER.error(

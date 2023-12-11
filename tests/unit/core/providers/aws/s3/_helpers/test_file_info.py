@@ -1,5 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.file_info."""
-# pylint: disable=no-self-use
+
 from __future__ import annotations
 
 import datetime

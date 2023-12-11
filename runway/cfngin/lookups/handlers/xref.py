@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
-XREF_PRESISTENT_STATE = {"has_warned": False}
+XREF_PERSISTENT_STATE = {"has_warned": False}
 
 
 class XrefLookup(LookupHandler):

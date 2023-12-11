@@ -44,8 +44,8 @@ def aws_eks_update_kubeconfig(context: CfnginContext, **kwargs: Any) -> bool:
     if not os.environ.get("PIPENV_ACTIVE") and (
         not os.environ.get("VIRTUAL_ENV") and not which("aws")
     ):
-        print("", file=sys.stderr)  # noqa: T001
-        print(  # noqa: T001
+        print("", file=sys.stderr)  # noqa: T201
+        print(  # noqa: T201
             "Warning: the generated kubeconfig uses the aws-cli for "
             "authentication, but it is not found in your environment. ",
             file=sys.stderr,

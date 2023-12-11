@@ -1,5 +1,5 @@
 """Test runway.utils.__init__."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 
@@ -247,8 +247,9 @@ class TestSafeHaven:
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
 
-        # pylint: disable=unnecessary-comprehension
-        orig_val = {k: v for k, v in sys.modules.items()}
+        orig_val = {}
+        for k, v in sys.modules.items():
+            orig_val[k] = v
         expected_logs = ["entering a safe haven...", "resetting sys.modules..."]
 
         with SafeHaven() as obj:
@@ -262,7 +263,7 @@ class TestSafeHaven:
         assert caplog.messages[-1] == "leaving the safe haven..."
 
     def test_sys_modules_exclude(self, monkeypatch: MonkeyPatch) -> None:
-        """Test sys.modules interations with excluded module."""
+        """Test sys.modules interactions with excluded module."""
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())
 
         module = "tests.unit.fixtures.mock_hooks"

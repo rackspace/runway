@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 import logging
-from distutils.util import strtobool
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -32,6 +31,11 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 TransformToTypeLiteral = Literal["bool", "str"]
+
+
+def str2bool(v: str):
+    """Return boolean value of string."""
+    return v.lower() in ("yes", "true", "t", "1", "on", "y")
 
 
 class LookupHandler:
@@ -149,8 +153,8 @@ class LookupHandler:
     def _parse_args(cls, args: str) -> Dict[str, str]:
         """Convert a string into an args dict.
 
-        Each arg should be seporated by  ``,``. The key and value should
-        be seporated by ``=``. Any leading or following spaces are stripped.
+        Each arg should be separated by  ``,``. The key and value should
+        be separated by ``=``. Any leading or following spaces are stripped.
 
         Args:
             args: A string containing arguments to be parsed. (e.g.
@@ -216,7 +220,7 @@ class LookupHandler:
         """Load a Troposphere resource into a MutableMap.
 
         Args:
-            value: Troposphere resource to contvert to a MutableMap for parsing.
+            value: Troposphere resource to convert to a MutableMap for parsing.
 
         """
         if not isinstance(value, BaseAWSObject):
@@ -292,7 +296,7 @@ class LookupHandler:
         if isinstance(value, bool):
             return value
         if isinstance(value, str):
-            return bool(strtobool(value))
+            return bool(str2bool(value))
         raise TypeError(
             f"Value must be a string or bool to use transform=bool. Got type {type(value)}."
         )

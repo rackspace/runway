@@ -249,7 +249,7 @@ def get_content_type(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional
 
     Returns:
         The content type of the extra file. If 'content_type' is provided then
-        that is returned, otherways it is auto detected based on the name.
+        that is returned, otherwise it is auto detected based on the name.
 
     """
     return extra_file.content_type or auto_detect_content_type(extra_file.name)
@@ -426,17 +426,24 @@ def sync_extra_files(
                 "uploading extra file: %s as %s ", extra_file.file, extra_file.name
             )
 
-            extra_args = None
+            extra_args = ""
 
             if extra_file.content_type:
                 extra_args = {"ContentType": extra_file.content_type}
 
-            s3_client.upload_file(
-                Bucket=bucket,
-                ExtraArgs=extra_args,
-                Filename=str(extra_file.file),
-                Key=extra_file.name,
-            )
+            if extra_args:
+                s3_client.upload_file(
+                    Bucket=bucket,
+                    ExtraArgs=extra_args,
+                    Filename=str(extra_file.file),
+                    Key=extra_file.name,
+                )
+            if not extra_args:
+                s3_client.upload_file(
+                    Bucket=bucket,
+                    Filename=str(extra_file.file),
+                    Key=extra_file.name,
+                )
 
             uploaded.append(extra_file.name)
 

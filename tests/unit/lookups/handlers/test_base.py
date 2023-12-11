@@ -1,5 +1,5 @@
 """Tests for lookup handler base class."""
-# pylint: disable=no-self-use
+# pylint: disable=duplicate-value
 # pyright: basic
 from __future__ import annotations
 
@@ -157,7 +157,7 @@ class TestLookupHandler:
         assert isinstance(LookupHandler.transform("something", to_type=None), str)
 
     def test_transform_str_to_bool(self) -> None:
-        """String should be transformed using strtobool."""
+        """String should be transformed using str2bool."""
         result_true = LookupHandler.transform("true", to_type="bool")
         result_false = LookupHandler.transform("false", to_type="bool")
 

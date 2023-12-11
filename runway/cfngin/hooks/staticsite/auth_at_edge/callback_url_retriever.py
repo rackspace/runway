@@ -34,7 +34,7 @@ def get(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, Any]:
     hook entitled ``client_updater`` these Callback URLs are updated to that
     of the Distribution. Before then we need to ensure that if a Client
     already exists that the URLs for that client are used to prevent any
-    interuption of service during deploy.
+    interruption of service during deploy.
 
     Arguments parsed by
     :class:`~runway.cfngin.hooks.staticsite.auth_at_edge.callback_url_retriever.HookArgs`.

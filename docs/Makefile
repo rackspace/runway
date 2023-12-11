@@ -1,7 +1,9 @@
-SPHINXOPTS    =
-SPHINXBUILD   = poetry run sphinx-build
-SOURCEDIR     = source
-BUILDDIR      = build
+SPHINXOPTS          =
+SPHINXBUILD         = poetry run sphinx-build
+SPHINXAUTOBUILD     ?= poetry run sphinx-autobuild
+SPHINXAUTOBUILDPORT = 9997
+SOURCEDIR           = source
+BUILDDIR            = build
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -16,6 +18,9 @@ clean:
 	@echo "Removed apidocs from previous build"
 
 docs: clean html
+
+preview:
+	@$(SPHINXAUTOBUILD) --port $(SPHINXAUTOBUILDPORT) "$(SOURCEDIR)" "$(BUILDDIR)" $(O)
 
 open:
 	@open build/html/index.html

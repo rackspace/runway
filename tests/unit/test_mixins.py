@@ -186,7 +186,7 @@ class TestDelCachedPropMixin:
         # ensure value is cached and not being evaluated each call
         assert obj.test_prop == "foobar"
         assert obj.counter == 1
-        # this would fail if the suppresion was outside the loop
+        # this would fail if the suppression was outside the loop
         assert not obj._del_cached_property("invalid", "test_prop")
         assert obj.test_prop == "foobar"
         assert obj.counter == 2

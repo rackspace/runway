@@ -1,4 +1,4 @@
-"""Provides a sublass of unittest.TestCase for testing blueprints."""
+"""Provides a subclass of unittest.TestCase for testing blueprints."""
 from __future__ import annotations
 
 import difflib
@@ -126,7 +126,7 @@ class YamlDirTestGenerator:
         return "test_*.yaml"
 
     # pylint incorrectly detects this
-    def test_generator(  # pylint: disable=no-self-use
+    def test_generator(
         self,
     ) -> Iterator[BlueprintTestCase]:
         """Test generator."""

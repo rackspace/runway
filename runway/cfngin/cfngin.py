@@ -33,7 +33,7 @@ class CFNgin:
         concurrency: Max number of CFNgin stacks that can be deployed concurrently.
             If the value is ``0``, will be constrained based on the underlying graph.
         interactive: Whether or not to prompt the user before taking action.
-        parameters: Combination of the parameters provided when initalizing the
+        parameters: Combination of the parameters provided when initializing the
             class and any environment files that are found.
         recreate_failed: Destroy and re-create stacks that are stuck in
             a failed state from an initial deployment when updating.

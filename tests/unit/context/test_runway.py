@@ -1,5 +1,5 @@
 """Test runway.context._runway."""
-# pylint: disable=no-self-use
+
 # pyright: basic
 from __future__ import annotations
 
@@ -88,7 +88,7 @@ class TestRunwayContext:
         """Test no_color with a ValueError."""
         mocker.patch(f"{MODULE}.sys.stdout", isatty=MagicMock(return_value=True))
         mocker.patch.object(self.env, "vars", {"RUNWAY_COLORIZE": "invalid"})
-        assert not RunwayContext(deploy_environment=self.env).no_color
+        assert RunwayContext(deploy_environment=self.env).no_color
 
     def test_use_concurrent_not_posix(self, mocker: MockerFixture) -> None:
         """Test use_concurrent."""

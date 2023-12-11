@@ -94,7 +94,7 @@ class DynamodbLookup(LookupHandler):
     def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
         """Parse the value passed to the lookup.
 
-        This overrides the default parseing to account for special requirements.
+        This overrides the default parsing to account for special requirements.
 
         Args:
             value: The raw value passed to a lookup.
@@ -145,7 +145,7 @@ class DynamodbLookup(LookupHandler):
 
         Args:
             value: Parameter(s) given to this lookup.
-                ``[<region>:]<tablename>@<partionkey>:<keyvalue>.<keyvalue>...``
+                ``[<region>:]<tablename>@<partitionkey>:<keyvalue>.<keyvalue>...``
             context: Context instance.
 
         Raises:

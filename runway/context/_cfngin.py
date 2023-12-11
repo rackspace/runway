@@ -13,7 +13,7 @@ from .._logging import PrefixAdaptor, RunwayLogger
 from ..cfngin.exceptions import (
     PersistentGraphCannotLock,
     PersistentGraphCannotUnlock,
-    PersistentGraphLockCodeMissmatch,
+    PersistentGraphLockCodeMismatch,
     PersistentGraphLocked,
     PersistentGraphUnlocked,
 )
@@ -55,7 +55,7 @@ class CfnginContext(BaseContext):
         config: CFNgin configuration file that has been resolved & parsed into a
             python object.
         config_path: Path to the configuration file that has been resolved, parsed
-            and made accessable via this object.
+            and made accessible via this object.
         env: Deploy environment object containing information about the current
             deploy environment.
         force_stacks: List of stacks to force.
@@ -204,7 +204,7 @@ class CfnginContext(BaseContext):
             }
         except self.s3_client.exceptions.NoSuchKey:
             self.logger.debug(
-                "persistant graph object does not exist in S3; could not get tags"
+                "persistent graph object does not exist in S3; could not get tags"
             )
             return {}
 
@@ -237,7 +237,7 @@ class CfnginContext(BaseContext):
                     )
                 except self.s3_client.exceptions.NoSuchKey:
                     self.logger.info(
-                        "persistant graph object does not exist in s3; "
+                        "persistent graph object does not exist in s3; "
                         "creating one now..."
                     )
                     self.s3_client.put_object(
@@ -328,7 +328,7 @@ class CfnginContext(BaseContext):
             )
             return False
 
-        # If no namespace is specificied, and there's no explicit
+        # If no namespace is specified, and there's no explicit
         # cfngin bucket specified, don't upload to s3. This makes
         # sense because we can't realistically auto generate a cfngin
         # bucket name in this case.
@@ -425,7 +425,7 @@ class CfnginContext(BaseContext):
 
         Raises:
             :class:`runway.cfngin.exceptions.PersistentGraphUnlocked`
-            :class:`runway.cfngin.exceptions.PersistentGraphLockCodeMissmatch`
+            :class:`runway.cfngin.exceptions.PersistentGraphLockCodeMismatch`
 
         """
         if not self.persistent_graph:
@@ -442,7 +442,7 @@ class CfnginContext(BaseContext):
             )
 
         if self.persistent_graph_lock_code != lock_code:
-            raise PersistentGraphLockCodeMissmatch(
+            raise PersistentGraphLockCodeMismatch(
                 lock_code, self.persistent_graph_lock_code
             )
 
@@ -529,5 +529,5 @@ class CfnginContext(BaseContext):
             )
             return True
         raise PersistentGraphCannotUnlock(
-            PersistentGraphLockCodeMissmatch(lock_code, self.persistent_graph_lock_code)
+            PersistentGraphLockCodeMismatch(lock_code, self.persistent_graph_lock_code)
         )

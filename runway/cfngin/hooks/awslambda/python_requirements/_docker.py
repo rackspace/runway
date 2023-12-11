@@ -55,14 +55,14 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         return mounts
 
     @cached_property
-    def environmet_variables(self) -> Dict[str, str]:
+    def environment_variables(self) -> Dict[str, str]:
         """Environment variables to pass to the docker container.
 
         This is a subset of the environment variables stored in the context
         object as some will cause issues if they are passed.
 
         """
-        docker_env_vars = super().environmet_variables
+        docker_env_vars = super().environment_variables
         pip_env_vars = {
             k: v for k, v in self.ctx.env.vars.items() if k.startswith("PIP")
         }

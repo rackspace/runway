@@ -366,7 +366,6 @@ class BaseTransferRequestSubmitter:
                 return True
         return False
 
-    # pylint: disable=no-self-use
     def _get_warning_handlers(self) -> List[Callable[[FileInfo], Any]]:
         """Return a list of warning handlers, which are callables.
 

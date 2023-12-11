@@ -37,7 +37,7 @@ class DefaultLookup(LookupHandler):
 
             If ``app_security_groups`` is defined in the environment, its
             defined value will be returned. Otherwise, ``sg-12345,sg-67890``
-            will be thereturned value.
+            will be the returned value.
 
         """
         try:

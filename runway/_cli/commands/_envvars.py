@@ -68,13 +68,13 @@ def print_env_vars(env_vars: Dict[str, Any]) -> None:
 
 def __print_env_vars_posix(env_vars: Dict[str, Any]) -> None:
     """Print environment variables for bash."""
-    LOGGER.debug("using posix formating for environment variable export")
+    LOGGER.debug("using posix formatting for environment variable export")
     for key, val in env_vars.items():
         click.echo(f'export {key}="{val}"')
 
 
 def __print_env_vars_psh(env_vars: Dict[str, Any]) -> None:
     """Print environment variables for Powershell."""
-    LOGGER.debug("using powershell formating for environment variable export")
+    LOGGER.debug("using powershell formatting for environment variable export")
     for key, val in env_vars.items():
         click.echo(f'$env:{key} = "{val}"')

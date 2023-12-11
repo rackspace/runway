@@ -156,4 +156,4 @@ def setup_logging(
             **settings.coloredlogs,
         )
         LOGGER.debug("set dependency log level to debug")
-    LOGGER.debug("initalized logging for Runway")
+    LOGGER.debug("initialized logging for Runway")
