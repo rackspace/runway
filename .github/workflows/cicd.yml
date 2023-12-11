@@ -233,9 +233,8 @@ jobs:
         run: make test cov-xml
       - name: Upload to Codecov
         uses: codecov/codecov-action@v3.1.4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
   build-pypi:
     name: Build PyPi 📦
