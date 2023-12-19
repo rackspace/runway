@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 import boto3
+import botocore.exceptions
 
 from ..aws_sso_botocore.session import Session
 from ..cfngin.ui import ui
@@ -173,6 +174,6 @@ class BaseContext(DelCachedPropMixin):
                     self.env.vars["AWS_SESSION_TOKEN"] = frozen_creds.token
             else:
                 raise ValueError("Credentials could not be retrieved from the session.")
-        except Exception as e:
-            # Handle the exception as needed
-            self.logger.error("An error occurred: %s", e)
+        except botocore.exceptions.BotoCoreError as boto_error:
+            # Handle specific boto core exceptions
+            self.logger.error("BotoCoreError occurred: %s", boto_error)
