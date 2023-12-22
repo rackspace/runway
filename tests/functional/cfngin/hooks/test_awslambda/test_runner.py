@@ -160,8 +160,7 @@ def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
 @pytest.mark.order("first")
 def test_deploy_exit_code(deploy_result: Result) -> None:
     """Test deploy exit code."""
-    json.dumps(deploy_result.output, indent=2)
-    assert deploy_result.exit_code == 0
+    assert deploy_result.exit_code == 0, deploy_result.output
 
 
 def test_deploy_log_messages(deploy_result: Result) -> None:
