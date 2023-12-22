@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import json
 import shutil
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
@@ -27,7 +26,7 @@ if TYPE_CHECKING:
     from runway.context import RunwayContext
 
 AWS_REGION = "us-east-1"
-LOCAL_PYTHON_RUNTIME = f"python{sys.version_info.major}.{sys.version_info.minor}"
+PYTHON_RUNTIME = "python3.10"
 STACK_PREFIX = "test-awslambda"
 
 CURRENT_DIR = Path(__file__).parent
@@ -37,7 +36,7 @@ DOCKER_XMLSEC_DIR = SRC_DIR / "docker_xmlsec"
 
 ENV_VARS = {
     "CI": "1",
-    "LOCAL_PYTHON_RUNTIME": LOCAL_PYTHON_RUNTIME,
+    "PYTHON_RUNTIME": PYTHON_RUNTIME,
     "PIPENV_VENV_IN_PROJECT": "1",
     "PIPENV_VERBOSITY": "-1",
     "POETRY_VIRTUALENVS_IN_PROJECT": "true",
@@ -180,7 +179,7 @@ def test_docker(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-docker",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, PYTHON_RUNTIME)
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
@@ -201,7 +200,7 @@ def test_local(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-local",
     )
-    assert_runtime(tester, LOCAL_PYTHON_RUNTIME)
+    assert_runtime(tester, PYTHON_RUNTIME)
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     assert response["code"] == 200
@@ -216,7 +215,7 @@ def test_mysql(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-mysql",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.10")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
@@ -233,7 +232,7 @@ def test_xmlsec(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-xmlsec",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.10")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
@@ -252,7 +251,7 @@ def test_xmlsec_layer(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-xmlsec-layer",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.10")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)

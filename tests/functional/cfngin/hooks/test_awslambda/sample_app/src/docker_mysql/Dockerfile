@@ -1,3 +1,3 @@
-FROM public.ecr.aws/sam/build-python3.8:latest
+FROM public.ecr.aws/sam/build-python3.10:latest
 
 RUN yum install mysql-devel -y
