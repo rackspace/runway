@@ -15,7 +15,7 @@ env:
   AWS_DEFAULT_REGION: us-east-1
   AWS_MAX_ATTEMPTS: 20  # retry attempts for AWS API calls
   AWS_RETRY_MODE: adaptive  # defaults to "legacy"; this handles more errors
-  NODE_VERSION: '16'
+  NODE_VERSION: '18'
   PYTEST_ADDOPTS: --color=yes
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
   PIPENV_IGNORE_VIRTUALENVS: '1'
@@ -60,7 +60,7 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: 3.9
@@ -102,7 +102,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -128,7 +128,7 @@ jobs:
         python-version: [3.9]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -159,7 +159,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: 3.9
@@ -205,7 +205,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -233,9 +233,8 @@ jobs:
         run: make test cov-xml
       - name: Upload to Codecov
         uses: codecov/codecov-action@v3.1.4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
   build-pypi:
     name: Build PyPi 📦
@@ -247,7 +246,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: 3.9
@@ -271,7 +270,7 @@ jobs:
       - name: Run Build
         run: make build
       - name: Upload Distribution Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pypi-dist
           path: dist

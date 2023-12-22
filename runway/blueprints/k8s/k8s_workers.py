@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Module with k8s nodegroup."""
+import gzip
 import json
 import os
 from typing import Any
@@ -20,18 +21,24 @@ from runway.cfngin.blueprints.variables.types import (
 
 
 def get_valid_instance_types() -> Any:
-    """Return list of instance types."""
-    ec2_service_file = os.path.join(
-        os.path.dirname(botocore.__file__),
-        "data",
-        "ec2",
-        "2016-11-15",
-        "service-2.json",
+    """Return list of instance types from either a JSON or gzipped JSON file."""
+    base_path = os.path.join(
+        os.path.dirname(botocore.__file__), "data", "ec2", "2016-11-15"
     )
-    # This encoding needs to be explicitly called out as utf-8 on Windows
-    # (or it will try cp1252 instead)
-    with open(ec2_service_file, "r", encoding="utf-8") as stream:
-        return json.load(stream)["shapes"]["InstanceType"]["enum"]
+
+    json_path = os.path.join(base_path, "service-2.json")
+    gzip_path = os.path.join(base_path, "service-2.json.gz")
+
+    if os.path.exists(gzip_path):
+        with gzip.open(gzip_path, "rt", encoding="utf-8") as stream:
+            data = json.load(stream)
+    elif os.path.exists(json_path):
+        with open(json_path, "r", encoding="utf-8") as stream:
+            data = json.load(stream)
+    else:
+        raise FileNotFoundError("Neither JSON nor gzipped JSON file found.")
+
+    return data["shapes"]["InstanceType"]["enum"]
 
 
 class NodeGroup(Blueprint):

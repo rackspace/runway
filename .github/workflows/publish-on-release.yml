@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -58,7 +58,7 @@ jobs:
       - name: Run Build
         run: make build-pyinstaller-file
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pyinstaller-onefile-${{ matrix.os }}
           path: artifacts
@@ -80,7 +80,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -109,7 +109,7 @@ jobs:
       - name: Run Build
         run: make build-pyinstaller-folder
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pyinstaller-onefolder-${{ matrix.os }}
           path: artifacts
@@ -118,7 +118,7 @@ jobs:
     needs:
       - build-pyinstaller-onefolder
     env:
-      NODE_VERSION: 12
+      NODE_VERSION: 18
       NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
       fail-fast: true
@@ -131,7 +131,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
@@ -160,17 +160,17 @@ jobs:
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
       - run: poetry install --extras docs -vv
       - name: Download Artifacts (macOS)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-macos-12
           path: artifacts
       - name: Download Artifacts (ubuntu)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-windows-latest
           path: artifacts
@@ -184,7 +184,7 @@ jobs:
           rm -rf artifacts && mkdir -p artifacts
           find . -name 'onica-runway-*.*.*.tgz' -exec mv {} artifacts/ \;
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: npm-pack
           path: artifacts
@@ -194,7 +194,7 @@ jobs:
       - build-npm
     env:
       CI: true
-      NODE_VERSION: 12
+      NODE_VERSION: 18
       NPM_PACKAGE_NAME: '@onica/runway'
       NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
     strategy:
@@ -209,7 +209,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
       - name: Download Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: npm-pack
           path: artifacts
@@ -226,7 +226,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: 3.9
@@ -250,7 +250,7 @@ jobs:
       - name: Run Build
         run: make build
       - name: Upload Distribution Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pypi-dist
           path: dist
@@ -265,11 +265,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Download Distribution Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pypi-dist
           path: dist
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: 3.9
@@ -299,22 +299,22 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: 3.9
       - name: Download Artifacts (macOS)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefile-macos-12
           path: artifacts
       - name: Download Artifacts (ubuntu)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefile-ubuntu-latest
           path: artifacts
       - name: Download Artifacts (windows)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefile-windows-latest
           path: artifacts
@@ -336,7 +336,7 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         id: setup-python
         with:
           python-version: 3.9
