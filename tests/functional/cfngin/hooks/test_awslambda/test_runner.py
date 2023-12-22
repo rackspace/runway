@@ -160,7 +160,8 @@ def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
 @pytest.mark.order("first")
 def test_deploy_exit_code(deploy_result: Result) -> None:
     """Test deploy exit code."""
-    assert deploy_result.exit_code == 0, deploy_result.output
+    json.dumps(deploy_result.output, indent=2)
+    assert deploy_result.exit_code == 0
 
 
 def test_deploy_log_messages(deploy_result: Result) -> None:
@@ -215,7 +216,7 @@ def test_mysql(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-mysql",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.10")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
@@ -232,7 +233,7 @@ def test_xmlsec(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-xmlsec",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.10")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
@@ -251,7 +252,7 @@ def test_xmlsec_layer(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-xmlsec-layer",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, "python3.10")
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
