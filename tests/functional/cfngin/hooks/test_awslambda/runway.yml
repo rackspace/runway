@@ -5,7 +5,7 @@ deployments:
       test: true
     parameters:
       cfngin_bucket: runway-testing-lab-cfngin-bucket-${env AWS_REGION}
-      local_python_runtime: ${env LOCAL_PYTHON_RUNTIME}  # this is set by the test runner
+      python_runtime: ${env PYTHON_RUNTIME}  # this is set by the test runner
       namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
     regions:
       - us-east-1
