@@ -179,7 +179,7 @@ def test_docker(
         runway_context.get_session(region=AWS_REGION),
         f"{namespace}-{STACK_PREFIX}-docker",
     )
-    assert_runtime(tester, "python3.8")
+    assert_runtime(tester, PYTHON_RUNTIME)
     assert_uploaded(tester, deploy_result)
     response = tester.invoke()
     response_str = json.dumps(response, indent=4, sort_keys=True)
