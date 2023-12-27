@@ -1815,17 +1815,18 @@ tests = ["pytest (>=4.6)"]
 
 [[package]]
 name = "mypy-boto3"
-version = "1.26.164"
-description = "Type annotations for boto3 1.26.164 master module generated with mypy-boto3-builder 7.14.5"
+version = "1.34.8"
+description = "Type annotations for boto3 1.34.8 master module generated with mypy-boto3-builder 7.23.0"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-1.26.164.tar.gz", hash = "sha256:f8428590f72b97e6da83183b59a24c7f1444511282d68d38b47aeebc6de24be2"},
-    {file = "mypy_boto3-1.26.164-py3-none-any.whl", hash = "sha256:437c555f323c15b0852c7df58ab11526868a7f1d0c84f8ceb6a3d100d8288422"},
+    {file = "mypy-boto3-1.34.8.tar.gz", hash = "sha256:adb66047d96536fab43d0182fd7f478ec0226c09add21b95c55ac60b76a5e5ce"},
+    {file = "mypy_boto3-1.34.8-py3-none-any.whl", hash = "sha256:d4913de2a6958c56842ab20c8a02952b9e67be550355ae7adac8bb4defcf73d8"},
 ]
 
 [package.dependencies]
 boto3 = "*"
+typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-acm"
