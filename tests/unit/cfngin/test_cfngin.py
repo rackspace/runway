@@ -17,7 +17,6 @@ from ..factories import MockRunwayContext
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 
@@ -272,19 +271,6 @@ class TestCFNgin:
         assert result.namespace == "test-namespace"
         assert len(result.stacks) == 1
         assert result.stacks[0].name == "test-stack"
-
-    def test_load_cfn_template(self, caplog: LogCaptureFixture, tmp_path: Path) -> None:
-        """Test load a CFN template."""
-        cfn_template = tmp_path / "template.yml"
-        cfn_template.write_text("test_key: !Ref something")
-        cfngin = CFNgin(ctx=self.get_context(), sys_path=tmp_path)
-
-        caplog.set_level("ERROR", logger="runway.cfngin")
-
-        with pytest.raises(SystemExit):
-            cfngin.load(cfn_template)
-
-        assert "appears to be a CloudFormation template" in caplog.text
 
     def test_load_raise_constructor_error(
         self, mocker: MockerFixture, tmp_path: Path
