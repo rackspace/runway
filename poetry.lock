@@ -61,13 +61,13 @@ tests-no-zope = ["cloudpickle", "cloudpickle", "hypothesis", "hypothesis", "mypy
 
 [[package]]
 name = "awacs"
-version = "2.4.0"
+version = "2.4.1"
 description = "AWS Access Policy Language creation library"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "awacs-2.4.0-py3-none-any.whl", hash = "sha256:4be1a79ed0aea40beede9ef2f1f3b5fbd865cee741e008b9e5370c8730a6356c"},
-    {file = "awacs-2.4.0.tar.gz", hash = "sha256:89f960ead8ea165d6058ece526143018784043fa4a9bd9fc195bd4cfa7d26e83"},
+    {file = "awacs-2.4.1-py3-none-any.whl", hash = "sha256:8c54470f6a2d45de1ec2907417b46f791e44bf6e7d2d5a581ca1d5153b3ea9e6"},
+    {file = "awacs-2.4.1.tar.gz", hash = "sha256:b0da356ae56374ea872c6cdb00946bb22e9cd817c3f3ad6b008019e3a45d8040"},
 ]
 
 [[package]]
