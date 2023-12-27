@@ -3,11 +3,8 @@ from __future__ import annotations
 
 import logging
 import os
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
-
-from yaml.constructor import ConstructorError
 
 from .._logging import PrefixAdaptor
 from ..compat import cached_property
@@ -198,22 +195,19 @@ class CFNgin:
 
         """
         LOGGER.debug("loading CFNgin config: %s", config_path.name)
-        try:
-            config = self._get_config(config_path)
-            config.load()
-            return self._get_context(config, config_path)
-        except ConstructorError as err:
-            if str(err.problem).startswith(  # could be NoneType
-                "could not determine a constructor for the tag '!"
-            ):
-                LOGGER.error(
-                    '"%s" is located in the module\'s root directory '
-                    "and appears to be a CloudFormation template; "
-                    "please move CloudFormation templates to a subdirectory",
-                    config_path,
-                )
-                sys.exit(1)
-            raise
+
+        # Note: This previously had a try/except looking for a
+        # ConstructorError with a hint to move template to another
+        # location; however, there's a race condition between this
+        # and pydantic verifying that the config file will parse into
+        # the runway Cfngin class. That said since this error was sometimes
+        # being masked by pydantic's own error, the logic was removed.
+        #
+        # This race condition appears to have started with an update to
+        # pytest-xdist.
+        config = self._get_config(config_path)
+        config.load()
+        return self._get_context(config, config_path)
 
     def plan(self, force: bool = False, sys_path: Optional[Path] = None):
         """Run the CFNgin plan action.
