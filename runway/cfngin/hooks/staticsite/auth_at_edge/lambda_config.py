@@ -103,7 +103,11 @@ def write(
         # in the shared.py template file with actual
         # calculated values
         shared = re.sub(
-            r"{.+?(})$", str(config), file_.read(), 1, flags=re.DOTALL | re.MULTILINE
+            r"{.+?(})$",
+            str(config),
+            file_.read(),
+            count=1,
+            flags=re.DOTALL | re.MULTILINE,
         )
 
         filedir, temppath = mkstemp()
