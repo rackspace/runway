@@ -1792,13 +1792,13 @@ tests = ["pytest (>=4.6)"]
 
 [[package]]
 name = "mypy-boto3"
-version = "1.34.11"
-description = "Type annotations for boto3 1.34.11 master module generated with mypy-boto3-builder 7.23.0"
+version = "1.34.14"
+description = "Type annotations for boto3 1.34.14 master module generated with mypy-boto3-builder 7.23.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-1.34.11.tar.gz", hash = "sha256:1238516d7553b9eb5f1f950c290c33d075a5e7b40267bbb563046a9a18d73c2f"},
-    {file = "mypy_boto3-1.34.11-py3-none-any.whl", hash = "sha256:3f3fc21a03716510517263d43498bfcb0b701ff6c25e83a4b36441f8b7a79a0f"},
+    {file = "mypy-boto3-1.34.14.tar.gz", hash = "sha256:8e3c526a690a83c127e9889c58168b6e43d4fd4130b0e589a88a1572edfde6b6"},
+    {file = "mypy_boto3-1.34.14-py3-none-any.whl", hash = "sha256:fd6df0cf1235bf4c363a995ea075e85116856a3f5cd4eec381cf2f8075325783"},
 ]
 
 [package.dependencies]
