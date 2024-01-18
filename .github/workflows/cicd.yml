@@ -65,7 +65,7 @@ jobs:
         with:
           python-version: 3.9
       - uses: Gr1N/setup-poetry@v8
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: .venv
@@ -107,7 +107,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v8
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: .venv
@@ -133,7 +133,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v8
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: .venv
@@ -164,7 +164,7 @@ jobs:
         with:
           python-version: '3.10'
       - uses: Gr1N/setup-poetry@v8
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: .venv
@@ -210,7 +210,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: Gr1N/setup-poetry@v8
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: .venv
@@ -258,7 +258,7 @@ jobs:
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
       - uses: Gr1N/setup-poetry@v8
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: .venv
