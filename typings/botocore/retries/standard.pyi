@@ -62,6 +62,7 @@ class RetryEventAdapter(object):
     def create_retry_context(self, **kwargs):
         """Create context based on needs-retry kwargs."""
         ...
+
     def adapt_retry_response_from_context(self, context):
         """Modify response back to user back from context."""
         ...
@@ -106,6 +107,7 @@ class RetryContext(object):
 
         """
         ...
+
     def add_retry_metadata(self, **kwargs):
         """Add key/value pairs to the retry metadata.
 
@@ -116,6 +118,7 @@ class RetryContext(object):
 
         """
         ...
+
     def get_retry_metadata(self): ...
 
 class RetryPolicy(object):

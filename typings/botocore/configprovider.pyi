@@ -128,6 +128,7 @@ class ConfigChainFactory(object):
             is not provided it will default to use os.environ.
         """
         ...
+
     def create_config_chain(
         self,
         instance_name=...,
@@ -188,6 +189,7 @@ class ConfigValueStore(object):
             invoked to load the value.
         """
         ...
+
     def get_config_variable(self, logical_name):
         """
         Retrieve the value associeated with the specified logical_name
@@ -203,6 +205,7 @@ class ConfigValueStore(object):
         :returns: value of variable or None if not defined.
         """
         ...
+
     def set_config_variable(self, logical_name, value):
         """Set a configuration variable to a specific value.
 
@@ -228,6 +231,7 @@ class ConfigValueStore(object):
         :param value: The value to associate with the config variable.
         """
         ...
+
     def clear_config_variable(self, logical_name):
         """Remove an override config variable from the session.
 
@@ -236,6 +240,7 @@ class ConfigValueStore(object):
             value from.
         """
         ...
+
     def set_config_provider(self, logical_name, provider):
         """Set the provider for a config value.
 
@@ -284,6 +289,7 @@ class ChainProvider(BaseProvider):
             transform provided value.
         """
         ...
+
     def provide(self):
         """Provide the value from the first provider to return non-None.
 
@@ -292,6 +298,7 @@ class ChainProvider(BaseProvider):
         ChainProvider. When no non-None value is found, None is returned.
         """
         ...
+
     def __repr__(self): ...
 
 class InstanceVarProvider(BaseProvider):
@@ -308,9 +315,11 @@ class InstanceVarProvider(BaseProvider):
             file variables from.
         """
         ...
+
     def provide(self):
         """Provide a config value from the session instance vars."""
         ...
+
     def __repr__(self): ...
 
 class ScopedConfigProvider(BaseProvider):
@@ -328,9 +337,11 @@ class ScopedConfigProvider(BaseProvider):
             file variables from.
         """
         ...
+
     def provide(self):
         """Provide a value from a config file property."""
         ...
+
     def __repr__(self): ...
 
 class EnvironmentProvider(BaseProvider):
@@ -346,9 +357,11 @@ class EnvironmentProvider(BaseProvider):
         :param env: Environment variables dictionary to get variables from.
         """
         ...
+
     def provide(self):
         """Provide a config value from a source dictionary."""
         ...
+
     def __repr__(self): ...
 
 class SectionConfigProvider(BaseProvider):
@@ -369,4 +382,5 @@ class ConstantProvider(BaseProvider):
     def provide(self):
         """Provide the constant value given during initialization."""
         ...
+
     def __repr__(self): ...

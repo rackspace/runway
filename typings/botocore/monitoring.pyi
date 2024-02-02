@@ -17,9 +17,11 @@ class Monitor(object):
         :param publisher: A publisher for generated monitor events
         """
         ...
+
     def register(self, event_emitter):
         """Register an event emitter to the monitor"""
         ...
+
     def capture(self, event_name, **payload):
         """Captures an incoming event from the event emitter
 
@@ -36,6 +38,7 @@ class MonitorEventAdapter(object):
         :param time: A callable that produces the current time
         """
         ...
+
     def feed(self, emitter_event_name, emitter_payload):
         """Feed an event emitter event to generate a monitor event
 
@@ -68,6 +71,7 @@ class BaseMonitorEvent(object):
         :param timestamp: Epoch time in milliseconds from when the event began
         """
         ...
+
     def __repr__(self): ...
     def __eq__(self, other) -> bool: ...
 
@@ -109,6 +113,7 @@ class APICallEvent(BaseMonitorEvent):
             otherwise
         """
         ...
+
     def new_api_call_attempt(self, timestamp):
         """Instantiates APICallAttemptEvent associated to the APICallEvent
 
@@ -195,6 +200,7 @@ class CSMSerializer(object):
             to the serialized events
         """
         ...
+
     def serialize(self, event):
         """Serializes a monitor event to the CSM format
 
@@ -226,6 +232,7 @@ class SocketPublisher(object):
             and return bytes
         """
         ...
+
     def publish(self, event):
         """Publishes a specified monitor event
 

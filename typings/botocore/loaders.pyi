@@ -126,6 +126,7 @@ class JSONFileLoader(object):
 
         """
         ...
+
     def load_file(self, file_path):
         """Attempt to load the file path.
 
@@ -200,6 +201,7 @@ class Loader(object):
 
         """
         ...
+
     @instance_cache
     def determine_latest_version(self, service_name, type_name):
         """Find the latest API version available for a service.
@@ -222,6 +224,7 @@ class Loader(object):
 
         """
         ...
+
     @instance_cache
     def list_api_versions(self, service_name, type_name):
         """List all API versions available for a particular service type
@@ -238,6 +241,7 @@ class Loader(object):
 
         """
         ...
+
     @instance_cache
     def load_service_model(self, service_name, type_name, api_version=...):
         """Load a botocore service model
@@ -269,6 +273,7 @@ class Loader(object):
         :return: The loaded data, as a python type (e.g. dict, list, etc).
         """
         ...
+
     @instance_cache
     def load_data(self, name):
         """Load data given a data path.

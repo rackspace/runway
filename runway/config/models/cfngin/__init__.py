@@ -161,9 +161,9 @@ class CfnginStackDefinitionModel(ConfigProperty):
             https://pydantic-docs.helpmanual.io/usage/schema/#schema-customization
 
             """
-            schema[
-                "description"
-            ] = "Define CloudFormation stacks using a Blueprint or Template."
+            schema["description"] = (
+                "Define CloudFormation stacks using a Blueprint or Template."
+            )
             # prevents a false error when defining stacks as a dict
             schema.get("required", ["name"]).remove("name")
 

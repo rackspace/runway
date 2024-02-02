@@ -125,6 +125,7 @@ class AWSRequest(object):
     def prepare(self):
         """Constructs a :class:`AWSPreparedRequest <AWSPreparedRequest>`."""
         ...
+
     @property
     def body(self): ...
 
@@ -170,6 +171,7 @@ class AWSResponse(object):
     def content(self):
         """Content of the response as bytes."""
         ...
+
     @property
     def text(self):
         """Content of the response as a proper text type.

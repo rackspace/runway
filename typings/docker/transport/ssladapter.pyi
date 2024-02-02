@@ -9,7 +9,8 @@ import urllib3
 from docker.transport.basehttpadapter import BaseHTTPAdapter
 
 PoolManager = urllib3.poolmanager.PoolManager
-if sys.version_info[0] < 3 or sys.version_info[1] < 5: ...
+if sys.version_info[0] < 3 or sys.version_info[1] < 5:
+    ...
 
 class SSLHTTPAdapter(BaseHTTPAdapter):
     __attrs__ = ...

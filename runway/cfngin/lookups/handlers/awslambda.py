@@ -232,9 +232,9 @@ class AwsLambdaLookup(LookupHandler):
     class CompatibleArchitectures(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[
-            Literal["awslambda.CompatibleArchitectures"]
-        ] = "awslambda.CompatibleArchitectures"
+        TYPE_NAME: Final[Literal["awslambda.CompatibleArchitectures"]] = (
+            "awslambda.CompatibleArchitectures"
+        )
 
         @classmethod
         def handle(  # pylint: disable=arguments-differ
@@ -266,9 +266,9 @@ class AwsLambdaLookup(LookupHandler):
     class CompatibleRuntimes(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[
-            Literal["awslambda.CompatibleRuntimes"]
-        ] = "awslambda.CompatibleRuntimes"
+        TYPE_NAME: Final[Literal["awslambda.CompatibleRuntimes"]] = (
+            "awslambda.CompatibleRuntimes"
+        )
 
         @classmethod
         def handle(  # pylint: disable=arguments-differ
@@ -442,9 +442,9 @@ class AwsLambdaLookup(LookupHandler):
     class S3ObjectVersion(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[
-            Literal["awslambda.S3ObjectVersion"]
-        ] = "awslambda.S3ObjectVersion"
+        TYPE_NAME: Final[Literal["awslambda.S3ObjectVersion"]] = (
+            "awslambda.S3ObjectVersion"
+        )
 
         @classmethod
         def handle(  # pylint: disable=arguments-differ

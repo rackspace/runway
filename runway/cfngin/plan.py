@@ -51,13 +51,11 @@ _T = TypeVar("_T")
 
 
 @overload
-def json_serial(obj: Set[_T]) -> List[_T]:
-    ...
+def json_serial(obj: Set[_T]) -> List[_T]: ...
 
 
 @overload
-def json_serial(obj: Union[Dict[Any, Any], int, List[Any], str]) -> NoReturn:
-    ...
+def json_serial(obj: Union[Dict[Any, Any], int, List[Any], str]) -> NoReturn: ...
 
 
 def json_serial(obj: Union[Set[Any], Any]) -> Any:

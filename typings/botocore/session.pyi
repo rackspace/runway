@@ -57,6 +57,7 @@ class Session(object):
 
         """
         ...
+
     @property
     def available_profiles(self): ...
     @property
@@ -87,6 +88,7 @@ class Session(object):
 
         """
         ...
+
     def instance_variables(self): ...
     def get_scoped_config(self):
         """
@@ -111,6 +113,7 @@ class Session(object):
 
         """
         ...
+
     @property
     def full_config(self):
         """Return the parsed config file.
@@ -122,6 +125,7 @@ class Session(object):
         :rtype: dict
         """
         ...
+
     def get_default_client_config(self):
         """Retrieves the default config for creating clients
 
@@ -131,6 +135,7 @@ class Session(object):
             attached to the session.
         """
         ...
+
     def set_default_client_config(self, client_config):
         """Sets the default config for creating clients
 
@@ -140,6 +145,7 @@ class Session(object):
             object attached to the session.
         """
         ...
+
     def set_credentials(self, access_key, secret_key, token=...):
         """
         Manually create credentials for this session.  If you would
@@ -158,6 +164,7 @@ class Session(object):
             credentials.
         """
         ...
+
     def get_credentials(self):
         """
         Return the :class:`botocore.credential.Credential` object
@@ -168,6 +175,7 @@ class Session(object):
 
         """
         ...
+
     def user_agent(self):
         """
         Return a string suitable for use as a User-Agent header.
@@ -192,6 +200,7 @@ class Session(object):
 
         """
         ...
+
     def get_data(self, data_path):
         """
         Retrieve the data associated with `data_path`.
@@ -200,6 +209,7 @@ class Session(object):
         :param data_path: The path to the data you wish to retrieve.
         """
         ...
+
     def get_service_model(self, service_name, api_version=...):
         """Get the service model object.
 
@@ -215,6 +225,7 @@ class Session(object):
 
         """
         ...
+
     def get_waiter_model(self, service_name, api_version=...): ...
     def get_paginator_model(self, service_name, api_version=...): ...
     def get_service_data(self, service_name, api_version=...):
@@ -222,17 +233,20 @@ class Session(object):
         Retrieve the fully merged data associated with a service.
         """
         ...
+
     def get_available_services(self):
         """
         Return a list of names of available services.
         """
         ...
+
     def set_debug_logger(self, logger_name=...):
         """
         Convenience function to quickly configure full debug output
         to go to the console.
         """
         ...
+
     def set_stream_logger(self, logger_name, log_level, stream=..., format_string=...):
         """
         Convenience method to configure a stream logger.
@@ -256,6 +270,7 @@ class Session(object):
 
         """
         ...
+
     def set_file_logger(self, log_level, path, logger_name=...):
         """
         Convenience function to quickly configure any level of logging
@@ -269,6 +284,7 @@ class Session(object):
             if it doesn't already exist.
         """
         ...
+
     def register(self, event_name, handler, unique_id=..., unique_id_uses_count=...):
         """Register a handler with an event.
 
@@ -303,6 +319,7 @@ class Session(object):
             ``register`` call for that ``unique_id``.
         """
         ...
+
     def unregister(
         self, event_name, handler=..., unique_id=..., unique_id_uses_count=...
     ):
@@ -335,6 +352,7 @@ class Session(object):
             ``register`` call for that ``unique_id``.
         """
         ...
+
     def emit(self, event_name, **kwargs): ...
     def emit_first_non_none_response(self, event_name, **kwargs): ...
     def get_component(self, name): ...
@@ -423,6 +441,7 @@ class Session(object):
 
         """
         ...
+
     def get_available_partitions(self):
         """Lists the available partitions found on disk
 
@@ -430,6 +449,7 @@ class Session(object):
         :return: Returns a list of partition names (e.g., ["aws", "aws-cn"])
         """
         ...
+
     def get_available_regions(
         self, service_name, partition_name=..., allow_non_regional=...
     ):

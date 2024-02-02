@@ -350,16 +350,15 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
         raise NotImplementedError
 
     @overload
-    def build_response(self, stage: Literal["deploy"]) -> AwsLambdaHookDeployResponse:
-        ...
+    def build_response(
+        self, stage: Literal["deploy"]
+    ) -> AwsLambdaHookDeployResponse: ...
 
     @overload
-    def build_response(self, stage: Literal["destroy"]) -> Optional[BaseModel]:
-        ...
+    def build_response(self, stage: Literal["destroy"]) -> Optional[BaseModel]: ...
 
     @overload
-    def build_response(self, stage: Literal["plan"]) -> AwsLambdaHookDeployResponse:
-        ...
+    def build_response(self, stage: Literal["plan"]) -> AwsLambdaHookDeployResponse: ...
 
     def build_response(
         self, stage: Literal["deploy", "destroy", "plan"]

@@ -240,29 +240,25 @@ class VariableValue:
     @classmethod
     def parse_obj(
         cls, obj: _PydanticModelTypeVar, variable_type: VariableTypeLiteralTypeDef = ...
-    ) -> VariableValuePydanticModel[_PydanticModelTypeVar]:
-        ...
+    ) -> VariableValuePydanticModel[_PydanticModelTypeVar]: ...
 
     @overload
     @classmethod
     def parse_obj(
         cls, obj: Dict[str, Any], variable_type: VariableTypeLiteralTypeDef = ...
-    ) -> VariableValue:
-        ...
+    ) -> VariableValue: ...
 
     @overload
     @classmethod
     def parse_obj(
         cls, obj: List[Any], variable_type: VariableTypeLiteralTypeDef = ...
-    ) -> VariableValueList:
-        ...
+    ) -> VariableValueList: ...
 
     @overload
     @classmethod
     def parse_obj(
         cls, obj: int, variable_type: VariableTypeLiteralTypeDef = ...
-    ) -> VariableValueLiteral[int]:
-        ...
+    ) -> VariableValueLiteral[int]: ...
 
     @overload
     @classmethod
@@ -270,8 +266,7 @@ class VariableValue:
         cls, obj: str, variable_type: VariableTypeLiteralTypeDef = ...
     ) -> VariableValueConcatenation[
         Union[VariableValueLiteral[str], VariableValueLookup]
-    ]:
-        ...
+    ]: ...
 
     @classmethod
     def parse_obj(
@@ -523,12 +518,10 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         del self._data[__index]
 
     @overload
-    def __getitem__(self, __index: int) -> VariableValue:
-        ...
+    def __getitem__(self, __index: int) -> VariableValue: ...
 
     @overload
-    def __getitem__(self, __index: slice) -> List[VariableValue]:
-        ...
+    def __getitem__(self, __index: slice) -> List[VariableValue]: ...
 
     def __getitem__(  # type: ignore
         self, __index: Union[int, slice]
@@ -537,12 +530,10 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         return self._data[__index]  # type: ignore
 
     @overload
-    def __setitem__(self, __index: int, __value: VariableValue) -> None:
-        ...
+    def __setitem__(self, __index: int, __value: VariableValue) -> None: ...
 
     @overload
-    def __setitem__(self, __index: slice, __value: List[VariableValue]) -> None:
-        ...
+    def __setitem__(self, __index: slice, __value: List[VariableValue]) -> None: ...
 
     def __setitem__(
         self,
@@ -714,12 +705,10 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         del self._data[__index]
 
     @overload
-    def __getitem__(self, __index: int) -> _VariableValue:
-        ...
+    def __getitem__(self, __index: int) -> _VariableValue: ...
 
     @overload
-    def __getitem__(self, __index: slice) -> List[_VariableValue]:
-        ...
+    def __getitem__(self, __index: slice) -> List[_VariableValue]: ...
 
     def __getitem__(
         self, __index: Union[int, slice]
@@ -728,12 +717,10 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         return self._data[__index]
 
     @overload
-    def __setitem__(self, __index: int, __value: _VariableValue) -> None:
-        ...
+    def __setitem__(self, __index: int, __value: _VariableValue) -> None: ...
 
     @overload
-    def __setitem__(self, __index: slice, __value: List[_VariableValue]) -> None:
-        ...
+    def __setitem__(self, __index: slice, __value: List[_VariableValue]) -> None: ...
 
     def __setitem__(
         self,

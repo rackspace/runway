@@ -67,6 +67,7 @@ class _SixMetaPathImporter(object):
         Python 3.4 (see PEP451)
         """
         ...
+
     def get_code(self, fullname):
         """Return None
 
@@ -153,7 +154,8 @@ _moved_attributes = [
     MovedModule("xmlrpc_client", "xmlrpclib", "xmlrpc.client"),
     MovedModule("xmlrpc_server", "SimpleXMLRPCServer", "xmlrpc.server"),
 ]
-if sys.platform == "win32": ...
+if sys.platform == "win32":
+    ...
 moves = _MovedItems(__name__ + ".moves")
 
 class Module_six_moves_urllib_parse(_LazyModule):
@@ -397,5 +399,7 @@ def python_2_unicode_compatible(klass):
 
 __path__ = []
 __package__ = __name__
-if globals().get("__spec__") is not None: ...
-if sys.meta_path: ...
+if globals().get("__spec__") is not None:
+    ...
+if sys.meta_path:
+    ...

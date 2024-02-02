@@ -70,6 +70,7 @@ class DecodeUtils(object):
         :returns: The tuple (True, 0)
         """
         ...
+
     @staticmethod
     def unpack_false(data):
         """This method consumes none of the provided bytes and returns False.
@@ -82,6 +83,7 @@ class DecodeUtils(object):
         :returns: The tuple (False, 0)
         """
         ...
+
     @staticmethod
     def unpack_uint8(data):
         """Parse an unsigned 8-bit integer from the bytes.
@@ -93,6 +95,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (parsed integer value, bytes consumed)
         """
         ...
+
     @staticmethod
     def unpack_uint32(data):
         """Parse an unsigned 32-bit integer from the bytes.
@@ -104,6 +107,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (parsed integer value, bytes consumed)
         """
         ...
+
     @staticmethod
     def unpack_int8(data):
         """Parse a signed 8-bit integer from the bytes.
@@ -115,6 +119,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (parsed integer value, bytes consumed)
         """
         ...
+
     @staticmethod
     def unpack_int16(data):
         """Parse a signed 16-bit integer from the bytes.
@@ -127,6 +132,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (parsed integer value, bytes consumed)
         """
         ...
+
     @staticmethod
     def unpack_int32(data):
         """Parse a signed 32-bit integer from the bytes.
@@ -139,6 +145,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (parsed integer value, bytes consumed)
         """
         ...
+
     @staticmethod
     def unpack_int64(data):
         """Parse a signed 64-bit integer from the bytes.
@@ -151,6 +158,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (parsed integer value, bytes consumed)
         """
         ...
+
     @staticmethod
     def unpack_byte_array(data, length_byte_size=...):
         """Parse a variable length byte array from the bytes.
@@ -171,6 +179,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (parsed byte array, bytes consumed).
         """
         ...
+
     @staticmethod
     def unpack_utf8_string(data, length_byte_size=...):
         """Parse a variable length utf-8 string from the bytes.
@@ -192,6 +201,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (utf-8 string, bytes consumed).
         """
         ...
+
     @staticmethod
     def unpack_uuid(data):
         """Parse a 16-byte uuid from the bytes.
@@ -203,6 +213,7 @@ class DecodeUtils(object):
         :returns: A tuple containing the (uuid bytes, bytes consumed).
         """
         ...
+
     @staticmethod
     def unpack_prelude(data):
         """Parse the prelude for an event stream message from the bytes.
@@ -231,6 +242,7 @@ class MessagePrelude(object):
         :returns: The total payload length.
         """
         ...
+
     @property
     def payload_end(self):
         """Calculates the byte offset for the end of the message payload.
@@ -242,6 +254,7 @@ class MessagePrelude(object):
         message to the end of the payload.
         """
         ...
+
     @property
     def headers_end(self):
         """Calculates the byte offset for the end of the message headers.
@@ -295,6 +308,7 @@ class EventStreamBuffer(object):
         :param data: The bytes to add to the buffer to be used when parsing
         """
         ...
+
     def next(self):
         """Provides the next available message parsed from the stream
 
@@ -302,6 +316,7 @@ class EventStreamBuffer(object):
         :returns: The next event stream message
         """
         ...
+
     def __next__(self): ...
     def __iter__(self): ...
 

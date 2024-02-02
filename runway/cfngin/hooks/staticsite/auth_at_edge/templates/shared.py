@@ -46,9 +46,9 @@ def get_config():
         user_pool_region = region_match.groups()[0]
 
     config["cloud_front_headers"] = as_cloud_front_headers(config["http_headers"])
-    config[
-        "token_issuer"
-    ] = f"https://cognito-idp.{user_pool_region}.amazonaws.com/{config['user_pool_id']}"
+    config["token_issuer"] = (
+        f"https://cognito-idp.{user_pool_region}.amazonaws.com/{config['user_pool_id']}"
+    )
     config["token_jwks_uri"] = f"{config['token_issuer']}/.well-known/jwks.json"
     return config
 
@@ -259,10 +259,9 @@ def generate_cookie_headers(
     cookies[cookie_names["access_token_key"]] = f"{tokens.get('access_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("accessToken")),
     )
-    cookies[
-        cookie_names["refresh_token_key"]
-    ] = f"{tokens.get('refresh_token')}; " + str(
-        with_cookie_domain(domain_name, cookie_settings.get("refreshToken"))
+    cookies[cookie_names["refresh_token_key"]] = (
+        f"{tokens.get('refresh_token')}; "
+        + str(with_cookie_domain(domain_name, cookie_settings.get("refreshToken")))
     )
     cookies_iter = cookies  # type: ignore
     if event == "sign_out":

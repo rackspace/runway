@@ -224,6 +224,7 @@ class Template(object):
                      (optional) keys
         """
         ...
+
     def set_version(self, version: Optional[str] = ...) -> None: ...
     def set_transform(self, transform: List[Any]) -> None: ...
     def to_dict(self) -> Dict[str, Any]: ...
@@ -234,6 +235,7 @@ class Template(object):
         :type label: str
         """
         ...
+
     def add_parameter_to_group(self, parameter: Parameter, group_name: str) -> str:
         """
         Add a parameter under a group (created if needed).
@@ -241,6 +243,7 @@ class Template(object):
         :type group_name: str
         """
         ...
+
     def to_json(
         self,
         indent: int = ...,

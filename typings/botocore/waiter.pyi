@@ -47,6 +47,7 @@ class WaiterModel(object):
 
         """
         ...
+
     def get_waiter(self, waiter_name): ...
 
 class SingleWaiterConfig(object):
@@ -83,4 +84,5 @@ class Waiter(object):
 
         """
         ...
+
     def wait(self, **kwargs): ...

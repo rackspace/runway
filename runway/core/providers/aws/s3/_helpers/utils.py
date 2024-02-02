@@ -860,18 +860,17 @@ def human_readable_to_bytes(value: str) -> int:
 
 
 @overload
-def relative_path(filename: AnyPath, start: AnyPath = ...) -> str:
-    ...
+def relative_path(filename: AnyPath, start: AnyPath = ...) -> str: ...
 
 
 @overload
-def relative_path(filename: None, start: AnyPath = ...) -> None:
-    ...
+def relative_path(filename: None, start: AnyPath = ...) -> None: ...
 
 
 @overload
-def relative_path(filename: Optional[AnyPath], start: AnyPath = ...) -> Optional[str]:
-    ...
+def relative_path(
+    filename: Optional[AnyPath], start: AnyPath = ...
+) -> Optional[str]: ...
 
 
 def relative_path(

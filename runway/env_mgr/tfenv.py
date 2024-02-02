@@ -167,9 +167,9 @@ class TFEnvManager(EnvManager):
     """
 
     VERSION_REGEX: Final[str] = r"^(Terraform v)?(?P<version>[0-9]+\.[0-9]+\.[0-9]+\S*)"
-    VERSION_OUTPUT_REGEX: Final[
-        str
-    ] = r"^Terraform v(?P<version>[0-9]*\.[0-9]*\.[0-9]*)(?P<suffix>-.*)?"
+    VERSION_OUTPUT_REGEX: Final[str] = (
+        r"^Terraform v(?P<version>[0-9]*\.[0-9]*\.[0-9]*)(?P<suffix>-.*)?"
+    )
 
     def __init__(self, path: Optional[Path] = None) -> None:
         """Initialize class."""
@@ -192,16 +192,13 @@ class TFEnvManager(EnvManager):
         """Collect Terraform configuration blocks from a Terraform module."""
 
         @overload
-        def _flatten_lists(data: Dict[str, Any]) -> Dict[str, Any]:
-            ...
+        def _flatten_lists(data: Dict[str, Any]) -> Dict[str, Any]: ...
 
         @overload
-        def _flatten_lists(data: List[Any]) -> List[Any]:
-            ...
+        def _flatten_lists(data: List[Any]) -> List[Any]: ...
 
         @overload
-        def _flatten_lists(data: str) -> str:
-            ...
+        def _flatten_lists(data: str) -> str: ...
 
         def _flatten_lists(
             data: Union[Dict[str, Any], List[Any], Any]

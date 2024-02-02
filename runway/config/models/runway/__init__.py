@@ -291,9 +291,9 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             https://pydantic-docs.helpmanual.io/usage/schema/#schema-customization
 
             """
-            schema[
-                "description"
-            ] = "A collection of modules, regions, and other configurations to deploy."
+            schema["description"] = (
+                "A collection of modules, regions, and other configurations to deploy."
+            )
             # modify schema to allow simple string or mapping definition for a module
             module_ref = schema["properties"]["modules"]["items"].pop("$ref")
             schema["properties"]["modules"]["items"]["anyOf"] = [

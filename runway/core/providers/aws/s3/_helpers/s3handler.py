@@ -448,12 +448,12 @@ class BaseTransferRequestSubmitter:
 class UploadRequestSubmitter(BaseTransferRequestSubmitter):
     """Upload request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[
-        Callable[[Dict[Any, Any], Dict[Any, Any]], Any]
-    ] = RequestParamsMapper.map_put_object_params
-    RESULT_SUBSCRIBER_CLASS: ClassVar[
-        Type[UploadResultSubscriber]
-    ] = UploadResultSubscriber
+    REQUEST_MAPPER_METHOD: ClassVar[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]] = (
+        RequestParamsMapper.map_put_object_params
+    )
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[UploadResultSubscriber]] = (
+        UploadResultSubscriber
+    )
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -528,12 +528,12 @@ class UploadRequestSubmitter(BaseTransferRequestSubmitter):
 class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
     """Download request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[
-        Callable[[Dict[Any, Any], Dict[Any, Any]], Any]
-    ] = RequestParamsMapper.map_get_object_params
-    RESULT_SUBSCRIBER_CLASS: ClassVar[
-        Type[DownloadResultSubscriber]
-    ] = DownloadResultSubscriber
+    REQUEST_MAPPER_METHOD: ClassVar[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]] = (
+        RequestParamsMapper.map_get_object_params
+    )
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[DownloadResultSubscriber]] = (
+        DownloadResultSubscriber
+    )
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -600,9 +600,9 @@ class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
 class CopyRequestSubmitter(BaseTransferRequestSubmitter):
     """Copy request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[
-        Callable[[Dict[Any, Any], Dict[Any, Any]], Any]
-    ] = RequestParamsMapper.map_copy_object_params
+    REQUEST_MAPPER_METHOD: ClassVar[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]] = (
+        RequestParamsMapper.map_copy_object_params
+    )
     RESULT_SUBSCRIBER_CLASS: ClassVar[Type[CopyResultSubscriber]] = CopyResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
@@ -666,9 +666,9 @@ class CopyRequestSubmitter(BaseTransferRequestSubmitter):
 class UploadStreamRequestSubmitter(UploadRequestSubmitter):
     """Upload stream request submitter."""
 
-    RESULT_SUBSCRIBER_CLASS: ClassVar[
-        Type[UploadStreamResultSubscriber]
-    ] = UploadStreamResultSubscriber
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[UploadStreamResultSubscriber]] = (
+        UploadStreamResultSubscriber
+    )
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -709,9 +709,9 @@ class UploadStreamRequestSubmitter(UploadRequestSubmitter):
 class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
     """Download stream result subscriber."""
 
-    RESULT_SUBSCRIBER_CLASS: ClassVar[
-        Type[DownloadStreamResultSubscriber]
-    ] = DownloadStreamResultSubscriber
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[DownloadStreamResultSubscriber]] = (
+        DownloadStreamResultSubscriber
+    )
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -747,12 +747,12 @@ class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
 class DeleteRequestSubmitter(BaseTransferRequestSubmitter):
     """Delete request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[
-        Callable[[Dict[Any, Any], Dict[Any, Any]], Any]
-    ] = RequestParamsMapper.map_delete_object_params
-    RESULT_SUBSCRIBER_CLASS: ClassVar[
-        Type[DeleteResultSubscriber]
-    ] = DeleteResultSubscriber
+    REQUEST_MAPPER_METHOD: ClassVar[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]] = (
+        RequestParamsMapper.map_delete_object_params
+    )
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[DeleteResultSubscriber]] = (
+        DeleteResultSubscriber
+    )
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.

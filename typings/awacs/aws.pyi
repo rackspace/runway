@@ -67,6 +67,7 @@ class ConditionElement(AWSHelperFn):
 
         """
         ...
+
     def get_dict(self) -> Dict[str, Union[List[str], str]]: ...
 
 class Condition(AWSHelperFn):

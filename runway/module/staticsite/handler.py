@@ -309,9 +309,9 @@ class StaticSite(RunwayModule):
             # ensures yaml.safe_load will work by using JSON to convert objects
             "options": json.loads(self.options.data.json(by_alias=True))
         }
-        build_staticsite_args[
-            "artifact_bucket_rxref_lookup"
-        ] = f"{self.sanitized_name}-dependencies::ArtifactsBucketName"
+        build_staticsite_args["artifact_bucket_rxref_lookup"] = (
+            f"{self.sanitized_name}-dependencies::ArtifactsBucketName"
+        )
         build_staticsite_args["options"]["namespace"] = "${namespace}"
         build_staticsite_args["options"]["name"] = self.sanitized_name
         build_staticsite_args["options"]["path"] = os.path.join(
@@ -514,9 +514,9 @@ class StaticSite(RunwayModule):
             site_stack_variables["AcmCertificateArn"] = self.parameters.acmcert_arn
 
         if self.parameters.enable_cf_logging:
-            site_stack_variables[
-                "LogBucketName"
-            ] = f"${{rxref {self.sanitized_name}-dependencies::AWSLogBucketName}}"
+            site_stack_variables["LogBucketName"] = (
+                f"${{rxref {self.sanitized_name}-dependencies::AWSLogBucketName}}"
+            )
 
         if self.parameters.auth_at_edge:
             self._ensure_auth_at_edge_requirements()
@@ -573,9 +573,9 @@ class StaticSite(RunwayModule):
         }
 
         if self.parameters.create_user_pool:
-            args[
-                "created_user_pool_id"
-            ] = f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeUserPoolId}}"
+            args["created_user_pool_id"] = (
+                f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeUserPoolId}}"
+            )
 
         return args
 

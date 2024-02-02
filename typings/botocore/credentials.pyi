@@ -58,6 +58,7 @@ class JSONFileCache(object):
     def __getitem__(self, cache_key):
         """Retrieve value from a cache key."""
         ...
+
     def __setitem__(self, cache_key, value): ...
 
 class Credentials(object):
@@ -107,6 +108,7 @@ class RefreshableCredentials(Credentials):
         Please use get_frozen_credentials instead.
         """
         ...
+
     @access_key.setter
     def access_key(self, value): ...
     @property
@@ -116,6 +118,7 @@ class RefreshableCredentials(Credentials):
         Please use get_frozen_credentials instead.
         """
         ...
+
     @secret_key.setter
     def secret_key(self, value): ...
     @property
@@ -125,6 +128,7 @@ class RefreshableCredentials(Credentials):
         Please use get_frozen_credentials instead.
         """
         ...
+
     @token.setter
     def token(self, value): ...
     def refresh_needed(self, refresh_in=...):
@@ -148,6 +152,7 @@ class RefreshableCredentials(Credentials):
 
         """
         ...
+
     def get_frozen_credentials(self):
         """Return immutable credentials.
 
@@ -344,6 +349,7 @@ class EnvProvider(CredentialProvider):
             ``session_token``.
         """
         ...
+
     def load(self):
         """
         Search for credentials in explicit environment variables.
@@ -390,6 +396,7 @@ class ConfigProvider(CredentialProvider):
 
         """
         ...
+
     def load(self):
         """
         If there is are credentials in the configuration associated with
@@ -456,6 +463,7 @@ class AssumeRoleProvider(CredentialProvider):
             for the STS call.
         """
         ...
+
     def load(self): ...
 
 class AssumeRoleWithWebIdentityProvider(CredentialProvider):
@@ -487,6 +495,7 @@ class CanonicalNameCredentialSourcer(object):
             False otherwise.
         """
         ...
+
     def source_credentials(self, source_name):
         """Loads source credentials based on the provided configuration.
 
@@ -515,6 +524,7 @@ class CredentialResolver(object):
 
         """
         ...
+
     def insert_before(self, name, credential_provider):
         """
         Inserts a new instance of ``CredentialProvider`` into the chain that
@@ -530,6 +540,7 @@ class CredentialResolver(object):
         :type cred_instance: A subclass of ``Credentials``
         """
         ...
+
     def insert_after(self, name, credential_provider):
         """
         Inserts a new type of ``Credentials`` instance into the chain that will
@@ -545,6 +556,7 @@ class CredentialResolver(object):
         :type cred_instance: A subclass of ``Credentials``
         """
         ...
+
     def remove(self, name):
         """
         Removes a given ``Credentials`` instance from the chain.
@@ -553,6 +565,7 @@ class CredentialResolver(object):
         :type name: string
         """
         ...
+
     def get_provider(self, name):
         """Return a credential provider by name.
 
@@ -564,6 +577,7 @@ class CredentialResolver(object):
             is found.
         """
         ...
+
     def load_credentials(self):
         """
         Goes through the credentials chain, returning the first ``Credentials``
