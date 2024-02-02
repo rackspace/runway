@@ -1,4 +1,5 @@
 """AWS Lambda test hooks."""
+
 from __future__ import annotations
 
 import logging

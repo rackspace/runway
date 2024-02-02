@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.default."""
+
 # pyright: basic
 import unittest
 

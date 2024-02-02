@@ -1,4 +1,5 @@
 """Base class for CFNgin hooks."""
+
 from __future__ import annotations
 
 import logging

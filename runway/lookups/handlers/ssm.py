@@ -1,4 +1,5 @@
 """Retrieve a value from SSM Parameter Store."""
+
 from __future__ import annotations
 
 import logging
@@ -49,9 +50,11 @@ class SsmLookup(LookupHandler):
                 "Parameter"
             ]
             return cls.format_results(
-                response["Value"].split(",")
-                if response["Type"] == "StringList"
-                else response["Value"],
+                (
+                    response["Value"].split(",")
+                    if response["Type"] == "StringList"
+                    else response["Value"]
+                ),
                 **args,
             )
         except client.exceptions.ParameterNotFound:

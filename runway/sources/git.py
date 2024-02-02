@@ -1,4 +1,5 @@
 """'Git type Path Source."""
+
 import logging
 import shutil
 import subprocess

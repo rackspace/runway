@@ -1,4 +1,5 @@
 """Execute the AWS CLI update-kubeconfig command."""
+
 from __future__ import annotations
 
 import logging

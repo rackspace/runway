@@ -1,4 +1,5 @@
 """Purge all images from an ECR repository."""
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """Retrieve a value from an environment variable."""
+
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 

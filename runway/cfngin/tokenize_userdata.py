@@ -1,4 +1,5 @@
 """Resources to tokenize userdata."""
+
 import re
 from typing import List
 

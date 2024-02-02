@@ -1,4 +1,5 @@
 """Output Runway configuration file schema."""
+
 from __future__ import annotations
 
 import locale

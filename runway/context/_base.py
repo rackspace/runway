@@ -1,4 +1,5 @@
 """Base context classes."""
+
 from __future__ import annotations
 
 import logging

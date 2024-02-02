@@ -4,6 +4,7 @@
    https://github.com/aws/aws-cli/blob/83b43782dd/awscli/customizations/s3/transferconfig.py
 
 """
+
 from __future__ import annotations
 
 from typing import Any, ClassVar, Dict, List, NoReturn, Optional, Union

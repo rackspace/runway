@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.stack."""
+
 # pyright: basic
 import unittest
 from typing import Any

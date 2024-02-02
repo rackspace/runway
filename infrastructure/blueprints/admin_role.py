@@ -1,4 +1,5 @@
 """Blueprint for an admin role."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Dict, Optional

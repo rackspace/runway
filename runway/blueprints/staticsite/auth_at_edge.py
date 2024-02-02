@@ -4,6 +4,7 @@ Described in detail in this blogpost:
 https://aws.amazon.com/blogs/networking-and-content-delivery/authorizationedge-how-to-use-lambdaedge-and-json-web-tokens-to-enhance-web-application-security/
 
 """
+
 from __future__ import annotations
 
 import logging

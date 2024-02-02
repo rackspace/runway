@@ -1,4 +1,5 @@
 """Pytest fixtures and plugins."""
+
 # pyright: basic
 from __future__ import annotations
 

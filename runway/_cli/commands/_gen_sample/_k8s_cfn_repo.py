@@ -1,4 +1,5 @@
 """``runway gen-sample k8s-cfn`` command."""
+
 import locale
 import logging
 from pathlib import Path

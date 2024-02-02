@@ -1,4 +1,5 @@
 """Static website Module."""
+
 from __future__ import annotations
 
 import json

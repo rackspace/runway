@@ -9,6 +9,7 @@ The :attr:`~cfngin.hook.data_key` is then passed to the lookup as it's input/que
 This allows the lookup to function during a ``runway plan``.
 
 """  # noqa
+
 from __future__ import annotations
 
 import logging

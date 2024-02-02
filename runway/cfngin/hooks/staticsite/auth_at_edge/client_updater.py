@@ -4,6 +4,7 @@ Responsible for updating the User Pool Client with the generated
 distribution url + callback url paths.
 
 """
+
 from __future__ import annotations
 
 import logging

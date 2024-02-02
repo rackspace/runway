@@ -1,4 +1,5 @@
 """Replicated Lambda Function cleanup warning."""
+
 from __future__ import annotations
 
 import logging

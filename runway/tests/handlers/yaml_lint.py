@@ -1,4 +1,5 @@
 """yamllint test runner."""
+
 # filename contains underscore to prevent namespace collision
 from __future__ import annotations
 

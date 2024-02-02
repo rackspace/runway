@@ -1,4 +1,5 @@
 """Tests for update_urls."""
+
 # pylint: disable=no-member
 from unittest.mock import ANY, Mock, call, patch
 

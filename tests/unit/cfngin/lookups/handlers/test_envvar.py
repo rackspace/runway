@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.envvar."""
+
 # pyright: basic
 import os
 import unittest

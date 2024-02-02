@@ -1,4 +1,5 @@
 """Click options."""
+
 import click
 
 ci = click.option(

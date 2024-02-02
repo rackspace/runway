@@ -1,4 +1,5 @@
 """Set package version."""
+
 import logging
 import sys
 

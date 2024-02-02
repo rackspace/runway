@@ -1,4 +1,5 @@
 """``runway schema`` command group."""
+
 from typing import Any
 
 import click

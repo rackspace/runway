@@ -1,4 +1,5 @@
 """Deployment package."""
+
 from __future__ import annotations
 
 import base64
@@ -302,11 +303,13 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
         for dep in self.iterate_dependency_directory():
             archive_file.write(
                 dep,
-                self.insert_layer_dir(
-                    dep, self.project.dependency_directory
-                ).relative_to(self.project.dependency_directory)
-                if self.usage_type == "layer"
-                else dep.relative_to(self.project.dependency_directory),
+                (
+                    self.insert_layer_dir(
+                        dep, self.project.dependency_directory
+                    ).relative_to(self.project.dependency_directory)
+                    if self.usage_type == "layer"
+                    else dep.relative_to(self.project.dependency_directory)
+                ),
             )
 
     def _build_zip_source_code(self, archive_file: zipfile.ZipFile) -> None:
@@ -320,11 +323,13 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
         for src_file in self.project.source_code:
             archive_file.write(
                 src_file,
-                self.insert_layer_dir(
-                    src_file, self.project.source_code.root_directory
-                ).relative_to(self.project.source_code.root_directory)
-                if self.usage_type == "layer"
-                else src_file.relative_to(self.project.source_code.root_directory),
+                (
+                    self.insert_layer_dir(
+                        src_file, self.project.source_code.root_directory
+                    ).relative_to(self.project.source_code.root_directory)
+                    if self.usage_type == "layer"
+                    else src_file.relative_to(self.project.source_code.root_directory)
+                ),
             )
 
     @overload
@@ -348,16 +353,16 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
 
         """
         optional_metadata = {
-            self.META_TAGS["compatible_architectures"]: "+".join(
-                self.project.compatible_architectures
-            )
-            if self.project.compatible_architectures
-            else None,
-            self.META_TAGS["compatible_runtimes"]: "+".join(
-                self.project.compatible_runtimes
-            )
-            if self.project.compatible_runtimes
-            else None,
+            self.META_TAGS["compatible_architectures"]: (
+                "+".join(self.project.compatible_architectures)
+                if self.project.compatible_architectures
+                else None
+            ),
+            self.META_TAGS["compatible_runtimes"]: (
+                "+".join(self.project.compatible_runtimes)
+                if self.project.compatible_runtimes
+                else None
+            ),
             self.META_TAGS["license"]: self.project.license,
         }
         metadata = {

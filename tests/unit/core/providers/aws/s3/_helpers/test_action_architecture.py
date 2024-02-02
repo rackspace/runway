@@ -1,4 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.action_architecture."""
+
 from __future__ import annotations
 
 import os

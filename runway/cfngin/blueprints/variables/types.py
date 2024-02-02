@@ -1,4 +1,5 @@
 """CFNgin blueprint variable types."""
+
 from __future__ import annotations
 
 from typing import (

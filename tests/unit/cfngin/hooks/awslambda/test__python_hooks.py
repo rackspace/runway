@@ -1,4 +1,5 @@
 """Test runway.cfngin.hooks.awslambda._python_hooks."""
+
 # pylint: disable=redefined-outer-name
 from __future__ import annotations
 

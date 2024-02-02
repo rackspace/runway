@@ -1,4 +1,5 @@
 """CFNgin plan, plan components, and functions for interacting with a plan."""
+
 from __future__ import annotations
 
 import json

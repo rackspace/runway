@@ -606,9 +606,11 @@ class TestDockerizePip:
         "Mounts": [
             {
                 "Target": "/var/task",
-                "Source": os.getcwd().replace("\\", "/")
-                if platform.system() == "Windows"
-                else os.getcwd(),
+                "Source": (
+                    os.getcwd().replace("\\", "/")
+                    if platform.system() == "Windows"
+                    else os.getcwd()
+                ),
                 "Type": "bind",
                 "ReadOnly": False,
             }

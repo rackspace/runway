@@ -1,4 +1,5 @@
 """AWS Lambda Python Deployment Package."""
+
 from __future__ import annotations
 
 from pathlib import Path

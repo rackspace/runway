@@ -1,4 +1,5 @@
 """Update Runway release URLs."""
+
 # pylint: disable=no-member
 from __future__ import annotations
 

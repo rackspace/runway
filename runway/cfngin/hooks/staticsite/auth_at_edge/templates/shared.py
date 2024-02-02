@@ -1,4 +1,5 @@
 """Shared functionality for the Auth@Edge Lambda suite."""
+
 # pylint: disable=consider-using-f-string, inconsistent-return-statements
 import base64
 import hmac
@@ -86,15 +87,19 @@ def extract_and_parse_cookies(headers, client_id, cookie_compatibility="amplify"
         cookie_names = get_elasticsearch_cookie_names()
 
     return {
-        "token_user_name": cookies.get(cookie_names["last_user_key"])
-        if "last_user_key" in cookie_names
-        else None,
+        "token_user_name": (
+            cookies.get(cookie_names["last_user_key"])
+            if "last_user_key" in cookie_names
+            else None
+        ),
         "id_token": cookies.get(cookie_names["id_token_key"]),
         "access_token": cookies.get(cookie_names["access_token_key"]),
         "refresh_token": cookies.get(cookie_names["refresh_token_key"]),
-        "scopes": cookies.get(cookie_names["scope_key"])
-        if "scope_key" in cookie_names
-        else None,
+        "scopes": (
+            cookies.get(cookie_names["scope_key"])
+            if "scope_key" in cookie_names
+            else None
+        ),
         "nonce": cookies.get("spa-auth-edge-nonce"),
         "nonce_hmac": cookies.get("spa-auth-edge-nonce-hmac"),
         "pkce": cookies.get("spa-auth-edge-pkce"),

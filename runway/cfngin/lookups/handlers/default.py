@@ -1,4 +1,5 @@
 """Lookup to provide a default value."""
+
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 

@@ -1,4 +1,5 @@
 """Retrieve a value from AWS Elastic Container Registry (ECR)."""
+
 from __future__ import annotations
 
 import base64

@@ -1,4 +1,5 @@
 """Fake Docker API client."""
+
 # pylint: disable=attribute-defined-outside-init,protected-access
 import copy
 from typing import Any, Dict, Optional

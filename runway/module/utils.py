@@ -1,4 +1,5 @@
 """Runway module utilities."""
+
 from __future__ import annotations
 
 import logging

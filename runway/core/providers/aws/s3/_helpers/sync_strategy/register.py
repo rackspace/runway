@@ -4,6 +4,7 @@
    https://github.com/aws/aws-cli/blob/83b43782dd/awscli/customizations/s3/syncstrategy/register.py
 
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Type

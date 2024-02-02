@@ -1,4 +1,5 @@
 """Base class for AWS responses."""
+
 from http import HTTPStatus
 from typing import Any, Dict
 

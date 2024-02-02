@@ -1,4 +1,5 @@
 """Runway config test definition."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Generic, Tuple, TypeVar, Union

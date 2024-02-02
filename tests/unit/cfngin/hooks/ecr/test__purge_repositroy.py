@@ -1,4 +1,5 @@
 """Test runway.cfngin.hooks.ecr._purge_repository."""
+
 # pyright: basic
 from __future__ import annotations
 

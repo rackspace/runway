@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.hooks.cleanup_ssm."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

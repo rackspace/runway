@@ -1,4 +1,5 @@
 """Runway & CFNgin config model utilities."""
+
 from __future__ import annotations
 
 import re

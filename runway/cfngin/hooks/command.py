@@ -1,4 +1,5 @@
 """Command hook."""
+
 import logging
 import os
 import subprocess

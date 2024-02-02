@@ -1,4 +1,5 @@
 """Default AWS Provider."""
+
 # pylint: disable=too-many-lines,too-many-public-methods
 from __future__ import annotations
 
@@ -1273,12 +1274,16 @@ class Provider(BaseProvider):
         old_parameters_as_dict = self.params_as_dict(old_parameters)
         new_parameters_as_dict = self.params_as_dict(
             [
-                x
-                if "ParameterValue" in x
-                else {
-                    "ParameterKey": x["ParameterKey"],  # type: ignore
-                    "ParameterValue": old_parameters_as_dict[x["ParameterKey"]],  # type: ignore
-                }
+                (
+                    x
+                    if "ParameterValue" in x
+                    else {
+                        "ParameterKey": x["ParameterKey"],  # type: ignore
+                        "ParameterValue": old_parameters_as_dict[
+                            x["ParameterKey"]  # type: ignore
+                        ],
+                    }
+                )
                 for x in parameters
             ]
         )
@@ -1524,12 +1529,14 @@ class Provider(BaseProvider):
         )
         new_parameters_as_dict = self.params_as_dict(
             [
-                x
-                if "ParameterValue" in x
-                else {
-                    "ParameterKey": x["ParameterKey"],  # type: ignore
-                    "ParameterValue": old_params[x["ParameterKey"]],  # type: ignore
-                }
+                (
+                    x
+                    if "ParameterValue" in x
+                    else {
+                        "ParameterKey": x["ParameterKey"],  # type: ignore
+                        "ParameterValue": old_params[x["ParameterKey"]],  # type: ignore
+                    }
+                )
                 for x in parameters
             ]
         )

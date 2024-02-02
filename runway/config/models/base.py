@@ -1,4 +1,5 @@
 """Base models & other objects."""
+
 from __future__ import annotations
 
 import pydantic

@@ -1,4 +1,5 @@
 """Runway Static Site Module parameters."""
+
 from .models import (
     RunwayStaticSiteCustomErrorResponseDataModel,
     RunwayStaticSiteLambdaFunctionAssociationDataModel,

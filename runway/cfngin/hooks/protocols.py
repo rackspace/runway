@@ -4,6 +4,7 @@ For more information on protocols, refer to
 `PEP 544 <https://www.python.org/dev/peps/pep-0544/>`__.
 
 """
+
 from __future__ import annotations
 
 from abc import abstractmethod

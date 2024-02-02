@@ -306,6 +306,7 @@ else:
 
     class Iterator(object):
         def next(self): ...
+
     callable = callable
 get_method_function = operator.attrgetter(_meth_func)
 get_method_self = operator.attrgetter(_meth_self)

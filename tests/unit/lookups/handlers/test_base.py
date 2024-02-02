@@ -1,4 +1,5 @@
 """Tests for lookup handler base class."""
+
 # pylint: disable=duplicate-value
 # pyright: basic
 from __future__ import annotations

@@ -1,4 +1,5 @@
 """Handler for the ``path`` field of a Runway module."""
+
 from __future__ import annotations
 
 import logging

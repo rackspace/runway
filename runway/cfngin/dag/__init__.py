@@ -1,4 +1,5 @@
 """CFNgin directed acyclic graph (DAG) implementation."""
+
 from __future__ import annotations
 
 import collections

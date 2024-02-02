@@ -1,4 +1,5 @@
 """CFNgin blueprint representing raw template module."""
+
 from __future__ import annotations
 
 import hashlib

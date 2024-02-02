@@ -1,4 +1,5 @@
 """Docker logic for the awslambda hook."""
+
 from __future__ import annotations
 
 import logging
@@ -160,9 +161,11 @@ class DockerDependencyInstaller:
             *[
                 # wildcards need to exist outside of the quotes to work
                 # needs to be wrapped in `sh -c` to resolve wildcard
-                f"sh -c 'cp -v \"{extra_file.rstrip('*')}\"* \"{self.DEPENDENCY_DIR}\"'"
-                if extra_file.endswith("*")
-                else f'sh -c \'cp -v "{extra_file}" "{self.DEPENDENCY_DIR}"\''
+                (
+                    f"sh -c 'cp -v \"{extra_file.rstrip('*')}\"* \"{self.DEPENDENCY_DIR}\"'"
+                    if extra_file.endswith("*")
+                    else f'sh -c \'cp -v "{extra_file}" "{self.DEPENDENCY_DIR}"\''
+                )
                 for extra_file in self.options.extra_files
             ],
         ]

@@ -4,6 +4,7 @@
    https://github.com/aws/aws-cli/blob/83b43782dd/awscli/customizations/s3/syncstrategy/__init__.py
 
 """
+
 from .base import BaseSync, MissingFileSync, NeverSync, SizeAndLastModifiedSync
 from .delete import DeleteSync
 from .exact_timestamps import ExactTimestampsSync

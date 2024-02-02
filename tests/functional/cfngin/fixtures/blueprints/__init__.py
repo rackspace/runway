@@ -1,4 +1,5 @@
 """Blueprints."""
+
 from ._bastion import FakeBastion
 from ._broken import Broken
 from ._dummy import Dummy, LongRunningDummy, SecondDummy

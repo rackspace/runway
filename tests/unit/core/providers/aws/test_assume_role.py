@@ -1,4 +1,5 @@
 """Test runway.core.providers.aws._assume_role."""
+
 # pyright: basic
 from __future__ import annotations
 

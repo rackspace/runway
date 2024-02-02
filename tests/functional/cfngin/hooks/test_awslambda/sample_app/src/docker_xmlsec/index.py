@@ -1,4 +1,5 @@
 """Lambda Function."""
+
 # pylint: disable=broad-except,import-error,import-outside-toplevel,unused-argument
 from __future__ import annotations
 
