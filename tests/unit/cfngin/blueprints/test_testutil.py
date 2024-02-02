@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.blueprints.testutil."""
+
 # pyright: basic
 import unittest
 

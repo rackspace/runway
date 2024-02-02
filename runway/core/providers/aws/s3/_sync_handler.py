@@ -1,4 +1,5 @@
 """S3 sync handler."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, List, Optional, Union

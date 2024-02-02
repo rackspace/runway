@@ -1,4 +1,5 @@
 """CFNgin deploy action."""
+
 from __future__ import annotations
 
 import logging

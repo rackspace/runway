@@ -1,4 +1,5 @@
 """CFNgin hook for building static website."""
+
 from __future__ import annotations
 
 import logging

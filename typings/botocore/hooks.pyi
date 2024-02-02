@@ -55,6 +55,7 @@ class BaseEventHooks(object):
 
         """
         ...
+
     def register(self, event_name, handler, unique_id=..., unique_id_uses_count=...):
         """Register an event handler for a given event.
 
@@ -70,6 +71,7 @@ class BaseEventHooks(object):
 
         """
         ...
+
     def register_first(
         self, event_name, handler, unique_id=..., unique_id_uses_count=...
     ):
@@ -81,6 +83,7 @@ class BaseEventHooks(object):
 
         """
         ...
+
     def register_last(
         self, event_name, handler, unique_id=..., unique_id_uses_count=...
     ):
@@ -91,6 +94,7 @@ class BaseEventHooks(object):
 
         """
         ...
+
     def unregister(
         self, event_name, handler=..., unique_id=..., unique_id_uses_count=...
     ):
@@ -117,6 +121,7 @@ class HierarchicalEmitter(BaseEventHooks):
                  handlers.
         """
         ...
+
     def emit_until_response(self, event_name, **kwargs):
         """
         Emit an event by name with arguments passed as keyword args,
@@ -131,6 +136,7 @@ class HierarchicalEmitter(BaseEventHooks):
                  is not ``None``, otherwise (``None``, ``None``).
         """
         ...
+
     def unregister(
         self, event_name, handler=..., unique_id=..., unique_id_uses_count=...
     ): ...
@@ -185,6 +191,7 @@ class _PrefixTrie(object):
         value is appended to the list for the key.
         """
         ...
+
     def prefix_search(self, key):
         """Collect all items that are prefixes of key.
 
@@ -194,6 +201,7 @@ class _PrefixTrie(object):
 
         """
         ...
+
     def remove_item(self, key, value):
         """Remove an item associated with a key.
 
@@ -203,4 +211,5 @@ class _PrefixTrie(object):
 
         """
         ...
+
     def __copy__(self): ...

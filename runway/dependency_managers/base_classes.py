@@ -1,4 +1,5 @@
 """Base classes for dependency managers."""
+
 from __future__ import annotations
 
 from pathlib import Path

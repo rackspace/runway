@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.hook_data."""
+
 # pylint: disable=protected-access
 # pyright: basic
 from __future__ import annotations

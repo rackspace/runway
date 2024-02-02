@@ -1,4 +1,5 @@
 """``runway gen-sample cdk-tsc`` command."""
+
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast

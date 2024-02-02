@@ -5,6 +5,7 @@ query string parameter and cookie headers matches expectations. If it doesn't
 then inform the user of a bad request, otherwise retrieve the Cognito tokens to
 add to the cookie headers.
 """
+
 # pylint: disable=consider-using-f-string
 import base64
 import hmac

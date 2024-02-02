@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.actions.destroy."""
+
 # pylint: disable=protected-access,unused-argument
 # pyright: basic
 from __future__ import annotations

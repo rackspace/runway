@@ -1,4 +1,5 @@
 """CFNgin hook for syncing static website to S3 bucket."""
+
 from __future__ import annotations
 
 import hashlib

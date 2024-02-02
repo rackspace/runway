@@ -3,6 +3,7 @@
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 """
+
 # pylint: skip-file
 import os
 from pathlib import Path

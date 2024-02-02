@@ -1,4 +1,5 @@
 """CFNgin hook for cleaning up resources prior to CFN stack deletion."""
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """CFNgin UI manipulation."""
+
 from __future__ import annotations
 
 import logging

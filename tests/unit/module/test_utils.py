@@ -1,4 +1,5 @@
 """Test runway.module.utils."""
+
 # pylint: disable=unused-argument
 # pyright: basic
 from __future__ import annotations

@@ -1,4 +1,5 @@
 """User Pool Client Domain Updater."""
+
 from __future__ import annotations
 
 import logging

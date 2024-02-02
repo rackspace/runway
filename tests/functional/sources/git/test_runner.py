@@ -1,4 +1,5 @@
 """Test Runway module from git repo."""
+
 # pylint: disable=redefined-outer-name
 from __future__ import annotations
 

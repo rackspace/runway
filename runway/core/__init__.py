@@ -1,4 +1,5 @@
 """Core Runway API."""
+
 from __future__ import annotations
 
 import logging as _logging
@@ -73,9 +74,11 @@ class Runway:
         """
         self.__run_action(
             "destroy",
-            deployments
-            if deployments is not None
-            else self.reverse_deployments(self.deployments),
+            (
+                deployments
+                if deployments is not None
+                else self.reverse_deployments(self.deployments)
+            ),
         )
         if not deployments:
             # return config attribute to original state

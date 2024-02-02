@@ -1,4 +1,5 @@
 """CFNgin hooks for AWS Certificate Manager."""
+
 from __future__ import annotations
 
 import logging

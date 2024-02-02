@@ -45,12 +45,14 @@ class BaseEndpointResolver(object):
             - ...: Other keys may be included as well based on the metadata
         """
         ...
+
     def get_available_partitions(self):
         """Lists the partitions available to the endpoint resolver.
 
         :return: Returns a list of partition names (e.g., ["aws", "aws-cn"]).
         """
         ...
+
     def get_available_endpoints(
         self, service_name, partition_name=..., allow_non_regional=...
     ):
@@ -80,6 +82,7 @@ class EndpointResolver(BaseEndpointResolver):
         :param endpoint_data: A dict of partition data.
         """
         ...
+
     def get_available_partitions(self): ...
     def get_available_endpoints(
         self, service_name, partition_name=..., allow_non_regional=...

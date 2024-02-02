@@ -1,4 +1,5 @@
 """Hook for creating an AWS Lambda Function using Python runtime."""
+
 # pylint errors are python3.7 only
 # pylint: disable=inherit-non-class,no-value-for-parameter
 from __future__ import annotations

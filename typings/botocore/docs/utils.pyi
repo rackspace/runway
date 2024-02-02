@@ -87,6 +87,7 @@ class HideParamFromOperations(object):
         :param operation_names: Operation names to modify.
         """
         ...
+
     def hide_param(self, event_name, section, **kwargs): ...
 
 class AppendParamDocumentation(object):

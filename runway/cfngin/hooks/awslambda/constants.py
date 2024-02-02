@@ -1,4 +1,5 @@
 """Constant values."""
+
 AWS_SAM_BUILD_IMAGE_PREFIX = "public.ecr.aws/sam/build-"
 """Prefix for build image registries."""
 

@@ -1,4 +1,5 @@
 """Run a simple test of CFNgin deploy and destroy."""
+
 # pylint: disable=redefined-outer-name
 from __future__ import annotations
 

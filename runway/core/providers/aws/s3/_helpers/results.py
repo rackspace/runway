@@ -4,6 +4,7 @@
    https://github.com/aws/aws-cli/blob/83b43782dd/awscli/customizations/s3/results.py
 
 """
+
 from __future__ import annotations
 
 import logging
@@ -391,9 +392,9 @@ class ResultRecorder(BaseResultHandler):
         if self.start_time is None:
             self.start_time = time.time()
         total_transfer_size = result.total_transfer_size
-        self._ongoing_total_sizes[
-            self._get_ongoing_dict_key(result)
-        ] = total_transfer_size
+        self._ongoing_total_sizes[self._get_ongoing_dict_key(result)] = (
+            total_transfer_size
+        )
         # The total transfer size can be None if we do not know the size
         # immediately so do not add to the total right away.
         if total_transfer_size:
@@ -482,9 +483,9 @@ class ResultPrinter(BaseResultHandler):
     )
     SUCCESS_FORMAT: ClassVar[str] = "{transfer_type}: {transfer_location}"
     DRY_RUN_FORMAT: ClassVar[str] = "(dryrun) " + SUCCESS_FORMAT
-    FAILURE_FORMAT: ClassVar[
-        str
-    ] = "{transfer_type} failed: {transfer_location} {exception}"
+    FAILURE_FORMAT: ClassVar[str] = (
+        "{transfer_type} failed: {transfer_location} {exception}"
+    )
     WARNING_FORMAT: ClassVar[str] = "{message}"
     ERROR_FORMAT: ClassVar[str] = "fatal error: {exception}"
     CTRL_C_MSG: ClassVar[str] = "cancelled: ctrl-c received"

@@ -1,4 +1,5 @@
 """AWS Route 53 hook."""
+
 from __future__ import annotations
 
 import logging

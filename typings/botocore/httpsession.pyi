@@ -30,9 +30,11 @@ class ProxyConfiguration(object):
     def proxy_url_for(self, url):
         """Retrieves the corresponding proxy url for a given url."""
         ...
+
     def proxy_headers_for(self, proxy_url):
         """Retrieves the corresponding proxy headers for a given proxy url."""
         ...
+
     @property
     def settings(self): ...
 

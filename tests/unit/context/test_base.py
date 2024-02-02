@@ -1,4 +1,5 @@
 """Test runway.context._base."""
+
 # pylint: disable=redefined-outer-name
 # pyright: basic
 from __future__ import annotations

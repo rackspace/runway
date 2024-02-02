@@ -1,4 +1,5 @@
 """Shared jwt functionality for the Auth@Edge Lambda suite."""
+
 import base64
 import codecs
 import json

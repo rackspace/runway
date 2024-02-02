@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.dag."""
+
 # pyright: basic
 import threading
 from typing import Any, List

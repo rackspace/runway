@@ -1,4 +1,5 @@
 """Utility functions."""
+
 from __future__ import annotations
 
 import datetime
@@ -606,15 +607,13 @@ def load_object_from_string(
 @overload
 def merge_dicts(
     dict1: Dict[Any, Any], dict2: Dict[Any, Any], deep_merge: bool = ...
-) -> Dict[str, Any]:
-    ...
+) -> Dict[str, Any]: ...
 
 
 @overload
 def merge_dicts(
     dict1: List[Any], dict2: List[Any], deep_merge: bool = ...
-) -> List[Any]:
-    ...
+) -> List[Any]: ...
 
 
 def merge_dicts(

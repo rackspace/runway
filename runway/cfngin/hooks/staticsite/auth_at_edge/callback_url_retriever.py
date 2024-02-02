@@ -4,6 +4,7 @@ Dependency pre-hook responsible for ensuring correct
 callback urls are retrieved or a temporary one is used in it's place.
 
 """
+
 from __future__ import annotations
 
 import logging

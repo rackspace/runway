@@ -15,6 +15,7 @@ class BaseClientExceptions(object):
             error code.
         """
         ...
+
     def from_code(self, error_code):
         """Retrieves the error class based on the error code
 
@@ -30,6 +31,7 @@ class BaseClientExceptions(object):
             modeled exceptions then return a generic ClientError.
         """
         ...
+
     def __getattr__(self, name): ...
 
 class ClientExceptionsFactory(object):

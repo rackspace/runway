@@ -1,4 +1,5 @@
 """Runway config deployment definition."""
+
 from __future__ import annotations
 
 import logging
@@ -155,8 +156,9 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
     @overload
     @classmethod
-    def parse_obj(cls, obj: List[Dict[str, Any]]) -> List[RunwayDeploymentDefinition]:
-        ...
+    def parse_obj(
+        cls, obj: List[Dict[str, Any]]
+    ) -> List[RunwayDeploymentDefinition]: ...
 
     @overload
     @classmethod
@@ -165,15 +167,13 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         obj: Union[
             List[ConfigProperty], Set[ConfigProperty], Tuple[ConfigProperty, ...]
         ],
-    ) -> List[RunwayDeploymentDefinition]:
-        ...
+    ) -> List[RunwayDeploymentDefinition]: ...
 
     @overload
     @classmethod
     def parse_obj(
         cls, obj: Union[Dict[str, Any], ConfigProperty]
-    ) -> RunwayDeploymentDefinition:
-        ...
+    ) -> RunwayDeploymentDefinition: ...
 
     @classmethod
     def parse_obj(  # type: ignore

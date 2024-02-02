@@ -1,4 +1,5 @@
 """Hooks for AWS Lambda."""
+
 from . import (
     base_classes,
     constants,

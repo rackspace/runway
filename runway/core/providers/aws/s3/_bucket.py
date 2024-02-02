@@ -1,4 +1,5 @@
 """AWS S3 bucket."""
+
 from __future__ import annotations
 
 import json

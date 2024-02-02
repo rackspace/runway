@@ -1,4 +1,5 @@
 """Test runway.cfngin.hooks.staticsite.utils."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast

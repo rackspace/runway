@@ -4,6 +4,7 @@
    https://github.com/aws/aws-cli/blob/83b43782dd/awscli/customizations/s3/fileformat.py
 
 """
+
 from __future__ import annotations
 
 import os

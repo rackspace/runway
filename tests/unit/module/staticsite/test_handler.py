@@ -1,4 +1,5 @@
 """Test runway.module.staticsite.handler."""
+
 # pylint: disable=protected-access
 # pyright: basic
 from __future__ import annotations

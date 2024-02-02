@@ -4,6 +4,7 @@ Allows us to specify specific remote sourced resources for out application
 (Git, S3, ect.)
 
 """
+
 import logging
 from pathlib import Path
 from typing import Any, Union

@@ -1,4 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.deployment_package."""
+
 # pylint: disable=protected-access,redefined-outer-name,unused-argument
 # pylint: disable=too-many-lines
 from __future__ import annotations
@@ -745,9 +746,11 @@ class TestDeploymentPackageS3Object:
         mocker.patch.object(
             DeploymentPackageS3Object,
             "object_tags",
-            {DeploymentPackageS3Object.META_TAGS["compatible_architectures"]: value}
-            if value
-            else {},
+            (
+                {DeploymentPackageS3Object.META_TAGS["compatible_architectures"]: value}
+                if value
+                else {}
+            ),
         )
         assert DeploymentPackageS3Object(project).compatible_architectures == (
             value.split(", ") if value else None
@@ -761,9 +764,11 @@ class TestDeploymentPackageS3Object:
         mocker.patch.object(
             DeploymentPackageS3Object,
             "object_tags",
-            {DeploymentPackageS3Object.META_TAGS["compatible_runtimes"]: value}
-            if value
-            else {},
+            (
+                {DeploymentPackageS3Object.META_TAGS["compatible_runtimes"]: value}
+                if value
+                else {}
+            ),
         )
         assert DeploymentPackageS3Object(project).compatible_runtimes == (
             value.split(", ") if value else None

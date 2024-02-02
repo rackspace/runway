@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.lookups.registry."""
+
 # pyright: basic
 from __future__ import annotations
 

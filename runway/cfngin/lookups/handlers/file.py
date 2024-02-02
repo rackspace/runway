@@ -1,4 +1,5 @@
 """File lookup."""
+
 # pylint: disable=arguments-differ,no-self-argument
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
@@ -112,13 +113,11 @@ def _parameterize_string(raw: str) -> GenericHelperFn:
 
 
 @overload
-def parameterized_codec(raw: str, b64: Literal[False] = ...) -> GenericHelperFn:
-    ...
+def parameterized_codec(raw: str, b64: Literal[False] = ...) -> GenericHelperFn: ...
 
 
 @overload
-def parameterized_codec(raw: str, b64: Literal[True] = ...) -> Base64:
-    ...
+def parameterized_codec(raw: str, b64: Literal[True] = ...) -> Base64: ...
 
 
 def parameterized_codec(raw: str, b64: bool = False) -> Any:
@@ -141,18 +140,15 @@ def parameterized_codec(raw: str, b64: bool = False) -> Any:
 
 
 @overload
-def _parameterize_obj(obj: Union[bytes, str]) -> GenericHelperFn:
-    ...
+def _parameterize_obj(obj: Union[bytes, str]) -> GenericHelperFn: ...
 
 
 @overload
-def _parameterize_obj(obj: Mapping[str, Any]) -> ParameterizedObjectReturnTypeDef:
-    ...
+def _parameterize_obj(obj: Mapping[str, Any]) -> ParameterizedObjectReturnTypeDef: ...
 
 
 @overload
-def _parameterize_obj(obj: List[Any]) -> ParameterizedObjectReturnTypeDef:
-    ...
+def _parameterize_obj(obj: List[Any]) -> ParameterizedObjectReturnTypeDef: ...
 
 
 def _parameterize_obj(

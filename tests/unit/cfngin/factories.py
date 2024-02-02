@@ -1,4 +1,5 @@
 """Factories for tests."""
+
 # pylint: disable=unused-argument
 # pyright: basic
 from __future__ import annotations

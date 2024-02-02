@@ -44,9 +44,11 @@ class TestKBEnvManager:
         obj = KBEnvManager(tmp_path)
         assert obj.install(version_requested) == str(obj.bin)
         mock_download_kb_release.assert_called_once_with(
-            version_requested
-            if version_requested.startswith("v")
-            else f"v{version_requested}",
+            (
+                version_requested
+                if version_requested.startswith("v")
+                else f"v{version_requested}"
+            ),
             obj.versions_dir,
         )
 

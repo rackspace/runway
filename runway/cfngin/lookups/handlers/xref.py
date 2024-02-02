@@ -1,4 +1,5 @@
 """Handler for fetching outputs from fully qualified stacks."""
+
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 

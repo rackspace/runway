@@ -1,4 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.source_code."""
+
 # pylint: disable=protected-access, unnecessary-dunder-call
 from __future__ import annotations
 

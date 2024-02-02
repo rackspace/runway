@@ -1,4 +1,5 @@
 """``runway gen-sample cfngin`` command."""
+
 import logging
 import shutil
 from pathlib import Path

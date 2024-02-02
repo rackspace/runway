@@ -1,4 +1,5 @@
 """K8s (kustomize) module."""
+
 from __future__ import annotations
 
 import logging

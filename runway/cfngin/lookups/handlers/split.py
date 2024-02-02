@@ -1,4 +1,5 @@
 """Split lookup."""
+
 # pyright: reportIncompatibleMethodOverride=none
 from typing import Any, List
 

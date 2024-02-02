@@ -1,4 +1,5 @@
 """Tests for runway.variables."""
+
 # pylint: disable=expression-not-assigned,protected-access,unused-argument
 # pylint: disable=too-many-lines
 # pyright: basic

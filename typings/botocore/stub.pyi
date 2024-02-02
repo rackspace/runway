@@ -141,6 +141,7 @@ class Stubber(object):
         :param client: The client to add your stubs to.
         """
         ...
+
     def __enter__(self) -> Stubber: ...
     def __exit__(self, exception_type, exception_value, traceback): ...
     def activate(self):
@@ -148,11 +149,13 @@ class Stubber(object):
         Activates the stubber on the client
         """
         ...
+
     def deactivate(self):
         """
         Deactivates the stubber on the client
         """
         ...
+
     def add_response(self, method, service_response, expected_params=...):
         """
         Adds a service response to the response queue. This will be validated
@@ -177,6 +180,7 @@ class Stubber(object):
             in validation. stub.ANY is only valid for top level params.
         """
         ...
+
     def add_client_error(
         self,
         method,
@@ -221,6 +225,7 @@ class Stubber(object):
 
         """
         ...
+
     def assert_no_pending_responses(self):
         """
         Asserts that all expected calls were made.

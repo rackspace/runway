@@ -1,4 +1,5 @@
 """Class mixins."""
+
 from __future__ import annotations
 
 import logging
@@ -110,8 +111,7 @@ class CliInterfaceMixin:
         *,
         env: Optional[Dict[str, str]] = ...,
         suppress_output: Literal[True] = ...,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
     def _run_command(
@@ -120,8 +120,7 @@ class CliInterfaceMixin:
         *,
         env: Optional[Dict[str, str]] = ...,
         suppress_output: Literal[False] = ...,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def _run_command(
         self,

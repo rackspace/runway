@@ -4,6 +4,7 @@
    https://github.com/aws/aws-cli/blob/83b43782dd/awscli/customizations/s3/fileinfobuilder.py
 
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional
@@ -61,7 +62,9 @@ class FileInfoBuilder:
         delete_enabled = self._parameters.delete if self._parameters else False
         return FileInfo(
             **file_base.dict(),
-            **{"client": self._source_client, "source_client": self._client}
-            if file_base.operation_name == "delete" and delete_enabled
-            else {"client": self._client, "source_client": self._source_client},
+            **(
+                {"client": self._source_client, "source_client": self._client}
+                if file_base.operation_name == "delete" and delete_enabled
+                else {"client": self._client, "source_client": self._source_client}
+            ),
         )

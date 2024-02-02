@@ -1,4 +1,5 @@
 """Runway constants."""
+
 from typing import Any, Dict
 
 BOTO3_CREDENTIAL_CACHE: Dict[str, Any] = {}

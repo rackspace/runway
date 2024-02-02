@@ -1,4 +1,5 @@
 """Mock hook."""
+
 from typing import Any, Dict
 
 

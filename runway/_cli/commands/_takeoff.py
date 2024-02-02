@@ -1,4 +1,5 @@
 """``runway takeoff`` command."""
+
 # docs: file://./../../../docs/source/commands.rst
 import logging
 from typing import TYPE_CHECKING, Any, cast

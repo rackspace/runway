@@ -1,4 +1,5 @@
 """CFNgin lookup registry."""
+
 from __future__ import annotations
 
 import logging

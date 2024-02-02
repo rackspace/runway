@@ -42,6 +42,7 @@ class Shape(object):
 
         """
         ...
+
     @CachedProperty
     def serialization(self):
         """Serialization information about the shape.
@@ -66,6 +67,7 @@ class Shape(object):
 
         """
         ...
+
     @CachedProperty
     def metadata(self):
         """Metadata about the shape.
@@ -84,6 +86,7 @@ class Shape(object):
 
         """
         ...
+
     @CachedProperty
     def required_members(self):
         """A list of members that are required.
@@ -94,6 +97,7 @@ class Shape(object):
 
         """
         ...
+
     def __repr__(self): ...
     @property
     def event_stream_name(self): ...
@@ -149,6 +153,7 @@ class ServiceModel(object):
 
         """
         ...
+
     def shape_for(self, shape_name, member_traits=...): ...
     def shape_for_error_code(self, error_code): ...
     def resolve_shape_ref(self, shape_ref): ...
@@ -175,6 +180,7 @@ class ServiceModel(object):
 
         """
         ...
+
     @CachedProperty
     def service_id(self): ...
     @CachedProperty
@@ -185,6 +191,7 @@ class ServiceModel(object):
         value will be the endpoint prefix defined in the model.
         """
         ...
+
     @CachedProperty
     def api_version(self): ...
     @CachedProperty
@@ -231,6 +238,7 @@ class OperationModel(object):
 
         """
         ...
+
     @CachedProperty
     def name(self): ...
     @property
@@ -246,6 +254,7 @@ class OperationModel(object):
 
         """
         ...
+
     @property
     def service_model(self): ...
     @CachedProperty
@@ -346,6 +355,7 @@ class DenormalizedStructureBuilder(object):
 
         """
         ...
+
     def build_model(self):
         """Build the model based on the provided members.
 

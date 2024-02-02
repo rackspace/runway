@@ -166,6 +166,7 @@ class ClientMethodAlias(object):
             the client.
         """
         ...
+
     def __call__(self, client, **kwargs): ...
 
 class HeaderToHostHoister(object):

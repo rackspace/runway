@@ -1,4 +1,5 @@
 """CFNgin context."""
+
 from __future__ import annotations
 
 import collections.abc
@@ -306,9 +307,11 @@ class CfnginContext(BaseContext):
         return (
             self.config.tags
             if self.config.tags is not None
-            else {"cfngin_namespace": self.config.namespace}
-            if self.config.namespace
-            else {}
+            else (
+                {"cfngin_namespace": self.config.namespace}
+                if self.config.namespace
+                else {}
+            )
         )
 
     @cached_property

@@ -1,4 +1,5 @@
 """Execute the AWS CLI update-kubeconfig to generate your kubectl config."""
+
 from __future__ import annotations
 
 import logging

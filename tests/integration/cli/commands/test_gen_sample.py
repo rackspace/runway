@@ -1,4 +1,5 @@
 """Test ``runway gen-sample`` command."""
+
 from __future__ import annotations
 
 import logging
