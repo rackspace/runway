@@ -1,4 +1,5 @@
 """CFNgin session caching."""
+
 import logging
 from typing import Optional
 

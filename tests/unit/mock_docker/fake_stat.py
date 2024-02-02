@@ -1,4 +1,5 @@
 """Stats for fake Docker API."""
+
 # cspell:disable
 from typing import Any, Dict
 

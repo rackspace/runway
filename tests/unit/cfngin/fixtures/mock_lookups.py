@@ -1,4 +1,5 @@
 """Mock lookup."""
+
 from typing import Any
 
 TYPE_NAME = "mock"

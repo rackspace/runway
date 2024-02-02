@@ -13,32 +13,38 @@ class ReSTDocument(object):
         Write content into the document.
         """
         ...
+
     def writeln(self, content):
         """
         Write content on a newline.
         """
         ...
+
     def peek_write(self):
         """
         Returns the last content written to the document without
         removing it from the stack.
         """
         ...
+
     def pop_write(self):
         """
         Removes and returns the last content written to the stack.
         """
         ...
+
     def push_write(self, s):
         """
         Places new content on the stack.
         """
         ...
+
     def getvalue(self):
         """
         Returns the current content of the document as a string.
         """
         ...
+
     def translate_words(self, words): ...
     def handle_data(self, data): ...
     def include_doc_string(self, doc_string): ...
@@ -59,10 +65,12 @@ class DocumentStructure(ReSTDocument):
             are only stored per section not the entire structure.
         """
         ...
+
     @property
     def name(self):
         """The name of the document structure"""
         ...
+
     @property
     def path(self):
         """
@@ -70,6 +78,7 @@ class DocumentStructure(ReSTDocument):
         overlying document structure.
         """
         ...
+
     @path.setter
     def path(self, value): ...
     @property
@@ -92,12 +101,15 @@ class DocumentStructure(ReSTDocument):
             to the document structure it was instantiated from.
         """
         ...
+
     def get_section(self, name):
         """Retrieve a section"""
         ...
+
     def delete_section(self, name):
         """Delete a section"""
         ...
+
     def flush_structure(self):
         """Flushes a doc structure to a ReSTructed string
 
@@ -105,6 +117,7 @@ class DocumentStructure(ReSTDocument):
         subsections' values are added to the string as they are visited.
         """
         ...
+
     def getvalue(self): ...
     def remove_all_sections(self): ...
     def clear_text(self): ...

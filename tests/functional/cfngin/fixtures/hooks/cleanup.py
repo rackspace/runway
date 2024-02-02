@@ -1,4 +1,5 @@
 """Cleanup S3 Bucket."""
+
 from __future__ import annotations
 
 import logging

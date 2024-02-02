@@ -1,4 +1,5 @@
 """``runway new`` command."""
+
 # docs: file://./../../../docs/source/commands.rst
 import locale
 import logging

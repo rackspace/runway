@@ -1,4 +1,5 @@
 """Uninstall kubectl version(s) that were installed by Runway and/or kbenv."""
+
 # docs: file://./../../../../docs/source/commands.rst
 import logging
 from typing import TYPE_CHECKING, Any, Optional, cast

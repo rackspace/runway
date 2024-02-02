@@ -1,4 +1,5 @@
 """Run a simple test of `runway plan` for CFNgin."""
+
 # pylint: disable=redefined-outer-name,unused-argument
 from __future__ import annotations
 

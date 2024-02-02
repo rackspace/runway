@@ -1,4 +1,5 @@
 """CFNgin info action."""
+
 import logging
 from typing import Any
 

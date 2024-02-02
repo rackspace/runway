@@ -1,4 +1,5 @@
 """Retrieve a variable from the variables file or definition."""
+
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 

@@ -19,6 +19,7 @@ class RetryQuota(object):
 
         """
         ...
+
     def release(self, capacity_amount):
         """Release capacity back to the retry quota.
 
@@ -27,5 +28,6 @@ class RetryQuota(object):
 
         """
         ...
+
     @property
     def available_capacity(self): ...

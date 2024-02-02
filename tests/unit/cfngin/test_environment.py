@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.environment."""
+
 # pyright: basic, reportUnnecessaryIsInstance=none
 import unittest
 

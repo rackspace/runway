@@ -1,4 +1,5 @@
 """Utility functions for website build/upload."""
+
 from __future__ import annotations
 
 import hashlib

@@ -1,4 +1,5 @@
 """Response data models."""
+
 from typing import List, Optional
 
 from pydantic import Extra

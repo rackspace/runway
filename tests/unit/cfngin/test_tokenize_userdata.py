@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.tokenize_userdata."""
+
 # pyright: basic
 import unittest
 

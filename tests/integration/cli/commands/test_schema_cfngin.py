@@ -1,4 +1,5 @@
 """Test ``runway schema cfngin`` command."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

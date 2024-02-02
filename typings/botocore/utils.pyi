@@ -487,6 +487,7 @@ class S3RegionRedirector(object):
         redirect the request.
         """
         ...
+
     def get_bucket_region(self, bucket, response):
         """
         There are multiple potential sources for the new region to redirect to,
@@ -500,6 +501,7 @@ class S3RegionRedirector(object):
             due to incorrect region configuration.
         """
         ...
+
     def set_request_url(self, params, context, **kwargs): ...
     def redirect_from_cache(self, params, context, **kwargs):
         """
@@ -573,6 +575,7 @@ class ContainerMetadataFetcher(object):
 
         """
         ...
+
     def retrieve_uri(self, relative_uri):
         """Retrieve JSON metadata from ECS metadata.
 
@@ -583,6 +586,7 @@ class ContainerMetadataFetcher(object):
 
         """
         ...
+
     def full_url(self, relative_uri): ...
 
 def get_environ_proxies(url): ...

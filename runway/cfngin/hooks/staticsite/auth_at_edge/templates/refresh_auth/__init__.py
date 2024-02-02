@@ -1,4 +1,5 @@
 """Refresh authorization token for new credentials."""
+
 import logging
 import traceback
 from urllib.parse import parse_qs

@@ -21,6 +21,7 @@ class BaseParamsDocumenter(ShapeDocumenter):
             documentation.
         """
         ...
+
     def document_recursive_shape(self, section, shape, **kwargs): ...
     def document_shape_default(
         self, section, shape, history, include=..., exclude=..., **kwargs

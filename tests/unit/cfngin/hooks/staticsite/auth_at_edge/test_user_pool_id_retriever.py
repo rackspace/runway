@@ -1,4 +1,5 @@
 """Test runway.cfngin.hooks.staticsite.auth_at_edge.user_pool_id_retriever."""
+
 from __future__ import annotations
 
 import pytest

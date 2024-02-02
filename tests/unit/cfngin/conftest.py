@@ -1,4 +1,5 @@
 """Pytest fixtures and plugins."""
+
 # pyright: basic
 import os
 from pathlib import Path

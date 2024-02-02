@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.hooks.route53."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

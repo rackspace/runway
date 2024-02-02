@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.hooks.acm."""
+
 # pylint: disable=protected-access,unused-argument
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 # pyright: reportUnknownLambdaType=none
@@ -638,9 +639,11 @@ class TestCertificate:
         monkeypatch.setattr(
             cert,
             "get_validation_record",
-            lambda x, status: "get_validation_record"
-            if x == cert_arn and status == "SUCCESS"
-            else ValueError,
+            lambda x, status: (
+                "get_validation_record"
+                if x == cert_arn and status == "SUCCESS"
+                else ValueError
+            ),
         )
         monkeypatch.setattr(
             cert,

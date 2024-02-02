@@ -1,4 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.xref."""
+
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 import unittest
 

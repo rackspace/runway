@@ -1,4 +1,5 @@
 """CFNgin plan, plan components, and functions for interacting with a plan."""
+
 from __future__ import annotations
 
 import json
@@ -50,13 +51,11 @@ _T = TypeVar("_T")
 
 
 @overload
-def json_serial(obj: Set[_T]) -> List[_T]:
-    ...
+def json_serial(obj: Set[_T]) -> List[_T]: ...
 
 
 @overload
-def json_serial(obj: Union[Dict[Any, Any], int, List[Any], str]) -> NoReturn:
-    ...
+def json_serial(obj: Union[Dict[Any, Any], int, List[Any], str]) -> NoReturn: ...
 
 
 def json_serial(obj: Union[Set[Any], Any]) -> Any:

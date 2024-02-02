@@ -1,4 +1,5 @@
 """Base module for environment managers."""
+
 from __future__ import annotations
 
 import logging

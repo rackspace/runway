@@ -4,6 +4,7 @@ The below tests only cover the CLI.
 Runway's core logic has been mocked out to test on separately from the CLI.
 
 """
+
 from __future__ import annotations
 
 import logging

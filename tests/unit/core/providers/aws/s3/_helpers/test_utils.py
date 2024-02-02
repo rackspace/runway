@@ -1,4 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.utils."""
+
 # pylint: disable=too-many-lines
 from __future__ import annotations
 
@@ -459,9 +460,9 @@ class TestProvideLastModifiedTimeSubscriber:
         2016, 1, 18, 7, 0, 0, tzinfo=tzlocal()
     )
     result_queue: ClassVar["Queue[Any]"] = Queue()
-    subscriber: ClassVar[
-        ProvideLastModifiedTimeSubscriber
-    ] = ProvideLastModifiedTimeSubscriber(desired_utime, result_queue)
+    subscriber: ClassVar[ProvideLastModifiedTimeSubscriber] = (
+        ProvideLastModifiedTimeSubscriber(desired_utime, result_queue)
+    )
 
     def test_on_done_handle_exception(
         self, mocker: MockerFixture, tmp_path: Path

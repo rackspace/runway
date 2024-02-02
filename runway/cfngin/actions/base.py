@@ -1,4 +1,5 @@
 """CFNgin base action."""
+
 from __future__ import annotations
 
 import logging

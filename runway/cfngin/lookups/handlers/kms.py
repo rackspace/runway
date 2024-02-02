@@ -1,4 +1,5 @@
 """AWS KMS lookup."""
+
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 

@@ -1,4 +1,5 @@
 """Blueprints."""
+
 from .admin_role import AdminRole
 from .admin_user import AdminUser
 from .cfngin_bucket import CfnginBucket

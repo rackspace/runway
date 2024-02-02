@@ -1,4 +1,5 @@
 """Runway logging."""
+
 import logging
 from enum import IntEnum
 from typing import Any, MutableMapping, Tuple, Union

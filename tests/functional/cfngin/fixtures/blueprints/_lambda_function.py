@@ -1,4 +1,5 @@
 """Blueprint for creating a Lambda Function."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional
@@ -122,11 +123,11 @@ class LambdaFunction(Blueprint):
     def lambda_function(self) -> awslambda.Function:
         """AWS Lambda Function."""
         optional_kwargs: Dict[str, Any] = {
-            "Environment": awslambda.Environment(
-                Variables=self.variables["EnvironmentVariables"]
-            )
-            if self.variables["EnvironmentVariables"]
-            else {},
+            "Environment": (
+                awslambda.Environment(Variables=self.variables["EnvironmentVariables"])
+                if self.variables["EnvironmentVariables"]
+                else {}
+            ),
             "Layers": [self.lambda_layer.ref()] if self.lambda_layer else [],
         }
         func = awslambda.Function(

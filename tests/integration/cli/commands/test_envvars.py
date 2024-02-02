@@ -1,4 +1,5 @@
 """Test ``runway envvars``."""
+
 from __future__ import annotations
 
 import logging

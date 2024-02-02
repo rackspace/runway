@@ -1,4 +1,5 @@
 """Abstraction for the module 'type' value in a a Runway configuration."""
+
 from __future__ import annotations
 
 import logging

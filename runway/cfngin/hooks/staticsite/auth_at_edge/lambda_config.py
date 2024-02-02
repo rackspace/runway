@@ -1,4 +1,5 @@
 """CFNgin prehook responsible for creation of Lambda@Edge functions."""
+
 from __future__ import annotations
 
 import logging

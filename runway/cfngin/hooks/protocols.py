@@ -4,6 +4,7 @@ For more information on protocols, refer to
 `PEP 544 <https://www.python.org/dev/peps/pep-0544/>`__.
 
 """
+
 from __future__ import annotations
 
 from abc import abstractmethod
@@ -29,13 +30,11 @@ class CfnginHookArgsProtocol(Protocol):
 
     @overload
     @abstractmethod
-    def get(self, __name: str) -> Optional[Any]:
-        ...
+    def get(self, __name: str) -> Optional[Any]: ...
 
     @overload
     @abstractmethod
-    def get(self, __name: str, __default: Union[Any, _T]) -> Union[Any, _T]:
-        ...
+    def get(self, __name: str, __default: Union[Any, _T]) -> Union[Any, _T]: ...
 
     @abstractmethod
     def get(self, __name: str, __default: Union[Any, _T] = None) -> Union[Any, _T]:

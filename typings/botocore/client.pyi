@@ -100,6 +100,7 @@ class BaseClient(object):
 
         """
         ...
+
     def can_paginate(self, operation_name):
         """Check if an operation can be paginated.
 
@@ -116,6 +117,7 @@ class BaseClient(object):
 
         """
         ...
+
     def get_waiter(self, waiter_name):
         """Returns an object that can wait for some condition.
 
@@ -127,10 +129,12 @@ class BaseClient(object):
         :rtype: botocore.waiter.Waiter
         """
         ...
+
     @CachedProperty
     def waiter_names(self):
         """Returns a list of all available waiters."""
         ...
+
     @property
     def exceptions(self): ...
 

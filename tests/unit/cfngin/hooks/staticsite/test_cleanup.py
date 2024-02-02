@@ -1,4 +1,5 @@
 """Test runway.cfngin.hooks.staticsite.cleanup."""
+
 from __future__ import annotations
 
 from datetime import datetime

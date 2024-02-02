@@ -89,6 +89,7 @@ class RequestSigner(object):
         :param signing_name: The name to use for the service when signing.
         """
         ...
+
     def get_auth_instance(
         self, signing_name, region_name, signature_version=..., **kwargs
     ):
@@ -180,6 +181,7 @@ class CloudFrontSigner(object):
                The hash algorithm needed by CloudFront is SHA-1.
         """
         ...
+
     def generate_presigned_url(self, url, date_less_than=..., policy=...):
         """Creates a signed CloudFront URL based on given parameters.
 
@@ -196,6 +198,7 @@ class CloudFrontSigner(object):
         :return: The signed URL.
         """
         ...
+
     def build_policy(
         self, resource, date_less_than, date_greater_than=..., ip_address=...
     ):

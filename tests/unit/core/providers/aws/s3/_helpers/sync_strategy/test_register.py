@@ -1,4 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.sync_strategy.register."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

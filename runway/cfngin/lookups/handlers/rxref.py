@@ -1,4 +1,5 @@
 """Handler for fetching outputs from a stack in the current namespace."""
+
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 

@@ -1,4 +1,5 @@
 """Assume an AWS IAM role."""
+
 from __future__ import annotations
 
 import logging

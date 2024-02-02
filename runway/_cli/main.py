@@ -1,4 +1,5 @@
 """Runway CLI entrypoint."""
+
 import argparse
 import logging
 import os

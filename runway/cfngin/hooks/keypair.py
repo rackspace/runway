@@ -1,4 +1,5 @@
 """AWS EC2 keypair hook."""
+
 from __future__ import annotations
 
 import logging

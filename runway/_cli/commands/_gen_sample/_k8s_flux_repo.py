@@ -1,4 +1,5 @@
 """``runway gen-sample k8s-flux-repo`` command."""
+
 import logging
 import shutil
 from pathlib import Path

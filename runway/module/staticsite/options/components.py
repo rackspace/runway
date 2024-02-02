@@ -1,4 +1,5 @@
 """Runway Static Site Module options component classes."""
+
 from __future__ import annotations
 
 from ...base import ModuleOptions

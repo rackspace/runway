@@ -1,4 +1,5 @@
 """``runway gen-sample tf`` command."""
+
 import locale
 import logging
 from pathlib import Path

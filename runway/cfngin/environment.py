@@ -1,4 +1,5 @@
 """CFNgin environment file parsing."""
+
 from typing import Any, Dict
 
 

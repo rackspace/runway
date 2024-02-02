@@ -1,4 +1,5 @@
 """Test runway.cfngin.blueprints.variables.types."""
+
 from __future__ import annotations
 
 import re

@@ -4,6 +4,7 @@ This only aims to test basic functionality.
 Other tests should exist to test low-level interactions with Terraform.
 
 """
+
 # pylint: disable=redefined-outer-name
 from __future__ import annotations
 

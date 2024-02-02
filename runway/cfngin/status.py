@@ -1,4 +1,5 @@
 """CFNgin statuses."""
+
 import operator
 from typing import Any, Callable, Optional
 

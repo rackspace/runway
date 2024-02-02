@@ -1,4 +1,5 @@
 """Retrieve the ID of the Cognito User Pool."""
+
 import logging
 from typing import Any, Dict, Optional
 
