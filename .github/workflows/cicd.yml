@@ -64,7 +64,7 @@ jobs:
         id: setup-python
         with:
           python-version: 3.9
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
       - uses: actions/cache@v4
         id: cache
         with:
@@ -106,7 +106,7 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
       - uses: actions/cache@v4
         id: cache
         with:
@@ -132,7 +132,7 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
       - uses: actions/cache@v4
         id: cache
         with:
@@ -163,7 +163,7 @@ jobs:
         id: setup-python
         with:
           python-version: '3.10'
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
       - uses: actions/cache@v4
         id: cache
         with:
@@ -209,7 +209,7 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
       - uses: actions/cache@v4
         id: cache
         with:
@@ -257,7 +257,7 @@ jobs:
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
       - name: Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
-      - uses: Gr1N/setup-poetry@v8
+      - uses: Gr1N/setup-poetry@v9
       - uses: actions/cache@v4
         id: cache
         with:
