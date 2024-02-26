@@ -232,7 +232,7 @@ jobs:
         # assertions assume linux so some fail when run on windows
         run: make test cov-xml
       - name: Upload to Codecov
-        uses: codecov/codecov-action@v4.0.1
+        uses: codecov/codecov-action@v4.0.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
