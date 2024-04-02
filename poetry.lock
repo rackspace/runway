@@ -2630,13 +2630,13 @@ six = ">=1.5"
 
 [[package]]
 name = "python-hcl2"
-version = "4.3.2"
+version = "4.3.3"
 description = "A parser for HCL2"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "python-hcl2-4.3.2.tar.gz", hash = "sha256:7122661438be27ccd8b8f3db71969d8ef2cce3b3cf183e88f8172575e7405a65"},
-    {file = "python_hcl2-4.3.2-py3-none-any.whl", hash = "sha256:e958fe52ca0519e3500eb621caa16be6be9c27870cbcd1879d8c538fb85067ea"},
+    {file = "python-hcl2-4.3.3.tar.gz", hash = "sha256:03d1df5a025c7430ddde789695c845701269faae3bdbe37049201c0f57bbcbde"},
+    {file = "python_hcl2-4.3.3-py3-none-any.whl", hash = "sha256:8fda0b8769ceda87f2e06b1ecf63343a8e83c4f0a2b410798a81aa3b9689a25c"},
 ]
 
 [package.dependencies]
