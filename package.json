@@ -59,7 +59,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "cspell": "^8.6.1",
+    "cspell": "^8.7.0",
     "pyright": "^1.1.223"
   }
 }
