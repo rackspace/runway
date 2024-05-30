@@ -53,13 +53,13 @@
   ],
   "version": "2.0.0-dev",
   "dependencies": {
-    "tar": "^7.1.0"
+    "tar": "^7.2.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
-    "cspell": "^8.8.1",
+    "cspell": "^8.8.3",
     "pyright": "^1.1.223"
   }
 }
