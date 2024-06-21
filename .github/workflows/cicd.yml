@@ -73,7 +73,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -115,7 +115,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - name: Install Node Dependencies
         run: make npm-ci
       - name: Run Linters
@@ -141,7 +141,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - uses: pre-commit/action@v3.0.1
   test-functional:
     name: Functional Tests
@@ -172,7 +172,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - name: Install Ubuntu Dependencies
         run: |
           sudo apt update -y
@@ -218,7 +218,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - name: Install Node Dependencies
         run: make npm-install
       - name: Configure Pagefile  # avoid MemoryError during tests
@@ -266,7 +266,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - name: Run Build
         run: make build
       - name: Upload Distribution Artifact
