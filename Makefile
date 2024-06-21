@@ -124,9 +124,7 @@ setup: setup-poetry setup-pre-commit setup-npm ## setup development environment
 setup-npm: npm-ci ## install node dependencies with npm
 
 setup-poetry: ## setup python virtual environment
-	@poetry install \
-		--extras docs \
-		--sync
+	@poetry install --sync
 
 setup-pre-commit: ## install pre-commit git hooks
 	@poetry run pre-commit install
