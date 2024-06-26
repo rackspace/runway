@@ -49,7 +49,7 @@ jobs:
               - 'infrastructure/blueprints/test_runner_boundary.py'
               - 'infrastructure/test-alt/common/**'
   info:
-    name: Output useful information.
+    name: Output useful information
     runs-on: ubuntu-latest
     outputs:
       is-actor-bot: ${{ steps.gh-context.outputs.is-actor-bot }}  # if the actor (user) is a bot
