@@ -60,7 +60,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - name: Run Build
         run: make build-pyinstaller-file
       - name: Upload Artifacts
@@ -110,7 +110,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - name: Run Build
         run: make build-pyinstaller-folder
       - name: Upload Artifacts
@@ -171,7 +171,7 @@ jobs:
       - name: Ensure Cache Is Healthy
         if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
         run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install --extras docs -vv
+      - run: poetry install -vv
       - name: Download Artifacts (macOS)
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v4
