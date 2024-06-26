@@ -48,13 +48,41 @@ jobs:
               - 'infrastructure/blueprints/prevent_privilege_escalation.py'
               - 'infrastructure/blueprints/test_runner_boundary.py'
               - 'infrastructure/test-alt/common/**'
+  info:
+    name: Output useful information.
+    runs-on: ubuntu-latest
+    outputs:
+      is-actor-bot: ${{ steps.gh-context.outputs.is-actor-bot }}  # if the actor (user) is a bot
+      is-fork: ${{ steps.gh-context.outputs.is-fork }}  # if the action is running in or from (PR) a fork
+      repo-head: ${{ steps.gh-context.outputs.repo-head }}  # repo where change occurred
+      repo-origin: ${{ steps.gh-context.outputs.repo-origin }}  # origin of codebase
+    steps:
+      - name: Output GitHub Context
+        id: gh-context
+        run: |
+          export _REPO_ORIGIN="onicagroup/runway";
+          echo "repo-origin=${_REPO_ORIGIN}" >> "${GITHUB_OUTPUT}";
+          export _REPO_HEAD="${{ github.event.pull_request.head.repo.full_name || github.repository }}";
+          echo "repo-head=${_REPO_HEAD}" >> "${GITHUB_OUTPUT}";
+          if [[ "${_REPO_HEAD}" == "${_REPO_ORIGIN}" ]]; then
+            echo "is-fork=false" >> "${GITHUB_OUTPUT}";
+          else
+            echo "is-fork=true" >> "${GITHUB_OUTPUT}";
+          fi;
+          if [[ ${{ github.actor }} == *"[bot]" ]]; then
+            echo "is-actor-bot=true" >> "${GITHUB_OUTPUT}";
+          else
+            echo "is-actor-bot=false" >> "${GITHUB_OUTPUT}";
+          fi;
   deploy-test-infrastructure:
     name: Deploy Test Infrastructure
     environment: test
     concurrency: test-infrastructure
-    needs: changes
+    needs:
+      - changes
+      - info
     if: |
-      github.repository == 'onicagroup/runway' &&
+      needs.info.outputs.is-fork == 'false' &&
       (needs.changes.outputs.infra-test == 'true' || needs.changes.outputs.infra-test-alt == 'true')
     runs-on: ubuntu-latest
     steps:
@@ -145,12 +173,13 @@ jobs:
       - uses: pre-commit/action@v3.0.1
   test-functional:
     name: Functional Tests
-    needs: deploy-test-infrastructure
-    # will fail if run from forks
+    needs:
+      - deploy-test-infrastructure
+      - info
     if: |
       always() &&
-      github.repository == 'onicagroup/runway' &&
-      github.actor != 'dependabot[bot]' &&
+      needs.info.outputs.is-fork == 'false' &&
+      needs.info.outputs.is-actor-bot == 'false' &&
       (needs.deploy-test-infrastructure.result == 'success' || needs.deploy-test-infrastructure.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
