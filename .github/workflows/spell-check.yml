@@ -3,12 +3,14 @@ name: Spell Check
 # There is an official action published by cSpell.
 # v1.1.1 was tested but did not function as desired so we are using the CLI.
 
-on: push
-
+on:
+  pull_request:  # any pull request
+  push:
+    branches:
+      - master
 
 env:
   NODE_VERSION: '18'
-
 
 jobs:
   spell-check:
