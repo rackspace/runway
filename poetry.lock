@@ -2638,13 +2638,13 @@ six = ">=1.5"
 
 [[package]]
 name = "python-hcl2"
-version = "4.3.3"
+version = "4.3.4"
 description = "A parser for HCL2"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "python-hcl2-4.3.3.tar.gz", hash = "sha256:03d1df5a025c7430ddde789695c845701269faae3bdbe37049201c0f57bbcbde"},
-    {file = "python_hcl2-4.3.3-py3-none-any.whl", hash = "sha256:8fda0b8769ceda87f2e06b1ecf63343a8e83c4f0a2b410798a81aa3b9689a25c"},
+    {file = "python-hcl2-4.3.4.tar.gz", hash = "sha256:ef1b9bad018bcfc1fe2792044974299e559145fe96e3ca298c1e5e9500c8de66"},
+    {file = "python_hcl2-4.3.4-py3-none-any.whl", hash = "sha256:00f4f0dfa177b1217a5478d5d36b4a70ec01228ad59fc9f2a79eadd4b16676cd"},
 ]
 
 [package.dependencies]
@@ -2854,13 +2854,13 @@ files = [
 
 [[package]]
 name = "requests"
-version = "2.31.0"
+version = "2.32.3"
 description = "Python HTTP for Humans."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "requests-2.31.0-py3-none-any.whl", hash = "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f"},
-    {file = "requests-2.31.0.tar.gz", hash = "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"},
+    {file = "requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"},
+    {file = "requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"},
 ]
 
 [package.dependencies]
