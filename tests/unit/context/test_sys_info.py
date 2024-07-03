@@ -17,13 +17,13 @@ MODULE = "runway.context.sys_info"
 
 
 @pytest.fixture(scope="function")
-def clear_OsInfo() -> None:  # noqa
+def clear_OsInfo() -> None:
     """Clear OsInfo singleton."""
     OsInfo.clear_singleton()
 
 
 @pytest.fixture(scope="function")
-def clear_SystemInfo() -> None:  # noqa
+def clear_SystemInfo() -> None:
     """Clear OsInfo singleton."""
     SystemInfo.clear_singleton()
 

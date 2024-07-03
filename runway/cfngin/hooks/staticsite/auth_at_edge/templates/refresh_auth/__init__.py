@@ -4,7 +4,7 @@ import logging
 import traceback
 from urllib.parse import parse_qs
 
-from shared import (  # noqa pylint: disable=import-error
+from shared import (  # pylint: disable=import-error
     create_error_html,
     extract_and_parse_cookies,
     generate_cookie_headers,

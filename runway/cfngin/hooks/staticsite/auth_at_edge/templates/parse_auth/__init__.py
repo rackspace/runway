@@ -14,12 +14,12 @@ import logging
 from datetime import datetime
 from urllib.parse import parse_qs
 
-from shared_jose import (  # noqa pylint: disable=import-error
+from shared_jose import (  # pylint: disable=import-error
     MissingRequiredGroupError,
     validate_and_check_id_token,
 )
 
-from shared import (  # noqa pylint: disable=import-error
+from shared import (  # pylint: disable=import-error
     create_error_html,
     extract_and_parse_cookies,
     generate_cookie_headers,

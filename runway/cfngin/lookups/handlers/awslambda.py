@@ -8,7 +8,7 @@ the CFNgin configuration file (it can be reused in other CFNgin configuration fi
 The :attr:`~cfngin.hook.data_key` is then passed to the lookup as it's input/query.
 This allows the lookup to function during a ``runway plan``.
 
-"""  # noqa
+"""
 
 from __future__ import annotations
 

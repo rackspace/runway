@@ -421,7 +421,7 @@ Outputs:
             i.set_archive(Path("/tmp/foo"))
             self.assertEqual(i.archive.name.endswith(i.extension), True)  # type: ignore
 
-    def test_SourceProcessor_helpers(self):  # noqa: N802
+    def test_SourceProcessor_helpers(self):
         """Test SourceProcessor helpers."""
         with mock.patch.object(
             SourceProcessor,

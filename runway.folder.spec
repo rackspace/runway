@@ -18,7 +18,7 @@ import distutils
 if getattr(distutils, "distutils_path", "").endswith("__init__.py"):
     distutils.distutils_path = os.path.dirname(distutils.distutils_path)
 
-CLI_PATH = os.path.join(os.path.dirname(os.path.dirname(workpath)), "runway")  # noqa
+CLI_PATH = os.path.join(os.path.dirname(os.path.dirname(workpath)), "runway")
 
 
 def get_submodules(package):
@@ -45,17 +45,17 @@ def get_submodules(package):
     ]
 
 
-def Entrypoint(dist, group, name, **kwargs):  # noqa
+def Entrypoint(dist, group, name, **kwargs):
     """Get entrypoint info for packages using setuptools."""
     ep = get_entry_info(dist, group, name)
     # script name must not be a valid module name to avoid name clashes on import
-    script_path = os.path.join(workpath, name + "-script.py")  # noqa: F821
+    script_path = os.path.join(workpath, name + "-script.py")
     print("creating script for entry point", dist, group, name)
     with open(script_path, "w") as fh:
         print("import", ep.module_name, file=fh)
         print("%s.%s()" % (ep.module_name, ".".join(ep.attrs)), file=fh)
 
-    return Analysis([script_path] + kwargs.get("scripts", []), **kwargs)  # noqa: F821
+    return Analysis([script_path] + kwargs.get("scripts", []), **kwargs)
 
 
 # files that are not explicitly imported but consumed at runtime
@@ -87,14 +87,14 @@ data_files.append(copy_metadata("runway")[0])  # support scm version
 hiddenimports = []
 # these packages do not have pyinstaller hooks so we need to import
 # them to collect a list of submodules to include as hidden imports.
-import runway  # noqa
-import troposphere  # noqa
-import awacs  # noqa
-import botocore  # noqa
-import pip  # noqa
-import wheel  # noqa
-import yamllint  # noqa
-import cfnlint  # noqa
+import runway
+import troposphere
+import awacs
+import botocore
+import pip
+import wheel
+import yamllint
+import cfnlint
 
 hiddenimports.extend(get_submodules(runway))
 hiddenimports.extend(get_submodules(troposphere))
@@ -123,9 +123,9 @@ a = Entrypoint(
     noarchive=False,
     binaries=[],
 )
-pyz = PYZ(a.pure, a.zipped_data, cipher=None)  # noqa: F821
+pyz = PYZ(a.pure, a.zipped_data, cipher=None)
 exe = EXE(
-    pyz,  # noqa: F821
+    pyz,
     a.scripts,
     [],
     exclude_binaries=True,
@@ -137,7 +137,7 @@ exe = EXE(
     console=True,
 )
 coll = COLLECT(
-    exe,  # noqa: F821
+    exe,
     a.binaries,
     a.zipfiles,
     a.datas,

@@ -110,7 +110,7 @@ def build_parameter(name: str, properties: BlueprintVariableTypeDef) -> Paramete
     Returns:
         The created parameter object.
 
-    """  # noqa: E501
+    """
     param = Parameter(name, Type=properties.get("type"))
     for name_, attr in PARAMETER_PROPERTIES.items():
         if name_ in properties:
@@ -376,7 +376,7 @@ class Blueprint(DelCachedPropMixin):
         Returns:
             Variables that need to be submitted as CloudFormation Parameters.
 
-        """  # noqa
+        """
         output: Dict[str, Union[List[Any], str]] = {}
         for key, value in self.variables.items():
             if hasattr(value, "to_parameter_value"):
@@ -444,7 +444,7 @@ class Blueprint(DelCachedPropMixin):
             Variables that need to be submitted as CloudFormation Parameters.
             Will be a dictionary of <parameter name>: <parameter value>.
 
-        """  # noqa
+        """
         output: Dict[str, Any] = {}
         for key, value in self.variables.items():
             try:
@@ -597,7 +597,7 @@ class Blueprint(DelCachedPropMixin):
             Variables that need to be submitted as CloudFormation Parameters.
             Will be a dictionary of <parameter name>: <parameter value>.
 
-        """  # noqa
+        """
         LOGGER.warning(
             "%s.get_parameter_values is deprecated and will be removed in a future release",
             self.__class__.__name__,

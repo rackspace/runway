@@ -116,7 +116,7 @@ class AmiLookup(LookupHandler):
             You can also optionally specify the region in which to perform the
             AMI lookup.
 
-        """  # noqa
+        """
         query, raw_args = cls.parse(value)
         args = ArgsDataModel.parse_obj(raw_args)
         ec2 = context.get_session(region=args.region).client("ec2")

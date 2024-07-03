@@ -92,7 +92,7 @@ TESTS: List[TypeDefTestDefinition] = [
         },
     },
     {
-        "definition": "git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo&bar=baz",  # noqa
+        "definition": "git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo&bar=baz",
         "expected": {
             "location": "src/foo/bar",
             "arguments": {"branch": "foo", "bar": "baz"},

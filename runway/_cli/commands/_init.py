@@ -52,7 +52,7 @@ def init(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> No
       "terraform init" again if the workspace was changed, and finally
       downloads/updates Terraform modules.
 
-    """  # noqa: D301
+    """
     try:
         Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).init(
             select_deployments(ctx, ctx.obj.runway_config.deployments, tags)

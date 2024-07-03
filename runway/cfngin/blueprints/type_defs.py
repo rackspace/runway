@@ -74,4 +74,4 @@ class BlueprintVariableTypeDef(
             If there is an issue validating the value, an exception
             (``ValueError``, ``TypeError``, etc) should be raised by the function.
 
-    """  # noqa
+    """

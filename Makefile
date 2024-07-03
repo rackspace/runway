@@ -70,16 +70,11 @@ fix-black: ## automatically fix all black errors
 fix-isort: ## automatically fix all isort errors
 	@poetry run isort .
 
-lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
+lint: lint-isort lint-black lint-pyright lint-pylint ## run all linters
 
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
 	@poetry run black . --check --color --diff
-	@echo ""
-
-lint-flake8: ## run flake8
-	@echo "Running flake8..."
-	@poetry run flake8 --config=setup.cfg
 	@echo ""
 
 lint-isort: ## run isort

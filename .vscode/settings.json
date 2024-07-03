@@ -37,10 +37,6 @@
     "files.insertFinalNewline": true,
     "python.analysis.typeCheckingMode": "strict",
     "python.formatting.provider": "black",
-    "python.linting.flake8Args": [
-        "--docstring-convention=all"
-    ],
-    "python.linting.flake8Enabled": true,
     "python.linting.mypyEnabled": false,
     "python.linting.pylintArgs": [
         "--rcfile=pyproject.toml"

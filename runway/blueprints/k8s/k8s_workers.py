@@ -244,7 +244,7 @@ class NodeGroup(Blueprint):
                 GroupId=nodesecuritygroup.ref(),
                 SourceSecurityGroupId=self.variables[
                     "ClusterControlPlaneSecurityGroup"
-                ].ref,  # noqa
+                ].ref,
                 IpProtocol="tcp",
                 FromPort=443,
                 ToPort=443,
@@ -364,6 +364,4 @@ class NodeGroup(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(  # noqa: T201
-        NodeGroup("test", CfnginContext(parameters={"namespace": "test"})).to_json()
-    )
+    print(NodeGroup("test", CfnginContext(parameters={"namespace": "test"})).to_json())

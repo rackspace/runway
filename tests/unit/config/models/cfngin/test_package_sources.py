@@ -132,7 +132,7 @@ class TestGitCfnginPackageSourceDefinitionModel:
 
 
 class TestLocalCfnginPackageSourceDefinitionModel:
-    """Test runway.config.models.cfngin._package_sources.LocalCfnginPackageSourceDefinitionModel."""  # noqa
+    """Test runway.config.models.cfngin._package_sources.LocalCfnginPackageSourceDefinitionModel."""
 
     def test_extra(self) -> None:
         """Test extra fields."""

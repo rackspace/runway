@@ -151,7 +151,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
             Variables that need to be submitted as CloudFormation Parameters.
             Will be a dictionary of ``<parameter name>: <parameter value>``.
 
-        """  # noqa
+        """
         return self._resolved_variables or {}
 
     @property

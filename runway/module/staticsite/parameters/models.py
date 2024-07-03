@@ -45,7 +45,7 @@ class RunwayStaticSiteLambdaFunctionAssociationDataModel(ConfigProperty):
         """Model configuration."""
 
         extra = Extra.forbid
-        title = "Runway static site Module staticsite_lambda_function_associations parameter item."  # noqa
+        title = "Runway static site Module staticsite_lambda_function_associations parameter item."
 
 
 class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):

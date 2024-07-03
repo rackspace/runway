@@ -3,7 +3,7 @@
 import logging
 import sys
 
-from ._logging import LogLevels, RunwayLogger  # noqa: F401
+from ._logging import LogLevels, RunwayLogger
 
 logging.setLoggerClass(RunwayLogger)
 

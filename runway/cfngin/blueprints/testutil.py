@@ -32,7 +32,7 @@ class BlueprintTestCase(unittest.TestCase):
 
     OUTPUT_PATH: str = "tests/fixtures/blueprints"
 
-    def assertRenderedBlueprint(  # noqa: N802 pylint: disable=invalid-name
+    def assertRenderedBlueprint(  # pylint: disable=invalid-name
         self, blueprint: Blueprint
     ) -> None:
         """Test that the rendered blueprint json matches the expected result.
@@ -175,7 +175,7 @@ class YamlDirTestGenerator:
                 blueprint.create_template()
                 self.assertRenderedBlueprint(blueprint)
 
-            def assertEqual(  # noqa: N802
+            def assertEqual(
                 self, first: Any, second: Any, msg: Optional[str] = None
             ) -> None:
                 """Test that first and second are equal.

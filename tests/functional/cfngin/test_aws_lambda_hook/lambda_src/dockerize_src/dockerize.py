@@ -1,6 +1,5 @@
 """Test handler."""
 
-# flake8: noqa
 # pylint: disable=unused-argument
 import lib
 

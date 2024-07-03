@@ -42,7 +42,7 @@ def plan(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> No
         - (non-interactive) all
     3. Attempt to determine change for deployments/modules in the order defined.
 
-    """  # noqa: D301
+    """
     try:
         Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).plan(
             select_deployments(ctx, ctx.obj.runway_config.deployments, tags)

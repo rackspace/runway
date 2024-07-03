@@ -42,7 +42,7 @@ def destroy(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) ->
         - (non-interactive) all
     3. Destroys selected deployments/modules in reverse the order defined.
 
-    """  # noqa: D301
+    """
     if not ctx.obj.env.ci:
         click.secho(
             "[WARNING] Runway is about to be run in DESTROY mode. [WARNING]",

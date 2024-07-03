@@ -25,12 +25,10 @@ class DockerHookData(MutableMap):
         return DockerClient.from_env()
 
     @overload
-    def update_context(self, context: CfnginContext = ...) -> DockerHookData:  # noqa
-        ...
+    def update_context(self, context: CfnginContext = ...) -> DockerHookData: ...
 
     @overload
-    def update_context(self, context: None = ...) -> None:  # noqa
-        ...
+    def update_context(self, context: None = ...) -> None: ...
 
     def update_context(
         self, context: Optional[CfnginContext] = None

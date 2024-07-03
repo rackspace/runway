@@ -105,6 +105,4 @@ class Iam(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(  # noqa: T201
-        Iam("test", CfnginContext(parameters={"namespace": "test"})).to_json()
-    )
+    print(Iam("test", CfnginContext(parameters={"namespace": "test"})).to_json())

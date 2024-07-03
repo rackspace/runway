@@ -44,12 +44,12 @@ from pydantic import BaseModel as _BaseModel
 from typing_extensions import Literal
 
 # make this importable for util as it was before
-from ..compat import cached_property  # noqa: F401
+from ..compat import cached_property
 
 # make this importable without defining __all__ yet.
 # more things need to be moved of this file before starting an explicit __all__.
-from ._file_hash import FileHash  # noqa: F401
-from ._version import Version  # noqa: F401
+from ._file_hash import FileHash
+from ._version import Version
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import OutputTypeDef
@@ -522,7 +522,7 @@ def ensure_file_is_executable(path: str) -> None:
     if platform.system() != "Windows" and (
         not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]
     ):
-        print(f"Error: File {path} is not executable")  # noqa: T201
+        print(f"Error: File {path} is not executable")
         sys.exit(1)
 
 
@@ -801,7 +801,7 @@ def run_commands(
             try:
                 check_call(command_list, env=env)
             except FileNotFoundError:
-                print(failed_to_find_error, file=sys.stderr)  # noqa: T201
+                print(failed_to_find_error, file=sys.stderr)
                 sys.exit(1)
 
 

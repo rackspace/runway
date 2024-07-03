@@ -806,28 +806,28 @@ def test_date_parser_datetime() -> None:
             "pre/key",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "key",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key:name",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key:name",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "key:name",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key/name",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key/name",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "key/name",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/prefix/key:name",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/prefix/key:name",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "prefix/key:name",
         ),
     ],

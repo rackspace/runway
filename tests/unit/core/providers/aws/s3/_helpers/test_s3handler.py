@@ -808,7 +808,7 @@ class TestS3TransferHandler:
             fileinfos[0]
         )
         mock_submitters.instances["copy"].submit.assert_called_once_with(fileinfos[0])
-        self.result_command_recorder.notify_total_submissions.assert_called_once_with(1)  # type: ignore  # noqa
+        self.result_command_recorder.notify_total_submissions.assert_called_once_with(1)  # type: ignore
         self.result_command_recorder.get_command_result.assert_called_once_with()  # type: ignore
 
 

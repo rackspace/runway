@@ -194,10 +194,7 @@ class TestLookupHandler:
     def test_transform_str_list(self) -> None:
         """Test list type joined to create string."""
         assert LookupHandler.transform(["val1", "val2"], to_type="str") == "val1,val2"
-        assert (
-            LookupHandler.transform({"val", "val"}, to_type="str")  # noqa: B033
-            == "val"
-        )
+        assert LookupHandler.transform({"val", "val"}, to_type="str") == "val"
         assert LookupHandler.transform(("val1", "val2"), to_type="str") == "val1,val2"
 
     def test_transform_str_list_delimiter(self) -> None:

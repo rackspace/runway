@@ -143,7 +143,7 @@ class TestHooks(unittest.TestCase):
                 required=True,
             )
         ]
-        with self.assertRaises(Exception):  # noqa: B017
+        with self.assertRaises(Exception):
             handle_hooks("fail", hooks, self.provider, self.context)
         hooks = [
             CfnginHookDefinitionModel(

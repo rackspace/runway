@@ -75,7 +75,7 @@ class PrefixAdaptor(logging.LoggerAdapter):  # type: ignore
         """
         return self.prefix_template.format(prefix=self.prefix, msg=msg), kwargs
 
-    def setLevel(self, level: Union[int, str]) -> None:  # noqa
+    def setLevel(self, level: Union[int, str]) -> None:
         """Set the specified level on the underlying logger.
 
         Python 2 backport.

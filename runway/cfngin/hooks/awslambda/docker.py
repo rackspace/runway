@@ -283,7 +283,7 @@ class DockerDependencyInstaller:
         - :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.install_commands`
         - :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.post_install_commands`
 
-        """  # noqa
+        """
         for cmd in self.pre_install_commands:
             self.run_command(cmd)
         for cmd in self.install_commands:
