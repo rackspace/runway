@@ -1,39 +1,39 @@
 [tool.poetry]
 name = "runway"
 version = "2.0.0-dev"  # do not change
-description = "Simplify infrastructure/app testing/deployment"
-license = "Apache-2.0"
 authors = [
   "Onica Group LLC <opensource@onica.com>",
 ]
-maintainers = [
-  "Kyle Finley <kyle@finley.sh>", "Sam Fakhreddine <sam.fakhreddine@rackspace.com>"
-]
-readme = "README.md"
-homepage = "https://github.com/onicagroup/runway"
-repository = "https://github.com/onicagroup/runway"
-documentation = "https://docs.onica.com/projects/runway"
-keywords = ["cli"]
 classifiers = [
   "Intended Audience :: Developers",
-  "Topic :: Utilities",
   "Natural Language :: English",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12"
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Utilities",
+]
+description = "Simplify infrastructure/app testing/deployment"
+documentation = "https://docs.onica.com/projects/runway"
+homepage = "https://github.com/onicagroup/runway"
+keywords = ["cli"]
+license = "Apache-2.0"
+maintainers = [
+  "Kyle Finley <kyle@finley.sh>",
+  "Sam Fakhreddine <sam.fakhreddine@rackspace.com>",
 ]
 packages = [
-  { include = "runway" },
+  {include = "runway"},
 ]
+readme = "README.md"
+repository = "https://github.com/onicagroup/runway"
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.13"
-
-"backports.cached_property" = { version = "*", python = "<3.8" }
 awacs = "*"
+"backports.cached_property" = {python = "<3.8", version = "*"}
 boto3 = "^1.16"
 cfn-lint = "*"
 cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
@@ -43,30 +43,30 @@ docker = ">=3.0.0"  # used in runway.cfngin.hooks
 formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
 igittigitt = ">=2.0.5"
-importlib-metadata = { version = "*", python = "<3.8" }
+importlib-metadata = {python = "<3.8", version = "*"}
 jinja2 = ">=2.7"  # used in runway.cfngin.blueprints.raw
+moto = "3.0.5"
 packaging = "*"  # component of setuptools needed for version compare
+pipenv = "2022.1.8"
 pyOpenSSL = "*"  # For embedded hook & associated script usage
 pydantic = "^1.4"
 pyhcl = "^0.4"  # does not support HCL2, possibly move to extras_require in the future
+pyinstaller = "^6.2.0"
 python-hcl2 = ">=3.0.0"
 pyyaml = ">5.4"
 requests = "*"
 send2trash = "*"
+testfixtures = "^7.0.3"
 tomli = ">=1.2.2"
 troposphere = ">=2.4, <5"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
-yamllint = "*"
-pipenv = "2022.1.8"
-moto = "3.0.5"
-testfixtures = "^7.0.3"
 wheel = "^0.42.0"
-pyinstaller = "^6.2.0"
+yamllint = "*"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=22.1"
-coverage = { version = ">=6.3", extras = ["toml"] }
+coverage = {extras = ["toml"], version = ">=6.3"}
 doc8 = ">=0.10"  # for linting with vscode rst extension
 dunamai = "^1.5"
 flake8 = ">=4.0.1"
@@ -77,10 +77,10 @@ flake8-print = ">=4.0.0"  # flake8 plugin
 flake8-use-fstring = ">=1.3"  # flake8 plugin
 isort = ">=5.12"
 mock = ">=4.0"
-moto = { version = ">=3.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }
+moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = ">=3.0"}
 pep8-naming = ">=0.12.1"  # flake8 plugin
 pipenv = "^2022.1.8"  # only used in tests
-pre-commit = ">=2.14"
+pre-commit = "^3.7.1"
 pydocstyle = ">=6.1.1"  # flake8 plugin
 pylint = ">=2.12"
 pytest = ">=7.0"
@@ -134,11 +134,6 @@ runway = "runway._cli.main:cli"
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/onicagroup/runway/issues"
 
-[build-system]
-requires = ["poetry_core>=1.0.7"]
-build-backend = "poetry.core.masonry.api"
-
-
 [tool.black]
 force-exclude = '''
 /(
@@ -161,21 +156,19 @@ include = '\.pyi?$'
 line-length = 88
 target-version = ["py38", "py39"]
 
-
 [tool.coverage.report]
 exclude_lines = [
+  "@overload",
   "cov: ignore",  # standard exclude comment
+  "from pathlib import Path",
   "if TYPE_CHECKING:",  # excluded blocks
   "if __name__ == .__main__.:",
   "raise AssertionError",  # defensive exceptions
   "raise NotImplementedError",
-  "from pathlib import Path",
-  "@overload",
 ]
 fail_under = 85
 precision = 2
 show_missing = true
-
 
 [tool.coverage.run]
 concurrency = [
@@ -183,19 +176,19 @@ concurrency = [
   "thread",
 ]
 omit = [
+  "*/compat.py",
   "*/runway/aws_sso_botocore/*",  # TODO remove native support is added to botocore
   "*/runway/cfngin/hooks/staticsite/auth_at_edge/templates/*",
-  "*/compat.py",
   "*/type_defs.py",
 ]
 
 [tool.isort]
-profile = "black"
 known_local_folder = [
   "jwks_rsa",
   "shared",
   "update_urls",
 ]
+profile = "black"
 skip = [
   ".demo",
   ".eggs",
@@ -211,7 +204,6 @@ skip = [
   "node_modules",
   "venv",
 ]
-
 
 [tool.pylint.basic]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#basic-checker
@@ -246,17 +238,17 @@ defining-attr-methods = [
   "__new__",
   "setUp",
 ]
-exclude-protected=[
+exclude-protected = [
   "_asdict",
-  "_fields",
-  "_replace",
-  "_source",
-  "_make",
-  "_session",  # for boto3.session.Session
-  "_prompter",
   "_client_config",  # boto3.client.Client._client_config contains info like region
   "_endpoint",  # boto3.client.Client._endpoint contains s3 endpoint info
-  "_validate_props"  # called on troposphere resources
+  "_fields",
+  "_make",
+  "_prompter",
+  "_replace",
+  "_session",  # for boto3.session.Session
+  "_source",
+  "_validate_props",  # called on troposphere resources
 ]
 
 [tool.pylint.design]
@@ -295,23 +287,23 @@ ignore-patterns = [
 ]
 jobs = 0
 
-[tool.pylint.miscellaneous]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#miscellaneous-checker
-notes = ["FIXME"]
-
 [tool.pylint.message_control]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#messages-control-options
 disable = [
+  "broad-exception-raised",
   "line-too-long",  # flake8 overlap
   "missing-class-docstring",  # flake8 (pydocstyle) overlap
   "missing-function-docstring",  # flake8 (pydocstyle) overlap
   "missing-module-docstring",  # flake8 (pydocstyle) overlap
+  "missing-timeout",
   "similarities",  # black overcomplicated this
-  "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
+  "ungrouped-imports",  # false positive when using TYPE_CHECKING; isort should cover this
   "unused-import",  # flake8 overlap (F401)
-  "broad-exception-raised",
-  "missing-timeout"
 ]
+
+[tool.pylint.miscellaneous]
+# http://pylint.pycqa.org/en/latest/technical_reference/features.html#miscellaneous-checker
+notes = ["FIXME"]
 
 [tool.pylint.typecheck]
 # http://pylint.pycqa.org/en/latest/technical_reference/features.html#typecheck-checker
@@ -321,24 +313,23 @@ ignored-classes = [
 ]
 ignored-modules = ["_typeshed", "distutils"]
 
-
 [tool.pyright]
 exclude = [
-  "**/__pycache__",
   "**/.demo",
   "**/.eggs",
   "**/.git",
   "**/.runway",
   "**/.venv",
+  "**/__pycache__",
   "**/docs",
   "**/node_modules",
   "**/quickstarts",
-  "**/typings",
   "**/runway/aws_sso_botocore",
   "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
   "**/runway/templates/cdk-py",
   "**/tests/functional/cfngin/test_aws_lambda_hook/lambda_src",
-  "**/tests/unit"
+  "**/tests/unit",
+  "**/typings",
 ]
 extraPaths = [
   "./.github/scripts/urlshortener",
@@ -360,7 +351,6 @@ typeCheckingMode = "strict"
 useLibraryCodeForTypes = true
 venv = ".venv"
 
-
 [tool.pytest.ini_options]
 addopts = [
   "--cov-config=pyproject.toml",
@@ -378,3 +368,16 @@ python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 testpaths = ["tests"]
+
+[tool.tomlsort]
+all = true
+in_place = true
+sort_first = ["tool", "tool.poetry"]
+spaces_before_inline_comment = 2
+trailing_comma_inline_array = true
+overrides."tool.poetry".first = ["name", "version"]
+overrides."tool.poetry.dependencies".first = ["python"]
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry_core>=1.0.7"]

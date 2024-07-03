@@ -1,11 +1,19 @@
 {
-  "name": "runway",
+  "author": {
+    "email": "opensource@onica.com",
+    "name": "Onica Group LLC",
+    "url": "https://onica.com"
+  },
+  "bugs": {
+    "url": "https://github.com/onicagroup/runway/issues"
+  },
+  "dependencies": {
+    "tar": "^7.2.0"
+  },
   "description": "Simplify infrastructure/app testing/deployment",
-  "main": "NA",
-  "scripts": {
-    "postinstall": "node ./postinstall.js",
-    "preuninstall": "node ./preuninstall.js",
-    "py-type-check": "pyright --venv-path ./"
+  "devDependencies": {
+    "cspell": "^8.11.0",
+    "pyright": "^1.1.223"
   },
   "files": [
     "src/osx/*",
@@ -14,10 +22,7 @@
     "postinstall.js",
     "preuninstall.js"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/onicagroup/runway"
-  },
+  "homepage": "https://github.com/onicagroup/runway",
   "keywords": [
     "aws",
     "ci",
@@ -30,11 +35,6 @@
     "cloudformation",
     "cdk"
   ],
-  "author": {
-    "name": "Onica Group LLC",
-    "email": "opensource@onica.com",
-    "url": "https://onica.com"
-  },
   "license": "Apache-2.0",
   "licenses": [
     {
@@ -42,24 +42,14 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     }
   ],
-  "bugs": {
-    "url": "https://github.com/onicagroup/runway/issues"
-  },
-  "homepage": "https://github.com/onicagroup/runway",
+  "main": "NA",
+  "name": "runway",
   "os": [
     "darwin",
     "linux",
     "win32"
   ],
-  "version": "2.0.0-dev",
-  "dependencies": {
-    "tar": "^7.2.0"
-  },
   "publishConfig": {
     "access": "public"
-  },
-  "devDependencies": {
-    "cspell": "^8.11.0",
-    "pyright": "^1.1.223"
   }
 }

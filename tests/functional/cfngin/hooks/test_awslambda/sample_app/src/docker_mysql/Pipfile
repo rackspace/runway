@@ -1,9 +1,9 @@
-[[source]]
-url = "https://pypi.org/simple"
-verify_ssl = true
-name = "pypi"
+[dev-packages]
 
 [packages]
 mysqlclient = "==2.1.1"
 
-[dev-packages]
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true

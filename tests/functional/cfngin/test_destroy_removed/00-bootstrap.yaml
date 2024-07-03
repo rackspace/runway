@@ -16,22 +16,22 @@ stacks:
 
 post_destroy:
   - path: hooks.cleanup.s3_delete_prefix
-    required: True
+    required: true
     args:
       bucket_name: ${cfngin_bucket}
       prefix: persistent_graphs/${namespace}/
   - path: hooks.cleanup.s3_delete_prefix
-    required: True
+    required: true
     args:
       bucket_name: ${cfngin_bucket}
       prefix: stack_templates/${namespace}-bastion/
   - path: hooks.cleanup.s3_delete_prefix
-    required: True
+    required: true
     args:
       bucket_name: ${cfngin_bucket}
       prefix: stack_templates/${namespace}-other/
   - path: hooks.cleanup.s3_delete_prefix
-    required: True
+    required: true
     args:
       bucket_name: ${cfngin_bucket}
       prefix: stack_templates/${namespace}-vpc/

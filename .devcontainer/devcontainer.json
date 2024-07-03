@@ -1,18 +1,20 @@
 {
-	"name": "Ubuntu",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"args": { "VARIANT": "ubuntu-22.04" }
-	},
-	"remoteUser": "vscode",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"ms-python.python"
-			]
-		}
-	},
-	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
-	}
+    "build": {
+        "args": {
+            "VARIANT": "ubuntu-22.04"
+        },
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python"
+            ]
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    },
+    "name": "Ubuntu",
+    "remoteUser": "vscode"
 }

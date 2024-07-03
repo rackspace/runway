@@ -1,17 +1,6 @@
 {
-  "name": "test_multistack",
-  "version": "0.0.0",
   "bin": {
     "example": "bin/example.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "deploy": "cdk deploy",
-    "diff": "cdk diff",
-    "lint": "eslint 'bin/*.ts' 'lib/*.ts'",
-    "lintfix": "npm run lint -- --fix",
-    "synth": "cdk synth",
-    "watch": "tsc -w"
   },
   "dependencies": {
     "@aws-cdk/core": "^1.181.0"
@@ -33,5 +22,16 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.3.0",
     "typescript": "^4.9.4"
-  }
+  },
+  "name": "test_multistack",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "cdk deploy",
+    "diff": "cdk diff",
+    "lint": "eslint 'bin/*.ts' 'lib/*.ts'",
+    "lintfix": "npm run lint -- --fix",
+    "synth": "cdk synth",
+    "watch": "tsc -w"
+  },
+  "version": "0.0.0"
 }
