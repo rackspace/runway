@@ -1,6 +1,6 @@
 # Tests
 
-Runway's tests are split into three catagories; [functional](#functional-tests), [integration](#integration-tests), and [unit](#unit-tests).
+Runway's tests are split into three categories; [functional](#functional-tests), [integration](#integration-tests), and [unit](#unit-tests).
 
 - [Tests](#tests)
   - [Test Types](#test-types)
