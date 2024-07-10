@@ -19,9 +19,7 @@ def fixture_dir() -> Path:
 
 
 @pytest.fixture(scope="function")
-def local_backend(
-    fixture_dir: Path, request: SubRequest
-) -> Generator[Path, None, None]:
+def local_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, None]:
     """Copy local_backend.tf into the test directory."""
     file_name = "local_backend.tf"
     og_file = fixture_dir / file_name

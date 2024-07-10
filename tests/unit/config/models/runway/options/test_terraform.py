@@ -28,9 +28,7 @@ class TestRunwayTerraformArgsDataModel:
 
     def test_init(self) -> None:
         """Test init."""
-        obj = RunwayTerraformArgsDataModel(
-            apply=["-apply"], init=["-init"], plan=["-plan"]
-        )
+        obj = RunwayTerraformArgsDataModel(apply=["-apply"], init=["-init"], plan=["-plan"])
         assert obj.apply == ["-apply"]
         assert obj.init == ["-init"]
         assert obj.plan == ["-plan"]
@@ -43,9 +41,7 @@ class TestRunwayTerraformBackendConfigDataModel:
         """Test __bool__."""
         assert RunwayTerraformBackendConfigDataModel(bucket="test")
         assert RunwayTerraformBackendConfigDataModel(dynamodb_table="test")
-        assert RunwayTerraformBackendConfigDataModel(
-            bucket="test", dynamodb_table="test"
-        )
+        assert RunwayTerraformBackendConfigDataModel(bucket="test", dynamodb_table="test")
         assert RunwayTerraformBackendConfigDataModel(
             bucket="test", dynamodb_table="test", workspace_key_prefix="state"
         )
@@ -116,8 +112,7 @@ class TestRunwayTerraformModuleOptionsDataModel:
         obj = RunwayTerraformModuleOptionsDataModel.parse_obj(data)
         assert obj.args.init == data["args"]["init"]  # type: ignore
         assert (
-            obj.backend_config.bucket
-            == data["terraform_backend_config"]["bucket"]  # type: ignore
+            obj.backend_config.bucket == data["terraform_backend_config"]["bucket"]  # type: ignore
         )
         assert obj.version == data["terraform_version"]
         assert obj.workspace == data["terraform_workspace"]

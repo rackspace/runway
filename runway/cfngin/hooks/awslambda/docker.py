@@ -350,9 +350,7 @@ class DockerDependencyInstaller:
                 raise DockerExecFailedError(response)
 
     @classmethod
-    def from_project(
-        cls: Type[_T], project: Project[AwsLambdaHookArgs]
-    ) -> Optional[_T]:
+    def from_project(cls: Type[_T], project: Project[AwsLambdaHookArgs]) -> Optional[_T]:
         """Instantiate class from a project.
 
         High-level method that wraps instantiation in error handling.

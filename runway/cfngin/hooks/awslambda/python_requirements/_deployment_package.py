@@ -28,15 +28,9 @@ class PythonDeploymentPackage(DeploymentPackage["PythonProject"]):
         """
         if self.project.args.slim:
             gitignore_filter = IgnoreParser()
-            gitignore_filter.add_rule(
-                "**/*.dist-info*", self.project.dependency_directory
-            )
-            gitignore_filter.add_rule(
-                "**/*.py[c|d|i|o]", self.project.dependency_directory
-            )
-            gitignore_filter.add_rule(
-                "**/__pycache__*", self.project.dependency_directory
-            )
+            gitignore_filter.add_rule("**/*.dist-info*", self.project.dependency_directory)
+            gitignore_filter.add_rule("**/*.py[c|d|i|o]", self.project.dependency_directory)
+            gitignore_filter.add_rule("**/__pycache__*", self.project.dependency_directory)
             if self.project.args.strip:
                 gitignore_filter.add_rule("**/*.so", self.project.dependency_directory)
             return gitignore_filter

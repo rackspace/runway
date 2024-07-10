@@ -16,9 +16,7 @@ if TYPE_CHECKING:
     from pytest import CaptureFixture, LogCaptureFixture
 
 
-def test_kbenv_run_no_version_file(
-    cd_tmp_path: Path, caplog: LogCaptureFixture
-) -> None:
+def test_kbenv_run_no_version_file(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway kbenv run -- --help`` no version file."""
     caplog.set_level(logging.WARNING, logger="runway")
     runner = CliRunner()

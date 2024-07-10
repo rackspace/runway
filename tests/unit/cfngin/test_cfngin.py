@@ -27,12 +27,8 @@ def copy_fixture(src: Path, dest: Path) -> Path:
 
 def copy_basic_fixtures(cfngin_fixtures: Path, tmp_path: Path) -> None:
     """Copy the basic env file and config file to a tmp_path."""
-    copy_fixture(
-        src=cfngin_fixtures / "envs" / "basic.env", dest=tmp_path / "test-us-east-1.env"
-    )
-    copy_fixture(
-        src=cfngin_fixtures / "configs" / "basic.yml", dest=tmp_path / "basic.yml"
-    )
+    copy_fixture(src=cfngin_fixtures / "envs" / "basic.env", dest=tmp_path / "test-us-east-1.env")
+    copy_fixture(src=cfngin_fixtures / "configs" / "basic.yml", dest=tmp_path / "basic.yml")
 
 
 @pytest.fixture(scope="function")
@@ -57,9 +53,7 @@ class TestCFNgin:
     @staticmethod
     def get_context(name: str = "test", region: str = "us-east-1") -> MockRunwayContext:
         """Create a basic Runway context object."""
-        context = MockRunwayContext(
-            deploy_environment=DeployEnvironment(explicit_name=name)
-        )
+        context = MockRunwayContext(deploy_environment=DeployEnvironment(explicit_name=name))
         context.env.aws_region = region
         return context
 
@@ -86,9 +80,7 @@ class TestCFNgin:
         result = CFNgin(ctx=self.get_context(region="us-west-2"), sys_path=tmp_path)
         assert result.env_file["test_value"] == "test-us-west-2"
 
-        result = CFNgin(
-            ctx=self.get_context(name="lab", region="ca-central-1"), sys_path=tmp_path
-        )
+        result = CFNgin(ctx=self.get_context(name="lab", region="ca-central-1"), sys_path=tmp_path)
         assert result.env_file["test_value"] == "lab-ca-central-1"
 
     def test_deploy(
@@ -102,9 +94,7 @@ class TestCFNgin:
         mock_action = mocker.patch("runway.cfngin.actions.deploy.Action", Mock())
         mock_instance = self.configure_mock_action_instance(mock_action)
         copy_basic_fixtures(cfngin_fixtures, tmp_path)
-        copy_fixture(
-            src=cfngin_fixtures / "configs" / "basic.yml", dest=tmp_path / "basic2.yml"
-        )
+        copy_fixture(src=cfngin_fixtures / "configs" / "basic.yml", dest=tmp_path / "basic2.yml")
 
         context = self.get_context()
         context.env.vars["CI"] = "1"
@@ -183,9 +173,7 @@ class TestCFNgin:
         cfngin.destroy()
 
         mock_action.assert_called_once()
-        mock_instance.execute.assert_called_once_with(
-            concurrency=0, force=True, tail=False
-        )
+        mock_instance.execute.assert_called_once_with(concurrency=0, force=True, tail=False)
         patch_safehaven.assert_has_calls(
             [
                 call(environ=context.env.vars),
@@ -272,9 +260,7 @@ class TestCFNgin:
         assert len(result.stacks) == 1
         assert result.stacks[0].name == "test-stack"
 
-    def test_load_raise_constructor_error(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_load_raise_constructor_error(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test load raise ConstructorError."""
         config = Mock(load=Mock(side_effect=ConstructorError(problem="something else")))
         get_config = mocker.patch.object(CFNgin, "_get_config", return_value=config)

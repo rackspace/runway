@@ -86,9 +86,7 @@ class TestAMILookup:
                 == image_id
             )
 
-    def test_basic_lookup_multiple_images(
-        self, cfngin_context: MockCFNginContext
-    ) -> None:
+    def test_basic_lookup_multiple_images(self, cfngin_context: MockCFNginContext) -> None:
         """Test basic lookup multiple images."""
         stubber = cfngin_context.add_stubber("ec2")
         image_id = "ami-fffccc111"
@@ -180,9 +178,7 @@ class TestAMILookup:
                 == image_id
             )
 
-    def test_basic_lookup_no_matching_images(
-        self, cfngin_context: MockCFNginContext
-    ) -> None:
+    def test_basic_lookup_no_matching_images(self, cfngin_context: MockCFNginContext) -> None:
         """Test basic lookup no matching images."""
         stubber = cfngin_context.add_stubber("ec2")
         stubber.add_response("describe_images", {"Images": []})
@@ -216,6 +212,4 @@ class TestAMILookup:
         )
 
         with stubber, pytest.raises(ImageNotFound):
-            AmiLookup.handle(
-                value=r"owners:self name_regex:MyImage\s\d", context=cfngin_context
-            )
+            AmiLookup.handle(value=r"owners:self name_regex:MyImage\s\d", context=cfngin_context)

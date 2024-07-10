@@ -231,9 +231,7 @@ class TestBucket:
     ) -> None:
         """Test forbidden."""
         response = BaseResponse()
-        response.metadata.http_status_code = (
-            HTTPStatus.FORBIDDEN if forbidden else HTTPStatus.OK
-        )
+        response.metadata.http_status_code = HTTPStatus.FORBIDDEN if forbidden else HTTPStatus.OK
         mocker.patch.object(Bucket, "head", response)
         assert Bucket(runway_context, "test-bucket").forbidden is expected
 
@@ -256,9 +254,7 @@ class TestBucket:
 
         response = {"Status": "Enabled", "MFADelete": "Enabled"}
 
-        stubber.add_response(
-            "get_bucket_versioning", response, {"Bucket": "test-bucket"}
-        )
+        stubber.add_response("get_bucket_versioning", response, {"Bucket": "test-bucket"})
 
         with stubber:
             assert bucket.get_versioning() == response
@@ -311,9 +307,7 @@ class TestBucket:
     ) -> None:
         """Test not_found."""
         response = BaseResponse()
-        response.metadata.http_status_code = (
-            HTTPStatus.NOT_FOUND if not_found else HTTPStatus.OK
-        )
+        response.metadata.http_status_code = HTTPStatus.NOT_FOUND if not_found else HTTPStatus.OK
         mocker.patch.object(Bucket, "head", response)
         assert Bucket(runway_context, "test-bucket").not_found is expected
 
@@ -322,9 +316,7 @@ class TestBucket:
     ) -> None:
         """Test sync_from_local."""
         mock_handler = MagicMock()
-        mock_handler_class = mocker.patch(
-            f"{MODULE}.S3SyncHandler", return_value=mock_handler
-        )
+        mock_handler_class = mocker.patch(f"{MODULE}.S3SyncHandler", return_value=mock_handler)
         runway_context.add_stubber("s3")
         src_directory = "/test/"
         obj = Bucket(runway_context, "test-bucket")
@@ -343,20 +335,14 @@ class TestBucket:
         )
         mock_handler.run.assert_called_once_with()
 
-    def test_sync_to_local(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext
-    ) -> None:
+    def test_sync_to_local(self, mocker: MockerFixture, runway_context: MockRunwayContext) -> None:
         """Test sync_to_local."""
         mock_handler = MagicMock()
-        mock_handler_class = mocker.patch(
-            f"{MODULE}.S3SyncHandler", return_value=mock_handler
-        )
+        mock_handler_class = mocker.patch(f"{MODULE}.S3SyncHandler", return_value=mock_handler)
         runway_context.add_stubber("s3")
         dest_directory = "/test/"
         obj = Bucket(runway_context, "test-bucket")
-        assert not obj.sync_to_local(
-            dest_directory, follow_symlinks=True, include=["something"]
-        )
+        assert not obj.sync_to_local(dest_directory, follow_symlinks=True, include=["something"])
         mock_handler_class.assert_called_once_with(
             context=runway_context,
             delete=False,

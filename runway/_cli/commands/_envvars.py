@@ -41,9 +41,7 @@ def envvars(ctx: click.Context, debug: bool, **_: Any) -> None:
     ctx.obj.env.ci = True
     LOGGER.verbose("forced Runway to non-interactive mode to suppress prompts")
     try:
-        env_vars = Runway(
-            ctx.obj.runway_config, ctx.obj.get_runway_context()
-        ).get_env_vars()
+        env_vars = Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).get_env_vars()
     except ValidationError as err:
         LOGGER.error(err, exc_info=debug)
         ctx.exit(1)

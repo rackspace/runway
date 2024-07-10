@@ -26,9 +26,7 @@ class TestStack(unittest.TestCase):
         self.sd = {"name": "test"}
         self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
         self.context = CfnginContext(config=self.config)
-        self.stack = Stack(
-            definition=generate_definition("vpc", 1), context=self.context
-        )
+        self.stack = Stack(definition=generate_definition("vpc", 1), context=self.context)
 
         class FakeLookup(LookupHandler):
             """False Lookup."""
@@ -56,8 +54,7 @@ class TestStack(unittest.TestCase):
                     "some.template.value:${output fakeStack2.FakeOutput}:"
                     "${output fakeStack.FakeOutput}"
                 ),
-                "Var3": "${output fakeStack.FakeOutput},"
-                "${output fakeStack2.FakeOutput}",
+                "Var3": "${output fakeStack.FakeOutput}," "${output fakeStack2.FakeOutput}",
             },
             requires=["fakeStack"],
         )
@@ -102,18 +99,14 @@ class TestStack(unittest.TestCase):
     def test_stack_tags_override(self) -> None:
         """Test stack tags override."""
         self.config.tags = {"environment": "prod"}
-        definition = generate_definition(
-            base_name="vpc", stack_id=1, tags={"environment": "stage"}
-        )
+        definition = generate_definition(base_name="vpc", stack_id=1, tags={"environment": "stage"})
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(stack.tags, {"environment": "stage"})
 
     def test_stack_tags_extra(self) -> None:
         """Test stack tags extra."""
         self.config.tags = {"environment": "prod"}
-        definition = generate_definition(
-            base_name="vpc", stack_id=1, tags={"app": "graph"}
-        )
+        definition = generate_definition(base_name="vpc", stack_id=1, tags={"app": "graph"})
         stack = Stack(definition=definition, context=self.context)
         self.assertEqual(stack.tags, {"environment": "prod", "app": "graph"})
 

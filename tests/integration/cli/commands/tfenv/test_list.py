@@ -17,9 +17,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
-def test_tfenv_list(
-    caplog: LogCaptureFixture, mocker: MockerFixture, tmp_path: Path
-) -> None:
+def test_tfenv_list(caplog: LogCaptureFixture, mocker: MockerFixture, tmp_path: Path) -> None:
     """Test ``runway tfenv list``."""
     caplog.set_level(logging.INFO, logger="runway.cli.commands.tfenv")
     mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
@@ -36,9 +34,7 @@ def test_tfenv_list(
     )
 
 
-def test_tfenv_list_none(
-    caplog: LogCaptureFixture, mocker: MockerFixture, tmp_path: Path
-) -> None:
+def test_tfenv_list_none(caplog: LogCaptureFixture, mocker: MockerFixture, tmp_path: Path) -> None:
     """Test ``runway tfenv list`` no versions installed."""
     caplog.set_level(logging.WARNING, logger="runway.cli.commands.tfenv")
     mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)

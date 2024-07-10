@@ -104,9 +104,7 @@ class JwksClient:
         try:
             request_res = request.urlopen(self.options.get("jwks_uri"))
             data = json.loads(
-                request_res.read().decode(
-                    request_res.info().get_param("charset") or "utf-8"
-                )
+                request_res.read().decode(request_res.info().get_param("charset") or "utf-8")
             )
             keys = data["keys"]
             LOGGER.info("Keys: %s", keys)
@@ -238,9 +236,7 @@ def validate_jwt(jwt_token, jwks_uri, issuer, audience):
     )
 
 
-def validate_and_check_id_token(
-    id_token, jwks_uri, issuer, audience, required_group=None
-):
+def validate_and_check_id_token(id_token, jwks_uri, issuer, audience, required_group=None):
     """Validate JWT and (optionally) check group membership."""
     id_token_payload = validate_jwt(id_token, jwks_uri, issuer, audience)
     if required_group:

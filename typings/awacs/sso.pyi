@@ -38,17 +38,11 @@ DeletePermissionSet = Action("DeletePermissionSet")
 DeletePermissionsPolicy = Action("DeletePermissionsPolicy")
 DeleteProfile = Action("DeleteProfile")
 DeleteUser = Action("DeleteUser")
-DescribeAccountAssignmentCreationStatus = Action(
-    "DescribeAccountAssignmentCreationStatus"
-)
-DescribeAccountAssignmentDeletionStatus = Action(
-    "DescribeAccountAssignmentDeletionStatus"
-)
+DescribeAccountAssignmentCreationStatus = Action("DescribeAccountAssignmentCreationStatus")
+DescribeAccountAssignmentDeletionStatus = Action("DescribeAccountAssignmentDeletionStatus")
 DescribeGroups = Action("DescribeGroups")
 DescribePermissionSet = Action("DescribePermissionSet")
-DescribePermissionSetProvisioningStatus = Action(
-    "DescribePermissionSetProvisioningStatus"
-)
+DescribePermissionSetProvisioningStatus = Action("DescribePermissionSetProvisioningStatus")
 DescribePermissionsPolicies = Action("DescribePermissionsPolicies")
 DescribeRegisteredRegions = Action("DescribeRegisteredRegions")
 DescribeUsers = Action("DescribeUsers")
@@ -77,9 +71,7 @@ ImportApplicationInstanceServiceProviderMetadata = Action(
 ListAccountAssignmentCreationStatus = Action("ListAccountAssignmentCreationStatus")
 ListAccountAssignmentDeletionStatus = Action("ListAccountAssignmentDeletionStatus")
 ListAccountAssignments = Action("ListAccountAssignments")
-ListAccountsForProvisionedPermissionSet = Action(
-    "ListAccountsForProvisionedPermissionSet"
-)
+ListAccountsForProvisionedPermissionSet = Action("ListAccountsForProvisionedPermissionSet")
 ListApplicationInstanceCertificates = Action("ListApplicationInstanceCertificates")
 ListApplicationInstances = Action("ListApplicationInstances")
 ListApplicationTemplates = Action("ListApplicationTemplates")
@@ -91,9 +83,7 @@ ListManagedPoliciesInPermissionSet = Action("ListManagedPoliciesInPermissionSet"
 ListMembersInGroup = Action("ListMembersInGroup")
 ListPermissionSetProvisioningStatus = Action("ListPermissionSetProvisioningStatus")
 ListPermissionSets = Action("ListPermissionSets")
-ListPermissionSetsProvisionedToAccount = Action(
-    "ListPermissionSetsProvisionedToAccount"
-)
+ListPermissionSetsProvisionedToAccount = Action("ListPermissionSetsProvisionedToAccount")
 ListProfileAssociations = Action("ListProfileAssociations")
 ListProfiles = Action("ListProfiles")
 ListTagsForResource = Action("ListTagsForResource")
@@ -108,9 +98,7 @@ SetTemporaryPassword = Action("SetTemporaryPassword")
 StartSSO = Action("StartSSO")
 TagResource = Action("TagResource")
 UntagResource = Action("UntagResource")
-UpdateApplicationInstanceActiveCertificate = Action(
-    "UpdateApplicationInstanceActiveCertificate"
-)
+UpdateApplicationInstanceActiveCertificate = Action("UpdateApplicationInstanceActiveCertificate")
 UpdateApplicationInstanceDisplayData = Action("UpdateApplicationInstanceDisplayData")
 UpdateApplicationInstanceResponseConfiguration = Action(
     "UpdateApplicationInstanceResponseConfiguration"
@@ -127,9 +115,7 @@ UpdateApplicationInstanceServiceProviderConfiguration = Action(
 UpdateApplicationInstanceStatus = Action("UpdateApplicationInstanceStatus")
 UpdateDirectoryAssociation = Action("UpdateDirectoryAssociation")
 UpdateGroup = Action("UpdateGroup")
-UpdateManagedApplicationInstanceStatus = Action(
-    "UpdateManagedApplicationInstanceStatus"
-)
+UpdateManagedApplicationInstanceStatus = Action("UpdateManagedApplicationInstanceStatus")
 UpdatePermissionSet = Action("UpdatePermissionSet")
 UpdateProfile = Action("UpdateProfile")
 UpdateSSOConfiguration = Action("UpdateSSOConfiguration")

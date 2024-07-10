@@ -68,9 +68,7 @@ class TestRunwayTestDefinitionModel:
     def test_string_args(self) -> None:
         """Test args defined as a string."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayTestDefinitionModel.parse_obj(
-                {"args": "something", "type": "yamllint"}
-            )
+            RunwayTestDefinitionModel.parse_obj({"args": "something", "type": "yamllint"})
         error = excinfo.value.errors()[0]
         assert error["loc"] == ("args",)
         assert error["msg"] == "field can only be a string if it's a lookup"
@@ -84,9 +82,7 @@ class TestRunwayTestDefinitionModel:
     def test_string_required(self) -> None:
         """Test required defined as a string."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayTestDefinitionModel.parse_obj(
-                {"required": "something", "type": "yamllint"}
-            )
+            RunwayTestDefinitionModel.parse_obj({"required": "something", "type": "yamllint"})
         error = excinfo.value.errors()[0]
         assert error["loc"] == ("required",)
         assert error["msg"] == "field can only be a string if it's a lookup"

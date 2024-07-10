@@ -96,9 +96,7 @@ class TestLambdaHooks(unittest.TestCase):
         with ZipFile(zip_data, "r") as zip_file:
             for zip_info in zip_file.infolist():
                 perms = (zip_info.external_attr & ZIP_PERMS_MASK) >> 16
-                self.assertIn(
-                    perms, (0o755, 0o644), "ZIP member permission must be 755 or 644"
-                )
+                self.assertIn(perms, (0o755, 0o644), "ZIP member permission must be 755 or 644")
                 found_files.add(zip_info.filename)
 
         compare(found_files, set(files))
@@ -116,9 +114,7 @@ class TestLambdaHooks(unittest.TestCase):
     def setUp(self) -> None:
         """Run before tests."""
         self.context = CfnginContext(
-            config=CfnginConfig.parse_obj(
-                {"namespace": "test", "cfngin_bucket": "test"}
-            )
+            config=CfnginConfig.parse_obj({"namespace": "test", "cfngin_bucket": "test"})
         )
         self.provider = mock_provider(region="us-east-1")
 
@@ -161,17 +157,13 @@ class TestLambdaHooks(unittest.TestCase):
         code = results.get("MyFunction")
         self.assertIsInstance(code, Code)
         self.assert_s3_zip_file_list(code.S3Bucket, code.S3Key, F1_FILES)
-        self.assertTrue(
-            code.S3Key.startswith("cloudformation-custom-resources/lambda-MyFunction-")
-        )
+        self.assertTrue(code.S3Key.startswith("cloudformation-custom-resources/lambda-MyFunction-"))
 
     @mock_s3
     def test_prefix_missing(self) -> None:
         """Test prefix missing."""
         with self.temp_directory_with_files() as temp_dir:
-            results = self.run_hook(
-                functions={"MyFunction": {"path": temp_dir.path + "/f1"}}
-            )
+            results = self.run_hook(functions={"MyFunction": {"path": temp_dir.path + "/f1"}})
 
         self.assertIsNotNone(results)
 
@@ -194,9 +186,7 @@ class TestLambdaHooks(unittest.TestCase):
             results = self.run_hook(
                 functions={"MyFunction": {"path": "test"}},
                 context=CfnginContext(
-                    config=CfnginConfig.parse_obj(
-                        {"namespace": "test", "cfngin_bucket": "test"}
-                    ),
+                    config=CfnginConfig.parse_obj({"namespace": "test", "cfngin_bucket": "test"}),
                     config_path=Path(str(temp_dir.path)),
                 ),
             )
@@ -211,9 +201,10 @@ class TestLambdaHooks(unittest.TestCase):
     def test_path_home_relative(self) -> None:
         """Test path home relative."""
         orig_expanduser = os.path.expanduser
-        with self.temp_directory_with_files(["test.py"]) as temp_dir, patch(
-            "os.path.expanduser"
-        ) as mock1:
+        with (
+            self.temp_directory_with_files(["test.py"]) as temp_dir,
+            patch("os.path.expanduser") as mock1,
+        ):
             test_path = "~/test"
 
             mock1.side_effect = lambda p: (  # type: ignore
@@ -252,16 +243,11 @@ class TestLambdaHooks(unittest.TestCase):
     @mock_s3
     def test_patterns_invalid(self) -> None:
         """Test patterns invalid."""
-        msg = (
-            "Invalid file patterns in key 'include': must be a string or "
-            "list of strings"
-        )
+        msg = "Invalid file patterns in key 'include': must be a string or " "list of strings"
 
         with ShouldRaise(ValueError(msg)):
             self.run_hook(
-                functions={
-                    "MyFunction": {"path": "test", "include": {"invalid": "invalid"}}
-                }
+                functions={"MyFunction": {"path": "test", "include": {"invalid": "invalid"}}}
             )
 
     @mock_s3
@@ -332,9 +318,7 @@ class TestLambdaHooks(unittest.TestCase):
 
         code = results.get("MyFunction")
         self.assertIsInstance(code, Code)
-        self.assert_s3_zip_file_list(
-            code.S3Bucket, code.S3Key, ["f1.py", "__init__.py"]
-        )
+        self.assert_s3_zip_file_list(code.S3Bucket, code.S3Key, ["f1.py", "__init__.py"])
 
     @mock_s3
     def test_patterns_exclude_all(self) -> None:
@@ -344,13 +328,9 @@ class TestLambdaHooks(unittest.TestCase):
             "include/exclude options for errors."
         )
 
-        with self.temp_directory_with_files() as temp_dir, ShouldRaise(
-            RuntimeError(msg)
-        ):
+        with self.temp_directory_with_files() as temp_dir, ShouldRaise(RuntimeError(msg)):
             results = self.run_hook(
-                functions={
-                    "MyFunction": {"path": temp_dir.path + "/f1", "exclude": ["**"]}
-                }
+                functions={"MyFunction": {"path": temp_dir.path + "/f1", "exclude": ["**"]}}
             )
 
             self.assertIsNone(results)
@@ -433,9 +413,7 @@ class TestLambdaHooks(unittest.TestCase):
 
     def test_select_bucket_region(self) -> None:
         """Test select bucket region."""
-        tests: Tuple[
-            Tuple[Tuple[Optional[str], Optional[str], Optional[str], str], str], ...
-        ] = (
+        tests: Tuple[Tuple[Tuple[Optional[str], Optional[str], Optional[str], str], str], ...] = (
             (("myBucket", "us-east-1", "us-west-1", "eu-west-1"), "us-east-1"),
             (("myBucket", None, "us-west-1", "eu-west-1"), "eu-west-1"),
             ((None, "us-east-1", "us-west-1", "eu-west-1"), "us-west-1"),
@@ -450,9 +428,7 @@ class TestLambdaHooks(unittest.TestCase):
         """Test follow symlink nonbool."""
         msg = "follow_symlinks option must be a boolean"
         with ShouldRaise(ValueError(msg)):
-            self.run_hook(
-                follow_symlinks="raiseValueError", functions={"MyFunction": {}}
-            )
+            self.run_hook(follow_symlinks="raiseValueError", functions={"MyFunction": {}})
 
     @mock_s3
     def test_follow_symlink_true(self) -> None:
@@ -587,9 +563,7 @@ class TestLambdaHooks(unittest.TestCase):
                 }
             )
         mock_proc.check_call.assert_called_once_with([ANY, "run-python", ANY])
-        assert mock_proc.check_call.call_args.args[0][2].endswith(
-            "__runway_run_pip_install.py"
-        )
+        assert mock_proc.check_call.call_args.args[0][2].endswith("__runway_run_pip_install.py")
 
 
 class TestDockerizePip:
@@ -691,9 +665,7 @@ class TestDockerizePip:
                 docker_image="docker_image",
             )
         with pytest.raises(InvalidDockerizePipConfiguration):
-            dockerized_pip(
-                os.getcwd(), client=client, docker_file="docker_file", runtime="runtime"
-            )
+            dockerized_pip(os.getcwd(), client=client, docker_file="docker_file", runtime="runtime")
         with pytest.raises(InvalidDockerizePipConfiguration):
             dockerized_pip(
                 os.getcwd(),
@@ -743,15 +715,11 @@ class TestHandleRequirements:
             req_path = handle_requirements(
                 package_root=cast(str, tmp_dir.path),
                 dest_path=cast(str, tmp_dir.path),
-                requirements=cast(
-                    Dict[str, bool], find_requirements(cast(str, tmp_dir.path))
-                ),
+                requirements=cast(Dict[str, bool], find_requirements(cast(str, tmp_dir.path))),
             )
 
             assert req_path == os.path.join(cast(str, tmp_dir.path), "requirements.txt")
-            assert not os.path.isfile(
-                os.path.join(cast(str, tmp_dir.path), "Pipfile.lock")
-            )
+            assert not os.path.isfile(os.path.join(cast(str, tmp_dir.path), "Pipfile.lock"))
             assert tmp_dir.read("requirements.txt") == expected
 
     def test_explicit_pipenv(self, tmp_path: Path) -> None:
@@ -792,9 +760,7 @@ class TestHandleRequirements:
     ) -> None:
         """Test use pipenv from Pyinstaller build."""
         caplog.set_level(logging.ERROR, logger="runway.cfngin.hooks.aws_lambda")
-        monkeypatch.setattr(
-            "runway.cfngin.hooks.aws_lambda.sys.frozen", True, raising=False
-        )
+        monkeypatch.setattr("runway.cfngin.hooks.aws_lambda.sys.frozen", True, raising=False)
 
         with pytest.raises(SystemExit) as excinfo:
             handle_requirements(
@@ -807,9 +773,7 @@ class TestHandleRequirements:
                 },
             )
         assert excinfo.value.code == 1
-        assert [
-            "pipenv can only be used with python installed from PyPi"
-        ] == caplog.messages
+        assert ["pipenv can only be used with python installed from PyPi"] == caplog.messages
 
     def test_implicit_pipenv(self, tmp_path: Path) -> None:
         """Test implicit use of pipenv."""

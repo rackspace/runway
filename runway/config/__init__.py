@@ -243,9 +243,7 @@ class CfnginConfig(BaseConfig):
         self.package_sources = self._data.package_sources
         self.persistent_graph_key = self._data.persistent_graph_key
         self.post_deploy = cast(List[CfnginHookDefinitionModel], self._data.post_deploy)
-        self.post_destroy = cast(
-            List[CfnginHookDefinitionModel], self._data.post_destroy
-        )
+        self.post_destroy = cast(List[CfnginHookDefinitionModel], self._data.post_destroy)
         self.pre_deploy = cast(List[CfnginHookDefinitionModel], self._data.pre_deploy)
         self.pre_destroy = cast(List[CfnginHookDefinitionModel], self._data.pre_destroy)
         self.service_role = self._data.service_role
@@ -293,11 +291,7 @@ class CfnginConfig(BaseConfig):
         yml_files.extend(list(path.glob("*.yaml")))
 
         for f in yml_files:
-            if (
-                re.match(cls.EXCLUDE_REGEX, f.name)
-                or f.name in exclude
-                or f.name.startswith(".")
-            ):
+            if re.match(cls.EXCLUDE_REGEX, f.name) or f.name in exclude or f.name.startswith("."):
                 continue  # cov: ignore
             result.append(f)
         result.sort()
@@ -359,9 +353,7 @@ class CfnginConfig(BaseConfig):
             work_dir: Working directory.
 
         """
-        return cls(
-            CfnginConfigDefinitionModel.parse_obj(obj), path=path, work_dir=work_dir
-        )
+        return cls(CfnginConfigDefinitionModel.parse_obj(obj), path=path, work_dir=work_dir)
 
     @classmethod
     def parse_raw(
@@ -389,9 +381,7 @@ class CfnginConfig(BaseConfig):
         if skip_package_sources:
             return cls.parse_obj(yaml.safe_load(pre_rendered))
         config_dict = yaml.safe_load(
-            cls.process_package_sources(
-                pre_rendered, parameters=parameters, work_dir=work_dir
-            )
+            cls.process_package_sources(pre_rendered, parameters=parameters, work_dir=work_dir)
         )
         return cls.parse_obj(config_dict, path=path)
 
@@ -418,9 +408,7 @@ class CfnginConfig(BaseConfig):
                 config.get("package_sources", {})  # type: ignore
             ),
             cache_dir=Path(
-                config.get(
-                    "cfngin_cache_dir", (work_dir or Path().cwd() / ".runway") / "cache"
-                )
+                config.get("cfngin_cache_dir", (work_dir or Path().cwd() / ".runway") / "cache")
             ),
         )
         processor.get_package_sources()
@@ -474,9 +462,7 @@ class RunwayConfig(BaseConfig):
 
     _data: RunwayConfigDefinitionModel
 
-    def __init__(
-        self, data: RunwayConfigDefinitionModel, *, path: Optional[Path] = None
-    ) -> None:
+    def __init__(self, data: RunwayConfigDefinitionModel, *, path: Optional[Path] = None) -> None:
         """Instantiate class.
 
         Args:
@@ -485,9 +471,7 @@ class RunwayConfig(BaseConfig):
 
         """
         super().__init__(data, path=path)
-        self.deployments = [
-            RunwayDeploymentDefinition(d) for d in self._data.deployments
-        ]
+        self.deployments = [RunwayDeploymentDefinition(d) for d in self._data.deployments]
         self.future = self._data.future
         self.ignore_git_branch = self._data.ignore_git_branch
         self.runway_version = self._data.runway_version
@@ -538,9 +522,7 @@ class RunwayConfig(BaseConfig):
         if file_path:
             if not file_path.is_file():
                 raise ConfigNotFound(path=file_path)
-            return cls.parse_obj(
-                yaml.safe_load(file_path.read_text()), path=file_path, **kwargs
-            )
+            return cls.parse_obj(yaml.safe_load(file_path.read_text()), path=file_path, **kwargs)
         if path:
             return cls.parse_file(file_path=cls.find_config_file(path), **kwargs)
         raise ValueError("must provide path or file_path")

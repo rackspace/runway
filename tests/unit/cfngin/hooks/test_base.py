@@ -118,9 +118,7 @@ class TestHook:
 
         assert caplog.records[0].message == f"{stack.name}:{SKIPPED.name}"
 
-    @patch(
-        "runway.cfngin.hooks.base.HookDeployAction.run", MagicMock(side_effect=[FAILED])
-    )
+    @patch("runway.cfngin.hooks.base.HookDeployAction.run", MagicMock(side_effect=[FAILED]))
     def test_deploy_stack_wait_failed(self, cfngin_context: MockCFNginContext) -> None:
         """Test for deploy_stack with wait and skip."""
         hook = Hook(cfngin_context, MagicMock())
@@ -152,9 +150,7 @@ class TestHook:
             == f"{stack.name}:{COMPLETE_W_REASON.name} ({COMPLETE_W_REASON.reason})"
         )
 
-    def test_wait_for_stack_till_reason(
-        self, cfngin_context: MockCFNginContext
-    ) -> None:
+    def test_wait_for_stack_till_reason(self, cfngin_context: MockCFNginContext) -> None:
         """Test _wait_for_stack till_reason option."""
         hook = Hook(cfngin_context, MagicMock())
         stack = MagicMock(fqn="test-stack", name="stack")
@@ -239,9 +235,7 @@ class TestHookDeployAction:
 
         assert obj.build_provider() == provider
 
-    def test_run(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_run(self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch) -> None:
         """Test run."""
         obj = HookDeployAction(cfngin_context, MagicMock())
         monkeypatch.setattr(obj, "_launch_stack", lambda: "success")
@@ -252,9 +246,7 @@ class TestHookDeployAction:
 class TestHookDestroyAction:
     """Tests for runway.cfngin.hooks.base.HookDestroyAction."""
 
-    def test_run(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_run(self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch) -> None:
         """Test run."""
         obj = HookDestroyAction(cfngin_context, MagicMock())
         monkeypatch.setattr(obj, "_destroy_stack", lambda: "success")

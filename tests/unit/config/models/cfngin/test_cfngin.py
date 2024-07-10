@@ -19,23 +19,21 @@ from runway.config.models.cfngin import (
 class TestCfnginConfigDefinitionModel:
     """Test runway.config.models.cfngin.CfnginConfigDefinitionModel."""
 
-    @pytest.mark.parametrize(
-        "field", ["post_deploy", "post_destroy", "pre_deploy", "pre_destroy"]
-    )
+    @pytest.mark.parametrize("field", ["post_deploy", "post_destroy", "pre_deploy", "pre_destroy"])
     def test_convert_hook_definitions(self, field: str) -> None:
         """Test _convert_hook_definitions."""
         dict_hook = {"name": {"path": "something"}}
         list_hook = [{"path": "something"}]
         assert (
-            CfnginConfigDefinitionModel.parse_obj(
-                {"namespace": "test", field: dict_hook}
-            ).dict(exclude_unset=True)[field]
+            CfnginConfigDefinitionModel.parse_obj({"namespace": "test", field: dict_hook}).dict(
+                exclude_unset=True
+            )[field]
             == list_hook
         )
         assert (
-            CfnginConfigDefinitionModel.parse_obj(
-                {"namespace": "test", field: list_hook}
-            ).dict(exclude_unset=True)[field]
+            CfnginConfigDefinitionModel.parse_obj({"namespace": "test", field: list_hook}).dict(
+                exclude_unset=True
+            )[field]
             == list_hook
         )
 
@@ -47,14 +45,18 @@ class TestCfnginConfigDefinitionModel:
             CfnginConfigDefinitionModel(
                 namespace="test",
                 stacks=dict_stack,  # type: ignore
-            ).dict(exclude_unset=True)["stacks"]
+            ).dict(
+                exclude_unset=True
+            )["stacks"]
             == list_stack
         )
         assert (
             CfnginConfigDefinitionModel(
                 namespace="test",
                 stacks=list_stack,  # type: ignore
-            ).dict(exclude_unset=True)["stacks"]
+            ).dict(
+                exclude_unset=True
+            )["stacks"]
             == list_stack
         )
 
@@ -264,13 +266,9 @@ class TestCfnginStackDefinitionModel:
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("__root__",)
-        assert (
-            errors[0]["msg"] == "only one of class_path or template_path can be defined"
-        )
+        assert errors[0]["msg"] == "only one of class_path or template_path can be defined"
 
-    @pytest.mark.parametrize(
-        "enabled, locked", [(True, True), (False, True), (False, False)]
-    )
+    @pytest.mark.parametrize("enabled, locked", [(True, True), (False, True), (False, False)])
     def test_validate_class_or_template(self, enabled: bool, locked: bool) -> None:
         """Test _validate_class_or_template."""
         assert CfnginStackDefinitionModel(

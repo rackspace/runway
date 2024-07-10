@@ -121,9 +121,7 @@ class TestMutableMap:
         """Validate default value functionality."""
         mute_map = MutableMap(**VALUE)
 
-        assert (
-            mute_map.find("NOT_VALID", "default_val") == "default_val"
-        ), "default should be used"
+        assert mute_map.find("NOT_VALID", "default_val") == "default_val", "default should be used"
         assert (
             mute_map.find("str_val", "default_val") == VALUE["str_val"]
         ), "default should be ignored"
@@ -190,9 +188,7 @@ class TestSafeHaven:
         assert os.environ == orig_val
         assert caplog.messages == expected_logs
 
-    def test_reset_all(
-        self, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_reset_all(self, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch) -> None:
         """Test reset_all."""
         mock_method = MagicMock()
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
@@ -240,9 +236,7 @@ class TestSafeHaven:
         assert sys.argv == orig_val
         assert caplog.messages == expected_logs
 
-    def test_sys_modules(
-        self, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_sys_modules(self, caplog: LogCaptureFixture, monkeypatch: MonkeyPatch) -> None:
         """Test sys.modules interactions."""
         caplog.set_level(logging.DEBUG, "runway.SafeHaven")
         monkeypatch.setattr(SafeHaven, "reset_all", MagicMock())

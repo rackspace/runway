@@ -54,9 +54,7 @@ DescribeAssetTemplates = Action("DescribeAssetTemplates")
 DescribeAssets = Action("DescribeAssets")
 DescribeDashboard = Action("DescribeDashboard")
 DescribeGateway = Action("DescribeGateway")
-DescribeGatewayCapabilityConfiguration = Action(
-    "DescribeGatewayCapabilityConfiguration"
-)
+DescribeGatewayCapabilityConfiguration = Action("DescribeGatewayCapabilityConfiguration")
 DescribeGateways = Action("DescribeGateways")
 DescribeGroups = Action("DescribeGroups")
 DescribeLoggingOptions = Action("DescribeLoggingOptions")

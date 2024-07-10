@@ -23,9 +23,7 @@ class TestPythonDeploymentPackage:
     @pytest.mark.parametrize(
         "slim, strip", [(False, False), (False, True), (True, False), (True, True)]
     )
-    def test_gitignore_filter(
-        self, mocker: MockerFixture, slim: bool, strip: bool
-    ) -> None:
+    def test_gitignore_filter(self, mocker: MockerFixture, slim: bool, strip: bool) -> None:
         """Test gitignore_filter."""
         mock_ignore_parser = Mock()
         mock_ignore_parser_class = mocker.patch(
@@ -35,9 +33,7 @@ class TestPythonDeploymentPackage:
         project.args.slim = slim
         project.args.strip = strip
         if slim:
-            assert (
-                PythonDeploymentPackage(project).gitignore_filter == mock_ignore_parser
-            )
+            assert PythonDeploymentPackage(project).gitignore_filter == mock_ignore_parser
             mock_ignore_parser_class.assert_called_once_with()
             calls = [
                 call("**/*.dist-info*", project.dependency_directory),
@@ -57,8 +53,6 @@ class TestPythonDeploymentPackage:
             == tmp_path / "python" / "foo.txt"
         )
         assert (
-            PythonDeploymentPackage.insert_layer_dir(
-                tmp_path / "bar" / "foo.txt", tmp_path
-            )
+            PythonDeploymentPackage.insert_layer_dir(tmp_path / "bar" / "foo.txt", tmp_path)
             == tmp_path / "python" / "bar" / "foo.txt"
         )

@@ -125,9 +125,7 @@ class Variable:
 
         """
         try:
-            self._value.resolve(
-                context, provider=provider, variables=variables, **kwargs
-            )
+            self._value.resolve(context, provider=provider, variables=variables, **kwargs)
         except FailedLookup as err:
             raise FailedVariableLookup(self, err) from err.cause
 
@@ -264,9 +262,7 @@ class VariableValue:
     @classmethod
     def parse_obj(
         cls, obj: str, variable_type: VariableTypeLiteralTypeDef = ...
-    ) -> VariableValueConcatenation[
-        Union[VariableValueLiteral[str], VariableValueLookup]
-    ]: ...
+    ) -> VariableValueConcatenation[Union[VariableValueLiteral[str], VariableValueLookup]]: ...
 
     @classmethod
     def parse_obj(
@@ -361,9 +357,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
             variable_type: Type of variable (cfngin|runway).
 
         """
-        self._data = {
-            k: self.parse_obj(v, variable_type=variable_type) for k, v in data.items()
-        }
+        self._data = {k: self.parse_obj(v, variable_type=variable_type) for k, v in data.items()}
         self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
@@ -675,9 +669,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         values: List[str] = []
         for value in self:
             resolved_value = value.value
-            if isinstance(resolved_value, bool) or not isinstance(
-                resolved_value, (int, str)
-            ):
+            if isinstance(resolved_value, bool) or not isinstance(resolved_value, (int, str)):
                 raise InvalidLookupConcatenation(value, self)
             values.append(str(resolved_value))
         return "".join(values)
@@ -790,9 +782,7 @@ class VariableValueLookup(VariableValue):
                 elif variable_type == "runway":
                     handler = RUNWAY_LOOKUP_HANDLERS[lookup_name_resolved]
                 else:
-                    raise ValueError(
-                        'Variable type must be one of "cfngin" or "runway"'
-                    )
+                    raise ValueError('Variable type must be one of "cfngin" or "runway"')
             except KeyError:
                 raise UnknownLookupType(self) from None
         self.handler = handler
@@ -849,9 +839,7 @@ class VariableValueLookup(VariableValue):
             FailedLookup: A lookup failed for any reason.
 
         """
-        self.lookup_query.resolve(
-            context=context, provider=provider, variables=variables, **kwargs
-        )
+        self.lookup_query.resolve(context=context, provider=provider, variables=variables, **kwargs)
         try:
             result = self.handler.handle(
                 self.lookup_query.value,
@@ -871,9 +859,7 @@ class VariableValueLookup(VariableValue):
     def __repr__(self) -> str:
         """Return object representation."""
         if self._resolved:
-            return (
-                f"Lookup[{self._data} ({self.lookup_name} {repr(self.lookup_query)})]"
-            )
+            return f"Lookup[{self._data} ({self.lookup_name} {repr(self.lookup_query)})]"
         return f"Lookup[{self.lookup_name} {repr(self.lookup_query)}]"
 
     def __str__(self) -> str:
@@ -977,8 +963,7 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
     def __repr__(self) -> str:
         """Return object representation."""
         return (
-            self._model_class.__name__
-            + f"[{', '.join(f'{k}={v}' for k, v in self._data.items())}]"
+            self._model_class.__name__ + f"[{', '.join(f'{k}={v}' for k, v in self._data.items())}]"
         )
 
     def __setitem__(self, __key: str, __value: VariableValue) -> None:

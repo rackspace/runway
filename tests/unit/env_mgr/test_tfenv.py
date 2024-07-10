@@ -64,9 +64,7 @@ terraform {
 def test_get_available_tf_versions(mocker: MockerFixture) -> None:
     """Test runway.env_mgr.tfenv.get_available_tf_versions."""
     mock_requests = mocker.patch(f"{MODULE}.requests")
-    response: Dict[str, Any] = {
-        "terraform": {"versions": {"0.12.0": {}, "0.12.0-beta": {}}}
-    }
+    response: Dict[str, Any] = {"terraform": {"versions": {"0.12.0": {}, "0.12.0-beta": {}}}}
     mock_requests.get.return_value = MagicMock(text=json.dumps(response))
     assert get_available_tf_versions() == ["0.12.0"]
     assert get_available_tf_versions(include_prerelease=True) == [
@@ -200,21 +198,13 @@ class TestTFEnvManager:
         output: str,
     ) -> None:
         """Test get_version_from_executable."""
-        fake_process.register_subprocess(
-            ["usr/tfenv/terraform", "-version"], stdout=output
-        )
-        assert (
-            TFEnvManager.get_version_from_executable("usr/tfenv/terraform") == expected
-        )
+        fake_process.register_subprocess(["usr/tfenv/terraform", "-version"], stdout=output)
+        assert TFEnvManager.get_version_from_executable("usr/tfenv/terraform") == expected
 
     def test_get_version_from_executable_raise(self, fake_process: FakeProcess) -> None:
         """Test get_version_from_executable raise exception."""
-        fake_process.register_subprocess(
-            ["usr/tfenv/terraform", "-version"], returncode=1
-        )
-        with pytest.raises(
-            subprocess.CalledProcessError, match="returned non-zero exit status 1"
-        ):
+        fake_process.register_subprocess(["usr/tfenv/terraform", "-version"], returncode=1)
+        with pytest.raises(subprocess.CalledProcessError, match="returned non-zero exit status 1"):
             TFEnvManager.get_version_from_executable("usr/tfenv/terraform")
 
     def test_get_version_from_file(self, tmp_path: Path) -> None:
@@ -248,9 +238,7 @@ class TestTFEnvManager:
             str(version), tfenv.versions_dir, tfenv.command_suffix
         )
 
-    def test_install_already_installed(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_install_already_installed(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test install."""
         version = Version("0.15.5")
         mocker.patch.object(TFEnvManager, "version", version)
@@ -267,9 +255,7 @@ class TestTFEnvManager:
         mocker.patch.object(TFEnvManager, "version", version)
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)
         mock_download = mocker.patch(f"{MODULE}.download_tf_release")
-        mock_set_version = mocker.patch.object(
-            TFEnvManager, "set_version", return_value=None
-        )
+        mock_set_version = mocker.patch.object(TFEnvManager, "set_version", return_value=None)
         tfenv = TFEnvManager(tmp_path)
         assert tfenv.install(str(version))
         mock_download.assert_called_once_with(
@@ -277,15 +263,11 @@ class TestTFEnvManager:
         )
         mock_set_version.assert_called_once_with(str(version))
 
-    def test_install_version_undefined(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_install_version_undefined(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test install."""
         mocker.patch.object(TFEnvManager, "version", None)
         tfenv = TFEnvManager(tmp_path)
-        with pytest.raises(
-            ValueError, match=r"^version not provided and unable to find .*"
-        ):
+        with pytest.raises(ValueError, match=r"^version not provided and unable to find .*"):
             tfenv.install()
 
     def test_list_installed(self, mocker: MockerFixture, tmp_path: Path) -> None:
@@ -311,9 +293,7 @@ class TestTFEnvManager:
             ("0.15.0-alpha13", Version("0.15.0-alpha13")),
         ],
     )
-    def test_parse_version_string(
-        self, provided: str, expected: Optional[Version]
-    ) -> None:
+    def test_parse_version_string(self, provided: str, expected: Optional[Version]) -> None:
         """Test parse_version_string."""
         assert TFEnvManager.parse_version_string(provided) == expected
 
@@ -461,9 +441,7 @@ class TestTFEnvManager:
         mock_get_version_from_file.assert_called_once_with()
         mock_get_available_tf_versions.assert_called_once_with(False)
 
-    def test_version_latest_partial(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_version_latest_partial(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test version latest."""
         version = Version("0.14.3")
         mocker.patch.object(TFEnvManager, "versions_dir", tmp_path)

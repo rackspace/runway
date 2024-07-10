@@ -31,9 +31,7 @@ from shared import (
 
 LOGGER = logging.getLogger(__file__)
 
-SECRET_ALLOWED_CHARS = (
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
-)
+SECRET_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
 NONCE_LENGTH = 16
 PKCE_LENGTH = 43
 CONFIG = get_config()
@@ -89,9 +87,7 @@ def handler(event, _context):
                             % (
                                 domain_name,
                                 CONFIG.get("redirect_path_auth_refresh"),
-                                urlencode(
-                                    {"requestedUri": requested_uri, "nonce": nonce}
-                                ),
+                                urlencode({"requestedUri": requested_uri, "nonce": nonce}),
                             ),
                         }
                     ],
@@ -138,8 +134,7 @@ def handler(event, _context):
         }
         login_query_string = urlencode(
             {
-                "redirect_uri": "https://%s%s"
-                % (domain_name, CONFIG["redirect_path_sign_in"]),
+                "redirect_uri": "https://%s%s" % (domain_name, CONFIG["redirect_path_sign_in"]),
                 "response_type": "code",
                 "client_id": CONFIG["client_id"],
                 "state": base64.urlsafe_b64encode(

@@ -50,9 +50,7 @@ class HookArgs(HookArgsBaseModel):
     """S3 bucket website URL."""
 
 
-def get_archives_to_prune(
-    archives: List[Dict[str, Any]], hook_data: Dict[str, Any]
-) -> List[str]:
+def get_archives_to_prune(archives: List[Dict[str, Any]], hook_data: Dict[str, Any]) -> List[str]:
     """Return list of keys to delete.
 
     Args:
@@ -66,9 +64,7 @@ def get_archives_to_prune(
         if hook_data.get(i)
     ]
 
-    archives.sort(  # sort from oldest to newest
-        key=itemgetter("LastModified"), reverse=False
-    )
+    archives.sort(key=itemgetter("LastModified"), reverse=False)  # sort from oldest to newest
 
     # Drop all but last 15 files
     return [i["Key"] for i in archives[:-15] if i["Key"] not in files_to_skip]
@@ -274,9 +270,7 @@ def get_content(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]
             if extra_file.content_type == "text/yaml":
                 return yaml.safe_dump(extra_file.content)
 
-            raise ValueError(
-                '"content_type" must be json or yaml if "content" is not a string'
-            )
+            raise ValueError('"content_type" must be json or yaml if "content" is not a string')
 
         if not isinstance(extra_file.content, str):
             raise TypeError(f"unsupported content: {type(extra_file.content)}")
@@ -342,9 +336,7 @@ def get_ssm_value(session: Session, name: str) -> Optional[str]:
         return None
 
 
-def set_ssm_value(
-    session: Session, name: str, value: Any, description: str = ""
-) -> None:
+def set_ssm_value(session: Session, name: str, value: Any, description: str = "") -> None:
     """Set the ssm parameter.
 
     Args:
@@ -402,9 +394,7 @@ def sync_extra_files(
         hash_new = calculate_hash_of_extra_files(extra_files)
 
         if hash_new == hash_old:
-            LOGGER.info(
-                "skipped upload of extra files; latest version already deployed"
-            )
+            LOGGER.info("skipped upload of extra files; latest version already deployed")
             return []
 
     for extra_file in extra_files:
@@ -421,9 +411,7 @@ def sync_extra_files(
             uploaded.append(extra_file.name)
 
         if extra_file.file:
-            LOGGER.info(
-                "uploading extra file: %s as %s ", extra_file.file, extra_file.name
-            )
+            LOGGER.info("uploading extra file: %s as %s ", extra_file.file, extra_file.name)
 
             extra_args = ""
 
@@ -447,9 +435,7 @@ def sync_extra_files(
             uploaded.append(extra_file.name)
 
     if hash_new:
-        LOGGER.info(
-            "updating extra files SSM parameter %s with hash %s", hash_param, hash_new
-        )
+        LOGGER.info("updating extra files SSM parameter %s with hash %s", hash_param, hash_new)
         set_ssm_value(session, hash_param, hash_new)
 
     return uploaded

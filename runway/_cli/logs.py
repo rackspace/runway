@@ -46,9 +46,7 @@ class LogSettings:
         "level_styles": os.getenv("RUNWAY_LOG_LEVEL_STYLES"),
     }
 
-    def __init__(
-        self, *, debug: int = 0, no_color: bool = False, verbose: bool = False
-    ):
+    def __init__(self, *, debug: int = 0, no_color: bool = False, verbose: bool = False):
         """Instantiate class.
 
         Args:
@@ -98,9 +96,7 @@ class LogSettings:
         result = LOG_FIELD_STYLES.copy()
         if self.ENV["field_styles"]:
             result.update(
-                coloredlogs.parse_encoded_styles(  # type: ignore
-                    self.ENV["field_styles"]
-                )
+                coloredlogs.parse_encoded_styles(self.ENV["field_styles"])  # type: ignore
             )
         return result
 
@@ -118,9 +114,7 @@ class LogSettings:
         result = LOG_LEVEL_STYLES.copy()
         if self.ENV["level_styles"]:
             result.update(
-                coloredlogs.parse_encoded_styles(  # type: ignore
-                    self.ENV["level_styles"]
-                )
+                coloredlogs.parse_encoded_styles(self.ENV["level_styles"])  # type: ignore
             )
         return result
 
@@ -134,9 +128,7 @@ class LogSettings:
         return LogLevels.INFO
 
 
-def setup_logging(
-    *, debug: int = 0, no_color: bool = False, verbose: bool = False
-) -> None:
+def setup_logging(*, debug: int = 0, no_color: bool = False, verbose: bool = False) -> None:
     """Configure log settings for Runway CLI.
 
     Keyword Args:

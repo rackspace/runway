@@ -20,9 +20,7 @@ class TestStaticSiteOptions:
         data = RunwayStaticSiteModuleOptionsDataModel(
             build_output="./dist",
             build_steps=["runway --help"],
-            pre_build_steps=[
-                RunwayStaticSitePreBuildStepDataModel(command="runway --help")
-            ],
+            pre_build_steps=[RunwayStaticSitePreBuildStepDataModel(command="runway --help")],
         )
         obj = StaticSiteOptions(data=data)
         assert obj.build_output == data.build_output
@@ -36,7 +34,4 @@ class TestStaticSiteOptions:
         """Test parse_obj."""
         obj = StaticSiteOptions.parse_obj({})
         assert isinstance(obj.data, RunwayStaticSiteModuleOptionsDataModel)
-        assert (
-            obj.data.dict(exclude_defaults=True, exclude_none=True, exclude_unset=True)
-            == {}
-        )
+        assert obj.data.dict(exclude_defaults=True, exclude_none=True, exclude_unset=True) == {}

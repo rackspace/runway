@@ -246,9 +246,7 @@ def interactive_prompt(
     return None, None
 
 
-def ensure_keypair_exists(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> KeyPairInfo:
+def ensure_keypair_exists(context: CfnginContext, *__args: Any, **kwargs: Any) -> KeyPairInfo:
     """Ensure a specific keypair exists within AWS.
 
     If the key doesn't exist, upload it.
@@ -258,8 +256,7 @@ def ensure_keypair_exists(
 
     if args.public_key_path and args.ssm_parameter_name:
         LOGGER.error(
-            "public_key_path and ssm_parameter_name cannot be "
-            "specified at the same time"
+            "public_key_path and ssm_parameter_name cannot be " "specified at the same time"
         )
         return {}
 
@@ -282,9 +279,7 @@ def ensure_keypair_exists(
     else:
         action, path = interactive_prompt(args.keypair)
         if action == "import" and path:
-            keypair_info = create_key_pair_from_public_key_file(
-                ec2, args.keypair, Path(path)
-            )
+            keypair_info = create_key_pair_from_public_key_file(ec2, args.keypair, Path(path))
         elif action == "create" and path:
             keypair_info = create_key_pair_local(ec2, args.keypair, Path(path))
         else:

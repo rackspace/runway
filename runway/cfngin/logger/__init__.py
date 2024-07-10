@@ -5,8 +5,7 @@ import sys
 from typing import Any, Dict, Optional
 
 DEBUG_FORMAT = (
-    "[%(asctime)s] %(levelname)s %(threadName)s "
-    "%(name)s:%(lineno)d(%(funcName)s): %(message)s"
+    "[%(asctime)s] %(levelname)s %(threadName)s " "%(name)s:%(lineno)d(%(funcName)s): %(message)s"
 )
 INFO_FORMAT = "[%(asctime)s] %(message)s"
 COLOR_FORMAT = "[%(asctime)s] \033[%(color)sm%(message)s\033[39m"

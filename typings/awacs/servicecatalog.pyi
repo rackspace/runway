@@ -58,9 +58,7 @@ DescribeProvisioningArtifact = Action("DescribeProvisioningArtifact")
 DescribeProvisioningParameters = Action("DescribeProvisioningParameters")
 DescribeRecord = Action("DescribeRecord")
 DescribeServiceAction = Action("DescribeServiceAction")
-DescribeServiceActionExecutionParameters = Action(
-    "DescribeServiceActionExecutionParameters"
-)
+DescribeServiceActionExecutionParameters = Action("DescribeServiceActionExecutionParameters")
 DescribeTagOption = Action("DescribeTagOption")
 DisableAWSOrganizationsAccess = Action("DisableAWSOrganizationsAccess")
 DisassociateBudgetFromResource = Action("DisassociateBudgetFromResource")
@@ -72,9 +70,7 @@ DisassociateServiceActionFromProvisioningArtifact = Action(
 DisassociateTagOptionFromResource = Action("DisassociateTagOptionFromResource")
 EnableAWSOrganizationsAccess = Action("EnableAWSOrganizationsAccess")
 ExecuteProvisionedProductPlan = Action("ExecuteProvisionedProductPlan")
-ExecuteProvisionedProductServiceAction = Action(
-    "ExecuteProvisionedProductServiceAction"
-)
+ExecuteProvisionedProductServiceAction = Action("ExecuteProvisionedProductServiceAction")
 GetAWSOrganizationsAccessStatus = Action("GetAWSOrganizationsAccessStatus")
 ListAcceptedPortfolioShares = Action("ListAcceptedPortfolioShares")
 ListBudgetsForResource = Action("ListBudgetsForResource")
@@ -87,18 +83,12 @@ ListPortfoliosForProduct = Action("ListPortfoliosForProduct")
 ListPrincipalsForPortfolio = Action("ListPrincipalsForPortfolio")
 ListProvisionedProductPlans = Action("ListProvisionedProductPlans")
 ListProvisioningArtifacts = Action("ListProvisioningArtifacts")
-ListProvisioningArtifactsForServiceAction = Action(
-    "ListProvisioningArtifactsForServiceAction"
-)
+ListProvisioningArtifactsForServiceAction = Action("ListProvisioningArtifactsForServiceAction")
 ListRecordHistory = Action("ListRecordHistory")
 ListResourcesForTagOption = Action("ListResourcesForTagOption")
 ListServiceActions = Action("ListServiceActions")
-ListServiceActionsForProvisioningArtifact = Action(
-    "ListServiceActionsForProvisioningArtifact"
-)
-ListStackInstancesForProvisionedProduct = Action(
-    "ListStackInstancesForProvisionedProduct"
-)
+ListServiceActionsForProvisioningArtifact = Action("ListServiceActionsForProvisioningArtifact")
+ListStackInstancesForProvisionedProduct = Action("ListStackInstancesForProvisionedProduct")
 ListTagOptions = Action("ListTagOptions")
 ProvisionProduct = Action("ProvisionProduct")
 RejectPortfolioShare = Action("RejectPortfolioShare")

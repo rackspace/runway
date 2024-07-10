@@ -88,9 +88,7 @@ def test_get_content_yaml() -> None:
     content = {"a": 0}
 
     actual = get_content(
-        RunwayStaticSiteExtraFileDataModel(
-            content_type="text/yaml", content=content, name=""
-        )
+        RunwayStaticSiteExtraFileDataModel(content_type="text/yaml", content=content, name="")
     )
     expected = yaml.safe_dump(content)
 
@@ -153,9 +151,7 @@ def test_sync_extra_files_json_content(cfngin_context: MockCFNginContext) -> Non
     files = [RunwayStaticSiteExtraFileDataModel(name="test.json", content=content)]
 
     with s3_stub as stub:
-        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
-            "test.json"
-        ]
+        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == ["test.json"]
         stub.assert_no_pending_responses()
 
 
@@ -176,14 +172,10 @@ def test_sync_extra_files_yaml_content(cfngin_context: MockCFNginContext) -> Non
         },
     )
 
-    files = [
-        RunwayStaticSiteExtraFileDataModel.construct(name="test.yaml", content=content)
-    ]
+    files = [RunwayStaticSiteExtraFileDataModel.construct(name="test.yaml", content=content)]
 
     with s3_stub as stub:
-        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
-            "test.yaml"
-        ]
+        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == ["test.yaml"]
         stub.assert_no_pending_responses()
 
 
@@ -196,9 +188,7 @@ def test_sync_extra_files_empty_content(cfngin_context: MockCFNginContext) -> No
             cfngin_context,
             "bucket",
             extra_files=[
-                RunwayStaticSiteExtraFileDataModel.construct(
-                    name="test.yaml", content=""
-                )
+                RunwayStaticSiteExtraFileDataModel.construct(name="test.yaml", content="")
             ],
         )
         assert isinstance(result, list)
@@ -224,9 +214,7 @@ def test_sync_extra_files_file_reference(cfngin_context: MockCFNginContext) -> N
         },
     )
 
-    files = [
-        RunwayStaticSiteExtraFileDataModel.construct(name="test", file=".gitignore")
-    ]
+    files = [RunwayStaticSiteExtraFileDataModel.construct(name="test", file=".gitignore")]
 
     with s3_stub as stub:
         assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == ["test"]
@@ -250,16 +238,10 @@ def test_sync_extra_files_file_reference_with_content_type(
         },
     )
 
-    files = [
-        RunwayStaticSiteExtraFileDataModel.construct(
-            name="test.json", file=".gitignore"
-        )
-    ]
+    files = [RunwayStaticSiteExtraFileDataModel.construct(name="test.json", file=".gitignore")]
 
     with s3_stub as stub:
-        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
-            "test.json"
-        ]
+        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == ["test.json"]
         stub.assert_no_pending_responses()
 
 

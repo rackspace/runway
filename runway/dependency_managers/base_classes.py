@@ -27,9 +27,7 @@ class DependencyManager(CliInterfaceMixin):
     CONFIG_FILES: ClassVar[Tuple[str, ...]]
     """Configuration files used by the dependency manager."""
 
-    def __init__(
-        self, context: Union[CfnginContext, RunwayContext], cwd: StrPath
-    ) -> None:
+    def __init__(self, context: Union[CfnginContext, RunwayContext], cwd: StrPath) -> None:
         """Instantiate class.
 
         Args:

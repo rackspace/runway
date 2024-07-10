@@ -143,9 +143,7 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
 
     _validate_string_is_lookup = cast(
         "classmethod[Callable[..., Any]]",
-        validator("duration", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
+        validator("duration", allow_reuse=True, pre=True)(utils.validate_string_is_lookup),
     )
 
 
@@ -173,9 +171,7 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
 
     _validate_string_is_lookup = cast(
         "classmethod[Callable[..., Any]]",
-        validator("parallel", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
+        validator("parallel", allow_reuse=True, pre=True)(utils.validate_string_is_lookup),
     )
 
 
@@ -198,9 +194,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         default={},
         description="Assume a role when processing the deployment. (supports lookups)",
         examples=["arn:aws:iam::123456789012:role/name"]
-        + cast(
-            List[Any], RunwayAssumeRoleDefinitionModel.Config.schema_extra["examples"]
-        ),
+        + cast(List[Any], RunwayAssumeRoleDefinitionModel.Config.schema_extra["examples"]),
     )
     env_vars: RunwayEnvVarsUnresolvedType = Field(
         default={},
@@ -644,9 +638,7 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         return cast(
             "Model",
             cls.parse_raw(
-                Path(path).read_text(
-                    encoding=locale.getpreferredencoding(do_setlocale=False)
-                ),
+                Path(path).read_text(encoding=locale.getpreferredencoding(do_setlocale=False)),
                 content_type=content_type,  # type: ignore
                 encoding=encoding,
                 proto=proto,  # type: ignore

@@ -125,15 +125,11 @@ class BaseContext(DelCachedPropMixin):
                 region or "default",
             )
         else:  # use explicit values or grab values from env vars
-            aws_access_key_id = aws_access_key_id or self.env.vars.get(
-                "AWS_ACCESS_KEY_ID"
-            )
+            aws_access_key_id = aws_access_key_id or self.env.vars.get("AWS_ACCESS_KEY_ID")
             aws_secret_access_key = aws_secret_access_key or self.env.vars.get(
                 "AWS_SECRET_ACCESS_KEY"
             )
-            aws_session_token = aws_session_token or self.env.vars.get(
-                "AWS_SESSION_TOKEN"
-            )
+            aws_session_token = aws_session_token or self.env.vars.get("AWS_SESSION_TOKEN")
             if aws_access_key_id:
                 self.logger.debug(
                     'building session with Access Key "%s" in region "%s"',

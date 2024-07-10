@@ -70,9 +70,7 @@ class TestAction:
             with pytest.raises(SystemExit) as excinfo:
                 action.pre_run()
             assert excinfo.value.code == 1
-            assert (
-                f"access denied for CFNgin bucket: {bucket_name}"
-            ) in caplog.messages
+            assert (f"access denied for CFNgin bucket: {bucket_name}") in caplog.messages
             return
 
         action.pre_run()
@@ -99,9 +97,7 @@ class TestAction:
         cfngin_context.add_stubber("cloudformation")
         cfngin_context.config.cfngin_bucket = ""
         expected = SkippedStatus("cfngin_bucket: existing bucket required")
-        mock_build_parameters = mocker.patch.object(
-            Action, "build_parameters", return_value=[]
-        )
+        mock_build_parameters = mocker.patch.object(Action, "build_parameters", return_value=[])
         mock_get_stack_changes = mocker.patch.object(
             Provider,
             "get_stack_changes",
@@ -169,12 +165,8 @@ class TestDictValueFormat(unittest.TestCase):
             ],
         )
         unmodified = DictValue("k3", "value_1", "value_1")
-        self.assertEqual(
-            unmodified.changes(), [f" {unmodified.key} = {unmodified.old_value}"]
-        )
-        self.assertEqual(
-            unmodified.changes(), [f" {unmodified.key} = {unmodified.new_value}"]
-        )
+        self.assertEqual(unmodified.changes(), [f" {unmodified.key} = {unmodified.old_value}"])
+        self.assertEqual(unmodified.changes(), [f" {unmodified.key} = {unmodified.new_value}"])
 
 
 class TestDiffDictionary(unittest.TestCase):

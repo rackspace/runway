@@ -52,9 +52,7 @@ if TYPE_CHECKING:
 def mock_stack_parameters(parameters: Dict[str, Any]) -> StackTypeDef:
     """Mock stack parameters."""
     return {  # type: ignore
-        "Parameters": [
-            {"ParameterKey": k, "ParameterValue": v} for k, v in parameters.items()
-        ]
+        "Parameters": [{"ParameterKey": k, "ParameterValue": v} for k, v in parameters.items()]
     }
 
 
@@ -63,9 +61,7 @@ class MockProvider(BaseProvider):
 
     _outputs: Dict[str, Dict[str, str]]
 
-    def __init__(
-        self, *, outputs: Optional[Dict[str, Dict[str, str]]] = None, **_: Any
-    ) -> None:
+    def __init__(self, *, outputs: Optional[Dict[str, Dict[str, str]]] = None, **_: Any) -> None:
         """Instantiate class."""
         self._outputs = outputs or {}
 
@@ -155,16 +151,12 @@ class TestAction:
             Action(cfngin_context).upload_disabled = False
 
 
-class TestBuildAction(
-    unittest.TestCase
-):  # TODO: refactor tests into the TestAction class
+class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestAction class
     """Tests for runway.cfngin.actions.deploy.BuildAction."""
 
     def setUp(self) -> None:
         """Run before tests."""
-        self.context = CfnginContext(
-            config=CfnginConfig.parse_obj({"namespace": "namespace"})
-        )
+        self.context = CfnginContext(config=CfnginConfig.parse_obj({"namespace": "namespace"}))
         self.provider = MockProvider()
         self.deploy_action = deploy.Action(
             self.context,
@@ -216,37 +208,21 @@ class TestBuildAction(
         status = self.deploy_action._destroy_stack(
             MockStack("vpc", in_progress_behavior="wait"), status=PENDING  # type: ignore
         )
-        provider.is_stack_being_destroyed.assert_called_once_with(
-            provider.get_stack.return_value
-        )
-        provider.is_stack_destroyed.assert_called_once_with(
-            provider.get_stack.return_value
-        )
-        provider.is_stack_in_progress.assert_called_once_with(
-            provider.get_stack.return_value
-        )
-        provider.is_stack_destroy_possible.assert_called_once_with(
-            provider.get_stack.return_value
-        )
+        provider.is_stack_being_destroyed.assert_called_once_with(provider.get_stack.return_value)
+        provider.is_stack_destroyed.assert_called_once_with(provider.get_stack.return_value)
+        provider.is_stack_in_progress.assert_called_once_with(provider.get_stack.return_value)
+        provider.is_stack_destroy_possible.assert_called_once_with(provider.get_stack.return_value)
         provider.get_delete_failed_status_reason.assert_called_once_with("vpc")
-        provider.get_stack_status_reason.assert_called_once_with(
-            provider.get_stack.return_value
-        )
+        provider.get_stack_status_reason.assert_called_once_with(provider.get_stack.return_value)
         assert isinstance(status, FailedStatus)
         assert status.reason == "reason"
 
-    @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
-    )
+    @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
     def test_generate_plan_persist_destroy(self, mock_graph_tags: PropertyMock) -> None:
         """Test generate plan persist destroy."""
         mock_graph_tags.return_value = {}
-        context = self._get_context(
-            extra_config_args={"persistent_graph_key": "test.json"}
-        )
-        context._persistent_graph = Graph.from_steps(
-            [Step.from_stack_name("removed", context)]
-        )
+        context = self._get_context(extra_config_args={"persistent_graph_key": "test.json"})
+        context._persistent_graph = Graph.from_steps([Step.from_stack_name("removed", context)])
         deploy_action = deploy.Action(context=context)
         plan = cast(Plan, deploy_action._Action__generate_plan())  # type: ignore
 
@@ -336,13 +312,9 @@ class TestBuildAction(
             deploy_action.run(outline=False)
             self.assertEqual(mock_generate_plan().execute.call_count, 1)
 
-    @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
-    )
+    @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
     @patch("runway.context.CfnginContext.lock_persistent_graph", new_callable=MagicMock)
-    @patch(
-        "runway.context.CfnginContext.unlock_persistent_graph", new_callable=MagicMock
-    )
+    @patch("runway.context.CfnginContext.unlock_persistent_graph", new_callable=MagicMock)
     @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
     def test_run_persist(
         self,
@@ -353,12 +325,8 @@ class TestBuildAction(
     ) -> None:
         """Test run persist."""
         mock_graph_tags.return_value = {}
-        context = self._get_context(
-            extra_config_args={"persistent_graph_key": "test.json"}
-        )
-        context._persistent_graph = Graph.from_steps(
-            [Step.from_stack_name("removed", context)]
-        )
+        context = self._get_context(extra_config_args={"persistent_graph_key": "test.json"})
+        context._persistent_graph = Graph.from_steps([Step.from_stack_name("removed", context)])
         deploy_action = deploy.Action(context=context)
         deploy_action.run()
 
@@ -540,14 +508,10 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
         self.assertEqual(self.step.status, PENDING)
 
         # first action with an existing failed stack should be deleting it
-        self._advance(
-            "ROLLBACK_COMPLETE", SUBMITTED, "destroying stack for re-creation"
-        )
+        self._advance("ROLLBACK_COMPLETE", SUBMITTED, "destroying stack for re-creation")
 
         # status should stay as submitted during deletion
-        self._advance(
-            "DELETE_IN_PROGRESS", SUBMITTED, "destroying stack for re-creation"
-        )
+        self._advance("DELETE_IN_PROGRESS", SUBMITTED, "destroying stack for re-creation")
 
         # deletion being complete must trigger re-creation
         self._advance("DELETE_COMPLETE", SUBMITTED, "re-creating stack")

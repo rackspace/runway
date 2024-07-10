@@ -36,9 +36,7 @@ def get_principal_arn(context: CfnginContext) -> str:
     return assumed_role_to_principle(caller_identity_arn)
 
 
-def generate(
-    context: CfnginContext, *, filename: str, path: List[str], stack: str, **_: Any
-):
+def generate(context: CfnginContext, *, filename: str, path: List[str], stack: str, **_: Any):
     """Generate an EKS auth_map for worker connection.
 
     Args:
@@ -59,14 +57,12 @@ def generate(
     LOGGER.info("Creating auth_map at %s", file_path)
     overlay_path.mkdir(parents=True, exist_ok=True)
     principal_arn = get_principal_arn(context)
-    node_instancerole_arn = OutputLookup.handle(
-        f"{stack}::NodeInstanceRoleArn", context=context
-    )
+    node_instancerole_arn = OutputLookup.handle(f"{stack}::NodeInstanceRoleArn", context=context)
     aws_authmap_template = (Path(__file__).parent / "aws-auth-cm.yaml").read_text()
     file_path.write_text(
-        aws_authmap_template.replace(
-            "INSTANCEROLEARNHERE", node_instancerole_arn
-        ).replace("ORIGINALPRINCIPALARNHERE", principal_arn)
+        aws_authmap_template.replace("INSTANCEROLEARNHERE", node_instancerole_arn).replace(
+            "ORIGINALPRINCIPALARNHERE", principal_arn
+        )
     )
     return True
 

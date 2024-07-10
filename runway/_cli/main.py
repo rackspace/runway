@@ -44,20 +44,14 @@ class _CliGroup(click.Group):
         """
         parser = argparse.ArgumentParser(add_help=False)
         parser.add_argument("--ci", action="store_true", default=bool(os.getenv("CI")))
-        parser.add_argument(
-            "--debug", default=int(os.getenv("DEBUG", "0")), action="count"
-        )
-        parser.add_argument(
-            "-e", "--deploy-environment", default=os.getenv("DEPLOY_ENVIRONMENT")
-        )
+        parser.add_argument("--debug", default=int(os.getenv("DEBUG", "0")), action="count")
+        parser.add_argument("-e", "--deploy-environment", default=os.getenv("DEPLOY_ENVIRONMENT"))
         parser.add_argument(
             "--no-color",
             action="store_true",
             default=bool(os.getenv("RUNWAY_NO_COLOR")),
         )
-        parser.add_argument(
-            "--verbose", action="store_true", default=bool(os.getenv("VERBOSE"))
-        )
+        parser.add_argument("--verbose", action="store_true", default=bool(os.getenv("VERBOSE")))
         args, _ = parser.parse_known_args(list(ctx.args))
         return vars(args)
 
@@ -75,9 +69,7 @@ def cli(ctx: click.Context, **_: Any) -> None:
 
     """
     opts = ctx.meta["global.options"]
-    setup_logging(
-        debug=opts["debug"], no_color=opts["no_color"], verbose=opts["verbose"]
-    )
+    setup_logging(debug=opts["debug"], no_color=opts["no_color"], verbose=opts["verbose"])
     ctx.obj = CliContext(**opts)
 
 

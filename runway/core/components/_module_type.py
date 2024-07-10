@@ -113,16 +113,12 @@ class RunwayModuleType:
         if not self.class_path and self.type_str:
             self.class_path = self.TYPE_MAP.get(self.type_str, None)
             if self.class_path:
-                LOGGER.debug(
-                    'module class "%s" determined from explicit type', self.class_path
-                )
+                LOGGER.debug('module class "%s" determined from explicit type', self.class_path)
 
         if not self.class_path:
             self._set_class_path_based_on_extension()
             if self.class_path:
-                LOGGER.debug(
-                    'module class "%s" determined from path extension', self.class_path
-                )
+                LOGGER.debug('module class "%s" determined from path extension', self.class_path)
 
         if not self.class_path:
             self._set_class_path_based_on_autodetection()
@@ -161,9 +157,7 @@ class RunwayModuleType:
             self.class_path = self.TYPE_MAP.get("serverless", None)
         elif next(self.path.glob("*.tf"), None):
             self.class_path = self.TYPE_MAP.get("terraform", None)
-        elif (self.path / "cdk.json").is_file() and (
-            self.path / "package.json"
-        ).is_file():
+        elif (self.path / "cdk.json").is_file() and (self.path / "package.json").is_file():
             self.class_path = self.TYPE_MAP.get("cdk", None)
         elif (self.path / "overlays").is_dir() and self._find_kustomize_files():
             self.class_path = self.TYPE_MAP.get("kubernetes", None)
@@ -174,9 +168,7 @@ class RunwayModuleType:
         ):
             self.class_path = self.TYPE_MAP.get("cloudformation", None)
         if self.class_path:
-            LOGGER.debug(
-                'module class "%s" determined from autodetection', self.class_path
-            )
+            LOGGER.debug('module class "%s" determined from autodetection', self.class_path)
 
     def _find_kustomize_files(self) -> bool:
         """Return true if kustomize yaml file found.

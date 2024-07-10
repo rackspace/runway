@@ -26,17 +26,11 @@ class TestS3SyncHandler:
             runway_context, dest="", src=""
         ).client == runway_context.get_session().client("s3")
 
-    def test_run(
-        self, mocker: MockerFixture, runway_context: MockRunwayContext
-    ) -> None:
+    def test_run(self, mocker: MockerFixture, runway_context: MockRunwayContext) -> None:
         """Test run."""
-        mock_register_sync_strategies = mocker.patch(
-            f"{MODULE}.register_sync_strategies"
-        )
+        mock_register_sync_strategies = mocker.patch(f"{MODULE}.register_sync_strategies")
         mock_action = mocker.patch(f"{MODULE}.ActionArchitecture")
-        transfer_config = mocker.patch.object(
-            S3SyncHandler, "transfer_config", {"key": "val"}
-        )
+        transfer_config = mocker.patch.object(S3SyncHandler, "transfer_config", {"key": "val"})
         obj = S3SyncHandler(runway_context, dest="", src="")
         assert not obj.run()
         mock_register_sync_strategies.assert_called_once_with(obj._botocore_session)

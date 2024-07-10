@@ -52,9 +52,7 @@ class Iam(Blueprint):
         )
 
         nodeinstanceprofile = template.add_resource(
-            iam.InstanceProfile(
-                "NodeInstanceProfile", Path="/", Roles=[nodeinstancerole.ref()]
-            )
+            iam.InstanceProfile("NodeInstanceProfile", Path="/", Roles=[nodeinstancerole.ref()])
         )
         template.add_output(
             Output(

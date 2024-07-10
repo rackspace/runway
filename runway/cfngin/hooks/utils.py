@@ -117,9 +117,7 @@ def handle_hooks(
 
         try:
             if isinstance(method, type):
-                result: Any = getattr(
-                    method(context=context, provider=provider, **kwargs), stage
-                )()
+                result: Any = getattr(method(context=context, provider=provider, **kwargs), stage)()
             else:
                 result = cast(Any, method(context=context, provider=provider, **kwargs))
         except Exception:
@@ -130,13 +128,9 @@ def handle_hooks(
 
         if not result:
             if hook.required:
-                LOGGER.error(
-                    "required hook %s failed; return value: %s", hook.path, result
-                )
+                LOGGER.error("required hook %s failed; return value: %s", hook.path, result)
                 sys.exit(1)
-            LOGGER.warning(
-                "non-required hook %s failed; return value: %s", hook.path, result
-            )
+            LOGGER.warning("non-required hook %s failed; return value: %s", hook.path, result)
         else:
             if isinstance(result, (collections.abc.Mapping, pydantic.BaseModel)):
                 if hook.data_key:

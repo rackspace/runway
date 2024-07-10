@@ -529,9 +529,7 @@ fake_responses: Dict[Union[str, Tuple[str, str]], Callable[..., Tuple[int, Any]]
     "{1}/{0}/_ping".format(CURRENT_VERSION, prefix): get_fake_ping,
     "{1}/{0}/images/search".format(CURRENT_VERSION, prefix): get_fake_search,
     "{1}/{0}/images/json".format(CURRENT_VERSION, prefix): get_fake_images,
-    "{1}/{0}/images/test_image/history".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_image_history,
+    "{1}/{0}/images/test_image/history".format(CURRENT_VERSION, prefix): get_fake_image_history,
     "{1}/{0}/images/create".format(CURRENT_VERSION, prefix): post_fake_import_image,
     "{1}/{0}/containers/json".format(CURRENT_VERSION, prefix): get_fake_containers,
     "{1}/{0}/containers/3cc2351ab11b/start".format(
@@ -546,39 +544,19 @@ fake_responses: Dict[Union[str, Tuple[str, str]], Callable[..., Tuple[int, Any]]
     "{1}/{0}/containers/3cc2351ab11b/rename".format(
         CURRENT_VERSION, prefix
     ): post_fake_rename_container,
-    "{1}/{0}/images/e9aa60c60128/tag".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_tag_image,
-    "{1}/{0}/containers/3cc2351ab11b/wait".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_wait,
-    "{1}/{0}/containers/3cc2351ab11b/logs".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_logs,
-    "{1}/{0}/containers/3cc2351ab11b/changes".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_diff,
-    "{1}/{0}/containers/3cc2351ab11b/export".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_export,
+    "{1}/{0}/images/e9aa60c60128/tag".format(CURRENT_VERSION, prefix): post_fake_tag_image,
+    "{1}/{0}/containers/3cc2351ab11b/wait".format(CURRENT_VERSION, prefix): get_fake_wait,
+    "{1}/{0}/containers/3cc2351ab11b/logs".format(CURRENT_VERSION, prefix): get_fake_logs,
+    "{1}/{0}/containers/3cc2351ab11b/changes".format(CURRENT_VERSION, prefix): get_fake_diff,
+    "{1}/{0}/containers/3cc2351ab11b/export".format(CURRENT_VERSION, prefix): get_fake_export,
     "{1}/{0}/containers/3cc2351ab11b/update".format(
         CURRENT_VERSION, prefix
     ): post_fake_update_container,
-    "{1}/{0}/containers/3cc2351ab11b/exec".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_exec_create,
-    "{1}/{0}/exec/d5d177f121dc/start".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_exec_start,
-    "{1}/{0}/exec/d5d177f121dc/json".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_exec_inspect,
-    "{1}/{0}/exec/d5d177f121dc/resize".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_exec_resize,
-    "{1}/{0}/containers/3cc2351ab11b/stats".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_stats,
+    "{1}/{0}/containers/3cc2351ab11b/exec".format(CURRENT_VERSION, prefix): post_fake_exec_create,
+    "{1}/{0}/exec/d5d177f121dc/start".format(CURRENT_VERSION, prefix): post_fake_exec_start,
+    "{1}/{0}/exec/d5d177f121dc/json".format(CURRENT_VERSION, prefix): get_fake_exec_inspect,
+    "{1}/{0}/exec/d5d177f121dc/resize".format(CURRENT_VERSION, prefix): post_fake_exec_resize,
+    "{1}/{0}/containers/3cc2351ab11b/stats".format(CURRENT_VERSION, prefix): get_fake_stats,
     "{1}/{0}/containers/3cc2351ab11b/top".format(CURRENT_VERSION, prefix): get_fake_top,
     "{1}/{0}/containers/3cc2351ab11b/stop".format(
         CURRENT_VERSION, prefix
@@ -595,28 +573,16 @@ fake_responses: Dict[Union[str, Tuple[str, str]], Callable[..., Tuple[int, Any]]
     "{1}/{0}/containers/3cc2351ab11b/restart".format(
         CURRENT_VERSION, prefix
     ): post_fake_restart_container,
-    "{1}/{0}/containers/3cc2351ab11b".format(
-        CURRENT_VERSION, prefix
-    ): delete_fake_remove_container,
+    "{1}/{0}/containers/3cc2351ab11b".format(CURRENT_VERSION, prefix): delete_fake_remove_container,
     "{1}/{0}/images/create".format(CURRENT_VERSION, prefix): post_fake_image_create,
-    "{1}/{0}/images/e9aa60c60128".format(
-        CURRENT_VERSION, prefix
-    ): delete_fake_remove_image,
-    "{1}/{0}/images/e9aa60c60128/get".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_get_image,
+    "{1}/{0}/images/e9aa60c60128".format(CURRENT_VERSION, prefix): delete_fake_remove_image,
+    "{1}/{0}/images/e9aa60c60128/get".format(CURRENT_VERSION, prefix): get_fake_get_image,
     "{1}/{0}/images/load".format(CURRENT_VERSION, prefix): post_fake_load_image,
-    "{1}/{0}/images/test_image/json".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_inspect_image,
-    "{1}/{0}/images/test_image/insert".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_insert_image,
+    "{1}/{0}/images/test_image/json".format(CURRENT_VERSION, prefix): get_fake_inspect_image,
+    "{1}/{0}/images/test_image/insert".format(CURRENT_VERSION, prefix): get_fake_insert_image,
     "{1}/{0}/images/test_image/push".format(CURRENT_VERSION, prefix): post_fake_push,
     "{1}/{0}/commit".format(CURRENT_VERSION, prefix): post_fake_commit,
-    "{1}/{0}/containers/create".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_create_container,
+    "{1}/{0}/containers/create".format(CURRENT_VERSION, prefix): post_fake_create_container,
     "{1}/{0}/build".format(CURRENT_VERSION, prefix): post_fake_build_container,
     "{1}/{0}/events".format(CURRENT_VERSION, prefix): get_fake_events,
     ("{1}/{0}/volumes".format(CURRENT_VERSION, prefix), "GET"): get_fake_volume_list,
@@ -630,9 +596,7 @@ fake_responses: Dict[Union[str, Tuple[str, str]], Callable[..., Tuple[int, Any]]
         "DELETE",
     ): fake_remove_volume,
     (
-        "{1}/{0}/nodes/{2}/update?version=1".format(
-            CURRENT_VERSION, prefix, FAKE_NODE_ID
-        ),
+        "{1}/{0}/nodes/{2}/update?version=1".format(CURRENT_VERSION, prefix, FAKE_NODE_ID),
         "POST",
     ): post_fake_update_node,
     (
@@ -657,9 +621,7 @@ fake_responses: Dict[Union[str, Tuple[str, str]], Callable[..., Tuple[int, Any]]
         "POST",
     ): post_fake_network_connect,
     (
-        "{1}/{0}/networks/{2}/disconnect".format(
-            CURRENT_VERSION, prefix, FAKE_NETWORK_ID
-        ),
+        "{1}/{0}/networks/{2}/disconnect".format(CURRENT_VERSION, prefix, FAKE_NETWORK_ID),
         "POST",
     ): post_fake_network_disconnect,
 }

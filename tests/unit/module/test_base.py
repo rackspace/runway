@@ -44,9 +44,7 @@ class TestModuleOptions:
 class TestRunwayModuleNpm:
     """Test runway.module.base.RunwayModuleNpm."""
 
-    def test_check_for_npm_missing(
-        self, caplog: LogCaptureFixture, mocker: MockerFixture
-    ) -> None:
+    def test_check_for_npm_missing(self, caplog: LogCaptureFixture, mocker: MockerFixture) -> None:
         """Test check_for_npm missing."""
         caplog.set_level(logging.ERROR, logger=MODULE)
         mock_which = mocker.patch(f"{MODULE}.which", return_value=False)
@@ -71,9 +69,7 @@ class TestRunwayModuleNpm:
         mock_check_for_npm = mocker.patch.object(
             RunwayModuleNpm, "check_for_npm", side_effect=NpmNotFound
         )
-        mock_warn_on_boto_env_vars = mocker.patch.object(
-            RunwayModuleNpm, "warn_on_boto_env_vars"
-        )
+        mock_warn_on_boto_env_vars = mocker.patch.object(RunwayModuleNpm, "warn_on_boto_env_vars")
         with pytest.raises(NpmNotFound):
             RunwayModuleNpm(runway_context, module_root=tmp_path)
         mock_check_for_npm.assert_called_once()
@@ -84,9 +80,7 @@ class TestRunwayModuleNpm:
     ) -> None:
         """Test __init__."""
         mock_check_for_npm = mocker.patch.object(RunwayModuleNpm, "check_for_npm")
-        mock_warn_on_boto_env_vars = mocker.patch.object(
-            RunwayModuleNpm, "warn_on_boto_env_vars"
-        )
+        mock_warn_on_boto_env_vars = mocker.patch.object(RunwayModuleNpm, "warn_on_boto_env_vars")
         obj = RunwayModuleNpm(
             runway_context,
             module_root=tmp_path,
@@ -256,9 +250,7 @@ class TestRunwayModuleNpm:
 class TestRunwayModule:
     """Test runway.module.base.RunwayModule."""
 
-    def test___init___default(
-        self, runway_context: MockRunwayContext, tmp_path: Path
-    ) -> None:
+    def test___init___default(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test __init__ default values."""
         obj = RunwayModule(runway_context, module_root=tmp_path)
         assert not obj.explicitly_enabled

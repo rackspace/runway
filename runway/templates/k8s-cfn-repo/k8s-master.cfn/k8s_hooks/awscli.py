@@ -34,9 +34,7 @@ def aws_eks_update_kubeconfig(context: CfnginContext, **kwargs: Any) -> bool:
             f"{kwargs['stack']}::EksClusterName", context=context
         )
     LOGGER.info("writing kubeconfig...")
-    subprocess.check_output(
-        ["aws", "eks", "update-kubeconfig", "--name", eks_cluster_name]
-    )
+    subprocess.check_output(["aws", "eks", "update-kubeconfig", "--name", eks_cluster_name])
     LOGGER.info("kubeconfig written successfully...")
 
     # The newly-generated kubeconfig will have introduced a dependency on the

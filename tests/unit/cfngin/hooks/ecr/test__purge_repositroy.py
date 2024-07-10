@@ -35,9 +35,7 @@ def test_delete_ecr_images() -> None:
     )
 
     with stubber:
-        assert not delete_ecr_images(
-            client, image_ids=image_ids, repository_name=repo_name
-        )
+        assert not delete_ecr_images(client, image_ids=image_ids, repository_name=repo_name)
 
 
 def test_delete_ecr_images_failures() -> None:
@@ -109,9 +107,7 @@ def test_list_ecr_images_repository_not_found() -> None:
         assert list_ecr_images(client, repository_name="test-repo") == []
 
 
-def test_purge_repository(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture
-) -> None:
+def test_purge_repository(cfngin_context: MockCFNginContext, mocker: MockerFixture) -> None:
     """Test purge_repository."""
     mock_list_ecr_images = mocker.patch(
         MODULE + ".list_ecr_images", return_value=[{"imageDigest": "abc123"}]
@@ -121,18 +117,14 @@ def test_purge_repository(
     client = cfngin_context.get_session().client("ecr")
     repo_name = "test-repo"
 
-    assert purge_repository(cfngin_context, repository_name=repo_name) == {
-        "status": "success"
-    }
+    assert purge_repository(cfngin_context, repository_name=repo_name) == {"status": "success"}
     mock_list_ecr_images.assert_called_once_with(client, repository_name=repo_name)
     mock_delete_ecr_images.assert_called_once_with(
         client, image_ids=mock_list_ecr_images.return_value, repository_name=repo_name
     )
 
 
-def test_purge_repository_skip(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture
-) -> None:
+def test_purge_repository_skip(cfngin_context: MockCFNginContext, mocker: MockerFixture) -> None:
     """Test purge_repository."""
     mock_list_ecr_images = mocker.patch(MODULE + ".list_ecr_images", return_value=[])
     mock_delete_ecr_images = mocker.patch(MODULE + ".delete_ecr_images")
@@ -140,8 +132,6 @@ def test_purge_repository_skip(
     client = cfngin_context.get_session().client("ecr")
     repo_name = "test-repo"
 
-    assert purge_repository(cfngin_context, repository_name=repo_name) == {
-        "status": "skipped"
-    }
+    assert purge_repository(cfngin_context, repository_name=repo_name) == {"status": "skipped"}
     mock_list_ecr_images.assert_called_once_with(client, repository_name=repo_name)
     mock_delete_ecr_images.assert_not_called()

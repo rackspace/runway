@@ -64,9 +64,7 @@ def should_update(stack: Stack) -> bool:
     """
     if stack.locked:
         if not stack.force:
-            LOGGER.debug(
-                "%s:locked and not in --force list; refusing to update", stack.name
-            )
+            LOGGER.debug("%s:locked and not in --force list; refusing to update", stack.name)
             return False
         LOGGER.debug("%s:locked but is in --force list", stack.name)
     return True
@@ -100,9 +98,7 @@ def should_ensure_cfn_bucket(outline: bool, dump: bool) -> bool:
     return not outline and not dump
 
 
-def _resolve_parameters(
-    parameters: Dict[str, Any], blueprint: Blueprint
-) -> Dict[str, Any]:
+def _resolve_parameters(parameters: Dict[str, Any], blueprint: Blueprint) -> Dict[str, Any]:
     """Resolve CloudFormation Parameters for a given blueprint.
 
     Given a list of parameters, handles:
@@ -175,9 +171,7 @@ def _handle_missing_parameters(
         ]
         for param in missing_params:
             if param in stack_parameters:
-                LOGGER.debug(
-                    "using previous value for parameter %s from existing stack", param
-                )
+                LOGGER.debug("using previous value for parameter %s from existing stack", param)
                 parameter_values[param] = UsePreviousParameterValue
     final_missing = list(set(required_params) - set(parameter_values.keys()))
     if final_missing:
@@ -293,9 +287,7 @@ class Action(BaseAction):
 
         return param_list
 
-    def _destroy_stack(
-        self, stack: Stack, *, status: Optional[Status] = None, **_: Any
-    ) -> Status:
+    def _destroy_stack(self, stack: Stack, *, status: Optional[Status] = None, **_: Any) -> Status:
         """Delete a CloudFormation stack.
 
         Used to remove stacks that exist in the persistent graph but not
@@ -553,9 +545,7 @@ class Action(BaseAction):
 
         return Plan(context=self.context, description=self.DESCRIPTION, graph=graph)
 
-    def pre_run(
-        self, *, dump: Union[bool, str] = False, outline: bool = False, **_: Any
-    ) -> None:
+    def pre_run(self, *, dump: Union[bool, str] = False, outline: bool = False, **_: Any) -> None:
         """Any steps that need to be taken prior to running the action."""
         if should_ensure_cfn_bucket(outline, bool(dump)):
             self.ensure_cfn_bucket()
@@ -613,9 +603,7 @@ class Action(BaseAction):
         if isinstance(dump, str):
             plan.dump(directory=dump, context=self.context, provider=self.provider)
 
-    def post_run(
-        self, *, dump: Union[bool, str] = False, outline: bool = False, **_: Any
-    ) -> None:
+    def post_run(self, *, dump: Union[bool, str] = False, outline: bool = False, **_: Any) -> None:
         """Any steps that need to be taken after running the action."""
         handle_hooks(
             "post_deploy",

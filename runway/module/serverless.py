@@ -117,8 +117,7 @@ class Serverless(RunwayModuleNpm):
             if self.parameters or self.explicitly_enabled or self.env_file:
                 return False
             self.logger.info(
-                "skipped; config file for this stage/region not found"
-                " -- looking for one of: %s",
+                "skipped; config file for this stage/region not found" " -- looking for one of: %s",
                 ", ".join(gen_sls_config_files(self.stage, self.region)),
             )
         else:
@@ -158,8 +157,7 @@ class Serverless(RunwayModuleNpm):
                 self.logger.debug("removed temporary Serverless config")
             except OSError:
                 self.logger.debug(
-                    "encountered an error when trying to delete the "
-                    "temporary Serverless config",
+                    "encountered an error when trying to delete the " "temporary Serverless config",
                     exc_info=True,
                 )
 
@@ -200,9 +198,7 @@ class Serverless(RunwayModuleNpm):
             command="sls", command_opts=args, path=self.path, logger=self.logger
         )
 
-    def sls_deploy(
-        self, *, package: Optional[AnyPath] = None, skip_install: bool = False
-    ) -> None:
+    def sls_deploy(self, *, package: Optional[AnyPath] = None, skip_install: bool = False) -> None:
         """Execute ``sls deploy`` command.
 
         Args:
@@ -353,9 +349,7 @@ class Serverless(RunwayModuleNpm):
 
     def init(self) -> None:
         """Run init."""
-        self.logger.warning(
-            "init not currently supported for %s", self.__class__.__name__
-        )
+        self.logger.warning("init not currently supported for %s", self.__class__.__name__)
 
     def plan(self) -> None:
         """Entrypoint for Runway's plan action."""
@@ -388,9 +382,7 @@ class ServerlessArtifact:
         self.ctx = context
         self.config = config
         self.logger = logger
-        self.package_path = (
-            Path(package_path) if isinstance(package_path, str) else package_path
-        )
+        self.package_path = Path(package_path) if isinstance(package_path, str) else package_path
         self.path = Path(path) if isinstance(path, str) else path
 
     @cached_property
@@ -398,9 +390,7 @@ class ServerlessArtifact:
         """File hash(es) of each service's source code."""
         if self.config.get("package", {"": ""}).get("individually"):
             return {
-                name: get_hash_of_files(
-                    self.path / os.path.dirname(detail.get("handler"))
-                )
+                name: get_hash_of_files(self.path / os.path.dirname(detail.get("handler")))
                 for name, detail in self.config.get("functions", {}).items()
             }
         directories: List[Dict[str, Union[List[str], str]]] = []
@@ -410,11 +400,7 @@ class ServerlessArtifact:
                 directories.append(func_path)
         if isinstance(self.config["service"], dict):
             # handle sls<3.0.0 potential service property object notation
-            return {
-                self.config["service"]["name"]: get_hash_of_files(
-                    self.path, directories
-                )
-            }
+            return {self.config["service"]["name"]: get_hash_of_files(self.path, directories)}
         return {self.config["service"]: get_hash_of_files(self.path, directories)}
 
     def sync_with_s3(self, bucket_name: str) -> None:
@@ -476,9 +462,7 @@ class ServerlessOptions(ModuleOptions):
 
         """
         self._arg_parser = self._create_arg_parser()
-        cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(
-            data.args.copy()
-        )
+        cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(data.args.copy())
         self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
 
         self.data = data

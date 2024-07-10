@@ -12,12 +12,8 @@ from runway.cfngin.blueprints.variables.types import CFNType
 PATTERN_LIST = r"(AWS|CFN)?(?P<type>.*)List?"
 PATTERN_SUB_AWS_PARAMETER_TYPE = r"(AWS|::)"
 
-AWS_CLASSES = [
-    kls for kls in CFNType.__subclasses__() if not kls.__name__.startswith("CFN")
-]
-CFN_CLASSES = [
-    kls for kls in CFNType.__subclasses__() if kls.__name__.startswith("CFN")
-]
+AWS_CLASSES = [kls for kls in CFNType.__subclasses__() if not kls.__name__.startswith("CFN")]
+CFN_CLASSES = [kls for kls in CFNType.__subclasses__() if kls.__name__.startswith("CFN")]
 
 
 def handle_ssm_parameter_value(value: str) -> str:

@@ -61,9 +61,7 @@ class Deployment:
         """Parse the definition to get assume role arguments."""
         assume_role = self.definition.assume_role
         if not assume_role:
-            self.logger.debug(
-                "assume_role not configured for deployment: %s", self.name
-            )
+            self.logger.debug("assume_role not configured for deployment: %s", self.name)
             return {}
         if isinstance(assume_role, str):  # type: ignore
             self.logger.debug("role found: %s", assume_role)
@@ -71,9 +69,7 @@ class Deployment:
         elif isinstance(assume_role, dict):  # type: ignore
             assume_role = RunwayAssumeRoleDefinitionModel.parse_obj(assume_role)
         if not assume_role.arn:
-            self.logger.debug(
-                "assume_role not configured for deployment: %s", self.name
-            )
+            self.logger.debug("assume_role not configured for deployment: %s", self.name)
             return {}
         return {
             "duration_seconds": assume_role.duration,
@@ -113,9 +109,7 @@ class Deployment:
         High level method for running a deployment.
 
         """
-        self.logger.verbose(
-            "attempting to deploy to region(s): %s", ", ".join(self.regions)
-        )
+        self.logger.verbose("attempting to deploy to region(s): %s", ", ".join(self.regions))
         if self.use_async:
             return self.__async("deploy")
         return self.__sync("deploy")
@@ -126,9 +120,7 @@ class Deployment:
         High level method for running a deployment.
 
         """
-        self.logger.verbose(
-            "attempting to destroy in region(s): %s", ", ".join(self.regions)
-        )
+        self.logger.verbose("attempting to destroy in region(s): %s", ", ".join(self.regions))
         if self.use_async:
             return self.__async("destroy")
         return self.__sync("destroy")
@@ -139,9 +131,7 @@ class Deployment:
         High level method for running a deployment.
 
         """
-        self.logger.verbose(
-            "attempting to initialize region(s): %s", ", ".join(self.regions)
-        )
+        self.logger.verbose("attempting to initialize region(s): %s", ", ".join(self.regions))
         if self.use_async:
             return self.__async("init")
         return self.__sync("init")
@@ -188,9 +178,7 @@ class Deployment:
                 variables=self._variables,
             )
 
-    def validate_account_credentials(
-        self, context: Optional[RunwayContext] = None
-    ) -> None:
+    def validate_account_credentials(self, context: Optional[RunwayContext] = None) -> None:
         """Exit if requested deployment account doesn't match credentials.
 
         Args:
@@ -235,9 +223,7 @@ class Deployment:
             self.logger.verbose(
                 "environment variable overrides are being applied to this deployment"
             )
-            self.logger.debug(
-                "environment variable overrides: %s", self.env_vars_config
-            )
+            self.logger.debug("environment variable overrides: %s", self.env_vars_config)
             self.ctx.env.vars = merge_dicts(self.ctx.env.vars, self.env_vars_config)
 
     def __async(self, action: RunwayActionTypeDef) -> None:
@@ -247,16 +233,12 @@ class Deployment:
             action: Name of action to run.
 
         """
-        self.logger.info(
-            "processing regions in parallel... (output will be interwoven)"
-        )
+        self.logger.info("processing regions in parallel... (output will be interwoven)")
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=self.ctx.env.max_concurrent_regions,
             mp_context=multiprocessing.get_context("fork"),
         ) as executor:
-            futures = [
-                executor.submit(self.run, *[action, region]) for region in self.regions
-            ]
+            futures = [executor.submit(self.run, *[action, region]) for region in self.regions]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 

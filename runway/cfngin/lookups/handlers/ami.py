@@ -55,9 +55,7 @@ class ImageNotFound(Exception):
     def __init__(self, search_string: str) -> None:
         """Instantiate class."""
         self.search_string = search_string
-        super().__init__(
-            f"Unable to find ec2 image with search string: {search_string}"
-        )
+        super().__init__(f"Unable to find ec2 image with search string: {search_string}")
 
 
 class AmiLookup(LookupHandler):
@@ -94,9 +92,7 @@ class AmiLookup(LookupHandler):
         return args.pop("name_regex"), args
 
     @classmethod
-    def handle(
-        cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
-    ) -> str:
+    def handle(cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any) -> str:
         """Fetch the most recent AMI Id using a filter.
 
         Args:
@@ -124,9 +120,7 @@ class AmiLookup(LookupHandler):
             "Filters": [
                 {"Name": key, "Values": val.split(",") if val else val}
                 for key, val in {
-                    k: v
-                    for k, v in raw_args.items()
-                    if k not in ArgsDataModel.__fields__
+                    k: v for k, v in raw_args.items() if k not in ArgsDataModel.__fields__
                 }.items()
             ],
             "Owners": args.owners,

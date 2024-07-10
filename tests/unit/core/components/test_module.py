@@ -123,9 +123,7 @@ class TestModule:
     ) -> None:
         """Test environments with opts_from_file."""
         runway_context.env.root_dir = cd_tmp_path
-        mocker.patch.object(
-            Module, "opts_from_file", {"environments": {"test": ["us-east-1"]}}
-        )
+        mocker.patch.object(Module, "opts_from_file", {"environments": {"test": ["us-east-1"]}})
         deployment = fx_deployments.load("environments_map_str")
         mod = Module(
             context=runway_context,
@@ -256,9 +254,7 @@ class TestModule:
         runway_context: MockRunwayContext,
     ) -> None:
         """Test type."""
-        mock_path = mocker.patch(
-            f"{MODULE}.ModulePath", module_root=runway_context.env.root_dir
-        )
+        mock_path = mocker.patch(f"{MODULE}.ModulePath", module_root=runway_context.env.root_dir)
         mock_type = mocker.patch(f"{MODULE}.RunwayModuleType")
         mock_type.return_value = mock_type
         mocker.patch.object(Module, "path", mock_path)
@@ -311,9 +307,7 @@ class TestModule:
         use_concurrent: bool,
     ) -> None:
         """Test use_async."""
-        obj = Module(
-            context=runway_context, definition=fx_deployments.load(config).modules[0]
-        )
+        obj = Module(context=runway_context, definition=fx_deployments.load(config).modules[0])
         obj.ctx._use_concurrent = use_concurrent  # type: ignore
         assert obj.use_async == expected
 
@@ -558,9 +552,7 @@ class TestModule:
         mocker.patch.object(Module, "should_skip", False)
         assert not mod.run("deploy")
         mock_change_dir.assert_called_once_with(tmp_path)
-        mock_type.module_class.assert_called_once_with(
-            mod.ctx, module_root=tmp_path, **mod.payload
-        )
+        mock_type.module_class.assert_called_once_with(mod.ctx, module_root=tmp_path, **mod.payload)
         mock_inst["deploy"].assert_called_once_with()
 
         del mock_inst.deploy

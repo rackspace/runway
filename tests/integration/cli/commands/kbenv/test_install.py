@@ -39,9 +39,7 @@ def test_kbenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     assert kb_bin.exists()
 
 
-def test_kbenv_install_no_version_file(
-    cd_tmp_path: Path, caplog: LogCaptureFixture
-) -> None:
+def test_kbenv_install_no_version_file(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway kbenv install`` no version file."""
     caplog.set_level(logging.WARNING, logger="runway")
     runner = CliRunner()

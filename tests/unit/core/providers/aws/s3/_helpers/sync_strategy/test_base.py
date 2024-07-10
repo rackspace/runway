@@ -37,9 +37,7 @@ class TestBaseSync:
         dest_file = FileStats(src="", size=dest_size)
         assert BaseSync.compare_size(src_file, dest_file) is expected
 
-    @pytest.mark.parametrize(
-        "src, dest", [(None, None), (Mock(), None), (None, Mock())]
-    )
+    @pytest.mark.parametrize("src, dest", [(None, None), (Mock(), None), (None, Mock())])
     def test_compare_size_raise_value_error(
         self, dest: Optional[FileStats], src: Optional[FileStats]
     ) -> None:
@@ -133,9 +131,7 @@ class TestBaseSync:
             is True
         )
 
-    @pytest.mark.parametrize(
-        "src, dest", [(None, None), (Mock(), None), (None, Mock())]
-    )
+    @pytest.mark.parametrize("src, dest", [(None, None), (Mock(), None), (None, Mock())])
     def test_compare_time_raise_value_error(
         self, dest: Optional[FileStats], src: Optional[FileStats]
     ) -> None:
@@ -178,12 +174,7 @@ class TestBaseSync:
 
     def test_use_sync_strategy(self, mocker: MockerFixture) -> None:
         """Test use_sync_strategy."""
-        assert (
-            BaseSync().use_sync_strategy(
-                {"invalid_sync_strategy": True}  # type: ignore
-            )
-            is None
-        )
+        assert BaseSync().use_sync_strategy({"invalid_sync_strategy": True}) is None  # type: ignore
         mocker.patch.object(BaseSync, "name", "something")
         obj = BaseSync()
         assert obj.use_sync_strategy({"something": True}) == obj  # type: ignore
@@ -212,9 +203,7 @@ class TestMissingFileSync:
             MissingFileSync, "compare_time", return_value=is_time
         )
         assert (
-            MissingFileSync().determine_should_sync(
-                FileStats(src=""), FileStats(src="")
-            )
+            MissingFileSync().determine_should_sync(FileStats(src=""), FileStats(src=""))
             is expected
         )
         mock_compare_size.assert_not_called()
@@ -245,16 +234,9 @@ class TestTestNeverSync:
         self, expected: bool, is_size: bool, is_time: bool, mocker: MockerFixture
     ) -> None:
         """Test determine_should_sync."""
-        mock_compare_size = mocker.patch.object(
-            NeverSync, "compare_size", return_value=is_size
-        )
-        mock_compare_time = mocker.patch.object(
-            NeverSync, "compare_time", return_value=is_time
-        )
-        assert (
-            NeverSync().determine_should_sync(FileStats(src=""), FileStats(src=""))
-            is expected
-        )
+        mock_compare_size = mocker.patch.object(NeverSync, "compare_size", return_value=is_size)
+        mock_compare_time = mocker.patch.object(NeverSync, "compare_time", return_value=is_time)
+        assert NeverSync().determine_should_sync(FileStats(src=""), FileStats(src="")) is expected
         mock_compare_size.assert_not_called()
         mock_compare_time.assert_not_called()
 
@@ -291,10 +273,7 @@ class TestSizeAndLastModifiedSync:
         mock_compare_time = mocker.patch.object(
             SizeAndLastModifiedSync, "compare_time", return_value=is_time
         )
-        assert (
-            SizeAndLastModifiedSync().determine_should_sync(src_file, dest_file)
-            is expected
-        )
+        assert SizeAndLastModifiedSync().determine_should_sync(src_file, dest_file) is expected
         mock_compare_size.assert_called_once_with(src_file, dest_file)
         mock_compare_time.assert_called_once_with(src_file, dest_file)
 

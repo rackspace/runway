@@ -179,9 +179,7 @@ class ImageBuildArgs(BaseModel):
         path: Path = values["path"]
         dockerfile = path / v
         if not dockerfile.is_file():
-            raise ValueError(
-                f"Dockerfile does not exist at path provided: {dockerfile}"
-            )
+            raise ValueError(f"Dockerfile does not exist at path provided: {dockerfile}")
         return v
 
 

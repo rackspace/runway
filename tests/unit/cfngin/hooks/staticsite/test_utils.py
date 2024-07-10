@@ -29,10 +29,7 @@ def test_calculate_hash_of_files(mocker: MockerFixture, tmp_path: Path) -> None:
 
     file0 = tmp_path / "nested" / "file0.txt"
     file1 = tmp_path / "file1.txt"
-    assert (
-        calculate_hash_of_files([file0, file1], tmp_path)
-        == mock_file_hash_obj.hexdigest
-    )
+    assert calculate_hash_of_files([file0, file1], tmp_path) == mock_file_hash_obj.hexdigest
     mock_file_hash_obj.add_files.assert_called_once_with(
         [str(file1), str(file0)], relative_to=tmp_path
     )
@@ -74,10 +71,7 @@ def test_get_hash_of_files(
     gitignore.add_rule("exclude/", tmp_path)
 
     if directories:
-        assert (
-            get_hash_of_files(tmp_path, directories)
-            == mock_calculate_hash_of_files.return_value
-        )
+        assert get_hash_of_files(tmp_path, directories) == mock_calculate_hash_of_files.return_value
     else:
         assert get_hash_of_files(tmp_path) == mock_calculate_hash_of_files.return_value
     mock_get_ignorer.assert_has_calls(
@@ -103,8 +97,6 @@ def test_get_ignorer(
     ignore_parser.parse_rule_files.assert_called_once_with(tmp_path)
 
     if additional_exclusions:
-        ignore_parser.add_rule.assert_has_calls(
-            [call(i, tmp_path) for i in additional_exclusions]
-        )
+        ignore_parser.add_rule.assert_has_calls([call(i, tmp_path) for i in additional_exclusions])
     else:
         ignore_parser.add_rule.assert_not_called()

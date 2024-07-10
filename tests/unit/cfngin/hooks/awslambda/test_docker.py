@@ -37,13 +37,9 @@ MODULE = "runway.cfngin.hooks.awslambda.docker"
 class TestDockerDependencyInstaller:
     """Test DockerDependencyInstaller."""
 
-    def test___init__(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test___init__(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test __init__."""
-        from_env = mocker.patch(
-            f"{MODULE}.DockerClient.from_env", return_value="success"
-        )
+        from_env = mocker.patch(f"{MODULE}.DockerClient.from_env", return_value="success")
         options = Mock()
         project = Mock(args=Mock(docker=options))
         obj = DockerDependencyInstaller(project, context=cfngin_context)
@@ -56,9 +52,7 @@ class TestDockerDependencyInstaller:
     def test___init___client(self, mocker: MockerFixture) -> None:
         """Test __init__ passing client."""
         client = Mock()
-        from_env = mocker.patch(
-            f"{MODULE}.DockerClient.from_env", return_value="success"
-        )
+        from_env = mocker.patch(f"{MODULE}.DockerClient.from_env", return_value="success")
         obj = DockerDependencyInstaller(Mock(), client=client)
         from_env.assert_not_called()
         assert obj.client == client
@@ -72,9 +66,7 @@ class TestDockerDependencyInstaller:
         )
         obj = DockerDependencyInstaller(project, client=Mock())
         assert obj.bind_mounts == [
-            Mount(
-                target="/var/task/lambda", source="dependency_directory", type="bind"
-            ),
+            Mount(target="/var/task/lambda", source="dependency_directory", type="bind"),
             Mount(target="/var/task/project", source="project_root", type="bind"),
         ]
 
@@ -87,16 +79,12 @@ class TestDockerDependencyInstaller:
         )
         obj = DockerDependencyInstaller(project, client=Mock())
         assert obj.bind_mounts == [
-            Mount(
-                target="/var/task/lambda", source="dependency_directory", type="bind"
-            ),
+            Mount(target="/var/task/lambda", source="dependency_directory", type="bind"),
             Mount(target="/var/task/project", source="project_root", type="bind"),
             Mount(target="/var/task/cache_dir", source="cache_dir", type="bind"),
         ]
 
-    @pytest.mark.parametrize(
-        "name, pull, tag", [("foo", False, "bar"), (None, True, None)]
-    )
+    @pytest.mark.parametrize("name, pull, tag", [("foo", False, "bar"), (None, True, None)])
     def test_build_image(
         self,
         mocker: MockerFixture,
@@ -134,9 +122,7 @@ class TestDockerDependencyInstaller:
             pull=pull,
         )
         mock_log_docker_msg_dict.assert_called_once_with(logs)
-        image.tag.assert_called_once_with(
-            name or DEFAULT_IMAGE_NAME, tag=tag or DEFAULT_IMAGE_TAG
-        )
+        image.tag.assert_called_once_with(name or DEFAULT_IMAGE_NAME, tag=tag or DEFAULT_IMAGE_TAG)
         image.reload.assert_called_once_with()
 
     def test_build_image_raise_docker_exception(self, tmp_path: Path) -> None:
@@ -261,9 +247,7 @@ class TestDockerDependencyInstaller:
         runtime: Optional[str],
     ) -> None:
         """Test image pull image."""
-        project = Mock(
-            args=Mock(docker=Mock(file=None, image=image, pull=pull), runtime=runtime)
-        )
+        project = Mock(args=Mock(docker=Mock(file=None, image=image, pull=pull), runtime=runtime))
         pull_image = mocker.patch.object(
             DockerDependencyInstaller, "pull_image", return_value="success"
         )
@@ -281,9 +265,7 @@ class TestDockerDependencyInstaller:
 
     def test_image_raise_value_error(self, mocker: MockerFixture) -> None:
         """Test image raise ValueError."""
-        project = Mock(
-            args=Mock(docker=Mock(file=None, image=None, pull=True), runtime=None)
-        )
+        project = Mock(args=Mock(docker=Mock(file=None, image=None, pull=True), runtime=None))
         build_image = mocker.patch.object(DockerDependencyInstaller, "build_image")
         pull_image = mocker.patch.object(DockerDependencyInstaller, "pull_image")
         obj = DockerDependencyInstaller(project, client=Mock())
@@ -328,9 +310,7 @@ class TestDockerDependencyInstaller:
         msg = "foobar"
         obj = DockerDependencyInstaller(Mock(), client=Mock())
         docker_logger = mocker.patch.object(obj, "_docker_logger")
-        assert obj.log_docker_msg_bytes(iter([f"{msg}\n".encode()]), level=level) == [
-            msg
-        ]
+        assert obj.log_docker_msg_bytes(iter([f"{msg}\n".encode()]), level=level) == [msg]
         docker_logger.log.assert_called_once_with(level, msg)
 
     @pytest.mark.parametrize("level", [logging.INFO, logging.DEBUG])
@@ -379,9 +359,7 @@ class TestDockerDependencyInstaller:
         # these methods don't exist on windows so they need to be mocked
         getgid = mocker.patch(f"{MODULE}.os.getgid", create=True, return_value=3)
         getuid = mocker.patch(f"{MODULE}.os.getuid", create=True, return_value=4)
-        obj = DockerDependencyInstaller(
-            Mock(args=Mock(docker=Mock(extra_files=[]))), client=Mock()
-        )
+        obj = DockerDependencyInstaller(Mock(args=Mock(docker=Mock(extra_files=[]))), client=Mock())
         assert obj.post_install_commands == [
             f"chown -R {getuid.return_value}:{getgid.return_value} /var/task/lambda",
             f"chown -R {getuid.return_value}:{getgid.return_value} /var/task/cache_dir",
@@ -430,9 +408,7 @@ class TestDockerDependencyInstaller:
         "exists_locally, force",
         [(False, False), (False, True), (True, True), (True, False)],
     )
-    def test_pull_image(
-        self, caplog: LogCaptureFixture, exists_locally: bool, force: bool
-    ) -> None:
+    def test_pull_image(self, caplog: LogCaptureFixture, exists_locally: bool, force: bool) -> None:
         """Test pull_image."""
         caplog.set_level(logging.INFO, logger=MODULE)
         name = "foo:latest"
@@ -459,14 +435,10 @@ class TestDockerDependencyInstaller:
                 mock_pull.assert_not_called()
             else:
                 mock_pull.assert_called_once_with(repository=name)
-                assert caplog.messages == [
-                    f"image not found; pulling docker image {name}..."
-                ]
+                assert caplog.messages == [f"image not found; pulling docker image {name}..."]
 
     @pytest.mark.parametrize("command, level", [("foo", logging.DEBUG), ("bar", None)])
-    def test_run_command(
-        self, command: str, level: Optional[int], mocker: MockerFixture
-    ) -> None:
+    def test_run_command(self, command: str, level: Optional[int], mocker: MockerFixture) -> None:
         """Test run_command."""
         container = Mock(
             logs=Mock(return_value="log-stream"),
@@ -476,9 +448,7 @@ class TestDockerDependencyInstaller:
         mock_log_docker_msg_bytes = mocker.patch.object(
             DockerDependencyInstaller, "log_docker_msg_bytes", return_value=["logs"]
         )
-        bind_mounts = mocker.patch.object(
-            DockerDependencyInstaller, "bind_mounts", ["mount"]
-        )
+        bind_mounts = mocker.patch.object(DockerDependencyInstaller, "bind_mounts", ["mount"])
         environment_variables = mocker.patch.object(
             DockerDependencyInstaller, "environment_variables", {"foo": "bar"}
         )
@@ -508,9 +478,7 @@ class TestDockerDependencyInstaller:
         container.wait.assert_called_once_with()
         container.remove.assert_called_once_with(force=True)
 
-    def test_run_command_container_nonzero_exit_code(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_run_command_container_nonzero_exit_code(self, mocker: MockerFixture) -> None:
         """Test run_command container non-zero exit code."""
         error_msg = "error msg"
         container = Mock(
@@ -522,9 +490,7 @@ class TestDockerDependencyInstaller:
             DockerDependencyInstaller, "log_docker_msg_bytes", return_value=["logs"]
         )
         mocker.patch.object(DockerDependencyInstaller, "bind_mounts", ["mount"])
-        mocker.patch.object(
-            DockerDependencyInstaller, "environment_variables", {"foo": "bar"}
-        )
+        mocker.patch.object(DockerDependencyInstaller, "environment_variables", {"foo": "bar"})
         mocker.patch.object(DockerDependencyInstaller, "image", "image")
         with pytest.raises(DockerExecFailedError) as excinfo:
             DockerDependencyInstaller(
@@ -550,9 +516,7 @@ class TestDockerDependencyInstaller:
             DockerDependencyInstaller, "log_docker_msg_bytes", return_value=["logs"]
         )
         mocker.patch.object(DockerDependencyInstaller, "bind_mounts", ["mount"])
-        mocker.patch.object(
-            DockerDependencyInstaller, "environment_variables", {"foo": "bar"}
-        )
+        mocker.patch.object(DockerDependencyInstaller, "environment_variables", {"foo": "bar"})
         mocker.patch.object(DockerDependencyInstaller, "image", "image")
 
         with pytest.raises(DockerException):

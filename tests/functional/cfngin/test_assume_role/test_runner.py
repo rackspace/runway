@@ -26,9 +26,7 @@ def assert_session_belongs_to_account(session: boto3.Session, account_id: str) -
 
 
 @pytest.fixture(scope="module")
-def assumed_session(
-    main_session: boto3.Session, variables: Dict[str, Any]
-) -> boto3.Session:
+def assumed_session(main_session: boto3.Session, variables: Dict[str, Any]) -> boto3.Session:
     """boto3 session for assumed account."""
     role_arn = variables["runner_role"]["test-alt"]
     sts_client = main_session.client("sts")
@@ -91,9 +89,7 @@ def test_exists_in_assumed_account(
     assumed_session: boto3.Session, namespace: str, variables: Dict[str, Any]
 ) -> None:
     """Test that the deployed stack exists in the assumed account."""
-    assert_session_belongs_to_account(
-        assumed_session, variables["account_id"]["test-alt"]
-    )
+    assert_session_belongs_to_account(assumed_session, variables["account_id"]["test-alt"])
     assert assumed_session.client("cloudformation").describe_stacks(
         StackName=f"{namespace}-test-assume-role"
     )["Stacks"]

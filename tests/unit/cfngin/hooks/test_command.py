@@ -26,9 +26,7 @@ def test_run_command(fake_process: FakeProcess) -> None:
 
 def test_run_command_capture(fake_process: FakeProcess) -> None:
     """Test run_command with ``capture``."""
-    fake_process.register_subprocess(
-        ["foo"], returncode=0, stderr="bar", stdout="foobar"
-    )
+    fake_process.register_subprocess(["foo"], returncode=0, stderr="bar", stdout="foobar")
     assert run_command(command=["foo"], capture=True) == {
         "returncode": 0,
         "stderr": b"bar",  # for some reason, pytest-subprocess returns these as bytes

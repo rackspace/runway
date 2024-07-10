@@ -40,9 +40,7 @@ class TestServerless:
 
     def test___init__(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test __init__ and the attributes set in __init__."""
-        obj = Serverless(
-            runway_context, module_root=tmp_path, options={"skip_npm_ci": True}
-        )
+        obj = Serverless(runway_context, module_root=tmp_path, options={"skip_npm_ci": True})
         assert isinstance(obj.options, ServerlessOptions)
         assert obj.region == runway_context.env.aws_region
         assert obj.stage == runway_context.env.name
@@ -82,25 +80,17 @@ class TestServerless:
         """Test _deploy_package."""
         caplog.set_level(logging.INFO, logger=MODULE)
         artifact = Mock(package_path=tmp_path)
-        artifact_class = mocker.patch(
-            f"{MODULE}.ServerlessArtifact", return_value=artifact
-        )
+        artifact_class = mocker.patch(f"{MODULE}.ServerlessArtifact", return_value=artifact)
         sls_deploy = mocker.patch.object(Serverless, "sls_deploy")
-        sls_package = mocker.patch.object(
-            Serverless, "sls_package", return_value=str(tmp_path)
-        )
-        sls_print = mocker.patch.object(
-            Serverless, "sls_print", return_value="print output"
-        )
+        sls_package = mocker.patch.object(Serverless, "sls_package", return_value=str(tmp_path))
+        sls_print = mocker.patch.object(Serverless, "sls_print", return_value="print output")
         obj = Serverless(
             runway_context,
             module_root=tmp_path,
             options={"promotezip": {"bucketname": "test-bucket"}},
         )
         assert not obj._deploy_package()
-        tempfile_temporary_directory.assert_called_once_with(
-            dir=runway_context.work_dir
-        )
+        tempfile_temporary_directory.assert_called_once_with(dir=runway_context.work_dir)
         sls_print.assert_called_once()
         artifact_class.assert_called_once_with(
             runway_context,
@@ -309,14 +299,10 @@ class TestServerless:
         tmp_file = obj.options.update_args.call_args[0][1]
         # 'no way to check the prefix since it will be a uuid'
         assert tmp_file.endswith(".tmp.serverless.yml")
-        assert not (
-            tmp_path / tmp_file
-        ).exists(), 'should always be deleted after calling "func"'
+        assert not (tmp_path / tmp_file).exists(), 'should always be deleted after calling "func"'
 
         caplog.clear()
-        mocker.patch(
-            "pathlib.Path.unlink", MagicMock(side_effect=OSError("test OSError"))
-        )
+        mocker.patch("pathlib.Path.unlink", MagicMock(side_effect=OSError("test OSError")))
         assert not obj.extend_serverless_yml(mock_func)
         assert (
             f"{tmp_path.name}:encountered an error when trying to delete the "
@@ -393,9 +379,7 @@ class TestServerless:
         caplog.set_level(logging.INFO, logger="runway")
         obj = Serverless(runway_context, module_root=tmp_path)
         assert not obj.plan()
-        assert [
-            f"{tmp_path.name}:plan not currently supported for Serverless"
-        ] == caplog.messages
+        assert [f"{tmp_path.name}:plan not currently supported for Serverless"] == caplog.messages
 
     def test_skip(
         self,
@@ -491,9 +475,7 @@ class TestServerless:
         else:
             npm_install.assert_called_once_with()
         if output_path:
-            gen_cmd.assert_called_once_with(
-                "package", args_list=["--package", str(output_path)]
-            )
+            gen_cmd.assert_called_once_with("package", args_list=["--package", str(output_path)])
         else:
             gen_cmd.assert_called_once_with("package", args_list=[])
         run_module_command.assert_called_once_with(
@@ -514,9 +496,7 @@ class TestServerless:
         """Test sls_print."""
         expected_dict = {"status": "success"}
         mock_check_output = MagicMock(return_value=yaml.safe_dump(expected_dict))
-        gen_cmd = mocker.patch.object(
-            Serverless, "gen_cmd", MagicMock(return_value=["print"])
-        )
+        gen_cmd = mocker.patch.object(Serverless, "gen_cmd", MagicMock(return_value=["print"]))
         npm_install = mocker.patch.object(Serverless, "npm_install", MagicMock())
         mocker.patch("subprocess.check_output", mock_check_output)
         assert (
@@ -550,9 +530,7 @@ class TestServerless:
     ) -> None:
         """Test sls_remove."""
         fake_process.register_subprocess("remove", stdout="success")
-        gen_cmd = mocker.patch.object(
-            Serverless, "gen_cmd", MagicMock(return_value=["remove"])
-        )
+        gen_cmd = mocker.patch.object(Serverless, "gen_cmd", MagicMock(return_value=["remove"]))
         npm_install = mocker.patch.object(Serverless, "npm_install", MagicMock())
         assert not Serverless(runway_context, module_root=tmp_path).sls_remove(
             skip_install=skip_install
@@ -650,9 +628,7 @@ class TestServerlessArtifact:
         tmp_path: Path,
     ) -> None:
         """Test source_hash."""
-        get_hash_of_files = mocker.patch(
-            f"{MODULE}.get_hash_of_files", Mock(return_value="hash")
-        )
+        get_hash_of_files = mocker.patch(f"{MODULE}.get_hash_of_files", Mock(return_value="hash"))
         assert ServerlessArtifact(
             runway_context,
             {
@@ -708,9 +684,7 @@ class TestServerlessArtifact:
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test sync_with_s3."""
-        does_s3_object_exist = mocker.patch(
-            f"{MODULE}.does_s3_object_exist", return_value=True
-        )
+        does_s3_object_exist = mocker.patch(f"{MODULE}.does_s3_object_exist", return_value=True)
         download = mocker.patch(f"{MODULE}.download")
         session = Mock()
         package_path = tmp_path / "package"
@@ -741,9 +715,7 @@ class TestServerlessArtifact:
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test sync_with_s3."""
-        does_s3_object_exist = mocker.patch(
-            f"{MODULE}.does_s3_object_exist", return_value=False
-        )
+        does_s3_object_exist = mocker.patch(f"{MODULE}.does_s3_object_exist", return_value=False)
         download = mocker.patch(f"{MODULE}.download")
         session = Mock()
         package_path = tmp_path / "package"
@@ -776,9 +748,7 @@ class TestServerlessArtifact:
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test sync_with_s3."""
-        does_s3_object_exist = mocker.patch(
-            f"{MODULE}.does_s3_object_exist", return_value=False
-        )
+        does_s3_object_exist = mocker.patch(f"{MODULE}.does_s3_object_exist", return_value=False)
         download = mocker.patch(f"{MODULE}.download")
         session = Mock()
         package_path = tmp_path / "package"
@@ -871,9 +841,9 @@ class TestServerlessOptions:
             assert obj.promotezip
         else:
             assert not obj.promotezip
-        assert obj.promotezip.bucketname == config.get(
-            "promotezip", cast(Dict[str, Any], {})
-        ).get("bucketname")
+        assert obj.promotezip.bucketname == config.get("promotezip", cast(Dict[str, Any], {})).get(
+            "bucketname"
+        )
         assert obj.skip_npm_ci == config.get("skip_npm_ci", False)
 
     def test_parse_invalid_promotezip(self) -> None:

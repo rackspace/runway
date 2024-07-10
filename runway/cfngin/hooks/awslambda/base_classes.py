@@ -54,9 +54,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
     ctx: CfnginContext
     """CFNgin context object."""
 
-    def __init__(
-        self, args: _AwsLambdaHookArgsTypeVar_co, context: CfnginContext
-    ) -> None:
+    def __init__(self, args: _AwsLambdaHookArgsTypeVar_co, context: CfnginContext) -> None:
         """Instantiate class.
 
         Args:
@@ -226,11 +224,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         top_lvl_dir = (
             self.ctx.config_path.parent
             if self.ctx.config_path.is_file()
-            else (
-                self.ctx.config_path
-                if self.ctx.config_path.is_dir()
-                else self.args.source_code
-            )
+            else (self.ctx.config_path if self.ctx.config_path.is_dir() else self.args.source_code)
         )
         if top_lvl_dir == self.args.source_code:
             return top_lvl_dir
@@ -238,8 +232,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         parents = list(self.args.source_code.parents)
         if top_lvl_dir not in parents:
             LOGGER.info(
-                "ignoring project directory; "
-                "source code located outside of project directory"
+                "ignoring project directory; " "source code located outside of project directory"
             )
             return self.args.source_code
 
@@ -349,9 +342,7 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
         raise NotImplementedError
 
     @overload
-    def build_response(
-        self, stage: Literal["deploy"]
-    ) -> AwsLambdaHookDeployResponse: ...
+    def build_response(self, stage: Literal["deploy"]) -> AwsLambdaHookDeployResponse: ...
 
     @overload
     def build_response(self, stage: Literal["destroy"]) -> Optional[BaseModel]: ...
@@ -359,9 +350,7 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
     @overload
     def build_response(self, stage: Literal["plan"]) -> AwsLambdaHookDeployResponse: ...
 
-    def build_response(
-        self, stage: Literal["deploy", "destroy", "plan"]
-    ) -> Optional[BaseModel]:
+    def build_response(self, stage: Literal["deploy", "destroy", "plan"]) -> Optional[BaseModel]:
         """Build response object that will be returned by this hook.
 
         Args:

@@ -33,12 +33,8 @@ class TestKMSHandler:
             assert KmsLookup.handle(SECRET, context=cfngin_context) == SECRET
             stubber.assert_no_pending_responses()
 
-    @pytest.mark.parametrize(
-        "template", ["${region}@${blob}", "${blob}::region=${region}"]
-    )
-    def test_handle_with_region(
-        self, cfngin_context: MockCFNginContext, template: str
-    ) -> None:
+    @pytest.mark.parametrize("template", ["${region}@${blob}", "${blob}::region=${region}"])
+    def test_handle_with_region(self, cfngin_context: MockCFNginContext, template: str) -> None:
         """Test handle with region."""
         region = "us-west-2"
         query = string.Template(template).substitute({"blob": SECRET, "region": region})

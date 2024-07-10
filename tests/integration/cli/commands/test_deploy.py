@@ -96,9 +96,7 @@ def test_deploy_options_tag(
     mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("tagged_modules", cd_tmp_path)
     runner = CliRunner()
-    result0 = runner.invoke(
-        cli, ["deploy", "--tag", "app:test-app", "--tag", "tier:iac"]
-    )
+    result0 = runner.invoke(cli, ["deploy", "--tag", "app:test-app", "--tag", "tier:iac"])
     assert result0.exit_code == 0
     deployment = mock_runway.return_value.deploy.call_args.args[0][0]
     assert len(deployment.modules) == 1

@@ -97,9 +97,7 @@ class Comparator:
 
                 compare_keys = self.compare_comp_key(src_file, dest_file)
                 if compare_keys == "equal":
-                    should_sync = self._sync_strategy.determine_should_sync(
-                        src_file, dest_file
-                    )
+                    should_sync = self._sync_strategy.determine_should_sync(src_file, dest_file)
                     if should_sync:
                         yield cast("FileStats", src_file)
                 elif compare_keys == "less_than":
@@ -121,25 +119,19 @@ class Comparator:
 
             elif (not src_done) and dest_done:
                 src_take = True
-                should_sync = self._not_at_dest_sync_strategy.determine_should_sync(
-                    src_file, None
-                )
+                should_sync = self._not_at_dest_sync_strategy.determine_should_sync(src_file, None)
                 if should_sync:
                     yield cast("FileStats", src_file)
             elif src_done and (not dest_done):
                 dest_take = True
-                should_sync = self._not_at_src_sync_strategy.determine_should_sync(
-                    None, dest_file
-                )
+                should_sync = self._not_at_src_sync_strategy.determine_should_sync(None, dest_file)
                 if should_sync:
                     yield cast("FileStats", dest_file)
             else:
                 break  # cov: ignore
 
     @staticmethod
-    def compare_comp_key(
-        src_file: Optional[FileStats], dest_file: Optional[FileStats]
-    ) -> str:
+    def compare_comp_key(src_file: Optional[FileStats], dest_file: Optional[FileStats]) -> str:
         """Compare the source & destination compare_key."""
         src_comp_key = (src_file.compare_key if src_file else None) or ""
         dest_comp_key = (dest_file.compare_key if dest_file else None) or ""

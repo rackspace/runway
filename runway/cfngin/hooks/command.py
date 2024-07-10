@@ -147,9 +147,7 @@ def run_command(*__args: Any, **kwargs: Any) -> RunCommandResponseTypeDef:
                 if LOGGER.isEnabledFor(logging.INFO):  # cov: ignore
                     LOGGER.warning("command failed with returncode %d", status)
                 else:
-                    LOGGER.warning(
-                        "command failed with returncode %d: %s", status, args.command
-                    )
+                    LOGGER.warning("command failed with returncode %d: %s", status, args.command)
 
                 return {}
             except Exception:  # cov: ignore

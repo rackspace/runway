@@ -98,9 +98,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         """
         if not all(isinstance(i, RunwayModuleDefinition) for i in modules):  # type: ignore
             raise TypeError("modules must be type List[RunwayModuleDefinition]")
-        self._data.modules = [
-            RunwayModuleDefinitionModel.parse_obj(mod.data) for mod in modules
-        ]
+        self._data.modules = [RunwayModuleDefinitionModel.parse_obj(mod.data) for mod in modules]
 
     def reverse(self):
         """Reverse the order of modules and regions."""
@@ -124,9 +122,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
         """
         if not isinstance(modules, list):  # type: ignore
-            raise TypeError(
-                f"expected List[RunwayModuleDefinition]; got {type(modules)}"
-            )
+            raise TypeError(f"expected List[RunwayModuleDefinition]; got {type(modules)}")
         sanitized: List[RunwayModuleDefinitionModel] = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
@@ -156,17 +152,13 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
     @overload
     @classmethod
-    def parse_obj(
-        cls, obj: List[Dict[str, Any]]
-    ) -> List[RunwayDeploymentDefinition]: ...
+    def parse_obj(cls, obj: List[Dict[str, Any]]) -> List[RunwayDeploymentDefinition]: ...
 
     @overload
     @classmethod
     def parse_obj(
         cls,
-        obj: Union[
-            List[ConfigProperty], Set[ConfigProperty], Tuple[ConfigProperty, ...]
-        ],
+        obj: Union[List[ConfigProperty], Set[ConfigProperty], Tuple[ConfigProperty, ...]],
     ) -> List[RunwayDeploymentDefinition]: ...
 
     @overload
@@ -186,7 +178,5 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
         """
         if isinstance(obj, (list, set, tuple)):
-            return [
-                cls(RunwayDeploymentDefinitionModel.parse_obj(o)) for o in obj  # type: ignore
-            ]
+            return [cls(RunwayDeploymentDefinitionModel.parse_obj(o)) for o in obj]  # type: ignore
         return cls(RunwayDeploymentDefinitionModel.parse_obj(obj))

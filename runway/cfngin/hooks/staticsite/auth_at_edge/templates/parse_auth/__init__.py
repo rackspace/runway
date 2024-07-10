@@ -106,8 +106,7 @@ def validate_querystring_and_cookies(request, cookies):
     calculated_hmac = sign(current_nonce, CONFIG["nonce_signing_secret"])
     if not hmac.compare_digest(calculated_hmac, nonce_hmac):
         raise RequiresConfirmationError(
-            "Nonce signature mismatch; expected %s but got %s"
-            % (calculated_hmac, nonce_hmac)
+            "Nonce signature mismatch; expected %s but got %s" % (calculated_hmac, nonce_hmac)
         )
 
     return [code, pkce, requested_uri]
@@ -139,8 +138,7 @@ def handler(event, _context):
         body = {
             "grant_type": "authorization_code",
             "client_id": CONFIG["client_id"],
-            "redirect_uri": "https://%s%s"
-            % (domain_name, CONFIG.get("redirect_path_sign_in")),
+            "redirect_uri": "https://%s%s" % (domain_name, CONFIG.get("redirect_path_sign_in")),
             "code": code[0],
             "code_verifier": pkce,
         }
@@ -234,8 +232,6 @@ def handler(event, _context):
             "status": "200",
             "headers": {
                 **CONFIG.get("cloud_front_headers", {}),
-                "content-type": [
-                    {"key": "Content-Type", "value": "text/html; charset=UTF-8"}
-                ],
+                "content-type": [{"key": "Content-Type", "value": "text/html; charset=UTF-8"}],
             },
         }

@@ -14,9 +14,7 @@ from typing import Tuple
 from typing_extensions import Literal, TypedDict
 
 SupportedPathType = Literal["local", "s3"]
-FormattedPathDetails = TypedDict(
-    "FormattedPathDetails", path=str, type=SupportedPathType
-)
+FormattedPathDetails = TypedDict("FormattedPathDetails", path=str, type=SupportedPathType)
 FormatPathResult = TypedDict(
     "FormattedPaths",
     dest=FormattedPathDetails,

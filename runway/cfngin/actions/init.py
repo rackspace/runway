@@ -46,9 +46,7 @@ class Action(BaseAction):
             cancel: Cancel handler.
 
         """
-        super().__init__(
-            context=context.copy(), provider_builder=provider_builder, cancel=cancel
-        )
+        super().__init__(context=context.copy(), provider_builder=provider_builder, cancel=cancel)
 
     @property
     def _stack_action(self) -> Any:

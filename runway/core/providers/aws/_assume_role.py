@@ -19,9 +19,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
-_KwargsTypeDef = TypedDict(
-    "_KwargsTypeDef", DurationSeconds=int, RoleArn=str, RoleSessionName=str
-)
+_KwargsTypeDef = TypedDict("_KwargsTypeDef", DurationSeconds=int, RoleArn=str, RoleSessionName=str)
 
 
 class AssumeRole(ContextManager["AssumeRole"]):

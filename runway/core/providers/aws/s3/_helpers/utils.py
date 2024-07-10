@@ -67,8 +67,7 @@ SIZE_SUFFIX = {
 }
 
 _S3_ACCESSPOINT_TO_BUCKET_KEY_REGEX = re.compile(
-    r"^(?P<bucket>arn:(aws).*:s3:[a-z\-0-9]+:[0-9]{12}:accesspoint[:/][^/]+)/?"
-    r"(?P<key>.*)$"
+    r"^(?P<bucket>arn:(aws).*:s3:[a-z\-0-9]+:[0-9]{12}:accesspoint[:/][^/]+)/?" r"(?P<key>.*)$"
 )
 _S3_OUTPOST_TO_BUCKET_KEY_REGEX = re.compile(
     r"^(?P<bucket>arn:(aws).*:s3-outposts:[a-z\-0-9]+:[0-9]{12}:outpost[/:]"
@@ -251,9 +250,7 @@ class DirectoryCreatorSubscriber(BaseSubscriber):
                 os.makedirs(dirname)
         except OSError as exc:
             if exc.errno != errno.EEXIST:
-                raise CreateDirectoryError(
-                    f"Could not create directory {dirname}: {exc}"
-                ) from exc
+                raise CreateDirectoryError(f"Could not create directory {dirname}: {exc}") from exc
 
 
 class NonSeekableStream:
@@ -314,9 +311,7 @@ class ProvideCopyContentTypeSubscriber(BaseProvideContentTypeSubscriber):
 class ProvideLastModifiedTimeSubscriber(OnDoneFilteredSubscriber):
     """Sets utime for a downloaded file."""
 
-    def __init__(
-        self, last_modified_time: datetime, result_queue: "Queue[Any]"
-    ) -> None:
+    def __init__(self, last_modified_time: datetime, result_queue: "Queue[Any]") -> None:
         """Instantiate class."""
         self._last_modified_time = last_modified_time
         self._result_queue = result_queue
@@ -540,9 +535,7 @@ class RequestParamsMapper:
     @classmethod
     def _auto_populate_metadata_directive(cls, request_params: Dict[Any, Any]) -> None:
         """Auto populate metadata directive."""
-        if request_params.get("Metadata") and not request_params.get(
-            "MetadataDirective"
-        ):
+        if request_params.get("Metadata") and not request_params.get("MetadataDirective"):
             request_params["MetadataDirective"] = "REPLACE"
 
     @classmethod
@@ -596,9 +589,7 @@ class RequestParamsMapper:
                 try:
                     permission, grantee = grant.split("=", 1)
                 except ValueError:
-                    raise ValueError(
-                        "grants should be of the form permission=principal"
-                    ) from None
+                    raise ValueError("grants should be of the form permission=principal") from None
                 request_params[cls._permission_to_param(permission)] = grantee
 
     @classmethod
@@ -638,12 +629,8 @@ class RequestParamsMapper:
         cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
     ) -> None:
         if config_params.get("sse_c_copy_source"):
-            request_params["CopySourceSSECustomerAlgorithm"] = config_params[
-                "sse_c_copy_source"
-            ]
-            request_params["CopySourceSSECustomerKey"] = config_params[
-                "sse_c_copy_source_key"
-            ]
+            request_params["CopySourceSSECustomerAlgorithm"] = config_params["sse_c_copy_source"]
+            request_params["CopySourceSSECustomerKey"] = config_params["sse_c_copy_source_key"]
 
     @classmethod
     def _set_sse_c_request_params(
@@ -868,14 +855,10 @@ def relative_path(filename: None, start: AnyPath = ...) -> None: ...
 
 
 @overload
-def relative_path(
-    filename: Optional[AnyPath], start: AnyPath = ...
-) -> Optional[str]: ...
+def relative_path(filename: Optional[AnyPath], start: AnyPath = ...) -> Optional[str]: ...
 
 
-def relative_path(
-    filename: Optional[AnyPath], start: AnyPath = os.path.curdir
-) -> Optional[str]:
+def relative_path(filename: Optional[AnyPath], start: AnyPath = os.path.curdir) -> Optional[str]:
     """Cross platform relative path of a filename.
 
     If no relative path can be calculated (i.e different

@@ -126,10 +126,7 @@ class TestRunwayConfigDefinitionModel:
         """Test _convert_runway_version invalid specifier set."""
         with pytest.raises(ValidationError) as excinfo:
             RunwayConfigDefinitionModel(runway_version="=latest")  # type: ignore
-        assert (
-            excinfo.value.errors()[0]["msg"]
-            == "=latest is not a valid version specifier set"
-        )
+        assert excinfo.value.errors()[0]["msg"] == "=latest is not a valid version specifier set"
 
     def test_extra(self) -> None:
         """Test extra fields."""
@@ -183,9 +180,7 @@ class TestRunwayDeploymentDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayDeploymentDefinitionModel.parse_obj(
-                {"invalid": "val", "regions": ["us-east-1"]}
-            )
+            RunwayDeploymentDefinitionModel.parse_obj({"invalid": "val", "regions": ["us-east-1"]})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -259,9 +254,7 @@ class TestRunwayDeploymentDefinitionModel:
         assert obj0.regions == ["us-east-1"]
         assert obj0.parallel_regions == []
 
-        obj1 = RunwayDeploymentDefinitionModel(
-            modules=[], parallel_regions=["us-east-1"]
-        )
+        obj1 = RunwayDeploymentDefinitionModel(modules=[], parallel_regions=["us-east-1"])
         assert obj1.regions == []
         assert obj1.parallel_regions == ["us-east-1"]
 
@@ -279,9 +272,7 @@ class TestRunwayDeploymentRegionDefinitionModel:
     def test_extra(self) -> None:
         """Test extra fields."""
         with pytest.raises(ValidationError) as excinfo:
-            RunwayDeploymentRegionDefinitionModel.parse_obj(
-                {"invalid": "val", "parallel": []}
-            )
+            RunwayDeploymentRegionDefinitionModel.parse_obj({"invalid": "val", "parallel": []})
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("invalid",)
@@ -390,9 +381,7 @@ class TestRunwayModuleDefinitionModel:
             parallel=[{"name": "test", "path": "./"}]  # type: ignore
         ).parallel == [RunwayModuleDefinitionModel(name="test", path="./")]
 
-    @pytest.mark.parametrize(
-        "field", ["env_vars", "environments", "options", "parameters"]
-    )
+    @pytest.mark.parametrize("field", ["env_vars", "environments", "options", "parameters"])
     def test_fields_string_lookup_only(self, field: str) -> None:
         """Test fields that support strings only for lookups."""
         data = {field: "something"}

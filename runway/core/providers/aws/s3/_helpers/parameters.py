@@ -102,9 +102,7 @@ class ParametersDataModel(BaseModel):
 class Parameters:
     """Initial error based on the parameters and arguments passed to sync."""
 
-    def __init__(
-        self, action: str, parameters: Union[Dict[str, Any], ParametersDataModel]
-    ):
+    def __init__(self, action: str, parameters: Union[Dict[str, Any], ParametersDataModel]):
         """Instantiate class.
 
         Args:

@@ -43,6 +43,4 @@ def test_new_file_exists(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     runner = CliRunner()
     result = runner.invoke(cli, ["new"])
     assert result.exit_code == 1
-    assert caplog.messages == [
-        "There is already a runway.yml file in the current directory"
-    ]
+    assert caplog.messages == ["There is already a runway.yml file in the current directory"]

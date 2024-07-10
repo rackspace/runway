@@ -179,10 +179,7 @@ class TestTerraform:
         mock_terraform_workspace_show = mocker.patch.object(
             Terraform, "terraform_workspace_show", return_value="default"
         )
-        assert (
-            Terraform(runway_context, module_root=tmp_path).current_workspace
-            == "default"
-        )
+        assert Terraform(runway_context, module_root=tmp_path).current_workspace == "default"
         mock_terraform_workspace_show.assert_called_once_with()
 
     @pytest.mark.parametrize(
@@ -231,9 +228,7 @@ class TestTerraform:
         mocker.patch.object(Terraform, "handle_parameters", MagicMock())
         mocker.patch.object(Terraform, "terraform_init", MagicMock())
         mocker.patch.object(Terraform, "current_workspace", "test")
-        mocker.patch.object(
-            Terraform, "terraform_workspace_list", MagicMock(return_value="* test")
-        )
+        mocker.patch.object(Terraform, "terraform_workspace_list", MagicMock(return_value="* test"))
         mocker.patch.object(Terraform, "terraform_workspace_select", MagicMock())
         mocker.patch.object(Terraform, "terraform_workspace_new", MagicMock())
         mocker.patch.object(Terraform, "terraform_get", MagicMock())
@@ -288,9 +283,7 @@ class TestTerraform:
         assert "re-running init after workspace change..." in logs
 
         # module is run; create workspace
-        mocker.patch.object(
-            Terraform, "terraform_workspace_list", MagicMock(return_value="")
-        )
+        mocker.patch.object(Terraform, "terraform_workspace_list", MagicMock(return_value=""))
         assert not obj[action]()
         obj.terraform_workspace_new.assert_called_once_with("test")
 
@@ -450,9 +443,7 @@ class TestTerraform:
 
         assert not obj.handle_backend()
         mock_get_full_configuration.assert_called_once_with()
-        assert '"workspaces" not defined in backend config' in "\n".join(
-            caplog.messages
-        )
+        assert '"workspaces" not defined in backend config' in "\n".join(caplog.messages)
 
     def test_handle_parameters(
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
@@ -549,9 +540,8 @@ class TestTerraform:
             assert obj.tf_bin
         assert excinfo.value.code == 1
         mock_which.assert_called_once_with("terraform")
-        assert (
-            "terraform not available and a version to install not specified"
-            in "\n".join(caplog.messages)
+        assert "terraform not available and a version to install not specified" in "\n".join(
+            caplog.messages
         )
 
     def test_tf_bin_options(
@@ -615,9 +605,7 @@ class TestTerraform:
             Terraform, "gen_command", return_value=["mock_gen_command"]
         )
         mocker.patch.object(Terraform, "version", version)
-        mock_run_command = mocker.patch(
-            f"{MODULE}.run_module_command", return_value=None
-        )
+        mock_run_command = mocker.patch(f"{MODULE}.run_module_command", return_value=None)
         obj = Terraform(runway_context, module_root=tmp_path)
         mocker.patch.object(obj, "env_file", ["env_file"])
 
@@ -770,9 +758,7 @@ class TestTerraform:
         )
         mock_subprocess = mocker.patch(f"{MODULE}.subprocess")
         check_output_result = MagicMock(
-            strip=MagicMock(
-                return_value=MagicMock(decode=MagicMock(return_value="decoded"))
-            )
+            strip=MagicMock(return_value=MagicMock(decode=MagicMock(return_value="decoded")))
         )
         mock_subprocess.check_output.return_value = check_output_result
 
@@ -832,9 +818,7 @@ class TestTerraform:
         tfenv.get_version_from_executable.return_value = None
         mocker.patch.object(Terraform, "tfenv", tfenv)
         mocker.patch.object(Terraform, "tf_bin", "/bin/terraform")
-        with pytest.raises(
-            ValueError, match="unable to retrieve version from /bin/terraform"
-        ):
+        with pytest.raises(ValueError, match="unable to retrieve version from /bin/terraform"):
             assert Terraform(runway_context, module_root=tmp_path).version
 
 
@@ -1046,10 +1030,7 @@ class TestTerraformBackendConfig:
             "backend.tfvars",
         ]
 
-        assert (
-            TerraformBackendConfig.gen_backend_filenames("test", "us-east-1")
-            == expected
-        )
+        assert TerraformBackendConfig.gen_backend_filenames("test", "us-east-1") == expected
 
     @pytest.mark.parametrize(
         "filename, expected",

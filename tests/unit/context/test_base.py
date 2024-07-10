@@ -61,10 +61,7 @@ class TestBaseContext:
     def test_boto3_credentials(self, mocker: MockerFixture) -> None:
         """Test boto3_credentials."""
         mocker.patch.object(self.env, "vars", TEST_ENV_CREDS)
-        assert (
-            BaseContext(deploy_environment=self.env).boto3_credentials
-            == TEST_BOTO3_CREDS
-        )
+        assert BaseContext(deploy_environment=self.env).boto3_credentials == TEST_BOTO3_CREDS
 
     def test_boto3_credentials_empty(self, mocker: MockerFixture) -> None:
         """Test boto3_credentials empty."""
@@ -74,9 +71,7 @@ class TestBaseContext:
     def test_current_aws_creds(self, mocker: MockerFixture) -> None:
         """Test current_aws_creds."""
         mocker.patch.object(self.env, "vars", TEST_ENV_CREDS)
-        assert (
-            BaseContext(deploy_environment=self.env).current_aws_creds == TEST_ENV_CREDS
-        )
+        assert BaseContext(deploy_environment=self.env).current_aws_creds == TEST_ENV_CREDS
 
     def test_current_aws_creds_empty(self, mocker: MockerFixture) -> None:
         """Test current_aws_creds empty."""

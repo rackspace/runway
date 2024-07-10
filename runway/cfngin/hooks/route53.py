@@ -21,9 +21,7 @@ class CreateDomainHookArgs(BaseModel):
     """Domain name for the Route 53 hosted zone to be created."""
 
 
-def create_domain(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> Dict[str, str]:
+def create_domain(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, str]:
     """Create a domain within route53.
 
     Args:

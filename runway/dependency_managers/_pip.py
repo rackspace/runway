@@ -30,8 +30,7 @@ class PipInstallFailedError(RunwayError):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Instantiate class. All args/kwargs are passed to parent method."""
         self.message = (
-            "pip failed to install dependencies; "
-            "review pip's output above to troubleshoot"
+            "pip failed to install dependencies; " "review pip's output above to troubleshoot"
         )
         super().__init__(*args, **kwargs)
 
@@ -51,9 +50,7 @@ class Pip(DependencyManager):
         cmd_output = self._run_command([self.EXECUTABLE, "--version"])
         match = re.search(r"^pip \S* from .+ \(python (?P<version>\S*)\)$", cmd_output)
         if not match:
-            LOGGER.warning(
-                "unable to parse Python version from output:\n%s", cmd_output
-            )
+            LOGGER.warning("unable to parse Python version from output:\n%s", cmd_output)
             return Version("0.0.0")
         return Version(match.group("version"))
 

@@ -46,9 +46,7 @@ class SsmLookup(LookupHandler):
         client = session.client("ssm")
 
         try:
-            response = client.get_parameter(Name=query, WithDecryption=True)[
-                "Parameter"
-            ]
+            response = client.get_parameter(Name=query, WithDecryption=True)["Parameter"]
             return cls.format_results(
                 (
                     response["Value"].split(",")

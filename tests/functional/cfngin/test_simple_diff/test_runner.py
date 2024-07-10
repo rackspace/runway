@@ -25,9 +25,7 @@ def initial_deploy(cli_runner: CliRunner) -> Generator[None, None, None]:
 @pytest.fixture(scope="module")
 def plan_result(cli_runner: CliRunner, initial_deploy: None) -> Result:
     """Execute `runway plan`."""
-    return cli_runner.invoke(
-        cli, ["plan"], env={"CI": "1", "DEPLOY_ENVIRONMENT": "test2"}
-    )
+    return cli_runner.invoke(cli, ["plan"], env={"CI": "1", "DEPLOY_ENVIRONMENT": "test2"})
 
 
 @pytest.mark.order("first")

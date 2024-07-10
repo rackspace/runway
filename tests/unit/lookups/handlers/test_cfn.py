@@ -96,10 +96,7 @@ class TestCfnLookup:
         )
 
         # test happy path when used from CFNgin (provider)
-        assert (
-            CfnLookup.handle(value, context=mock_context, provider=mock_provider)
-            == "success"
-        )
+        assert CfnLookup.handle(value, context=mock_context, provider=mock_provider) == "success"
         mock_parse.assert_called_once_with(value)
         mock_provider.get_output.assert_called_once_with(*query)
         mock_should_use.assert_called_once_with({"region": region}, mock_provider)
@@ -136,9 +133,7 @@ class TestCfnLookup:
     ) -> None:
         """Test handle cls.get_stack_output raise exception."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
-        mock_should_use = mocker.patch.object(
-            CfnLookup, "should_use_provider", return_value=False
-        )
+        mock_should_use = mocker.patch.object(CfnLookup, "should_use_provider", return_value=False)
         mock_context = MagicMock(name="context")
         mock_session = MagicMock(name="session")
         mock_context.get_session.return_value = mock_session
@@ -150,10 +145,7 @@ class TestCfnLookup:
         query = OutputQuery(*raw_query.split("."))
 
         if default:
-            assert (
-                CfnLookup.handle(raw_query + "::default=" + default, mock_context)
-                == default
-            )
+            assert CfnLookup.handle(raw_query + "::default=" + default, mock_context) == default
             mock_should_use.assert_called_once_with({"default": default}, None)
             assert (
                 "unable to resolve lookup for CloudFormation Stack output "
@@ -198,9 +190,7 @@ class TestCfnLookup:
     ) -> None:
         """Test handle provider raise exception."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
-        mock_should_use = mocker.patch.object(
-            CfnLookup, "should_use_provider", return_value=True
-        )
+        mock_should_use = mocker.patch.object(CfnLookup, "should_use_provider", return_value=True)
         mock_provider = MagicMock(region="us-east-1")
         mock_provider.get_output.side_effect = exception
         raw_query = "test-stack.output1"
@@ -239,10 +229,7 @@ class TestCfnLookup:
         """Test handle raising ValueError."""
         with pytest.raises(ValueError) as excinfo:
             assert CfnLookup.handle("something", runway_context)
-        assert (
-            str(excinfo.value)
-            == 'query must be <stack-name>.<output-name>; got "something"'
-        )
+        assert str(excinfo.value) == 'query must be <stack-name>.<output-name>; got "something"'
 
     def test_get_stack_output(self, caplog: LogCaptureFixture) -> None:
         """Test get_stack_output."""
@@ -323,9 +310,7 @@ class TestCfnLookup:
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         assert not CfnLookup.should_use_provider(args, provider)
         if provider:
-            assert (
-                "not using provider; requested region does not match" in caplog.messages
-            )
+            assert "not using provider; requested region does not match" in caplog.messages
             assert "using provider" not in caplog.messages
 
     @pytest.mark.parametrize(

@@ -45,9 +45,7 @@ class TestParameters:
         "cmd, expected",
         [("sync", True), ("mb", True), ("rb", True), ("cp", False), ("mv", False)],
     )
-    def test_init_set_dir_op(
-        self, cmd: str, expected: bool, mocker: MockerFixture
-    ) -> None:
+    def test_init_set_dir_op(self, cmd: str, expected: bool, mocker: MockerFixture) -> None:
         """Test __init__."""
         mocker.patch.object(Parameters, "_validate_path_args")
         assert Parameters(cmd, self.data_locallocal).data.dir_op == expected
@@ -56,9 +54,7 @@ class TestParameters:
         "cmd, expected",
         [("sync", False), ("mb", False), ("rb", False), ("cp", False), ("mv", True)],
     )
-    def test_init_set_is_move(
-        self, cmd: str, expected: bool, mocker: MockerFixture
-    ) -> None:
+    def test_init_set_is_move(self, cmd: str, expected: bool, mocker: MockerFixture) -> None:
         """Test __init__."""
         mocker.patch.object(Parameters, "_validate_path_args")
         assert Parameters(cmd, self.data_locallocal).data.is_move == expected
@@ -126,9 +122,7 @@ class TestParametersDataModel:
             ("s3://test-dest", "s3://test-src", "s3s3"),
         ],
     )
-    def test_determine_paths_type(
-        self, dest: str, expected: PathsType, src: str
-    ) -> None:
+    def test_determine_paths_type(self, dest: str, expected: PathsType, src: str) -> None:
         """Test _determine_paths_type."""
         assert ParametersDataModel(dest=dest, src=src).paths_type == expected
 
@@ -168,9 +162,7 @@ class TestParametersDataModel:
         "kwargs, error_locs",
         [({"dest": "test-dest"}, ["src"]), ({"src": "test-src"}, ["dest"])],
     )
-    def test_required_fields(
-        self, error_locs: List[str], kwargs: Dict[str, Any]
-    ) -> None:
+    def test_required_fields(self, error_locs: List[str], kwargs: Dict[str, Any]) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
             ParametersDataModel(**kwargs)

@@ -229,12 +229,8 @@ class TestRunway:
         caplog.set_level(logging.ERROR, logger="runway")
         test_handlers = {
             "exception": MagicMock(handle=MagicMock(side_effect=Exception())),
-            "fail_system_exit_0": MagicMock(
-                handle=MagicMock(side_effect=SystemExit(0))
-            ),
-            "fail_system_exit_1": MagicMock(
-                handle=MagicMock(side_effect=SystemExit(1))
-            ),
+            "fail_system_exit_0": MagicMock(handle=MagicMock(side_effect=SystemExit(0))),
+            "fail_system_exit_1": MagicMock(handle=MagicMock(side_effect=SystemExit(1))),
             "success": MagicMock(),
         }
         monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
@@ -246,9 +242,7 @@ class TestRunway:
         ]
         assert not obj.test()
         assert "the following tests failed" not in "\n".join(caplog.messages)
-        test_handlers["success"].handle.assert_called_with(
-            obj.tests[0].name, obj.tests[0].args
-        )
+        test_handlers["success"].handle.assert_called_with(obj.tests[0].name, obj.tests[0].args)
         test_handlers["fail_system_exit_0"].handle.assert_called_with(
             obj.tests[1].name, obj.tests[1].args
         )
@@ -281,13 +275,8 @@ class TestRunway:
             assert not obj.test()
         assert excinfo.value.code == 1
         assert "exception:running test (fail)" in caplog.messages
-        assert (
-            "exception:test required; the remaining tests have been skipped"
-            in caplog.messages
-        )
-        test_handlers["exception"].handle.assert_called_with(
-            obj.tests[0].name, obj.tests[0].args
-        )
+        assert "exception:test required; the remaining tests have been skipped" in caplog.messages
+        test_handlers["exception"].handle.assert_called_with(obj.tests[0].name, obj.tests[0].args)
         assert test_handlers["success"].handle.call_count == 1
 
     def test_test_keyerror(

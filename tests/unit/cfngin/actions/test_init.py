@@ -25,9 +25,7 @@ MODULE = "runway.cfngin.actions.init"
 class TestAction:
     """Test Action."""
 
-    def test___init__(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test___init__(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test __init__."""
         copied_context = mocker.patch.object(cfngin_context, "copy")
         obj = Action(cfngin_context)
@@ -38,22 +36,16 @@ class TestAction:
         """Test _stack_action."""
         assert Action(cfngin_context)._stack_action is None
 
-    def test_cfngin_bucket(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_cfngin_bucket(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test cfngin_bucket."""
         mocker.patch.object(cfngin_context, "copy", return_value=cfngin_context)
         mocker.patch.object(cfngin_context, "s3_client")
         bucket = mocker.patch(f"{MODULE}.Bucket")
         bucket_name = mocker.patch.object(cfngin_context, "bucket_name", "bucket_name")
-        bucket_region = mocker.patch.object(
-            cfngin_context, "bucket_region", "bucket_region"
-        )
+        bucket_region = mocker.patch.object(cfngin_context, "bucket_region", "bucket_region")
         obj = Action(cfngin_context)
         assert obj.cfngin_bucket == bucket.return_value
-        bucket.assert_called_once_with(
-            cfngin_context, name=bucket_name, region=bucket_region
-        )
+        bucket.assert_called_once_with(cfngin_context, name=bucket_name, region=bucket_region)
 
     def test_cfngin_bucket_handle_no_bucket(
         self, cfngin_context: CfnginContext, mocker: MockerFixture
@@ -73,9 +65,7 @@ class TestAction:
         """Test default_cfngin_bucket_stack."""
         mocker.patch.object(cfngin_context, "copy", return_value=cfngin_context)
         bucket_name = mocker.patch.object(cfngin_context, "bucket_name", "bucket_name")
-        assert Action(
-            cfngin_context
-        ).default_cfngin_bucket_stack == CfnginStackDefinitionModel(
+        assert Action(cfngin_context).default_cfngin_bucket_stack == CfnginStackDefinitionModel(
             class_path="runway.cfngin.blueprints.cfngin_bucket.CfnginBucket",
             in_progress_behavior="wait",
             name="cfngin-bucket",
@@ -161,9 +151,7 @@ class TestAction:
         assert not Action(cfngin_context).run()
         assert f"cfngin_bucket {cfngin_bucket.name} already exists" in caplog.messages
 
-    def test_run_forbidden(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_run_forbidden(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test run."""
         cfngin_bucket = mocker.patch.object(
             Action,
@@ -192,9 +180,7 @@ class TestAction:
         )
         assert not Action(cfngin_context, provider_builder, cancel).run()
         get_stack.assert_called_once_with("cfngin-bucket")
-        assert (
-            "found stack for creating cfngin_bucket: cfngin-bucket" in caplog.messages
-        )
+        assert "found stack for creating cfngin_bucket: cfngin-bucket" in caplog.messages
         assert cfngin_context.stack_names == ["cfngin-bucket"]
         mock_deploy.Action.assert_called_once_with(
             context=cfngin_context, provider_builder=provider_builder, cancel=cancel

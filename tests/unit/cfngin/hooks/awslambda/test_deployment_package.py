@@ -75,12 +75,8 @@ class TestDeploymentPackage:
 
         obj = DeploymentPackage(project)
         obj._build_fix_file_permissions(archive_file)
-        assert (
-            file0.external_attr & DeploymentPackage.ZIPFILE_PERMISSION_MASK
-        ) >> 16 == 0o755
-        assert (
-            file0.external_attr & DeploymentPackage.ZIPFILE_PERMISSION_MASK
-        ) >> 16 == 0o755
+        assert (file0.external_attr & DeploymentPackage.ZIPFILE_PERMISSION_MASK) >> 16 == 0o755
+        assert (file0.external_attr & DeploymentPackage.ZIPFILE_PERMISSION_MASK) >> 16 == 0o755
 
     @pytest.mark.parametrize("usage_type", ["function", "layer"])
     def test__build_zip_dependencies(
@@ -174,8 +170,7 @@ class TestDeploymentPackage:
         if usage_type == "layer":
             mock_insert_layer_dir.assert_has_calls(
                 [  # type: ignore
-                    call(src_file, project.source_code.root_directory)
-                    for src_file in files
+                    call(src_file, project.source_code.root_directory) for src_file in files
                 ]
             )
             archive_file.write.assert_has_calls(
@@ -226,13 +221,9 @@ class TestDeploymentPackage:
         assert obj.bucket == bucket_class.return_value
         bucket_class.assert_any_call(project.ctx, project.args.bucket_name)
 
-    def test_bucket_forbidden(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_bucket_forbidden(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test bucket."""
-        mocker.patch(
-            f"{MODULE}.Bucket", return_value=Mock(forbidden=True, not_found=False)
-        )
+        mocker.patch(f"{MODULE}.Bucket", return_value=Mock(forbidden=True, not_found=False))
         with pytest.raises(BucketAccessDeniedError):
             assert DeploymentPackage(project).bucket
 
@@ -262,21 +253,15 @@ class TestDeploymentPackage:
         mock_build_fix_file_permissions = mocker.patch.object(
             DeploymentPackage, "_build_fix_file_permissions"
         )
-        mock_del_cached_property = mocker.patch.object(
-            DeploymentPackage, "_del_cached_property"
-        )
+        mock_del_cached_property = mocker.patch.object(DeploymentPackage, "_del_cached_property")
 
         obj = DeploymentPackage(project)
         assert obj.build() == obj.archive_file
-        mock_zipfile_class.assert_called_once_with(
-            obj.archive_file, "w", zipfile.ZIP_DEFLATED
-        )
+        mock_zipfile_class.assert_called_once_with(obj.archive_file, "w", zipfile.ZIP_DEFLATED)
         mock_zipfile.__enter__.assert_called_once_with()
         mock_build_zip_dependencies.assert_called_once_with(mock_zipfile)
         mock_build_fix_file_permissions.assert_called_once_with(mock_zipfile)
-        mock_del_cached_property.assert_called_once_with(
-            "code_sha256", "exists", "md5_checksum"
-        )
+        mock_del_cached_property.assert_called_once_with("code_sha256", "exists", "md5_checksum")
         assert f"building {obj.archive_file.name} ({obj.runtime})..." in caplog.messages
 
     def test_build_file_empty_after_build(
@@ -318,9 +303,7 @@ class TestDeploymentPackage:
         obj.archive_file.write_text("test" * 8)
         assert obj.build() == obj.archive_file
         mock_zipfile_class.assert_not_called()
-        assert (
-            f"build skipped; {obj.archive_file.name} already exists" in caplog.messages
-        )
+        assert f"build skipped; {obj.archive_file.name} already exists" in caplog.messages
 
     def test_build_raise_runtime_mismatch_error(
         self, mocker: MockerFixture, project: ProjectTypeAlias
@@ -354,16 +337,10 @@ class TestDeploymentPackage:
         url_encoded: bool,
     ) -> None:
         """Test build_tag_set."""
-        code_sha256 = mocker.patch.object(
-            DeploymentPackage, "code_sha256", "code_sha256"
-        )
+        code_sha256 = mocker.patch.object(DeploymentPackage, "code_sha256", "code_sha256")
         mocker.patch.object(project, "compatible_runtimes", ["compatible_runtimes"])
-        md5_checksum = mocker.patch.object(
-            DeploymentPackage, "md5_checksum", "md5_checksum"
-        )
-        source_md5_hash = mocker.patch.object(
-            project.source_code, "md5_hash", "source_code.hash"
-        )
+        md5_checksum = mocker.patch.object(DeploymentPackage, "md5_checksum", "md5_checksum")
+        source_md5_hash = mocker.patch.object(project.source_code, "md5_hash", "source_code.hash")
         expected = {
             **project.ctx.tags,
             DeploymentPackage.META_TAGS["code_sha256"]: code_sha256,
@@ -378,33 +355,20 @@ class TestDeploymentPackage:
             urlencode(expected) if url_encoded else expected
         )
 
-    def test_bucket_not_found(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_bucket_not_found(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test bucket."""
-        mocker.patch(
-            f"{MODULE}.Bucket", return_value=Mock(forbidden=False, not_found=True)
-        )
+        mocker.patch(f"{MODULE}.Bucket", return_value=Mock(forbidden=False, not_found=True))
         with pytest.raises(BucketNotFoundError):
             assert DeploymentPackage(project).bucket
 
-    def test_code_sha256(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_code_sha256(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test code_sha256."""
-        archive_file = mocker.patch.object(
-            DeploymentPackage, "archive_file", "archive_file"
-        )
+        archive_file = mocker.patch.object(DeploymentPackage, "archive_file", "archive_file")
         file_hash = Mock(digest="digest")
         mock_b64encode = mocker.patch("base64.b64encode", return_value=b"success")
-        mock_file_hash_class = mocker.patch(
-            f"{MODULE}.FileHash", return_value=file_hash
-        )
+        mock_file_hash_class = mocker.patch(f"{MODULE}.FileHash", return_value=file_hash)
         mock_sha256 = mocker.patch("hashlib.sha256")
-        assert (
-            DeploymentPackage(project).code_sha256
-            == mock_b64encode.return_value.decode()
-        )
+        assert DeploymentPackage(project).code_sha256 == mock_b64encode.return_value.decode()
         mock_file_hash_class.assert_called_once_with(mock_sha256.return_value)
         file_hash.add_file.assert_called_once_with(archive_file)
         mock_b64encode.assert_called_once_with(file_hash.digest)
@@ -416,9 +380,7 @@ class TestDeploymentPackage:
         mocker.patch.object(project, "compatible_architectures", ["foobar"])
         assert DeploymentPackage(project).compatible_architectures == ["foobar"]
 
-    def test_compatible_runtimes(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_compatible_runtimes(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test compatible_runtimes."""
         mocker.patch.object(project, "compatible_runtimes", ["foobar"])
         assert DeploymentPackage(project).compatible_runtimes == ["foobar"]
@@ -428,9 +390,7 @@ class TestDeploymentPackage:
         self, mocker: MockerFixture, project: ProjectTypeAlias, should_exist: bool
     ) -> None:
         """Test delete."""
-        mock_del_cached_property = mocker.patch.object(
-            DeploymentPackage, "_del_cached_property"
-        )
+        mock_del_cached_property = mocker.patch.object(DeploymentPackage, "_del_cached_property")
         obj = DeploymentPackage(project)
         if should_exist:
             obj.archive_file.touch()
@@ -452,9 +412,7 @@ class TestDeploymentPackage:
         """Test gitignore_filter."""
         assert not DeploymentPackage(project).gitignore_filter
 
-    @pytest.mark.parametrize(
-        "exists_in_s3, usage_type", [(False, "function"), (True, "layer")]
-    )
+    @pytest.mark.parametrize("exists_in_s3, usage_type", [(False, "function"), (True, "layer")])
     def test_init(
         self,
         exists_in_s3: bool,
@@ -464,16 +422,12 @@ class TestDeploymentPackage:
     ) -> None:
         """Test init where runtime always matches."""
         s3_obj = Mock(exists=exists_in_s3, runtime=project.runtime)
-        s3_obj_class = mocker.patch(
-            f"{MODULE}.DeploymentPackageS3Object", return_value=s3_obj
-        )
+        s3_obj_class = mocker.patch(f"{MODULE}.DeploymentPackageS3Object", return_value=s3_obj)
 
         if exists_in_s3:
             assert DeploymentPackage.init(project, usage_type) == s3_obj
         else:
-            assert isinstance(
-                DeploymentPackage.init(project, usage_type), DeploymentPackage
-            )
+            assert isinstance(DeploymentPackage.init(project, usage_type), DeploymentPackage)
         s3_obj_class.assert_called_once_with(project, usage_type)
 
     def test_init_runtime_change(
@@ -485,9 +439,7 @@ class TestDeploymentPackage:
         """Test init where runtime has changed and object exists in S3."""
         caplog.set_level(LogLevels.WARNING, logger=MODULE)
         s3_obj = Mock(exists=True, runtime="change")
-        s3_obj_class = mocker.patch(
-            f"{MODULE}.DeploymentPackageS3Object", return_value=s3_obj
-        )
+        s3_obj_class = mocker.patch(f"{MODULE}.DeploymentPackageS3Object", return_value=s3_obj)
         assert isinstance(DeploymentPackage.init(project), DeploymentPackage)
         s3_obj_class.assert_called_once_with(project, "function")
         s3_obj.delete.assert_called_once_with()
@@ -525,23 +477,14 @@ class TestDeploymentPackage:
         mocker.patch.object(project, "license", "foobar")
         assert DeploymentPackage(project).license == "foobar"
 
-    def test_md5_checksum(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_md5_checksum(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test md5_checksum."""
-        archive_file = mocker.patch.object(
-            DeploymentPackage, "archive_file", "archive_file"
-        )
+        archive_file = mocker.patch.object(DeploymentPackage, "archive_file", "archive_file")
         file_hash = Mock(digest="digest")
         mock_b64encode = mocker.patch("base64.b64encode", return_value=b"success")
-        mock_file_hash_class = mocker.patch(
-            f"{MODULE}.FileHash", return_value=file_hash
-        )
+        mock_file_hash_class = mocker.patch(f"{MODULE}.FileHash", return_value=file_hash)
         mock_md5 = mocker.patch("hashlib.md5")
-        assert (
-            DeploymentPackage(project).md5_checksum
-            == mock_b64encode.return_value.decode()
-        )
+        assert DeploymentPackage(project).md5_checksum == mock_b64encode.return_value.decode()
         mock_file_hash_class.assert_called_once_with(mock_md5.return_value)
         file_hash.add_file.assert_called_once_with(archive_file)
         mock_b64encode.assert_called_once_with(file_hash.digest)
@@ -565,9 +508,7 @@ class TestDeploymentPackage:
         project.args.object_prefix = object_prefix
         obj = DeploymentPackage(project, usage_type)
         if object_prefix:
-            expected_prefix = (
-                f"awslambda/{usage_type}s/{object_prefix.lstrip('/').rstrip('/')}"
-            )
+            expected_prefix = f"awslambda/{usage_type}s/{object_prefix.lstrip('/').rstrip('/')}"
         else:
             expected_prefix = f"awslambda/{usage_type}s"
         assert obj.object_key == (
@@ -575,9 +516,7 @@ class TestDeploymentPackage:
             f"{project.source_code.md5_hash}.zip"
         )
 
-    @pytest.mark.parametrize(
-        "response, expected", [({}, None), ({"VersionId": "foo"}, "foo")]
-    )
+    @pytest.mark.parametrize("response, expected", [({}, None), ({"VersionId": "foo"}, "foo")])
     def test_object_version_id(
         self,
         expected: Optional[str],
@@ -595,9 +534,7 @@ class TestDeploymentPackage:
         assert DeploymentPackage(project).runtime == project.runtime
 
     @pytest.mark.parametrize("build", [False, True])
-    def test_upload(
-        self, build: bool, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_upload(self, build: bool, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test upload."""
         mocker.patch.object(
             DeploymentPackage,
@@ -611,15 +548,11 @@ class TestDeploymentPackage:
             "build_tag_set",
             return_value="foo=bar",
         )
-        mock_del_cached_property = mocker.patch.object(
-            DeploymentPackage, "_del_cached_property"
-        )
+        mock_del_cached_property = mocker.patch.object(DeploymentPackage, "_del_cached_property")
         mock_guess_type = mocker.patch(
             "mimetypes.guess_type", return_value=("application/zip", None)
         )
-        md5_checksum = mocker.patch.object(
-            DeploymentPackage, "md5_checksum", "checksum"
-        )
+        md5_checksum = mocker.patch.object(DeploymentPackage, "md5_checksum", "checksum")
 
         obj = DeploymentPackage(project)
         obj.archive_file.write_text("foobar")
@@ -687,13 +620,9 @@ class TestDeploymentPackageS3Object:
         mocker.patch.object(DeploymentPackageS3Object, "exists", True)
         obj = DeploymentPackageS3Object(project)
         assert obj.build() == obj.archive_file
-        assert (
-            f"build skipped; {obj.archive_file.name} already exists" in caplog.messages
-        )
+        assert f"build skipped; {obj.archive_file.name} already exists" in caplog.messages
 
-    def test_build_not_exists(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_build_not_exists(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test build object doesn't exist raises S3ObjectDoesNotExistError."""
         mocker.patch.object(DeploymentPackageS3Object, "exists", False)
         bucket = Bucket(project.ctx, project.args.bucket_name)
@@ -704,9 +633,7 @@ class TestDeploymentPackageS3Object:
         assert excinfo.value.bucket == bucket.name
         assert excinfo.value.key == obj.object_key
 
-    def test_code_sha256(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_code_sha256(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test code_sha256."""
         expected = "foobar"
         mocker.patch.object(
@@ -732,9 +659,7 @@ class TestDeploymentPackageS3Object:
             assert DeploymentPackageS3Object(project).code_sha256
         bucket.format_bucket_path_uri.assert_called_once_with(key=object_key)
         assert excinfo.value.resource == bucket.format_bucket_path_uri.return_value
-        assert (
-            excinfo.value.tag_key == DeploymentPackageS3Object.META_TAGS["code_sha256"]
-        )
+        assert excinfo.value.tag_key == DeploymentPackageS3Object.META_TAGS["code_sha256"]
 
     @pytest.mark.parametrize("value", ["foobar", None, "foo,bar"])
     def test_compatible_architectures(
@@ -762,11 +687,7 @@ class TestDeploymentPackageS3Object:
         mocker.patch.object(
             DeploymentPackageS3Object,
             "object_tags",
-            (
-                {DeploymentPackageS3Object.META_TAGS["compatible_runtimes"]: value}
-                if value
-                else {}
-            ),
+            ({DeploymentPackageS3Object.META_TAGS["compatible_runtimes"]: value} if value else {}),
         )
         assert DeploymentPackageS3Object(project).compatible_runtimes == (
             value.split(", ") if value else None
@@ -867,9 +788,7 @@ class TestDeploymentPackageS3Object:
         object_key = mocker.patch.object(DeploymentPackageS3Object, "object_key", "key")
 
         stubber = cast("Stubber", project.ctx.add_stubber("s3"))  # type: ignore
-        stubber.add_client_error(
-            "head_object", http_status_code=403, service_message="Forbidden"
-        )
+        stubber.add_client_error("head_object", http_status_code=403, service_message="Forbidden")
         with stubber, pytest.raises(ClientError):
             assert DeploymentPackageS3Object(project).head
         stubber.assert_no_pending_responses()
@@ -895,16 +814,11 @@ class TestDeploymentPackageS3Object:
         object_key = mocker.patch.object(DeploymentPackageS3Object, "object_key", "key")
 
         stubber = cast("Stubber", project.ctx.add_stubber("s3"))  # type: ignore
-        stubber.add_client_error(
-            "head_object", http_status_code=404, service_message="Not Found"
-        )
+        stubber.add_client_error("head_object", http_status_code=404, service_message="Not Found")
         with stubber:
             assert not DeploymentPackageS3Object(project).head
         stubber.assert_no_pending_responses()
-        assert (
-            f"{bucket.format_bucket_path_uri(key=object_key)} not found"
-            in caplog.messages
-        )
+        assert f"{bucket.format_bucket_path_uri(key=object_key)} not found" in caplog.messages
 
     @pytest.mark.parametrize("value", ["foobar", None])
     def test_license(
@@ -918,9 +832,7 @@ class TestDeploymentPackageS3Object:
         )
         assert DeploymentPackageS3Object(project).license == (value)
 
-    def test_md5_checksum(
-        self, project: ProjectTypeAlias, mocker: MockerFixture
-    ) -> None:
+    def test_md5_checksum(self, project: ProjectTypeAlias, mocker: MockerFixture) -> None:
         """Test md5_checksum."""
         expected = "foobar"
         mocker.patch.object(
@@ -948,9 +860,7 @@ class TestDeploymentPackageS3Object:
             assert DeploymentPackageS3Object(project).md5_checksum
         bucket.format_bucket_path_uri.assert_called_once_with(key=object_key)
         assert excinfo.value.resource == bucket.format_bucket_path_uri.return_value
-        assert (
-            excinfo.value.tag_key == DeploymentPackageS3Object.META_TAGS["md5_checksum"]
-        )
+        assert excinfo.value.tag_key == DeploymentPackageS3Object.META_TAGS["md5_checksum"]
 
     @pytest.mark.parametrize(
         "response, expected",
@@ -1029,9 +939,7 @@ class TestDeploymentPackageS3Object:
         assert excinfo.value.resource == bucket.format_bucket_path_uri.return_value
         assert excinfo.value.tag_key == DeploymentPackageS3Object.META_TAGS["runtime"]
 
-    def test_update_tags(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_update_tags(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test mock_update_tags."""
         bucket = Bucket(project.ctx, project.args.bucket_name)
         mocker.patch.object(DeploymentPackageS3Object, "bucket", bucket)
@@ -1103,9 +1011,7 @@ class TestDeploymentPackageS3Object:
         )
         mock_update_tags.assert_called_once_with()
 
-    def test_upload_not_exists(
-        self, mocker: MockerFixture, project: ProjectTypeAlias
-    ) -> None:
+    def test_upload_not_exists(self, mocker: MockerFixture, project: ProjectTypeAlias) -> None:
         """Test upload object doesn't exist raises S3ObjectDoesNotExistError."""
         mocker.patch.object(DeploymentPackageS3Object, "exists", False)
         bucket = Bucket(project.ctx, project.args.bucket_name)

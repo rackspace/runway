@@ -132,17 +132,14 @@ def build(
 
     context_dict["hash"] = get_hash_of_files(
         root_path=Path(args.options.path),
-        directories=options.get("source_hashing", {"directories": None}).get(
-            "directories"
-        ),
+        directories=options.get("source_hashing", {"directories": None}).get("directories"),
     )
     LOGGER.debug("application hash: %s", context_dict["hash"])
 
     # Now determine if the current staticsite has already been deployed
     if args.options.source_hashing.enabled:
         context_dict["hash_tracking_parameter"] = (
-            args.options.source_hashing.parameter
-            or f"{context_dict['artifact_key_prefix']}hash"
+            args.options.source_hashing.parameter or f"{context_dict['artifact_key_prefix']}hash"
         )
 
         ssm_client = session.client("ssm")

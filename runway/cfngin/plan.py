@@ -82,10 +82,7 @@ def merge_graphs(graph1: Graph, graph2: Graph) -> Graph:
 
     """
     merged_graph_dict = merge_dicts(graph1.to_dict().copy(), graph2.to_dict())
-    steps = [
-        graph1.steps.get(name, graph2.steps.get(name))
-        for name in merged_graph_dict.keys()
-    ]
+    steps = [graph1.steps.get(name, graph2.steps.get(name)) for name in merged_graph_dict.keys()]
     return Graph.from_steps([step for step in steps if step])
 
 
@@ -139,9 +136,7 @@ class Step:
         stop_watcher = threading.Event()
         watcher = None
         if self.watch_func:
-            watcher = threading.Thread(
-                target=self.watch_func, args=(self.stack, stop_watcher)
-            )
+            watcher = threading.Thread(target=self.watch_func, args=(self.stack, stop_watcher))
             watcher.start()
 
         try:
@@ -284,18 +279,14 @@ class Step:
         """
         from runway.config.models.cfngin import CfnginStackDefinitionModel
 
-        stack_def = CfnginStackDefinitionModel.construct(
-            name=stack_name, requires=requires or []
-        )
+        stack_def = CfnginStackDefinitionModel.construct(name=stack_name, requires=requires or [])
         stack = Stack(stack_def, context)
         return cls(stack, fn=fn, watch_func=watch_func)
 
     @classmethod
     def from_persistent_graph(
         cls,
-        graph_dict: Union[
-            Dict[str, List[str]], Dict[str, Set[str]], OrderedDict[str, Set[str]]
-        ],
+        graph_dict: Union[Dict[str, List[str]], Dict[str, Set[str]], OrderedDict[str, Set[str]]],
         context: CfnginContext,
         fn: Optional[Callable[..., Status]] = None,
         watch_func: Optional[Callable[..., Any]] = None,
@@ -348,9 +339,7 @@ class Graph:
     dag: DAG
     steps: Dict[str, Step]
 
-    def __init__(
-        self, steps: Optional[Dict[str, Step]] = None, dag: Optional[DAG] = None
-    ) -> None:
+    def __init__(self, steps: Optional[Dict[str, Step]] = None, dag: Optional[DAG] = None) -> None:
         """Instantiate class.
 
         Args:
@@ -542,9 +531,7 @@ class Graph:
     @classmethod
     def from_dict(
         cls,
-        graph_dict: Union[
-            Dict[str, List[str]], Dict[str, Set[str]], OrderedDict[str, Set[str]]
-        ],
+        graph_dict: Union[Dict[str, List[str]], Dict[str, Set[str]], OrderedDict[str, Set[str]]],
         context: CfnginContext,
     ) -> Graph:
         """Create a Graph from a graph dict.
@@ -626,11 +613,7 @@ class Plan:
             self.locked = self.context.persistent_graph_locked
 
             if self.context.stack_names:
-                nodes = [
-                    target
-                    for target in self.context.stack_names
-                    if graph.steps.get(target)
-                ]
+                nodes = [target for target in self.context.stack_names if graph.steps.get(target)]
 
                 graph = graph.filtered(nodes)
         else:
@@ -751,15 +734,12 @@ class Plan:
                 return result
 
             if step.completed or (
-                step.skipped
-                and step.status.reason == ("does not exist in cloudformation")
+                step.skipped and step.status.reason == ("does not exist in cloudformation")
             ):
                 fn_name = step.fn.__name__ if callable(step.fn) else step.fn
                 if fn_name == "_destroy_stack":
                     self.context.persistent_graph.pop(step)
-                    LOGGER.debug(
-                        "removed step '%s' from the persistent graph", step.name
-                    )
+                    LOGGER.debug("removed step '%s' from the persistent graph", step.name)
                 elif fn_name == "_launch_stack":
                     self.context.persistent_graph.add_step_if_not_exists(
                         step, add_dependencies=True, add_dependents=True

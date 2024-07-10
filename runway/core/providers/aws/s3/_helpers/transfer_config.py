@@ -85,9 +85,7 @@ class RuntimeConfig:
             "multipart_chunksize": multipart_chunksize,
             "multipart_threshold": multipart_threshold,
         }
-        runtime_config.update(
-            {k: v for k, v in kwargs.items() if v is not None}  # type: ignore
-        )
+        runtime_config.update({k: v for k, v in kwargs.items() if v is not None})  # type: ignore
         cls._convert_human_readable_sizes(runtime_config)
         cls._convert_human_readable_rates(runtime_config)
         cls._validate_config(runtime_config)
@@ -127,9 +125,7 @@ class RuntimeConfig:
 
     @staticmethod
     def _error_positive_value(name: str, value: int) -> NoReturn:
-        raise InvalidConfigError(
-            f"Value for {name} must be a positive integer: {value}"
-        )
+        raise InvalidConfigError(f"Value for {name} must be a positive integer: {value}")
 
 
 def create_transfer_config_from_runtime_config(

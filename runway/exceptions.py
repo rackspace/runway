@@ -52,8 +52,7 @@ class ConfigNotFound(RunwayError):
 
         if looking_for:
             self.message = (
-                f"config file not found at path {path}; "
-                f"looking for one of {looking_for}"
+                f"config file not found at path {path}; " f"looking for one of {looking_for}"
             )
         else:
             self.message = f"config file not found at path {path}"
@@ -161,8 +160,7 @@ class FailedVariableLookup(RunwayError):
         self.cause = lookup_error
         self.variable = variable
         self.message = (
-            f'Could not resolve lookup "{lookup_error.lookup}" '
-            f'for variable "{variable.name}"'
+            f'Could not resolve lookup "{lookup_error.lookup}" ' f'for variable "{variable.name}"'
         )
         super().__init__(*args, **kwargs)
 
@@ -189,9 +187,7 @@ class HclParserError(RunwayError):
         self.reason = exc
         self.file_path = file_path
         if parser:
-            self.message = (
-                f"Unable to parse {file_path} as {parser.__name__.upper()}\n\n{exc}"
-            )
+            self.message = f"Unable to parse {file_path} as {parser.__name__.upper()}\n\n{exc}"
         else:
             self.message = f"Unable to parse {file_path}\n\n{exc}"
         super().__init__()
@@ -339,9 +335,7 @@ class UnresolvedVariable(RunwayError):
             variable: The unresolved variable.
 
         """
-        self.message = (
-            f'Attempted to use variable "{variable.name}" before it was resolved'
-        )
+        self.message = f'Attempted to use variable "{variable.name}" before it was resolved'
         self.variable = variable
         super().__init__(*args, **kwargs)
 

@@ -158,9 +158,7 @@ class Filter:
         filter_patterns: Set[FilterPattern] = set()
         for filter_type in cls.FILTER_TYPES:
             for pat in parameters[filter_type]:
-                filter_patterns.add(
-                    FilterPattern(type=cast(_FilterType, filter_type), pattern=pat)
-                )
+                filter_patterns.add(FilterPattern(type=cast(_FilterType, filter_type), pattern=pat))
         return Filter(
             filter_patterns,
             cls.parse_rootdir(parameters.src),

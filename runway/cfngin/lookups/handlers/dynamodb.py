@@ -78,9 +78,9 @@ class QueryDataModel(BaseModel):
             )
         return {
             self.partition_key: {
-                cast(
-                    Literal["B", "N", "S"], match.groupdict("S")["data_type"]
-                ): match.group("value")
+                cast(Literal["B", "N", "S"], match.groupdict("S")["data_type"]): match.group(
+                    "value"
+                )
             }
         }
 
@@ -139,9 +139,7 @@ class DynamodbLookup(LookupHandler):
         return QueryDataModel.parse_obj(match.groupdict())
 
     @classmethod
-    def handle(
-        cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any) -> Any:
         """Get a value from a DynamoDB table.
 
         Args:
@@ -169,22 +167,16 @@ class DynamodbLookup(LookupHandler):
             response = dynamodb.get_item(
                 TableName=query.table_name,
                 Key=query.item_key,
-                ProjectionExpression=",".join(
-                    [query.partition_key, *key_dict["clean_table_keys"]]
-                ),
+                ProjectionExpression=",".join([query.partition_key, *key_dict["clean_table_keys"]]),
             )
         except dynamodb.exceptions.ResourceNotFoundException as exc:
-            raise ValueError(
-                f"Can't find the DynamoDB table: {query.table_name}"
-            ) from exc
+            raise ValueError(f"Can't find the DynamoDB table: {query.table_name}") from exc
         except ClientError as exc:
             if exc.response["Error"]["Code"] == "ValidationException":
                 raise ValueError(
                     f"No DynamoDB record matched the partition key: {query.partition_key}"
                 ) from exc
-            raise ValueError(
-                f"The DynamoDB lookup '{value}' encountered an error: {exc}"
-            ) from exc
+            raise ValueError(f"The DynamoDB lookup '{value}' encountered an error: {exc}") from exc
         # find and return the key from the dynamo data returned
         if "Item" in response:
             return _get_val_from_ddb_data(response["Item"], key_dict["new_keys"])

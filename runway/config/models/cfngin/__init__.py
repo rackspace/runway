@@ -90,18 +90,14 @@ class CfnginStackDefinitionModel(ConfigProperty):
         title="Stack Description",
         description="A description that will be applied to the stack in CloudFormation.",
     )
-    enabled: bool = Field(
-        default=True, description="Whether the stack will be deployed."
-    )
+    enabled: bool = Field(default=True, description="Whether the stack will be deployed.")
     in_progress_behavior: Optional[Literal["wait"]] = Field(
         default=None,
         title="Stack In Progress Behavior",
         description="The action to take when a stack's status is "
         "CREATE_IN_PROGRESS or UPDATE_IN_PROGRESS when trying to update it.",
     )
-    locked: bool = Field(
-        default=False, description="Whether to limit updating of the stack."
-    )
+    locked: bool = Field(default=False, description="Whether to limit updating of the stack.")
     name: str = Field(..., title="Stack Name", description="Name of the stack.")
     protected: bool = Field(
         default=False,
@@ -160,9 +156,7 @@ class CfnginStackDefinitionModel(ConfigProperty):
             https://pydantic-docs.helpmanual.io/usage/schema/#schema-customization
 
             """
-            schema["description"] = (
-                "Define CloudFormation stacks using a Blueprint or Template."
-            )
+            schema["description"] = "Define CloudFormation stacks using a Blueprint or Template."
             # prevents a false error when defining stacks as a dict
             schema.get("required", ["name"]).remove("name")
 
@@ -176,9 +170,7 @@ class CfnginStackDefinitionModel(ConfigProperty):
 
     _resolve_path_fields = cast(
         "classmethod[Callable[..., Any]]",
-        validator("stack_policy_path", "template_path", allow_reuse=True)(
-            utils.resolve_path_field
-        ),
+        validator("stack_policy_path", "template_path", allow_reuse=True)(utils.resolve_path_field),
     )
 
     @root_validator(pre=True)
@@ -193,11 +185,7 @@ class CfnginStackDefinitionModel(ConfigProperty):
         """Ensure that either class_path or template_path is defined."""
         # if the stack is disabled or locked, it is ok that these are missing
         required = values.get("enabled", True) and not values.get("locked", False)
-        if (
-            not values.get("class_path")
-            and not values.get("template_path")
-            and required
-        ):
+        if not values.get("class_path") and not values.get("template_path") and required:
             raise ValueError("either class_path or template_path must be defined")
         return values
 
@@ -245,9 +233,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
     )
     package_sources: CfnginPackageSourcesDefinitionModel = Field(
         default=CfnginPackageSourcesDefinitionModel(),
-        description=CfnginPackageSourcesDefinitionModel.Config.schema_extra[
-            "description"
-        ],
+        description=CfnginPackageSourcesDefinitionModel.Config.schema_extra["description"],
     )
     persistent_graph_key: Optional[str] = Field(
         default=None,
@@ -305,9 +291,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
 
     _resolve_path_fields = cast(
         "classmethod[Callable[..., Any]]",
-        validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(
-            utils.resolve_path_field
-        ),
+        validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(utils.resolve_path_field),
     )
 
     @validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", pre=True)
@@ -358,9 +342,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         return cast(
             "Model",
             cls.parse_raw(
-                Path(path).read_text(
-                    encoding=locale.getpreferredencoding(do_setlocale=False)
-                ),
+                Path(path).read_text(encoding=locale.getpreferredencoding(do_setlocale=False)),
                 content_type=content_type,  # type: ignore
                 encoding=encoding,
                 proto=proto,  # type: ignore

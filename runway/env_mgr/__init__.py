@@ -71,9 +71,7 @@ class EnvManager(DelCachedPropMixin):
     env_dir_name: str
     path: Path
 
-    def __init__(
-        self, bin_name: str, dir_name: str, path: Optional[Path] = None
-    ) -> None:
+    def __init__(self, bin_name: str, dir_name: str, path: Optional[Path] = None) -> None:
         """Initialize class.
 
         Args:
@@ -85,9 +83,7 @@ class EnvManager(DelCachedPropMixin):
         """
         self._bin_name = bin_name + self.command_suffix
         self.current_version = None
-        self.env_dir_name = (
-            dir_name if platform.system() == "Windows" else "." + dir_name
-        )
+        self.env_dir_name = dir_name if platform.system() == "Windows" else "." + dir_name
         self.path = Path.cwd() if not path else path
 
     @property

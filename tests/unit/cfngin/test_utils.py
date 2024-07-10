@@ -149,9 +149,7 @@ def test_ensure_s3_bucket_persist_graph(caplog: LogCaptureFixture) -> None:
     s3_client = boto3.client("s3")
     stubber = Stubber(s3_client)
     stubber.add_response("head_bucket", {}, {"Bucket": "test-bucket"})
-    stubber.add_response(
-        "get_bucket_versioning", {"Status": "Enabled"}, {"Bucket": "test-bucket"}
-    )
+    stubber.add_response("get_bucket_versioning", {"Status": "Enabled"}, {"Bucket": "test-bucket"})
     with stubber:
         assert not ensure_s3_bucket(s3_client, "test-bucket", persist_graph=True)
     stubber.assert_no_pending_responses()
@@ -174,8 +172,7 @@ def test_ensure_s3_bucket_persist_graph_mfa_delete(caplog: LogCaptureFixture) ->
     stubber.assert_no_pending_responses()
     assert (
         'MFADelete must be disabled on bucket "test-bucket" when using persistent '
-        "graphs to allow for proper management of the graphs"
-        in "\n".join(caplog.messages)
+        "graphs to allow for proper management of the graphs" in "\n".join(caplog.messages)
     )
 
 
@@ -190,15 +187,12 @@ def test_ensure_s3_bucket_persist_graph_versioning_not_enabled(
     s3_client = boto3.client("s3")
     stubber = Stubber(s3_client)
     stubber.add_response("head_bucket", {}, {"Bucket": "test-bucket"})
-    stubber.add_response(
-        "get_bucket_versioning", versioning_response, {"Bucket": "test-bucket"}
-    )
+    stubber.add_response("get_bucket_versioning", versioning_response, {"Bucket": "test-bucket"})
     with stubber:
         assert not ensure_s3_bucket(s3_client, "test-bucket", persist_graph=True)
     stubber.assert_no_pending_responses()
-    assert (
-        "it is recommended to enable versioning when using persistent graphs"
-        in "\n".join(caplog.messages)
+    assert "it is recommended to enable versioning when using persistent graphs" in "\n".join(
+        caplog.messages
     )
 
 
@@ -244,10 +238,7 @@ def test_read_value_from_path_root_path_dir(tmp_path: Path) -> None:
     """Test read_value_from_path root_path is dir."""
     test_file = tmp_path / "test.txt"
     test_file.write_text("success")
-    assert (
-        read_value_from_path(f"file://./{test_file.name}", root_path=tmp_path)
-        == "success"
-    )
+    assert read_value_from_path(f"file://./{test_file.name}", root_path=tmp_path) == "success"
 
 
 def test_read_value_from_path_root_path_file(tmp_path: Path) -> None:
@@ -255,9 +246,7 @@ def test_read_value_from_path_root_path_file(tmp_path: Path) -> None:
     test_file = tmp_path / "test.txt"
     test_file.write_text("success")
     assert (
-        read_value_from_path(
-            f"file://./{test_file.name}", root_path=tmp_path / "something.json"
-        )
+        read_value_from_path(f"file://./{test_file.name}", root_path=tmp_path / "something.json")
         == "success"
     )
 
@@ -406,9 +395,7 @@ Outputs:
             path = self.tmp_path / "my_directory"
             with self.assertRaises(Exception) as context:
                 safe_tar_extract(tar, path)
-            self.assertEqual(
-                str(context.exception), "Attempted Path Traversal in Tar File"
-            )
+            self.assertEqual(str(context.exception), "Attempted Path Traversal in Tar File")
 
     def test_extractors(self):
         """Test extractors."""
@@ -484,17 +471,13 @@ Outputs:
             )
             self.assertEqual(
                 sp.determine_git_ref(
-                    GitCfnginPackageSourceDefinitionModel(
-                        **{"uri": "git@foo", "commit": "1234"}
-                    )
+                    GitCfnginPackageSourceDefinitionModel(**{"uri": "git@foo", "commit": "1234"})
                 ),
                 "1234",
             )
             self.assertEqual(
                 sp.determine_git_ref(
-                    GitCfnginPackageSourceDefinitionModel(
-                        **{"uri": "git@foo", "tag": "v1.0.0"}
-                    )
+                    GitCfnginPackageSourceDefinitionModel(**{"uri": "git@foo", "tag": "v1.0.0"})
                 ),
                 "v1.0.0",
             )
@@ -515,34 +498,26 @@ class TestExceptionRetries(unittest.TestCase):
         """Run before tests."""
         self.counter = 0
 
-    def _works_immediately(
-        self, a: Any, b: Any, x: Any = None, y: Any = None
-    ) -> List[Any]:
+    def _works_immediately(self, a: Any, b: Any, x: Any = None, y: Any = None) -> List[Any]:
         """Works immediately."""
         self.counter += 1
         return [a, b, x, y]
 
-    def _works_second_attempt(
-        self, a: Any, b: Any, x: Any = None, y: Any = None
-    ) -> List[Any]:
+    def _works_second_attempt(self, a: Any, b: Any, x: Any = None, y: Any = None) -> List[Any]:
         """Works second_attempt."""
         self.counter += 1
         if self.counter == 2:
             return [a, b, x, y]
         raise Exception("Broke.")
 
-    def _second_raises_exception2(
-        self, a: Any, b: Any, x: Any = None, y: Any = None
-    ) -> List[Any]:
+    def _second_raises_exception2(self, a: Any, b: Any, x: Any = None, y: Any = None) -> List[Any]:
         """Second raises exception2."""
         self.counter += 1
         if self.counter == 2:
             return [a, b, x, y]
         raise MockException("Broke.")
 
-    def _throws_exception2(
-        self, a: Any, b: Any, x: Any = None, y: Any = None
-    ) -> List[Any]:
+    def _throws_exception2(self, a: Any, b: Any, x: Any = None, y: Any = None) -> List[Any]:
         """Throws exception2."""
         self.counter += 1
         raise MockException("Broke.")

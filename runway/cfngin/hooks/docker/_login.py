@@ -44,9 +44,7 @@ class LoginArgs(BaseModel):
     def _set_ecr(cls, v: Any, values: Dict[str, Any]) -> Any:
         """Set the value of ``ecr``."""
         if v and isinstance(v, dict):
-            return ElasticContainerRegistry.parse_obj(
-                {"context": values.get("context"), **v}
-            )
+            return ElasticContainerRegistry.parse_obj({"context": values.get("context"), **v})
         return v
 
     @validator("registry", pre=True, always=True, allow_reuse=True)

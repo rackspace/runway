@@ -36,9 +36,7 @@ class TestPip:
             ({"file_name": "foo.txt"}, True),
         ],
     )
-    def test_dir_is_project(
-        self, expected: bool, kwargs: Dict[str, str], tmp_path: Path
-    ) -> None:
+    def test_dir_is_project(self, expected: bool, kwargs: Dict[str, str], tmp_path: Path) -> None:
         """Test dir_is_project."""
         requirements_txt = tmp_path / kwargs.get("file_name", "requirements.txt")
         if expected:
@@ -117,9 +115,7 @@ class TestPip:
         mock_generate_install_command = mocker.patch.object(
             Pip, "generate_install_command", return_value=["generate_install_command"]
         )
-        mock_run_command = mocker.patch.object(
-            Pip, "_run_command", return_value="_run_command"
-        )
+        mock_run_command = mocker.patch.object(Pip, "_run_command", return_value="_run_command")
 
         assert (
             Pip(Mock(), tmp_path).install(
@@ -158,9 +154,7 @@ class TestPip:
         )
 
         with pytest.raises(PipInstallFailedError) as excinfo:
-            assert Pip(Mock(), tmp_path).install(
-                requirements=requirements_txt, target=target
-            )
+            assert Pip(Mock(), tmp_path).install(requirements=requirements_txt, target=target)
         assert (
             excinfo.value.message == "pip failed to install dependencies; "
             "review pip's output above to troubleshoot"
@@ -180,9 +174,7 @@ class TestPip:
         self, cmd_output: str, expected: str, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test python_version."""
-        mock_run_command = mocker.patch.object(
-            Pip, "_run_command", return_value=cmd_output
-        )
+        mock_run_command = mocker.patch.object(Pip, "_run_command", return_value=cmd_output)
         version_cls = mocker.patch(f"{MODULE}.Version", return_value="success")
         assert Pip(Mock(), tmp_path).python_version == version_cls.return_value
         mock_run_command.assert_called_once_with([Pip.EXECUTABLE, "--version"])
@@ -202,9 +194,7 @@ class TestPip:
         self, cmd_output: str, expected: str, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test version."""
-        mock_run_command = mocker.patch.object(
-            Pip, "_run_command", return_value=cmd_output
-        )
+        mock_run_command = mocker.patch.object(Pip, "_run_command", return_value=cmd_output)
         version_cls = mocker.patch(f"{MODULE}.Version", return_value="success")
         assert Pip(Mock(), tmp_path).version == version_cls.return_value
         mock_run_command.assert_called_once_with([Pip.EXECUTABLE, "--version"])

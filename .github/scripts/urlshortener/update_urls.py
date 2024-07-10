@@ -17,9 +17,7 @@ HDLR = logging.StreamHandler()
 HDLR.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
 
 ID_TEMPLATE = "runway/{release}/{os}"
-TARGET_TEMPLATE = (
-    "https://{bucket_name}.s3-{region}.amazonaws.com/runway/{version}/{os}/runway"
-)
+TARGET_TEMPLATE = "https://{bucket_name}.s3-{region}.amazonaws.com/runway/{version}/{os}/runway"
 
 OS_NAMES = ["linux", "osx", "windows"]
 

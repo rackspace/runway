@@ -92,9 +92,7 @@ def test_generate_node_command_npx(
     mock_which.assert_called_once_with(NPX_BIN)
 
 
-def test_generate_node_command_npx_package(
-    mocker: MockerFixture, tmp_path: Path
-) -> None:
+def test_generate_node_command_npx_package(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test generate_node_command."""
     mock_which = mocker.patch(f"{MODULE}.which", return_value=True)
     assert generate_node_command(

@@ -65,19 +65,14 @@ class ModulePath:
         if isinstance(self.definition, str):
             match = re.match(rf"^.*{self.ARGS_REGEX}", self.definition)
             if match:
-                return {
-                    k: ",".join(v) for k, v in parse_qs(match.group("args")).items()
-                }
+                return {k: ",".join(v) for k, v in parse_qs(match.group("args")).items()}
         return {}
 
     @cached_property
     def location(self) -> str:
         """Location of the module."""
         if isinstance(self.definition, str):
-            if (
-                re.match(r"^(/|//|\.|\./)", self.definition)
-                or "::" not in self.definition
-            ):
+            if re.match(r"^(/|//|\.|\./)", self.definition) or "::" not in self.definition:
                 return re.sub(self.ARGS_REGEX, "", self.definition)
             no_src = re.sub(rf"^{self.SOURCE_REGEX}", "", self.definition)
             no_uri = re.sub(rf"^{self.URI_REGEX}", "", no_src)
@@ -141,9 +136,7 @@ class ModulePath:
     @classmethod
     def parse_obj(
         cls,
-        obj: Optional[
-            Union[Path, RunwayModuleDefinition, RunwayModuleDefinitionModel, str]
-        ],
+        obj: Optional[Union[Path, RunwayModuleDefinition, RunwayModuleDefinitionModel, str]],
         *,
         cache_dir: Path,
         deploy_environment: Optional[DeployEnvironment] = None,

@@ -24,9 +24,7 @@ NPX_BIN = "npx.cmd" if platform.system().lower() == "windows" else "npx"
 
 def format_npm_command_for_logging(command: List[str]) -> str:
     """Convert npm command list to string for display to user."""
-    if platform.system().lower() == "windows" and (
-        command[0] == "npx.cmd" and command[1] == "-c"
-    ):
+    if platform.system().lower() == "windows" and (command[0] == "npx.cmd" and command[1] == "-c"):
         return f'npx.cmd -c "{" ".join(command[2:])}"'
     return " ".join(command)
 
@@ -107,10 +105,7 @@ def use_npm_ci(path: Path) -> bool:
     # https://docs.npmjs.com/cli/ci#description
     with open(os.devnull, "w", encoding="utf-8") as fnull:
         if (
-            (path / "package-lock.json").is_file()
-            or (path / "npm-shrinkwrap.json").is_file()
-        ) and subprocess.call(
-            [NPM_BIN, "ci", "-h"], stdout=fnull, stderr=subprocess.STDOUT
-        ) == 0:
+            (path / "package-lock.json").is_file() or (path / "npm-shrinkwrap.json").is_file()
+        ) and subprocess.call([NPM_BIN, "ci", "-h"], stdout=fnull, stderr=subprocess.STDOUT) == 0:
             return True
     return False

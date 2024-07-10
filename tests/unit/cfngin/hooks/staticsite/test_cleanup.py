@@ -29,18 +29,13 @@ MODULE = "runway.cfngin.hooks.staticsite.cleanup"
     [
         ([], []),
         (
-            [
-                {"OutputKey": i, "OutputValue": f"{i}Val"}
-                for i in REPLICATED_FUNCTION_OUTPUTS
-            ]
+            [{"OutputKey": i, "OutputValue": f"{i}Val"} for i in REPLICATED_FUNCTION_OUTPUTS]
             + [{"OutputKey": "foo", "OutputValue": "bar"}],
             [f"{i}Val" for i in REPLICATED_FUNCTION_OUTPUTS],
         ),
     ],
 )
-def test_get_replicated_function_names(
-    expected: list[str], outputs: list[OutputTypeDef]
-) -> None:
+def test_get_replicated_function_names(expected: list[str], outputs: list[OutputTypeDef]) -> None:
     """Test get_replicated_function_names."""
     assert get_replicated_function_names(outputs) == expected
 

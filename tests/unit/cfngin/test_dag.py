@@ -172,9 +172,7 @@ def test_transitive_reduction(empty_dag: DAG) -> None:
     """Test transitive reduction."""
     dag = empty_dag
     # https://en.wikipedia.org/wiki/Transitive_reduction#/media/File:Tred-G.svg
-    dag.from_dict(
-        {"a": ["b", "c", "d", "e"], "b": ["d"], "c": ["d", "e"], "d": ["e"], "e": []}
-    )
+    dag.from_dict({"a": ["b", "c", "d", "e"], "b": ["d"], "c": ["d", "e"], "d": ["e"], "e": []})
     dag.transitive_reduction()
     # https://en.wikipedia.org/wiki/Transitive_reduction#/media/File:Tred-Gprime.svg
     assert dag.graph == {

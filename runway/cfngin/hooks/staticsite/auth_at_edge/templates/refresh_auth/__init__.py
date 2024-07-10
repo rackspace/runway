@@ -101,9 +101,7 @@ def handler(event, _context):
             ),
             "status": "400",
             "headers": {
-                "content-type": [
-                    {"key": "Content-Type", "value": "text/html; charset=UTF-8"}
-                ],
+                "content-type": [{"key": "Content-Type", "value": "text/html; charset=UTF-8"}],
                 **CONFIG.get("cloud_front_headers", {}),
             },
         }

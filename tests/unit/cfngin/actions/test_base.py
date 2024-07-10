@@ -63,9 +63,7 @@ class TestBaseAction(unittest.TestCase):
         """Test ensure cfn bucket exists."""
         action = BaseAction(
             context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(
-                provider=Provider(get_session("us-east-1"))
-            ),
+            provider_builder=MockProviderBuilder(provider=Provider(get_session("us-east-1"))),
         )
         assert not action.ensure_cfn_bucket()
         mock_ensure_s3_bucket.assert_called_once_with(
@@ -82,9 +80,7 @@ class TestBaseAction(unittest.TestCase):
         )
         action = BaseAction(
             context=mock_context("mynamespace"),
-            provider_builder=MockProviderBuilder(
-                provider=Provider(get_session("us-east-1"))
-            ),
+            provider_builder=MockProviderBuilder(provider=Provider(get_session("us-east-1"))),
         )
         with self.assertRaises(CfnginBucketNotFound):
             assert action.ensure_cfn_bucket()
@@ -92,12 +88,8 @@ class TestBaseAction(unittest.TestCase):
             action.s3_conn, action.bucket_name, None, create=False
         )
 
-    @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
-    )
-    @patch(
-        "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
-    )
+    @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
+    @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
     def test_generate_plan_no_persist_exclude(
         self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
     ) -> None:
@@ -111,9 +103,7 @@ class TestBaseAction(unittest.TestCase):
         )
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(
-                provider=self.provider, region=self.region
-            ),
+            provider_builder=MockProviderBuilder(provider=self.provider, region=self.region),
         )
 
         plan = action._generate_plan(include_persistent_graph=False)
@@ -128,12 +118,8 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertTrue(plan.require_unlocked)
 
-    @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
-    )
-    @patch(
-        "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
-    )
+    @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
+    @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
     def test_generate_plan_no_persist_include(
         self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
     ) -> None:
@@ -147,9 +133,7 @@ class TestBaseAction(unittest.TestCase):
         )
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(
-                provider=self.provider, region=self.region
-            ),
+            provider_builder=MockProviderBuilder(provider=self.provider, region=self.region),
         )
 
         plan = action._generate_plan(include_persistent_graph=True)
@@ -164,12 +148,8 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertTrue(plan.require_unlocked)
 
-    @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
-    )
-    @patch(
-        "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
-    )
+    @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
+    @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
     def test_generate_plan_with_persist_exclude(
         self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
     ) -> None:
@@ -183,9 +163,7 @@ class TestBaseAction(unittest.TestCase):
         context._persistent_graph = Graph.from_steps([persist_step])
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(
-                provider=self.provider, region=self.region
-            ),
+            provider_builder=MockProviderBuilder(provider=self.provider, region=self.region),
         )
 
         plan = action._generate_plan(include_persistent_graph=False)
@@ -199,12 +177,8 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertTrue(plan.require_unlocked)
 
-    @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
-    )
-    @patch(
-        "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
-    )
+    @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
+    @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
     def test_generate_plan_with_persist_include(
         self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
     ) -> None:
@@ -218,9 +192,7 @@ class TestBaseAction(unittest.TestCase):
         context._persistent_graph = Graph.from_steps([persist_step])
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(
-                provider=self.provider, region=self.region
-            ),
+            provider_builder=MockProviderBuilder(provider=self.provider, region=self.region),
         )
 
         plan = action._generate_plan(include_persistent_graph=True)
@@ -236,12 +208,8 @@ class TestBaseAction(unittest.TestCase):
         self.assertEqual(BaseAction.DESCRIPTION, plan.description)
         self.assertTrue(plan.require_unlocked)
 
-    @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
-    )
-    @patch(
-        "runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock
-    )
+    @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
+    @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
     def test_generate_plan_with_persist_no_lock_req(
         self, mock_stack_action: PropertyMock, mock_tags: PropertyMock
     ) -> None:
@@ -255,14 +223,10 @@ class TestBaseAction(unittest.TestCase):
         context._persistent_graph = Graph.from_steps([persist_step])
         action = BaseAction(
             context=context,
-            provider_builder=MockProviderBuilder(
-                provider=self.provider, region=self.region
-            ),
+            provider_builder=MockProviderBuilder(provider=self.provider, region=self.region),
         )
 
-        plan = action._generate_plan(
-            include_persistent_graph=True, require_unlocked=False
-        )
+        plan = action._generate_plan(include_persistent_graph=True, require_unlocked=False)
 
         self.assertIsInstance(plan, Plan)
         mock_tags.assert_called_once()

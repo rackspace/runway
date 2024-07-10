@@ -21,9 +21,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-def _get_client(
-    session: Optional[boto3.Session] = None, region: Optional[str] = None
-) -> S3Client:
+def _get_client(session: Optional[boto3.Session] = None, region: Optional[str] = None) -> S3Client:
     """Get S3 boto client."""
     return session.client("s3") if session else boto3.client("s3", region_name=region)
 
@@ -32,9 +30,7 @@ def _get_resource(
     session: Optional[boto3.Session] = None, region: Optional[str] = None
 ) -> S3ServiceResource:
     """Get S3 boto resource."""
-    return (
-        session.resource("s3") if session else boto3.resource("s3", region_name=region)
-    )
+    return session.resource("s3") if session else boto3.resource("s3", region_name=region)
 
 
 def purge_and_delete_bucket(
@@ -84,9 +80,7 @@ def does_bucket_exist(
             LOGGER.info('bucket "%s" does not exist', bucket_name)
             return False
         if exc.response["Error"]["Message"] == "Forbidden":
-            LOGGER.exception(
-                'access denied for bucket "%s" (permissions?)', bucket_name
-            )
+            LOGGER.exception('access denied for bucket "%s" (permissions?)', bucket_name)
             raise
     return False
 
@@ -101,9 +95,7 @@ def ensure_bucket_exists(
         if region == "us-east-1":
             create_bucket_opts: Dict[str, Any] = {}
         else:
-            create_bucket_opts = {
-                "CreateBucketConfiguration": {"LocationConstraint": region}
-            }
+            create_bucket_opts = {"CreateBucketConfiguration": {"LocationConstraint": region}}
         s3_client.create_bucket(Bucket=bucket_name, **create_bucket_opts)
 
         # sometimes when creating the bucket it can take a few moments before
@@ -116,9 +108,7 @@ def ensure_bucket_exists(
         s3_client.put_bucket_encryption(
             Bucket=bucket_name,
             ServerSideEncryptionConfiguration={
-                "Rules": [
-                    {"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}
-                ]
+                "Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]
             },
         )
         LOGGER.verbose('enabled encryption for bucket "%s"', bucket_name)
@@ -143,18 +133,14 @@ def does_s3_object_exist(
     return True
 
 
-def upload(
-    bucket: str, key: str, filename: str, session: Optional[boto3.Session] = None
-) -> None:
+def upload(bucket: str, key: str, filename: str, session: Optional[boto3.Session] = None) -> None:
     """Upload file to S3 bucket."""
     s3_client = _get_client(session)
     LOGGER.info("uploading %s to s3://%s/%s...", filename, bucket, key)
     s3_client.upload_file(Filename=filename, Bucket=bucket, Key=key)
 
 
-def download(
-    bucket: str, key: str, file_path: str, session: Optional[boto3.Session] = None
-) -> str:
+def download(bucket: str, key: str, file_path: str, session: Optional[boto3.Session] = None) -> str:
     """Download a file from S3 to the given path."""
     s3_client = _get_client(session)
 

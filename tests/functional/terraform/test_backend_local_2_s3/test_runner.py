@@ -24,9 +24,7 @@ def tf_state_bucket(cli_runner: CliRunner) -> Iterator[None]:
     """Create Terraform state bucket and table."""
     cli_runner.invoke(cli, ["deploy", "--tag", "bootstrap"], env={"CI": "1"})
     yield
-    destroy_result = cli_runner.invoke(
-        cli, ["destroy", "--tag", "cleanup"], env={"CI": "1"}
-    )
+    destroy_result = cli_runner.invoke(cli, ["destroy", "--tag", "cleanup"], env={"CI": "1"})
     assert destroy_result.exit_code == 0
 
 
@@ -47,17 +45,13 @@ def tf_version(request: SubRequest) -> Iterator[str]:
 
 
 @pytest.fixture(scope="function")
-def deploy_local_backend_result(
-    cli_runner: CliRunner, local_backend: Path
-) -> Iterator[Result]:
+def deploy_local_backend_result(cli_runner: CliRunner, local_backend: Path) -> Iterator[Result]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "local"], env={"CI": "1"})
 
 
 @pytest.fixture(scope="function")
-def deploy_s3_backend_result(
-    cli_runner: CliRunner, s3_backend: Path
-) -> Iterator[Result]:
+def deploy_s3_backend_result(cli_runner: CliRunner, s3_backend: Path) -> Iterator[Result]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "test"], env={"CI": "1"})
     # cleanup files

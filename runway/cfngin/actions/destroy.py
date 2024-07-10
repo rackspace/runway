@@ -49,9 +49,7 @@ class Action(BaseAction):
         """Run against a step."""
         return self._destroy_stack
 
-    def _destroy_stack(
-        self, stack: Stack, *, status: Optional[Status], **_: Any
-    ) -> Status:
+    def _destroy_stack(self, stack: Stack, *, status: Optional[Status], **_: Any) -> Status:
         wait_time = 0 if status is PENDING else STACK_POLL_TIME
         if self.cancel.wait(wait_time):
             return INTERRUPTED
@@ -82,9 +80,7 @@ class Action(BaseAction):
             LOGGER.debug("%s:destroying stack", stack.fqn)
             provider.destroy_stack(stack_data)
             return DESTROYING_STATUS
-        LOGGER.critical(
-            "%s: %s", stack.fqn, provider.get_delete_failed_status_reason(stack.fqn)
-        )
+        LOGGER.critical("%s: %s", stack.fqn, provider.get_delete_failed_status_reason(stack.fqn))
         return FailedStatus(provider.get_stack_status_reason(stack_data))
 
     def pre_run(
@@ -116,9 +112,7 @@ class Action(BaseAction):
         **_kwargs: Any,
     ) -> None:
         """Kicks off the destruction of the stacks in the stack_definitions."""
-        plan = self._generate_plan(
-            tail=tail, reverse=True, include_persistent_graph=True
-        )
+        plan = self._generate_plan(tail=tail, reverse=True, include_persistent_graph=True)
         if not plan.keys():
             LOGGER.warning("no stacks detected (error in config?)")
         if force:

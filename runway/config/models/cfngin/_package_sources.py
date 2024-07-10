@@ -37,9 +37,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         default=[],
         description="Array of paths relative to the root of the package source to add to $PATH.",
     )
-    tag: Optional[str] = Field(
-        default=None, title="Git Tag", examples=["1.0.0", "v1.0.0"]
-    )
+    tag: Optional[str] = Field(default=None, title="Git Tag", examples=["1.0.0", "v1.0.0"])
     uri: str = Field(
         ...,
         title="Git Repository URI",
@@ -165,23 +163,17 @@ class CfnginPackageSourcesDefinitionModel(ConfigProperty):
     git: List[GitCfnginPackageSourceDefinitionModel] = Field(
         default=[],
         title="CFNgin Git Repository Package Source Definitions",
-        description=GitCfnginPackageSourceDefinitionModel.Config.schema_extra[
-            "description"
-        ],
+        description=GitCfnginPackageSourceDefinitionModel.Config.schema_extra["description"],
     )
     local: List[LocalCfnginPackageSourceDefinitionModel] = Field(
         default=[],
         title="CFNgin Local Package Source Definitions",
-        description=LocalCfnginPackageSourceDefinitionModel.Config.schema_extra[
-            "description"
-        ],
+        description=LocalCfnginPackageSourceDefinitionModel.Config.schema_extra["description"],
     )
     s3: List[S3CfnginPackageSourceDefinitionModel] = Field(
         default=[],
         title="CFNgin S3 Package Source Definitions",
-        description=S3CfnginPackageSourceDefinitionModel.Config.schema_extra[
-            "description"
-        ],
+        description=S3CfnginPackageSourceDefinitionModel.Config.schema_extra["description"],
     )
 
     class Config(ConfigProperty.Config):

@@ -96,9 +96,7 @@ class ConfigComponentDefinition(ABC):
                 as a variable if it contains a lookup.
 
         """
-        self._vars[var_name] = Variable(
-            name=var_name, value=var_value, variable_type="runway"
-        )
+        self._vars[var_name] = Variable(name=var_name, value=var_value, variable_type="runway")
 
     @classmethod
     @abstractmethod
@@ -134,9 +132,7 @@ class ConfigComponentDefinition(ABC):
             raise UnresolvedVariable(self._vars[name])
         if name in super().__getattribute__("_data"):
             return super().__getattribute__("_data").__getattribute__(name)
-        raise AttributeError(
-            f"{self.__class__.__name__} object has not attribute {name}"
-        )
+        raise AttributeError(f"{self.__class__.__name__} object has not attribute {name}")
 
     def __getitem__(self, name: str):
         """Implement evaluation of self[name].

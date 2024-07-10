@@ -43,9 +43,7 @@ class TestExactTimestampsSync:
             is False
         )
 
-    @pytest.mark.parametrize(
-        "src, dest", [(None, None), (Mock(), None), (None, Mock())]
-    )
+    @pytest.mark.parametrize("src, dest", [(None, None), (Mock(), None), (None, Mock())])
     def test_compare_time_raise_value_error(
         self, dest: Optional[FileStats], src: Optional[FileStats]
     ) -> None:

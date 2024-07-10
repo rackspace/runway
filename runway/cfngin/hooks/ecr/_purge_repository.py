@@ -29,30 +29,23 @@ def delete_ecr_images(
     repository_name: str,
 ) -> None:
     """Delete images from an ECR repository."""
-    response = client.batch_delete_image(
-        repositoryName=repository_name, imageIds=image_ids
-    )
+    response = client.batch_delete_image(repositoryName=repository_name, imageIds=image_ids)
     if "failures" in response and response["failures"]:
         for msg in response["failures"]:
             LOGGER.info(
                 "failed to delete image %s: (%s) %s",
-                msg.get("imageId", {}).get("imageDigest")
-                or msg.get("imageId", {}).get("imageTag"),
+                msg.get("imageId", {}).get("imageDigest") or msg.get("imageId", {}).get("imageTag"),
                 msg.get("failureCode"),
                 msg.get("failureReason"),
             )
         raise ValueError("failures present in response")
 
 
-def list_ecr_images(
-    client: ECRClient, repository_name: str
-) -> List[ImageIdentifierTypeDef]:
+def list_ecr_images(client: ECRClient, repository_name: str) -> List[ImageIdentifierTypeDef]:
     """List all images in an ECR repository."""
     image_ids: List[ImageIdentifierTypeDef] = []
     try:
-        response = client.list_images(
-            repositoryName=repository_name, filter={"tagStatus": "ANY"}
-        )
+        response = client.list_images(repositoryName=repository_name, filter={"tagStatus": "ANY"})
         image_ids.extend(response["imageIds"])
         while response.get("nextToken"):
             response = client.list_images(
@@ -63,18 +56,14 @@ def list_ecr_images(
             image_ids.extend(response["imageIds"])
         return [
             {"imageDigest": digest}
-            for digest in {
-                image["imageDigest"] for image in image_ids if image.get("imageDigest")
-            }
+            for digest in {image["imageDigest"] for image in image_ids if image.get("imageDigest")}
         ]
     except client.exceptions.RepositoryNotFoundException:
         LOGGER.info("repository %s does not exist", repository_name)
         return []
 
 
-def purge_repository(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> Dict[str, str]:
+def purge_repository(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, str]:
     """Purge all images from an ECR repository.
 
     Args:

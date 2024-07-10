@@ -50,9 +50,7 @@ def test_kbenv_uninstall_all(caplog: LogCaptureFixture, cd_tmp_path: Path) -> No
     assert all(not v.exists() for v in version_dirs)
 
 
-def test_kbenv_uninstall_all_takes_precedence(
-    caplog: LogCaptureFixture, cd_tmp_path: Path
-) -> None:
+def test_kbenv_uninstall_all_takes_precedence(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
     """Test ``runway kbenv uninstall --all`` takes precedence over arg."""
     caplog.set_level(logging.INFO, logger=LOGGER)
     version_dirs = [cd_tmp_path / "v1.14.0", cd_tmp_path / "v1.21.0"]
@@ -66,9 +64,7 @@ def test_kbenv_uninstall_all_takes_precedence(
     assert all(not v.exists() for v in version_dirs)
 
 
-def test_kbenv_uninstall_all_none_installed(
-    caplog: LogCaptureFixture, cd_tmp_path: Path
-) -> None:
+def test_kbenv_uninstall_all_none_installed(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
     """Test ``runway kbenv uninstall --all`` none installed."""
     caplog.set_level(logging.INFO, logger=LOGGER)
     runner = CliRunner()
@@ -90,9 +86,7 @@ def test_kbenv_uninstall_arg_takes_precedence(cd_tmp_path: Path) -> None:
     assert not version_dir.exists()
 
 
-def test_kbenv_uninstall_no_version(
-    caplog: LogCaptureFixture, cd_tmp_path: Path
-) -> None:
+def test_kbenv_uninstall_no_version(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
     """Test ``runway kbenv uninstall`` no version."""
     caplog.set_level(logging.ERROR, logger=LOGGER)
     runner = CliRunner()

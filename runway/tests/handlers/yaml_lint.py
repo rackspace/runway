@@ -47,9 +47,7 @@ class YamllintHandler(TestHandler):
             yamllint_config = os.path.join(base_dir, ".yamllint.yml")
         else:
             yamllint_config = os.path.join(
-                os.path.dirname(
-                    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-                ),
+                os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                 "templates",
                 ".yamllint.yml",
             )

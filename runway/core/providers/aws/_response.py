@@ -83,7 +83,5 @@ class BaseResponse(BaseModel):
     error: ResponseError = Field(default=ResponseError(), alias="Error")
     """Information about a service or networking error."""
 
-    metadata: ResponseMetadata = Field(
-        default=ResponseMetadata(), alias="ResponseMetadata"
-    )
+    metadata: ResponseMetadata = Field(default=ResponseMetadata(), alias="ResponseMetadata")
     """Information about the request."""

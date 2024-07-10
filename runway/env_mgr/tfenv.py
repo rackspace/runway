@@ -70,8 +70,7 @@ def download_tf_release(
         elif platform.system().startswith("Windows") or (
             platform.system().startswith("MINGW64")
             or (
-                platform.system().startswith("MSYS_NT")
-                or platform.system().startswith("CYGWIN_NT")
+                platform.system().startswith("MSYS_NT") or platform.system().startswith("CYGWIN_NT")
             )
         ):
             tfver_os = f"windows_{arch}"
@@ -94,9 +93,7 @@ def download_tf_release(
     checksum = FileHash(hashlib.sha256())
     checksum.add_file(os.path.join(download_dir, filename))
     if tf_hash != checksum.hexdigest:
-        LOGGER.error(
-            "downloaded Terraform %s does not match sha256 %s", filename, tf_hash
-        )
+        LOGGER.error("downloaded Terraform %s does not match sha256 %s", filename, tf_hash)
         sys.exit(1)
 
     with zipfile.ZipFile(os.path.join(download_dir, filename)) as tf_zipfile:
@@ -110,9 +107,9 @@ def download_tf_release(
 
 def get_available_tf_versions(include_prerelease: bool = False) -> List[str]:
     """Return available Terraform versions."""
-    tf_releases = json.loads(
-        requests.get("https://releases.hashicorp.com/index.json").text
-    )["terraform"]
+    tf_releases = json.loads(requests.get("https://releases.hashicorp.com/index.json").text)[
+        "terraform"
+    ]
 
     # Remove versions that don't align with
     # PEP440 (https://peps.python.org/pep-0440/)
@@ -263,9 +260,7 @@ class TFEnvManager(EnvManager):
             version_requested = self.get_min_required()
 
         if re.match(r"^latest:.*$", version_requested):
-            regex = re.search(r"latest:(.*)", version_requested).group(  # type: ignore
-                1
-            )
+            regex = re.search(r"latest:(.*)", version_requested).group(1)  # type: ignore
             include_prerelease_versions = False
         elif re.match(r"^latest$", version_requested):
             regex = r"^[0-9]+\.[0-9]+\.[0-9]+$"
@@ -362,9 +357,7 @@ class TFEnvManager(EnvManager):
         # Now that a version has been selected, skip downloading if it's
         # already been downloaded
         if (self.versions_dir / str(self.version)).is_dir():
-            LOGGER.verbose(
-                "Terraform version %s already installed; using it...", self.version
-            )
+            LOGGER.verbose("Terraform version %s already installed; using it...", self.version)
             return str(self.bin)
 
         LOGGER.info("downloading and using Terraform version %s ...", self.version)
@@ -413,9 +406,7 @@ class TFEnvManager(EnvManager):
             env: Environment variable overrides.
 
         """
-        output = subprocess.check_output(
-            [str(bin_path), "-version"], cwd=cwd, env=env
-        ).decode()
+        output = subprocess.check_output([str(bin_path), "-version"], cwd=cwd, env=env).decode()
         match = re.search(cls.VERSION_OUTPUT_REGEX, output)
         if not match:
             return None
@@ -432,7 +423,5 @@ class TFEnvManager(EnvManager):
         """
         match = re.search(cls.VERSION_REGEX, version)
         if not match:
-            raise ValueError(
-                f"provided version doesn't conform to regex: {cls.VERSION_REGEX}"
-            )
+            raise ValueError(f"provided version doesn't conform to regex: {cls.VERSION_REGEX}")
         return Version(match.group("version"))

@@ -38,13 +38,9 @@ class TestCliInterfaceMixin:
     ) -> None:
         """Test _run_command."""
         ctx_env = {"foo": "bar", "bar": "foo"}
-        mock_subprocess = mocker.patch(
-            f"{MODULE}.subprocess.check_output", return_value="success"
-        )
+        mock_subprocess = mocker.patch(f"{MODULE}.subprocess.check_output", return_value="success")
         assert (
-            self.Kls(Mock(env=Mock(vars=ctx_env)), tmp_path)._run_command(
-                "test", env=env
-            )
+            self.Kls(Mock(env=Mock(vars=ctx_env)), tmp_path)._run_command("test", env=env)
             == mock_subprocess.return_value
         )
         mock_subprocess.assert_called_once_with(
@@ -56,17 +52,11 @@ class TestCliInterfaceMixin:
             text=True,
         )
 
-    def test__run_command_no_suppress_output(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test__run_command_no_suppress_output(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test _run_command."""
         env = {"foo": "bar"}
-        mock_list2cmdline = mocker.patch.object(
-            self.Kls, "list2cmdline", return_value="success"
-        )
-        mock_subprocess = mocker.patch(
-            f"{MODULE}.subprocess.check_call", return_value=0
-        )
+        mock_list2cmdline = mocker.patch.object(self.Kls, "list2cmdline", return_value="success")
+        mock_subprocess = mocker.patch(f"{MODULE}.subprocess.check_call", return_value=0)
         assert not self.Kls(Mock(env=Mock(vars=env)), tmp_path)._run_command(
             ["foo", "bar"], suppress_output=False
         )
@@ -86,9 +76,7 @@ class TestCliInterfaceMixin:
             ("--", "foo-bar", "--foo-bar"),
         ],
     )
-    def test_convert_to_cli_arg(
-        self, expected: str, prefix: Optional[str], provided: str
-    ) -> None:
+    def test_convert_to_cli_arg(self, expected: str, prefix: Optional[str], provided: str) -> None:
         """Test convert_to_cli_arg."""
         if prefix:
             assert self.Kls.convert_to_cli_arg(provided, prefix=prefix) == expected
@@ -128,9 +116,7 @@ class TestCliInterfaceMixin:
             *expected,
         ]
 
-    def test_list2cmdline_darwin(
-        self, mocker: MockerFixture, platform_darwin: None
-    ) -> None:
+    def test_list2cmdline_darwin(self, mocker: MockerFixture, platform_darwin: None) -> None:
         """Test list2cmdline on Darwin/macOS systems."""
         mock_list2cmdline = mocker.patch(f"{MODULE}.subprocess.list2cmdline")
         mock_join = mocker.patch(f"{MODULE}.shlex_join", return_value="success")
@@ -138,9 +124,7 @@ class TestCliInterfaceMixin:
         mock_list2cmdline.assert_not_called()
         mock_join.assert_called_once_with("foo")
 
-    def test_list2cmdline_linus(
-        self, mocker: MockerFixture, platform_linux: None
-    ) -> None:
+    def test_list2cmdline_linus(self, mocker: MockerFixture, platform_linux: None) -> None:
         """Test list2cmdline on Linux systems."""
         mock_list2cmdline = mocker.patch(f"{MODULE}.subprocess.list2cmdline")
         mock_join = mocker.patch(f"{MODULE}.shlex_join", return_value="success")
@@ -148,9 +132,7 @@ class TestCliInterfaceMixin:
         mock_list2cmdline.assert_not_called()
         mock_join.assert_called_once_with("foo")
 
-    def test_list2cmdline_windows(
-        self, mocker: MockerFixture, platform_windows: None
-    ) -> None:
+    def test_list2cmdline_windows(self, mocker: MockerFixture, platform_windows: None) -> None:
         """Test list2cmdline on Windows systems."""
         mock_list2cmdline = mocker.patch(
             f"{MODULE}.subprocess.list2cmdline", return_value="success"

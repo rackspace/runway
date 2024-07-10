@@ -28,9 +28,7 @@ class TestLookupHandler:
         This should always return an empty set.
 
         """
-        assert isinstance(
-            LookupHandler.dependencies(MagicMock(autospec=VariableValue)), set
-        )
+        assert isinstance(LookupHandler.dependencies(MagicMock(autospec=VariableValue)), set)
 
     def test_format_results(self) -> None:
         """Test format_results."""
@@ -43,18 +41,9 @@ class TestLookupHandler:
         assert LookupHandler.format_results(test_dict) == test_dict
         assert LookupHandler.format_results(mute_map) == test_dict
 
-        assert (
-            LookupHandler.format_results(test_dict, get="test_key")
-            == test_dict["test_key"]
-        )
-        assert (
-            LookupHandler.format_results(mute_map, get="test_key")
-            == mute_map["test_key"]
-        )
-        assert (
-            LookupHandler.format_results(mute_map, get="nested")
-            == mute_map["nested"].data
-        )
+        assert LookupHandler.format_results(test_dict, get="test_key") == test_dict["test_key"]
+        assert LookupHandler.format_results(mute_map, get="test_key") == mute_map["test_key"]
+        assert LookupHandler.format_results(mute_map, get="nested") == mute_map["nested"].data
         assert (
             LookupHandler.format_results(mute_map, get="nested.nested_key")
             == mute_map["nested"]["nested_key"]
@@ -64,12 +53,11 @@ class TestLookupHandler:
         assert LookupHandler.format_results(mute_map, transform="str") == json.dumps(
             json.dumps(test_dict, indent=0)
         )
-        assert LookupHandler.format_results(
-            mute_map, transform="str", indent=2
-        ) == json.dumps(json.dumps(test_dict, indent=2))
+        assert LookupHandler.format_results(mute_map, transform="str", indent=2) == json.dumps(
+            json.dumps(test_dict, indent=2)
+        )
         assert (
-            LookupHandler.format_results(mute_map, get="nested.bool", transform="str")
-            == '"True"'
+            LookupHandler.format_results(mute_map, get="nested.bool", transform="str") == '"True"'
         )
 
         with pytest.raises(TypeError):
@@ -87,9 +75,7 @@ class TestLookupHandler:
             ("undefined", "undefined"),
         ],
     )
-    def test_format_results_handle_none(
-        self, value: str, expected: Optional[str]
-    ) -> None:
+    def test_format_results_handle_none(self, value: str, expected: Optional[str]) -> None:
         """Test format_results."""
         assert LookupHandler.format_results(value) == expected
         if isinstance(expected, str):
@@ -198,6 +184,5 @@ class TestLookupHandler:
     def test_transform_str_list_delimiter(self) -> None:
         """Test list to string with a specified delimiter."""
         assert (
-            LookupHandler.transform(["val1", "val2"], to_type="str", delimiter="|")
-            == "val1|val2"
+            LookupHandler.transform(["val1", "val2"], to_type="str", delimiter="|") == "val1|val2"
         )

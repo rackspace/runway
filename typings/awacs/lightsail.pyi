@@ -88,9 +88,7 @@ GetRelationalDatabaseBundles = Action("GetRelationalDatabaseBundles")
 GetRelationalDatabaseEvents = Action("GetRelationalDatabaseEvents")
 GetRelationalDatabaseLogEvents = Action("GetRelationalDatabaseLogEvents")
 GetRelationalDatabaseLogStreams = Action("GetRelationalDatabaseLogStreams")
-GetRelationalDatabaseMasterUserPassword = Action(
-    "GetRelationalDatabaseMasterUserPassword"
-)
+GetRelationalDatabaseMasterUserPassword = Action("GetRelationalDatabaseMasterUserPassword")
 GetRelationalDatabaseMetricData = Action("GetRelationalDatabaseMetricData")
 GetRelationalDatabaseParameters = Action("GetRelationalDatabaseParameters")
 GetRelationalDatabaseSnapshot = Action("GetRelationalDatabaseSnapshot")

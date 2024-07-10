@@ -120,19 +120,11 @@ class TestDestroyAction(unittest.TestCase):
         provider.get_stack_status_reason.return_value = "reason"
         self.action.provider_builder = MockProviderBuilder(provider=provider)
         status = self.action._destroy_stack(MockStack("vpc"), status=PENDING)  # type: ignore
-        provider.is_stack_destroyed.assert_called_once_with(
-            provider.get_stack.return_value
-        )
-        provider.is_stack_in_progress.assert_called_once_with(
-            provider.get_stack.return_value
-        )
-        provider.is_stack_destroy_possible.assert_called_once_with(
-            provider.get_stack.return_value
-        )
+        provider.is_stack_destroyed.assert_called_once_with(provider.get_stack.return_value)
+        provider.is_stack_in_progress.assert_called_once_with(provider.get_stack.return_value)
+        provider.is_stack_destroy_possible.assert_called_once_with(provider.get_stack.return_value)
         provider.get_delete_failed_status_reason.assert_called_once_with("vpc")
-        provider.get_stack_status_reason.assert_called_once_with(
-            provider.get_stack.return_value
-        )
+        provider.get_stack_status_reason.assert_called_once_with(provider.get_stack.return_value)
         assert isinstance(status, FailedStatus)
         assert status.reason == "reason"
 
@@ -175,13 +167,9 @@ class TestDestroyAction(unittest.TestCase):
         step._run_once()
         self.assertEqual(step.status, COMPLETE)
 
-    @patch(
-        "runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock
-    )
+    @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
     @patch("runway.context.CfnginContext.lock_persistent_graph", new_callable=MagicMock)
-    @patch(
-        "runway.context.CfnginContext.unlock_persistent_graph", new_callable=MagicMock
-    )
+    @patch("runway.context.CfnginContext.unlock_persistent_graph", new_callable=MagicMock)
     @patch("runway.cfngin.plan.Plan.execute", new_callable=MagicMock)
     def test_run_persist(
         self,
@@ -192,12 +180,8 @@ class TestDestroyAction(unittest.TestCase):
     ) -> None:
         """Test run persist."""
         mock_graph_tags.return_value = {}
-        context = self._get_context(
-            extra_config_args={"persistent_graph_key": "test.json"}
-        )
-        context._persistent_graph = Graph.from_steps(
-            [Step.from_stack_name("removed", context)]
-        )
+        context = self._get_context(extra_config_args={"persistent_graph_key": "test.json"})
+        context._persistent_graph = Graph.from_steps([Step.from_stack_name("removed", context)])
         destroy_action = destroy.Action(context=context)
         destroy_action.run(force=True)
 

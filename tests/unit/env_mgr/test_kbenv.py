@@ -44,11 +44,7 @@ class TestKBEnvManager:
         obj = KBEnvManager(tmp_path)
         assert obj.install(version_requested) == str(obj.bin)
         mock_download_kb_release.assert_called_once_with(
-            (
-                version_requested
-                if version_requested.startswith("v")
-                else f"v{version_requested}"
-            ),
+            (version_requested if version_requested.startswith("v") else f"v{version_requested}"),
             obj.versions_dir,
         )
 
@@ -77,9 +73,7 @@ class TestKBEnvManager:
             ("v0.15.0-alpha.13", Version("v0.15.0-alpha.13")),
         ],
     )
-    def test_parse_version_string(
-        self, provided: str, expected: Optional[Version]
-    ) -> None:
+    def test_parse_version_string(self, provided: str, expected: Optional[Version]) -> None:
         """Test parse_version_string."""
         assert KBEnvManager.parse_version_string(provided) == expected
 
@@ -114,9 +108,7 @@ class TestKBEnvManager:
 
     def test_version(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test version."""
-        get_version_from_file = mocker.patch.object(
-            KBEnvManager, "get_version_from_file"
-        )
+        get_version_from_file = mocker.patch.object(KBEnvManager, "get_version_from_file")
         parse_version_string = mocker.patch.object(
             KBEnvManager, "parse_version_string", return_value="success"
         )
@@ -126,9 +118,7 @@ class TestKBEnvManager:
         get_version_from_file.assert_not_called()
         parse_version_string.assert_called_once_with("version")
 
-    def test_version_get_version_from_file(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_version_get_version_from_file(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test version."""
         get_version_from_file = mocker.patch.object(
             KBEnvManager, "get_version_from_file", return_value="version"
@@ -179,6 +169,4 @@ class TestKBEnvManager:
         expected = overlay_path / KB_VERSION_FILENAME
         expected.touch()
         assert obj.version_file == mod_path / KB_VERSION_FILENAME
-        assert (
-            KBEnvManager(mod_path, overlay_path=overlay_path).version_file == expected
-        )
+        assert KBEnvManager(mod_path, overlay_path=overlay_path).version_file == expected

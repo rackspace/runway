@@ -166,9 +166,7 @@ class FunctionalTests(Blueprint):
         template.add_output(Output("User", Value=Ref(user)))
         template.add_output(Output("AccessKeyId", Value=Ref(key)))
         template.add_output(
-            Output(
-                "SecretAccessKey", Value=GetAtt("FunctionalTestKey", "SecretAccessKey")
-            )
+            Output("SecretAccessKey", Value=GetAtt("FunctionalTestKey", "SecretAccessKey"))
         )
         template.add_output(Output("FunctionalTestRole", Value=GetAtt(role, "Arn")))
 
@@ -359,8 +357,7 @@ class DiffTester(Blueprint):
         },
         "WaitConditionCount": {
             "type": int,
-            "description": "Number of WaitConditionHandle resources "
-            "to add to the template",
+            "description": "Number of WaitConditionHandle resources " "to add to the template",
         },
     }
 

@@ -275,9 +275,7 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
     )
 
     @validator("runtime", always=True, allow_reuse=True)
-    def _validate_runtime_or_docker(
-        cls, v: Optional[str], values: Dict[str, Any]
-    ) -> Optional[str]:
+    def _validate_runtime_or_docker(cls, v: Optional[str], values: Dict[str, Any]) -> Optional[str]:
         """Validate that either runtime is provided or Docker image is provided."""
         if v:  # if runtime was provided, we don't need to check anything else
             return v

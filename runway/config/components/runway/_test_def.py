@@ -95,9 +95,7 @@ class RunwayTestDefinition(Generic[_DataModel], ConfigComponentDefinition):
         return cls(RunwayTestDefinitionModel.parse_obj(obj))
 
 
-class CfnLintRunwayTestDefinition(
-    RunwayTestDefinition[CfnLintRunwayTestDefinitionModel]
-):
+class CfnLintRunwayTestDefinition(RunwayTestDefinition[CfnLintRunwayTestDefinitionModel]):
     """Runway cfn-lint test definition."""
 
     args: CfnLintRunwayTestArgs
@@ -139,9 +137,7 @@ class ScriptRunwayTestDefinition(RunwayTestDefinition[ScriptRunwayTestDefinition
         return cls(ScriptRunwayTestDefinitionModel.parse_obj(obj))
 
 
-class YamlLintRunwayTestDefinition(
-    RunwayTestDefinition[YamlLintRunwayTestDefinitionModel]
-):
+class YamlLintRunwayTestDefinition(RunwayTestDefinition[YamlLintRunwayTestDefinitionModel]):
     """Runway yamllint test definition."""
 
     type: Literal["yamllint"] = "yamllint"

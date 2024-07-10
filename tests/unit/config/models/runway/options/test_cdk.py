@@ -20,8 +20,6 @@ class TestRunwayCdkModuleOptionsDataModel:
 
     def test_init(self) -> None:
         """Test init."""
-        obj = RunwayCdkModuleOptionsDataModel(
-            build_steps=["test0", "test1"], skip_npm_ci=True
-        )
+        obj = RunwayCdkModuleOptionsDataModel(build_steps=["test0", "test1"], skip_npm_ci=True)
         assert obj.build_steps == ["test0", "test1"]
         assert obj.skip_npm_ci

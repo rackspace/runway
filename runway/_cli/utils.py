@@ -192,9 +192,7 @@ def select_deployments(
         LOGGER.debug("only one deployment detected; no selection necessary")
     else:
         # build the menu before displaying it so debug logs don't break up what is printed
-        deployment_menu = yaml.safe_dump(
-            {i + 1: d.menu_entry for i, d in enumerate(deployments)}
-        )
+        deployment_menu = yaml.safe_dump({i + 1: d.menu_entry for i, d in enumerate(deployments)})
         click.secho("\nConfigured deployments\n", bold=True, underline=True)
         click.echo(deployment_menu)
         if ctx.command.name == "destroy":
@@ -206,9 +204,7 @@ def select_deployments(
             'Enter number of deployment to run (or "all")',
             default="all",
             show_choices=False,
-            type=click.Choice(
-                [str(n) for n in range(1, len(deployments) + 1)] + ["all"]
-            ),
+            type=click.Choice([str(n) for n in range(1, len(deployments) + 1)] + ["all"]),
         )
     if choice != "all":
         deployments = [deployments[int(choice) - 1]]
@@ -233,8 +229,7 @@ def select_modules(
         LOGGER.debug("only one module detected; no selection necessary")
         if ctx.command.name == "destroy":
             LOGGER.info(
-                "Only one module detected; all modules "
-                "automatically selected for deletion."
+                "Only one module detected; all modules " "automatically selected for deletion."
             )
             if not click.confirm("Proceed?"):
                 ctx.exit(0)
@@ -243,8 +238,7 @@ def select_modules(
     click.echo(yaml.safe_dump({i + 1: m.menu_entry for i, m in enumerate(modules)}))
     if ctx.command.name == "destroy":
         click.echo(
-            '(operating in destroy mode -- "all" will destroy all '
-            "modules in reverse order)\n"
+            '(operating in destroy mode -- "all" will destroy all ' "modules in reverse order)\n"
         )
     choice = click.prompt(
         'Enter number of module to run (or "all")',

@@ -166,9 +166,7 @@ class SOARecord:
     def __init__(self, record: ResourceRecordSetTypeDef) -> None:
         """Instantiate class."""
         self.name = record["Name"]
-        self.text = SOARecordText(
-            record.get("ResourceRecords", [{"Value": ""}])[0]["Value"]
-        )
+        self.text = SOARecordText(record.get("ResourceRecords", [{"Value": ""}])[0]["Value"])
         self.ttl = record.get("TTL", 0)
 
 
@@ -383,13 +381,9 @@ def read_value_from_path(value: str, *, root_path: Optional[Path] = None) -> str
             else:
                 read_path = root_path.parent / path
         if read_path.is_file():
-            return read_path.read_text(
-                encoding=locale.getpreferredencoding(do_setlocale=False)
-            )
+            return read_path.read_text(encoding=locale.getpreferredencoding(do_setlocale=False))
         if read_path.is_dir():
-            raise ValueError(
-                f"path must lead to a file not directory: {read_path.absolute()}"
-            )
+            raise ValueError(f"path must lead to a file not directory: {read_path.absolute()}")
         raise ValueError(f"path does not exist: {read_path.absolute()}")
     return value
 
@@ -498,8 +492,7 @@ def ensure_s3_bucket(
             return
         if err.response["Error"]["Message"] == "Forbidden":
             LOGGER.exception(
-                "Access denied for bucket %s. Did you remember "
-                "to use a globally unique name?",
+                "Access denied for bucket %s. Did you remember " "to use a globally unique name?",
                 bucket_name,
             )
         elif err.response["Error"]["Message"] != "Not Found":
@@ -664,9 +657,7 @@ class SourceProcessor:
         for config in self.sources.git:
             self.fetch_git_package(config=config)
 
-    def fetch_local_package(
-        self, config: LocalCfnginPackageSourceDefinitionModel
-    ) -> None:
+    def fetch_local_package(self, config: LocalCfnginPackageSourceDefinitionModel) -> None:
         """Make a local path available to current CFNgin config.
 
         Args:
@@ -754,8 +745,7 @@ class SourceProcessor:
                 tmp_package_path = Path(tmp_dir) / dir_name
                 extractor.set_archive(tmp_package_path)
                 LOGGER.debug(
-                    "starting remote package download from S3 to %s "
-                    'with extra S3 options "%s"',
+                    "starting remote package download from S3 to %s " 'with extra S3 options "%s"',
                     extractor.archive,
                     str(extra_s3_args),
                 )
@@ -770,8 +760,7 @@ class SourceProcessor:
                 )
                 extractor.extract(tmp_package_path)
                 LOGGER.debug(
-                    "moving extracted package directory %s to the "
-                    "CFNgin cache at %s",
+                    "moving extracted package directory %s to the " "CFNgin cache at %s",
                     dir_name,
                     self.package_cache_dir,
                 )
@@ -822,8 +811,7 @@ class SourceProcessor:
                 shutil.rmtree(tmp_dir)
         else:
             LOGGER.debug(
-                "remote repo %s appears to have been previously "
-                "cloned to %s; download skipped",
+                "remote repo %s appears to have been previously " "cloned to %s; download skipped",
                 config.uri,
                 cached_dir_path,
             )

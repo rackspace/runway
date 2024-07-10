@@ -245,10 +245,7 @@ class TestModulePath:
         if isinstance(test["definition"], (type(None), Path)):
             assert obj.module_root == test["definition"] or Path.cwd()
         elif test["expected"]["source"] == "local":
-            assert (
-                obj.module_root
-                == deploy_environment.root_dir / test["expected"]["location"]
-            )
+            assert obj.module_root == deploy_environment.root_dir / test["expected"]["location"]
         else:
             assert (
                 obj.module_root
@@ -297,19 +294,13 @@ class TestModulePath:
             == test["expected"]["uri"]
         )
 
-    def test_parse_obj_none(
-        self, deploy_environment: DeployEnvironment, tmp_path: Path
-    ) -> None:
+    def test_parse_obj_none(self, deploy_environment: DeployEnvironment, tmp_path: Path) -> None:
         """Test parse_obj None."""
-        obj = ModulePath.parse_obj(
-            None, cache_dir=tmp_path, deploy_environment=deploy_environment
-        )
+        obj = ModulePath.parse_obj(None, cache_dir=tmp_path, deploy_environment=deploy_environment)
         assert obj.definition == Path.cwd()
         assert obj.env == deploy_environment
 
-    def test_parse_obj_path(
-        self, deploy_environment: DeployEnvironment, tmp_path: Path
-    ) -> None:
+    def test_parse_obj_path(self, deploy_environment: DeployEnvironment, tmp_path: Path) -> None:
         """Test parse_obj Path."""
         obj = ModulePath.parse_obj(
             tmp_path, cache_dir=tmp_path, deploy_environment=deploy_environment
@@ -334,9 +325,7 @@ class TestModulePath:
         assert obj1.definition == model.path
         assert obj1.env == deploy_environment
 
-    def test_parse_obj_str(
-        self, deploy_environment: DeployEnvironment, tmp_path: Path
-    ) -> None:
+    def test_parse_obj_str(self, deploy_environment: DeployEnvironment, tmp_path: Path) -> None:
         """Test parse_obj str."""
         obj = ModulePath.parse_obj(
             "./test", cache_dir=tmp_path, deploy_environment=deploy_environment

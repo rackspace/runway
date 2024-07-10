@@ -66,9 +66,7 @@ class CfnginBucket(Blueprint):
         self.add_output("BucketArn", bucket.get_att("Arn"))
         self.add_output("BucketDomainName", bucket.get_att("DomainName"))
         self.add_output("BucketName", bucket.ref())
-        self.add_output(
-            "BucketRegionalDomainName", bucket.get_att("RegionalDomainName")
-        )
+        self.add_output("BucketRegionalDomainName", bucket.get_att("RegionalDomainName"))
         return bucket
 
     @cached_property

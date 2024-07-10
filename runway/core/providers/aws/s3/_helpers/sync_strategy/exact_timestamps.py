@@ -25,9 +25,7 @@ class ExactTimestampsSync(SizeAndLastModifiedSync):
 
     NAME: ClassVar[Literal["exact_timestamps"]] = "exact_timestamps"
 
-    def compare_time(
-        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
-    ) -> bool:
+    def compare_time(self, src_file: Optional[FileStats], dest_file: Optional[FileStats]) -> bool:
         """Compare modified time of two FileStats objects.
 
         Returns:

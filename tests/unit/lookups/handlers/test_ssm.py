@@ -40,9 +40,7 @@ def get_parameter_response(
     }
 
 
-def get_parameter_request(
-    name: str, decrypt: bool = True
-) -> Dict[str, Union[bool, str]]:
+def get_parameter_request(name: str, decrypt: bool = True) -> Dict[str, Union[bool, str]]:
     """Generate the expected request parameters for ssm.get_parameter."""
     return {"Name": name, "WithDecryption": decrypt}
 
@@ -110,9 +108,7 @@ class TestSsmLookup:
         name = "/test/param"
         value = "test value"
         stubber = runway_context.add_stubber("ssm", region="us-west-2")
-        var = Variable(
-            "test_var", f"${{ssm {name}::region=us-west-2}}", variable_type="runway"
-        )
+        var = Variable("test_var", f"${{ssm {name}::region=us-west-2}}", variable_type="runway")
 
         stubber.add_response(
             "get_parameter",

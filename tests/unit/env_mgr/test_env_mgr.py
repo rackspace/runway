@@ -69,9 +69,7 @@ class TestEnvManager:
         assert obj.env_dir == expected_env_dir
         assert obj.versions_dir == expected_env_dir / "versions"
 
-    def test_bin(
-        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture
-    ) -> None:
+    def test_bin(self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture) -> None:
         """Test bin."""
         home = cd_tmp_path / "home"
         mocker.patch("runway.env_mgr.Path.home", return_value=home)
@@ -117,10 +115,7 @@ class TestEnvManager:
             version_dir.mkdir()
             (version_dir / "foo").touch()
             assert obj.uninstall(version)
-            assert (
-                f"uninstalling {bin_name} {version} from {tmp_path}..."
-                in caplog.messages
-            )
+            assert f"uninstalling {bin_name} {version} from {tmp_path}..." in caplog.messages
             assert f"uninstalled {bin_name} {version}" in caplog.messages
         else:
             assert not obj.uninstall(version)

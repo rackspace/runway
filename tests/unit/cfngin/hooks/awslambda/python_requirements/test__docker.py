@@ -36,9 +36,7 @@ class TestPythonDockerDependencyInstaller:
         )
         obj = PythonDockerDependencyInstaller(project, client=Mock())
         assert obj.bind_mounts == [
-            Mount(
-                target="/var/task/lambda", source="dependency_directory", type="bind"
-            ),
+            Mount(target="/var/task/lambda", source="dependency_directory", type="bind"),
             Mount(target="/var/task/project", source="project_root", type="bind"),
             Mount(
                 target=f"/var/task/{requirements_txt.name}",
@@ -105,9 +103,7 @@ class TestPythonDockerDependencyInstaller:
         mock_version_cls = mocker.patch(f"{MODULE}.Version", return_value="success")
         obj = PythonDockerDependencyInstaller(Mock(), client=Mock())
         assert obj.python_version == mock_version_cls.return_value
-        mock_run_command.assert_called_once_with(
-            "python --version", level=logging.DEBUG
-        )
+        mock_run_command.assert_called_once_with("python --version", level=logging.DEBUG)
         mock_version_cls.assert_called_once_with(version)
 
     def test_python_version_not_found(self, mocker: MockerFixture) -> None:
@@ -120,9 +116,7 @@ class TestPythonDockerDependencyInstaller:
         mock_version_cls = mocker.patch(f"{MODULE}.Version")
         obj = PythonDockerDependencyInstaller(Mock(), client=Mock())
         assert not obj.python_version
-        mock_run_command.assert_called_once_with(
-            "python --version", level=logging.DEBUG
-        )
+        mock_run_command.assert_called_once_with("python --version", level=logging.DEBUG)
         mock_version_cls.assert_not_called()
 
     @pytest.mark.parametrize(
@@ -140,6 +134,4 @@ class TestPythonDockerDependencyInstaller:
     ) -> None:
         """Test runtime."""
         mocker.patch.object(PythonDockerDependencyInstaller, "python_version", version)
-        assert (
-            PythonDockerDependencyInstaller(Mock(), client=Mock()).runtime == expected
-        )
+        assert PythonDockerDependencyInstaller(Mock(), client=Mock()).runtime == expected

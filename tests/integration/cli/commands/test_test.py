@@ -48,9 +48,7 @@ def test_test_invalid_type(
     # caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        yaml.safe_dump(
-            {"deployments": [], "tests": [INVALID_TYPE.copy(), SUCCESS.copy()]}
-        )
+        yaml.safe_dump({"deployments": [], "tests": [INVALID_TYPE.copy(), SUCCESS.copy()]})
     )
 
     runner = CliRunner()
@@ -88,9 +86,7 @@ def test_test_single_successful(
     """Test ``runway test`` with a single, successful test."""
     caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
-    runway_yml.write_text(
-        yaml.safe_dump({"deployments": [], "tests": [SUCCESS.copy()]})
-    )
+    runway_yml.write_text(yaml.safe_dump({"deployments": [], "tests": [SUCCESS.copy()]}))
 
     runner = CliRunner()
     result = runner.invoke(cli, ["test"])
@@ -136,9 +132,7 @@ def test_test_two_test_required(
     caplog.set_level(logging.INFO)
     runway_yml = cd_tmp_path / "runway.yml"
     runway_yml.write_text(
-        yaml.safe_dump(
-            {"deployments": [], "tests": [FAIL_REQUIRED.copy(), SUCCESS.copy()]}
-        )
+        yaml.safe_dump({"deployments": [], "tests": [FAIL_REQUIRED.copy(), SUCCESS.copy()]})
     )
 
     runner = CliRunner()

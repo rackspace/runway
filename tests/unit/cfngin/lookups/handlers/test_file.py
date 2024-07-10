@@ -91,9 +91,7 @@ class TestFileLookup:
         tmp_file = tmp_path / "test"
         tmp_file.write_text(data, encoding="utf-8")
 
-        assert_template_dicts(
-            FileLookup.handle(f"json-parameterized:file://{tmp_file}"), expected
-        )
+        assert_template_dicts(FileLookup.handle(f"json-parameterized:file://{tmp_file}"), expected)
         assert_template_dicts(FileLookup.handle(f"json-parameterized:{data}"), expected)
 
     @pytest.mark.parametrize(
@@ -106,16 +104,12 @@ class TestFileLookup:
             ("Test Without Interpolation Here", "Test Without Interpolation Here"),
         ],
     )
-    def test_handle_parameterized(
-        self, data: str, expected: Any, tmp_path: Path
-    ) -> None:
+    def test_handle_parameterized(self, data: str, expected: Any, tmp_path: Path) -> None:
         """Test handle parameterized."""
         tmp_file = tmp_path / "test"
         tmp_file.write_text(data, encoding="utf-8")
 
-        assert_template_dicts(
-            FileLookup.handle(f"parameterized:file://{tmp_file}"), expected
-        )
+        assert_template_dicts(FileLookup.handle(f"parameterized:file://{tmp_file}"), expected)
         assert_template_dicts(FileLookup.handle(f"parameterized:{data}"), expected)
 
     @pytest.mark.parametrize(
@@ -131,16 +125,12 @@ class TestFileLookup:
             ),
         ],
     )
-    def test_handle_parameterized_b64(
-        self, data: str, expected: Base64, tmp_path: Path
-    ) -> None:
+    def test_handle_parameterized_b64(self, data: str, expected: Base64, tmp_path: Path) -> None:
         """Test handle parameterized-b64."""
         tmp_file = tmp_path / "test"
         tmp_file.write_text(data, encoding="utf-8")
 
-        assert_template_dicts(
-            FileLookup.handle(f"parameterized-b64:file://{tmp_file}"), expected
-        )
+        assert_template_dicts(FileLookup.handle(f"parameterized-b64:file://{tmp_file}"), expected)
         assert_template_dicts(FileLookup.handle(f"parameterized-b64:{data}"), expected)
 
     def test_handle_plain(self, tmp_path: Path) -> None:
@@ -199,7 +189,5 @@ class TestFileLookup:
         tmp_file = tmp_path / "test"
         tmp_file.write_text(data, encoding="utf-8")
 
-        assert_template_dicts(
-            FileLookup.handle(f"yaml-parameterized:file://{tmp_file}"), expected
-        )
+        assert_template_dicts(FileLookup.handle(f"yaml-parameterized:file://{tmp_file}"), expected)
         assert_template_dicts(FileLookup.handle(f"yaml-parameterized:{data}"), expected)

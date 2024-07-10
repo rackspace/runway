@@ -146,9 +146,7 @@ class LambdaFunction(Blueprint):
         self.add_output(f"{func.title}Arn", func.get_att("Arn"))
         self.add_output("Runtime", self.runtime)
         for attr in awslambda.Code.props:
-            self.add_output(
-                f"Code{attr}", getattr(self.variables["Code"], attr, "null")
-            )
+            self.add_output(f"Code{attr}", getattr(self.variables["Code"], attr, "null"))
         return func
 
     @cached_property

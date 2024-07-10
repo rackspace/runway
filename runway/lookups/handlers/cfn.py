@@ -117,13 +117,9 @@ class CfnLookup(LookupHandler):
             # args for testing to function correctly
             if cls.should_use_provider(args.copy(), provider):
                 # this will only happen when used from cfngin
-                result = cast("Provider", provider).get_output(
-                    query.stack_name, query.output_name
-                )
+                result = cast("Provider", provider).get_output(query.stack_name, query.output_name)
             else:
-                cfn_client = context.get_session(region=args.get("region")).client(
-                    "cloudformation"
-                )
+                cfn_client = context.get_session(region=args.get("region")).client("cloudformation")
                 result = cls.get_stack_output(cfn_client, query)
         except (ClientError, KeyError, StackDoesNotExist) as exc:
             # StackDoesNotExist is only raised by provider

@@ -19,9 +19,7 @@ if TYPE_CHECKING:
     from ....context import CfnginContext
 
 
-ECR_REPO_FQN_TEMPLATE = (
-    "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/{repo_name}"
-)
+ECR_REPO_FQN_TEMPLATE = "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/{repo_name}"
 
 
 class ElasticContainerRegistry(BaseModel):
@@ -50,9 +48,7 @@ class ElasticContainerRegistry(BaseModel):
         """Fully qualified ECR name."""
         if self.public:
             return self.PUBLIC_URI_TEMPLATE.format(registry_alias=self.alias)
-        return self.URI_TEMPLATE.format(
-            aws_account_id=self.account_id, aws_region=self.region
-        )
+        return self.URI_TEMPLATE.format(aws_account_id=self.account_id, aws_region=self.region)
 
     @root_validator(allow_reuse=True, pre=True)
     def _set_defaults(cls, values: Dict[str, Any]) -> Dict[str, Any]:

@@ -69,9 +69,7 @@ class EnsureServerCertExistsHookArgs(BaseModel):
     """Whether to prompt to upload a certificate if one does not exist."""
 
 
-def create_ecs_service_role(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> bool:
+def create_ecs_service_role(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
     """Create ecsServiceRole IAM role.
 
     https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html
@@ -100,9 +98,7 @@ def create_ecs_service_role(
 
 
 def _get_cert_arn_from_response(
-    response: Union[
-        GetServerCertificateResponseTypeDef, UploadServerCertificateResponseTypeDef
-    ]
+    response: Union[GetServerCertificateResponseTypeDef, UploadServerCertificateResponseTypeDef]
 ) -> str:
     result = copy.deepcopy(response)
     # GET response returns this extra key
@@ -193,9 +189,7 @@ def ensure_server_cert_exists(
         LOGGER.info("certificate exists: %s (%s)", args.cert_name, cert_arn)
     except ClientError:
         if args.prompt:
-            upload = input(
-                f"Certificate '{args.cert_name}' wasn't found. Upload it now? (yes/no) "
-            )
+            upload = input(f"Certificate '{args.cert_name}' wasn't found. Upload it now? (yes/no) ")
             if upload != "yes":
                 return {}
 

@@ -32,9 +32,7 @@ class TestCloudFormation:
     @staticmethod
     def get_context(name: str = "test", region: str = "us-east-1") -> MockRunwayContext:
         """Create a basic Runway context object."""
-        context = MockRunwayContext(
-            deploy_environment=DeployEnvironment(explicit_name=name)
-        )
+        context = MockRunwayContext(deploy_environment=DeployEnvironment(explicit_name=name))
         context.env.aws_region = region
         return context
 

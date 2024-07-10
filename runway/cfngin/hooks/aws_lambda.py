@@ -61,9 +61,7 @@ SUPPORTED_RUNTIMES = ["python3.7", "python3.8"]
 DockerizePipArgTypeDef = Optional[
     Union[
         bool,
-        Literal[
-            "false", "False", "no", "No", "non-linux", "true", "True", "yes", "Yes"
-        ],
+        Literal["false", "False", "no", "No", "non-linux", "true", "True", "yes", "Yes"],
     ]
 ]
 
@@ -182,12 +180,8 @@ def _zip_files(files: Iterable[str], root: str) -> Tuple[bytes, str]:
             perms = (zip_entry.external_attr & ZIP_PERMS_MASK) >> 16
             new_perms = 0o755 if perms & stat.S_IXUSR != 0 else 0o644
             if new_perms != perms:
-                LOGGER.debug(
-                    "fixing perms: %s: %o => %o", zip_entry.filename, perms, new_perms
-                )
-                new_attr = (zip_entry.external_attr & ~ZIP_PERMS_MASK) | (
-                    new_perms << 16
-                )
+                LOGGER.debug("fixing perms: %s: %o => %o", zip_entry.filename, perms, new_perms)
+                new_attr = (zip_entry.external_attr & ~ZIP_PERMS_MASK) | (new_perms << 16)
                 zip_entry.external_attr = new_attr
 
     contents = zip_data.getvalue()
@@ -383,9 +377,7 @@ def _handle_use_pipenv(
                 return req_path
             if int(sys.version[0]) > 2:
                 stderr = stderr.decode("UTF-8")
-            LOGGER.error(
-                '"%s" failed with the following output:\n%s', " ".join(cmd), stderr
-            )
+            LOGGER.error('"%s" failed with the following output:\n%s', " ".join(cmd), stderr)
             raise PipenvError
 
 
@@ -417,8 +409,7 @@ def dockerized_pip(
         # exactly one of these is needed. converting to bool will give us a
         # 'False' (0) for 'None' and 'True' (1) for anything else.
         raise InvalidDockerizePipConfiguration(
-            "exactly only one of [docker_file, docker_file, runtime] must be "
-            "provided"
+            "exactly only one of [docker_file, docker_file, runtime] must be " "provided"
         )
 
     if not client:
@@ -448,21 +439,15 @@ def dockerized_pip(
         LOGGER.info('docker image "%s" created', docker_image)
     if runtime:
         if runtime not in SUPPORTED_RUNTIMES:
-            raise ValueError(
-                f'invalid runtime "{runtime}" must be one of {SUPPORTED_RUNTIMES}'
-            )
+            raise ValueError(f'invalid runtime "{runtime}" must be one of {SUPPORTED_RUNTIMES}')
         docker_image = f"lambci/lambda:build-{runtime}"
-        LOGGER.debug(
-            'selected docker image "%s" based on provided runtime', docker_image
-        )
+        LOGGER.debug('selected docker image "%s" based on provided runtime', docker_image)
 
     if sys.platform.lower() == "win32":
         LOGGER.debug("formatted docker mount path for Windows")
         work_dir = work_dir.replace("\\", "/")
 
-    work_dir_mount = docker.types.Mount(
-        target="/var/task", source=work_dir, type="bind"
-    )
+    work_dir_mount = docker.types.Mount(target="/var/task", source=work_dir, type="bind")
     pip_cmd = "python -m pip install -t /var/task -r /var/task/requirements.txt"
 
     LOGGER.info('using docker image "%s" to build deployment package...', docker_image)
@@ -510,9 +495,7 @@ def _pip_has_no_color_option(python_path: str) -> bool:
             [
                 python_path,
                 "-c",
-                "from __future__ import print_function;"
-                "import pip;"
-                "print(pip.__version__)",
+                "from __future__ import print_function;" "import pip;" "print(pip.__version__)",
             ]
         )
         if isinstance(pip_version_string, bytes):  # type: ignore
@@ -670,9 +653,7 @@ def _zip_package(
     return contents, content_hash
 
 
-def _head_object(
-    s3_conn: S3Client, bucket: str, key: str
-) -> Optional[HeadObjectOutputTypeDef]:
+def _head_object(s3_conn: S3Client, bucket: str, key: str) -> Optional[HeadObjectOutputTypeDef]:
     """Retrieve information about an object in S3 if it exists.
 
     Args:
@@ -844,9 +825,7 @@ def _upload_function(
     try:
         root = os.path.expanduser(options["path"])
     except KeyError as exc:
-        raise ValueError(
-            f"missing required property '{exc.args[0]}' in function '{name}'"
-        ) from exc
+        raise ValueError(f"missing required property '{exc.args[0]}' in function '{name}'") from exc
 
     includes = _check_pattern_list(options.get("include"), "include", default=["**"])
     excludes = _check_pattern_list(options.get("exclude"), "exclude", default=[])
@@ -873,9 +852,7 @@ def _upload_function(
             root, cast(List[str], includes), cast(List[str], excludes), follow_symlinks
         )
 
-    return _upload_code(
-        s3_conn, bucket, prefix, name, zip_contents, content_hash, payload_acl
-    )
+    return _upload_code(s3_conn, bucket, prefix, name, zip_contents, content_hash, payload_acl)
 
 
 def select_bucket_region(

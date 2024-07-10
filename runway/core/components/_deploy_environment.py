@@ -82,9 +82,7 @@ class DeployEnvironment(DelCachedPropMixin):
     @property
     def aws_region(self) -> str:
         """Get AWS region from environment variables."""
-        return self.vars.get(
-            "AWS_REGION", self.vars.get("AWS_DEFAULT_REGION", "us-east-1")
-        )
+        return self.vars.get("AWS_REGION", self.vars.get("AWS_DEFAULT_REGION", "us-east-1"))
 
     @aws_region.setter
     def aws_region(self, region: str) -> None:
@@ -261,9 +259,7 @@ class DeployEnvironment(DelCachedPropMixin):
         else:
             self.name_derived_from = "directory"
             if self.root_dir.name.startswith("ENV-"):
-                LOGGER.verbose(
-                    'stripped "ENV-" from the directory name "%s"', self.root_dir.name
-                )
+                LOGGER.verbose('stripped "ENV-" from the directory name "%s"', self.root_dir.name)
                 name = self.root_dir.name[4:]
             else:
                 name = self.root_dir.name
@@ -307,9 +303,7 @@ class DeployEnvironment(DelCachedPropMixin):
         """Output name to log."""
         name = self.name  # resolve if not already resolved
         if self.name_derived_from == "explicit":
-            LOGGER.info(
-                'deploy environment "%s" is explicitly defined in the environment', name
-            )
+            LOGGER.info('deploy environment "%s" is explicitly defined in the environment', name)
             LOGGER.info(
                 "if not correct, update the value or unset it to fall back "
                 "to the name of the current git branch or parent directory"
@@ -337,9 +331,7 @@ class DeployEnvironment(DelCachedPropMixin):
         """Parse branch name for use as deploy environment name."""
         if self.branch_name:
             if self.branch_name.startswith("ENV-"):
-                LOGGER.verbose(
-                    'stripped "ENV-" from the branch name "%s"', self.branch_name
-                )
+                LOGGER.verbose('stripped "ENV-" from the branch name "%s"', self.branch_name)
                 return self.branch_name[4:]
             if self.branch_name == "master":
                 LOGGER.verbose('translated branch name "master" to "common"')

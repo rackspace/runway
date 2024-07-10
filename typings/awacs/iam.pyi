@@ -89,9 +89,7 @@ GetSAMLProvider = Action("GetSAMLProvider")
 GetSSHPublicKey = Action("GetSSHPublicKey")
 GetServerCertificate = Action("GetServerCertificate")
 GetServiceLastAccessedDetails = Action("GetServiceLastAccessedDetails")
-GetServiceLastAccessedDetailsWithEntities = Action(
-    "GetServiceLastAccessedDetailsWithEntities"
-)
+GetServiceLastAccessedDetailsWithEntities = Action("GetServiceLastAccessedDetailsWithEntities")
 GetServiceLinkedRoleDeletionStatus = Action("GetServiceLinkedRoleDeletionStatus")
 GetUser = Action("GetUser")
 GetUserPolicy = Action("GetUserPolicy")
@@ -129,9 +127,7 @@ PutRolePermissionsBoundary = Action("PutRolePermissionsBoundary")
 PutRolePolicy = Action("PutRolePolicy")
 PutUserPermissionsBoundary = Action("PutUserPermissionsBoundary")
 PutUserPolicy = Action("PutUserPolicy")
-RemoveClientIDFromOpenIDConnectProvider = Action(
-    "RemoveClientIDFromOpenIDConnectProvider"
-)
+RemoveClientIDFromOpenIDConnectProvider = Action("RemoveClientIDFromOpenIDConnectProvider")
 RemoveRoleFromInstanceProfile = Action("RemoveRoleFromInstanceProfile")
 RemoveUserFromGroup = Action("RemoveUserFromGroup")
 RequestSmsMfaRegistration = Action("RequestSmsMfaRegistration")

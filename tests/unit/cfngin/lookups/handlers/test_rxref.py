@@ -46,13 +46,9 @@ class TestRxrefLookup:
         cfn.handle.return_value = "success"
         provider = Mock(name="provider")
         assert RxrefLookup.handle(provided, context=cfngin_context, provider=provider)
-        cfn.handle.assert_called_once_with(
-            expected, context=cfngin_context, provider=provider
-        )
+        cfn.handle.assert_called_once_with(expected, context=cfngin_context, provider=provider)
 
-    def test_legacy_parse(
-        self, caplog: LogCaptureFixture, mocker: MockerFixture
-    ) -> None:
+    def test_legacy_parse(self, caplog: LogCaptureFixture, mocker: MockerFixture) -> None:
         """Test legacy_parse."""
         query = "foo"
         caplog.set_level(LogLevels.WARNING, MODULE)

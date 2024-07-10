@@ -47,9 +47,7 @@ def test_is_readable(tmp_path: Path) -> None:
     assert is_readable(tmp_file)
 
 
-def test_is_readable_unreadable_directory(
-    mocker: MockerFixture, tmp_path: Path
-) -> None:
+def test_is_readable_unreadable_directory(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test is_readable."""
     mocker.patch("os.listdir", side_effect=OSError)
     assert not is_readable(tmp_path)
@@ -78,9 +76,7 @@ def test_is_special_file_block_device(mocker: MockerFixture, tmp_path: Path) -> 
     assert is_special_file(tmp_file)
 
 
-def test_is_special_file_character_device(
-    mocker: MockerFixture, tmp_path: Path
-) -> None:
+def test_is_special_file_character_device(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test is_special_file."""
     mocker.patch("stat.S_ISCHR", return_value=True)
     tmp_file = tmp_path / "foo"
@@ -149,9 +145,7 @@ class TestFileGenerator:
             formatted_path["src"]["path"], formatted_path["dir_op"]
         )
         mock_list_objects.assert_not_called()
-        mock_find_dest_path_comp_key.assert_called_once_with(
-            formatted_path, f"{src}test.txt"
-        )
+        mock_find_dest_path_comp_key.assert_called_once_with(formatted_path, f"{src}test.txt")
 
     def test_call_s3local(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test call."""
@@ -184,13 +178,9 @@ class TestFileGenerator:
             formatted_path["src"]["path"], formatted_path["dir_op"]
         )
         mock_list_files.assert_not_called()
-        mock_find_dest_path_comp_key.assert_called_once_with(
-            formatted_path, f"{src}test.txt"
-        )
+        mock_find_dest_path_comp_key.assert_called_once_with(formatted_path, f"{src}test.txt")
 
-    def test_list_files_directory(
-        self, loc_files: LocalFiles, mocker: MockerFixture
-    ) -> None:
+    def test_list_files_directory(self, loc_files: LocalFiles, mocker: MockerFixture) -> None:
         """Test list_files."""
         mocker.patch(f"{MODULE}.get_file_stat", return_value=(15, NOW))
         mocker.patch.object(FileGenerator, "should_ignore_file", return_value=False)
@@ -200,9 +190,7 @@ class TestFileGenerator:
         assert (loc_files["files"][0], {"Size": 15, "LastModified": NOW}) in result
         assert (loc_files["files"][1], {"Size": 15, "LastModified": NOW}) in result
 
-    def test_list_files_file(
-        self, loc_files: LocalFiles, mocker: MockerFixture
-    ) -> None:
+    def test_list_files_file(self, loc_files: LocalFiles, mocker: MockerFixture) -> None:
         """Test list_files."""
         mocker.patch(f"{MODULE}.get_file_stat", return_value=(15, NOW))
         mocker.patch.object(FileGenerator, "should_ignore_file", return_value=False)
@@ -222,9 +210,7 @@ class TestFileGenerator:
         mock_inst = Mock(list_objects=mock_list_objects)
         mock_class = mocker.patch(f"{MODULE}.BucketLister", return_value=mock_inst)
         params = {"key": "val"}
-        obj = FileGenerator(
-            self.client, "", request_parameters={"ListObjectsV2": params}
-        )
+        obj = FileGenerator(self.client, "", request_parameters={"ListObjectsV2": params})
         result = list(obj.list_objects("bucket/", dir_op=True))
         mock_class.assert_called_once_with(self.client)
         mock_list_objects.assert_called_once_with(
@@ -243,9 +229,7 @@ class TestFileGenerator:
         mock_inst = Mock(list_objects=mock_list_objects)
         mock_class = mocker.patch(f"{MODULE}.BucketLister", return_value=mock_inst)
         params = {"key": "val"}
-        obj = FileGenerator(
-            self.client, "delete", request_parameters={"ListObjectsV2": params}
-        )
+        obj = FileGenerator(self.client, "delete", request_parameters={"ListObjectsV2": params})
         result = list(obj.list_objects("bucket/prefix", dir_op=True))
         mock_class.assert_called_once_with(self.client)
         mock_list_objects.assert_called_once_with(
@@ -273,9 +257,7 @@ class TestFileGenerator:
 
     def test_list_objects_single(self) -> None:
         """Test list_objects."""
-        head_object = Mock(
-            return_value={"ContentLength": "13", "LastModified": NOW.isoformat()}
-        )
+        head_object = Mock(return_value={"ContentLength": "13", "LastModified": NOW.isoformat()})
         self.client.head_object = head_object
         obj = FileGenerator(self.client, "")
         result = list(obj.list_objects("bucket/key.txt", False))
@@ -294,17 +276,13 @@ class TestFileGenerator:
 
     def test_list_objects_single_client_error_404(self) -> None:
         """Test list_objects."""
-        exc = ClientError(
-            {"Error": {"Code": "404", "Message": "something"}}, "HeadObject"
-        )
+        exc = ClientError({"Error": {"Code": "404", "Message": "something"}}, "HeadObject")
         head_object = Mock(side_effect=exc)
         self.client.head_object = head_object
         with pytest.raises(ClientError) as excinfo:
             list(FileGenerator(self.client, "").list_objects("bucket/key.txt", False))
         assert excinfo.value != exc
-        assert (
-            excinfo.value.response["Error"]["Message"] == 'Key "key.txt" does not exist'
-        )
+        assert excinfo.value.response["Error"]["Message"] == 'Key "key.txt" does not exist'
 
     def test_list_objects_single_delete(self) -> None:
         """Test list_objects."""
@@ -333,9 +311,7 @@ class TestFileGenerator:
 
     def test_safely_get_file_stats(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test safely_get_file_stats."""
-        mock_get_file_stat = mocker.patch(
-            f"{MODULE}.get_file_stat", return_value=(15, NOW)
-        )
+        mock_get_file_stat = mocker.patch(f"{MODULE}.get_file_stat", return_value=(15, NOW))
         obj = FileGenerator(self.client, "")
         assert obj.safely_get_file_stats(tmp_path) == (
             tmp_path,
@@ -357,9 +333,7 @@ class TestFileGenerator:
         self, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test safely_get_file_stats."""
-        mock_create_warning = mocker.patch(
-            f"{MODULE}.create_warning", return_value="warning"
-        )
+        mock_create_warning = mocker.patch(f"{MODULE}.create_warning", return_value="warning")
         mocker.patch(f"{MODULE}.get_file_stat", return_value=(15, None))
         obj = FileGenerator(self.client, "")
         assert obj.safely_get_file_stats(tmp_path) == (
@@ -368,8 +342,7 @@ class TestFileGenerator:
         )
         mock_create_warning.assert_called_once_with(
             path=tmp_path,
-            error_message="File has an invalid timestamp. Passing epoch "
-            "time as timestamp.",
+            error_message="File has an invalid timestamp. Passing epoch " "time as timestamp.",
             skip_file=False,
         )
         assert obj.result_queue.get() == "warning"
@@ -379,9 +352,7 @@ class TestFileGenerator:
         mock_triggers_warning = mocker.patch.object(
             FileGenerator, "triggers_warning", return_value=False
         )
-        assert not FileGenerator(
-            self.client, "", follow_symlinks=True
-        ).should_ignore_file(tmp_path)
+        assert not FileGenerator(self.client, "", follow_symlinks=True).should_ignore_file(tmp_path)
         mock_triggers_warning.assert_called_once_with(tmp_path)
 
     def test_should_ignore_file_symlink(self, tmp_path: Path) -> None:
@@ -390,64 +361,42 @@ class TestFileGenerator:
         real_path = tmp_path / "real_path"
         real_path.mkdir()
         tmp_symlink.symlink_to(real_path)
-        assert FileGenerator(self.client, "", follow_symlinks=False).should_ignore_file(
-            tmp_symlink
-        )
+        assert FileGenerator(self.client, "", follow_symlinks=False).should_ignore_file(tmp_symlink)
 
     def test_should_ignore_file_triggers_warning(
         self, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test should_ignore_file."""
         mocker.patch.object(FileGenerator, "triggers_warning", return_value=True)
-        assert FileGenerator(self.client, "", follow_symlinks=True).should_ignore_file(
-            tmp_path
-        )
+        assert FileGenerator(self.client, "", follow_symlinks=True).should_ignore_file(tmp_path)
 
     def test_triggers_warning(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test triggers_warning."""
         mock_create_warning = mocker.patch(f"{MODULE}.create_warning")
-        mock_is_special_file = mocker.patch(
-            f"{MODULE}.is_special_file", return_value=False
-        )
+        mock_is_special_file = mocker.patch(f"{MODULE}.is_special_file", return_value=False)
         mock_is_readable = mocker.patch(f"{MODULE}.is_readable", return_value=True)
-        assert not FileGenerator(
-            self.client, "", follow_symlinks=True
-        ).triggers_warning(tmp_path)
+        assert not FileGenerator(self.client, "", follow_symlinks=True).triggers_warning(tmp_path)
         mock_is_special_file.assert_called_once_with(tmp_path)
         mock_is_readable.assert_called_once_with(tmp_path)
         mock_create_warning.assert_not_called()
 
-    def test_triggers_warning_does_not_exist(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_triggers_warning_does_not_exist(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test triggers_warning."""
         missing_path = tmp_path / "missing"
-        mock_create_warning = mocker.patch(
-            f"{MODULE}.create_warning", return_value="warning"
-        )
-        mock_is_special_file = mocker.patch(
-            f"{MODULE}.is_special_file", return_value=False
-        )
+        mock_create_warning = mocker.patch(f"{MODULE}.create_warning", return_value="warning")
+        mock_is_special_file = mocker.patch(f"{MODULE}.is_special_file", return_value=False)
         mock_is_readable = mocker.patch(f"{MODULE}.is_readable", return_value=True)
         obj = FileGenerator(self.client, "", follow_symlinks=True)
         assert obj.triggers_warning(missing_path)
         mock_is_special_file.assert_not_called()
         mock_is_readable.assert_not_called()
-        mock_create_warning.assert_called_once_with(
-            missing_path, "File does not exist."
-        )
+        mock_create_warning.assert_called_once_with(missing_path, "File does not exist.")
         assert obj.result_queue.get() == "warning"
 
-    def test_triggers_warning_is_special_file(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_triggers_warning_is_special_file(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test triggers_warning."""
-        mock_create_warning = mocker.patch(
-            f"{MODULE}.create_warning", return_value="warning"
-        )
-        mock_is_special_file = mocker.patch(
-            f"{MODULE}.is_special_file", return_value=True
-        )
+        mock_create_warning = mocker.patch(f"{MODULE}.create_warning", return_value="warning")
+        mock_is_special_file = mocker.patch(f"{MODULE}.is_special_file", return_value=True)
         mock_is_readable = mocker.patch(f"{MODULE}.is_readable", return_value=True)
         obj = FileGenerator(self.client, "", follow_symlinks=True)
         assert obj.triggers_warning(tmp_path)
@@ -459,24 +408,16 @@ class TestFileGenerator:
         )
         assert obj.result_queue.get() == "warning"
 
-    def test_triggers_warning_is_unreadable(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_triggers_warning_is_unreadable(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test triggers_warning."""
-        mock_create_warning = mocker.patch(
-            f"{MODULE}.create_warning", return_value="warning"
-        )
-        mock_is_special_file = mocker.patch(
-            f"{MODULE}.is_special_file", return_value=False
-        )
+        mock_create_warning = mocker.patch(f"{MODULE}.create_warning", return_value="warning")
+        mock_is_special_file = mocker.patch(f"{MODULE}.is_special_file", return_value=False)
         mock_is_readable = mocker.patch(f"{MODULE}.is_readable", return_value=False)
         obj = FileGenerator(self.client, "", follow_symlinks=True)
         assert obj.triggers_warning(tmp_path)
         mock_is_special_file.assert_called_once_with(tmp_path)
         mock_is_readable.assert_called_once_with(tmp_path)
-        mock_create_warning.assert_called_once_with(
-            tmp_path, "File/Directory is not readable."
-        )
+        mock_create_warning.assert_called_once_with(tmp_path, "File/Directory is not readable.")
         assert obj.result_queue.get() == "warning"
 
 

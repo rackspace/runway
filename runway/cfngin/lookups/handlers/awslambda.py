@@ -107,9 +107,7 @@ class AwsLambdaLookup(LookupHandler):
         if not hooks_with_data_key:
             raise ValueError(f"no hook definition found with data_key {data_key}")
         if len(hooks_with_data_key) > 1:
-            raise ValueError(
-                f"more than one hook definition found with data_key {data_key}"
-            )
+            raise ValueError(f"more than one hook definition found with data_key {data_key}")
         return hooks_with_data_key.pop()
 
     @classmethod
@@ -255,18 +253,14 @@ class AwsLambdaLookup(LookupHandler):
             """
             _query, lookup_args = cls.parse(value)
             return cls.format_results(
-                AwsLambdaLookup.handle(
-                    value, context, *args, **kwargs
-                ).compatible_architectures,
+                AwsLambdaLookup.handle(value, context, *args, **kwargs).compatible_architectures,
                 **lookup_args,
             )
 
     class CompatibleRuntimes(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.CompatibleRuntimes"]] = (
-            "awslambda.CompatibleRuntimes"
-        )
+        TYPE_NAME: Final[Literal["awslambda.CompatibleRuntimes"]] = "awslambda.CompatibleRuntimes"
 
         @classmethod
         def handle(
@@ -289,9 +283,7 @@ class AwsLambdaLookup(LookupHandler):
             """
             _query, lookup_args = cls.parse(value)
             return cls.format_results(
-                AwsLambdaLookup.handle(
-                    value, context, *args, **kwargs
-                ).compatible_runtimes,
+                AwsLambdaLookup.handle(value, context, *args, **kwargs).compatible_runtimes,
                 **lookup_args,
             )
 
@@ -440,9 +432,7 @@ class AwsLambdaLookup(LookupHandler):
     class S3ObjectVersion(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.S3ObjectVersion"]] = (
-            "awslambda.S3ObjectVersion"
-        )
+        TYPE_NAME: Final[Literal["awslambda.S3ObjectVersion"]] = "awslambda.S3ObjectVersion"
 
         @classmethod
         def handle(
@@ -464,6 +454,4 @@ class AwsLambdaLookup(LookupHandler):
                 ``AWS::Lambda::LayerVersion.Content.S3ObjectVersion``.
 
             """
-            return AwsLambdaLookup.handle(
-                value, context, *args, **kwargs
-            ).object_version_id
+            return AwsLambdaLookup.handle(value, context, *args, **kwargs).object_version_id

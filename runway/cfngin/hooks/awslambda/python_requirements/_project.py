@@ -45,17 +45,11 @@ class PythonProject(Project[PythonHookArgs]):
 
         """
         if self.project_type == "poetry":
-            config_files = [
-                self.project_root / config_file for config_file in Poetry.CONFIG_FILES
-            ]
+            config_files = [self.project_root / config_file for config_file in Poetry.CONFIG_FILES]
         elif self.project_type == "pipenv":
-            config_files = [
-                self.project_root / config_file for config_file in Pipenv.CONFIG_FILES
-            ]
+            config_files = [self.project_root / config_file for config_file in Pipenv.CONFIG_FILES]
         else:
-            config_files = [
-                self.project_root / config_file for config_file in Pip.CONFIG_FILES
-            ]
+            config_files = [self.project_root / config_file for config_file in Pip.CONFIG_FILES]
         return tuple(path for path in config_files if path.exists())
 
     @cached_property
@@ -119,15 +113,11 @@ class PythonProject(Project[PythonHookArgs]):
         if Poetry.dir_is_project(self.project_root):
             if self.args.use_poetry:
                 return "poetry"
-            LOGGER.warning(
-                "poetry project detected but use of poetry is explicitly disabled"
-            )
+            LOGGER.warning("poetry project detected but use of poetry is explicitly disabled")
         if Pipenv.dir_is_project(self.project_root):
             if self.args.use_pipenv:
                 return "pipenv"
-            LOGGER.warning(
-                "pipenv project detected but use of pipenv is explicitly disabled"
-            )
+            LOGGER.warning("pipenv project detected but use of pipenv is explicitly disabled")
         return "pip"
 
     @cached_property
@@ -190,8 +180,6 @@ class PythonProject(Project[PythonHookArgs]):
                     requirements=self.requirements_txt,
                     target=self.dependency_directory,
                 )
-            LOGGER.debug(
-                "dependencies successfully installed to %s", self.dependency_directory
-            )
+            LOGGER.debug("dependencies successfully installed to %s", self.dependency_directory)
         else:
             LOGGER.info("skipped installing dependencies; none found")

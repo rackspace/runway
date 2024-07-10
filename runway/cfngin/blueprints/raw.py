@@ -165,9 +165,7 @@ class RawTemplateBlueprint(Blueprint):
                 ):
                     self._rendered = (
                         Environment(
-                            loader=FileSystemLoader(
-                                searchpath=os.path.dirname(template_path)
-                            )
+                            loader=FileSystemLoader(searchpath=os.path.dirname(template_path))
                         )
                         .get_template(os.path.basename(template_path))
                         .render(

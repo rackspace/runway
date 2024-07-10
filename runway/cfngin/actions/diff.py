@@ -228,15 +228,10 @@ class Action(deploy.Action):
             stack.set_outputs(provider.get_outputs(stack.fqn))
         except exceptions.StackDoesNotExist:
             if self.context.persistent_graph:
-                return SkippedStatus(
-                    "persistent graph: stack does not exist, will be removed"
-                )
+                return SkippedStatus("persistent graph: stack does not exist, will be removed")
             return DoesNotExistInCloudFormation()
         except AttributeError as err:
-            if (
-                self.context.persistent_graph
-                and "defined class or template path" in str(err)
-            ):
+            if self.context.persistent_graph and "defined class or template path" in str(err):
                 return SkippedStatus("persistent graph: will be destroyed")
             raise
         except ClientError as err:
@@ -245,8 +240,7 @@ class Action(deploy.Action):
                 and "length less than or equal to" in err.response["Error"]["Message"]
             ):
                 LOGGER.error(
-                    "%s:template is too large to provide directly to the API; "
-                    "S3 must be used",
+                    "%s:template is too large to provide directly to the API; " "S3 must be used",
                     stack.name,
                 )
                 return SkippedStatus("cfngin_bucket: existing bucket required")
@@ -265,9 +259,7 @@ class Action(deploy.Action):
         **_kwargs: Any,
     ) -> None:
         """Kicks off the diffing of the stacks in the stack_definitions."""
-        plan = self._generate_plan(
-            require_unlocked=False, include_persistent_graph=True
-        )
+        plan = self._generate_plan(require_unlocked=False, include_persistent_graph=True)
         plan.outline(logging.DEBUG)
         if plan.keys():
             LOGGER.info("diffing stacks: %s", ", ".join(plan.keys()))
@@ -296,8 +288,7 @@ class Action(deploy.Action):
             sys.exit(1)
         if bucket.not_found:
             LOGGER.warning(
-                'cfngin_bucket "%s" does not exist and will be creating '
-                "during the next deploy",
+                'cfngin_bucket "%s" does not exist and will be creating ' "during the next deploy",
                 bucket.name,
             )
             LOGGER.verbose("proceeding without a cfngin_bucket...")

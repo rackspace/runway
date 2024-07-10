@@ -95,9 +95,7 @@ class LookupHandler:
             elif isinstance(value, dict):
                 value = value.get(get)
             else:
-                raise TypeError(
-                    f'value must be dict type to use "get"; got type "{type(value)}"'
-                )
+                raise TypeError(f'value must be dict type to use "get"; got type "{type(value)}"')
         if (
             isinstance(value, str)
             and value.lower() in ["none", "null"]
@@ -167,8 +165,7 @@ class LookupHandler:
         """
         split_args = args.split(",")
         return {
-            key.strip(): value.strip()
-            for key, value in [arg.split("=", 1) for arg in split_args]
+            key.strip(): value.strip() for key, value in [arg.split("=", 1) for arg in split_args]
         }
 
     @classmethod
@@ -325,9 +322,7 @@ class LookupHandler:
             value = value.data
         if isinstance(value, dict):
             # dumped twice for an escaped json dict
-            return json.dumps(
-                json.dumps(cast(Dict[str, Any], value), indent=int(indent))
-            )
+            return json.dumps(json.dumps(cast(Dict[str, Any], value), indent=int(indent)))
         if isinstance(value, bool):
             return json.dumps(str(value))
         return str(value)

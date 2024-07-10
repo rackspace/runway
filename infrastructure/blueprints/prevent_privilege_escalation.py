@@ -60,9 +60,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
         tmp = [self.policy_arn]
         for policy_name in self.variables["ApprovedPermissionBoundaries"]:
             tmp.append(
-                Sub(
-                    f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:policy/{policy_name}"
-                )
+                Sub(f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:policy/{policy_name}")
             )
         return tmp
 
@@ -70,9 +68,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
     def deny_assume_role_not_resources(self) -> List[Union[str, Sub]]:
         """List of IAM Role ARNs that can be assumed."""
         tmp: List[Union[str, Sub]] = [
-            Sub(
-                f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:role/{self.namespace}-*"
-            )
+            Sub(f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:role/{self.namespace}-*")
         ]
         for arn in self.variables["DenyAssumeRoleNotResources"]:
             tmp.append(arn)
@@ -81,16 +77,12 @@ class AdminPreventPrivilegeEscalation(Blueprint):
     @property
     def policy_arn(self) -> Sub:
         """ARN of the IAM policy that will be created."""
-        return Sub(
-            f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:policy/{self.POLICY_NAME}"
-        )
+        return Sub(f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:policy/{self.POLICY_NAME}")
 
     @cached_property
     def statement_allow_admin_access(self) -> Statement:
         """Statement to allow admin access."""
-        return Statement(
-            Action=[Action("*")], Effect=Allow, Resource=["*"], Sid="AllowAdminAccess"
-        )
+        return Statement(Action=[Action("*")], Effect=Allow, Resource=["*"], Sid="AllowAdminAccess")
 
     @cached_property
     def statement_deny_alter_boundary_policy(self) -> Statement:
@@ -143,9 +135,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
         return Statement(
             Action=[awacs.iam.CreateRole, awacs.iam.CreateUser],
             Condition=Condition(
-                StringNotEquals(
-                    {"iam:PermissionsBoundary": self.approved_boundary_policies}
-                )
+                StringNotEquals({"iam:PermissionsBoundary": self.approved_boundary_policies})
             ),
             Effect=Deny,
             Resource=[
@@ -162,13 +152,9 @@ class AdminPreventPrivilegeEscalation(Blueprint):
             Action=[Action("*")],
             Effect=Deny,
             Resource=[
+                Sub("arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/" "onica-sso"),
                 Sub(
-                    "arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/"
-                    "onica-sso"
-                ),
-                Sub(
-                    "arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/"
-                    "onica-sso-*"
+                    "arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/" "onica-sso-*"
                 ),
                 Sub("arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/onica-sso"),
                 Sub("arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/onica-sso-*"),
@@ -186,9 +172,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
                 awacs.iam.PutUserPermissionsBoundary,
             ],
             Condition=Condition(
-                StringNotEquals(
-                    {"iam:PermissionsBoundary": self.approved_boundary_policies}
-                )
+                StringNotEquals({"iam:PermissionsBoundary": self.approved_boundary_policies})
             ),
             Effect=Deny,
             Resource=[
@@ -206,9 +190,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
                 awacs.iam.DeleteRolePermissionsBoundary,
                 awacs.iam.DeleteUserPermissionsBoundary,
             ],
-            Condition=Condition(
-                StringEquals({"iam:PermissionsBoundary": self.policy_arn})
-            ),
+            Condition=Condition(StringEquals({"iam:PermissionsBoundary": self.policy_arn})),
             Effect=Deny,
             Resource=["*"],
             Sid="DenyRemovalOfBoundaryFromUserOrRole",

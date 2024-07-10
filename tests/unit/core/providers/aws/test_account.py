@@ -50,7 +50,5 @@ class TestAccountDetails:
             {"UserId": "test-user", "Arn": arn},
         )
         account = AccountDetails(runway_context)
-        with stubber, pytest.raises(
-            ValueError, match="get_caller_identity did not return Account"
-        ):
+        with stubber, pytest.raises(ValueError, match="get_caller_identity did not return Account"):
             assert not account.id

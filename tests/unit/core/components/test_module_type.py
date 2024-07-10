@@ -57,9 +57,7 @@ class TestRunwayModuleType:
         assert not result.type_str
         assert result.module_class.__name__ == expected.__name__
 
-    def test_autodetection_fail(
-        self, caplog: LogCaptureFixture, cd_tmp_path: Path
-    ) -> None:
+    def test_autodetection_fail(self, caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
         """Test autodetection fail."""
         caplog.set_level(logging.ERROR, logger="runway")
         with pytest.raises(SystemExit) as excinfo:

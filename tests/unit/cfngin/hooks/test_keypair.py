@@ -75,9 +75,7 @@ def ssm() -> Iterator[None]:
 
 
 @contextmanager
-def mock_input(
-    lines: Tuple[str, ...] = (), isatty: bool = True
-) -> Iterator[mock.MagicMock]:
+def mock_input(lines: Tuple[str, ...] = (), isatty: bool = True) -> Iterator[mock.MagicMock]:
     """Mock input."""
     with mock.patch(
         "runway.cfngin.hooks.keypair.get_raw_input", side_effect=lines
@@ -86,9 +84,7 @@ def mock_input(
             yield mock_get_raw_input
 
 
-def assert_key_present(
-    hook_result: KeyPairInfo, key_name: str, fingerprint: str
-) -> None:
+def assert_key_present(hook_result: KeyPairInfo, key_name: str, fingerprint: str) -> None:
     """Assert key present."""
     assert hook_result.get("key_name") == key_name
     assert hook_result.get("fingerprint") == fingerprint
@@ -132,9 +128,7 @@ def test_import_file(tmp_path: Path, context: CfnginContext, ssh_key: SSHKey) ->
     pub_key = tmp_path / "id_rsa.pub"
     pub_key.write_bytes(ssh_key.public_key)
 
-    result = ensure_keypair_exists(
-        context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key)
-    )
+    result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key))
     assert_key_present(result, KEY_PAIR_NAME, ssh_key.fingerprint)
     assert result.get("status") == "imported"
 
@@ -144,16 +138,12 @@ def test_import_bad_key_data(tmp_path: Path, context: CfnginContext) -> None:
     pub_key = tmp_path / "id_rsa.pub"
     pub_key.write_text("garbage")
 
-    result = ensure_keypair_exists(
-        context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key)
-    )
+    result = ensure_keypair_exists(context, keypair=KEY_PAIR_NAME, public_key_path=str(pub_key))
     assert result == {}
 
 
 @pytest.mark.parametrize("ssm_key_id", ["my-key"])
-def test_create_in_ssm(
-    context: CfnginContext, ssh_key: SSHKey, ssm_key_id: str
-) -> None:
+def test_create_in_ssm(context: CfnginContext, ssh_key: SSHKey, ssm_key_id: str) -> None:
     """Test create in ssm."""
     result = ensure_keypair_exists(
         context,
@@ -167,9 +157,9 @@ def test_create_in_ssm(
 
     ssm = boto3.client("ssm")
     param = ssm.get_parameter(Name="param", WithDecryption=True).get("Parameter", {})
-    assert param.get("Value", "").replace("\n", "") == ssh_key.private_key.decode(
-        "ascii"
-    ).replace(os.linesep, "")
+    assert param.get("Value", "").replace("\n", "") == ssh_key.private_key.decode("ascii").replace(
+        os.linesep, ""
+    )
     assert param.get("Type") == "SecureString"
 
     params = ssm.describe_parameters().get("Parameters", [])
@@ -198,9 +188,7 @@ def test_interactive_retry_cancel(context: CfnginContext) -> None:
     assert result == {}
 
 
-def test_interactive_import(
-    tmp_path: Path, context: CfnginContext, ssh_key: SSHKey
-) -> None:
+def test_interactive_import(tmp_path: Path, context: CfnginContext, ssh_key: SSHKey) -> None:
     """."""
     key_file = tmp_path / "id_rsa.pub"
     key_file.write_bytes(ssh_key.public_key)
@@ -213,9 +201,7 @@ def test_interactive_import(
     assert result.get("status") == "imported"
 
 
-def test_interactive_create(
-    tmp_path: Path, context: CfnginContext, ssh_key: SSHKey
-) -> None:
+def test_interactive_create(tmp_path: Path, context: CfnginContext, ssh_key: SSHKey) -> None:
     """Test interactive create."""
     key_dir = tmp_path / "keys"
     key_dir.mkdir(parents=True, exist_ok=True)
@@ -242,9 +228,7 @@ def test_interactive_create_bad_dir(tmp_path: Path, context: CfnginContext) -> N
     assert result == {}
 
 
-def test_interactive_create_existing_file(
-    tmp_path: Path, context: CfnginContext
-) -> None:
+def test_interactive_create_existing_file(tmp_path: Path, context: CfnginContext) -> None:
     """Test interactive create existing file."""
     key_dir = tmp_path / "keys"
     key_dir.mkdir(exist_ok=True, parents=True)

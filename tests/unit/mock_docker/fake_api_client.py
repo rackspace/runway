@@ -20,9 +20,7 @@ class CopyReturnMagicMock(mock.MagicMock):
         return ret  # type: ignore
 
 
-def make_fake_api_client(
-    overrides: Optional[Dict[str, Any]] = None
-) -> CopyReturnMagicMock:
+def make_fake_api_client(overrides: Optional[Dict[str, Any]] = None) -> CopyReturnMagicMock:
     """Return non-complete fake APIClient.
 
     This returns most of the default cases correctly, but most arguments that

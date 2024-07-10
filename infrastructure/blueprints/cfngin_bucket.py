@@ -63,11 +63,7 @@ class CfnginBucket(Blueprint):
             BucketName=self.bucket_name,
             DeletionPolicy=self.variables["DeletionPolicy"],
             LifecycleConfiguration=s3.LifecycleConfiguration(
-                Rules=[
-                    s3.LifecycleRule(
-                        NoncurrentVersionExpirationInDays=30, Status="Enabled"
-                    )
-                ]
+                Rules=[s3.LifecycleRule(NoncurrentVersionExpirationInDays=30, Status="Enabled")]
             ),
             VersioningConfiguration=s3.VersioningConfiguration(Status="Enabled"),
         )

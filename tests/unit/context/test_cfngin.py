@@ -119,9 +119,7 @@ class TestCFNginContext:
         mocker.patch.object(CfnginContext, "upload_to_s3", True)
         assert (
             CfnginContext(
-                config=CfnginConfig.parse_obj(
-                    {"namespace": "test", "cfngin_bucket": "test-bucket"}
-                )
+                config=CfnginConfig.parse_obj({"namespace": "test", "cfngin_bucket": "test-bucket"})
             ).bucket_name
             == "test-bucket"
         )
@@ -149,9 +147,7 @@ class TestCFNginContext:
         mock_get_fqn = mocker.patch(f"{MODULE}.get_fqn", return_value="success")
         obj = CfnginContext(config=self.config)
         assert obj.get_fqn("name") == "success"
-        mock_get_fqn.assert_called_once_with(
-            obj.base_fqn, self.config.namespace_delimiter, "name"
-        )
+        mock_get_fqn.assert_called_once_with(obj.base_fqn, self.config.namespace_delimiter, "name")
 
     def test_get_stack(self) -> None:
         """Test get_stack."""
@@ -245,9 +241,7 @@ class TestCFNginContext:
             "put_object_tagging",
             {},
             {
-                "Tagging": {
-                    "TagSet": [{"Key": obj._persistent_graph_lock_tag, "Value": "123"}]
-                },
+                "Tagging": {"TagSet": [{"Key": obj._persistent_graph_lock_tag, "Value": "123"}]},
                 **obj.persistent_graph_location,
             },
         )
@@ -268,13 +262,8 @@ class TestCFNginContext:
 
     def test_namespace_delimiter(self) -> None:
         """Test namespace_delimiter."""
-        config = CfnginConfig.parse_obj(
-            {"namespace": "test", "namespace_delimiter": "."}
-        )
-        assert (
-            CfnginContext(config=config).namespace_delimiter
-            == config.namespace_delimiter
-        )
+        config = CfnginConfig.parse_obj({"namespace": "test", "namespace_delimiter": "."})
+        assert CfnginContext(config=config).namespace_delimiter == config.namespace_delimiter
 
     def test_persistent_graph_no_location(self, mocker: MockerFixture) -> None:
         """Test persistent_graph no persistent_graph_location."""
@@ -448,9 +437,7 @@ class TestCFNginContext:
         obj = CfnginContext()
         stubber = Stubber(obj.s3_client)
 
-        stubber.add_response(
-            "get_object_tagging", {"TagSet": []}, obj.persistent_graph_location
-        )
+        stubber.add_response("get_object_tagging", {"TagSet": []}, obj.persistent_graph_location)
         stubber.add_response(
             "get_object_tagging",
             {"TagSet": [{"Key": "key", "Value": "val"}]},
@@ -475,9 +462,7 @@ class TestCFNginContext:
         with stubber:
             assert not obj.put_persistent_graph("123")
 
-    def test_put_persistent_graph_lock_code_mismatch(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_put_persistent_graph_lock_code_mismatch(self, mocker: MockerFixture) -> None:
         """Test put_persistent_graph lock code mismatch."""
         mocker.patch.object(
             CfnginContext,
@@ -525,9 +510,7 @@ class TestCFNginContext:
             "put_object",
             {},
             {
-                "Body": json.dumps(
-                    self.persist_graph_raw, default=json_serial, indent=4
-                ).encode(),
+                "Body": json.dumps(self.persist_graph_raw, default=json_serial, indent=4).encode(),
                 "ServerSideEncryption": "AES256",
                 "ACL": "bucket-owner-full-control",
                 "ContentType": "application/json",
@@ -609,16 +592,12 @@ class TestCFNginContext:
 
     def test_tags_empty(self) -> None:
         """Test tags empty."""
-        obj = CfnginContext(
-            config=CfnginConfig.parse_obj({"namespace": "test", "tags": {}})
-        )
+        obj = CfnginContext(config=CfnginConfig.parse_obj({"namespace": "test", "tags": {}}))
         assert obj.tags == {}
 
     def test_tags_none(self) -> None:
         """Test tags None."""
-        obj = CfnginContext(
-            config=CfnginConfig.parse_obj({"namespace": "test", "tags": None})
-        )
+        obj = CfnginContext(config=CfnginConfig.parse_obj({"namespace": "test", "tags": None}))
         assert obj.tags == {"cfngin_namespace": obj.config.namespace}
 
     def test_tags(self) -> None:
@@ -630,10 +609,7 @@ class TestCFNginContext:
 
     def test_template_indent(self) -> None:
         """Test template_indent."""
-        assert (
-            CfnginContext(config=self.config).template_indent
-            == self.config.template_indent
-        )
+        assert CfnginContext(config=self.config).template_indent == self.config.template_indent
 
     @pytest.mark.parametrize(
         "config, expected",
@@ -647,14 +623,9 @@ class TestCFNginContext:
     )
     def test_upload_to_s3(self, config: Dict[str, Any], expected: bool) -> None:
         """Test upload_to_s3."""
-        assert (
-            CfnginContext(config=CfnginConfig.parse_obj(config)).upload_to_s3
-            is expected
-        )
+        assert CfnginContext(config=CfnginConfig.parse_obj(config)).upload_to_s3 is expected
 
-    def test_unlock_persistent_graph_empty_no_such_key(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_unlock_persistent_graph_empty_no_such_key(self, mocker: MockerFixture) -> None:
         """Test unlock_persistent_graph empty graph NoSuchKey."""
         mocker.patch.object(
             CfnginContext,
@@ -668,9 +639,7 @@ class TestCFNginContext:
         with stubber:
             assert obj.unlock_persistent_graph("123")
 
-    def test_unlock_persistent_graph_lock_code_mismatch(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_unlock_persistent_graph_lock_code_mismatch(self, mocker: MockerFixture) -> None:
         """Test unlock_persistent_graph lock code mismatch."""
         mocker.patch.object(
             CfnginContext,
@@ -727,9 +696,7 @@ class TestCFNginContext:
         with stubber:
             assert obj.unlock_persistent_graph("123")
 
-    @pytest.mark.parametrize(
-        "graph_dict", cast(List[Dict[str, List[str]]], [{"stack0": []}, {}])
-    )
+    @pytest.mark.parametrize("graph_dict", cast(List[Dict[str, List[str]]], [{"stack0": []}, {}]))
     def test_unlock_persistent_graph(
         self, graph_dict: Dict[str, List[str]], mocker: MockerFixture
     ) -> None:

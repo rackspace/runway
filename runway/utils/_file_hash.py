@@ -26,9 +26,7 @@ class FileHash:
         1024 * 10_000_000  # 10mb - number of bytes in each read operation
     )
 
-    def __init__(
-        self, hash_alg: "hashlib._Hash", *, chunk_size: int = DEFAULT_CHUNK_SIZE
-    ) -> None:
+    def __init__(self, hash_alg: "hashlib._Hash", *, chunk_size: int = DEFAULT_CHUNK_SIZE) -> None:
         """Instantiate class.
 
         Args:
@@ -103,11 +101,7 @@ class FileHash:
         """
         self._hash.update(
             (
-                str(
-                    Path(file_path).relative_to(relative_to)
-                    if relative_to
-                    else Path(file_path)
-                )
+                str(Path(file_path).relative_to(relative_to) if relative_to else Path(file_path))
                 + end_character
             ).encode()
         )

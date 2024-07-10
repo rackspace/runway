@@ -140,9 +140,7 @@ class FileStats:
         return deepcopy(cast(FileStatsDict, self.__dict__))
 
 
-_LastModifiedAndSize = TypedDict(
-    "_LastModifiedAndSize", Size=int, LastModified=datetime.datetime
-)
+_LastModifiedAndSize = TypedDict("_LastModifiedAndSize", Size=int, LastModified=datetime.datetime)
 
 
 class FileGenerator:
@@ -187,9 +185,7 @@ class FileGenerator:
     def call(self, files: FormatPathResult) -> Generator[FileStats, None, None]:
         """Generalized function to yield the ``FileInfo`` objects."""
         function_table = {"s3": self.list_objects, "local": self.list_files}
-        file_iterator = function_table[files["src"]["type"]](
-            files["src"]["path"], files["dir_op"]
-        )
+        file_iterator = function_table[files["src"]["type"]](files["src"]["path"], files["dir_op"])
         for src_path, extra_information in file_iterator:
             dest_path, compare_key = find_dest_path_comp_key(files, src_path)
             file_stat_kwargs: FileStatsDict = {
@@ -263,9 +259,7 @@ class FileGenerator:
         """
         names.sort(key=lambda item: item.replace(os_sep, character))
 
-    def safely_get_file_stats(
-        self, path: Path
-    ) -> Optional[Tuple[Path, _LastModifiedAndSize]]:
+    def safely_get_file_stats(self, path: Path) -> Optional[Tuple[Path, _LastModifiedAndSize]]:
         """Get file stats with handling for some common errors.
 
         Args:
@@ -288,8 +282,7 @@ class FileGenerator:
         if update_time is None:
             warning = create_warning(
                 path=path,
-                error_message="File has an invalid timestamp. Passing epoch "
-                "time as timestamp.",
+                error_message="File has an invalid timestamp. Passing epoch " "time as timestamp.",
                 skip_file=False,
             )
             self.result_queue.put(warning)
@@ -330,10 +323,7 @@ class FileGenerator:
         if is_special_file(path):
             warning = create_warning(
                 path,
-                (
-                    "File is character special device, "
-                    "block special device, FIFO, or socket."
-                ),
+                ("File is character special device, " "block special device, FIFO, or socket."),
             )
             self.result_queue.put(warning)
             return True
@@ -345,9 +335,7 @@ class FileGenerator:
 
     def list_objects(
         self, s3_path: str, dir_op: bool
-    ) -> Generator[
-        Tuple[str, Union[HeadObjectOutputTypeDef, ObjectTypeDef]], None, None
-    ]:
+    ) -> Generator[Tuple[str, Union[HeadObjectOutputTypeDef, ObjectTypeDef]], None, None]:
         """Yield the appropriate object or objects under a common prefix.
 
         It yields the file's source path, size, and last update.

@@ -518,9 +518,7 @@ def ensure_file_is_executable(path: str) -> None:
         SystemExit: file is not executable.
 
     """
-    if platform.system() != "Windows" and (
-        not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]
-    ):
+    if platform.system() != "Windows" and (not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]):
         print(f"Error: File {path} is not executable")
         sys.exit(1)
 
@@ -565,9 +563,7 @@ def json_serial(obj: Any) -> Any:
     raise TypeError(f"Type {type(obj)} not serializable")
 
 
-def load_object_from_string(
-    fqcn: str, try_reload: bool = False
-) -> Union[type, Callable[..., Any]]:
+def load_object_from_string(fqcn: str, try_reload: bool = False) -> Union[type, Callable[..., Any]]:
     """Convert "." delimited strings to a python object.
 
     Args:
@@ -594,8 +590,7 @@ def load_object_from_string(
         if (
             try_reload
             and sys.modules.get(module_path)
-            and module_path.split(".")[0]
-            not in sys.builtin_module_names  # skip builtins
+            and module_path.split(".")[0] not in sys.builtin_module_names  # skip builtins
         ):
             importlib.reload(sys.modules[module_path])
         else:
@@ -610,9 +605,7 @@ def merge_dicts(
 
 
 @overload
-def merge_dicts(
-    dict1: List[Any], dict2: List[Any], deep_merge: bool = ...
-) -> List[Any]: ...
+def merge_dicts(dict1: List[Any], dict2: List[Any], deep_merge: bool = ...) -> List[Any]: ...
 
 
 def merge_dicts(
@@ -629,19 +622,13 @@ def merge_dicts(
             return dict2
 
         for key in dict2:
-            dict1[key] = (
-                merge_dicts(dict1[key], dict2[key], True)
-                if key in dict1
-                else dict2[key]
-            )
+            dict1[key] = merge_dicts(dict1[key], dict2[key], True) if key in dict1 else dict2[key]
         return dict1
     if isinstance(dict1, dict) and isinstance(dict2, dict):
         dict3 = dict1.copy()
         dict3.update(dict2)
         return dict3
-    raise ValueError(
-        f"values of type {type(dict1)} and {type(dict2)} must be type dict"
-    )
+    raise ValueError(f"values of type {type(dict1)} and {type(dict2)} must be type dict")
 
 
 def snake_case_to_kebab_case(value: str) -> str:
@@ -663,9 +650,7 @@ def extract_boto_args_from_env(env_vars: Dict[str, str]) -> Dict[str, str]:
     }
 
 
-def flatten_path_lists(
-    env_dict: Dict[str, Any], env_root: Optional[str] = None
-) -> Dict[str, Any]:
+def flatten_path_lists(env_dict: Dict[str, Any], env_root: Optional[str] = None) -> Dict[str, Any]:
     """Join paths in environment dict down to strings."""
     for key, val in env_dict.items():
         # Lists are presumed to be path components and will be turned back
@@ -786,9 +771,7 @@ def run_commands(
             raw_command = step["command"]
         else:
             raise AttributeError(f"Invalid command step: {step}")
-        command_list = (
-            raw_command.split(" ") if isinstance(raw_command, str) else raw_command
-        )
+        command_list = raw_command.split(" ") if isinstance(raw_command, str) else raw_command
         if platform.system().lower() == "windows":
             command_list = fix_windows_command_list(command_list)
 

@@ -82,9 +82,7 @@ def unregister_lookup_handler(lookup_type: str) -> None:
 register_lookup_handler(AmiLookup.TYPE_NAME, AmiLookup)
 register_lookup_handler(AwsLambdaLookup.TYPE_NAME, AwsLambdaLookup)
 register_lookup_handler(AwsLambdaLookup.Code.TYPE_NAME, AwsLambdaLookup.Code)
-register_lookup_handler(
-    AwsLambdaLookup.CodeSha256.TYPE_NAME, AwsLambdaLookup.CodeSha256
-)
+register_lookup_handler(AwsLambdaLookup.CodeSha256.TYPE_NAME, AwsLambdaLookup.CodeSha256)
 register_lookup_handler(
     AwsLambdaLookup.CompatibleArchitectures.TYPE_NAME,
     AwsLambdaLookup.CompatibleArchitectures,
@@ -93,15 +91,11 @@ register_lookup_handler(
     AwsLambdaLookup.CompatibleRuntimes.TYPE_NAME, AwsLambdaLookup.CompatibleRuntimes
 )
 register_lookup_handler(AwsLambdaLookup.Content.TYPE_NAME, AwsLambdaLookup.Content)
-register_lookup_handler(
-    AwsLambdaLookup.LicenseInfo.TYPE_NAME, AwsLambdaLookup.LicenseInfo
-)
+register_lookup_handler(AwsLambdaLookup.LicenseInfo.TYPE_NAME, AwsLambdaLookup.LicenseInfo)
 register_lookup_handler(AwsLambdaLookup.Runtime.TYPE_NAME, AwsLambdaLookup.Runtime)
 register_lookup_handler(AwsLambdaLookup.S3Bucket.TYPE_NAME, AwsLambdaLookup.S3Bucket)
 register_lookup_handler(AwsLambdaLookup.S3Key.TYPE_NAME, AwsLambdaLookup.S3Key)
-register_lookup_handler(
-    AwsLambdaLookup.S3ObjectVersion.TYPE_NAME, AwsLambdaLookup.S3ObjectVersion
-)
+register_lookup_handler(AwsLambdaLookup.S3ObjectVersion.TYPE_NAME, AwsLambdaLookup.S3ObjectVersion)
 register_lookup_handler(CfnLookup.TYPE_NAME, CfnLookup)
 register_lookup_handler(DefaultLookup.TYPE_NAME, DefaultLookup)
 register_lookup_handler(DynamodbLookup.TYPE_NAME, DynamodbLookup)

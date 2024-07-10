@@ -162,9 +162,9 @@ class _Parameter(CfnginHookProtocol):
         if self.args.force:  # bypass getting current value
             return {}
         try:
-            return self.client.get_parameter(
-                Name=self.args.name, WithDecryption=True
-            ).get("Parameter", {})
+            return self.client.get_parameter(Name=self.args.name, WithDecryption=True).get(
+                "Parameter", {}
+            )
         except self.client.exceptions.ParameterNotFound:
             LOGGER.verbose("parameter %s does not exist", self.args.name)
             return {}
@@ -213,9 +213,7 @@ class _Parameter(CfnginHookProtocol):
         if current_param.get("Value") != self.args.value:
             try:
                 result = self.client.put_parameter(
-                    **self.args.dict(
-                        by_alias=True, exclude_none=True, exclude={"force", "tags"}
-                    )
+                    **self.args.dict(by_alias=True, exclude_none=True, exclude={"force", "tags"})
                 )
             except self.client.exceptions.ParameterAlreadyExists:
                 LOGGER.warning(
@@ -239,9 +237,7 @@ class _Parameter(CfnginHookProtocol):
         """Update tags."""
         current_tags = self.get_current_tags()
         if self.args.tags and current_tags:
-            diff_tag_keys = list(
-                {i["Key"] for i in current_tags} ^ {i.key for i in self.args.tags}
-            )
+            diff_tag_keys = list({i["Key"] for i in current_tags} ^ {i.key for i in self.args.tags})
         elif self.args.tags:
             diff_tag_keys = []
         else:
@@ -255,14 +251,11 @@ class _Parameter(CfnginHookProtocol):
                     ResourceType="Parameter",
                     TagKeys=diff_tag_keys,
                 )
-                LOGGER.debug(
-                    "removed tags for parameter %s: %s", self.args.name, diff_tag_keys
-                )
+                LOGGER.debug("removed tags for parameter %s: %s", self.args.name, diff_tag_keys)
 
             if self.args.tags:
                 tags_to_add = [
-                    cast("TagTypeDef", tag.dict(by_alias=True))
-                    for tag in self.args.tags
+                    cast("TagTypeDef", tag.dict(by_alias=True)) for tag in self.args.tags
                 ]
                 self.client.add_tags_to_resource(
                     ResourceId=self.args.name,
@@ -275,9 +268,7 @@ class _Parameter(CfnginHookProtocol):
                     [tag["Key"] for tag in tags_to_add],
                 )
         except self.client.exceptions.InvalidResourceId:
-            LOGGER.info(
-                "skipped updating tags; parameter %s does not exist", self.args.name
-            )
+            LOGGER.info("skipped updating tags; parameter %s does not exist", self.args.name)
         else:
             LOGGER.info("updated tags for parameter %s", self.args.name)
 

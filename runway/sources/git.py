@@ -91,9 +91,7 @@ class Git(Source):
 
     def __determine_git_ref(self) -> str:
         """Determine the git reference code."""
-        ref_config_keys = sum(
-            bool(self.args.get(i)) for i in ["commit", "tag", "branch"]
-        )
+        ref_config_keys = sum(bool(self.args.get(i)) for i in ["commit", "tag", "branch"])
         if ref_config_keys > 1:
             raise ValueError(
                 "Fetching remote git sources failed: conflicting revisions "

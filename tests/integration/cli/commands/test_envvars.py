@@ -29,9 +29,7 @@ PSH_OUTPUT = (
 )
 
 
-def test_envvars(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
-) -> None:
+def test_envvars(cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch) -> None:
     """Test envvars."""
     monkeypatch.setattr("platform.system", Mock(return_value="Darwin"))
     cp_config("simple_env_vars", cd_tmp_path)

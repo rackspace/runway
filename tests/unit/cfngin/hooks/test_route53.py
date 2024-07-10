@@ -14,14 +14,10 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.route53"
 
 
-def test_create_domain(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture
-) -> None:
+def test_create_domain(cfngin_context: MockCFNginContext, mocker: MockerFixture) -> None:
     """Test create_domain."""
     domain = "foo"
-    create_route53_zone = mocker.patch(
-        f"{MODULE}.create_route53_zone", return_value="bar"
-    )
+    create_route53_zone = mocker.patch(f"{MODULE}.create_route53_zone", return_value="bar")
     _ = cfngin_context.add_stubber("route53")
     assert create_domain(cfngin_context, domain=domain) == {
         "domain": domain,

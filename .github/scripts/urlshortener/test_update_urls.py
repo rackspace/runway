@@ -31,9 +31,7 @@ def test_put_item():
     table: Table = boto3.resource("dynamodb").Table(table_name)
     stubber = Stubber(table.meta.client)
 
-    stubber.add_response(
-        "put_item", {"Attributes": {"id": {"S": id_val}, "target": {"S": target}}}
-    )
+    stubber.add_response("put_item", {"Attributes": {"id": {"S": id_val}, "target": {"S": target}}})
 
     with stubber:
         assert not put_item(table, id_val, target)
@@ -48,26 +46,22 @@ def test_handler(mock_put_item: Mock):
         call(
             table=table,
             id_val="runway/latest/linux",
-            target="https://test-bucket.s3-us-west-2.amazonaws.com/"
-            "runway/1.0.0/linux/runway",
+            target="https://test-bucket.s3-us-west-2.amazonaws.com/" "runway/1.0.0/linux/runway",
         ),
         call(
             table=table,
             id_val="runway/1.0.0/linux",
-            target="https://test-bucket.s3-us-west-2.amazonaws.com/"
-            "runway/1.0.0/linux/runway",
+            target="https://test-bucket.s3-us-west-2.amazonaws.com/" "runway/1.0.0/linux/runway",
         ),
         call(
             table=table,
             id_val="runway/latest/osx",
-            target="https://test-bucket.s3-us-west-2.amazonaws.com/"
-            "runway/1.0.0/osx/runway",
+            target="https://test-bucket.s3-us-west-2.amazonaws.com/" "runway/1.0.0/osx/runway",
         ),
         call(
             table=table,
             id_val="runway/1.0.0/osx",
-            target="https://test-bucket.s3-us-west-2.amazonaws.com/"
-            "runway/1.0.0/osx/runway",
+            target="https://test-bucket.s3-us-west-2.amazonaws.com/" "runway/1.0.0/osx/runway",
         ),
         call(
             table=table,
@@ -88,16 +82,14 @@ def test_handler(mock_put_item: Mock):
         call(
             table=table,
             id_val="runway/1.1.0/linux",
-            target="https://test-bucket.s3-us-east-1.amazonaws.com/"
-            "runway/1.1.0/linux/runway",
+            target="https://test-bucket.s3-us-east-1.amazonaws.com/" "runway/1.1.0/linux/runway",
         )
     )
     calls.append(
         call(
             table=table,
             id_val="runway/1.1.0/osx",
-            target="https://test-bucket.s3-us-east-1.amazonaws.com/"
-            "runway/1.1.0/osx/runway",
+            target="https://test-bucket.s3-us-east-1.amazonaws.com/" "runway/1.1.0/osx/runway",
         )
     )
     calls.append(

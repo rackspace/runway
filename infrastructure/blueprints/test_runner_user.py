@@ -34,8 +34,7 @@ class TestRunnerUser(AdminUser):
                         Statement(
                             Action=[awacs.sts.AssumeRole],
                             Effect=Deny,
-                            NotResource=self.variables["DenyAssumeRoleNotResources"]
-                            or ["*"],
+                            NotResource=self.variables["DenyAssumeRoleNotResources"] or ["*"],
                         )
                     ],
                     Version="2012-10-17",

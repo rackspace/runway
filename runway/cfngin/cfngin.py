@@ -113,9 +113,7 @@ class CFNgin:
         sys_path = sys_path or self.sys_path
         config_file_paths = self.find_config_files(sys_path=sys_path)
 
-        with SafeHaven(
-            environ=self.__ctx.env.vars, sys_modules_exclude=["awacs", "troposphere"]
-        ):
+        with SafeHaven(environ=self.__ctx.env.vars, sys_modules_exclude=["awacs", "troposphere"]):
             for config_path in config_file_paths:
                 logger = PrefixAdaptor(os.path.basename(config_path), LOGGER)
                 logger.notice("deploy (in progress)")
@@ -123,9 +121,7 @@ class CFNgin:
                     ctx = self.load(config_path)
                     action = deploy.Action(
                         context=ctx,
-                        provider_builder=self._get_provider_builder(
-                            ctx.config.service_role
-                        ),
+                        provider_builder=self._get_provider_builder(ctx.config.service_role),
                     )
                     action.execute(concurrency=self.concurrency, tail=self.tail)
                 logger.success("deploy (complete)")
@@ -155,13 +151,9 @@ class CFNgin:
                     ctx = self.load(config_path)
                     action = destroy.Action(
                         context=ctx,
-                        provider_builder=self._get_provider_builder(
-                            ctx.config.service_role
-                        ),
+                        provider_builder=self._get_provider_builder(ctx.config.service_role),
                     )
-                    action.execute(
-                        concurrency=self.concurrency, force=True, tail=self.tail
-                    )
+                    action.execute(concurrency=self.concurrency, force=True, tail=self.tail)
                 logger.success("destroy (complete)")
 
     def init(self, force: bool = False, sys_path: Optional[Path] = None) -> None:
@@ -171,9 +163,7 @@ class CFNgin:
         sys_path = sys_path or self.sys_path
         config_file_paths = self.find_config_files(sys_path=sys_path)
 
-        with SafeHaven(
-            environ=self.__ctx.env.vars, sys_modules_exclude=["awacs", "troposphere"]
-        ):
+        with SafeHaven(environ=self.__ctx.env.vars, sys_modules_exclude=["awacs", "troposphere"]):
             for config_path in config_file_paths:
                 logger = PrefixAdaptor(os.path.basename(config_path), LOGGER)
                 logger.notice("init (in progress)")
@@ -181,9 +171,7 @@ class CFNgin:
                     ctx = self.load(config_path)
                     action = init.Action(
                         context=ctx,
-                        provider_builder=self._get_provider_builder(
-                            ctx.config.service_role
-                        ),
+                        provider_builder=self._get_provider_builder(ctx.config.service_role),
                     )
                     action.execute(concurrency=self.concurrency, tail=self.tail)
                 logger.success("init (complete)")
@@ -232,9 +220,7 @@ class CFNgin:
                     ctx = self.load(config_path)
                     action = diff.Action(
                         context=ctx,
-                        provider_builder=self._get_provider_builder(
-                            ctx.config.service_role
-                        ),
+                        provider_builder=self._get_provider_builder(ctx.config.service_role),
                     )
                     action.execute()
                 logger.success("plan (complete)")
@@ -284,9 +270,7 @@ class CFNgin:
             work_dir=self.__ctx.work_dir,
         )
 
-    def _get_provider_builder(
-        self, service_role: Optional[str] = None
-    ) -> ProviderBuilder:
+    def _get_provider_builder(self, service_role: Optional[str] = None) -> ProviderBuilder:
         """Initialize provider builder.
 
         Args:

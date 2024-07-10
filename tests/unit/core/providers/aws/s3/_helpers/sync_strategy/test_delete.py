@@ -31,16 +31,9 @@ class TestDeleteSync:
         self, expected: bool, is_size: bool, is_time: bool, mocker: MockerFixture
     ) -> None:
         """Test determine_should_sync."""
-        mock_compare_size = mocker.patch.object(
-            DeleteSync, "compare_size", return_value=is_size
-        )
-        mock_compare_time = mocker.patch.object(
-            DeleteSync, "compare_time", return_value=is_time
-        )
-        assert (
-            DeleteSync().determine_should_sync(FileStats(src=""), FileStats(src=""))
-            is expected
-        )
+        mock_compare_size = mocker.patch.object(DeleteSync, "compare_size", return_value=is_size)
+        mock_compare_time = mocker.patch.object(DeleteSync, "compare_time", return_value=is_time)
+        assert DeleteSync().determine_should_sync(FileStats(src=""), FileStats(src="")) is expected
         mock_compare_size.assert_not_called()
         mock_compare_time.assert_not_called()
 

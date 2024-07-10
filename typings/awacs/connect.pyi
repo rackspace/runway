@@ -59,9 +59,7 @@ UpdateContactAttributes = Action("UpdateContactAttributes")
 UpdateContactFlowContent = Action("UpdateContactFlowContent")
 UpdateContactFlowName = Action("UpdateContactFlowName")
 UpdateRoutingProfileConcurrency = Action("UpdateRoutingProfileConcurrency")
-UpdateRoutingProfileDefaultOutboundQueue = Action(
-    "UpdateRoutingProfileDefaultOutboundQueue"
-)
+UpdateRoutingProfileDefaultOutboundQueue = Action("UpdateRoutingProfileDefaultOutboundQueue")
 UpdateRoutingProfileName = Action("UpdateRoutingProfileName")
 UpdateRoutingProfileQueues = Action("UpdateRoutingProfileQueues")
 UpdateUserHierarchy = Action("UpdateUserHierarchy")

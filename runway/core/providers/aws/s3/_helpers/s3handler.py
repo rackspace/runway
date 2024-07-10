@@ -109,9 +109,7 @@ class S3TransferHandlerFactory:
         self._config_params = config_params
         self._runtime_config = runtime_config
 
-    def __call__(
-        self, client: S3Client, result_queue: "Queue[Any]"
-    ) -> S3TransferHandler:
+    def __call__(self, client: S3Client, result_queue: "Queue[Any]") -> S3TransferHandler:
         """Create a S3TransferHandler instance.
 
         Args:
@@ -120,9 +118,7 @@ class S3TransferHandlerFactory:
                 for the S3TransferHandler.
 
         """
-        transfer_config = create_transfer_config_from_runtime_config(
-            self._runtime_config
-        )
+        transfer_config = create_transfer_config_from_runtime_config(self._runtime_config)
         transfer_config.max_in_memory_upload_chunks = self.MAX_IN_MEMORY_CHUNKS
         transfer_config.max_in_memory_download_chunks = self.MAX_IN_MEMORY_CHUNKS
 
@@ -234,9 +230,7 @@ class S3TransferHandler:
                             if submitter.submit(fileinfo):
                                 total_submissions += 1
                             break
-                self._result_command_recorder.notify_total_submissions(
-                    total_submissions
-                )
+                self._result_command_recorder.notify_total_submissions(total_submissions)
         return self._result_command_recorder.get_command_result()
 
 
@@ -249,9 +243,9 @@ class BaseTransferRequestSubmitter:
 
     """
 
-    REQUEST_MAPPER_METHOD: ClassVar[
-        Optional[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]]
-    ] = None
+    REQUEST_MAPPER_METHOD: ClassVar[Optional[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]]] = (
+        None
+    )
     RESULT_SUBSCRIBER_CLASS: ClassVar[Optional[Type[BaseSubscriber]]] = None
 
     def __init__(
@@ -336,9 +330,7 @@ class BaseTransferRequestSubmitter:
         if self._config_params.is_move:
             transfer_type = "move"
         src, dest = self._format_src_dest(fileinfo)
-        self._result_queue.put(
-            DryRunResult(transfer_type=transfer_type, src=src, dest=dest)
-        )
+        self._result_queue.put(DryRunResult(transfer_type=transfer_type, src=src, dest=dest))
 
     def _add_additional_subscribers(
         self, subscribers: List[BaseSubscriber], fileinfo: FileInfo
@@ -377,17 +369,14 @@ class BaseTransferRequestSubmitter:
 
     def _should_inject_content_type(self) -> bool:
         """If should inject content type."""
-        return bool(
-            self._config_params.guess_mime_type and not self._config_params.content_type
-        )
+        return bool(self._config_params.guess_mime_type and not self._config_params.content_type)
 
     def _warn_glacier(self, fileinfo: FileInfo) -> bool:
         """Warn glacier."""
         if not self._config_params.force_glacier_transfer:
             if not fileinfo.is_glacier_compatible:
                 LOGGER.debug(
-                    "Encountered glacier object s3://%s. Not performing "
-                    "%s on object.",
+                    "Encountered glacier object s3://%s. Not performing " "%s on object.",
                     fileinfo.src,
                     fileinfo.operation_name,
                 )
@@ -416,16 +405,12 @@ class BaseTransferRequestSubmitter:
             else False
         )
         if escapes_cwd:
-            warning = create_warning(
-                fileinfo.compare_key, "File references a parent directory."
-            )
+            warning = create_warning(fileinfo.compare_key, "File references a parent directory.")
             self._result_queue.put(warning)
             return True
         return False
 
-    def _format_src_dest(
-        self, fileinfo: FileInfo
-    ) -> Tuple[Optional[str], Optional[str]]:
+    def _format_src_dest(self, fileinfo: FileInfo) -> Tuple[Optional[str], Optional[str]]:
         """Return formatted versions of a fileinfos source and destination."""
         raise NotImplementedError("_format_src_dest()")
 
@@ -449,9 +434,7 @@ class UploadRequestSubmitter(BaseTransferRequestSubmitter):
     REQUEST_MAPPER_METHOD: ClassVar[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]] = (
         RequestParamsMapper.map_put_object_params
     )
-    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[UploadResultSubscriber]] = (
-        UploadResultSubscriber
-    )
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[UploadResultSubscriber]] = UploadResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -514,9 +497,7 @@ class UploadRequestSubmitter(BaseTransferRequestSubmitter):
             warning = create_warning(file_path, warning_message, skip_file=False)
             self._result_queue.put(warning)
 
-    def _format_src_dest(
-        self, fileinfo: FileInfo
-    ) -> Tuple[Optional[str], Optional[str]]:
+    def _format_src_dest(self, fileinfo: FileInfo) -> Tuple[Optional[str], Optional[str]]:
         """Return formatted versions of a fileinfos source and destination."""
         src = self._format_local_path(fileinfo.src)
         dest = self._format_s3_path(fileinfo.dest)
@@ -529,9 +510,7 @@ class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
     REQUEST_MAPPER_METHOD: ClassVar[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]] = (
         RequestParamsMapper.map_get_object_params
     )
-    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[DownloadResultSubscriber]] = (
-        DownloadResultSubscriber
-    )
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[DownloadResultSubscriber]] = DownloadResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -557,9 +536,7 @@ class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
             ProvideLastModifiedTimeSubscriber(fileinfo.last_update, self._result_queue)
         )
         if self._config_params.is_move:
-            subscribers.append(
-                DeleteSourceObjectSubscriber(fileinfo.source_client)  # type: ignore
-            )
+            subscribers.append(DeleteSourceObjectSubscriber(fileinfo.source_client))  # type: ignore
 
     def _submit_transfer_request(
         self,
@@ -586,9 +563,7 @@ class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
         """Get warning handlers."""
         return [self._warn_glacier, self._warn_parent_reference]
 
-    def _format_src_dest(
-        self, fileinfo: FileInfo
-    ) -> Tuple[Optional[str], Optional[str]]:
+    def _format_src_dest(self, fileinfo: FileInfo) -> Tuple[Optional[str], Optional[str]]:
         """Return formatted versions of a fileinfos source and destination."""
         src = self._format_s3_path(fileinfo.src)
         dest = self._format_local_path(fileinfo.dest)
@@ -652,9 +627,7 @@ class CopyRequestSubmitter(BaseTransferRequestSubmitter):
         """Get warning handlers."""
         return [self._warn_glacier]
 
-    def _format_src_dest(
-        self, fileinfo: FileInfo
-    ) -> Tuple[Optional[str], Optional[str]]:
+    def _format_src_dest(self, fileinfo: FileInfo) -> Tuple[Optional[str], Optional[str]]:
         """Return formatted versions of a fileinfos source and destination."""
         src = self._format_s3_path(fileinfo.src)
         dest = self._format_s3_path(fileinfo.dest)
@@ -680,9 +653,7 @@ class UploadStreamRequestSubmitter(UploadRequestSubmitter):
             request to the underlying transfer manager. False, otherwise.
 
         """
-        return bool(
-            fileinfo.operation_name == "upload" and self._config_params.is_stream
-        )
+        return bool(fileinfo.operation_name == "upload" and self._config_params.is_stream)
 
     def _add_additional_subscribers(
         self, subscribers: List[BaseSubscriber], fileinfo: FileInfo
@@ -723,9 +694,7 @@ class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
             request to the underlying transfer manager. False, otherwise.
 
         """
-        return bool(
-            fileinfo.operation_name == "download" and self._config_params.is_stream
-        )
+        return bool(fileinfo.operation_name == "download" and self._config_params.is_stream)
 
     def _add_additional_subscribers(
         self, subscribers: List[BaseSubscriber], fileinfo: FileInfo
@@ -748,9 +717,7 @@ class DeleteRequestSubmitter(BaseTransferRequestSubmitter):
     REQUEST_MAPPER_METHOD: ClassVar[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]] = (
         RequestParamsMapper.map_delete_object_params
     )
-    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[DeleteResultSubscriber]] = (
-        DeleteResultSubscriber
-    )
+    RESULT_SUBSCRIBER_CLASS: ClassVar[Type[DeleteResultSubscriber]] = DeleteResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -778,9 +745,7 @@ class DeleteRequestSubmitter(BaseTransferRequestSubmitter):
             bucket=bucket, key=key, extra_args=extra_args, subscribers=subscribers
         )
 
-    def _format_src_dest(
-        self, fileinfo: FileInfo
-    ) -> Tuple[Optional[str], Optional[str]]:
+    def _format_src_dest(self, fileinfo: FileInfo) -> Tuple[Optional[str], Optional[str]]:
         """Return formatted versions of a fileinfos source and destination."""
         return self._format_s3_path(fileinfo.src), None
 
@@ -788,9 +753,9 @@ class DeleteRequestSubmitter(BaseTransferRequestSubmitter):
 class LocalDeleteRequestSubmitter(BaseTransferRequestSubmitter):
     """Local delete request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[
-        Optional[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]]
-    ] = None
+    REQUEST_MAPPER_METHOD: ClassVar[Optional[Callable[[Dict[Any, Any], Dict[Any, Any]], Any]]] = (
+        None
+    )
     RESULT_SUBSCRIBER_CLASS: ClassVar[Optional[Type[BaseSubscriber]]] = None
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
@@ -839,7 +804,5 @@ class LocalDeleteRequestSubmitter(BaseTransferRequestSubmitter):
             self._result_queue.put(FailureResult(exception=exc, **result_kwargs))
         return True
 
-    def _format_src_dest(
-        self, fileinfo: FileInfo
-    ) -> Tuple[Optional[str], Optional[str]]:
+    def _format_src_dest(self, fileinfo: FileInfo) -> Tuple[Optional[str], Optional[str]]:
         return self._format_local_path(fileinfo.src), None

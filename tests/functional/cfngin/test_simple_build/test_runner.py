@@ -26,9 +26,7 @@ def cfngin_config(
     request: SubRequest, runway_config: RunwayConfig, runway_context: RunwayContext
 ) -> CfnginConfig:
     """Find and return the CFNgin config."""
-    runway_config.deployments[0].resolve(
-        runway_context, variables=runway_config.variables
-    )
+    runway_config.deployments[0].resolve(runway_context, variables=runway_config.variables)
     return CfnginConfig.parse_file(
         path=request.path.parent / "simple-build.cfn" / "cfngin.yml",
         parameters=runway_config.deployments[0].parameters,

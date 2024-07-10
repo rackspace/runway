@@ -44,8 +44,7 @@ class AuthAtEdge(StaticSite):
         "RedirectPathAuthRefresh": {
             "type": str,
             "default": "/refreshauth",
-            "description": "The URL path that should "
-            "handle the JWT refresh request.",
+            "description": "The URL path that should " "handle the JWT refresh request.",
         },
         "NonSPAMode": {
             "type": bool,
@@ -77,9 +76,7 @@ class AuthAtEdge(StaticSite):
             description: Used to describe the resulting CloudFormation template.
 
         """
-        super().__init__(
-            name=name, context=context, description=description, mappings=mappings
-        )
+        super().__init__(name=name, context=context, description=description, mappings=mappings)
         self.VARIABLES.update(StaticSite.VARIABLES)
         self.VARIABLES.update(self.AUTH_VARIABLES)
 
@@ -109,36 +106,28 @@ class AuthAtEdge(StaticSite):
             check_auth_name,
             "Check Authorization information for request",
             "check_auth",
-            self.add_lambda_execution_role(
-                "CheckAuthLambdaExecutionRole", check_auth_name
-            ),
+            self.add_lambda_execution_role("CheckAuthLambdaExecutionRole", check_auth_name),
         )
         http_headers_name = "HttpHeaders"
         http_headers_lambda = self.get_auth_at_edge_lambda_and_ver(
             http_headers_name,
             "Additional Headers added to every response",
             "http_headers",
-            self.add_lambda_execution_role(
-                "HttpHeadersLambdaExecutionRole", http_headers_name
-            ),
+            self.add_lambda_execution_role("HttpHeadersLambdaExecutionRole", http_headers_name),
         )
         parse_auth_name = "ParseAuth"
         parse_auth_lambda = self.get_auth_at_edge_lambda_and_ver(
             parse_auth_name,
             "Parse the Authorization Headers/Cookies for the request",
             "parse_auth",
-            self.add_lambda_execution_role(
-                "ParseAuthLambdaExecutionRole", parse_auth_name
-            ),
+            self.add_lambda_execution_role("ParseAuthLambdaExecutionRole", parse_auth_name),
         )
         refresh_auth_name = "RefreshAuth"
         refresh_auth_lambda = self.get_auth_at_edge_lambda_and_ver(
             refresh_auth_name,
             "Refresh the Authorization information when expired",
             "refresh_auth",
-            self.add_lambda_execution_role(
-                "RefreshAuthLambdaExecutionRole", refresh_auth_name
-            ),
+            self.add_lambda_execution_role("RefreshAuthLambdaExecutionRole", refresh_auth_name),
         )
         sign_out_name = "SignOut"
         sign_out_lambda = self.get_auth_at_edge_lambda_and_ver(
@@ -217,9 +206,7 @@ class AuthAtEdge(StaticSite):
 
         return lamb
 
-    def add_version(
-        self, title: str, lambda_function: awslambda.Function
-    ) -> awslambda.Version:
+    def add_version(self, title: str, lambda_function: awslambda.Function) -> awslambda.Version:
         """Create a version association with a Lambda@Edge function.
 
         In order to ensure different versions of the function
@@ -235,9 +222,7 @@ class AuthAtEdge(StaticSite):
         s3_key = lambda_function.properties["Code"].to_dict()["S3Key"]
         code_hash = s3_key.split(".")[0].split("-")[-1]
         return self.template.add_resource(
-            awslambda.Version(
-                title + "Ver" + code_hash, FunctionName=lambda_function.ref()
-            )
+            awslambda.Version(title + "Ver" + code_hash, FunctionName=lambda_function.ref())
         )
 
     def get_distribution_options(

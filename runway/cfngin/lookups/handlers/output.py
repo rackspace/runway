@@ -80,9 +80,7 @@ class OutputLookup(LookupHandler):
             raise StackDoesNotExist(context.get_fqn(query.stack_name))
 
         if "default" in args:  # handle falsy default
-            return cls.format_results(
-                stack.outputs.get(query.output_name, args["default"]), **args
-            )
+            return cls.format_results(stack.outputs.get(query.output_name, args["default"]), **args)
 
         try:
             return cls.format_results(stack.outputs[query.output_name], **args)

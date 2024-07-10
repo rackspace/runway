@@ -60,9 +60,7 @@ _T = TypeVar("_T")
 class CFNParameter:
     """Wrapper around a value to indicate a CloudFormation Parameter."""
 
-    def __init__(
-        self, name: str, value: Union[bool, float, int, List[Any], str, Any]
-    ) -> None:
+    def __init__(self, name: str, value: Union[bool, float, int, List[Any], str, Any]) -> None:
         """Instantiate class.
 
         Args:
@@ -143,9 +141,7 @@ def validate_variable_type(
         try:
             value = var_type.create(value)
         except Exception as exc:
-            raise ValidatorError(
-                var_name, f"{var_type.resource_name}.create", value, exc
-            ) from exc
+            raise ValidatorError(var_name, f"{var_type.resource_name}.create", value, exc) from exc
     elif issubclass(var_type, CFNType):
         value = CFNParameter(name=var_name, value=value)
     else:
@@ -241,9 +237,7 @@ def resolve_variable(
     return value
 
 
-def parse_user_data(
-    variables: Dict[str, Any], raw_user_data: str, blueprint_name: str
-) -> str:
+def parse_user_data(variables: Dict[str, Any], raw_user_data: str, blueprint_name: str) -> str:
     """Parse the given user data and renders it as a template.
 
     It supports referencing template variables to create userdata
@@ -694,9 +688,7 @@ class Blueprint(DelCachedPropMixin):
         self._resolved_variables = {}
         variable_dict = {var.name: var for var in provided_variables}
         for var_name, var_def in self.defined_variables.items():
-            value = resolve_variable(
-                var_name, var_def, variable_dict.get(var_name), self.name
-            )
+            value = resolve_variable(var_name, var_def, variable_dict.get(var_name), self.name)
             self._resolved_variables[var_name] = value
 
     def set_template_description(self, description: str) -> None:

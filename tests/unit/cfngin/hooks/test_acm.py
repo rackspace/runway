@@ -186,9 +186,7 @@ class TestCertificate:
         assert not template.conditions
         assert not template.mappings
         assert template.outputs["DomainName"].Value.to_dict() == {"Ref": "DomainName"}
-        assert template.outputs["ValidateRecordTTL"].Value.to_dict() == {
-            "Ref": "ValidateRecordTTL"
-        }
+        assert template.outputs["ValidateRecordTTL"].Value.to_dict() == {"Ref": "ValidateRecordTTL"}
         assert not template.parameters
         assert isinstance(template.resources["Certificate"], CertificateResource)
         assert not template.rules
@@ -243,9 +241,7 @@ class TestCertificate:
         assert not cert.domain_changed()
         assert not cert.domain_changed()
 
-    def test_get_certificate(
-        self, cfngin_context: MockCFNginContext, patch_time: None
-    ) -> None:
+    def test_get_certificate(self, cfngin_context: MockCFNginContext, patch_time: None) -> None:
         """Test get_certificate."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -302,9 +298,7 @@ class TestCertificate:
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
         expected_request = {"CertificateArn": cert_arn}
-        validate_option_missing_record = gen_domain_validation_option(
-            ValidationStatus=status
-        )
+        validate_option_missing_record = gen_domain_validation_option(ValidationStatus=status)
         del validate_option_missing_record["ResourceRecord"]
 
         cert = Certificate(
@@ -332,17 +326,15 @@ class TestCertificate:
             "describe_certificate",
             gen_certificate(
                 CertificateArn=cert_arn,
-                DomainValidationOptions=[
-                    gen_domain_validation_option(ValidationStatus=status)
-                ],
+                DomainValidationOptions=[gen_domain_validation_option(ValidationStatus=status)],
             ),
             expected_request,
         )
 
         with acm_stubber:
-            assert cert.get_validation_record(
-                status=status
-            ) == gen_domain_validation_option().get("ResourceRecord")
+            assert cert.get_validation_record(status=status) == gen_domain_validation_option().get(
+                "ResourceRecord"
+            )
         acm_stubber.assert_no_pending_responses()
 
     @pytest.mark.parametrize(
@@ -376,9 +368,7 @@ class TestCertificate:
             "describe_certificate",
             gen_certificate(
                 CertificateArn=cert_arn,
-                DomainValidationOptions=[
-                    gen_domain_validation_option(ValidationStatus=found)
-                ],
+                DomainValidationOptions=[gen_domain_validation_option(ValidationStatus=found)],
             ),
             expected_request,
         )
@@ -389,9 +379,7 @@ class TestCertificate:
         assert "No validations with status" in str(excinfo.value)
         acm_stubber.assert_no_pending_responses()
 
-    def test_get_validation_record_gt_one(
-        self, cfngin_context: MockCFNginContext
-    ) -> None:
+    def test_get_validation_record_gt_one(self, cfngin_context: MockCFNginContext) -> None:
         """Test get get_validation_record more than one result."""
         # setup context
         acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
@@ -450,9 +438,7 @@ class TestCertificate:
                         gen_change(
                             record_set=cast(
                                 "ResourceRecordSetTypeDef",
-                                gen_record_set(
-                                    use_resource_record=True, TTL=cert.args.ttl
-                                ),
+                                gen_record_set(use_resource_record=True, TTL=cert.args.ttl),
                             )
                         )
                     ]
@@ -461,9 +447,7 @@ class TestCertificate:
         )
 
         with r53_stubber:
-            assert not cert.put_record_set(
-                cast("ResourceRecordTypeDef", gen_record_set())
-            )
+            assert not cert.put_record_set(cast("ResourceRecordTypeDef", gen_record_set()))
         r53_stubber.assert_no_pending_responses()
 
     def test_remove_validation_records(
@@ -498,9 +482,7 @@ class TestCertificate:
             "describe_certificate",
             gen_certificate(
                 CertificateArn=cert_arn,
-                DomainValidationOptions=[
-                    gen_domain_validation_option(ValidationMethod="EMAIL")
-                ],
+                DomainValidationOptions=[gen_domain_validation_option(ValidationMethod="EMAIL")],
             ),
             expected_cert_request,
         )
@@ -519,9 +501,7 @@ class TestCertificate:
                                 gen_record_set(
                                     use_resource_record=True,
                                     TTL=cert.args.ttl,
-                                    **gen_domain_validation_option().get(
-                                        "ResourceRecord", {}
-                                    ),
+                                    **gen_domain_validation_option().get("ResourceRecord", {}),
                                 ),
                             ),
                         )
@@ -563,9 +543,7 @@ class TestCertificate:
                             action="UPSERT",
                             record_set=cast(
                                 "ResourceRecordSetTypeDef",
-                                gen_record_set(
-                                    use_resource_record=True, TTL=cert.args.ttl
-                                ),
+                                gen_record_set(use_resource_record=True, TTL=cert.args.ttl),
                             ),
                         )
                     ]
@@ -574,14 +552,10 @@ class TestCertificate:
         )
 
         with r53_stubber:
-            assert not cert.update_record_set(
-                cast("ResourceRecordTypeDef", gen_record_set())
-            )
+            assert not cert.update_record_set(cast("ResourceRecordTypeDef", gen_record_set()))
         r53_stubber.assert_no_pending_responses()
 
-    def test_deploy(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_deploy(self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch) -> None:
         """Test deploy."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -639,9 +613,7 @@ class TestCertificate:
             cert,
             "get_validation_record",
             lambda x, status: (
-                "get_validation_record"
-                if x == cert_arn and status == "SUCCESS"
-                else ValueError
+                "get_validation_record" if x == cert_arn and status == "SUCCESS" else ValueError
             ),
         )
         monkeypatch.setattr(
@@ -677,9 +649,7 @@ class TestCertificate:
 
         assert cert.deploy() == expected
 
-    def test_deploy_recreate(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
-    ):
+    def test_deploy_recreate(self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch):
         """Test deploy with stack recreation."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -697,9 +667,7 @@ class TestCertificate:
         )
         monkeypatch.setattr(cert, "domain_changed", lambda: False)
         monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.recreate)  # type: ignore
-        monkeypatch.setattr(
-            cert, "get_certificate", MagicMock(side_effect=["old", cert_arn])
-        )
+        monkeypatch.setattr(cert, "get_certificate", MagicMock(side_effect=["old", cert_arn]))
         monkeypatch.setattr(
             cert, "_wait_for_stack", MagicMock(side_effect=[STATUS.new, None])  # type: ignore
         )
@@ -772,12 +740,8 @@ class TestCertificate:
                 ]
             ),
         )
-        monkeypatch.setattr(
-            cert, "destroy", lambda records, skip_r53: check_bool_is_true(skip_r53)
-        )
-        monkeypatch.setattr(
-            cert, "_wait_for_stack", MagicMock(side_effect=StackFailed("test"))
-        )
+        monkeypatch.setattr(cert, "destroy", lambda records, skip_r53: check_bool_is_true(skip_r53))
+        monkeypatch.setattr(cert, "_wait_for_stack", MagicMock(side_effect=StackFailed("test")))
 
         assert not cert.deploy()  # cert.r53_client.exceptions.InvalidChangeBatch
         assert not cert.deploy()  # cert.r53_client.exceptions.NoSuchHostedZone
@@ -811,9 +775,7 @@ class TestCertificate:
 
         assert not cert.deploy()
 
-    def test_destroy(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
-    ) -> None:
+    def test_destroy(self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch) -> None:
         """Test destroy."""
         # setup context
         cfngin_context.add_stubber("acm", "us-east-1")
@@ -827,9 +789,7 @@ class TestCertificate:
             hosted_zone_id="test",
         )
         # should only be called once
-        monkeypatch.setattr(
-            cert, "remove_validation_records", MagicMock(return_value=None)
-        )
+        monkeypatch.setattr(cert, "remove_validation_records", MagicMock(return_value=None))
         monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)
 
         assert cert.destroy()

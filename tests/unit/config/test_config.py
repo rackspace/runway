@@ -121,9 +121,7 @@ class TestCfnginConfig:
             CfnginConfig.parse_file(file_path=config_yml)
         assert excinfo.value.path == config_yml
 
-    def test_parse_file_find_config_file(
-        self, monkeypatch: MonkeyPatch, tmp_path: Path
-    ) -> None:
+    def test_parse_file_find_config_file(self, monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
         """Test parse_file with path."""
         file_path = tmp_path / "test.yml"
         file_path.write_text("name: test\n")
@@ -141,9 +139,7 @@ class TestCfnginConfig:
         self, monkeypatch: MonkeyPatch, tmp_path: Path
     ) -> None:
         """Test parse_file with path raise ValueError."""
-        mock_find_config_file = MagicMock(
-            return_value=[tmp_path / "01.yml", tmp_path / "02.yml"]
-        )
+        mock_find_config_file = MagicMock(return_value=[tmp_path / "01.yml", tmp_path / "02.yml"])
         monkeypatch.setattr(CfnginConfig, "find_config_file", mock_find_config_file)
         with pytest.raises(ValueError) as excinfo:
             CfnginConfig.parse_file(path=tmp_path)
@@ -170,9 +166,7 @@ class TestCfnginConfig:
         mock_process_package_sources = MagicMock()
         monkeypatch.setattr(CfnginConfig, "resolve_raw_data", mock_resolve_raw_data)
         monkeypatch.setattr(CfnginConfig, "parse_obj", mock_parse_obj)
-        monkeypatch.setattr(
-            CfnginConfig, "process_package_sources", mock_process_package_sources
-        )
+        monkeypatch.setattr(CfnginConfig, "process_package_sources", mock_process_package_sources)
 
         data = {"namespace": "test"}
         data_str = yaml.dump(data)
@@ -181,20 +175,14 @@ class TestCfnginConfig:
         mock_process_package_sources.return_value = data_str
 
         assert (
-            CfnginConfig.parse_raw(
-                data_str, skip_package_sources=True, work_dir=tmp_path
-            )
-            == data
+            CfnginConfig.parse_raw(data_str, skip_package_sources=True, work_dir=tmp_path) == data
         )
         mock_resolve_raw_data.assert_called_once_with(yaml.dump(data), parameters={})
         mock_parse_obj.assert_called_once_with(data)
         mock_process_package_sources.assert_not_called()
 
         assert (
-            CfnginConfig.parse_raw(
-                data_str, parameters={"key": "val"}, work_dir=tmp_path
-            )
-            == data
+            CfnginConfig.parse_raw(data_str, parameters={"key": "val"}, work_dir=tmp_path) == data
         )
         mock_resolve_raw_data.assert_called_with(
             yaml.dump(data),
@@ -242,9 +230,7 @@ class TestCfnginConfig:
             == "rendered"
         )
         mock_source_processor.assert_called_with(
-            sources=CfnginPackageSourcesDefinitionModel.parse_obj(
-                {"git": [{"uri": "something"}]}
-            ),
+            sources=CfnginPackageSourcesDefinitionModel.parse_obj({"git": [{"uri": "something"}]}),
             cache_dir=tmp_path / "cache",
         )
         assert mock_source_processor.call_count == 2
@@ -258,10 +244,7 @@ class TestCfnginConfig:
         """Test resolve_raw_data."""
         raw_data = "namespace: ${namespace}"
         expected = "namespace: test"
-        assert (
-            CfnginConfig.resolve_raw_data(raw_data, parameters={"namespace": "test"})
-            == expected
-        )
+        assert CfnginConfig.resolve_raw_data(raw_data, parameters={"namespace": "test"}) == expected
 
     def test_resolve_raw_data_missing_value(self) -> None:
         """Test resolve_raw_data missing value."""

@@ -29,9 +29,7 @@ if TYPE_CHECKING:
 MODULE = "runway._cli.commands._destroy"
 
 
-def test_destroy(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
-) -> None:
+def test_destroy(cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture) -> None:
     """Test destroy."""
     mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway))
     cp_config("min_required", cd_tmp_path)
@@ -83,9 +81,7 @@ def test_destroy_options_deploy_environment(
     mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway))
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
-    assert (
-        runner.invoke(cli, ["destroy", "-e", "e-option"], input="y\ny\n").exit_code == 0
-    )
+    assert runner.invoke(cli, ["destroy", "-e", "e-option"], input="y\ny\n").exit_code == 0
     assert mock_runway.call_args.args[1].env.name == "e-option"
 
     assert (
@@ -121,10 +117,7 @@ def test_destroy_options_tag(
     assert len(deployment.modules) == 1
     assert deployment.modules[0].name == "sampleapp-01.cfn"
 
-    assert (
-        runner.invoke(cli, ["destroy", "--tag", "app:test-app"], input="y\n").exit_code
-        == 0
-    )
+    assert runner.invoke(cli, ["destroy", "--tag", "app:test-app"], input="y\n").exit_code == 0
     deployment = mock_destroy.call_args.args[0][0]
     assert len(deployment.modules) == 3
     assert deployment.modules[0].name == "parallel_parent"
@@ -133,9 +126,7 @@ def test_destroy_options_tag(
     assert deployment.modules[1].name == "sampleapp-02.cfn"
     assert deployment.modules[2].name == "sampleapp-01.cfn"
 
-    assert (
-        runner.invoke(cli, ["destroy", "--tag", "no-match"], input="y\n").exit_code == 1
-    )
+    assert runner.invoke(cli, ["destroy", "--tag", "no-match"], input="y\n").exit_code == 1
     assert "No modules found with the provided tag(s): no-match" in caplog.messages
 
 

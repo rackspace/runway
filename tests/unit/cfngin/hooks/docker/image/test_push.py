@@ -78,9 +78,7 @@ class TestImagePushArgs:
         """Test _set_repo ECR."""
         repo = ElasticContainerRegistryRepository(
             repo_name="test",
-            registry=ElasticContainerRegistry(
-                account_id="123456789012", aws_region="us-east-1"
-            ),
+            registry=ElasticContainerRegistry(account_id="123456789012", aws_region="us-east-1"),
         )
         assert ImagePushArgs(ecr_repo=repo).repo == repo.fqn
 

@@ -97,9 +97,7 @@ class TestDeployEnvironment:
 
         obj = DeployEnvironment()
         assert obj.branch_name == branch_name
-        mock_git.Repo.assert_called_once_with(
-            os.getcwd(), search_parent_directories=True
-        )
+        mock_git.Repo.assert_called_once_with(os.getcwd(), search_parent_directories=True)
 
     def test_branch_name_invalid_repo(self, mocker: MockerFixture) -> None:
         """Test branch_name handle InvalidGitRepositoryError."""
@@ -108,13 +106,9 @@ class TestDeployEnvironment:
 
         obj = DeployEnvironment()
         assert obj.branch_name is None
-        mock_git.Repo.assert_called_once_with(
-            os.getcwd(), search_parent_directories=True
-        )
+        mock_git.Repo.assert_called_once_with(os.getcwd(), search_parent_directories=True)
 
-    def test_branch_name_no_git(
-        self, mocker: MockerFixture, caplog: LogCaptureFixture
-    ) -> None:
+    def test_branch_name_no_git(self, mocker: MockerFixture, caplog: LogCaptureFixture) -> None:
         """Test branch_name git ImportError."""
         caplog.set_level(logging.DEBUG, logger="runway.core.components")
         mocker.patch(f"{MODULE}.git", object)
@@ -126,9 +120,7 @@ class TestDeployEnvironment:
             "to read the branch name"
         ) in caplog.messages
 
-    def test_branch_name_type_error(
-        self, mocker: MockerFixture, caplog: LogCaptureFixture
-    ) -> None:
+    def test_branch_name_type_error(self, mocker: MockerFixture, caplog: LogCaptureFixture) -> None:
         """Test branch_name handle TypeError."""
         caplog.set_level(logging.WARNING, logger="runway")
         mock_git = mocker.patch(f"{MODULE}.git")
@@ -315,8 +307,7 @@ class TestDeployEnvironment:
             (
                 "explicit",
                 [
-                    'deploy environment "test" is explicitly defined '
-                    "in the environment",
+                    'deploy environment "test" is explicitly defined ' "in the environment",
                     "if not correct, update the value or unset it to "
                     "fall back to the name of the current git branch "
                     "or parent directory",
@@ -325,8 +316,7 @@ class TestDeployEnvironment:
             (
                 "branch",
                 [
-                    'deploy environment "test" was determined from the '
-                    "current git branch",
+                    'deploy environment "test" was determined from the ' "current git branch",
                     "if not correct, update the branch name or set an "
                     "override via the DEPLOY_ENVIRONMENT environment "
                     "variable",
@@ -335,8 +325,7 @@ class TestDeployEnvironment:
             (
                 "directory",
                 [
-                    'deploy environment "test" was determined from '
-                    "the current directory",
+                    'deploy environment "test" was determined from ' "the current directory",
                     "if not correct, update the directory name or "
                     "set an override via the DEPLOY_ENVIRONMENT "
                     "environment variable",

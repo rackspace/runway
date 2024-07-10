@@ -217,9 +217,7 @@ class TestPlan(unittest.TestCase):
             definition=generate_definition("bastion", 1, requires=[vpc.name]),
             context=context,
         )
-        removed = Stack(
-            definition=generate_definition("removed", 1, requires=[]), context=context
-        )
+        removed = Stack(definition=generate_definition("removed", 1, requires=[]), context=context)
         context._persistent_graph = Graph.from_steps([Step(removed)])
 
         calls: List[str] = []
@@ -272,9 +270,7 @@ class TestPlan(unittest.TestCase):
             calls.append(stack.fqn)
             return COMPLETE
 
-        graph = Graph.from_steps(
-            [Step(vpc, fn=_launch_stack), Step(bastion, fn=_launch_stack)]
-        )
+        graph = Graph.from_steps([Step(vpc, fn=_launch_stack), Step(bastion, fn=_launch_stack)])
         plan = Plan(description="Test", graph=graph, context=context)
 
         plan.execute(walk)
@@ -461,9 +457,7 @@ class TestPlan(unittest.TestCase):
 
         with self.assertRaises(GraphError) as expected:
             Graph.from_steps([Step(bastion)])
-        message_starts = (
-            "Error detected when adding 'vpc-1' as a dependency of 'bastion-1':"
-        )
+        message_starts = "Error detected when adding 'vpc-1' as a dependency of 'bastion-1':"
         message_contains = "dependent node vpc-1 does not exist"
         self.assertTrue(str(expected.exception).startswith(message_starts))
         self.assertTrue(message_contains in str(expected.exception))

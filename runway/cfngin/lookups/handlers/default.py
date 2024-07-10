@@ -20,9 +20,7 @@ class DefaultLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(
-        cls, value: str, context: Optional[CfnginContext] = None, **_: Any
-    ) -> Any:
+    def handle(cls, value: str, context: Optional[CfnginContext] = None, **_: Any) -> Any:
         """Use a value from the environment or fall back to a default value.
 
         Allows defaults to be set at the config file level.

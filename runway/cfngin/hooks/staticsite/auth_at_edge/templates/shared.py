@@ -87,18 +87,12 @@ def extract_and_parse_cookies(headers, client_id, cookie_compatibility="amplify"
 
     return {
         "token_user_name": (
-            cookies.get(cookie_names["last_user_key"])
-            if "last_user_key" in cookie_names
-            else None
+            cookies.get(cookie_names["last_user_key"]) if "last_user_key" in cookie_names else None
         ),
         "id_token": cookies.get(cookie_names["id_token_key"]),
         "access_token": cookies.get(cookie_names["access_token_key"]),
         "refresh_token": cookies.get(cookie_names["refresh_token_key"]),
-        "scopes": (
-            cookies.get(cookie_names["scope_key"])
-            if "scope_key" in cookie_names
-            else None
-        ),
+        "scopes": (cookies.get(cookie_names["scope_key"]) if "scope_key" in cookie_names else None),
         "nonce": cookies.get("spa-auth-edge-nonce"),
         "nonce_hmac": cookies.get("spa-auth-edge-nonce-hmac"),
         "pkce": cookies.get("spa-auth-edge-pkce"),
@@ -248,9 +242,7 @@ def generate_cookie_headers(
         cookie_names = get_elasticsearch_cookie_names()
         cookies = {
             cookie_names["cognito_enabled_key"]: "True; "
-            + str(
-                with_cookie_domain(domain_name, cookie_settings.get("cognitoEnabled"))
-            ),
+            + str(with_cookie_domain(domain_name, cookie_settings.get("cognitoEnabled"))),
         }
     cookies[cookie_names["id_token_key"]] = f"{tokens.get('id_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("idToken")),
@@ -258,9 +250,8 @@ def generate_cookie_headers(
     cookies[cookie_names["access_token_key"]] = f"{tokens.get('access_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("accessToken")),
     )
-    cookies[cookie_names["refresh_token_key"]] = (
-        f"{tokens.get('refresh_token')}; "
-        + str(with_cookie_domain(domain_name, cookie_settings.get("refreshToken")))
+    cookies[cookie_names["refresh_token_key"]] = f"{tokens.get('refresh_token')}; " + str(
+        with_cookie_domain(domain_name, cookie_settings.get("refreshToken"))
     )
     cookies_iter = cookies  # type: ignore
     if event == "sign_out":
@@ -277,9 +268,7 @@ def generate_cookie_headers(
             cookies[i] = expire_cookie(cookies[i])
 
     # Return cookies in the form of CF headers
-    return [
-        {"key": "set-cookie", "value": f"{key}={val}"} for key, val in cookies.items()
-    ]
+    return [{"key": "set-cookie", "value": f"{key}={val}"} for key, val in cookies.items()]
 
 
 def expire_cookie_filter(cookie):

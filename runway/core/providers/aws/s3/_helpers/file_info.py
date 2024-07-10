@@ -120,9 +120,7 @@ class FileInfo:
         return False
 
     @staticmethod
-    def _is_restored(
-        response_data: Union[HeadObjectOutputTypeDef, ObjectTypeDef]
-    ) -> bool:
+    def _is_restored(response_data: Union[HeadObjectOutputTypeDef, ObjectTypeDef]) -> bool:
         """Return True is this is a glacier object that has been restored back to S3."""
         # 'Restore' looks like: 'ongoing-request="false", expiry-date="..."'
         return 'ongoing-request="false"' in response_data.get("Restore", "")

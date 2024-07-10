@@ -67,9 +67,7 @@ class Poetry(DependencyManager):
         cmd_output = self._run_command([self.EXECUTABLE, "--version"])
         match = re.search(r"^Poetry version (?P<version>\S*)", cmd_output)
         if not match:
-            LOGGER.warning(
-                "unable to parse poetry version from output:\n%s", cmd_output
-            )
+            LOGGER.warning("unable to parse poetry version from output:\n%s", cmd_output)
             return Version("0.0.0")
         return Version(match.group("version"))
 
@@ -88,9 +86,9 @@ class Poetry(DependencyManager):
 
         # check for PEP-517 definition
         pyproject = tomli.loads(pyproject_path.read_text())
-        build_system_requires: Optional[List[str]] = pyproject.get(
-            "build-system", {}
-        ).get("requires")
+        build_system_requires: Optional[List[str]] = pyproject.get("build-system", {}).get(
+            "requires"
+        )
 
         if build_system_requires:
             for req in build_system_requires:

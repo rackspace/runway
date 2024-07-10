@@ -66,9 +66,7 @@ class Module:
         """
         self.__deployment = deployment
         self.__future = future or RunwayFutureDefinitionModel()
-        self.__variables = variables or RunwayVariablesDefinition(
-            RunwayVariablesDefinitionModel()
-        )
+        self.__variables = variables or RunwayVariablesDefinition(RunwayVariablesDefinitionModel())
         self.ctx = context.copy()  # each module has it's own instance of context
         definition.resolve(self.ctx, variables=variables)
         self.definition = definition
@@ -216,9 +214,7 @@ class Module:
         if not self.child_modules:
             return self.run("plan")
         if self.use_async:
-            self.logger.info(
-                "processing of modules will be done in parallel during deploy/destroy"
-            )
+            self.logger.info("processing of modules will be done in parallel during deploy/destroy")
         return self.__sync("plan")
 
     def run(self, action: RunwayActionTypeDef) -> None:
@@ -231,9 +227,7 @@ class Module:
 
         """
         LOGGER.info("")
-        self.logger.notice(
-            "processing module in %s (in progress)", self.ctx.env.aws_region
-        )
+        self.logger.notice("processing module in %s (in progress)", self.ctx.env.aws_region)
         self.logger.verbose("module payload: %s", json.dumps(self.payload))
         if self.should_skip:
             return
@@ -248,9 +242,7 @@ class Module:
             else:
                 self.logger.error('"%s" is missing method "%s"', inst, action)
                 sys.exit(1)
-        self.logger.success(
-            "processing module in %s (complete)", self.ctx.env.aws_region
-        )
+        self.logger.success("processing module in %s (complete)", self.ctx.env.aws_region)
 
     def __async(self, action: RunwayActionTypeDef) -> None:
         """Execute asynchronously.
@@ -259,9 +251,7 @@ class Module:
             action: Name of action to run.
 
         """
-        self.logger.info(
-            "processing modules in parallel... (output will be interwoven)"
-        )
+        self.logger.info("processing modules in parallel... (output will be interwoven)")
         # Can't use threading or ThreadPoolExecutor here because
         # we need to be able to do things like `cd` which is not
         # thread safe.
@@ -269,9 +259,7 @@ class Module:
             max_workers=self.ctx.env.max_concurrent_modules,
             mp_context=multiprocessing.get_context("fork"),
         ) as executor:
-            futures = [
-                executor.submit(child.run, *[action]) for child in self.child_modules
-            ]
+            futures = [executor.submit(child.run, *[action]) for child in self.child_modules]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
@@ -294,9 +282,7 @@ class Module:
                 self.logger.verbose(
                     "environment variable overrides are being applied to this module"
                 )
-                self.logger.debug(
-                    "environment variable overrides: %s", resolved_env_vars
-                )
+                self.logger.debug("environment variable overrides: %s", resolved_env_vars)
                 self.ctx.env.vars = merge_dicts(self.ctx.env.vars, resolved_env_vars)
 
     @classmethod

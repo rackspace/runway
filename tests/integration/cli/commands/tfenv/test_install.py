@@ -39,9 +39,7 @@ def test_tfenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     assert tf_bin.exists()
 
 
-def test_tfenv_install_no_version_file(
-    cd_tmp_path: Path, caplog: LogCaptureFixture
-) -> None:
+def test_tfenv_install_no_version_file(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway tfenv install`` no version file."""
     caplog.set_level(logging.ERROR, logger="runway")
     runner = CliRunner()

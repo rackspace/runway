@@ -87,9 +87,7 @@ class StaticSite(Blueprint):
         "RewriteDirectoryIndex": {
             "type": str,
             "default": "",
-            "description": "(Optional) File name to "
-            "append to directory "
-            "requests.",
+            "description": "(Optional) File name to " "append to directory " "requests.",
         },
         "RoleBoundaryArn": {
             "type": str,
@@ -165,10 +163,8 @@ class StaticSite(Blueprint):
 
             if self.directory_index_specified:
                 index_rewrite = self._get_index_rewrite_role_function_and_version()
-                lambda_function_associations = (
-                    self.get_directory_index_lambda_association(
-                        lambda_function_associations, index_rewrite["version"]
-                    )
+                lambda_function_associations = self.get_directory_index_lambda_association(
+                    lambda_function_associations, index_rewrite["version"]
                 )
 
             distribution_options = self.get_cloudfront_distribution_options(
@@ -364,19 +360,13 @@ class StaticSite(Blueprint):
                     Rules=[s3.OwnershipControlsRule(ObjectOwnership="ObjectWriter")]
                 ),
                 LifecycleConfiguration=s3.LifecycleConfiguration(
-                    Rules=[
-                        s3.LifecycleRule(
-                            NoncurrentVersionExpirationInDays=90, Status="Enabled"
-                        )
-                    ]
+                    Rules=[s3.LifecycleRule(NoncurrentVersionExpirationInDays=90, Status="Enabled")]
                 ),
                 VersioningConfiguration=s3.VersioningConfiguration(Status="Enabled"),
             )
         )
         self.template.add_output(
-            Output(
-                "BucketName", Description="Name of website bucket", Value=bucket.ref()
-            )
+            Output("BucketName", Description="Name of website bucket", Value=bucket.ref())
         )
 
         if not self.cf_enabled:
@@ -413,9 +403,7 @@ class StaticSite(Blueprint):
                 Bucket=bucket.ref(),
                 PolicyDocument=PolicyDocument(
                     Version="2012-10-17",
-                    Statement=self._get_cloudfront_bucket_policy_statements(
-                        bucket, oai
-                    ),
+                    Statement=self._get_cloudfront_bucket_policy_statements(bucket, oai),
                 ),
             )
         )
@@ -464,9 +452,7 @@ class StaticSite(Blueprint):
                     "lambda.amazonaws.com", "edgelambda.amazonaws.com"
                 ),
                 PermissionsBoundary=(
-                    self.variables["RoleBoundaryArn"]
-                    if self.role_boundary_specified
-                    else NoValue
+                    self.variables["RoleBoundaryArn"] if self.role_boundary_specified else NoValue
                 ),
                 Policies=[
                     iam.Policy(
@@ -490,9 +476,7 @@ class StaticSite(Blueprint):
             )
         )
 
-    def add_cloudfront_directory_index_rewrite(
-        self, role: iam.Role
-    ) -> awslambda.Function:
+    def add_cloudfront_directory_index_rewrite(self, role: iam.Role) -> awslambda.Function:
         """Add an index CloudFront directory index rewrite lambda function to the template.
 
         Keyword Args:
@@ -547,9 +531,7 @@ class StaticSite(Blueprint):
 
         """
         code_hash = hashlib.md5(
-            str(
-                directory_index_rewrite.properties["Code"].properties["ZipFile"]
-            ).encode()
+            str(directory_index_rewrite.properties["Code"].properties["ZipFile"]).encode()
         ).hexdigest()
 
         return self.template.add_resource(
@@ -578,9 +560,7 @@ class StaticSite(Blueprint):
             cloudfront.Distribution(
                 "CFDistribution",
                 DependsOn=bucket_policy.title,
-                DistributionConfig=cloudfront.DistributionConfig(
-                    **cloudfront_distribution_options
-                ),
+                DistributionConfig=cloudfront.DistributionConfig(**cloudfront_distribution_options),
             )
         )
         self.template.add_output(
@@ -621,9 +601,7 @@ class StaticSite(Blueprint):
         )
         function = self.add_cloudfront_directory_index_rewrite(role)
         version = self.add_cloudfront_directory_index_rewrite_version(function)
-        return _IndexRewriteFunctionInfoTypeDef(
-            function=function, role=role, version=version
-        )
+        return _IndexRewriteFunctionInfoTypeDef(function=function, role=role, version=version)
 
 
 # Helper section to enable easy blueprint -> template generation

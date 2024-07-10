@@ -20,10 +20,7 @@ CURRENT_DIR = Path(__file__).parent
 def deploy_bad_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "bad"], env={"CI": "1"})
-    assert (
-        cli_runner.invoke(cli, ["destroy", "--tag", "good"], env={"CI": "1"}).exit_code
-        == 0
-    )
+    assert cli_runner.invoke(cli, ["destroy", "--tag", "good"], env={"CI": "1"}).exit_code == 0
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
 
 
@@ -59,8 +56,7 @@ def test_deploy_bad_log_messages(deploy_bad_result: Result, namespace: str) -> N
     # output may or may not have a "rolled back" or "failed (creating new stack)" msg
     # depends on API throttling
     assert (
-        "[runway] The following steps failed: recreate-failed"
-        in deploy_bad_result.stdout
+        "[runway] The following steps failed: recreate-failed" in deploy_bad_result.stdout
     ), f"stdout does not match expected\n\nSTDOUT:\n{deploy_bad_result.stdout}"
 
 

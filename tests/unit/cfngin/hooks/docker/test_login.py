@@ -56,9 +56,7 @@ class TestLoginArgs:
             ElasticContainerRegistry, "parse_obj", return_value=expected
         )
         assert (
-            LoginArgs.parse_obj(
-                {"ecr": expected.dict(), "password": "", "username": ""}
-            ).ecr
+            LoginArgs.parse_obj({"ecr": expected.dict(), "password": "", "username": ""}).ecr
             == expected
         )
         mock_parse_obj.assert_called_once_with({"context": None, **expected.dict()})
@@ -72,9 +70,7 @@ class TestLoginArgs:
             (
                 ElasticContainerRegistry(alias="foobar"),
                 None,
-                ElasticContainerRegistry.PUBLIC_URI_TEMPLATE.format(
-                    registry_alias="foobar"
-                ),
+                ElasticContainerRegistry.PUBLIC_URI_TEMPLATE.format(registry_alias="foobar"),
             ),
         ],
     )
@@ -85,10 +81,7 @@ class TestLoginArgs:
         registry: Optional[str],
     ) -> None:
         """Test _set_registry."""
-        assert (
-            LoginArgs(ecr=ecr, password="", registry=registry, username="").registry
-            == expected
-        )
+        assert LoginArgs(ecr=ecr, password="", registry=registry, username="").registry == expected
 
     def test_field_defaults(self) -> None:
         """Test field defaults."""

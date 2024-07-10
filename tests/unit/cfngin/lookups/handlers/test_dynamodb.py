@@ -71,9 +71,7 @@ class TestDynamoDBHandler:
         }
         stubber.add_response("get_item", GET_ITEM_RESPONSE, expected_params)
         with stubber:
-            assert (
-                DynamodbLookup.handle(query, context=cfngin_context) == expected_result
-            )
+            assert DynamodbLookup.handle(query, context=cfngin_context) == expected_result
         stubber.assert_no_pending_responses()
 
     def test_handle_client_error(self, cfngin_context: MockCFNginContext) -> None:
@@ -103,9 +101,7 @@ class TestDynamoDBHandler:
             DynamodbLookup.handle(query, context=cfngin_context)
         assert str(excinfo.value).startswith(f"Query '{query}' doesn't match regex:")
 
-    def test_handle_invalid_partition_key(
-        self, cfngin_context: MockCFNginContext
-    ) -> None:
+    def test_handle_invalid_partition_key(self, cfngin_context: MockCFNginContext) -> None:
         """Test handle with invalid partition key."""
         stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
@@ -125,14 +121,9 @@ class TestDynamoDBHandler:
                 "TestTable@FakeKey:TestVal.TestMap[M].String1", context=cfngin_context
             )
         stubber.assert_no_pending_responses()
-        assert (
-            str(excinfo.value)
-            == "No DynamoDB record matched the partition key: FakeKey"
-        )
+        assert str(excinfo.value) == "No DynamoDB record matched the partition key: FakeKey"
 
-    def test_handle_invalid_partition_value(
-        self, cfngin_context: MockCFNginContext
-    ) -> None:
+    def test_handle_invalid_partition_value(self, cfngin_context: MockCFNginContext) -> None:
         """Test handle with invalid partition value."""
         stubber = cfngin_context.add_stubber("dynamodb")
         expected_params = {
@@ -147,8 +138,7 @@ class TestDynamoDBHandler:
                 "TestTable@TestKey:FakeVal.TestMap[M].String1", context=cfngin_context
             )
         assert (
-            str(excinfo.value)
-            == "The DynamoDB record could not be found using the following: "
+            str(excinfo.value) == "The DynamoDB record could not be found using the following: "
             "{'TestKey': {'S': 'FakeVal'}}"
         )
 
@@ -217,17 +207,13 @@ class TestDynamoDBHandler:
         stubber.assert_no_pending_responses()
         assert str(excinfo.value) == "Can't find the DynamoDB table: FakeTable"
 
-    def test_handle_unsupported_data_type(
-        self, cfngin_context: MockCFNginContext
-    ) -> None:
+    def test_handle_unsupported_data_type(self, cfngin_context: MockCFNginContext) -> None:
         """Test handle with unsupported data type."""
         with pytest.raises(ValueError) as excinfo:
             DynamodbLookup.handle(
                 "TestTable@TestKey:FakeVal.TestStringSet[B]", context=cfngin_context
             )
-        assert (
-            str(excinfo.value) == "CFNgin does not support looking up the data type: B"
-        )
+        assert str(excinfo.value) == "CFNgin does not support looking up the data type: B"
 
 
 class TestQueryDataModel:

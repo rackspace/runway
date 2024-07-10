@@ -30,9 +30,7 @@ class DockerHookData(MutableMap):
     @overload
     def update_context(self, context: None = ...) -> None: ...
 
-    def update_context(
-        self, context: Optional[CfnginContext] = None
-    ) -> Optional[DockerHookData]:
+    def update_context(self, context: Optional[CfnginContext] = None) -> Optional[DockerHookData]:
         """Update context object with new the current DockerHookData."""
         if not context:
             return None

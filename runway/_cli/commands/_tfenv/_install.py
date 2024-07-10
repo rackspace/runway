@@ -28,9 +28,7 @@ def install(ctx: click.Context, version: Optional[str] = None, **_: Any) -> None
 
     """
     try:
-        LOGGER.debug(
-            "terraform path: %s", TFEnvManager().install(version_requested=version)
-        )
+        LOGGER.debug("terraform path: %s", TFEnvManager().install(version_requested=version))
     except ValueError as err:
         LOGGER.debug("terraform install failed", exc_info=True)
         if "unable to find" not in str(err):

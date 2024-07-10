@@ -449,9 +449,7 @@ class ThreadedWalker:
 
             def _fn(node_: str, deps: List[str]) -> Any:
                 if deps:
-                    LOGGER.debug(
-                        "%s waiting for %s to complete", node_, ", ".join(deps)
-                    )
+                    LOGGER.debug("%s waiting for %s to complete", node_, ", ".join(deps))
 
                 # Wait for all dependencies to complete.
                 wait_for(deps)

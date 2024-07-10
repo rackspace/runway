@@ -17,9 +17,7 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.ecs"
 
 
-def test_create_clusters(
-    caplog: LogCaptureFixture, cfngin_context: MockCFNginContext
-) -> None:
+def test_create_clusters(caplog: LogCaptureFixture, cfngin_context: MockCFNginContext) -> None:
     """Test create_clusters."""
     caplog.set_level(LogLevels.DEBUG, MODULE)
     stub = cfngin_context.add_stubber("ecs")
@@ -28,12 +26,8 @@ def test_create_clusters(
         "bar": {"clusterName": "bar"},
     }
 
-    stub.add_response(
-        "create_cluster", {"cluster": clusters["foo"]}, {"clusterName": "foo"}
-    )
-    stub.add_response(
-        "create_cluster", {"cluster": clusters["bar"]}, {"clusterName": "bar"}
-    )
+    stub.add_response("create_cluster", {"cluster": clusters["foo"]}, {"clusterName": "foo"})
+    stub.add_response("create_cluster", {"cluster": clusters["bar"]}, {"clusterName": "bar"})
 
     with stub:
         assert create_clusters(cfngin_context, clusters=list(clusters)) == {

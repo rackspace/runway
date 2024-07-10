@@ -166,11 +166,7 @@ def requires_replacement(changeset: List[ChangeTypeDef]) -> List[ChangeTypeDef]:
         changeset: List of changes
 
     """
-    return [
-        r
-        for r in changeset
-        if r.get("ResourceChange", {}).get("Replacement", False) == "True"
-    ]
+    return [r for r in changeset if r.get("ResourceChange", {}).get("Replacement", False) == "True"]
 
 
 def output_full_changeset(
@@ -233,9 +229,7 @@ def ask_for_approval(
     if include_verbose:
         approval_options.append("v")
 
-    approve = ui.ask(
-        f"Execute the above changes? [{'/'.join(approval_options)}] "
-    ).lower()
+    approve = ui.ask(f"Execute the above changes? [{'/'.join(approval_options)}] ").lower()
 
     if include_verbose and approve == "v":
         output_full_changeset(
@@ -371,9 +365,7 @@ def create_change_set(
     service_role: Optional[str] = None,
 ) -> Tuple[List[ChangeTypeDef], str]:
     """Create CloudFormation change set."""
-    LOGGER.debug(
-        "attempting to create change set of type %s for stack: %s", change_set_type, fqn
-    )
+    LOGGER.debug("attempting to create change set of type %s for stack: %s", change_set_type, fqn)
     args = generate_cloudformation_args(
         fqn,
         parameters,
@@ -409,9 +401,7 @@ def create_change_set(
             "didn't contain changes" in status_reason
             or "No updates are to be performed" in status_reason
         ):
-            LOGGER.debug(
-                "%s:stack did not change; not updating and removing changeset", fqn
-            )
+            LOGGER.debug("%s:stack did not change; not updating and removing changeset", fqn)
             cfn_client.delete_change_set(ChangeSetName=change_set_id)
             raise exceptions.StackDidNotChange()
         LOGGER.warning(
@@ -420,9 +410,7 @@ def create_change_set(
             status,
             change_set_id,
         )
-        raise exceptions.UnhandledChangeSetStatus(
-            fqn, change_set_id, status, status_reason
-        )
+        raise exceptions.UnhandledChangeSetStatus(fqn, change_set_id, status, status_reason)
 
     execution_status = response["ExecutionStatus"]
     if execution_status != "AVAILABLE":
@@ -504,9 +492,7 @@ def generate_cloudformation_args(
     elif template.body:
         args["TemplateBody"] = template.body
     else:
-        raise ValueError(
-            "either template.body or template.url is required; neither were provided"
-        )
+        raise ValueError("either template.body or template.url is required; neither were provided")
 
     # When creating args for CreateChangeSet, don't include the stack policy,
     # since ChangeSets don't support it.
@@ -555,9 +541,7 @@ class ProviderBuilder:
         self.providers = {}
         self.lock = threading.Lock()
 
-    def build(
-        self, *, profile: Optional[str] = None, region: Optional[str] = None
-    ) -> Provider:
+    def build(self, *, profile: Optional[str] = None, region: Optional[str] = None) -> Provider:
         """Get or create the provider for the given region and profile."""
         with self.lock:
             # memorization lookup key derived from region + profile.
@@ -566,9 +550,7 @@ class ProviderBuilder:
                 # assume provider is in provider dictionary.
                 provider = self.providers[key]
             except KeyError:
-                LOGGER.debug(
-                    "missed memorized lookup (%s); creating new AWS provider", key
-                )
+                LOGGER.debug("missed memorized lookup (%s); creating new AWS provider", key)
                 if not region:
                     region = self.region
                 # memoize the result for later.
@@ -653,9 +635,7 @@ class Provider(BaseProvider):
     def get_stack(self, stack_name: str, *_args: Any, **_kwargs: Any) -> StackTypeDef:
         """Get stack."""
         try:
-            return self.cloudformation.describe_stacks(StackName=stack_name)["Stacks"][
-                0
-            ]
+            return self.cloudformation.describe_stacks(StackName=stack_name)["Stacks"][0]
         except botocore.exceptions.ClientError as err:
             if "does not exist" not in str(err):
                 raise
@@ -739,19 +719,13 @@ class Provider(BaseProvider):
         while True:
             attempts += 1
             try:
-                self.tail(
-                    stack.fqn, cancel=cancel, log_func=log_func, include_initial=False
-                )
+                self.tail(stack.fqn, cancel=cancel, log_func=log_func, include_initial=False)
                 break
             except botocore.exceptions.ClientError as err:
                 if "does not exist" in str(err):
-                    LOGGER.debug(
-                        "%s:unable to tail stack; it does not exist", stack.fqn
-                    )
+                    LOGGER.debug("%s:unable to tail stack; it does not exist", stack.fqn)
                     if action == "destroy":
-                        LOGGER.debug(
-                            "%s:stack was deleted before it could be tailed", stack.fqn
-                        )
+                        LOGGER.debug("%s:stack was deleted before it could be tailed", stack.fqn)
                         return
                     if attempts < retries:
                         # stack might be in the process of launching, wait for a
@@ -763,9 +737,7 @@ class Provider(BaseProvider):
 
     @staticmethod
     def _tail_print(event: StackEventTypeDef) -> None:
-        print(
-            f'{event.get("ResourceStatus")} {event.get("ResourceType")} {event.get("EventId")}'
-        )
+        print(f'{event.get("ResourceStatus")} {event.get("ResourceType")} {event.get("EventId")}')
 
     def get_delete_failed_status_reason(self, stack_name: str) -> Optional[str]:
         """Process events and return latest delete failed reason.
@@ -778,10 +750,7 @@ class Provider(BaseProvider):
 
         """
         event: Union[Dict[str, str], StackEventTypeDef] = (
-            self.get_event_by_resource_status(
-                stack_name, "DELETE_FAILED", chronological=True
-            )
-            or {}
+            self.get_event_by_resource_status(stack_name, "DELETE_FAILED", chronological=True) or {}
         )
         return event.get("ResourceStatusReason")
 
@@ -830,9 +799,7 @@ class Provider(BaseProvider):
         if chronological:
             return cast(
                 Iterable["StackEventTypeDef"],
-                reversed(
-                    cast(List["StackEventTypeDef"], sum(event_list, []))  # type: ignore
-                ),
+                reversed(cast(List["StackEventTypeDef"], sum(event_list, []))),  # type: ignore
             )
         return cast(Iterable["StackEventTypeDef"], sum(event_list, []))  # type: ignore
 
@@ -907,9 +874,7 @@ class Provider(BaseProvider):
         LOGGER.debug("%s:attempting to delete stack", fqn)
 
         if action == "deploy":
-            LOGGER.info(
-                "%s:removed from the CFNgin config file; it is being destroyed", fqn
-            )
+            LOGGER.info("%s:removed from the CFNgin config file; it is being destroyed", fqn)
 
         destroy_method = self.select_destroy_method(force_interactive)
         return destroy_method(fqn=fqn, action=action, approval=approval, **kwargs)
@@ -947,9 +912,7 @@ class Provider(BaseProvider):
         LOGGER.debug(
             "attempting to create stack %s: %s",
             fqn,
-            json.dumps(
-                {"parameters": parameters, "tags": tags, "template_url": template.url}
-            ),
+            json.dumps({"parameters": parameters, "tags": tags, "template_url": template.url}),
         )
         if not template.url:
             LOGGER.debug("no template url; uploading template directly")
@@ -987,8 +950,7 @@ class Provider(BaseProvider):
                 self.cloudformation.create_stack(**args)
             except botocore.exceptions.ClientError as err:
                 if err.response["Error"]["Message"] == (
-                    "TemplateURL must reference a valid S3 object to which you "
-                    "have access."
+                    "TemplateURL must reference a valid S3 object to which you " "have access."
                 ):
                     s3_fallback(
                         fqn,
@@ -1021,9 +983,7 @@ class Provider(BaseProvider):
             return self.noninteractive_changeset_update
         return self.default_update_stack
 
-    def prepare_stack_for_update(
-        self, stack: StackTypeDef, tags: List[TagTypeDef]
-    ) -> bool:
+    def prepare_stack_for_update(self, stack: StackTypeDef, tags: List[TagTypeDef]) -> bool:
         """Prepare a stack for updating.
 
         It may involve deleting the stack if is has failed it's initial
@@ -1075,8 +1035,7 @@ class Provider(BaseProvider):
             raise exceptions.StackUpdateBadStatus(
                 stack_name,
                 stack_status,
-                "Tags differ from current configuration, possibly not created "
-                "with CFNgin",
+                "Tags differ from current configuration, possibly not created " "with CFNgin",
             )
 
         if self.interactive:
@@ -1132,9 +1091,7 @@ class Provider(BaseProvider):
         LOGGER.debug(
             "attempting to update stack %s: %s",
             fqn,
-            json.dumps(
-                {"parameters": parameters, "tags": tags, "template_url": template.url}
-            ),
+            json.dumps({"parameters": parameters, "tags": tags, "template_url": template.url}),
         )
         if not template.url:
             LOGGER.debug("no template url; uploading template directly")
@@ -1151,9 +1108,7 @@ class Provider(BaseProvider):
             **kwargs,
         )
 
-    def update_termination_protection(
-        self, fqn: str, termination_protection: bool
-    ) -> None:
+    def update_termination_protection(self, fqn: str, termination_protection: bool) -> None:
         """Update a Stack's termination protection if needed.
 
         Runs before the normal stack update process.
@@ -1278,9 +1233,7 @@ class Provider(BaseProvider):
                     if "ParameterValue" in x
                     else {
                         "ParameterKey": x["ParameterKey"],  # type: ignore
-                        "ParameterValue": old_parameters_as_dict[
-                            x["ParameterKey"]  # type: ignore
-                        ],
+                        "ParameterValue": old_parameters_as_dict[x["ParameterKey"]],  # type: ignore
                     }
                 )
                 for x in parameters
@@ -1444,9 +1397,7 @@ class Provider(BaseProvider):
         """Get stack tags."""
         return stack.get("Tags", [])
 
-    def get_outputs(
-        self, stack_name: str, *_args: Any, **_kwargs: Any
-    ) -> Dict[str, str]:
+    def get_outputs(self, stack_name: str, *_args: Any, **_kwargs: Any) -> Dict[str, str]:
         """Get stack outputs."""
         if not self._outputs.get(stack_name):
             stack = self.get_stack(stack_name)
@@ -1458,16 +1409,12 @@ class Provider(BaseProvider):
         """Get stack outputs dict."""
         return get_output_dict(stack)
 
-    def get_stack_info(
-        self, stack: StackTypeDef
-    ) -> Tuple[str, Dict[str, Union[List[str], str]]]:
+    def get_stack_info(self, stack: StackTypeDef) -> Tuple[str, Dict[str, Union[List[str], str]]]:
         """Get the template and parameters of the stack currently in AWS."""
         stack_name = stack.get("StackId", "None")
 
         try:
-            template = self.cloudformation.get_template(StackName=stack_name)[
-                "TemplateBody"
-            ]
+            template = self.cloudformation.get_template(StackName=stack_name)["TemplateBody"]
         except botocore.exceptions.ClientError as err:
             if "does not exist" not in str(err):
                 raise
@@ -1508,9 +1455,7 @@ class Provider(BaseProvider):
             if self.get_stack_status(stack_details) == self.REVIEW_STATUS:
                 raise exceptions.StackDoesNotExist(stack.fqn)
             old_template_raw, old_params = self.get_stack_info(stack_details)
-            old_template: Dict[str, Any] = parse_cloudformation_template(
-                old_template_raw
-            )
+            old_template: Dict[str, Any] = parse_cloudformation_template(old_template_raw)
             change_type = "UPDATE"
         except exceptions.StackDoesNotExist:
             old_params: Dict[str, Union[List[str], str]] = {}

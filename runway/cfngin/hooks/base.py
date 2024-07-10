@@ -56,9 +56,7 @@ class Hook(CfnginHookProtocol):
     stack: Optional[Stack] = None
     stack_name: str = "stack"
 
-    def __init__(
-        self, context: CfnginContext, provider: Provider, **kwargs: Any
-    ) -> None:
+    def __init__(self, context: CfnginContext, provider: Provider, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -115,13 +113,9 @@ class Hook(CfnginHookProtocol):
             Ending status of the stack.
 
         """
-        return self._run_stack_action(
-            action=self._deploy_action, stack=stack, wait=wait
-        )
+        return self._run_stack_action(action=self._deploy_action, stack=stack, wait=wait)
 
-    def destroy_stack(
-        self, stack: Optional[Stack] = None, wait: bool = False
-    ) -> Status:
+    def destroy_stack(self, stack: Optional[Stack] = None, wait: bool = False) -> Status:
         """Destroy a stack.
 
         Args:
@@ -132,9 +126,7 @@ class Hook(CfnginHookProtocol):
             Ending status of the stack.
 
         """
-        return self._run_stack_action(
-            action=self._destroy_action, stack=stack, wait=wait
-        )
+        return self._run_stack_action(action=self._destroy_action, stack=stack, wait=wait)
 
     def post_deploy(self) -> Any:
         """Run during the **post_deploy** stage."""
@@ -197,9 +189,7 @@ class Hook(CfnginHookProtocol):
         self._log_stack(stack, status)
 
         if wait and status != SKIPPED:
-            status = self._wait_for_stack(
-                action=action, stack=stack, last_status=status
-            )
+            status = self._wait_for_stack(action=action, stack=stack, last_status=status)
         return status
 
     def _wait_for_stack(

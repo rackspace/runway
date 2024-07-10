@@ -45,9 +45,7 @@ RegisterActivityType = Action("RegisterActivityType")
 RegisterDomain = Action("RegisterDomain")
 RegisterWorkflowType = Action("RegisterWorkflowType")
 RequestCancelActivityTask = Action("RequestCancelActivityTask")
-RequestCancelExternalWorkflowExecution = Action(
-    "RequestCancelExternalWorkflowExecution"
-)
+RequestCancelExternalWorkflowExecution = Action("RequestCancelExternalWorkflowExecution")
 RequestCancelWorkflowExecution = Action("RequestCancelWorkflowExecution")
 RespondActivityTaskCanceled = Action("RespondActivityTaskCanceled")
 RespondActivityTaskCompleted = Action("RespondActivityTaskCompleted")

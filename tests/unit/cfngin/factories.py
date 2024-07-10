@@ -34,16 +34,12 @@ class MockThreadingEvent:
 class MockProviderBuilder(ProviderBuilder):
     """Mock provider builder."""
 
-    def __init__(
-        self, *, provider: Provider, region: Optional[str] = None, **_: Any
-    ) -> None:
+    def __init__(self, *, provider: Provider, region: Optional[str] = None, **_: Any) -> None:
         """Instantiate class."""
         self.provider = provider
         self.region = region
 
-    def build(
-        self, *, profile: Optional[str] = None, region: Optional[str] = None
-    ) -> Provider:
+    def build(self, *, profile: Optional[str] = None, region: Optional[str] = None) -> Provider:
         """Mock build method."""
         return self.provider
 
@@ -81,9 +77,7 @@ def generate_definition(
     return CfnginStackDefinitionModel(**definition)
 
 
-def mock_lookup(
-    lookup_input: Any, lookup_type: str, raw: Optional[str] = None
-) -> Lookup:
+def mock_lookup(lookup_input: Any, lookup_type: str, raw: Optional[str] = None) -> Lookup:
     """Mock lookup."""
     if raw is None:
         raw = f"{lookup_type} {lookup_input}"

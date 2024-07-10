@@ -32,9 +32,7 @@ class TestCfnginBucket:
                 "VersioningStatus": Mock(ref="Ref(VersioningStatus)"),
             },
         )
-        mock_bucket = Mock(
-            get_att=Mock(return_value="get_att"), ref=Mock(return_value="ref")
-        )
+        mock_bucket = Mock(get_att=Mock(return_value="get_att"), ref=Mock(return_value="ref"))
         mock_bucket.return_value = mock_bucket
         mocker.patch(f"{MODULE}.s3", Bucket=mock_bucket)
         bucket_encryption = mocker.patch.object(
@@ -80,9 +78,7 @@ class TestCfnginBucket:
             == "AES256"
         )
 
-    def test_bucket_name(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_bucket_name(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test bucket_name."""
         mocker.patch.object(
             CfnginBucket,
@@ -110,9 +106,7 @@ class TestCfnginBucket:
         obj = CfnginBucket("test", cfngin_context)
         assert obj.bucket_tags.to_dict() == [{"Key": "version", "Value": __version__}]
 
-    def test_create_template(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_create_template(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test create_template."""
         bucket = mocker.patch.object(CfnginBucket, "bucket", "bucket")
         obj = CfnginBucket("test", cfngin_context)

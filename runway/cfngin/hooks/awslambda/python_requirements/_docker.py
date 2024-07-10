@@ -64,9 +64,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
 
         """
         docker_env_vars = super().environment_variables
-        pip_env_vars = {
-            k: v for k, v in self.ctx.env.vars.items() if k.startswith("PIP")
-        }
+        pip_env_vars = {k: v for k, v in self.ctx.env.vars.items() if k.startswith("PIP")}
         return {**docker_env_vars, **pip_env_vars}
 
     @cached_property

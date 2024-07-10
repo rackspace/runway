@@ -60,19 +60,13 @@ def get(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, Any]:
             user_pool_id = args.user_pool_arn.split("/")[-1:][0]
         else:
             user_pool_id = [
-                o["OutputValue"]
-                for o in outputs
-                if o["OutputKey"] == "AuthAtEdgeUserPoolId"
+                o["OutputValue"] for o in outputs if o["OutputKey"] == "AuthAtEdgeUserPoolId"
             ][0]
 
-        client_id = [
-            o["OutputValue"] for o in outputs if o["OutputKey"] == "AuthAtEdgeClient"
-        ][0]
+        client_id = [o["OutputValue"] for o in outputs if o["OutputKey"] == "AuthAtEdgeClient"][0]
 
         # Poll the user pool client information
-        resp = cognito_client.describe_user_pool_client(
-            UserPoolId=user_pool_id, ClientId=client_id
-        )
+        resp = cognito_client.describe_user_pool_client(UserPoolId=user_pool_id, ClientId=client_id)
 
         # Retrieve the callbacks
         callbacks = resp["UserPoolClient"]["CallbackURLs"]

@@ -60,9 +60,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
     # TODO add regex to schema
     _validate_string_is_lookup = cast(
         "classmethod[Callable[..., Any]]",
-        validator("args", "required", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
+        validator("args", "required", allow_reuse=True, pre=True)(utils.validate_string_is_lookup),
     )
 
 
@@ -87,9 +85,7 @@ class CfnLintRunwayTestArgs(ConfigProperty):
     # TODO add regex to schema
     _validate_string_is_lookup = cast(
         "classmethod[Callable[..., Any]]",
-        validator("cli_args", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
+        validator("cli_args", allow_reuse=True, pre=True)(utils.validate_string_is_lookup),
     )
 
 
@@ -106,9 +102,7 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         default=False,
         description="Whether the test must pass for subsequent tests to be run.",
     )
-    type: Literal["cfn-lint"] = Field(
-        default="cfn-lint", description="The type of test to run."
-    )
+    type: Literal["cfn-lint"] = Field(default="cfn-lint", description="The type of test to run.")
 
     class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
@@ -138,9 +132,7 @@ class ScriptRunwayTestArgs(ConfigProperty):
     # TODO add regex to schema
     _validate_string_is_lookup = cast(
         "classmethod[Callable[..., Any]]",
-        validator("commands", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
+        validator("commands", allow_reuse=True, pre=True)(utils.validate_string_is_lookup),
     )
 
 
@@ -157,9 +149,7 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         default=False,
         description="Whether the test must pass for subsequent tests to be run.",
     )
-    type: Literal["script"] = Field(
-        default="script", description="The type of test to run."
-    )
+    type: Literal["script"] = Field(default="script", description="The type of test to run.")
 
     class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
@@ -178,9 +168,7 @@ class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         default=False,
         description="Whether the test must pass for subsequent tests to be run.",
     )
-    type: Literal["yamllint"] = Field(
-        default="yamllint", description="The type of test to run."
-    )
+    type: Literal["yamllint"] = Field(default="yamllint", description="The type of test to run.")
 
     class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""

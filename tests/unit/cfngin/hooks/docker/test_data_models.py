@@ -70,9 +70,7 @@ class TestElasticContainerRegistry:
 
     def test_fqn_private(self) -> None:
         """Test fqn private."""
-        obj = ElasticContainerRegistry(
-            account_id="123456789012", aws_region="us-east-1"
-        )
+        obj = ElasticContainerRegistry(account_id="123456789012", aws_region="us-east-1")
         assert obj.fqn == "123456789012.dkr.ecr.us-east-1.amazonaws.com/"
 
     def test_fqn_public(self) -> None:

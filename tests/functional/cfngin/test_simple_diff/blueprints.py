@@ -24,8 +24,7 @@ class DiffTester(Blueprint):
         },
         "WaitConditionCount": {
             "type": int,
-            "description": "Number of WaitConditionHandle resources "
-            "to add to the template",
+            "description": "Number of WaitConditionHandle resources " "to add to the template",
         },
     }
 

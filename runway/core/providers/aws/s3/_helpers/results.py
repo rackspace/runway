@@ -169,9 +169,7 @@ class BaseResultSubscriber(OnDoneFilteredSubscriber):
 
     TRANSFER_TYPE: ClassVar[Optional[str]] = None
 
-    def __init__(
-        self, result_queue: "queue.Queue[Any]", transfer_type: Optional[str] = None
-    ):
+    def __init__(self, result_queue: "queue.Queue[Any]", transfer_type: Optional[str] = None):
         """Send result notifications during transfer process.
 
         Args:
@@ -193,9 +191,7 @@ class BaseResultSubscriber(OnDoneFilteredSubscriber):
         queued_result = QueuedResult(**result_kwargs)
         self._result_queue.put(queued_result)
 
-    def on_progress(
-        self, future: TransferFuture, bytes_transferred: int, **_: Any
-    ) -> None:
+    def on_progress(self, future: TransferFuture, bytes_transferred: int, **_: Any) -> None:
         """On progress."""
         result_kwargs: Dict[str, Any] = self._result_kwargs_cache.get(
             cast(str, future.meta.transfer_id), cast(Dict[str, Any], {})
@@ -232,9 +228,7 @@ class BaseResultSubscriber(OnDoneFilteredSubscriber):
         }
         self._result_kwargs_cache[cast(str, future.meta.transfer_id)] = result_kwargs
 
-    def _on_done_pop_from_result_kwargs_cache(
-        self, future: TransferFuture
-    ) -> Dict[str, Any]:
+    def _on_done_pop_from_result_kwargs_cache(self, future: TransferFuture) -> Dict[str, Any]:
         """On done, pop from results cache."""
         result_kwargs: Dict[str, Any] = self._result_kwargs_cache.pop(
             cast(str, future.meta.transfer_id)
@@ -377,9 +371,7 @@ class ResultRecorder(BaseResultHandler):
                 key_parts.append(ensure_string(result_property))
         return ":".join(key_parts)
 
-    def _pop_result_from_ongoing_dicts(
-        self, result: AnyResult
-    ) -> Tuple[int, Optional[int]]:
+    def _pop_result_from_ongoing_dicts(self, result: AnyResult) -> Tuple[int, Optional[int]]:
         ongoing_key = self._get_ongoing_dict_key(result)
         total_progress = self._ongoing_progress.pop(ongoing_key, 0)
         total_file_size = self._ongoing_total_sizes.pop(ongoing_key, None)
@@ -392,9 +384,7 @@ class ResultRecorder(BaseResultHandler):
         if self.start_time is None:
             self.start_time = time.time()
         total_transfer_size = result.total_transfer_size
-        self._ongoing_total_sizes[self._get_ongoing_dict_key(result)] = (
-            total_transfer_size
-        )
+        self._ongoing_total_sizes[self._get_ongoing_dict_key(result)] = total_transfer_size
         # The total transfer size can be None if we do not know the size
         # immediately so do not add to the total right away.
         if total_transfer_size:
@@ -462,9 +452,7 @@ class ResultRecorder(BaseResultHandler):
     def _record_error_result(self, **_: Any) -> None:
         self.errors += 1
 
-    def _record_final_expected_files(
-        self, result: FinalTotalSubmissionsResult, **_: Any
-    ) -> None:
+    def _record_final_expected_files(self, result: FinalTotalSubmissionsResult, **_: Any) -> None:
         self.final_expected_files_transferred = result.total_submissions
 
 
@@ -483,9 +471,7 @@ class ResultPrinter(BaseResultHandler):
     )
     SUCCESS_FORMAT: ClassVar[str] = "{transfer_type}: {transfer_location}"
     DRY_RUN_FORMAT: ClassVar[str] = "(dryrun) " + SUCCESS_FORMAT
-    FAILURE_FORMAT: ClassVar[str] = (
-        "{transfer_type} failed: {transfer_location} {exception}"
-    )
+    FAILURE_FORMAT: ClassVar[str] = "{transfer_type} failed: {transfer_location} {exception}"
     WARNING_FORMAT: ClassVar[str] = "{message}"
     ERROR_FORMAT: ClassVar[str] = "fatal error: {exception}"
     CTRL_C_MSG: ClassVar[str] = "cancelled: ctrl-c received"
@@ -574,9 +560,7 @@ class ResultPrinter(BaseResultHandler):
     def _get_transfer_location(self, result: AnyResult) -> str:
         if result.dest is None:
             return self.SRC_TRANSFER_LOCATION_FORMAT.format(src=result.src)
-        return self.SRC_DEST_TRANSFER_LOCATION_FORMAT.format(
-            src=result.src, dest=result.dest
-        )
+        return self.SRC_DEST_TRANSFER_LOCATION_FORMAT.format(src=result.src, dest=result.dest)
 
     def _redisplay_progress(self) -> None:
         # Reset to zero because done statements are printed with new lines
@@ -609,8 +593,7 @@ class ResultPrinter(BaseResultHandler):
             )
 
             transfer_speed = (
-                human_readable_size(self._result_recorder.bytes_transfer_speed)
-                or "0 Bytes"
+                human_readable_size(self._result_recorder.bytes_transfer_speed) or "0 Bytes"
             ) + "/s"
             progress_statement = self.BYTE_PROGRESS_FORMAT.format(
                 bytes_completed=bytes_completed,
@@ -630,9 +613,7 @@ class ResultPrinter(BaseResultHandler):
             progress_statement += self._STILL_CALCULATING_TOTALS
 
         # Make sure that it overrides any previous progress bar.
-        progress_statement = self._adjust_statement_padding(
-            progress_statement, ending_char="\r"
-        )
+        progress_statement = self._adjust_statement_padding(progress_statement, ending_char="\r")
         # We do not want to include the carriage return in this calculation
         # as progress length is used for determining whitespace padding.
         # So we subtract one off of the length.
@@ -646,9 +627,7 @@ class ResultPrinter(BaseResultHandler):
             return self._ESTIMATED_EXPECTED_TOTAL.format(expected_total=expected_total)
         return expected_total
 
-    def _adjust_statement_padding(
-        self, print_statement: str, ending_char: str = "\n"
-    ) -> str:
+    def _adjust_statement_padding(self, print_statement: str, ending_char: str = "\n") -> str:
         print_statement = print_statement.ljust(self._progress_length, " ")
         return print_statement + ending_char
 
@@ -787,8 +766,7 @@ class CommandResultRecorder:
     def get_command_result(self) -> CommandResult:
         """Get the CommandResult representing the result of a command."""
         return CommandResult(
-            num_tasks_failed=self._result_recorder.files_failed
-            + self._result_recorder.errors,
+            num_tasks_failed=self._result_recorder.files_failed + self._result_recorder.errors,
             num_tasks_warned=self._result_recorder.files_warned,
         )
 

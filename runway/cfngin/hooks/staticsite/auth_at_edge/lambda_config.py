@@ -192,7 +192,5 @@ def random_key(length: int = 16) -> str:
         length: The length of the random key.
 
     """
-    secret_allowed_chars = (
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
-    )
+    secret_allowed_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
     return "".join(secrets.choice(secret_allowed_chars) for _ in range(length))

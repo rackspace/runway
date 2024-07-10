@@ -39,11 +39,7 @@ class HookDataLookup(LookupHandler):
 
         result = hook_data.find(query, args.get("default"))
 
-        if (
-            isinstance(result, BaseAWSObject)
-            and args.get("get")
-            and not args.get("load")
-        ):
+        if isinstance(result, BaseAWSObject) and args.get("get") and not args.get("load"):
             args["load"] = "troposphere"
 
         if not result:

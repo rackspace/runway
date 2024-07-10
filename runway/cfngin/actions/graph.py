@@ -56,10 +56,7 @@ def json_format(out: TextIO, graph: Graph) -> None:
         graph: Graph to be output.
 
     """
-    steps = {
-        step.name: {"deps": [dep.name for dep in deps]}
-        for step, deps in each_step(graph)
-    }
+    steps = {step.name: {"deps": [dep.name for dep in deps]} for step, deps in each_step(graph)}
 
     json.dump({"steps": steps}, out, indent=4)
     out.write("\n")
@@ -94,9 +91,7 @@ class Action(BaseAction):
         **kwargs: Any,
     ) -> None:
         """Generate the underlying graph and prints it."""
-        graph = self._generate_plan(
-            require_unlocked=False, include_persistent_graph=True
-        ).graph
+        graph = self._generate_plan(require_unlocked=False, include_persistent_graph=True).graph
         if self.context.persistent_graph:
             graph = merge_graphs(self.context.persistent_graph, graph)
         if kwargs.get("reduce"):

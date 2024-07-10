@@ -121,17 +121,13 @@ class BaseSync:
         return None
 
     @staticmethod
-    def compare_size(
-        src_file: Optional[FileStats], dest_file: Optional[FileStats]
-    ) -> bool:
+    def compare_size(src_file: Optional[FileStats], dest_file: Optional[FileStats]) -> bool:
         """Compare the size of two FileStats objects."""
         if not (src_file and dest_file):
             raise ValueError("src_file and dest_file must not be None")
         return src_file.size == dest_file.size
 
-    def compare_time(
-        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
-    ) -> bool:
+    def compare_time(self, src_file: Optional[FileStats], dest_file: Optional[FileStats]) -> bool:
         """Compare modified time of two FileStats objects.
 
         Returns:
@@ -158,9 +154,7 @@ class BaseSync:
 class MissingFileSync(BaseSync):
     """File is missing from destination."""
 
-    def __init__(
-        self, sync_type: Literal["file_not_at_dest"] = "file_not_at_dest"
-    ) -> None:
+    def __init__(self, sync_type: Literal["file_not_at_dest"] = "file_not_at_dest") -> None:
         """Instantiate class.
 
         Args:
@@ -185,9 +179,7 @@ class MissingFileSync(BaseSync):
 class NeverSync(BaseSync):
     """Never sync file."""
 
-    def __init__(
-        self, sync_type: Literal["file_not_at_src"] = "file_not_at_src"
-    ) -> None:
+    def __init__(self, sync_type: Literal["file_not_at_src"] = "file_not_at_src") -> None:
         """Instantiate class.
 
         Args:

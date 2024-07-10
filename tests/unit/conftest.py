@@ -185,15 +185,9 @@ def runway_config() -> MockRunwayConfig:
 def runway_context(request: FixtureRequest, tmp_path: Path) -> MockRunwayContext:
     """Create a mock Runway context object."""
     env_vars = {
-        "AWS_REGION": getattr(
-            cast("Module", request.module), "AWS_REGION", "us-east-1"
-        ),
-        "DEFAULT_AWS_REGION": getattr(
-            cast("Module", request.module), "AWS_REGION", "us-east-1"
-        ),
-        "DEPLOY_ENVIRONMENT": getattr(
-            cast("Module", request.module), "DEPLOY_ENVIRONMENT", "test"
-        ),
+        "AWS_REGION": getattr(cast("Module", request.module), "AWS_REGION", "us-east-1"),
+        "DEFAULT_AWS_REGION": getattr(cast("Module", request.module), "AWS_REGION", "us-east-1"),
+        "DEPLOY_ENVIRONMENT": getattr(cast("Module", request.module), "DEPLOY_ENVIRONMENT", "test"),
     }
     creds = {
         "AWS_ACCESS_KEY_ID": "test_access_key",

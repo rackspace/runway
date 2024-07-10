@@ -22,9 +22,7 @@ if TYPE_CHECKING:
 
 def diff(first: str, second: str) -> str:
     """Human readable differ."""
-    return "\n".join(
-        list(difflib.Differ().compare(first.splitlines(), second.splitlines()))
-    )
+    return "\n".join(list(difflib.Differ().compare(first.splitlines(), second.splitlines())))
 
 
 class BlueprintTestCase(unittest.TestCase):
@@ -44,18 +42,14 @@ class BlueprintTestCase(unittest.TestCase):
         rendered_dict = blueprint.template.to_dict()
         rendered_text = json.dumps(rendered_dict, indent=4, sort_keys=True)
 
-        with open(
-            expected_output + "-result", "w", encoding="utf-8"
-        ) as expected_output_file:
+        with open(expected_output + "-result", "w", encoding="utf-8") as expected_output_file:
             expected_output_file.write(rendered_text)
 
         with open(expected_output, encoding="utf-8") as expected_output_file:
             expected_dict = json.loads(expected_output_file.read())
             expected_text = json.dumps(expected_dict, indent=4, sort_keys=True)
 
-        self.assertEqual(
-            rendered_dict, expected_dict, diff(rendered_text, expected_text)
-        )
+        self.assertEqual(rendered_dict, expected_dict, diff(rendered_text, expected_text))
 
 
 class YamlDirTestGenerator:
@@ -156,25 +150,19 @@ class YamlDirTestGenerator:
                 try:
                     ctx = self.context
                 except AttributeError:
-                    ctx = CfnginContext(
-                        config=self.config, parameters={"environment": "test"}
-                    )
+                    ctx = CfnginContext(config=self.config, parameters={"environment": "test"})
 
                 configvars = self.stack.variables or {}
                 variables = [Variable(k, v, "cfngin") for k, v in configvars.items()]
 
-                blueprint_class = load_object_from_string(
-                    cast(str, self.stack.class_path)
-                )
+                blueprint_class = load_object_from_string(cast(str, self.stack.class_path))
                 blueprint = blueprint_class(self.stack.name, ctx)
                 blueprint.resolve_variables(variables or [])
                 blueprint.setup_parameters()
                 blueprint.create_template()
                 self.assertRenderedBlueprint(blueprint)
 
-            def assertEqual(
-                self, first: Any, second: Any, msg: Optional[str] = None
-            ) -> None:
+            def assertEqual(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
                 """Test that first and second are equal.
 
                 If the values do not compare equal, the test will fail.

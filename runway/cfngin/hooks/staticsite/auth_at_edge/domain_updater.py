@@ -20,9 +20,7 @@ class HookArgs(HookArgsBaseModel):
     """The ID of the Cognito User Pool Client."""
 
 
-def update(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> Union[Dict[str, Any], bool]:
+def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> Union[Dict[str, Any], bool]:
     """Retrieve/Update the domain name of the specified client.
 
     A domain name is required in order to make authorization and token
@@ -43,9 +41,7 @@ def update(
     context_dict: Dict[str, Any] = {}
 
     user_pool_id = context.hook_data["aae_user_pool_id_retriever"]["id"]
-    user_pool = cognito_client.describe_user_pool(UserPoolId=user_pool_id).get(
-        "UserPool", {}
-    )
+    user_pool = cognito_client.describe_user_pool(UserPoolId=user_pool_id).get("UserPool", {})
     (user_pool_region, user_pool_hash) = user_pool_id.split("_")
 
     domain_prefix = user_pool.get("CustomDomain", user_pool.get("Domain"))
@@ -58,9 +54,7 @@ def update(
     try:
         domain_prefix = (f"{user_pool_hash}-{args.client_id}").lower()
 
-        cognito_client.create_user_pool_domain(
-            Domain=domain_prefix, UserPoolId=user_pool_id
-        )
+        cognito_client.create_user_pool_domain(Domain=domain_prefix, UserPoolId=user_pool_id)
         context_dict["domain"] = get_user_pool_domain(domain_prefix, user_pool_region)
         return context_dict
     except Exception:
@@ -68,9 +62,7 @@ def update(
         return False
 
 
-def delete(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> Union[Dict[str, Any], bool]:
+def delete(context: CfnginContext, *__args: Any, **kwargs: Any) -> Union[Dict[str, Any], bool]:
     """Delete the domain if the user pool was created by Runway.
 
     If a User Pool was created by Runway, and populated with a domain, that
@@ -94,9 +86,7 @@ def delete(
     domain_prefix = (f"{user_pool_hash}-{args.client_id}").lower()
 
     try:
-        cognito_client.delete_user_pool_domain(
-            UserPoolId=user_pool_id, Domain=domain_prefix
-        )
+        cognito_client.delete_user_pool_domain(UserPoolId=user_pool_id, Domain=domain_prefix)
         return True
     except cognito_client.exceptions.InvalidParameterException:
         LOGGER.info('skipped deletion; no domain with prefix "%s"', domain_prefix)

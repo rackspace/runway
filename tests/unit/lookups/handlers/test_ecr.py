@@ -41,9 +41,7 @@ class TestEcrLookup:
         response = {
             "authorizationData": [
                 {
-                    "authorizationToken": base64.b64encode(
-                        ("AWS:" + password).encode()
-                    ).decode(),
+                    "authorizationToken": base64.b64encode(("AWS:" + password).encode()).decode(),
                     "expiresAt": datetime.datetime(2015, 1, 1),
                     "proxyEndpoint": "string",
                 }
@@ -69,14 +67,15 @@ class TestEcrLookup:
         cfngin_stubber.assert_no_pending_responses()
         runway_stubber.assert_no_pending_responses()
 
-    def test_get_login_password_raise_value_error(
-        self, runway_context: MockRunwayContext
-    ) -> None:
+    def test_get_login_password_raise_value_error(self, runway_context: MockRunwayContext) -> None:
         """Test get_login_password."""
         runway_stubber = runway_context.add_stubber("ecr")
         runway_stubber.add_response("get_authorization_token", {}, {})
-        with runway_stubber, pytest.raises(
-            ValueError, match="get_authorization_token did not return authorizationData"
+        with (
+            runway_stubber,
+            pytest.raises(
+                ValueError, match="get_authorization_token did not return authorizationData"
+            ),
         ):
             assert EcrLookup.get_login_password(
                 runway_context.get_session().client("ecr")  # type: ignore
@@ -96,13 +95,10 @@ class TestEcrLookup:
             return_value="EcrLookup.get_login_password()",
         )
         assert (
-            EcrLookup.handle("login-password", runway_context)
-            == mock_format_results.return_value
+            EcrLookup.handle("login-password", runway_context) == mock_format_results.return_value
         )
         mock_get_login_password.assert_called_once()
-        mock_format_results.assert_called_once_with(
-            mock_get_login_password.return_value
-        )
+        mock_format_results.assert_called_once_with(mock_get_login_password.return_value)
 
     def test_handle_value_error(self, runway_context: MockRunwayContext) -> None:
         """Test handle raise ValueError."""

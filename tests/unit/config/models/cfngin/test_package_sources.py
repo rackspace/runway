@@ -40,8 +40,8 @@ class TestCfnginPackageSourcesDefinitionModel:
             "local": [{"source": "something"}],
             "s3": [{"bucket": "bucket", "key": "something"}],
         }
-        obj: CfnginPackageSourcesDefinitionModel = (
-            CfnginPackageSourcesDefinitionModel.parse_obj(data)
+        obj: CfnginPackageSourcesDefinitionModel = CfnginPackageSourcesDefinitionModel.parse_obj(
+            data
         )
         assert isinstance(obj.git[0], GitCfnginPackageSourceDefinitionModel)
         assert isinstance(obj.local[0], LocalCfnginPackageSourceDefinitionModel)
@@ -93,10 +93,7 @@ class TestGitCfnginPackageSourceDefinitionModel:
     def test_validate_one_ref(self, ref: Dict[str, str]) -> None:
         """Test _validate_one_ref."""
         data = {"uri": "something", ref["field"]: ref["value"]}
-        assert (
-            GitCfnginPackageSourceDefinitionModel.parse_obj(data)[ref["field"]]
-            == ref["value"]
-        )
+        assert GitCfnginPackageSourceDefinitionModel.parse_obj(data)[ref["field"]] == ref["value"]
 
     @pytest.mark.parametrize(
         "refs",

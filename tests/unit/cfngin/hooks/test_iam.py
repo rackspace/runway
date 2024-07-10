@@ -200,9 +200,7 @@ def test_ensure_server_cert_exists_no_prompt_no_parameters(
     stub.add_client_error("get_server_certificate")
 
     with stub:
-        assert not ensure_server_cert_exists(
-            cfngin_context, cert_name="foo", prompt=False
-        )
+        assert not ensure_server_cert_exists(cfngin_context, cert_name="foo", prompt=False)
     stub.assert_no_pending_responses()
 
 

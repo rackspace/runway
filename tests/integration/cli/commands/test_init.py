@@ -117,9 +117,7 @@ def test_init_options_deploy_environment(
     assert mock_runway.call_args.args[1].env.name == "e-option"
 
     assert (
-        runner.invoke(
-            cli, ["init", "--deploy-environment", "deploy-environment-option"]
-        ).exit_code
+        runner.invoke(cli, ["init", "--deploy-environment", "deploy-environment-option"]).exit_code
         == 0
     )
     assert mock_runway.call_args.args[1].env.name == "deploy-environment-option"

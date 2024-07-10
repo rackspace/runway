@@ -45,9 +45,7 @@ def copy_template_to_env(path: Path, env: str, region: str):
                 if templated_file_path.is_file():
                     filedata = templated_file_path.read_text()
                     if "REPLACEMEENV" in filedata:
-                        templated_file_path.write_text(
-                            filedata.replace("REPLACEMEENV", env)
-                        )
+                        templated_file_path.write_text(filedata.replace("REPLACEMEENV", env))
     else:
         LOGGER.info(
             'Skipping bootstrap of k8s module at "%s"; no template directory present',
@@ -65,9 +63,7 @@ def create_runway_environments(*, context: CfnginContext, namespace: str, **_: A
     Returns: boolean for whether or not the hook succeeded.
 
     """
-    LOGGER.info(
-        "Bootstrapping runway k8s modules, looking for unconfigured environments..."
-    )
+    LOGGER.info("Bootstrapping runway k8s modules, looking for unconfigured environments...")
 
     environment = namespace
 

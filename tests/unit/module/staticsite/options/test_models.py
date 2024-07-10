@@ -35,15 +35,12 @@ class TestRunwayStaticSiteExtraFileDataModel:
     def test_autofill_content_type(self, expected: Optional[str], name: str) -> None:
         """Test _autofill_content_type."""
         assert (
-            RunwayStaticSiteExtraFileDataModel(content="test", name=name).content_type
-            == expected
+            RunwayStaticSiteExtraFileDataModel(content="test", name=name).content_type == expected
         )
 
     def test_init_default(self) -> None:
         """Test init default."""
-        obj = RunwayStaticSiteExtraFileDataModel(
-            content="test-content", name="test-name"
-        )
+        obj = RunwayStaticSiteExtraFileDataModel(content="test-content", name="test-name")
         assert not obj.content_type
         assert obj.content == "test-content"
         assert not obj.file
@@ -159,9 +156,7 @@ class TestRunwayStaticSitePreBuildStepDataModel:
 
     def test_init(self, tmp_path: Path) -> None:
         """Test init."""
-        obj = RunwayStaticSitePreBuildStepDataModel(
-            command="runway --help", cwd=tmp_path
-        )
+        obj = RunwayStaticSitePreBuildStepDataModel(command="runway --help", cwd=tmp_path)
         assert obj.command == "runway --help"
         assert obj.cwd == tmp_path
 

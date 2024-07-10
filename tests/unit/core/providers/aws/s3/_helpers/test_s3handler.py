@@ -80,9 +80,7 @@ def mock_submitters(mocker: MockerFixture) -> MockSubmitters:
         "copy": mocker.patch(f"{MODULE}.CopyRequestSubmitter", Mock()),
         "delete": mocker.patch(f"{MODULE}.DeleteRequestSubmitter", Mock()),
         "download": mocker.patch(f"{MODULE}.DownloadRequestSubmitter", Mock()),
-        "download_stream": mocker.patch(
-            f"{MODULE}.DownloadStreamRequestSubmitter", Mock()
-        ),
+        "download_stream": mocker.patch(f"{MODULE}.DownloadStreamRequestSubmitter", Mock()),
         "local_delete": mocker.patch(f"{MODULE}.LocalDeleteRequestSubmitter", Mock()),
         "upload": mocker.patch(f"{MODULE}.UploadRequestSubmitter", Mock()),
         "upload_stream": mocker.patch(f"{MODULE}.UploadStreamRequestSubmitter", Mock()),
@@ -134,9 +132,7 @@ class TestBaseTransferRequestSubmitter:
             ("s3://test", "s3://test"),
         ],
     )
-    def test_format_s3_path(
-        self, expected: Optional[str], path: Optional[AnyPath]
-    ) -> None:
+    def test_format_s3_path(self, expected: Optional[str], path: Optional[AnyPath]) -> None:
         """Test _format_s3_path."""
         assert (
             BaseTransferRequestSubmitter(
@@ -346,10 +342,7 @@ class TestCopyRequestSubmitter(BaseTransferRequestSubmitterTest):
 
         warning_result = self.result_queue.get()
         assert isinstance(warning_result, PrintTask)
-        assert (
-            "Unable to perform copy operations on GLACIER objects"
-            in warning_result.message
-        )
+        assert "Unable to perform copy operations on GLACIER objects" in warning_result.message
         assert future is None
         assert len(self.transfer_manager.copy.call_args_list) == 0  # type: ignore
 
@@ -390,9 +383,7 @@ class TestDeleteRequestSubmitter(BaseTransferRequestSubmitterTest):
 
     def test_submit(self) -> None:
         """Test submit."""
-        fileinfo = FileInfo(
-            src=self.bucket + "/" + self.key, dest=None, operation_name="delete"
-        )
+        fileinfo = FileInfo(src=self.bucket + "/" + self.key, dest=None, operation_name="delete")
         future = self.transfer_request_submitter.submit(fileinfo)
         assert self.transfer_manager.delete.return_value is future
 
@@ -579,9 +570,7 @@ class TestDownloadRequestSubmitter(BaseTransferRequestSubmitterTest):
     def test_submit_warn_glacier_force(self) -> None:
         """Test submit."""
         self.config_params["force_glacier_transfer"] = True
-        fileinfo = self.create_file_info(
-            self.key, response_data={"StorageClass": "GLACIER"}
-        )
+        fileinfo = self.create_file_info(self.key, response_data={"StorageClass": "GLACIER"})
         future = self.transfer_request_submitter.submit(fileinfo)
         assert self.result_queue.empty()
         assert self.transfer_manager.download.return_value is future
@@ -612,10 +601,7 @@ class TestDownloadRequestSubmitter(BaseTransferRequestSubmitterTest):
         future = self.transfer_request_submitter.submit(fileinfo)
         warning_result = self.result_queue.get()
         assert isinstance(warning_result, PrintTask)
-        assert (
-            "Unable to perform download operations on GLACIER objects"
-            in warning_result.message
-        )
+        assert "Unable to perform download operations on GLACIER objects" in warning_result.message
         assert not future
         self.assert_no_downloads_happened()
 
@@ -699,27 +685,21 @@ class TestLocalDeleteRequestSubmitter(BaseTransferRequestSubmitterTest):
 
     def test_can_submit(self) -> None:
         """Test can_submit."""
-        fileinfo = FileInfo(
-            src=self.filename, dest=None, operation_name="delete", src_type="local"
-        )
+        fileinfo = FileInfo(src=self.filename, dest=None, operation_name="delete", src_type="local")
         assert self.transfer_request_submitter.can_submit(fileinfo)
         fileinfo.operation_name = "foo"
         assert not self.transfer_request_submitter.can_submit(fileinfo)
 
     def test_can_submit_remote_deletes(self) -> None:
         """Test can_submit."""
-        fileinfo = FileInfo(
-            src=self.filename, dest=None, operation_name="delete", src_type="s3"
-        )
+        fileinfo = FileInfo(src=self.filename, dest=None, operation_name="delete", src_type="s3")
         assert not self.transfer_request_submitter.can_submit(fileinfo)
 
     def test_submit(self, tmp_path: Path) -> None:
         """Test submit."""
         full_filename = tmp_path / self.filename
         full_filename.write_text("content")
-        fileinfo = FileInfo(
-            src=full_filename, dest=None, operation_name="delete", src_type="local"
-        )
+        fileinfo = FileInfo(src=full_filename, dest=None, operation_name="delete", src_type="local")
         result = self.transfer_request_submitter.submit(fileinfo)
         assert result
         queued_result = self.result_queue.get()
@@ -756,9 +736,7 @@ class TestLocalDeleteRequestSubmitter(BaseTransferRequestSubmitterTest):
 
     def test_submit_with_exception(self) -> None:
         """Test submit."""
-        fileinfo = FileInfo(
-            src=self.filename, dest=None, operation_name="delete", src_type="local"
-        )
+        fileinfo = FileInfo(src=self.filename, dest=None, operation_name="delete", src_type="local")
         result = self.transfer_request_submitter.submit(fileinfo)
         assert result
 
@@ -802,9 +780,7 @@ class TestS3TransferHandler:
         )
         fileinfos = [FileInfo(src=tmp_path)]
         assert handler.call(fileinfos) == "success"  # type: ignore
-        mock_submitters.instances["copy"].can_submit.assert_called_once_with(
-            fileinfos[0]
-        )
+        mock_submitters.instances["copy"].can_submit.assert_called_once_with(fileinfos[0])
         mock_submitters.instances["copy"].submit.assert_called_once_with(fileinfos[0])
         self.result_command_recorder.notify_total_submissions.assert_called_once_with(1)  # type: ignore
         self.result_command_recorder.get_command_result.assert_called_once_with()  # type: ignore
@@ -840,9 +816,7 @@ class TestS3TransferHandlerFactory:
         call_kwargs = cast(Dict[str, Any], mock_processor.call_args[1])
         assert len(call_kwargs["result_handlers"]) == 2
         assert isinstance(call_kwargs["result_handlers"][0], ResultRecorder)
-        assert isinstance(
-            call_kwargs["result_handlers"][1], OnlyShowErrorsResultPrinter
-        )
+        assert isinstance(call_kwargs["result_handlers"][1], OnlyShowErrorsResultPrinter)
 
     def test_call_no_progress(self, mocker: MockerFixture) -> None:
         """Test __call__."""
@@ -866,9 +840,7 @@ class TestS3TransferHandlerFactory:
         call_kwargs = cast(Dict[str, Any], mock_processor.call_args[1])
         assert len(call_kwargs["result_handlers"]) == 2
         assert isinstance(call_kwargs["result_handlers"][0], ResultRecorder)
-        assert isinstance(
-            call_kwargs["result_handlers"][1], OnlyShowErrorsResultPrinter
-        )
+        assert isinstance(call_kwargs["result_handlers"][1], OnlyShowErrorsResultPrinter)
 
     def test_call_quiet(self, mocker: MockerFixture) -> None:
         """Test __call__."""
@@ -1127,7 +1099,4 @@ class TestUploadStreamRequestSubmitter(BaseTransferRequestSubmitterTest):
         )
         with pytest.raises(StdinMissingError) as excinfo:
             self.transfer_request_submitter.submit(fileinfo)
-        assert (
-            excinfo.value.message
-            == "stdin is required for this operation, but is not available"
-        )
+        assert excinfo.value.message == "stdin is required for this operation, but is not available"

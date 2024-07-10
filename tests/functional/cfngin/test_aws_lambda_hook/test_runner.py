@@ -60,8 +60,7 @@ def test_deploy_log_messages_pipenv(deploy_result: Result) -> None:
 def test_deploy_log_messages_upload(deploy_result: Result, namespace: str) -> None:
     """Test deploy log messages."""
     assert (
-        f"uploading object: lambda_functions/{namespace}/lambda-dockerize-"
-        in deploy_result.stdout
+        f"uploading object: lambda_functions/{namespace}/lambda-dockerize-" in deploy_result.stdout
     )
     assert (
         f"uploading object: lambda_functions/{namespace}/lambda-nondockerize-"

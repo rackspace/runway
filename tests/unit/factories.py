@@ -201,9 +201,7 @@ class MockRunwayConfig(MutableMap):
         self.variables = MutableMap()
 
         # classmethods
-        self.find_config_file = MagicMock(
-            name="find_config_file", return_value="./runway.yml"
-        )
+        self.find_config_file = MagicMock(name="find_config_file", return_value="./runway.yml")
         self.load_from_file = MagicMock(name="load_from_file", return_value=self)
 
     def __call__(self, **kwargs: Any) -> MockRunwayConfig:
@@ -228,9 +226,7 @@ class MockRunwayContext(RunwayContext):
         """Instantiate class."""
         if not deploy_environment:
             deploy_environment = DeployEnvironment(environ={}, explicit_name="test")
-        super().__init__(
-            command=command, deploy_environment=deploy_environment, work_dir=work_dir
-        )
+        super().__init__(command=command, deploy_environment=deploy_environment, work_dir=work_dir)
         self._boto3_test_client = MutableMap()
         self._boto3_test_stubber = MutableMap()
         self._use_concurrent = True

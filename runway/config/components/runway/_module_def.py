@@ -64,9 +64,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
 
         """
         if not isinstance(modules, list):  # type: ignore
-            raise TypeError(
-                f"expected List[RunwayModuleDefinition]; got {type(modules)}"
-            )
+            raise TypeError(f"expected List[RunwayModuleDefinition]; got {type(modules)}")
         sanitized: List[RunwayModuleDefinitionModel] = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
@@ -89,9 +87,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     def menu_entry(self) -> str:
         """Return menu entry representation of this module."""
         if self.is_parent:
-            return (
-                f"{self.name} [{', '.join([c.menu_entry for c in self.child_modules])}]"
-            )
+            return f"{self.name} [{', '.join([c.menu_entry for c in self.child_modules])}]"
         return self.name
 
     def reverse(self):

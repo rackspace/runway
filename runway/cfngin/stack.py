@@ -173,9 +173,7 @@ class Stack:
                 blueprint_class = RawTemplateBlueprint
                 kwargs["raw_template_path"] = self.definition.template_path
             else:
-                raise AttributeError(
-                    "Stack does not have a defined class or template path."
-                )
+                raise AttributeError("Stack does not have a defined class or template path.")
 
             self._blueprint = cast(
                 "Blueprint",
@@ -224,9 +222,7 @@ class Stack:
         """Return all CloudFormation Parameters without a default value."""
         return self.blueprint.required_parameter_definitions
 
-    def resolve(
-        self, context: CfnginContext, provider: Optional[Provider] = None
-    ) -> None:
+    def resolve(self, context: CfnginContext, provider: Optional[Provider] = None) -> None:
         """Resolve the Stack variables.
 
         This resolves the Stack variables and then prepares the Blueprint for

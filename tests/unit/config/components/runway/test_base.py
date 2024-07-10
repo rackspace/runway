@@ -79,9 +79,7 @@ class SampleConfigComponentDefinition(ConfigComponentDefinition):
 class TestConfigComponentDefinition:
     """Test runway.config.components.runway.base.ConfigComponentDefinition."""
 
-    VARIABLES = RunwayVariablesDefinition.parse_obj(
-        {"key": "val", "test": {"key": "test-val"}}
-    )
+    VARIABLES = RunwayVariablesDefinition.parse_obj({"key": "val", "test": {"key": "test-val"}})
 
     def test_contains(self) -> None:
         """Test __contains__."""
@@ -112,9 +110,7 @@ class TestConfigComponentDefinition:
             var_attr="${var ${env DEPLOY_ENVIRONMENT}.key}", var_attr_pre="${var key}"
         )
         obj = SampleConfigComponentDefinition(data)
-        assert not obj.resolve(
-            runway_context, pre_process=True, variables=self.VARIABLES
-        )
+        assert not obj.resolve(runway_context, pre_process=True, variables=self.VARIABLES)
 
         assert obj.var_attr_pre == self.VARIABLES["key"]
         with pytest.raises(UnresolvedVariable):
@@ -125,9 +121,7 @@ class TestConfigComponentDefinition:
     def test_getitem(self, monkeypatch: MonkeyPatch) -> None:
         """Test __getitem__."""
         mock_getattr = MagicMock(side_effect=["val", AttributeError])
-        monkeypatch.setattr(
-            SampleConfigComponentDefinition, "__getattr__", mock_getattr
-        )
+        monkeypatch.setattr(SampleConfigComponentDefinition, "__getattr__", mock_getattr)
         obj = SampleConfigComponentDefinition.parse_obj({})
 
         assert obj["key"] == "val"
@@ -174,9 +168,7 @@ class TestConfigComponentDefinition:
             var_attr="${var ${env DEPLOY_ENVIRONMENT}.key}", var_attr_pre="${var key}"
         )
         obj = SampleConfigComponentDefinition(data)
-        assert not obj.resolve(
-            runway_context, pre_process=True, variables=self.VARIABLES
-        )
+        assert not obj.resolve(runway_context, pre_process=True, variables=self.VARIABLES)
 
         assert not obj._vars["var_attr"].resolved
         with pytest.raises(UnresolvedVariable):

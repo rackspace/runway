@@ -74,9 +74,7 @@ class TestAwsLambdaHookArgs:
         assert errors[0]["loc"] == ("runtime",)
         assert errors[0]["msg"] == "runtime must be provided if docker.disabled is True"
 
-    def test__validate_runtime_or_docker_no_runtime_or_docker(
-        self, tmp_path: Path
-    ) -> None:
+    def test__validate_runtime_or_docker_no_runtime_or_docker(self, tmp_path: Path) -> None:
         """Test _validate_runtime_or_docker no runtime or docker."""
         with pytest.raises(ValidationError) as excinfo:
             AwsLambdaHookArgs(
@@ -125,10 +123,7 @@ class TestAwsLambdaHookArgs:
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("source_code",)
-        assert (
-            errors[0]["msg"]
-            == f'file or directory at path "{source_path}" does not exist'
-        )
+        assert errors[0]["msg"] == f'file or directory at path "{source_path}" does not exist'
 
 
 class TestPythonHookArgs:

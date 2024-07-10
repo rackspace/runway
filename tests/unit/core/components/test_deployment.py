@@ -115,9 +115,7 @@ class TestDeployment:
         runway_context: MockRunwayContext,
     ) -> None:
         """Test env_vars_config raise UnresolvedVariable."""
-        mocker.patch.object(
-            Deployment, "_Deployment__merge_env_vars", Mock(return_value=None)
-        )
+        mocker.patch.object(Deployment, "_Deployment__merge_env_vars", Mock(return_value=None))
         mocker.patch.object(
             RunwayDeploymentDefinition,
             "env_vars",
@@ -147,9 +145,7 @@ class TestDeployment:
     ) -> None:
         """Test env_vars_config unresolved."""
         expected = {"key": "val"}
-        mocker.patch.object(
-            Deployment, "_Deployment__merge_env_vars", Mock(return_value=None)
-        )
+        mocker.patch.object(Deployment, "_Deployment__merge_env_vars", Mock(return_value=None))
         mocker.patch.object(
             RunwayDeploymentDefinition,
             "env_vars",
@@ -166,9 +162,7 @@ class TestDeployment:
         )
         variable = Mock(value=expected)
 
-        raw_deployment: Dict[str, Any] = cast(
-            Dict[str, Any], fx_deployments.get("min_required")
-        )
+        raw_deployment: Dict[str, Any] = cast(Dict[str, Any], fx_deployments.get("min_required"))
         deployment = RunwayDeploymentDefinition.parse_obj(raw_deployment)
         obj = Deployment(context=runway_context, definition=deployment)
         obj.definition._vars.update({"env_vars": variable})
@@ -228,9 +222,7 @@ class TestDeployment:
         """Test deploy."""
         mock_run = MagicMock()
         mocker.patch.object(Deployment, "run", mock_run)
-        obj = Deployment(
-            context=runway_context, definition=fx_deployments.load("min_required")
-        )
+        obj = Deployment(context=runway_context, definition=fx_deployments.load("min_required"))
         assert not obj.deploy()
         mock_run.assert_called_once_with("deploy", "us-east-1")
 
@@ -287,12 +279,8 @@ class TestDeployment:
             definition=fx_deployments.load("simple_parallel_regions"),
         )
         assert not obj.deploy()
-        assert (
-            "unnamed_deployment:processing regions sequentially..." in caplog.messages
-        )
-        mock_run.assert_has_calls(
-            [call("deploy", "us-east-1"), call("deploy", "us-west-2")]
-        )
+        assert "unnamed_deployment:processing regions sequentially..." in caplog.messages
+        mock_run.assert_has_calls([call("deploy", "us-east-1"), call("deploy", "us-west-2")])
 
     @pytest.mark.parametrize("async_used", [(True), (False)])
     def test_destroy(
@@ -434,8 +422,7 @@ class TestDeployment:
         assert new_ctx != runway_context
         assert new_ctx.command == "destroy" and runway_context.command != "destroy"
         assert (
-            new_ctx.env.aws_region == "us-west-2"
-            and runway_context.env.aws_region != "us-west-2"
+            new_ctx.env.aws_region == "us-west-2" and runway_context.env.aws_region != "us-west-2"
         )
         assert mock_module.run_list.call_args.kwargs["context"] == new_ctx
 
@@ -449,9 +436,7 @@ class TestDeployment:
         """Test validate_account_credentials."""
         caplog.set_level(logging.INFO, logger="runway")
         mock_aws = mocker.patch(f"{MODULE}.aws")
-        obj = Deployment(
-            context=runway_context, definition=fx_deployments.load("validate_account")
-        )
+        obj = Deployment(context=runway_context, definition=fx_deployments.load("validate_account"))
 
         account = MagicMock()
         account.aliases = ["no-match"]
@@ -460,9 +445,7 @@ class TestDeployment:
         with pytest.raises(SystemExit) as excinfo:
             assert obj.validate_account_credentials()
         assert excinfo.value.code == 1
-        assert 'does not match required account "123456789012"' in "\n".join(
-            caplog.messages
-        )
+        assert 'does not match required account "123456789012"' in "\n".join(caplog.messages)
         caplog.clear()
         del excinfo
 
@@ -508,10 +491,6 @@ class TestDeployment:
             future=None,  # type: ignore
             variables=mock_vars,
         )
-        dep0.resolve.assert_called_once_with(
-            runway_context, variables=mock_vars, pre_process=True
-        )
-        dep1.resolve.assert_called_once_with(
-            runway_context, variables=mock_vars, pre_process=True
-        )
+        dep0.resolve.assert_called_once_with(runway_context, variables=mock_vars, pre_process=True)
+        dep1.resolve.assert_called_once_with(runway_context, variables=mock_vars, pre_process=True)
         mock_action.assert_called_once_with()

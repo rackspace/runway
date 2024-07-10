@@ -34,9 +34,7 @@ class AdminRole(Blueprint):
                 Statement(
                     Action=[awacs.sts.AssumeRole],
                     Effect=Allow,
-                    Principal=AWSPrincipal(
-                        self.variables["CrossAccountAccessAccountIds"]
-                    ),
+                    Principal=AWSPrincipal(self.variables["CrossAccountAccessAccountIds"]),
                 )
             )
         return policy_doc

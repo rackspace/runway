@@ -44,18 +44,12 @@ class TestHooks(unittest.TestCase):
     def test_missing_required_hook_method(self) -> None:
         """Test missing required hook method."""
         with self.assertRaises(AttributeError):
-            hooks = [
-                CfnginHookDefinitionModel(
-                    path="runway.cfngin.hooks.blah", required=True
-                )
-            ]
+            hooks = [CfnginHookDefinitionModel(path="runway.cfngin.hooks.blah", required=True)]
             handle_hooks("missing", hooks, self.provider, self.context)
 
     def test_missing_non_required_hook_method(self) -> None:
         """Test missing non required hook method."""
-        hooks = [
-            CfnginHookDefinitionModel(path="runway.cfngin.hooks.blah", required=False)
-        ]
+        hooks = [CfnginHookDefinitionModel(path="runway.cfngin.hooks.blah", required=False)]
         handle_hooks("missing", hooks, self.provider, self.context)
         self.assertTrue(HOOK_QUEUE.empty())
 
@@ -161,9 +155,7 @@ class TestHooks(unittest.TestCase):
                 data_key="my_hook_results",
             ),
             # Shouldn't return data
-            CfnginHookDefinitionModel(
-                path="tests.unit.cfngin.hooks.test_utils.context_hook"
-            ),
+            CfnginHookDefinitionModel(path="tests.unit.cfngin.hooks.test_utils.context_hook"),
         ]
         handle_hooks("result", hooks, self.provider, self.context)
 

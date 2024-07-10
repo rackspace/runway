@@ -48,9 +48,7 @@ class Runway:
         self.__assert_config_version()
         self.ctx.env.log_name()
 
-    def deploy(
-        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
-    ) -> None:
+    def deploy(self, deployments: Optional[List[RunwayDeploymentDefinition]] = None) -> None:
         """Deploy action.
 
         Args:
@@ -58,13 +56,9 @@ class Runway:
                 all deployments in the config will be run.
 
         """
-        self.__run_action(
-            "deploy", deployments if deployments is not None else self.deployments
-        )
+        self.__run_action("deploy", deployments if deployments is not None else self.deployments)
 
-    def destroy(
-        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
-    ) -> None:
+    def destroy(self, deployments: Optional[List[RunwayDeploymentDefinition]] = None) -> None:
         """Destroy action.
 
         Args:
@@ -105,9 +99,7 @@ class Runway:
             result.update(obj.env_vars_config)
         return result
 
-    def init(
-        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
-    ) -> None:
+    def init(self, deployments: Optional[List[RunwayDeploymentDefinition]] = None) -> None:
         """Init action.
 
         Args:
@@ -115,13 +107,9 @@ class Runway:
                 all deployments in the config will be run.
 
         """
-        self.__run_action(
-            "init", deployments if deployments is not None else self.deployments
-        )
+        self.__run_action("init", deployments if deployments is not None else self.deployments)
 
-    def plan(
-        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
-    ) -> None:
+    def plan(self, deployments: Optional[List[RunwayDeploymentDefinition]] = None) -> None:
         """Plan action.
 
         Args:
@@ -129,9 +117,7 @@ class Runway:
                 all deployments in the config will be run.
 
         """
-        self.__run_action(
-            "plan", deployments if deployments is not None else self.deployments
-        )
+        self.__run_action("plan", deployments if deployments is not None else self.deployments)
 
     @staticmethod
     def reverse_deployments(

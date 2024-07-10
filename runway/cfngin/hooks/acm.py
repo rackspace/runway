@@ -89,9 +89,7 @@ class Certificate(Hook):
     stack: Stack
     template_description: str
 
-    def __init__(
-        self, context: CfnginContext, provider: Provider, **kwargs: Any
-    ) -> None:
+    def __init__(self, context: CfnginContext, provider: Provider, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -158,22 +156,16 @@ class Certificate(Hook):
         try:
             stack_info = self.provider.get_stack(self.stack.fqn)
             if self.provider.is_stack_recreatable(stack_info):
-                LOGGER.debug(
-                    "stack is in a recreatable state; domain change does not matter"
-                )
+                LOGGER.debug("stack is in a recreatable state; domain change does not matter")
                 return False
             if self.provider.is_stack_in_progress(
                 stack_info
             ) or self.provider.is_stack_rolling_back(stack_info):
                 LOGGER.debug("stack is in progress; can't check for domain change")
                 return False
-            if (
-                self.args.domain
-                != self.provider.get_outputs(self.stack.fqn)["DomainName"]
-            ):
+            if self.args.domain != self.provider.get_outputs(self.stack.fqn)["DomainName"]:
                 LOGGER.error(
-                    '"domain" can\'t be changed for existing '
-                    'certificate in stack "%s"',
+                    '"domain" can\'t be changed for existing ' 'certificate in stack "%s"',
                     self.stack.fqn,
                 )
                 return True
@@ -228,25 +220,18 @@ class Certificate(Hook):
         """
         if not cert_arn:
             cert_arn = self.get_certificate()
-        cert = self.acm_client.describe_certificate(CertificateArn=cert_arn).get(
-            "Certificate", {}
-        )
+        cert = self.acm_client.describe_certificate(CertificateArn=cert_arn).get("Certificate", {})
 
         try:
             domain_validation = [
-                opt
-                for opt in cert["DomainValidationOptions"]
-                if opt["ValidationStatus"] == status
+                opt for opt in cert["DomainValidationOptions"] if opt["ValidationStatus"] == status
             ]
         except KeyError:
             LOGGER.debug(
-                "waiting for DomainValidationOptions to become "
-                "available for the certificate..."
+                "waiting for DomainValidationOptions to become " "available for the certificate..."
             )
             time.sleep(interval)
-            return self.get_validation_record(
-                cert_arn=cert_arn, interval=interval, status=status
-            )
+            return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
 
         if not domain_validation:
             raise ValueError(
@@ -266,9 +251,7 @@ class Certificate(Hook):
                 "to become available for the certificate..."
             )
             time.sleep(interval)
-            return self.get_validation_record(
-                cert_arn=cert_arn, interval=interval, status=status
-            )
+            return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
 
     def put_record_set(self, record_set: ResourceRecordTypeDef) -> None:
         """Create/update a record set on a Route 53 Hosted Zone.
@@ -277,9 +260,7 @@ class Certificate(Hook):
             record_set: Record set to be added to Route 53.
 
         """
-        LOGGER.info(
-            "adding validation record to hosted zone: %s", self.args.hosted_zone_id
-        )
+        LOGGER.info("adding validation record to hosted zone: %s", self.args.hosted_zone_id)
         self.__change_record_set("CREATE", [record_set])
 
     def remove_validation_records(
@@ -447,17 +428,13 @@ class Certificate(Hook):
             ) as err:
                 # these error are fine if they happen during destruction but
                 # could require manual steps to finish cleanup.
-                LOGGER.warning(
-                    "deletion of the validation records failed with error:\n%s", err
-                )
+                LOGGER.warning("deletion of the validation records failed with error:\n%s", err)
             except ClientError as err:
                 if err.response["Error"]["Message"] != (
                     f"Stack with id {self.stack.fqn} does not exist"
                 ):
                     raise
-                LOGGER.warning(
-                    "deletion of the validation records failed with error:\n%s", err
-                )
+                LOGGER.warning("deletion of the validation records failed with error:\n%s", err)
         else:
             LOGGER.info("deletion of validation records was skipped")
         self.destroy_stack(wait=True)

@@ -123,10 +123,7 @@ class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
                 Action("cloudformation", "List*"),
             ],
             Resource=[
-                Sub(
-                    "arn:aws:cloudformation:*:${AWS::AccountId}:stack/"
-                    f"{self.namespace}-*"
-                ),
+                Sub("arn:aws:cloudformation:*:${AWS::AccountId}:stack/" f"{self.namespace}-*"),
                 f"arn:aws:s3:::{self.namespace}",
                 f"arn:aws:s3:::{self.namespace}/*",
                 f"arn:aws:s3:::{self.namespace}-*",

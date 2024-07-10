@@ -53,26 +53,20 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
         hash_alg: "hashlib._Hash" = hashlib.sha512()
         checksum_filename = filename + "." + hash_alg.name
         LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
-        download_request = requests.get(
-            kb_url + "/" + checksum_filename, allow_redirects=True
-        )
+        download_request = requests.get(kb_url + "/" + checksum_filename, allow_redirects=True)
         download_request.raise_for_status()
     except requests.exceptions.HTTPError:
         try:
             hash_alg = hashlib.sha256()
             checksum_filename = filename + "." + hash_alg.name
             LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
-            download_request = requests.get(
-                kb_url + "/" + checksum_filename, allow_redirects=True
-            )
+            download_request = requests.get(kb_url + "/" + checksum_filename, allow_redirects=True)
             download_request.raise_for_status()
         except requests.exceptions.HTTPError:
             try:
                 hash_alg = hashlib.sha1()
                 checksum_filename = filename + "." + hash_alg.name
-                LOGGER.debug(
-                    "attempting download of kubectl %s checksum...", hash_alg.name
-                )
+                LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
                 download_request = requests.get(
                     kb_url + "/" + checksum_filename, allow_redirects=True
                 )
@@ -81,9 +75,7 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
                 try:
                     hash_alg = hashlib.md5()
                     checksum_filename = filename + "." + hash_alg.name
-                    LOGGER.debug(
-                        "attempting download of kubectl %s checksum...", hash_alg.name
-                    )
+                    LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
                     download_request = requests.get(
                         kb_url + "/" + checksum_filename, allow_redirects=True
                     )
@@ -164,9 +156,7 @@ class KBEnvManager(EnvManager):
 
     VERSION_REGEX: Final[str] = r"^(v)?(?P<version>[0-9]+\.[0-9]+\.[0-9]+\S*)"
 
-    def __init__(
-        self, path: Optional[Path] = None, *, overlay_path: Optional[Path] = None
-    ) -> None:
+    def __init__(self, path: Optional[Path] = None, *, overlay_path: Optional[Path] = None) -> None:
         """Initialize class.
 
         Args:
@@ -237,9 +227,7 @@ class KBEnvManager(EnvManager):
         # Return early (i.e before reaching out to the internet) if the
         # matching version is already installed
         if (self.versions_dir / version_requested).is_dir():
-            LOGGER.verbose(
-                "kubectl version %s already installed; using it...", version_requested
-            )
+            LOGGER.verbose("kubectl version %s already installed; using it...", version_requested)
             self.current_version = version_requested
             return str(self.bin)
 
@@ -285,7 +273,5 @@ class KBEnvManager(EnvManager):
         """
         match = re.search(cls.VERSION_REGEX, version)
         if not match:
-            raise ValueError(
-                f"provided version doesn't conform to regex: {cls.VERSION_REGEX}"
-            )
+            raise ValueError(f"provided version doesn't conform to regex: {cls.VERSION_REGEX}")
         return Version(f"v{match.group('version')}")

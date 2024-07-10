@@ -33,18 +33,14 @@ def destroy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
 
 
 @pytest.mark.order("first")
-@pytest.mark.skipif(
-    platform.system() != "Linux", reason="only runs consistently on Linux"
-)
+@pytest.mark.skipif(platform.system() != "Linux", reason="only runs consistently on Linux")
 def test_deploy_exit_code(deploy_result: Result) -> None:
     """Test deploy exit code."""
     assert deploy_result.exit_code == 0
 
 
 @pytest.mark.order(after="test_deploy_exit_code")
-@pytest.mark.skipif(
-    platform.system() != "Linux", reason="only runs consistently on Linux"
-)
+@pytest.mark.skipif(platform.system() != "Linux", reason="only runs consistently on Linux")
 def test_deploy_log_messages(deploy_result: Result) -> None:
     """Test deploy log messages."""
     assert (
@@ -54,9 +50,7 @@ def test_deploy_log_messages(deploy_result: Result) -> None:
 
 
 @pytest.mark.order("last")
-@pytest.mark.skipif(
-    platform.system() != "Linux", reason="only runs consistently on Linux"
-)
+@pytest.mark.skipif(platform.system() != "Linux", reason="only runs consistently on Linux")
 def test_destroy_exit_code(destroy_result: Result) -> None:
     """Test destroy exit code."""
     assert destroy_result.exit_code == 0

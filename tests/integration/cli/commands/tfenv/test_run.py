@@ -15,9 +15,7 @@ if TYPE_CHECKING:
     from pytest import CaptureFixture, LogCaptureFixture
 
 
-def test_tfenv_run_no_version_file(
-    cd_tmp_path: Path, caplog: LogCaptureFixture
-) -> None:
+def test_tfenv_run_no_version_file(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     """Test ``runway tfenv run -- --help`` no version file."""
     caplog.set_level(logging.ERROR, logger="runway")
     runner = CliRunner()

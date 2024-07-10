@@ -34,7 +34,4 @@ def test_schema_runway_output(cd_tmp_path: Path) -> None:
     assert result.exit_code == 0
     assert str(file_path) in result.output
     assert file_path.is_file()
-    assert (
-        file_path.read_text()
-        == RunwayConfigDefinitionModel.schema_json(indent=4) + "\n"
-    )
+    assert file_path.read_text() == RunwayConfigDefinitionModel.schema_json(indent=4) + "\n"

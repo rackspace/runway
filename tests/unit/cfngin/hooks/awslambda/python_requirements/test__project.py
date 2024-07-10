@@ -74,10 +74,7 @@ class TestPythonProject:
             tmp_requirements_txt.exists.assert_called_once_with()
         else:
             tmp_requirements_txt.exists.assert_not_called()
-        if (
-            max([sum([file_exists, pipenv_value]), sum([file_exists, poetry_value])])
-            == 2
-        ):
+        if max([sum([file_exists, pipenv_value]), sum([file_exists, poetry_value])]) == 2:
             tmp_requirements_txt.unlink.assert_called_once_with()
         else:
             tmp_requirements_txt.unlink.assert_not_called()
@@ -125,9 +122,7 @@ class TestPythonProject:
     @pytest.mark.parametrize(
         "pipenv, poetry", [(False, False), (False, True), (True, False), (True, True)]
     )
-    def test_install_dependencies(
-        self, mocker: MockerFixture, pipenv: bool, poetry: bool
-    ) -> None:
+    def test_install_dependencies(self, mocker: MockerFixture, pipenv: bool, poetry: bool) -> None:
         """Test install_dependencies."""
         args = Mock(cache_dir="foo", extend_pip_args=["--foo", "bar"], use_cache=True)
         mocker.patch.object(PythonProject, "pipenv", pipenv)
@@ -153,17 +148,13 @@ class TestPythonProject:
         """Test install_dependencies using Docker."""
         mock_docker = mocker.patch.object(PythonProject, "docker")
         mock_pip = mocker.patch.object(PythonProject, "pip")
-        mocker.patch.object(
-            PythonProject, "dependency_directory", "dependency_directory"
-        )
+        mocker.patch.object(PythonProject, "dependency_directory", "dependency_directory")
         mocker.patch.object(PythonProject, "requirements_txt", "requirements.txt")
         assert not PythonProject(Mock(), Mock()).install_dependencies()
         mock_docker.install.assert_called_once_with()
         mock_pip.install.assert_not_called()
 
-    def test_install_dependencies_does_not_catch_errors(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_install_dependencies_does_not_catch_errors(self, mocker: MockerFixture) -> None:
         """Test install_dependencies does not catch errors."""
         mocker.patch.object(PythonProject, "pipenv", False)
         mocker.patch.object(PythonProject, "poetry", False)
@@ -196,9 +187,7 @@ class TestPythonProject:
         caplog.set_level(logging.INFO, logger=MODULE.replace("._", "."))
         mock_docker = mocker.patch.object(PythonProject, "docker")
         mock_pip = mocker.patch.object(PythonProject, "pip")
-        mocker.patch.object(
-            PythonProject, "dependency_directory", "dependency_directory"
-        )
+        mocker.patch.object(PythonProject, "dependency_directory", "dependency_directory")
         mocker.patch.object(PythonProject, "requirements_txt", None)
         assert not PythonProject(Mock(), Mock()).install_dependencies()
         mock_docker.install.assert_not_called()
@@ -252,10 +241,7 @@ class TestPythonProject:
         )
         mocker.patch.object(PythonProject, "project_type", "pipenv")
         project_root = mocker.patch.object(PythonProject, "project_root")
-        assert (
-            PythonProject(Mock(use_poetry=True), ctx).pipenv
-            == pipenv_class.return_value
-        )
+        assert PythonProject(Mock(use_poetry=True), ctx).pipenv == pipenv_class.return_value
         pipenv_class.found_in_path.assert_called_once_with()
         pipenv_class.assert_called_once_with(ctx, project_root)
 
@@ -286,10 +272,7 @@ class TestPythonProject:
         )
         mocker.patch.object(PythonProject, "project_type", "poetry")
         project_root = mocker.patch.object(PythonProject, "project_root")
-        assert (
-            PythonProject(Mock(use_poetry=True), ctx).poetry
-            == poetry_class.return_value
-        )
+        assert PythonProject(Mock(use_poetry=True), ctx).poetry == poetry_class.return_value
         poetry_class.found_in_path.assert_called_once_with()
         poetry_class.assert_called_once_with(ctx, project_root)
 
@@ -368,9 +351,7 @@ class TestPythonProject:
                 )
         else:
             mock_pipenv_dir_is_project.assert_called_once_with(tmp_path)
-        if (pipenv_project and not use_pipenv) and sum(
-            [poetry_project, use_poetry]
-        ) != 2:
+        if (pipenv_project and not use_pipenv) and sum([poetry_project, use_poetry]) != 2:
             assert (
                 "pipenv project detected but use of pipenv is explicitly disabled"
                 in caplog.messages
@@ -380,9 +361,7 @@ class TestPythonProject:
         """Test requirements_txt."""
         expected = tmp_path / "requirements.txt"
         expected.touch()
-        mock_dir_is_project = mocker.patch(
-            f"{MODULE}.Pip.dir_is_project", return_value=True
-        )
+        mock_dir_is_project = mocker.patch(f"{MODULE}.Pip.dir_is_project", return_value=True)
         mocker.patch.object(PythonProject, "pipenv", None)
         mocker.patch.object(PythonProject, "poetry", None)
         mocker.patch.object(PythonProject, "project_root", tmp_path)
@@ -391,16 +370,12 @@ class TestPythonProject:
 
     def test_requirements_txt_none(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test requirements_txt is None."""
-        mock_dir_is_project = mocker.patch(
-            f"{MODULE}.Pip.dir_is_project", return_value=False
-        )
+        mock_dir_is_project = mocker.patch(f"{MODULE}.Pip.dir_is_project", return_value=False)
         mocker.patch.object(PythonProject, "pipenv", None)
         mocker.patch.object(PythonProject, "poetry", None)
         mocker.patch.object(PythonProject, "project_root", tmp_path)
         assert not PythonProject(Mock(), Mock()).requirements_txt
-        mock_dir_is_project.assert_called_once_with(
-            tmp_path, file_name="requirements.txt"
-        )
+        mock_dir_is_project.assert_called_once_with(tmp_path, file_name="requirements.txt")
 
     def test_requirements_txt_pipenv(self, mocker: MockerFixture) -> None:
         """Test requirements_txt."""
@@ -438,14 +413,10 @@ class TestPythonProject:
     def test_runtime_pip(self, mocker: MockerFixture) -> None:
         """Test runtime from pip."""
         mocker.patch.object(PythonProject, "docker", None)
-        mocker.patch.object(
-            PythonProject, "pip", Mock(python_version=Mock(major="3", minor="8"))
-        )
+        mocker.patch.object(PythonProject, "pip", Mock(python_version=Mock(major="3", minor="8")))
         assert PythonProject(Mock(runtime=None), Mock()).runtime == "python3.8"
 
-    def test_runtime_raise_runtime_mismatch_error_docker(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_runtime_raise_runtime_mismatch_error_docker(self, mocker: MockerFixture) -> None:
         """Test runtime raise RuntimeMismatchError."""
         args = Mock(runtime="bar")
         docker = mocker.patch.object(PythonProject, "docker", Mock(runtime="foo"))
@@ -454,15 +425,11 @@ class TestPythonProject:
         assert excinfo.value.detected_runtime == docker.runtime
         assert excinfo.value.expected_runtime == args.runtime
 
-    def test_runtime_raise_runtime_mismatch_error_pip(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_runtime_raise_runtime_mismatch_error_pip(self, mocker: MockerFixture) -> None:
         """Test runtime raise RuntimeMismatchError."""
         args = Mock(runtime="bar")
         mocker.patch.object(PythonProject, "docker", None)
-        mocker.patch.object(
-            PythonProject, "pip", Mock(python_version=Mock(major="3", minor="8"))
-        )
+        mocker.patch.object(PythonProject, "pip", Mock(python_version=Mock(major="3", minor="8")))
         with pytest.raises(RuntimeMismatchError) as excinfo:
             assert not PythonProject(args, Mock()).runtime
         assert excinfo.value.detected_runtime == "python3.8"
@@ -493,9 +460,7 @@ class TestPythonProject:
 
     def test_tmp_requirements_txt(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test tmp_requirements_txt."""
-        source_code = mocker.patch.object(
-            PythonProject, "source_code", Mock(md5_hash="hash")
-        )
+        source_code = mocker.patch.object(PythonProject, "source_code", Mock(md5_hash="hash"))
         assert (
             PythonProject(Mock(), Mock(work_dir=tmp_path)).tmp_requirements_txt
             == tmp_path / f"{source_code.md5_hash}.requirements.txt"
