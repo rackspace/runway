@@ -67,19 +67,11 @@ docs-changes: ## build HTML docs; only builds changes detected by Sphinx
 fix-black: ## automatically fix all black errors
 	@poetry run black .
 
-fix-isort: ## automatically fix all isort errors
-	@poetry run isort .
-
-lint: lint-isort lint-black lint-pyright ## run all linters
+lint: lint-black lint-pyright ## run all linters
 
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
 	@poetry run black . --check --color --diff
-	@echo ""
-
-lint-isort: ## run isort
-	@echo "Running isort... If this fails, run 'make fix-isort' to resolve."
-	@poetry run isort . --check-only
 	@echo ""
 
 lint-pyright: ## run pyright

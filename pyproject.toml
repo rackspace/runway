@@ -69,7 +69,6 @@ black = ">=22.1"
 coverage = {extras = ["toml"], version = ">=6.3"}
 doc8 = ">=0.10"  # for linting with vscode rst extension
 dunamai = "^1.5"
-isort = ">=5.12"
 mock = ">=4.0"
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = ">=3.0"}
 pipenv = "^2022.1.8"  # only used in tests
@@ -171,29 +170,6 @@ omit = [
   "*/runway/aws_sso_botocore/*",  # TODO remove native support is added to botocore
   "*/runway/cfngin/hooks/staticsite/auth_at_edge/templates/*",
   "*/type_defs.py",
-]
-
-[tool.isort]
-known_local_folder = [
-  "jwks_rsa",
-  "shared",
-  "update_urls",
-]
-profile = "black"
-skip = [
-  ".demo",
-  ".eggs",
-  ".git",
-  ".mypy_cache",
-  ".runway",
-  ".runway_cache",
-  ".venv",
-  "_build",
-  "build",
-  "dist",
-  "integration_tests",
-  "node_modules",
-  "venv",
 ]
 
 [tool.pyright]
