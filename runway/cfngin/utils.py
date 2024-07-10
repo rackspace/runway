@@ -797,7 +797,7 @@ class SourceProcessor:
         """
         # only loading git here when needed to avoid load errors on systems
         # without git installed
-        from git.repo import Repo  # pylint: disable=import-outside-toplevel
+        from git.repo import Repo
 
         ref = self.determine_git_ref(config)
         dir_name = self.sanitize_git_path(uri=config.uri, ref=ref)

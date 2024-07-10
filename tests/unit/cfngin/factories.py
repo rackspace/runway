@@ -1,6 +1,5 @@
 """Factories for tests."""
 
-# pylint: disable=unused-argument
 # pyright: basic
 from __future__ import annotations
 
@@ -35,7 +34,7 @@ class MockThreadingEvent:
 class MockProviderBuilder(ProviderBuilder):
     """Mock provider builder."""
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(
         self, *, provider: Provider, region: Optional[str] = None, **_: Any
     ) -> None:
         """Instantiate class."""

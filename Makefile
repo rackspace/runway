@@ -70,7 +70,7 @@ fix-black: ## automatically fix all black errors
 fix-isort: ## automatically fix all isort errors
 	@poetry run isort .
 
-lint: lint-isort lint-black lint-pyright lint-pylint ## run all linters
+lint: lint-isort lint-black lint-pyright ## run all linters
 
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
@@ -80,11 +80,6 @@ lint-black: ## run black
 lint-isort: ## run isort
 	@echo "Running isort... If this fails, run 'make fix-isort' to resolve."
 	@poetry run isort . --check-only
-	@echo ""
-
-lint-pylint: ## run pylint
-	@echo "Running pylint..."
-	@poetry run pylint runway tests --rcfile=pyproject.toml
 	@echo ""
 
 lint-pyright: ## run pyright

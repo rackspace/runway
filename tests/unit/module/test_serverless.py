@@ -65,9 +65,7 @@ class TestServerless:
         """Test _deploy_package."""
         caplog.set_level(logging.INFO, logger=MODULE)
         sls_deploy = mocker.patch.object(Serverless, "sls_deploy")
-        assert not Serverless(  # pylint: disable=protected-access
-            runway_context, module_root=tmp_path
-        )._deploy_package()
+        assert not Serverless(runway_context, module_root=tmp_path)._deploy_package()
         tempfile_temporary_directory.assert_not_called()
         sls_deploy.assert_called_once_with()
         assert f"{tmp_path.name}:deploy (in progress)" in caplog.messages
@@ -99,7 +97,7 @@ class TestServerless:
             module_root=tmp_path,
             options={"promotezip": {"bucketname": "test-bucket"}},
         )
-        assert not obj._deploy_package()  # pylint: disable=protected-access
+        assert not obj._deploy_package()
         tempfile_temporary_directory.assert_called_once_with(
             dir=runway_context.work_dir
         )
@@ -290,7 +288,6 @@ class TestServerless:
         tmp_path: Path,
     ) -> None:
         """Test extend_serverless_yml."""
-        # pylint: disable=no-member
         mock_merge = mocker.patch("runway.module.serverless.merge_dicts")
         caplog.set_level(logging.DEBUG, logger="runway")
         mock_func = MagicMock()

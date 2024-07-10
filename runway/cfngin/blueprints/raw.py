@@ -73,7 +73,7 @@ def resolve_variable(provided_variable: Optional[Variable], blueprint_name: str)
     return value
 
 
-class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
+class RawTemplateBlueprint(Blueprint):
     """Blueprint class for blueprints auto-generated from raw templates.
 
     Attributes:
@@ -89,7 +89,7 @@ class RawTemplateBlueprint(Blueprint):  # pylint: disable=abstract-method
 
     raw_template_path: Path
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(
         self,
         name: str,
         context: CfnginContext,

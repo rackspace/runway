@@ -1,7 +1,5 @@
 """Fake Docker API."""
 
-# cspell:disable
-# pylint: disable=consider-using-f-string,invalid-name
 from typing import Any, Callable, Dict, Tuple, Union
 
 from docker import constants

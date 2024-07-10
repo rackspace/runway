@@ -6,7 +6,6 @@ import json
 from typing import Any, Dict, Union
 
 
-# pylint: disable=unused-argument
 def handler(event: Any, context: Any) -> Dict[str, Union[int, str]]:
     """Return Serverless Hello World."""
     body = {

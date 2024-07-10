@@ -1,6 +1,5 @@
 """CFNgin config models."""
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
 import copy
@@ -374,10 +373,10 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         cls: Type[Model],
         b: Union[bytes, str],
         *,
-        content_type: Optional[str] = None,  # pylint: disable=unused-argument
-        encoding: str = "utf8",  # pylint: disable=unused-argument
-        proto: Optional[Protocol] = None,  # pylint: disable=unused-argument
-        allow_pickle: bool = False,  # pylint: disable=unused-argument
+        content_type: Optional[str] = None,
+        encoding: str = "utf8",
+        proto: Optional[Protocol] = None,
+        allow_pickle: bool = False,
     ) -> Model:
         """Parse raw data."""
         return cast("Model", cls.parse_obj(yaml.safe_load(b)))

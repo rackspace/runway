@@ -314,9 +314,7 @@ def calculate_hash_of_extra_files(
         if extra_file.file:
             with open(extra_file.file, "rb") as f:
                 LOGGER.debug("hashing file: %s", extra_file.file)
-                for chunk in iter(
-                    lambda: f.read(4096), ""  # pylint: disable=cell-var-from-loop
-                ):
+                for chunk in iter(lambda: f.read(4096), ""):
                     if not chunk:
                         break
                     file_hash.update(chunk)

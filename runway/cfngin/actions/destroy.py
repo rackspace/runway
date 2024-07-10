@@ -90,7 +90,7 @@ class Action(BaseAction):
     def pre_run(
         self,
         *,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,
         outline: bool = False,
         **__kwargs: Any,
     ) -> None:
@@ -108,11 +108,11 @@ class Action(BaseAction):
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,
         force: bool = False,
-        outline: bool = False,  # pylint: disable=unused-argument
+        outline: bool = False,
         tail: bool = False,
-        upload_disabled: bool = False,  # pylint: disable=unused-argument
+        upload_disabled: bool = False,
         **_kwargs: Any,
     ) -> None:
         """Kicks off the destruction of the stacks in the stack_definitions."""
@@ -137,7 +137,7 @@ class Action(BaseAction):
     def post_run(
         self,
         *,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,
         outline: bool = False,
         **__kwargs: Any,
     ) -> None:

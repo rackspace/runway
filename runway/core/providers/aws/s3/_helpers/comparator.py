@@ -32,7 +32,7 @@ class Comparator:
         self._not_at_dest_sync_strategy = file_not_at_dest_sync_strategy
         self._not_at_src_sync_strategy = file_not_at_src_sync_strategy
 
-    def call(  # pylint: disable=too-many-statements
+    def call(
         self, src_files: Iterator[FileStats], dest_files: Iterator[FileStats]
     ) -> Generator[FileStats, None, None]:
         """Preform the actual comparisons.

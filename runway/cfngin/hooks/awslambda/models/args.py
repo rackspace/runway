@@ -1,6 +1,5 @@
 """Argument data models."""
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
 from pathlib import Path

@@ -7,7 +7,7 @@ import logging
 import re
 from urllib import request
 
-from jose import jwt  # pylint: disable=import-error
+from jose import jwt
 
 LOGGER = logging.getLogger(__name__)
 
@@ -102,7 +102,6 @@ class JwksClient:
         LOGGER.info("Fetching keys from %s", self.options.get("jwks_uri"))
 
         try:
-            # pylint: disable=consider-using-with
             request_res = request.urlopen(self.options.get("jwks_uri"))
             data = json.loads(
                 request_res.read().decode(
@@ -112,7 +111,7 @@ class JwksClient:
             keys = data["keys"]
             LOGGER.info("Keys: %s", keys)
             return keys
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             LOGGER.info("Failure: ConnectionError")
             LOGGER.info(err)
             return {}
@@ -167,7 +166,6 @@ class JwksClient:
         else:
             try:
                 jwk["rsaPublicKey"] = rsa_public_key_to_pem(key.get("n"), key.get("e"))
-            # pylint: disable=broad-except
             except Exception as err:
                 LOGGER.error(err)
                 jwk["rsaPublicKey"] = None

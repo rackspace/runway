@@ -93,6 +93,6 @@ def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
             UserPoolId=context.hook_data["aae_user_pool_id_retriever"]["id"],
         )
         return True
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         LOGGER.exception("unable to update user pool client callback urls")
         return False

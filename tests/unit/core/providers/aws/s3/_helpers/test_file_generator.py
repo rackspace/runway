@@ -93,7 +93,6 @@ def test_is_special_file_fifo(tmp_path: Path) -> None:
     """Test is_special_file."""
     tmp_file = tmp_path / "foo"
     # method only exists on linux systems
-    # pylint: disable=no-member
     os.mknod(tmp_file, 0o600 | stat.S_IFIFO)  # type: ignore
     assert is_special_file(tmp_file)
 

@@ -51,9 +51,7 @@ class OutputLookup(LookupHandler):
         return deconstruct(value), {}
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: CfnginContext, **_: Any
-    ) -> str:
+    def handle(cls, value: str, context: CfnginContext, **_: Any) -> str:
         """Fetch an output from the designated stack.
 
         Args:

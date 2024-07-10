@@ -27,7 +27,6 @@ def test_create_domain(
         "domain": domain,
         "zone_id": create_route53_zone.return_value,
     }
-    # pylint: disable=protected-access
     create_route53_zone.assert_called_once_with(
         cfngin_context._boto3_test_client[f"route53.{cfngin_context.env.aws_region}"],
         domain,

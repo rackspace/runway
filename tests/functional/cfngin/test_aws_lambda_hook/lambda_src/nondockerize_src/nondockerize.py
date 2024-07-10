@@ -1,6 +1,5 @@
 """Test handler."""
 
-# pylint: disable=unused-argument
 import lib
 
 
@@ -10,5 +9,5 @@ def handler(event, context):
         if lib.RESPONSE_OBJ.shape == (3, 5):
             return {"statusCode": 200, "body": str(lib.RESPONSE_OBJ.shape)}
         raise ValueError
-    except:  # pylint: disable=bare-except
+    except:
         return {"statusCode": 500, "body": "fail"}

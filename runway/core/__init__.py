@@ -198,7 +198,7 @@ class Runway:
             try:
                 handler.handle(tst.name, tst.args)
                 logger.success("running test (pass)")
-            except (Exception, SystemExit) as err:  # pylint: disable=broad-except
+            except (Exception, SystemExit) as err:
                 # for lack of an easy, better way to do this atm, assume
                 # SystemExits are due to a test failure and the failure reason
                 # has already been properly logged by the handler or the

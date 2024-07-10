@@ -1,6 +1,5 @@
 """Provider base class."""
 
-# pylint: disable=unused-argument
 from typing import Any, Optional
 
 

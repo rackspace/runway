@@ -357,7 +357,7 @@ class TestDockerDependencyInstaller:
     def test_post_install_commands(
         self,
         mocker: MockerFixture,
-        platform_linux: None,  # pylint: disable=unused-argument
+        platform_linux: None,
     ) -> None:
         """Test post_install_commands."""
         # these methods don't exist on windows so they need to be mocked
@@ -373,7 +373,7 @@ class TestDockerDependencyInstaller:
     def test_post_install_commands_cache_dir(
         self,
         mocker: MockerFixture,
-        platform_linux: None,  # pylint: disable=unused-argument
+        platform_linux: None,
     ) -> None:
         """Test post_install_commands with cache_dir."""
         # these methods don't exist on windows so they need to be mocked
@@ -390,7 +390,7 @@ class TestDockerDependencyInstaller:
     def test_post_install_commands_extra_files(
         self,
         mocker: MockerFixture,
-        platform_linux: None,  # pylint: disable=unused-argument
+        platform_linux: None,
     ) -> None:
         """Test post_install_commands with extra_files."""
         # these methods don't exist on windows so they need to be mocked
@@ -406,9 +406,7 @@ class TestDockerDependencyInstaller:
             f"chown -R {getuid.return_value}:{getgid.return_value} /var/task/lambda",
         ]
 
-    def test_post_install_commands_windows(
-        self, platform_windows: None  # pylint: disable=unused-argument
-    ) -> None:
+    def test_post_install_commands_windows(self, platform_windows: None) -> None:
         """Test post_install_commands Windows."""
         obj = DockerDependencyInstaller(
             Mock(args=Mock(docker=Mock(extra_files=[])), cache_dir=False), client=Mock()

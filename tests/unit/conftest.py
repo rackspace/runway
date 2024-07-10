@@ -1,6 +1,5 @@
 """Pytest fixtures and plugins."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import logging
@@ -35,7 +34,6 @@ LOG = logging.getLogger(__name__)
 TEST_ROOT = Path(os.path.dirname(os.path.realpath(__file__)))
 
 
-# pylint: disable=unused-argument
 def pytest_ignore_collect(path: Any, config: Config) -> bool:
     """Determine if this directory should have its tests collected."""
     if config.option.functional:

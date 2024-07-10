@@ -89,7 +89,6 @@ class Deployment:
             if not self.definition.env_vars:
                 return {}
         except UnresolvedVariable:
-            # pylint: disable=protected-access
             if "env_vars" in self.definition._vars:
                 var = self.definition._vars["env_vars"]
                 var.resolve(self.ctx, variables=self._variables)

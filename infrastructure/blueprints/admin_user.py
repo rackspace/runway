@@ -53,4 +53,4 @@ class AdminUser(Blueprint):
         """Create a template from the Blueprint."""
         self.template.set_description("Admin user")
         self.template.set_version("2010-09-09")
-        self.user  # pylint: disable=pointless-statement
+        self.user

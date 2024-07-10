@@ -84,7 +84,6 @@ def test_remove_image_not_found(
         f"{args.repo}:latest"
     )
     assert remove(context=cfngin_context, **args.dict()) == docker_hook_data
-    # pylint: disable=no-member
     docker_hook_data.client.api.remove_image.assert_has_calls(  # type: ignore
         [
             call(force=False, image=f"{args.repo}:{tag}", noprune=False)

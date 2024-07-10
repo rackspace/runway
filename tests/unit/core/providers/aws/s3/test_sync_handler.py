@@ -1,6 +1,5 @@
 """Test runway.core.providers.aws.s3._sync_handler."""
 
-# pylint: disable=protected-access
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

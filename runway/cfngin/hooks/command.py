@@ -152,5 +152,5 @@ def run_command(*__args: Any, **kwargs: Any) -> RunCommandResponseTypeDef:
                     )
 
                 return {}
-            except Exception:  # pylint: disable=broad-except  # cov: ignore
+            except Exception:  # cov: ignore
                 return {}

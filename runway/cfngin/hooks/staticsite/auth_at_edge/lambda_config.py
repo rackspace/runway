@@ -62,7 +62,6 @@ class HookArgs(HookArgsBaseModel):
     """Optional User Pool group to which access should be restricted."""
 
 
-# pylint: disable=too-many-locals
 def write(
     context: CfnginContext, provider: Provider, *__args: Any, **kwargs: Any
 ) -> Dict[str, Any]:

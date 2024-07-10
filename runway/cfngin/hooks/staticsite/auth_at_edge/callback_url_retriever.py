@@ -80,5 +80,5 @@ def get(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, Any]:
         if callbacks:
             context_dict["callback_urls"] = callbacks
         return context_dict
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         return context_dict

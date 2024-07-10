@@ -77,7 +77,7 @@ class ParametersDataModel(BaseModel):
     @classmethod
     def _determine_paths_type(
         cls,
-        v: Optional[str],  # pylint: disable=unused-argument
+        v: Optional[str],
         values: Dict[str, Any],
     ) -> PathsType:
         """Determine paths type for the given src and dest."""

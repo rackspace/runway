@@ -1,6 +1,5 @@
 """Pytest configuration, fixtures, and plugins."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import shutil
@@ -17,7 +16,6 @@ TEST_ROOT = Path(__file__).parent
 CpConfigTypeDef = Callable[[str, Path], Path]
 
 
-# pylint: disable=unused-argument
 def pytest_ignore_collect(path: Any, config: Config) -> bool:
     """Determine if this directory should have its tests collected."""
     if config.option.functional:

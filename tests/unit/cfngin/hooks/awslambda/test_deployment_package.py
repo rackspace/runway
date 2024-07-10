@@ -1,7 +1,5 @@
 """Test runway.cfngin.hooks.awslambda.deployment_package."""
 
-# pylint: disable=protected-access,redefined-outer-name,unused-argument
-# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import zipfile

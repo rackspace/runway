@@ -38,10 +38,6 @@
     "python.analysis.typeCheckingMode": "strict",
     "python.formatting.provider": "black",
     "python.linting.mypyEnabled": false,
-    "python.linting.pylintArgs": [
-        "--rcfile=pyproject.toml"
-    ],
-    "python.linting.pylintEnabled": true,
     "python.pythonPath": "${workspaceFolder}/.venv/",
     "python.testing.pytestArgs": [
         "tests",

@@ -1,6 +1,5 @@
 """Default AWS Provider."""
 
-# pylint: disable=too-many-lines,too-many-public-methods
 from __future__ import annotations
 
 import json
@@ -1328,7 +1327,7 @@ class Provider(BaseProvider):
 
         self.cloudformation.delete_stack(**args)
 
-    def noninteractive_changeset_update(  # pylint: disable=unused-argument
+    def noninteractive_changeset_update(
         self,
         fqn: str,
         template: Template,
@@ -1383,7 +1382,7 @@ class Provider(BaseProvider):
             return self.interactive_destroy_stack
         return self.noninteractive_destroy_stack
 
-    def default_update_stack(  # pylint: disable=unused-argument
+    def default_update_stack(
         self,
         fqn: str,
         template: Template,

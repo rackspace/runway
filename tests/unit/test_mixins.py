@@ -1,6 +1,5 @@
 """Test runway.mixins."""
 
-# pylint: disable=protected-access,unused-argument
 from __future__ import annotations
 
 import subprocess

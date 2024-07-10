@@ -174,7 +174,6 @@ class TestBaseSync:
         obj.register_strategy(session)
         register_args = cast(Mock, session.register).call_args_list
         assert register_args[0][0][0] == "choosing-s3-sync-strategy"
-        # pylint: disable=comparison-with-callable
         assert register_args[0][0][1] == obj.use_sync_strategy
 
     def test_use_sync_strategy(self, mocker: MockerFixture) -> None:

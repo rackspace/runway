@@ -54,7 +54,7 @@ def full_path(path: str) -> str:
 
 
 # TODO split up to reduce number of statements
-def handle_hooks(  # pylint: disable=too-many-statements
+def handle_hooks(
     stage: str,
     hooks: List[CfnginHookDefinitionModel],
     provider: Provider,
@@ -122,7 +122,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
                 )()
             else:
                 result = cast(Any, method(context=context, provider=provider, **kwargs))
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             LOGGER.exception("hook %s threw an exception", hook.path)
             if hook.required:
                 raise

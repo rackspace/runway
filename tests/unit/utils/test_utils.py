@@ -253,7 +253,6 @@ class TestSafeHaven:
         expected_logs = ["entering a safe haven...", "resetting sys.modules..."]
 
         with SafeHaven() as obj:
-            # pylint: disable=import-outside-toplevel
             from ..fixtures import mock_hooks
 
             assert sys.modules != orig_val
@@ -270,7 +269,6 @@ class TestSafeHaven:
 
         assert module not in sys.modules
         with SafeHaven(sys_modules_exclude=[module]) as obj:
-            # pylint: disable=import-outside-toplevel
             from ..fixtures import mock_hooks
 
             assert module in sys.modules
@@ -392,7 +390,7 @@ def test_load_object_from_string_reload_conditions(monkeypatch: MonkeyPatch) -> 
 
     try:
         del sys.modules["tests.unit.fixtures.mock_hooks"]
-    except:  # pylint: disable=bare-except
+    except:
         pass
 
     load_object_from_string(builtin_test, try_reload=False)

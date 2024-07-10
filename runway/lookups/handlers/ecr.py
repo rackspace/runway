@@ -35,7 +35,7 @@ class EcrLookup(LookupHandler):
         return password
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],

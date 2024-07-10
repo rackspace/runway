@@ -1,7 +1,5 @@
 """Tests for runway.variables."""
 
-# pylint: disable=expression-not-assigned,protected-access,unused-argument
-# pylint: disable=too-many-lines
 # pyright: basic
 from __future__ import annotations
 
@@ -49,7 +47,7 @@ class MockLookupHandler(LookupHandler):
     side_effect: ClassVar[Union[Any, List[Any]]] = None
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],
@@ -320,7 +318,7 @@ class TestVariableValue:
     def test_resolved(self) -> None:
         """Test resolved."""
         with pytest.raises(NotImplementedError):
-            VariableValue().resolved  # pylint: disable=expression-not-assigned
+            VariableValue().resolved
 
     def test_resolve(self, cfngin_context: MockCFNginContext) -> None:
         """Test resolve."""
@@ -334,7 +332,7 @@ class TestVariableValue:
     def test_value(self) -> None:
         """Test value."""
         with pytest.raises(NotImplementedError):
-            VariableValue().value  # pylint: disable=expression-not-assigned
+            VariableValue().value
 
 
 class TestVariableValueConcatenation:
@@ -634,8 +632,6 @@ class TestVariableValueList:
         """Test __getitem__."""
         obj = VariableValueList(["val0", "val1"])
         assert obj[1].value == "val1"
-        # for some reason, the current version of pylint does not see this as iterable
-        # pylint: disable=not-an-iterable
         assert [i.value for i in obj[:2]] == ["val0", "val1"]
 
     def test_init(self, mocker: MockerFixture) -> None:
@@ -899,7 +895,7 @@ class TestVariableValueLookup:
         obj = VariableValueLookup(VariableValueLiteral("test"), "query")
         assert obj.resolved is False
         with pytest.raises(UnresolvedVariableValue):
-            obj.value  # pylint: disable=pointless-statement
+            obj.value
         obj._resolve("success")
         assert obj.resolved is True
         assert obj.value == "success"

@@ -1,6 +1,5 @@
 """Test parallel deployment."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import platform

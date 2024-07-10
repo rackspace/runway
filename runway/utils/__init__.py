@@ -357,7 +357,6 @@ class SafeHaven(ContextManager["SafeHaven"]):
 
     """
 
-    # pylint: disable=redefined-outer-name
     def __init__(
         self,
         argv: Optional[Iterable[str]] = None,

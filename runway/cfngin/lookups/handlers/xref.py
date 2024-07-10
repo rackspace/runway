@@ -27,9 +27,7 @@ class XrefLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ,arguments-renamed
-        cls, value: str, provider: Provider, **_: Any
-    ) -> str:
+    def handle(cls, value: str, provider: Provider, **_: Any) -> str:
         """Fetch an output from the designated, fully qualified stack.
 
         The `output` handler supports fetching outputs from stacks created

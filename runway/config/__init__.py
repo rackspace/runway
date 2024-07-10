@@ -265,7 +265,7 @@ class CfnginConfig(BaseConfig):
                 register_lookup_handler(key, handler)
 
     @classmethod
-    def find_config_file(  # type: ignore pylint: disable=arguments-differ
+    def find_config_file(  # type: ignore
         cls, path: Optional[Path] = None, *, exclude: Optional[List[str]] = None
     ) -> List[Path]:
         """Find a config file in the provided path.

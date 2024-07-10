@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.blueprints.raw."""
 
-# pylint: disable=unused-argument
 # pyright: basic
 from __future__ import annotations
 
@@ -143,7 +142,7 @@ class TestRawTemplateBlueprint:
         """Test parameter_values."""
         obj = RawTemplateBlueprint("test", cfngin_context, raw_template_path=tmp_path)
         assert not obj.parameter_values and isinstance(obj.parameter_values, dict)
-        obj._resolved_variables = {"var": "val"}  # pylint: disable=protected-access
+        obj._resolved_variables = {"var": "val"}
         del obj.parameter_values
         assert obj.parameter_values == {"var": "val"}
 
@@ -307,7 +306,7 @@ class TestRawTemplateBlueprint:
         with pytest.raises(UnresolvedBlueprintVariables):
             _ = obj.variables
         # obj.resolve_variables([Variable("Var0", "test")])
-        obj._resolved_variables = {"var": "val"}  # pylint: disable=protected-access
+        obj._resolved_variables = {"var": "val"}
         assert obj.variables == {"var": "val"}
         obj.variables = {"key": "val"}
         assert obj.variables == {"key": "val"}

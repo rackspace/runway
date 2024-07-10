@@ -345,7 +345,6 @@ class Action(BaseAction):
             return SkippedStatus(reason="canceled execution")
 
     # TODO refactor long if, elif, else block
-    # pylint: disable=too-many-return-statements,too-many-branches,too-many-statements
     def _launch_stack(self, stack: Stack, *, status: Status, **_: Any) -> Status:
         """Handle the creating or updating of a stack in CloudFormation.
 
@@ -383,9 +382,7 @@ class Action(BaseAction):
                 provider.get_stack_status(provider_stack),
             )
 
-            if provider.is_stack_rolling_back(  # pylint: disable=no-else-return
-                provider_stack
-            ):
+            if provider.is_stack_rolling_back(provider_stack):
                 if status.reason and "rolling back" in status.reason:
                     return status
 
@@ -576,7 +573,7 @@ class Action(BaseAction):
         *,
         concurrency: int = 0,
         dump: Union[bool, str] = False,
-        force: bool = False,  # pylint: disable=unused-argument
+        force: bool = False,
         outline: bool = False,
         tail: bool = False,
         upload_disabled: bool = False,

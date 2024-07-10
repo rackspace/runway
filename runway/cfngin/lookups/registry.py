@@ -52,7 +52,7 @@ def register_lookup_handler(
             CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
             return
     # Handler is a not a new-style handler
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     LOGGER.error(
         'lookup "%s" uses an unsupported format; to learn how to write '

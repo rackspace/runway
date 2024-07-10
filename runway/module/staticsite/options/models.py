@@ -37,9 +37,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
         title = "Runway static site Module extra_files option item."
 
     @root_validator
-    def _autofill_content_type(  # pylint: disable=no-self-argument
-        cls, values: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _autofill_content_type(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Attempt to fill content_type if not provided."""
         if values.get("content_type"):
             return values
@@ -51,9 +49,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
         return values
 
     @root_validator(pre=True)
-    def _validate_content_or_file(  # pylint: disable=no-self-argument
-        cls, values: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _validate_content_or_file(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         """Validate that content or file is provided."""
         if all(i in values and values[i] for i in ["content", "file"]):
             raise ValueError("only one of content or file can be provided")

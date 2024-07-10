@@ -1,6 +1,5 @@
 """Docker login hook."""
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
 import logging

@@ -1,6 +1,5 @@
 """Test runway.config.components.runway.base."""
 
-# pylint: disable=protected-access
 # pyright: basic
 from __future__ import annotations
 
@@ -191,7 +190,7 @@ class TestConfigComponentDefinition:
         """Test __setattr__."""
         obj = SampleConfigComponentDefinition.parse_obj({})
         assert not obj._data.get("key")
-        obj.key = "val"  # pylint: disable=attribute-defined-outside-init
+        obj.key = "val"
         assert obj._data["key"] == "val"
         assert obj.key == "val"
 
@@ -207,7 +206,7 @@ class TestConfigComponentDefinition:
     def test_setattr_underscore(self) -> None:
         """Test __setattr__ underscore."""
         obj = SampleConfigComponentDefinition.parse_obj({})
-        obj._key = "_val"  # pylint: disable=attribute-defined-outside-init
+        obj._key = "_val"
         assert "_key" not in obj._data
         assert obj._key == "_val"
 

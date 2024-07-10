@@ -5,7 +5,6 @@ Other tests should exist to test low-level interactions with Terraform.
 
 """
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import locale
@@ -38,12 +37,12 @@ def tf_version(request: SubRequest) -> Generator[str, None, None]:
         encoding=locale.getpreferredencoding(do_setlocale=False),
     )
     yield cast(str, request.param)
-    file_path.unlink(missing_ok=True)  # pylint: disable=unexpected-keyword-arg
+    file_path.unlink(missing_ok=True)
 
 
 @pytest.fixture(scope="function")
 def deploy_result(
-    cli_runner: CliRunner, no_backend: Path  # pylint: disable=unused-argument
+    cli_runner: CliRunner, no_backend: Path
 ) -> Generator[Result, None, None]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
@@ -52,7 +51,6 @@ def deploy_result(
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
-    # pylint: disable=unexpected-keyword-arg
     (CURRENT_DIR / ".terraform.lock.hcl").unlink(missing_ok=True)
     assert destroy_result.exit_code == 0
 

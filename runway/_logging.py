@@ -21,7 +21,7 @@ class LogLevels(IntEnum):
     @classmethod
     def has_value(cls, value: int) -> bool:
         """Check if IntEnum has a value."""
-        return value in cls._value2member_map_  # pylint: disable=no-member
+        return value in cls._value2member_map_
 
 
 # Issue with this version of LoggerAdapter https://github.com/python/typeshed/issues/7855

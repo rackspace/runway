@@ -101,7 +101,7 @@ def warn(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
             LOGGER.warning("for x in %s; do %s; done", (" ").join(functions), cmd)
             LOGGER.warning("On Windows:")
             LOGGER.warning('Foreach ($x in "%s") { %s }', ('","').join(functions), cmd)
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         # There's no harm in continuing on in the event of an error
         # Orphaned functions have no cost
         pass

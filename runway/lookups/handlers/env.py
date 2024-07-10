@@ -20,7 +20,7 @@ class EnvLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],

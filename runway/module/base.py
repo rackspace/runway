@@ -92,7 +92,7 @@ class RunwayModule:
         return getattr(self, key)
 
 
-class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
+class RunwayModuleNpm(RunwayModule):
     """Base class for Runway modules that use npm."""
 
     def __init__(

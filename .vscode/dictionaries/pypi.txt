@@ -22,7 +22,6 @@ pydantic
 pydocstyle
 pyhcl
 pyinstaller
-pylint
 pywin
 pyyaml
 runpy

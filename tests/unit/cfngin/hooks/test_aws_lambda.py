@@ -81,7 +81,7 @@ class TestLambdaHooks(unittest.TestCase):
         return temp_dict
 
     @property
-    def s3(self) -> S3Client:  # pylint: disable=invalid-name
+    def s3(self) -> S3Client:
         """Return S3 client."""
         if not self._s3:
             self._s3 = boto3.client("s3", region_name=REGION)

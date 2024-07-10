@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.output."""
 
-# pylint: disable=protected-access
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

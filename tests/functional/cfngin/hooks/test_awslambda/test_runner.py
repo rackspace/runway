@@ -1,7 +1,5 @@
 """Test AWS Lambda hook."""
 
-# pylint: disable=no-self-argument
-# pylint: disable=redefined-outer-name,unexpected-keyword-arg,unused-argument
 from __future__ import annotations
 
 import json

@@ -85,12 +85,12 @@ class Action(BaseAction):
     def run(
         self,
         *,
-        concurrency: int = 0,  # pylint: disable=unused-argument
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        force: bool = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
-        tail: bool = False,  # pylint: disable=unused-argument
-        upload_disabled: bool = False,  # pylint: disable=unused-argument
+        concurrency: int = 0,
+        dump: Union[bool, str] = False,
+        force: bool = False,
+        outline: bool = False,
+        tail: bool = False,
+        upload_disabled: bool = False,
         **kwargs: Any,
     ) -> None:
         """Generate the underlying graph and prints it."""

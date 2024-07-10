@@ -1,6 +1,5 @@
 """Test ``runway tfenv uninstall`` command."""
 
-# pylint: disable=unused-argument
 from __future__ import annotations
 
 import logging

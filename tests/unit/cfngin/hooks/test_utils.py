@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.utils."""
 
-# pylint: disable=unused-argument, broad-exception-raised
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 from __future__ import annotations
 
@@ -209,7 +208,7 @@ class MockHook(CfnginHookProtocol):
 
     args: Dict[str, Any]
 
-    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:
         """Instantiate class."""
         self.args = {}
 

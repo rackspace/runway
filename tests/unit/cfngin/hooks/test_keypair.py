@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.keypair."""
 
-# pylint: disable=redefined-outer-name
 # pyright: basic
 from __future__ import annotations
 

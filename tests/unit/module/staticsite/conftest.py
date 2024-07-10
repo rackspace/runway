@@ -1,6 +1,5 @@
 """Pytest fixtures and plugins."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 from pathlib import Path

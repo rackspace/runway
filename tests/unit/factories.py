@@ -273,14 +273,12 @@ class MockRunwayContext(RunwayContext):
         )
 
     @property
-    def use_concurrent(self) -> bool:  # pylint: disable=invalid-overridden-method
+    def use_concurrent(self) -> bool:
         """Override property of parent with something that can be set."""
         return self._use_concurrent
 
     @use_concurrent.setter  # type: ignore
-    def use_concurrent(  # pylint: disable=invalid-overridden-method
-        self, value: bool
-    ) -> None:
+    def use_concurrent(self, value: bool) -> None:
         """Override property of parent with something that can be set.
 
         Args:

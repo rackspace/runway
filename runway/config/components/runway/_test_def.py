@@ -46,8 +46,7 @@ class RunwayTestDefinition(Generic[_DataModel], ConfigComponentDefinition):
         """Instantiate class."""
         super().__init__(data)
 
-    # error present on python3.7
-    def __new__(  # pylint: disable=arguments-differ
+    def __new__(
         cls,
         data: _DataModel,
     ) -> RunwayTestDefinition[_DataModel]:

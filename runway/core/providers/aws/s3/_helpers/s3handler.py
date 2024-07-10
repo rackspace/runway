@@ -313,7 +313,6 @@ class BaseTransferRequestSubmitter:
         """Do submit."""
         extra_args: Dict[Any, Any] = {}
         if self.REQUEST_MAPPER_METHOD:
-            # pylint: disable=not-callable
             # TODO revisit in future releases of pyright - not seeing second arg
             self.REQUEST_MAPPER_METHOD(extra_args, self._config_params.dict())  # type: ignore
         subscribers: List[BaseSubscriber] = []
@@ -325,7 +324,6 @@ class BaseTransferRequestSubmitter:
             result_kwargs: Dict[str, Any] = {"result_queue": self._result_queue}
             if self._config_params.is_move:
                 result_kwargs["transfer_type"] = "move"
-            # pylint: disable=not-callable
             subscribers.append(self.RESULT_SUBSCRIBER_CLASS(**result_kwargs))
 
         if not self._config_params.dryrun:
@@ -837,7 +835,7 @@ class LocalDeleteRequestSubmitter(BaseTransferRequestSubmitter):
             self._result_queue.put(QueuedResult(total_transfer_size=0, **result_kwargs))
             os.remove(fileinfo.src)
             self._result_queue.put(SuccessResult(**result_kwargs))
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             self._result_queue.put(FailureResult(exception=exc, **result_kwargs))
         return True
 

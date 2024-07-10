@@ -22,7 +22,6 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
 TroposphereT = TypeVar("TroposphereT", bound=BaseAWSObject)
-# https://github.com/PyCQA/pylint/issues/6003
 
 
 class TroposphereType(Generic[TroposphereT]):

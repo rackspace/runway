@@ -163,7 +163,7 @@ class OnDoneFilteredSubscriber(BaseSubscriber):
         """On done."""
         try:
             future.result()
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             self._on_failure(future, exc)
         else:
             self._on_success(future)
@@ -181,7 +181,7 @@ class DeleteSourceSubscriber(OnDoneFilteredSubscriber):
     def _on_success(self, future: TransferFuture) -> None:
         try:
             self._delete_source(future)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             future.set_exception(exc)
 
     def _delete_source(self, future: TransferFuture) -> None:
@@ -327,7 +327,7 @@ class ProvideLastModifiedTimeSubscriber(OnDoneFilteredSubscriber):
             last_update_tuple = self._last_modified_time.timetuple()
             mod_timestamp = time.mktime(last_update_tuple)
             set_file_utime(filename, int(mod_timestamp))
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:
             warning_message = (
                 f"Successfully Downloaded {filename} but was unable to update the "
                 f"last modified time. {exc}"

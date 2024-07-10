@@ -74,7 +74,6 @@ mock = ">=4.0"
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = ">=3.0"}
 pipenv = "^2022.1.8"  # only used in tests
 pre-commit = "^3.7.1"
-pylint = ">=2.12"
 pytest = ">=7.0"
 pytest-cov = ">=3.0"  # pytest plugin
 pytest-mock = ">=3.7"  # pytest plugin
@@ -196,114 +195,6 @@ skip = [
   "node_modules",
   "venv",
 ]
-
-[tool.pylint.basic]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#basic-checker
-attr-rgx = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
-# attr-name-hint = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
-good-names = [
-  "_",
-  "a",
-  "b",
-  "ci",
-  "db",
-  "f",
-  "fn",
-  "fp",
-  "gb",
-  "i",
-  "id",
-  "j",
-  "k",
-  "kb",
-  "mb",
-  "ok",
-  "os",
-  "ui",
-  "v",
-]
-
-[tool.pylint.classes]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#classes-checker
-defining-attr-methods = [
-  "__init__",
-  "__new__",
-  "setUp",
-]
-exclude-protected = [
-  "_asdict",
-  "_client_config",  # boto3.client.Client._client_config contains info like region
-  "_endpoint",  # boto3.client.Client._endpoint contains s3 endpoint info
-  "_fields",
-  "_make",
-  "_prompter",
-  "_replace",
-  "_session",  # for boto3.session.Session
-  "_source",
-  "_validate_props",  # called on troposphere resources
-]
-
-[tool.pylint.design]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#design-checker-options
-max-args = 10
-max-attributes = 20
-max-bool-expr = 5
-max-branches = 20
-max-locals = 25
-max-parents = 10
-max-public-methods = 30
-max-returns = 10
-max-statements = 50
-min-public-methods = 0
-
-[tool.pylint.format]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#format-checker
-max-line-length = 120
-max-module-lines = 1000
-
-[tool.pylint.imports]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#imports-checker
-allow-wildcard-with-all = "no"
-
-[tool.pylint.logging]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#logging-checker
-logging-format-style = "old"  # TODO update to new
-
-[tool.pylint.master]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#general-options
-extension-pkg-whitelist = [
-  "pydantic",  # https://github.com/samuelcolvin/pydantic/issues/992#issuecomment-553545180
-]
-ignore-patterns = [
-  ".+py[ci]$",
-]
-jobs = 0
-
-[tool.pylint.message_control]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#messages-control-options
-disable = [
-  "broad-exception-raised",
-  "line-too-long",  # flake8 overlap
-  "missing-class-docstring",  # flake8 (pydocstyle) overlap
-  "missing-function-docstring",  # flake8 (pydocstyle) overlap
-  "missing-module-docstring",  # flake8 (pydocstyle) overlap
-  "missing-timeout",
-  "similarities",  # black overcomplicated this
-  "ungrouped-imports",  # false positive when using TYPE_CHECKING; isort should cover this
-  "unused-import",  # flake8 overlap (F401)
-]
-
-[tool.pylint.miscellaneous]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#miscellaneous-checker
-notes = ["FIXME"]
-
-[tool.pylint.typecheck]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#typecheck-checker
-ignored-classes = [
-  "runway.config.ConfigComponent",
-  "runway.utils.MutableMap",
-]
-ignored-modules = ["_typeshed", "distutils"]
 
 [tool.pyright]
 exclude = [

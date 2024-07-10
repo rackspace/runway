@@ -1,6 +1,5 @@
 """AWS SSM Parameter Store hooks."""
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
 import json
@@ -124,14 +123,12 @@ class _Parameter(CfnginHookProtocol):
 
     args: ArgsDataModel
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(
         self,
         context: CfnginContext,
         *,
         name: str,
-        type: Literal[  # pylint: disable=redefined-builtin
-            "String", "StringList", "SecureString"
-        ],
+        type: Literal["String", "StringList", "SecureString"],
         **kwargs: Any,
     ) -> None:
         """Instantiate class.

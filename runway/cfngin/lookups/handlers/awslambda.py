@@ -62,7 +62,6 @@ class AwsLambdaLookup(LookupHandler):
         """
         # needs to be imported here to avoid cyclic imports for conditional code
         # caused by import of runway.cfngin.actions.deploy in runway.cfngin.hooks.base
-        # pylint: disable=import-outside-toplevel
         from ...hooks.awslambda.models.responses import (
             AwsLambdaHookDeployResponse as _AwsLambdaHookDeployResponse,
         )
@@ -114,7 +113,7 @@ class AwsLambdaLookup(LookupHandler):
         return hooks_with_data_key.pop()
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],
@@ -156,7 +155,6 @@ class AwsLambdaLookup(LookupHandler):
         """
         # needs to be imported here to avoid cyclic imports for conditional code
         # caused by import of runway.cfngin.actions.deploy in runway.cfngin.hooks.base
-        # pylint: disable=import-outside-toplevel
         from ...hooks.awslambda.base_classes import AwsLambdaHook as _AwsLambdaHook
 
         kls = load_object_from_string(hook_def.path)
@@ -177,7 +175,7 @@ class AwsLambdaLookup(LookupHandler):
         TYPE_NAME: Final[Literal["awslambda.Code"]] = "awslambda.Code"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -209,7 +207,7 @@ class AwsLambdaLookup(LookupHandler):
         TYPE_NAME: Final[Literal["awslambda.CodeSha256"]] = "awslambda.CodeSha256"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -237,7 +235,7 @@ class AwsLambdaLookup(LookupHandler):
         )
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -271,7 +269,7 @@ class AwsLambdaLookup(LookupHandler):
         )
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -303,7 +301,7 @@ class AwsLambdaLookup(LookupHandler):
         TYPE_NAME: Final[Literal["awslambda.Content"]] = "awslambda.Content"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -335,7 +333,7 @@ class AwsLambdaLookup(LookupHandler):
         TYPE_NAME: Final[Literal["awslambda.LicenseInfo"]] = "awslambda.LicenseInfo"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -365,7 +363,7 @@ class AwsLambdaLookup(LookupHandler):
         TYPE_NAME: Final[Literal["awslambda.Runtime"]] = "awslambda.Runtime"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -391,7 +389,7 @@ class AwsLambdaLookup(LookupHandler):
         TYPE_NAME: Final[Literal["awslambda.S3Bucket"]] = "awslambda.S3Bucket"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -418,7 +416,7 @@ class AwsLambdaLookup(LookupHandler):
         TYPE_NAME: Final[Literal["awslambda.S3Key"]] = "awslambda.S3Key"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],
@@ -447,7 +445,7 @@ class AwsLambdaLookup(LookupHandler):
         )
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
+        def handle(
             cls,
             value: str,
             context: Union[CfnginContext, RunwayContext],

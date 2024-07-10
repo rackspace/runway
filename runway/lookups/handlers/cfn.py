@@ -81,7 +81,7 @@ class CfnLookup(LookupHandler):
         return outputs[query.output_name]
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],

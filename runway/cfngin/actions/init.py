@@ -86,11 +86,11 @@ class Action(BaseAction):
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        force: bool = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,
+        force: bool = False,
+        outline: bool = False,
         tail: bool = False,
-        upload_disabled: bool = True,  # pylint: disable=unused-argument
+        upload_disabled: bool = True,
         **_kwargs: Any,
     ) -> None:
         """Run the action.
@@ -125,9 +125,7 @@ class Action(BaseAction):
             LOGGER.notice("using default blueprint to create cfngin_bucket...")
             self.context.config.stacks = [self.default_cfngin_bucket_stack]
             # clear cached values that were populated by checking the previous condition
-            self.context._del_cached_property(  # pylint: disable=protected-access
-                "stacks", "stacks_dict"
-            )
+            self.context._del_cached_property("stacks", "stacks_dict")
         if self.provider_builder:
             self.provider_builder.region = self.context.bucket_region
         deploy.Action(

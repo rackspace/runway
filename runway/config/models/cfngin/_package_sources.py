@@ -1,6 +1,5 @@
 """CFNgin package source models."""
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional

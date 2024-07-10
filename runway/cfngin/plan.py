@@ -161,7 +161,7 @@ class Step:
             status = self.fn(self.stack, status=self.status)
         except CancelExecution:
             status = SkippedStatus("canceled execution")
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             LOGGER.exception(err)
             status = FailedStatus(reason=str(err))
         self.set_status(status)
@@ -282,7 +282,6 @@ class Step:
                 step action.
 
         """
-        # pylint: disable=import-outside-toplevel
         from runway.config.models.cfngin import CfnginStackDefinitionModel
 
         stack_def = CfnginStackDefinitionModel.construct(

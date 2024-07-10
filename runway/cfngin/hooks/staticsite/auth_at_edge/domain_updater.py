@@ -63,7 +63,7 @@ def update(
         )
         context_dict["domain"] = get_user_pool_domain(domain_prefix, user_pool_region)
         return context_dict
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         LOGGER.exception("could not update user pool domain: %s", user_pool_id)
         return False
 
@@ -101,7 +101,7 @@ def delete(
     except cognito_client.exceptions.InvalidParameterException:
         LOGGER.info('skipped deletion; no domain with prefix "%s"', domain_prefix)
         return True
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         LOGGER.exception("could not delete user pool domain")
         return False
 

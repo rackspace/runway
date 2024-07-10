@@ -73,7 +73,7 @@ def test_get_fqn(delim: str, expected: str, name: Optional[str]) -> None:
     assert get_fqn("test", delim, name) == expected
 
 
-class TestCFNginContext:  # pylint: disable=too-many-public-methods
+class TestCFNginContext:
     """Test runway.context._cfngin.CFNginContext."""
 
     config = CfnginConfig.parse_obj(
@@ -246,7 +246,6 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             {},
             {
                 "Tagging": {
-                    # pylint: disable=protected-access
                     "TagSet": [{"Key": obj._persistent_graph_lock_tag, "Value": "123"}]
                 },
                 **obj.persistent_graph_location,

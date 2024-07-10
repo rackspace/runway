@@ -25,7 +25,7 @@ class VarLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls, value: str, *__args: Any, variables: MutableMap, **__kwargs: Any
     ) -> Any:
         """Retrieve a variable from the variable definition.

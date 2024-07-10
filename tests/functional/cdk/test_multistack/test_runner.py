@@ -10,7 +10,6 @@ To fix linting issue automatically, run the following from this directory::
 
 """
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import shutil

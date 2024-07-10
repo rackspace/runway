@@ -1,6 +1,5 @@
 """Shared functionality for the Auth@Edge Lambda suite."""
 
-# pylint: disable=consider-using-f-string, inconsistent-return-statements
 import base64
 import hmac
 import json
@@ -335,7 +334,6 @@ def http_post_with_retry(url, data, headers):
             read = res.decode("utf-8")
             json_data = json.loads(read)
             return json_data
-        # pylint: disable=broad-except
         except Exception as err:
             LOGGER.error("HTTP POST to %s failed (attempt %s)", url, attempts)
             LOGGER.error(err)

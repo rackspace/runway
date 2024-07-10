@@ -272,7 +272,6 @@ class TestBlueprint:
 
     def test_reset_template(self, cfngin_context: CfnginContext) -> None:
         """Test reset_template."""
-        # pylint: disable=protected-access
         obj = SampleBlueprint(name="test", context=cfngin_context)
         obj._rendered = "true"
         obj._version = "test"

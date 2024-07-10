@@ -36,7 +36,6 @@ class TestAction:
 
     def test__stack_action(self, cfngin_context: CfnginContext) -> None:
         """Test _stack_action."""
-        # pylint: disable=protected-access
         assert Action(cfngin_context)._stack_action is None
 
     def test_cfngin_bucket(

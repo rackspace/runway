@@ -20,7 +20,7 @@ from typing import Any, Dict, MutableMapping, MutableSequence, cast
 import yaml
 
 
-def intrinsics_multi_constructor(  # pylint: disable=unused-argument
+def intrinsics_multi_constructor(
     loader: yaml.Loader, tag_prefix: str, node: yaml.Node
 ) -> Dict[str, Any]:
     """YAML constructor to parse CloudFormation intrinsics.

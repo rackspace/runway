@@ -1,7 +1,6 @@
 """Test runway.module.terraform."""
 
-# pylint: disable=too-many-statements,too-many-lines
-# pyright: basic, reportFunctionMemberAccess=none
+# pyright: reportFunctionMemberAccess=none
 from __future__ import annotations
 
 import json
@@ -60,7 +59,7 @@ def test_update_env_vars_with_tf_var_values() -> None:
     assert result == expected
 
 
-class TestTerraform:  # pylint: disable=too-many-public-methods
+class TestTerraform:
     """Test runway.module.terraform.Terraform."""
 
     def test___init__(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
@@ -248,8 +247,6 @@ class TestTerraform:  # pylint: disable=too-many-public-methods
         )
         command = "apply" if action == "deploy" else action
 
-        # pylint: disable=no-member
-        # module is skipped
         obj = Terraform(runway_context, module_root=tmp_path)
         assert not obj[action]()
         obj.handle_backend.assert_called_once_with()

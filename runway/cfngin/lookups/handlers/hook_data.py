@@ -25,9 +25,7 @@ class HookDataLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: CfnginContext, **_: Any
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext, **_: Any) -> Any:
         """Return the data from ``hook_data``.
 
         Args:

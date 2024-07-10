@@ -39,7 +39,7 @@ def register_lookup_handler(
         if issubclass(handler, LookupHandler):
             RUNWAY_LOOKUP_HANDLERS[lookup_type] = handler
             return
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     raise TypeError(
         f"lookup {handler_or_path} must be a subclass of "

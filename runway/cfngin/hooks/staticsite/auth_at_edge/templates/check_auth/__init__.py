@@ -10,7 +10,6 @@ of the credentials by redirecting the user to the refresh agent.
 
 """
 
-# pylint: disable=consider-using-f-string
 import base64
 import datetime
 import hashlib
@@ -20,9 +19,9 @@ import re
 import secrets
 from urllib.parse import quote_plus, urlencode
 
-from shared_jose import validate_jwt  # pylint: disable=import-error
+from shared_jose import validate_jwt
 
-from shared import (  # pylint: disable=import-error
+from shared import (
     decode_token,
     extract_and_parse_cookies,
     get_config,
@@ -129,7 +128,7 @@ def handler(event, _context):
         )
 
         return request
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         # We need new authorization. Get the user over to Cognito
         nonce = generate_nonce()
         state = {

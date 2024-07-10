@@ -1,6 +1,5 @@
 """AWS Lambda hook."""
 
-# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import hashlib
@@ -212,7 +211,6 @@ def _calculate_hash(files: Iterable[str], root: str) -> str:
         file_path = os.path.join(root, file_name)
         file_hash.update((file_name + "\0").encode())
         with open(file_path, "rb") as file_:
-            # pylint: disable=cell-var-from-loop
             for chunk in iter(lambda: file_.read(4096), ""):
                 if not chunk:
                     break
@@ -527,7 +525,7 @@ def _pip_has_no_color_option(python_path: str) -> bool:
 
 
 # TODO refactor logic to breakup logic into smaller chunks
-def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
+def _zip_package(
     package_root: str,
     *,
     dockerize_pip: DockerizePipArgTypeDef = False,
@@ -578,7 +576,6 @@ def _zip_package(  # pylint: disable=too-many-locals,too-many-statements
     excludes = excludes or []
     excludes.append(".venv/")
 
-    # pylint: disable=consider-using-with
     tmpdir = tempfile.TemporaryDirectory(prefix="cfngin", dir=work_dir)
     tmp_req = os.path.join(tmpdir.name, "requirements.txt")
     copydir(package_root, tmpdir.name, includes, excludes, follow_symlinks)

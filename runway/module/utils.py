@@ -31,7 +31,6 @@ def format_npm_command_for_logging(command: List[str]) -> str:
     return " ".join(command)
 
 
-# type hint quoted b/c pylint 2.11.1 raises unsubscriptable-object
 def generate_node_command(
     command: str,
     command_opts: List[str],
@@ -75,7 +74,6 @@ def generate_node_command(
     return cmd_list
 
 
-# type hint b/c pylint 2.11.1 raises unsubscriptable-object
 def run_module_command(
     cmd_list: List[str],
     env_vars: Dict[str, str],

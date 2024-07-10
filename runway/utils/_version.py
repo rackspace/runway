@@ -22,7 +22,6 @@ class Version(packaging.version.Version):
         """Return repr."""
         # this usage of super is required to reproduce the intended result in
         # any subclasses of this class
-        # pylint: disable=super-with-arguments
         return f"<Version('{super(Version, self).__str__()}')>"
 
     def __str__(self) -> str:

@@ -5,7 +5,6 @@ can be used.
 
 """
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, cast

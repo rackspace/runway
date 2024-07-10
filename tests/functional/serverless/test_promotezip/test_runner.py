@@ -1,6 +1,5 @@
 """Test promote zip between environments."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import shutil

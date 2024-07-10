@@ -21,7 +21,7 @@ class EnvvarLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(cls, value: str, **_: Any) -> str:  # pylint: disable=arguments-differ
+    def handle(cls, value: str, **_: Any) -> str:
         """Retrieve an environment variable.
 
         Args:

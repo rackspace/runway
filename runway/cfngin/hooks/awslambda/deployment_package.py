@@ -394,9 +394,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
         )
 
     @staticmethod
-    def insert_layer_dir(
-        file_path: Path, relative_to: Path  # pylint: disable=unused-argument
-    ) -> Path:
+    def insert_layer_dir(file_path: Path, relative_to: Path) -> Path:
         """Insert directory into local file path for layer archive.
 
         If required, this should be overridden by a subclass for language
@@ -682,7 +680,6 @@ class DeploymentPackageS3Object(DeploymentPackage[_ProjectTypeVar]):
         )
         LOGGER.info("updated S3 object's tags")
 
-    # pylint: disable=unused-argument
     def upload(self, *, build: bool = True) -> None:
         """Upload deployment package.
 

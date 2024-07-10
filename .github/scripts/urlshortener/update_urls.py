@@ -1,6 +1,5 @@
 """Update Runway release URLs."""
 
-# pylint: disable=no-member
 from __future__ import annotations
 
 import logging
@@ -156,4 +155,4 @@ def command(
 
 
 if __name__ == "__main__":
-    command()  # pylint: disable=E
+    command()

@@ -1,6 +1,5 @@
 """Pytest fixtures and plugins."""
 
-# pylint: disable=redefined-outer-name,unused-argument
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast

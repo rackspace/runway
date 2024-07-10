@@ -20,7 +20,7 @@ class DefaultLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls, value: str, context: Optional[CfnginContext] = None, **_: Any
     ) -> Any:
         """Use a value from the environment or fall back to a default value.

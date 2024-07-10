@@ -1,7 +1,5 @@
 """Test runway.context.sys_info."""
 
-# pylint: disable=invalid-name,unused-argument
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

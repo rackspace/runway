@@ -40,7 +40,6 @@ class BootstrapValue(LookupHandler):
 
     """
 
-    # pylint: disable=arguments-differ
     @classmethod
     def handle(  # type: ignore
         cls,

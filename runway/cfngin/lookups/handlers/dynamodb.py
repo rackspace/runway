@@ -139,7 +139,7 @@ class DynamodbLookup(LookupHandler):
         return QueryDataModel.parse_obj(match.groupdict())
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
     ) -> Any:
         """Get a value from a DynamoDB table.

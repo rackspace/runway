@@ -1,6 +1,5 @@
 """Test duplicate stack names."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import shutil

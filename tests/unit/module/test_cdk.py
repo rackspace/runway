@@ -1,7 +1,5 @@
 """Test runway.module.cdk."""
 
-# pylint: disable=unused-argument
-# pyright: basic
 from __future__ import annotations
 
 import logging

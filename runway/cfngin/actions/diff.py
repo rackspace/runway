@@ -257,11 +257,11 @@ class Action(deploy.Action):
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        force: bool = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
-        tail: bool = False,  # pylint: disable=unused-argument
-        upload_disabled: bool = False,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,
+        force: bool = False,
+        outline: bool = False,
+        tail: bool = False,
+        upload_disabled: bool = False,
         **_kwargs: Any,
     ) -> None:
         """Kicks off the diffing of the stacks in the stack_definitions."""
@@ -279,8 +279,8 @@ class Action(deploy.Action):
     def pre_run(
         self,
         *,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
+        dump: Union[bool, str] = False,
+        outline: bool = False,
         **__kwargs: Any,
     ) -> None:
         """Any steps that need to be taken prior to running the action.

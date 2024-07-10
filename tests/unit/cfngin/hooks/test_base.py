@@ -166,9 +166,7 @@ class TestHook:
             COMPLETE,
         ]
 
-        result = hook._wait_for_stack(  # pylint: disable=protected-access
-            action, stack=stack, till_reason="catch"
-        )
+        result = hook._wait_for_stack(action, stack=stack, till_reason="catch")
         assert result == SUBMITTED
         assert result.reason == "catch"
 
@@ -185,7 +183,7 @@ class TestHook:
 
         monkeypatch.setattr(hook, "_log_stack", mock_log)
 
-        hook._wait_for_stack(  # pylint: disable=protected-access
+        hook._wait_for_stack(
             action,
             last_status=SubmittedStatus("original"),
             stack=stack,

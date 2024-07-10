@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.actions.deploy."""
 
-# pylint: disable=unused-argument, protected-access
 # pyright: basic
 from __future__ import annotations
 
@@ -535,7 +534,6 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
 
     def test_launch_stack_recreate(self) -> None:
         """Test launch stack recreate."""
-        # pylint: disable=attribute-defined-outside-init
         self.provider.recreate_failed = True
 
         # initial status should be PENDING

@@ -566,10 +566,8 @@ class ResultPrinter(BaseResultHandler):
         self._redisplay_progress()
 
     def _print_error(self, result: ErrorResult, **_: Any) -> None:
-        # pylint: disable=logging-format-interpolation
         LOGGER.error(self.ERROR_FORMAT.format(exception=result.exception))
 
-    # pylint: disable=unused-argument
     def _print_ctrl_c(self, result: CtrlCResult, **_: Any) -> None:
         LOGGER.warning(self.CTRL_C_MSG)
 
@@ -738,7 +736,7 @@ class ResultProcessor(threading.Thread):
         for result_handler in self._result_handlers:
             try:
                 result_handler(result)
-            except Exception as exc:  # pylint: disable=broad-except
+            except Exception as exc:
                 LOGGER.debug(
                     "Error processing result %s with handler %s: %s",
                     result,

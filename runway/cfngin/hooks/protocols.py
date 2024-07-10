@@ -79,16 +79,8 @@ class CfnginHookProtocol(Protocol):
     """Arguments passed to the hook and parsed into an object."""
 
     @abstractmethod
-    def __init__(  # pylint: disable=super-init-not-called
-        self, context: CfnginContext, **_kwargs: Any
-    ) -> None:
-        """Structural __init__ method.
-
-        This should not be called. Pylint will erroneously warn about
-        "super-init-not-called" if using this class as a subclass. This should
-        be disabled in-line until the bug reports for this issue is resolved.
-
-        """
+    def __init__(self, context: CfnginContext, **_kwargs: Any) -> None:
+        """Structural __init__ method."""
         raise NotImplementedError
 
     @abstractmethod

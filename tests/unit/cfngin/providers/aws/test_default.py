@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.providers.aws.default."""
 
-# pylint: disable=too-many-lines
 # pyright: basic
 from __future__ import annotations
 

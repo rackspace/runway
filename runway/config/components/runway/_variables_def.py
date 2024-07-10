@@ -34,7 +34,6 @@ class RunwayVariablesDefinition(MutableMap):
 
     def __load_file(self) -> Dict[str, Any]:
         """Load a variables file."""
-        # pylint: disable=protected-access
         if self._file_path:
             if self._file_path.is_file():
                 return yaml.safe_load(self._file_path.read_text())

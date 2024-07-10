@@ -6,7 +6,6 @@ then inform the user of a bad request, otherwise retrieve the Cognito tokens to
 add to the cookie headers.
 """
 
-# pylint: disable=consider-using-f-string
 import base64
 import hmac
 import json
@@ -14,12 +13,12 @@ import logging
 from datetime import datetime
 from urllib.parse import parse_qs
 
-from shared_jose import (  # pylint: disable=import-error
+from shared_jose import (
     MissingRequiredGroupError,
     validate_and_check_id_token,
 )
 
-from shared import (  # pylint: disable=import-error
+from shared import (
     create_error_html,
     extract_and_parse_cookies,
     generate_cookie_headers,
@@ -183,7 +182,7 @@ def handler(event, _context):
             },
         }
         return response
-    except Exception as err:  # pylint: disable=broad-except
+    except Exception as err:
         if id_token:
             # ID token found; checking if it is valid
             try:
@@ -203,7 +202,7 @@ def handler(event, _context):
                         **CONFIG.get("cloud_front_headers", {}),
                     },
                 }
-            except Exception as err2:  # pylint: disable=broad-except
+            except Exception as err2:
                 LOGGER.debug("Id token not valid")
                 LOGGER.debug(err2)
 

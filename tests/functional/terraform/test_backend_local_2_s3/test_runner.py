@@ -1,6 +1,5 @@
 """Test migrating local backend to s3."""
 
-# pylint: disable=redefined-outer-name,unused-argument
 from __future__ import annotations
 
 import locale
@@ -44,7 +43,7 @@ def tf_version(request: SubRequest) -> Iterator[str]:
         encoding=locale.getpreferredencoding(do_setlocale=False),
     )
     yield cast(str, request.param)
-    file_path.unlink(missing_ok=True)  # pylint: disable=unexpected-keyword-arg
+    file_path.unlink(missing_ok=True)
 
 
 @pytest.fixture(scope="function")
@@ -65,10 +64,7 @@ def deploy_s3_backend_result(
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
-    (CURRENT_DIR / "local_backend").unlink(  # pylint: disable=unexpected-keyword-arg
-        missing_ok=True
-    )
-    # pylint: disable=unexpected-keyword-arg
+    (CURRENT_DIR / "local_backend").unlink(missing_ok=True)
     (CURRENT_DIR / ".terraform.lock.hcl").unlink(missing_ok=True)
 
 

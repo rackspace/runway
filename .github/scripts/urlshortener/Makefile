@@ -1,11 +1,8 @@
 install:
 	@poetry install
 
-lint: lint-pylint
-
-lint-pylint:
-	@poetry run pylint update_urls.py \
-		--rcfile=./../../../pyproject.toml
+lint:
+	@echo "no linters configured currently"
 
 test:
 	@poetry run pytest ./test_update_urls.py \

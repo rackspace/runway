@@ -32,9 +32,7 @@ class BlueprintTestCase(unittest.TestCase):
 
     OUTPUT_PATH: str = "tests/fixtures/blueprints"
 
-    def assertRenderedBlueprint(  # pylint: disable=invalid-name
-        self, blueprint: Blueprint
-    ) -> None:
+    def assertRenderedBlueprint(self, blueprint: Blueprint) -> None:
         """Test that the rendered blueprint json matches the expected result.
 
         Result files are to be stored in the repo as
@@ -126,7 +124,6 @@ class YamlDirTestGenerator:
         """Yaml filename."""
         return "test_*.yaml"
 
-    # pylint incorrectly detects this
     def test_generator(
         self,
     ) -> Iterator[BlueprintTestCase]:
@@ -141,7 +138,7 @@ class YamlDirTestGenerator:
 
             context: CfnginContext
 
-            def __init__(  # pylint: disable=super-init-not-called
+            def __init__(
                 self,
                 config: CfnginConfig,
                 stack: CfnginStackDefinitionModel,
@@ -152,7 +149,7 @@ class YamlDirTestGenerator:
                 self.stack = stack
                 self.description = f"{stack.name} ({filepath})"
 
-            def __call__(self) -> None:  # pylint: disable=arguments-differ
+            def __call__(self) -> None:
                 """Run when the class instance is called directly."""
                 # Use the context property of the baseclass, if present.
                 # If not, default to a basic context.

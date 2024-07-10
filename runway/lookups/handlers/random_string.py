@@ -95,7 +95,7 @@ class RandomStringLookup(LookupHandler):
         return sum(c(value) for c in checks) == len(checks)
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],

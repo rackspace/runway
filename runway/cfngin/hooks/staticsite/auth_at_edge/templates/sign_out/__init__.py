@@ -1,10 +1,9 @@
 """Sign user out of Cognito and remove all Cookie Headers."""
 
-# pylint: disable=consider-using-f-string
 import logging
 from urllib.parse import urlencode
 
-from shared import (  # pylint: disable=import-error
+from shared import (
     create_error_html,
     extract_and_parse_cookies,
     generate_cookie_headers,

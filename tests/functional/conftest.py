@@ -1,6 +1,5 @@
 """Pytest configuration, fixtures, and plugins."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import os
@@ -23,7 +22,6 @@ if TYPE_CHECKING:
     from _pytest.fixtures import SubRequest
 
 
-# pylint: disable=unused-argument
 def pytest_ignore_collect(path: Any, config: Config) -> bool:
     """Determine if this directory should have its tests collected."""
     return not config.option.functional

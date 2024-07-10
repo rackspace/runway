@@ -1,6 +1,5 @@
 """AMI lookup."""
 
-# pylint: disable=no-self-argument
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
@@ -95,7 +94,7 @@ class AmiLookup(LookupHandler):
         return args.pop("name_regex"), args
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
     ) -> str:
         """Fetch the most recent AMI Id using a filter.

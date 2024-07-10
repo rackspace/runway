@@ -20,7 +20,7 @@ try:  # will raise an import error if git is not in the current path
     import git
     from git.exc import InvalidGitRepositoryError
 except ImportError:  # cov: ignore
-    git = object  # pylint: disable=invalid-name
+    git = object
     InvalidGitRepositoryError = AttributeError
 
 if TYPE_CHECKING:

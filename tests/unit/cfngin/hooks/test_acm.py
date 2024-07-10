@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.acm."""
 
-# pylint: disable=protected-access,unused-argument
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 # pyright: reportUnknownLambdaType=none
 from __future__ import annotations
@@ -835,9 +834,7 @@ class TestCertificate:
 
         assert cert.destroy()
         assert cert.destroy(skip_r53=True)
-        assert (  # pylint: disable=no-member
-            cert.remove_validation_records.call_count == 1  # type: ignore
-        )
+        assert cert.remove_validation_records.call_count == 1  # type: ignore
 
     def test_destroy_aws_errors(
         self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch

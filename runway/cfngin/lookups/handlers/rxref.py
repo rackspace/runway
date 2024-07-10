@@ -43,7 +43,7 @@ class RxrefLookup(LookupHandler):
         return deconstruct(value), {}
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls, value: str, context: CfnginContext, provider: Provider, **_: Any
     ) -> Any:
         """Fetch an output from the designated stack in the current namespace.

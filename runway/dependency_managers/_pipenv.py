@@ -111,7 +111,6 @@ class Pipenv(DependencyManager):
         except subprocess.CalledProcessError as exc:
             raise PipenvExportFailedError from exc
         output.parent.mkdir(exist_ok=True, parents=True)  # ensure directory exists
-        # python3.7 w/ pylint 2.12.[12] crashes if result is not wrapped in str()
         output.write_text(
             str(result), encoding=locale.getpreferredencoding(do_setlocale=False)
         )

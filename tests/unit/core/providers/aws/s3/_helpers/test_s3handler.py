@@ -1,6 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.s3handler."""
 
-# pylint: disable=redefined-outer-name,too-many-lines
 from __future__ import annotations
 
 from pathlib import Path
@@ -140,7 +139,6 @@ class TestBaseTransferRequestSubmitter:
     ) -> None:
         """Test _format_s3_path."""
         assert (
-            # pylint: disable=protected-access
             BaseTransferRequestSubmitter(
                 Mock(), Mock(), ParametersDataModel(dest="", src="")
             )._format_s3_path(path)

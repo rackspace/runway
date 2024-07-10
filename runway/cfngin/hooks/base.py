@@ -56,7 +56,7 @@ class Hook(CfnginHookProtocol):
     stack: Optional[Stack] = None
     stack_name: str = "stack"
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(
         self, context: CfnginContext, provider: Provider, **kwargs: Any
     ) -> None:
         """Instantiate class.
@@ -87,7 +87,7 @@ class Hook(CfnginHookProtocol):
             name=self.stack_name, tags=self.args.tags, **kwargs
         )
         stack = Stack(definition, self.context)
-        stack._blueprint = self.blueprint  # pylint: disable=protected-access
+        stack._blueprint = self.blueprint
         return stack
 
     def get_template_description(self, suffix: Optional[str] = None) -> str:

@@ -23,7 +23,7 @@ class TestStack(unittest.TestCase):
 
     def setUp(self) -> None:
         """Run before tests."""
-        self.sd = {"name": "test"}  # pylint: disable=invalid-name
+        self.sd = {"name": "test"}
         self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
         self.context = CfnginContext(config=self.config)
         self.stack = Stack(
@@ -33,7 +33,6 @@ class TestStack(unittest.TestCase):
         class FakeLookup(LookupHandler):
             """False Lookup."""
 
-            # pylint: disable=arguments-differ,unused-argument
             @classmethod
             def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
                 """Perform the lookup."""
@@ -76,7 +75,7 @@ class TestStack(unittest.TestCase):
         )
         stack = Stack(definition=definition, context=self.context)
         with self.assertRaises(ValueError):
-            stack.requires  # pylint: disable=pointless-statement
+            stack.requires
 
     def test_stack_cfn_parameters(self) -> None:
         """Test stack cfn parameters."""
@@ -86,7 +85,6 @@ class TestStack(unittest.TestCase):
             variables={"Param1": "${output fakeStack.FakeOutput}"},
         )
         stack = Stack(definition=definition, context=self.context)
-        # pylint: disable=protected-access
         stack._blueprint = MagicMock()
         stack._blueprint.parameter_values = {
             "Param2": "Some Resolved Value",

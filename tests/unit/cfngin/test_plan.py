@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.plan."""
 
-# pylint: disable=protected-access,unused-argument
 # pyright: basic
 from __future__ import annotations
 
@@ -156,7 +155,6 @@ class TestPlan(unittest.TestCase):
         class FakeLookup(LookupHandler):
             """False Lookup."""
 
-            # pylint: disable=arguments-differ
             @classmethod
             def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
                 """Perform the lookup."""

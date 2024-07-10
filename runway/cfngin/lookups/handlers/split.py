@@ -15,9 +15,7 @@ class SplitLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, **_: Any
-    ) -> List[str]:
+    def handle(cls, value: str, **_: Any) -> List[str]:
         """Split the supplied string on the given delimiter, providing a list.
 
         Args:

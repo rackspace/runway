@@ -3,8 +3,6 @@
 This file should be considered a python file and linted as such.
 
 """
-# pylint: disable=undefined-variable,wrong-import-order,invalid-name
-# pylint: disable=wrong-import-position,import-self
 import os
 import pkgutil
 from pkg_resources import get_distribution, get_entry_info

@@ -1,6 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.results."""
 
-# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import time
@@ -616,7 +615,6 @@ class TestOnlyShowErrorsResultPrinter(BaseResultPrinterTest):
         assert not self.out_file.getvalue()
 
 
-# pylint: disable=too-many-public-methods
 class TestResultPrinter(BaseResultPrinterTest):
     """Test ResultPrinter."""
 
@@ -1016,13 +1014,13 @@ class TestResultPrinter(BaseResultPrinterTest):
         """Test __init__ no error_file."""
         mock_stderr = mocker.patch("sys.stderr", Mock())
         result = ResultPrinter(self.result_recorder, out_file=self.out_file)
-        assert result._error_file == mock_stderr  # pylint: disable=protected-access
+        assert result._error_file == mock_stderr
 
     def test_init_no_out_file(self, mocker: MockerFixture) -> None:
         """Test __init__ no out_file."""
         mock_stdout = mocker.patch("sys.stdout", Mock())
         result = ResultPrinter(self.result_recorder, error_file=self.error_file)
-        assert result._out_file == mock_stdout  # pylint: disable=protected-access
+        assert result._out_file == mock_stdout
 
     def test_success(self, caplog: LogCaptureFixture) -> None:
         """Test success."""
@@ -1239,7 +1237,6 @@ class TestResultProcessor:
         self.result_queue.put(ShutdownThreadRequest())
         assert not self.result_processor.run()
         mock_process_result.assert_called_once_with(error_result)
-        # pylint: disable=protected-access
         assert not self.result_processor._result_handlers_enabled
 
     def test_process_result_handle_error(self) -> None:
@@ -1265,7 +1262,6 @@ class TestResultRecorder:
     def test_get_ongoing_dict_key(self) -> None:
         """Test _get_ongoing_dict_key."""
         with pytest.raises(TypeError):
-            # pylint: disable=protected-access
             self.result_recorder._get_ongoing_dict_key(Mock())  # type: ignore
 
     def test_record_error_result(self) -> None:

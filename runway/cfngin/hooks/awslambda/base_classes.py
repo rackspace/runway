@@ -142,7 +142,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         """
         return getattr(self.args, "license", None)
 
-    @cached_property  # pylint error is python3.7 only
+    @cached_property
     def metadata_files(self) -> Tuple[Path, ...]:
         """Project metadata files (e.g. ``project.json``, ``pyproject.toml``)."""
         return ()
@@ -269,7 +269,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         """
         raise NotImplementedError
 
-    @cached_property  # pylint error is python3.7 only
+    @cached_property
     def supported_metadata_files(self) -> Set[str]:
         """Names of all supported metadata files.
 
@@ -326,7 +326,6 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
     ctx: CfnginContext
     """CFNgin context object."""
 
-    # pylint: disable=super-init-not-called
     def __init__(self, context: CfnginContext, **_kwargs: Any) -> None:
         """Instantiate class.
 
