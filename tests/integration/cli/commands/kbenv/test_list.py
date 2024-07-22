@@ -27,7 +27,7 @@ def test_kbenv_list(
     assert result.exit_code == 0
     assert caplog.messages == ["kubectl versions installed:"]
     assert {i.strip() for i in result.output.split("\n")} == {
-        "kubectl versions installed:",
+        "[runway] kubectl versions installed:",
         "v1.14.0",
         "v1.21.0",
         "",

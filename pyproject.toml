@@ -288,6 +288,9 @@ select = ["ALL"]
 "*.py" = [
   "PYI024",  # Use `typing.NamedTuple` instead of `collections.namedtuple`  # NOTE (kyle): should only apply to pyi
 ]
+".github/scripts/*" = [
+  "EXE002",  # The file is executable but no shebang is present  # NOTE (kyle): fails linting on windows
+]
 "runway/templates/*" = [
   "N999",  # Invalid module name  # NOTE (kyle): these are fine here
 ]

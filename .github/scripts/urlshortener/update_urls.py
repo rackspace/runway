@@ -1,4 +1,4 @@
-"""Update Runway release URLs."""  # noqa: EXE002, INP001
+"""Update Runway release URLs."""  # noqa: INP001
 
 from __future__ import annotations
 
