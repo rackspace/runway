@@ -217,6 +217,12 @@
         "usefixtures",
         "viewcode",
         "writeacl",
-        "xmlsec"
+        "xmlsec",
+        "troyready",
+        "tomlsort",
+        "pyupgrade",
+        "tryceratops",
+        "errmsg",
+        "datetimez"
     ]
 }

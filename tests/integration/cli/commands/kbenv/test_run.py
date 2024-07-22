@@ -35,8 +35,8 @@ def test_kbenv_run_separator(
 ) -> None:
     """Test ``runway kbenv run -- --help``.
 
-    Parsing of command using ``--`` as a seperator between options and args.
-    Everything that comes after the seperator should be forwarded on as an arg
+    Parsing of command using ``--`` as a separator between options and args.
+    Everything that comes after the separator should be forwarded on as an arg
     and not parsed as an option by click. This is only required when trying to
     pass options shared with Runway such as ``--help``.
 

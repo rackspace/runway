@@ -351,10 +351,10 @@ class TestCertificate:
             ("FAILED", "SUCCESS"),
         ],
     )
-    def test_get_validation_record_status_missmatch(
+    def test_get_validation_record_status_mismatch(
         self, cfngin_context: MockCfnginContext, check: str, found: str
     ) -> None:
-        """Test get get_validation_record with a missmatched record status."""
+        """Test get get_validation_record with a mismatched record status."""
         # setup context
         acm_stubber = cfngin_context.add_stubber("acm", region="us-east-1")
         cfngin_context.add_stubber("route53", region="us-east-1")
