@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 from click.testing import CliRunner
-from mock import Mock
 from pydantic import ValidationError
 
 from runway._cli import cli
@@ -23,7 +23,7 @@ from runway.exceptions import ConfigNotFound
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
+    import pytest
     from pytest_mock import MockerFixture
 
     from ...conftest import CpConfigTypeDef
@@ -34,7 +34,7 @@ MODULE = "runway._cli.commands._init"
 def test_init(
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     mocker: MockerFixture,
 ) -> None:
     """Test init."""
@@ -124,7 +124,7 @@ def test_init_options_deploy_environment(
 
 
 def test_init_options_tag(
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
     mocker: MockerFixture,

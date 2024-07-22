@@ -1,20 +1,20 @@
-"""Test runway.core.components.deploy_environment."""
+"""Test runway.core.components._deploy_environment."""
 
+# ruff: noqa: SLF001
 from __future__ import annotations
 
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 import pytest
 from git.exc import InvalidGitRepositoryError
-from mock import MagicMock
 
-from runway.core.components import DeployEnvironment
+from runway.core.components._deploy_environment import DeployEnvironment
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 MODULE = "runway.core.components._deploy_environment"
@@ -29,7 +29,7 @@ TEST_CREDENTIALS = {
 class TestDeployEnvironment:
     """Test runway.core.components.DeployEnvironment."""
 
-    def test_init(self, cd_tmp_path: Path) -> None:
+    def test___init__(self, cd_tmp_path: Path) -> None:
         """Test attributes set by init."""
         new_dir = cd_tmp_path / "new_dir"
         obj = DeployEnvironment(
@@ -43,13 +43,18 @@ class TestDeployEnvironment:
         assert obj.root_dir == new_dir
         assert obj.vars == {"key": "val"}
 
-    def test_init_defaults(self, cd_tmp_path: Path) -> None:
+    def test___init___defaults(self, cd_tmp_path: Path) -> None:
         """Test attributes set by init default values."""
         obj = DeployEnvironment()
 
         assert not obj._ignore_git_branch
         assert obj.name_derived_from is None
         assert obj.root_dir == cd_tmp_path
+        assert obj.vars == os.environ
+
+    def test___init___empty_environ(self) -> None:
+        """Test attributes set by init."""
+        obj = DeployEnvironment(environ={})
         assert obj.vars == os.environ
 
     def test_boto3_credentials(self) -> None:
@@ -97,7 +102,7 @@ class TestDeployEnvironment:
 
         obj = DeployEnvironment()
         assert obj.branch_name == branch_name
-        mock_git.Repo.assert_called_once_with(os.getcwd(), search_parent_directories=True)
+        mock_git.Repo.assert_called_once_with(str(Path.cwd()), search_parent_directories=True)
 
     def test_branch_name_invalid_repo(self, mocker: MockerFixture) -> None:
         """Test branch_name handle InvalidGitRepositoryError."""
@@ -106,9 +111,11 @@ class TestDeployEnvironment:
 
         obj = DeployEnvironment()
         assert obj.branch_name is None
-        mock_git.Repo.assert_called_once_with(os.getcwd(), search_parent_directories=True)
+        mock_git.Repo.assert_called_once_with(str(Path.cwd()), search_parent_directories=True)
 
-    def test_branch_name_no_git(self, mocker: MockerFixture, caplog: LogCaptureFixture) -> None:
+    def test_branch_name_no_git(
+        self, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
+    ) -> None:
         """Test branch_name git ImportError."""
         caplog.set_level(logging.DEBUG, logger="runway.core.components")
         mocker.patch(f"{MODULE}.git", object)
@@ -120,15 +127,16 @@ class TestDeployEnvironment:
             "to read the branch name"
         ) in caplog.messages
 
-    def test_branch_name_type_error(self, mocker: MockerFixture, caplog: LogCaptureFixture) -> None:
+    def test_branch_name_type_error(
+        self, mocker: MockerFixture, caplog: pytest.LogCaptureFixture
+    ) -> None:
         """Test branch_name handle TypeError."""
         caplog.set_level(logging.WARNING, logger="runway")
         mock_git = mocker.patch(f"{MODULE}.git")
         mock_git.Repo.side_effect = TypeError
 
         with pytest.raises(SystemExit) as excinfo:
-            obj = DeployEnvironment()
-            assert not obj.branch_name
+            assert not DeployEnvironment().branch_name
 
         assert excinfo.value.code == 1
         assert "Unable to retrieve the current git branch name!" in caplog.messages
@@ -245,7 +253,7 @@ class TestDeployEnvironment:
         ],
     )
     def test_name_from_branch(
-        self, branch: str, environ: Dict[str, str], expected: str, mocker: MockerFixture
+        self, branch: str, environ: dict[str, str], expected: str, mocker: MockerFixture
     ) -> None:
         """Test name from branch."""
         mock_prompt = MagicMock(return_value="user_value")
@@ -307,7 +315,7 @@ class TestDeployEnvironment:
             (
                 "explicit",
                 [
-                    'deploy environment "test" is explicitly defined ' "in the environment",
+                    'deploy environment "test" is explicitly defined in the environment',
                     "if not correct, update the value or unset it to "
                     "fall back to the name of the current git branch "
                     "or parent directory",
@@ -316,7 +324,7 @@ class TestDeployEnvironment:
             (
                 "branch",
                 [
-                    'deploy environment "test" was determined from the ' "current git branch",
+                    'deploy environment "test" was determined from the current git branch',
                     "if not correct, update the branch name or set an "
                     "override via the DEPLOY_ENVIRONMENT environment "
                     "variable",
@@ -325,7 +333,7 @@ class TestDeployEnvironment:
             (
                 "directory",
                 [
-                    'deploy environment "test" was determined from ' "the current directory",
+                    'deploy environment "test" was determined from the current directory',
                     "if not correct, update the directory name or "
                     "set an override via the DEPLOY_ENVIRONMENT "
                     "environment variable",
@@ -336,8 +344,8 @@ class TestDeployEnvironment:
     def test_log_name(
         self,
         derived_from: str,
-        expected: List[str],
-        caplog: LogCaptureFixture,
+        expected: list[str],
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
     ) -> None:
         """Test log_name."""

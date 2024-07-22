@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-from mock import Mock
+from unittest.mock import Mock
 
 from runway.cfngin.hooks.awslambda.base_classes import Project
 from runway.cfngin.hooks.awslambda.models.args import AwsLambdaHookArgs

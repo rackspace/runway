@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from pydantic import ValidationError
@@ -67,9 +67,8 @@ class TestParameters:
     def test_same_path_mv_s3s3(self) -> None:
         """Test _same_path."""
         self.data_s3s3.dest = self.data_s3s3.src
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="Cannot mv a file onto itself"):
             Parameters("mv", self.data_s3s3)
-        assert "Cannot mv a file onto itself" in str(excinfo.value)
 
     def test_same_path_mv_s3s3_not_same(self) -> None:
         """Test _same_path."""
@@ -162,7 +161,7 @@ class TestParametersDataModel:
         "kwargs, error_locs",
         [({"dest": "test-dest"}, ["src"]), ({"src": "test-src"}, ["dest"])],
     )
-    def test_required_fields(self, error_locs: List[str], kwargs: Dict[str, Any]) -> None:
+    def test_required_fields(self, error_locs: list[str], kwargs: dict[str, Any]) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
             ParametersDataModel(**kwargs)

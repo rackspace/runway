@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock, call
 
 from runway.cfngin.hooks.awslambda.source_code import SourceCode
 

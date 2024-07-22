@@ -6,7 +6,7 @@ import concurrent.futures
 import logging
 import multiprocessing
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from ..._logging import PrefixAdaptor
 from ...compat import cached_property
@@ -57,7 +57,7 @@ class Deployment:
         self.__merge_env_vars()
 
     @property
-    def assume_role_config(self) -> Dict[str, Union[bool, int, str]]:
+    def assume_role_config(self) -> dict[str, Union[bool, int, str]]:
         """Parse the definition to get assume role arguments."""
         assume_role = self.definition.assume_role
         if not assume_role:
@@ -79,22 +79,22 @@ class Deployment:
         }
 
     @property
-    def env_vars_config(self) -> Dict[str, str]:
+    def env_vars_config(self) -> dict[str, str]:
         """Parse the definition to get the correct env_vars configuration."""
         try:
             if not self.definition.env_vars:
                 return {}
         except UnresolvedVariable:
-            if "env_vars" in self.definition._vars:
-                var = self.definition._vars["env_vars"]
+            if "env_vars" in self.definition._vars:  # noqa: SLF001
+                var = self.definition._vars["env_vars"]  # noqa: SLF001
                 var.resolve(self.ctx, variables=self._variables)
-                self.definition._data["env_vars"] = var.value
+                self.definition._data["env_vars"] = var.value  # noqa: SLF001
             else:
                 raise
         return flatten_path_lists(self.definition.env_vars, str(self.ctx.env.root_dir))
 
     @cached_property
-    def regions(self) -> List[str]:
+    def regions(self) -> list[str]:
         """List of regions this deployment is associated with."""
         return self.definition.parallel_regions or self.definition.regions
 
@@ -200,7 +200,7 @@ class Deployment:
                 )
                 sys.exit(1)
             self.logger.info(
-                "verified current AWS account matches required " + 'account id "%s"',
+                'verified current AWS account matches required account id "%s"',
                 self.definition.account_id,
             )
         if self.definition.account_alias:
@@ -259,7 +259,7 @@ class Deployment:
         cls,
         action: RunwayActionTypeDef,
         context: RunwayContext,
-        deployments: List[RunwayDeploymentDefinition],
+        deployments: list[RunwayDeploymentDefinition],
         future: RunwayFutureDefinitionModel,
         variables: RunwayVariablesDefinition,
     ) -> None:

@@ -4,15 +4,16 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final
 
 from troposphere import BaseAWSObject
-from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import MutableMap
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)

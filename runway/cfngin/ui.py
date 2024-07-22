@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import logging
 import threading
+from contextlib import AbstractContextManager
 from getpass import getpass
-from typing import TYPE_CHECKING, Any, ContextManager, Optional, TextIO, Type, Union
+from typing import TYPE_CHECKING, Any, TextIO
 
 if TYPE_CHECKING:
     from types import TracebackType
+
+    from typing_extensions import Self
 
 LOGGER = logging.getLogger(__name__)
 
@@ -18,7 +21,7 @@ def get_raw_input(message: str) -> str:
     return input(message)
 
 
-class UI(ContextManager["UI"]):
+class UI(AbstractContextManager["UI"]):
     """Used internally from terminal output in a multithreaded environment.
 
     Ensures that two threads don't write over each other while asking a user
@@ -33,9 +36,9 @@ class UI(ContextManager["UI"]):
     def log(
         self,
         lvl: int,
-        msg: Union[Exception, str],
+        msg: Exception | str,
         *args: Any,
-        logger: Union[logging.Logger, logging.LoggerAdapter[Any]] = LOGGER,
+        logger: logging.Logger | logging.LoggerAdapter[Any] = LOGGER,
         **kwargs: Any,
     ) -> None:
         """Log the message if the current thread owns the underlying lock.
@@ -44,8 +47,11 @@ class UI(ContextManager["UI"]):
             lvl: Log level.
             msg: String template or exception to use for the log record.
             logger: Specific logger to log to.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
+        kwargs["stacklevel"] = kwargs.get("stacklevel", 1) + 1
         with self:
             return logger.log(lvl, msg, *args, **kwargs)
 
@@ -53,7 +59,7 @@ class UI(ContextManager["UI"]):
         self,
         msg: str,
         *args: Any,
-        logger: Union[logging.Logger, logging.LoggerAdapter[Any]] = LOGGER,
+        logger: logging.Logger | logging.LoggerAdapter[Any] = LOGGER,
         **kwargs: Any,
     ) -> None:
         """Log the line if the current thread owns the underlying lock.
@@ -62,6 +68,8 @@ class UI(ContextManager["UI"]):
             msg: String template or exception to use
                 for the log record.
             logger: Specific logger to log to.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         kwargs["logger"] = logger
@@ -79,21 +87,21 @@ class UI(ContextManager["UI"]):
         with self:
             return get_raw_input(message)
 
-    def getpass(self, prompt: str, stream: Optional[TextIO] = None) -> str:
+    def getpass(self, prompt: str, stream: TextIO | None = None) -> str:
         """Wrap getpass to lock the UI."""
         with self:
             return getpass(prompt, stream)
 
-    def __enter__(self) -> UI:
+    def __enter__(self) -> Self:
         """Enter the context manager."""
         self._lock.__enter__()
         return self
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         """Exit the context manager."""
         self._lock.__exit__(exc_type, exc_value, traceback)

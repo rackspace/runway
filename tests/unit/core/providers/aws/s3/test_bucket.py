@@ -6,15 +6,14 @@ from __future__ import annotations
 import logging
 from http import HTTPStatus
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 import pytest
-from mock import MagicMock
 
 from runway.core.providers.aws import BaseResponse
 from runway.core.providers.aws.s3 import Bucket
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from .....factories import MockRunwayContext
@@ -87,7 +86,7 @@ class TestBucket:
         stubber.assert_no_pending_responses()
 
     def test_create_exists(
-        self, caplog: LogCaptureFixture, runway_context: MockRunwayContext
+        self, caplog: pytest.LogCaptureFixture, runway_context: MockRunwayContext
     ) -> None:
         """Test create with exists=True."""
         caplog.set_level(logging.DEBUG, logger="runway.core.providers.aws.s3.bucket")
@@ -106,7 +105,7 @@ class TestBucket:
         assert "bucket already exists" in "\n".join(caplog.messages)
 
     def test_create_forbidden(
-        self, caplog: LogCaptureFixture, runway_context: MockRunwayContext
+        self, caplog: pytest.LogCaptureFixture, runway_context: MockRunwayContext
     ) -> None:
         """Test create with forbidden=True."""
         caplog.set_level(logging.DEBUG, logger="runway.core.providers.aws.s3.bucket")
@@ -178,7 +177,7 @@ class TestBucket:
         stubber.assert_no_pending_responses()
 
     def test_enable_versioning_skipped(
-        self, caplog: LogCaptureFixture, runway_context: MockRunwayContext
+        self, caplog: pytest.LogCaptureFixture, runway_context: MockRunwayContext
     ) -> None:
         """Test enable_versioning with Status=Enabled."""
         caplog.set_level(logging.DEBUG, logger="runway.core.providers.aws.s3.bucket")
@@ -277,7 +276,7 @@ class TestBucket:
         stubber.assert_no_pending_responses()
 
     def test_head_clienterror(
-        self, caplog: LogCaptureFixture, runway_context: MockRunwayContext
+        self, caplog: pytest.LogCaptureFixture, runway_context: MockRunwayContext
     ) -> None:
         """Test head with ClientError."""
         caplog.set_level(logging.DEBUG, logger="runway.core.providers.aws.s3.bucket")

@@ -5,16 +5,15 @@ from __future__ import annotations
 import logging
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Union
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.compat import shlex_join
 from runway.dependency_managers import Pip, PipInstallFailedError
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 MODULE = "runway.dependency_managers._pip"
@@ -36,7 +35,7 @@ class TestPip:
             ({"file_name": "foo.txt"}, True),
         ],
     )
-    def test_dir_is_project(self, expected: bool, kwargs: Dict[str, str], tmp_path: Path) -> None:
+    def test_dir_is_project(self, expected: bool, kwargs: dict[str, str], tmp_path: Path) -> None:
         """Test dir_is_project."""
         requirements_txt = tmp_path / kwargs.get("file_name", "requirements.txt")
         if expected:
@@ -48,8 +47,8 @@ class TestPip:
     @pytest.mark.parametrize("command", ["test", ["test"]])
     def test_generate_command(
         self,
-        caplog: LogCaptureFixture,
-        command: Union[List[str], str],
+        caplog: pytest.LogCaptureFixture,
+        command: Union[list[str], str],
         mocker: MockerFixture,
     ) -> None:
         """Test generate_command."""
@@ -87,7 +86,7 @@ class TestPip:
         ],
     )
     def test_generate_install_command(
-        self, call_args: Dict[str, Any], expected: Dict[str, Any], mocker: MockerFixture
+        self, call_args: dict[str, Any], expected: dict[str, Any], mocker: MockerFixture
     ) -> None:
         """Test generate_install_command."""
         expected.setdefault("cache_dir", None)
@@ -134,7 +133,7 @@ class TestPip:
             target=target,
         )
         mock_run_command.assert_called_once_with(
-            mock_generate_install_command.return_value + ["--foo", "bar"],
+            [*mock_generate_install_command.return_value, "--foo", "bar"],
             suppress_output=False,
         )
 

@@ -2,7 +2,7 @@
 """Module with Terraform state resources."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 import awacs.dynamodb
 import awacs.s3
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class TfState(Blueprint):
     """CFNgin blueprint for creating Terraform state resources."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "BucketDeletionPolicy": {
             "type": str,
             "allowed_values": ["Delete", "Retain"],
@@ -148,4 +148,4 @@ class TfState(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(TfState("test", CfnginContext(parameters={"namespace": "test"})).to_json())
+    print(TfState("test", CfnginContext(parameters={"namespace": "test"})).to_json())  # noqa: T201

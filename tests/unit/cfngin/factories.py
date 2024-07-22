@@ -3,9 +3,8 @@
 # pyright: basic
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Optional
-
-from mock import MagicMock
+from typing import TYPE_CHECKING, Any, NamedTuple, Optional
+from unittest.mock import MagicMock
 
 from runway.cfngin.providers.aws.default import ProviderBuilder
 from runway.config import CfnginConfig, CfnginStackDefinitionModel
@@ -26,7 +25,7 @@ class Lookup(NamedTuple):
 class MockThreadingEvent:
     """Mock thread events."""
 
-    def wait(self, timeout: Optional[int] = None) -> bool:
+    def wait(self, timeout: Optional[int] = None) -> bool:  # noqa: ARG002
         """Mock wait method."""
         return False
 
@@ -39,7 +38,9 @@ class MockProviderBuilder(ProviderBuilder):
         self.provider = provider
         self.region = region
 
-    def build(self, *, profile: Optional[str] = None, region: Optional[str] = None) -> Provider:
+    def build(
+        self, *, profile: Optional[str] = None, region: Optional[str] = None  # noqa: ARG002
+    ) -> Provider:
         """Mock build method."""
         return self.provider
 
@@ -51,7 +52,7 @@ def mock_provider(**kwargs: Any) -> MagicMock:
 
 def mock_context(
     namespace: str = "default",
-    extra_config_args: Optional[Dict[str, Any]] = None,
+    extra_config_args: Optional[dict[str, Any]] = None,
     **kwargs: Any,
 ) -> CfnginContext:
     """Mock context."""
@@ -68,7 +69,7 @@ def generate_definition(
     base_name: str, stack_id: Any = None, **overrides: Any
 ) -> CfnginStackDefinitionModel:
     """Generate definitions."""
-    definition: Dict[str, Any] = {
+    definition: dict[str, Any] = {
         "name": f"{base_name}-{stack_id}" if stack_id else base_name,
         "class_path": f"tests.unit.cfngin.fixtures.mock_blueprints.{base_name.upper()}",
         "requires": [],
@@ -102,11 +103,11 @@ class SessionStub:
 
     """
 
-    def __init__(self, client_stub: Any):
+    def __init__(self, client_stub: Any) -> None:
         """Instantiate class."""
         self.client_stub = client_stub
 
-    def client(self, region: str) -> Any:
+    def client(self, region: str) -> Any:  # noqa: ARG002
         """Return the stubbed client object.
 
         Args:

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import string
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.lookups.handlers.random_string import ArgsDataModel, RandomStringLookup
 
@@ -189,7 +189,7 @@ class TestRandomStringLookup:
 
     def test_handle_raise_value_error(self) -> None:
         """Test handle."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             RandomStringLookup.handle("test", Mock())
 
     @pytest.mark.parametrize("value, expected", [(">!?test", False), ("t3st", True)])

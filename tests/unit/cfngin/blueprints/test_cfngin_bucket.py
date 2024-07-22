@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import ANY, Mock
 
-from mock import ANY, Mock
 from troposphere import s3
 
 from runway import __version__

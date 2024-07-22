@@ -6,7 +6,7 @@ https://aws.amazon.com/premiumsupport/knowledge-center/iam-permission-boundaries
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Union
+from typing import TYPE_CHECKING, ClassVar, Union
 
 import awacs.iam
 import awacs.sts
@@ -35,7 +35,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
 
     DESCRIPTION: ClassVar[str] = "Permission boundary for admin users."
     POLICY_NAME: ClassVar[str] = "AdminPreventPrivilegeEscalation"
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "ApprovedPermissionBoundaries": {
             "default": [],
             "description": "List of policy names (not ARNs) that are approved to "
@@ -55,23 +55,23 @@ class AdminPreventPrivilegeEscalation(Blueprint):
         return self.context.namespace
 
     @cached_property
-    def approved_boundary_policies(self) -> List[Sub]:
+    def approved_boundary_policies(self) -> list[Sub]:
         """List of approved permission boundary policies."""
-        tmp = [self.policy_arn]
-        for policy_name in self.variables["ApprovedPermissionBoundaries"]:
-            tmp.append(
+        return [
+            self.policy_arn,
+            *[
                 Sub(f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:policy/{policy_name}")
-            )
-        return tmp
+                for policy_name in self.variables["ApprovedPermissionBoundaries"]
+            ],
+        ]
 
     @cached_property
-    def deny_assume_role_not_resources(self) -> List[Union[str, Sub]]:
+    def deny_assume_role_not_resources(self) -> list[Union[str, Sub]]:
         """List of IAM Role ARNs that can be assumed."""
-        tmp: List[Union[str, Sub]] = [
+        tmp: list[Union[str, Sub]] = [
             Sub(f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:role/{self.namespace}-*")
         ]
-        for arn in self.variables["DenyAssumeRoleNotResources"]:
-            tmp.append(arn)
+        tmp.extend(self.variables["DenyAssumeRoleNotResources"])
         return tmp
 
     @property
@@ -152,10 +152,8 @@ class AdminPreventPrivilegeEscalation(Blueprint):
             Action=[Action("*")],
             Effect=Deny,
             Resource=[
-                Sub("arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/" "onica-sso"),
-                Sub(
-                    "arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/" "onica-sso-*"
-                ),
+                Sub("arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/onica-sso"),
+                Sub("arn:${AWS::Partition}:cloudformation:*:${AWS::AccountId}:stack/onica-sso-*"),
                 Sub("arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/onica-sso"),
                 Sub("arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/onica-sso-*"),
                 Sub("arn:${AWS::Partition}:iam::${AWS::AccountId}:role/onica-sso"),
@@ -197,7 +195,7 @@ class AdminPreventPrivilegeEscalation(Blueprint):
         )
 
     @cached_property
-    def statements(self) -> List[Statement]:
+    def statements(self) -> list[Statement]:
         """List of statements to add to the policy."""
         return [
             self.statement_allow_admin_access,

@@ -1,9 +1,9 @@
-"""Update Runway release URLs."""
+"""Update Runway release URLs."""  # noqa: EXE002, INP001
 
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import boto3
 import click
@@ -23,8 +23,8 @@ OS_NAMES = ["linux", "osx", "windows"]
 
 
 def sanitize_version(
-    _ctx: Optional[click.Context],
-    _param: Optional[Union[click.Option, click.Parameter]],
+    _ctx: click.Context | None,
+    _param: click.Option | click.Parameter | None,
     value: str,
 ) -> str:
     """Sanitize a version number by stripping git tag ref and leading "v".
@@ -64,7 +64,7 @@ def handler(
     """Handle the command.
 
     Core logic executed by the command aside from boto3 session/resource
-    initializeion and logging setup.
+    initialization and logging setup.
 
     Args:
         table: DynamoDB table resource.
@@ -119,7 +119,7 @@ def handler(
     "table_name",
     metavar="<table>",
     required=True,
-    help="Name of the DynamoDB table containing entries for the URL " "shortener.",
+    help="Name of the DynamoDB table containing entries for the URL shortener.",
 )
 @click.option(
     "--version",

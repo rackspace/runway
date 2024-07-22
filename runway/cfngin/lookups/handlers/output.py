@@ -5,9 +5,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Set, Tuple
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final, NamedTuple
 
 from ....exceptions import OutputDoesNotExist
 from ....lookups.handlers.base import LookupHandler
@@ -15,6 +13,8 @@ from ....utils import DOC_SITE
 from ...exceptions import StackDoesNotExist
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ....context import CfnginContext
     from ....variables import VariableValue
 
@@ -40,7 +40,7 @@ class OutputLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def legacy_parse(cls, value: str) -> Tuple[OutputQuery, Dict[str, str]]:
+    def legacy_parse(cls, value: str) -> tuple[OutputQuery, dict[str, str]]:
         """Retain support for legacy lookup syntax.
 
         Format of value:
@@ -90,7 +90,7 @@ class OutputLookup(LookupHandler):
             ) from None
 
     @classmethod
-    def dependencies(cls, lookup_query: VariableValue) -> Set[str]:
+    def dependencies(cls, lookup_query: VariableValue) -> set[str]:
         """Calculate any dependencies required to perform this lookup.
 
         Note that lookup_query may not be (completely) resolved at this time.
@@ -123,7 +123,7 @@ class OutputLookup(LookupHandler):
         return set()
 
 
-def deconstruct(value: str) -> OutputQuery:  # TODO remove in next major release
+def deconstruct(value: str) -> OutputQuery:  # TODO (kyle): remove in next major release
     """Deconstruct the value."""
     try:
         stack_name, output_name = value.split("::")

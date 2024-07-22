@@ -10,7 +10,7 @@ from __future__ import annotations
 import locale
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
@@ -18,6 +18,8 @@ from runway._cli import cli
 from runway.env_mgr.tfenv import TF_VERSION_FILENAME
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from _pytest.fixtures import SubRequest
     from click.testing import CliRunner, Result
 
@@ -40,8 +42,10 @@ def tf_version(request: SubRequest) -> Generator[str, None, None]:
     file_path.unlink(missing_ok=True)
 
 
-@pytest.fixture(scope="function")
-def deploy_result(cli_runner: CliRunner, no_backend: Path) -> Generator[Result, None, None]:
+@pytest.fixture()
+def deploy_result(
+    cli_runner: CliRunner, no_backend: Path  # noqa: ARG001
+) -> Generator[Result, None, None]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
     destroy_result = cli_runner.invoke(cli, ["destroy"], env={"CI": "1"})

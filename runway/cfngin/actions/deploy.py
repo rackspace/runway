@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Any, Callable, Union
 
 from ..exceptions import (
     CancelExecution,
@@ -35,6 +33,7 @@ from .base import STACK_POLL_TIME, BaseAction, build_walker
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import ParameterTypeDef, StackTypeDef
+    from typing_extensions import Literal
 
     from ...config.models.cfngin import CfnginHookDefinitionModel
     from ...context import CfnginContext
@@ -50,7 +49,7 @@ DESTROYED_STATUS = CompleteStatus("stack destroyed")
 DESTROYING_STATUS = SubmittedStatus("submitted for destruction")
 
 
-def build_stack_tags(stack: Stack) -> List[TagTypeDef]:
+def build_stack_tags(stack: Stack) -> list[TagTypeDef]:
     """Build a common set of tags to attach to a stack."""
     return [{"Key": t[0], "Value": t[1]} for t in stack.tags.items()]
 
@@ -98,7 +97,7 @@ def should_ensure_cfn_bucket(outline: bool, dump: bool) -> bool:
     return not outline and not dump
 
 
-def _resolve_parameters(parameters: Dict[str, Any], blueprint: Blueprint) -> Dict[str, Any]:
+def _resolve_parameters(parameters: dict[str, Any], blueprint: Blueprint) -> dict[str, Any]:
     """Resolve CloudFormation Parameters for a given blueprint.
 
     Given a list of parameters, handles:
@@ -114,7 +113,7 @@ def _resolve_parameters(parameters: Dict[str, Any], blueprint: Blueprint) -> Dic
         The resolved parameters.
 
     """
-    params: Dict[str, Any] = {}
+    params: dict[str, Any] = {}
     for key, value in parameters.items():
         if key not in blueprint.parameter_definitions:
             LOGGER.debug("blueprint %s does not use parameter %s", blueprint.name, key)
@@ -128,7 +127,7 @@ def _resolve_parameters(parameters: Dict[str, Any], blueprint: Blueprint) -> Dic
             continue
         if isinstance(value, bool):
             LOGGER.debug('converting parameter %s boolean "%s" to string', key, value)
-            value = str(value).lower()
+            value = str(value).lower()  # noqa: PLW2901
         params[key] = value
     return params
 
@@ -138,11 +137,11 @@ class UsePreviousParameterValue:
 
 
 def _handle_missing_parameters(
-    parameter_values: Dict[str, Any],
-    all_params: List[str],
-    required_params: List[str],
-    existing_stack: Optional[StackTypeDef] = None,
-) -> List[Tuple[str, Any]]:
+    parameter_values: dict[str, Any],
+    all_params: list[str],
+    required_params: list[str],
+    existing_stack: StackTypeDef | None = None,
+) -> list[tuple[str, Any]]:
     """Handle any missing parameters.
 
     If an existing_stack is provided, look up missing parameters there.
@@ -182,7 +181,7 @@ def _handle_missing_parameters(
 
 def handle_hooks(
     stage: Literal["post_deploy", "pre_deploy"],
-    hooks: List[CfnginHookDefinitionModel],
+    hooks: list[CfnginHookDefinitionModel],
     provider: Provider,
     context: CfnginContext,
     *,
@@ -233,9 +232,7 @@ class Action(BaseAction):
         """Whether the CloudFormation template should be uploaded to S3."""
         if self.upload_explicitly_disabled:
             return True
-        if not self.bucket_name:
-            return True
-        return False
+        return bool(not self.bucket_name)
 
     @upload_disabled.setter
     def upload_disabled(self, value: bool) -> None:
@@ -255,8 +252,8 @@ class Action(BaseAction):
 
     @staticmethod
     def build_parameters(
-        stack: Stack, provider_stack: Optional[StackTypeDef] = None
-    ) -> List[ParameterTypeDef]:
+        stack: Stack, provider_stack: StackTypeDef | None = None
+    ) -> list[ParameterTypeDef]:
         """Build the CloudFormation Parameters for our stack.
 
         Args:
@@ -274,7 +271,7 @@ class Action(BaseAction):
             resolved, all_parameters, required_parameters, provider_stack
         )
 
-        param_list: List[ParameterTypeDef] = []
+        param_list: list[ParameterTypeDef] = []
 
         for key, value in parameters:
             param_dict: ParameterTypeDef = {"ParameterKey": key}
@@ -287,7 +284,7 @@ class Action(BaseAction):
 
         return param_list
 
-    def _destroy_stack(self, stack: Stack, *, status: Optional[Status] = None, **_: Any) -> Status:
+    def _destroy_stack(self, stack: Stack, *, status: Status | None = None, **_: Any) -> Status:
         """Delete a CloudFormation stack.
 
         Used to remove stacks that exist in the persistent graph but not
@@ -336,8 +333,10 @@ class Action(BaseAction):
         except CancelExecution:
             return SkippedStatus(reason="canceled execution")
 
-    # TODO refactor long if, elif, else block
-    def _launch_stack(self, stack: Stack, *, status: Status, **_: Any) -> Status:
+    # TODO (kyle): refactor long if, elif, else block
+    def _launch_stack(  # noqa: C901, PLR0911, PLR0915, PLR0912
+        self, stack: Stack, *, status: Status, **_: Any
+    ) -> Status:
         """Handle the creating or updating of a stack in CloudFormation.
 
         Also makes sure that we don't try to create or update a stack while
@@ -385,10 +384,10 @@ class Action(BaseAction):
                     reason = "rolling back new stack"
 
                 return SubmittedStatus(reason)
-            elif provider.is_stack_in_progress(provider_stack):
+            if provider.is_stack_in_progress(provider_stack):
                 LOGGER.debug("%s:in progress", stack.fqn)
                 return status
-            elif provider.is_stack_destroyed(provider_stack):
+            if provider.is_stack_destroyed(provider_stack):
                 LOGGER.debug("%s:finished deleting", stack.fqn)
                 recreate = True
                 # Continue with creation afterwards
@@ -491,7 +490,7 @@ class Action(BaseAction):
         return Template(url=self.s3_stack_push(blueprint))
 
     @staticmethod
-    def _stack_policy(stack: Stack) -> Optional[Template]:
+    def _stack_policy(stack: Stack) -> Template | None:
         """Return a Template object for the stacks stack policy."""
         return Template(body=stack.stack_policy) if stack.stack_policy else None
 
@@ -512,7 +511,7 @@ class Action(BaseAction):
 
         graph = Graph()
         config_stack_names = [stack.name for stack in self.context.stacks]
-        inverse_steps: List[Step] = []
+        inverse_steps: list[Step] = []
         persist_graph = self.context.persistent_graph.transposed()
 
         for ind_node, dep_nodes in persist_graph.dag.graph.items():
@@ -545,7 +544,7 @@ class Action(BaseAction):
 
         return Plan(context=self.context, description=self.DESCRIPTION, graph=graph)
 
-    def pre_run(self, *, dump: Union[bool, str] = False, outline: bool = False, **_: Any) -> None:
+    def pre_run(self, *, dump: bool | str = False, outline: bool = False, **_: Any) -> None:
         """Any steps that need to be taken prior to running the action."""
         if should_ensure_cfn_bucket(outline, bool(dump)):
             self.ensure_cfn_bucket()
@@ -562,8 +561,8 @@ class Action(BaseAction):
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,
-        force: bool = False,
+        dump: bool | str = False,
+        force: bool = False,  # noqa: ARG002
         outline: bool = False,
         tail: bool = False,
         upload_disabled: bool = False,

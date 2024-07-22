@@ -6,10 +6,10 @@ from __future__ import annotations
 import os
 import sys
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Iterator, NamedTuple, Tuple
+from typing import TYPE_CHECKING, NamedTuple
+from unittest import mock
 
 import boto3
-import mock
 import pytest
 from moto import mock_ec2, mock_ssm
 
@@ -18,6 +18,7 @@ from runway.cfngin.hooks.keypair import KeyPairInfo, ensure_keypair_exists
 from ..factories import mock_context
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
     from runway.context import CfnginContext
@@ -45,7 +46,7 @@ def ssh_key(cfngin_fixtures: Path) -> SSHKey:
     )
 
 
-@pytest.fixture
+@pytest.fixture()
 def context() -> CfnginContext:
     """Mock context."""
     return mock_context(namespace="fake")
@@ -62,9 +63,8 @@ def ec2(ssh_key: SSHKey) -> Iterator[None]:
         "fingerprint": ssh_key.fingerprint,
         "material": ssh_key.private_key.decode("ascii"),
     }
-    with mock.patch("moto.ec2.models.random_key_pair", side_effect=[key_pair]):
-        with mock_ec2():
-            yield
+    with mock.patch("moto.ec2.models.random_key_pair", side_effect=[key_pair]), mock_ec2():
+        yield
 
 
 @pytest.fixture(autouse=True)
@@ -75,13 +75,15 @@ def ssm() -> Iterator[None]:
 
 
 @contextmanager
-def mock_input(lines: Tuple[str, ...] = (), isatty: bool = True) -> Iterator[mock.MagicMock]:
+def mock_input(lines: tuple[str, ...] = (), isatty: bool = True) -> Iterator[mock.MagicMock]:
     """Mock input."""
-    with mock.patch(
-        "runway.cfngin.hooks.keypair.get_raw_input", side_effect=lines
-    ) as mock_get_raw_input:
-        with mock.patch.object(sys.stdin, "isatty", return_value=isatty):
-            yield mock_get_raw_input
+    with (
+        mock.patch(
+            "runway.cfngin.hooks.keypair.get_raw_input", side_effect=lines
+        ) as mock_get_raw_input,
+        mock.patch.object(sys.stdin, "isatty", return_value=isatty),
+    ):
+        yield mock_get_raw_input
 
 
 def assert_key_present(hook_result: KeyPairInfo, key_name: str, fingerprint: str) -> None:

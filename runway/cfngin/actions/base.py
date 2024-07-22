@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Union
 
 import botocore.exceptions
 
@@ -66,7 +66,7 @@ def build_walker(concurrency: int) -> Callable[..., Any]:
     return ThreadedWalker(semaphore).walk
 
 
-def stack_template_url(bucket_name: str, blueprint: Blueprint, endpoint: str):
+def stack_template_url(bucket_name: str, blueprint: Blueprint, endpoint: str) -> str:
     """Produce an s3 url for a given blueprint.
 
     Args:
@@ -99,21 +99,21 @@ class BaseAction:
     """
 
     DESCRIPTION: ClassVar[str] = "Base action"
-    NAME: ClassVar[Optional[str]] = None
+    NAME: ClassVar[str | None] = None
 
-    bucket_name: Optional[str]
-    bucket_region: Optional[str]
+    bucket_name: str | None
+    bucket_region: str | None
     cancel: threading.Event
     context: CfnginContext
-    provider_builder: Optional[ProviderBuilder]
+    provider_builder: ProviderBuilder | None
     s3_conn: S3Client
 
     def __init__(
         self,
         context: CfnginContext,
-        provider_builder: Optional[ProviderBuilder] = None,
-        cancel: Optional[threading.Event] = None,
-    ):
+        provider_builder: ProviderBuilder | None = None,
+        cancel: threading.Event | None = None,
+    ) -> None:
         """Instantiate class.
 
         Args:

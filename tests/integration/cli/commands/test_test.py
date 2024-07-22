@@ -37,13 +37,13 @@ INVALID_TYPE_REQUIRED = {
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import CaptureFixture, LogCaptureFixture
+    import pytest
 
 
 # def test_test_invalid_type(cd_tmp_path, capfd, caplog):
 def test_test_invalid_type(
     cd_tmp_path: Path,
-) -> None:  # TODO update after catching error
+) -> None:  # TODO (kyle): update after catching error
     """Test ``runway test`` with two tests; one invalid."""
     # caplog.set_level(logging.INFO, logger="runway.core")
     runway_yml = cd_tmp_path / "runway.yml"
@@ -55,20 +55,10 @@ def test_test_invalid_type(
     result = runner.invoke(cli, ["test"])
     assert result.exit_code == 1
 
-    assert result.exception.errors()[0]["loc"] == ("tests", 0, "type")
-
-    # captured = capfd.readouterr()
-    # logs = "\n".join(caplog.messages)
-    # print(captured)
-    # assert "found 2 test(s)" in logs
-    # assert "invalid-type:running test (in progress)" in logs
-    # assert 'invalid-type:unable to find handler of type "invalid"' in logs
-    # assert "success:running test (in progress)" in logs
-    # assert "Hello world" in captured.out
-    # assert "success:running test (pass)" in logs
+    assert result.exception.errors()[0]["loc"] == ("tests", 0, "type")  # type: ignore
 
 
-def test_test_not_defined(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
+def test_test_not_defined(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     """Test ``runway test`` with no tests defined."""
     caplog.set_level(logging.ERROR)
     runway_yml = cd_tmp_path / "runway.yml"
@@ -81,7 +71,7 @@ def test_test_not_defined(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
 
 
 def test_test_single_successful(
-    cd_tmp_path: Path, capfd: CaptureFixture[str], caplog: LogCaptureFixture
+    cd_tmp_path: Path, capfd: pytest.CaptureFixture[str], caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test ``runway test`` with a single, successful test."""
     caplog.set_level(logging.INFO, logger="runway.core")
@@ -101,7 +91,7 @@ def test_test_single_successful(
 
 
 def test_test_two_test(
-    cd_tmp_path: Path, capfd: CaptureFixture[str], caplog: LogCaptureFixture
+    cd_tmp_path: Path, capfd: pytest.CaptureFixture[str], caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test ``runway test`` with two tests; one failing."""
     caplog.set_level(logging.INFO, logger="runway.core")
@@ -126,7 +116,7 @@ def test_test_two_test(
 
 
 def test_test_two_test_required(
-    cd_tmp_path: Path, capfd: CaptureFixture[str], caplog: LogCaptureFixture
+    cd_tmp_path: Path, capfd: pytest.CaptureFixture[str], caplog: pytest.LogCaptureFixture
 ) -> None:
     """Test ``runway test`` with two tests; one failing required."""
     caplog.set_level(logging.INFO)

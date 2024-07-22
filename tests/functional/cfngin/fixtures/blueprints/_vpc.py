@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 from troposphere.cloudformation import WaitConditionHandle
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class FakeVPC(Blueprint):
     """Fake VPC."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "AZCount": {"type": int, "default": 2},
         "PrivateSubnets": {
             "type": CFNCommaDelimitedList,

@@ -3,9 +3,9 @@
 # pyright: reportIncompatibleMethodOverride=none
 import logging
 import os
-from typing import Any
+from typing import Any, Final
 
-from typing_extensions import Final, Literal
+from typing_extensions import Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path

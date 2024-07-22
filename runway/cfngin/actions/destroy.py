@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable
 
 from ..exceptions import StackDoesNotExist
 from ..hooks.utils import handle_hooks
@@ -49,7 +49,7 @@ class Action(BaseAction):
         """Run against a step."""
         return self._destroy_stack
 
-    def _destroy_stack(self, stack: Stack, *, status: Optional[Status], **_: Any) -> Status:
+    def _destroy_stack(self, stack: Stack, *, status: Status | None, **_: Any) -> Status:
         wait_time = 0 if status is PENDING else STACK_POLL_TIME
         if self.cancel.wait(wait_time):
             return INTERRUPTED
@@ -86,9 +86,9 @@ class Action(BaseAction):
     def pre_run(
         self,
         *,
-        dump: Union[bool, str] = False,
+        dump: bool | str = False,  # noqa: ARG002
         outline: bool = False,
-        **__kwargs: Any,
+        **_kwargs: Any,
     ) -> None:
         """Any steps that need to be taken prior to running the action."""
         pre_destroy = self.context.config.pre_destroy
@@ -104,11 +104,11 @@ class Action(BaseAction):
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,
+        dump: bool | str = False,  # noqa: ARG002
         force: bool = False,
-        outline: bool = False,
+        outline: bool = False,  # noqa: ARG002
         tail: bool = False,
-        upload_disabled: bool = False,
+        upload_disabled: bool = False,  # noqa: ARG002
         **_kwargs: Any,
     ) -> None:
         """Kicks off the destruction of the stacks in the stack_definitions."""
@@ -131,9 +131,9 @@ class Action(BaseAction):
     def post_run(
         self,
         *,
-        dump: Union[bool, str] = False,
+        dump: bool | str = False,  # noqa: ARG002
         outline: bool = False,
-        **__kwargs: Any,
+        **_kwargs: Any,
     ) -> None:
         """Any steps that need to be taken after running the action."""
         if not outline and self.context.config.post_destroy:

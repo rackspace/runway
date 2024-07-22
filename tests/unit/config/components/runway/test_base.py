@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock, call
 
 import pytest
-from mock import MagicMock, call
 from pydantic import Extra
 
 from runway.config.components.runway import RunwayVariablesDefinition
@@ -15,7 +15,6 @@ from runway.config.models.base import ConfigProperty
 from runway.exceptions import UnresolvedVariable
 
 if TYPE_CHECKING:
-    from pytest import MonkeyPatch
 
     from ....factories import MockRunwayContext
 
@@ -95,7 +94,8 @@ class TestConfigComponentDefinition:
         obj = SampleConfigComponentDefinition(data)
         assert obj._data == data
         assert obj.data == data.dict()
-        assert not obj._vars and isinstance(obj._vars, dict)
+        assert not obj._vars
+        assert isinstance(obj._vars, dict)
 
     def test_get(self) -> None:
         """Test get."""
@@ -118,7 +118,7 @@ class TestConfigComponentDefinition:
         with pytest.raises(AttributeError):
             assert not obj.missing
 
-    def test_getitem(self, monkeypatch: MonkeyPatch) -> None:
+    def test_getitem(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test __getitem__."""
         mock_getattr = MagicMock(side_effect=["val", AttributeError])
         monkeypatch.setattr(SampleConfigComponentDefinition, "__getattr__", mock_getattr)

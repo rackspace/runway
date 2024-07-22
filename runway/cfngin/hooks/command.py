@@ -3,7 +3,7 @@
 import logging
 import os
 import subprocess
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union  # noqa: UP035
 
 from typing_extensions import TypedDict
 
@@ -19,10 +19,10 @@ class RunCommandHookArgs(BaseModel):
     capture: bool = False
     """If enabled, capture the command's stdout and stderr, and return them in the hook result."""
 
-    command: Union[str, List[str]]
+    command: Union[str, List[str]]  # noqa: UP006
     """Command(s) to run."""
 
-    env: Optional[Dict[str, str]] = None
+    env: Optional[Dict[str, str]] = None  # noqa: UP006
     """Dictionary of environment variable overrides for the command context.
     Will be merged with the current environment.
 
@@ -55,7 +55,7 @@ class RunCommandResponseTypeDef(TypedDict, total=False):
     stdout: str
 
 
-def run_command(*__args: Any, **kwargs: Any) -> RunCommandResponseTypeDef:
+def run_command(*_args: Any, **kwargs: Any) -> RunCommandResponseTypeDef:  # noqa: C901, PLR0912
     """Run a custom command as a hook.
 
     Arguments not parsed by the data model will be forwarded to the
@@ -106,7 +106,7 @@ def run_command(*__args: Any, **kwargs: Any) -> RunCommandResponseTypeDef:
             ValueError("Cannot enable `quiet` and `capture` options simultaneously"),
         )
 
-    with open(os.devnull, "wb") as devnull:
+    with open(os.devnull, "wb") as devnull:  # noqa: PTH123
         if args.quiet:
             out_err_type = devnull
         elif args.capture:
@@ -150,5 +150,5 @@ def run_command(*__args: Any, **kwargs: Any) -> RunCommandResponseTypeDef:
                     LOGGER.warning("command failed with returncode %d: %s", status, args.command)
 
                 return {}
-            except Exception:  # cov: ignore
+            except Exception:  # cov: ignore  # noqa: BLE001
                 return {}

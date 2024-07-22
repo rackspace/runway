@@ -1,5 +1,6 @@
 """CFNgin config models."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 import copy
@@ -8,11 +9,9 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
     Dict,
     List,
     Optional,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -148,7 +147,7 @@ class CfnginStackDefinitionModel(ConfigProperty):
         title = "CFNgin Stack Definition"
 
         @staticmethod
-        def schema_extra(schema: Dict[str, Any]) -> None:  # type: ignore
+        def schema_extra(schema: dict[str, Any]) -> None:  # type: ignore
             """Process the schema after it has been generated.
 
             Schema is modified in place. Return value is ignored.
@@ -168,20 +167,19 @@ class CfnginStackDefinitionModel(ConfigProperty):
                     {"type": "string", "pattern": utils.CFNGIN_LOOKUP_STRING_REGEX},
                 ]
 
-    _resolve_path_fields = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("stack_policy_path", "template_path", allow_reuse=True)(utils.resolve_path_field),
-    )
+    _resolve_path_fields = validator(  # pyright: ignore[reportUnknownVariableType]
+        "stack_policy_path", "template_path", allow_reuse=True
+    )(utils.resolve_path_field)
 
     @root_validator(pre=True)
-    def _validate_class_and_template(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_class_and_template(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate class_path and template_path are not both provided."""
         if values.get("class_path") and values.get("template_path"):
             raise ValueError("only one of class_path or template_path can be defined")
         return values
 
     @root_validator(pre=True)
-    def _validate_class_or_template(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_class_or_template(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Ensure that either class_path or template_path is defined."""
         # if the stack is disabled or locked, it is ok that these are missing
         required = values.get("enabled", True) and not values.get("locked", False)
@@ -210,7 +208,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         title="CFNgin Cache Directory",
         description="Path to a local directory that CFNgin will use for local caching.",
     )
-    log_formats: Dict[str, str] = Field(  # TODO create model
+    log_formats: Dict[str, str] = Field(  # TODO (kyle): create model
         default={}, description="Customize log message formatting by log level."
     )
     lookups: Dict[str, str] = Field(
@@ -289,15 +287,14 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         schema_extra = {"description": "Configuration file for Runway's CFNgin."}
         title = "CFNgin Config File"
 
-    _resolve_path_fields = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("cfngin_cache_dir", "sys_path", allow_reuse=True)(utils.resolve_path_field),
-    )
+    _resolve_path_fields = validator(  # pyright: ignore[reportUnknownVariableType]
+        "cfngin_cache_dir", "sys_path", allow_reuse=True
+    )(utils.resolve_path_field)
 
     @validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", pre=True)
     def _convert_hook_definitions(
-        cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]
-    ) -> List[Dict[str, Any]]:
+        cls, v: Union[dict[str, Any], list[dict[str, Any]]]  # noqa: N805
+    ) -> list[dict[str, Any]]:
         """Convert hooks defined as a dict to a list."""
         if isinstance(v, list):
             return v
@@ -305,12 +302,12 @@ class CfnginConfigDefinitionModel(ConfigProperty):
 
     @validator("stacks", pre=True)
     def _convert_stack_definitions(
-        cls, v: Union[Dict[str, Any], List[Dict[str, Any]]]
-    ) -> List[Dict[str, Any]]:
+        cls, v: Union[dict[str, Any], list[dict[str, Any]]]  # noqa: N805
+    ) -> list[dict[str, Any]]:
         """Convert stacks defined as a dict to a list."""
         if isinstance(v, list):
             return v
-        result: List[Dict[str, Any]] = []
+        result: list[dict[str, Any]] = []
         for name, stack in copy.deepcopy(v).items():
             stack["name"] = name
             result.append(stack)
@@ -318,8 +315,8 @@ class CfnginConfigDefinitionModel(ConfigProperty):
 
     @validator("stacks")
     def _validate_unique_stack_names(
-        cls, stacks: List[CfnginStackDefinitionModel]
-    ) -> List[CfnginStackDefinitionModel]:
+        cls, stacks: list[CfnginStackDefinitionModel]  # noqa: N805
+    ) -> list[CfnginStackDefinitionModel]:
         """Validate that each stack has a unique name."""
         stack_names = [stack.name for stack in stacks]
         if len(set(stack_names)) != len(stack_names):
@@ -330,12 +327,12 @@ class CfnginConfigDefinitionModel(ConfigProperty):
 
     @classmethod
     def parse_file(
-        cls: Type[Model],
+        cls: type[Model],
         path: Union[str, Path],
         *,
-        content_type: Optional[str] = None,
+        content_type: str | None = None,
         encoding: str = "utf8",
-        proto: Optional[Protocol] = None,
+        proto: Protocol | None = None,
         allow_pickle: bool = False,
     ) -> Model:
         """Parse a file."""
@@ -352,13 +349,13 @@ class CfnginConfigDefinitionModel(ConfigProperty):
 
     @classmethod
     def parse_raw(
-        cls: Type[Model],
+        cls: type[Model],
         b: Union[bytes, str],
         *,
-        content_type: Optional[str] = None,
-        encoding: str = "utf8",
-        proto: Optional[Protocol] = None,
-        allow_pickle: bool = False,
+        content_type: str | None = None,  # noqa: ARG003
+        encoding: str = "utf8",  # noqa: ARG003
+        proto: Protocol | None = None,  # noqa: ARG003
+        allow_pickle: bool = False,  # noqa: ARG003
     ) -> Model:
         """Parse raw data."""
         return cast("Model", cls.parse_obj(yaml.safe_load(b)))

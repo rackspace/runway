@@ -1,8 +1,9 @@
 """Runway static site Module parameters."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 from pydantic import Extra, Field, validator
 
@@ -128,7 +129,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
             "font-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; "
             "object-src 'none'; "
             "connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com",
-            "Strict-Transport-Security": "max-age=31536000; " "includeSubdomains; " "preload",
+            "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
             "Referrer-Policy": "same-origin",
             "X-XSS-Protection": "1; mode=block",
             "X-Frame-Options": "DENY",
@@ -183,7 +184,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         "supported_identity_providers",
         pre=True,
     )
-    def _convert_comma_delimited_list(cls, v: Union[List[str], str]) -> List[str]:
+    def _convert_comma_delimited_list(cls, v: list[str] | str) -> list[str]:  # noqa: N805
         """Convert comma delimited lists to a string."""
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]

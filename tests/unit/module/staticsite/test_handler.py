@@ -5,10 +5,10 @@ from __future__ import annotations
 import logging
 import platform
 import string
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.module.staticsite.handler import StaticSite
 from runway.module.staticsite.options.components import StaticSiteOptions
@@ -19,7 +19,6 @@ from runway.module.staticsite.parameters.models import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from runway.context import RunwayContext
@@ -97,7 +96,7 @@ class TestStaticSite:
     def test_create_dependencies_yaml(
         self,
         expected_yaml: Path,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         runway_context: RunwayContext,
         test_file_number: str,
         tmp_path: Path,
@@ -135,7 +134,7 @@ class TestStaticSite:
     def test_create_staticsite_yaml(
         self,
         expected_yaml: Path,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         runway_context: RunwayContext,
         test_file_number: str,
         tmp_path: Path,
@@ -256,7 +255,7 @@ class TestStaticSite:
         assert result["supported_identity_providers"] == obj.parameters.supported_identity_providers
 
     def test_init(
-        self, caplog: LogCaptureFixture, runway_context: RunwayContext, tmp_path: Path
+        self, caplog: pytest.LogCaptureFixture, runway_context: RunwayContext, tmp_path: Path
     ) -> None:
         """Test init."""
         caplog.set_level(logging.WARNING, logger=MODULE)

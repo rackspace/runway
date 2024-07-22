@@ -12,7 +12,6 @@ from runway.env_mgr import EnvManager
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture, MonkeyPatch
     from pytest_mock import MockerFixture
 
 
@@ -20,7 +19,7 @@ class TestEnvManager:
     """Test runway.env_mgr.EnvManager."""
 
     def test___init___darwin(
-        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture
+        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture  # noqa: ARG002
     ) -> None:
         """Test __init__ on Darwin platform."""
         home = cd_tmp_path / "home"
@@ -35,10 +34,10 @@ class TestEnvManager:
 
     def test___init___windows(
         self,
-        platform_windows: None,
+        platform_windows: None,  # noqa: ARG002
         cd_tmp_path: Path,
         mocker: MockerFixture,
-        monkeypatch: MonkeyPatch,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Test __init__ on Windows platform."""
         home = cd_tmp_path / "home"
@@ -55,7 +54,10 @@ class TestEnvManager:
         assert obj.versions_dir == expected_env_dir / "versions"
 
     def test___init___windows_appdata(
-        self, platform_windows: None, cd_tmp_path: Path, monkeypatch: MonkeyPatch
+        self,
+        platform_windows: None,  # noqa: ARG002
+        cd_tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Test __init__ on Windows platform."""
         monkeypatch.setenv("APPDATA", str(cd_tmp_path / "custom_path"))
@@ -69,7 +71,9 @@ class TestEnvManager:
         assert obj.env_dir == expected_env_dir
         assert obj.versions_dir == expected_env_dir / "versions"
 
-    def test_bin(self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture) -> None:
+    def test_bin(
+        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture  # noqa: ARG002
+    ) -> None:
         """Test bin."""
         home = cd_tmp_path / "home"
         mocker.patch("runway.env_mgr.Path.home", return_value=home)
@@ -97,7 +101,7 @@ class TestEnvManager:
     @pytest.mark.parametrize("exists", [False, True])
     def test_uninstall(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         exists: bool,
         mocker: MockerFixture,
         tmp_path: Path,

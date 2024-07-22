@@ -46,11 +46,11 @@ class Status:
             return operator_(self.code, other.code)
         return NotImplemented
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Compare if self is equal to another object."""
         return self._comparison(operator.eq, other)
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         """Compare if self is not equal to another object."""
         return self._comparison(operator.ne, other)
 

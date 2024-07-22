@@ -1,7 +1,6 @@
 """Test runway.config.models.cfngin._package_sources."""
 
 # pyright: basic
-from typing import Dict, List
 
 import pytest
 from pydantic import ValidationError
@@ -90,7 +89,7 @@ class TestGitCfnginPackageSourceDefinitionModel:
             {"field": "tag", "value": "v1.0.0"},
         ],
     )
-    def test_validate_one_ref(self, ref: Dict[str, str]) -> None:
+    def test_validate_one_ref(self, ref: dict[str, str]) -> None:
         """Test _validate_one_ref."""
         data = {"uri": "something", ref["field"]: ref["value"]}
         assert GitCfnginPackageSourceDefinitionModel.parse_obj(data)[ref["field"]] == ref["value"]
@@ -117,7 +116,7 @@ class TestGitCfnginPackageSourceDefinitionModel:
             ],
         ],
     )
-    def test_validate_one_ref_invalid(self, refs: List[Dict[str, str]]) -> None:
+    def test_validate_one_ref_invalid(self, refs: list[dict[str, str]]) -> None:
         """Test _validate_one_ref invalid values."""
         data = {"uri": "something", **{ref["field"]: ref["value"] for ref in refs}}
         with pytest.raises(ValidationError) as excinfo:

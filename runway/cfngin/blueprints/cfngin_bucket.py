@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Union
+from typing import TYPE_CHECKING, ClassVar, Union
 
 from troposphere import Equals, If, Not, NoValue, Or, Tag, Tags, s3
 
@@ -21,7 +21,7 @@ class CfnginBucket(Blueprint):
     """CFNgin Bucket Blueprint."""
 
     DESCRIPTION: ClassVar[str] = f"{__name__}.CFNginBucket (v{__version__})"
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "AccessControl": {
             "allowed_values": [
                 "AuthenticatedRead",

@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-from mock import Mock
+from unittest.mock import Mock
 
 from runway.core.providers.aws.s3._sync_handler import S3SyncHandler
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import boto3
 import botocore.exceptions
@@ -30,7 +30,7 @@ class BaseContext(DelCachedPropMixin):
     env: DeployEnvironment
     """Object containing information about the environment being deployed to."""
 
-    logger: Union[PrefixAdaptor, RunwayLogger]
+    logger: PrefixAdaptor | RunwayLogger
     """Custom logger."""
 
     sys_info: SystemInfo
@@ -43,8 +43,8 @@ class BaseContext(DelCachedPropMixin):
         self,
         *,
         deploy_environment: DeployEnvironment,
-        logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-        work_dir: Optional[Path] = None,
+        logger: PrefixAdaptor | RunwayLogger = LOGGER,
+        work_dir: Path | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -94,11 +94,11 @@ class BaseContext(DelCachedPropMixin):
     def get_session(
         self,
         *,
-        aws_access_key_id: Optional[str] = None,
-        aws_secret_access_key: Optional[str] = None,
-        aws_session_token: Optional[str] = None,
-        profile: Optional[str] = None,
-        region: Optional[str] = None,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        profile: str | None = None,
+        region: str | None = None,
     ) -> boto3.Session:
         """Create a thread-safe boto3 session.
 
@@ -147,10 +147,10 @@ class BaseContext(DelCachedPropMixin):
         cred_provider = session._session.get_component("credential_provider")  # type: ignore
         provider = cred_provider.get_provider("assume-role")  # type: ignore
         provider.cache = BOTO3_CREDENTIAL_CACHE
-        provider._prompter = ui.getpass
+        provider._prompter = ui.getpass  # noqa: SLF001
         return session
 
-    # TODO remove after IaC tools support AWS SSO
+    # TODO (kyle): remove after IaC tools support AWS SSO
     def _inject_profile_credentials(self) -> None:  # cov: ignore
         """Inject AWS credentials into self.env_vars if using an AWS profile.
 

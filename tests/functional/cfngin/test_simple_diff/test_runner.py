@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import pytest
 
 from runway._cli import cli
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from click.testing import CliRunner, Result
 
     from runway.config import RunwayConfig
@@ -23,7 +25,7 @@ def initial_deploy(cli_runner: CliRunner) -> Generator[None, None, None]:
 
 
 @pytest.fixture(scope="module")
-def plan_result(cli_runner: CliRunner, initial_deploy: None) -> Result:
+def plan_result(cli_runner: CliRunner, initial_deploy: None) -> Result:  # noqa: ARG001
     """Execute `runway plan`."""
     return cli_runner.invoke(cli, ["plan"], env={"CI": "1", "DEPLOY_ENVIRONMENT": "test2"})
 

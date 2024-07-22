@@ -4,24 +4,8 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Generic,
-    Iterable,
-    Iterator,
-    List,
-    MutableMapping,
-    MutableSequence,
-    Optional,
-    Set,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-    overload,
-)
+from collections.abc import Iterable, Iterator, MutableMapping, MutableSequence
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, overload
 
 from pydantic import BaseModel
 from typing_extensions import Literal
@@ -35,13 +19,13 @@ from .exceptions import (
     UnresolvedVariable,
     UnresolvedVariableValue,
 )
-from .lookups.handlers.base import LookupHandler
 from .lookups.registry import RUNWAY_LOOKUP_HANDLERS
 
 if TYPE_CHECKING:
     from .cfngin.providers.aws.default import Provider
     from .config.components.runway import RunwayVariablesDefinition
     from .context import CfnginContext, RunwayContext
+    from .lookups.handlers.base import LookupHandler
 
 LOGGER = logging.getLogger(__name__)
 
@@ -53,6 +37,7 @@ VariableTypeLiteralTypeDef = Literal["cfngin", "runway"]
 class Variable:
     """Represents a variable provided to a Runway directive."""
 
+    _value: VariableValue
     name: str
 
     def __init__(
@@ -75,11 +60,11 @@ class Variable:
         self.variable_type = variable_type
 
     @property
-    def dependencies(self) -> Set[str]:
+    def dependencies(self) -> set[str]:
         """Stack names that this variable depends on.
 
         Returns:
-            Set[str]: Stack names that this variable depends on.
+            set[str]: Stack names that this variable depends on.
 
         """
         return self._value.dependencies
@@ -108,9 +93,9 @@ class Variable:
 
     def resolve(
         self,
-        context: Union[CfnginContext, RunwayContext],
-        provider: Optional[Provider] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        context: CfnginContext | RunwayContext,
+        provider: Provider | None = None,
+        variables: RunwayVariablesDefinition | None = None,
         **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
@@ -119,6 +104,7 @@ class Variable:
             context: The current context object.
             provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
+            **kwargs: Arbitrary keyword arguments.
 
         Raises:
             FailedVariableLookup
@@ -145,9 +131,9 @@ class Variable:
 
 
 def resolve_variables(
-    variables: List[Variable],
-    context: Union[CfnginContext, RunwayContext],
-    provider: Optional[Provider] = None,
+    variables: list[Variable],
+    context: CfnginContext | RunwayContext,
+    provider: Provider | None = None,
 ) -> None:
     """Given a list of variables, resolve all of them.
 
@@ -172,7 +158,7 @@ class VariableValue:
     variable_type: VariableTypeLiteralTypeDef
 
     @property
-    def dependencies(self) -> Set[Any]:
+    def dependencies(self) -> set[Any]:
         """Stack names that this variable depends on."""
         return set()
 
@@ -210,9 +196,9 @@ class VariableValue:
 
     def resolve(
         self,
-        context: Union[CfnginContext, RunwayContext],
-        provider: Optional[Provider] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        context: CfnginContext | RunwayContext,
+        provider: Provider | None = None,
+        variables: RunwayVariablesDefinition | None = None,
         **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
@@ -221,6 +207,7 @@ class VariableValue:
             context: The current context object.
             provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
+            **kwargs: Arbitrary keyword arguments.
 
         """
 
@@ -243,13 +230,13 @@ class VariableValue:
     @overload
     @classmethod
     def parse_obj(
-        cls, obj: Dict[str, Any], variable_type: VariableTypeLiteralTypeDef = ...
+        cls, obj: dict[str, Any], variable_type: VariableTypeLiteralTypeDef = ...
     ) -> VariableValue: ...
 
     @overload
     @classmethod
     def parse_obj(
-        cls, obj: List[Any], variable_type: VariableTypeLiteralTypeDef = ...
+        cls, obj: list[Any], variable_type: VariableTypeLiteralTypeDef = ...
     ) -> VariableValueList: ...
 
     @overload
@@ -262,10 +249,10 @@ class VariableValue:
     @classmethod
     def parse_obj(
         cls, obj: str, variable_type: VariableTypeLiteralTypeDef = ...
-    ) -> VariableValueConcatenation[Union[VariableValueLiteral[str], VariableValueLookup]]: ...
+    ) -> VariableValueConcatenation[VariableValueLiteral[str] | VariableValueLookup]: ...
 
     @classmethod
-    def parse_obj(
+    def parse_obj(  # noqa: C901
         cls, obj: Any, variable_type: VariableTypeLiteralTypeDef = "cfngin"
     ) -> VariableValue:
         """Parse complex variable structures using type appropriate subclasses.
@@ -284,14 +271,14 @@ class VariableValue:
         if not isinstance(obj, str):
             return VariableValueLiteral(obj, variable_type=variable_type)  # type: ignore
 
-        tokens: VariableValueConcatenation[
-            Union[VariableValueLiteral[str], VariableValueLookup]
-        ] = VariableValueConcatenation(
-            # pyright 1.1.138 is having issues properly inferring the type from comprehension
-            [  # type: ignore
-                VariableValueLiteral(cast(str, t), variable_type=variable_type)
-                for t in re.split(r"(\$\{|\}|\s+)", obj)  # ${ or space or }
-            ]
+        tokens: VariableValueConcatenation[VariableValueLiteral[str] | VariableValueLookup] = (
+            VariableValueConcatenation(
+                # pyright 1.1.138 is having issues properly inferring the type from comprehension
+                [  # type: ignore
+                    VariableValueLiteral(cast(str, t), variable_type=variable_type)
+                    for t in re.split(r"(\$\{|\}|\s+)", obj)  # ${ or space or }
+                ]
+            )
         )
 
         opener = "${"
@@ -348,7 +335,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
     """A dict variable value."""
 
     def __init__(
-        self, data: Dict[str, Any], variable_type: VariableTypeLiteralTypeDef = "cfngin"
+        self, data: dict[str, Any], variable_type: VariableTypeLiteralTypeDef = "cfngin"
     ) -> None:
         """Instantiate class.
 
@@ -361,9 +348,9 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
         self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
-    def dependencies(self) -> Set[str]:
+    def dependencies(self) -> set[str]:
         """Stack names that this variable depends on."""
-        deps: Set[str] = set()
+        deps: set[str] = set()
         for item in self.values():
             deps.update(item.dependencies)
         return deps
@@ -377,7 +364,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
         return accumulator
 
     @property
-    def simplified(self) -> Dict[str, Any]:
+    def simplified(self) -> dict[str, Any]:
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
@@ -387,15 +374,15 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
         return {k: v.simplified for k, v in self.items()}
 
     @property
-    def value(self) -> Dict[str, Any]:
+    def value(self) -> dict[str, Any]:
         """Value of the variable. Can be resolved or unresolved."""
         return {k: v.value for k, v in self.items()}
 
     def resolve(
         self,
-        context: Union[CfnginContext, RunwayContext],
-        provider: Optional[Provider] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        context: CfnginContext | RunwayContext,
+        provider: Provider | None = None,
+        variables: RunwayVariablesDefinition | None = None,
         **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
@@ -404,6 +391,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
             context: The current context object.
             provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         for item in self.values():
@@ -427,7 +415,7 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
 
     def __repr__(self) -> str:
         """Return object representation."""
-        return f"Dict[{', '.join(f'{k}={v}' for k, v in self.items())}]"
+        return f"dict[{', '.join(f'{k}={v}' for k, v in self.items())}]"
 
     def __setitem__(self, __key: str, __value: VariableValue) -> None:
         """Set item by index."""
@@ -449,15 +437,15 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
             variable_type: Type of variable (cfngin|runway).
 
         """
-        self._data: List[VariableValue] = [
+        self._data: list[VariableValue] = [
             self.parse_obj(i, variable_type=variable_type) for i in iterable
         ]
         self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
-    def dependencies(self) -> Set[str]:
+    def dependencies(self) -> set[str]:
         """Stack names that this variable depends on."""
-        deps: Set[str] = set()
+        deps: set[str] = set()
         for item in self:
             deps.update(item.dependencies)
         return deps
@@ -471,7 +459,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         return accumulator
 
     @property
-    def simplified(self) -> List[VariableValue]:
+    def simplified(self) -> list[VariableValue]:
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
@@ -481,7 +469,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         return [item.simplified for item in self]
 
     @property
-    def value(self) -> List[Any]:
+    def value(self) -> list[Any]:
         """Value of the variable. Can be resolved or unresolved."""
         return [item.value for item in self]
 
@@ -491,9 +479,9 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
 
     def resolve(
         self,
-        context: Union[CfnginContext, RunwayContext],
-        provider: Optional[Provider] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        context: CfnginContext | RunwayContext,
+        provider: Provider | None = None,
+        variables: RunwayVariablesDefinition | None = None,
         **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
@@ -502,37 +490,44 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
             context: The current context object.
             provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         for item in self:
             item.resolve(context, provider=provider, variables=variables, **kwargs)
 
-    def __delitem__(self, __index: int) -> None:
+    @overload
+    def __delitem__(self, index: int) -> None: ...
+
+    @overload
+    def __delitem__(self, index: slice) -> None: ...
+
+    def __delitem__(self, index: int | slice) -> None:
         """Delete item by index."""
-        del self._data[__index]
+        del self._data[index]
 
     @overload
     def __getitem__(self, __index: int) -> VariableValue: ...
 
     @overload
-    def __getitem__(self, __index: slice) -> List[VariableValue]: ...
+    def __getitem__(self, __index: slice) -> list[VariableValue]: ...
 
-    def __getitem__(  # type: ignore
-        self, __index: Union[int, slice]
-    ) -> Union[MutableSequence[VariableValue], VariableValue]:
+    def __getitem__(  # pyright: ignore[reportIncompatibleMethodOverride]
+        self, __index: int | slice
+    ) -> MutableSequence[VariableValue] | VariableValue:
         """Get item by index."""
-        return self._data[__index]  # type: ignore
+        return self._data[__index]  # pyright: ignore[reportCallIssue]
 
     @overload
     def __setitem__(self, __index: int, __value: VariableValue) -> None: ...
 
     @overload
-    def __setitem__(self, __index: slice, __value: List[VariableValue]) -> None: ...
+    def __setitem__(self, __index: slice, __value: list[VariableValue]) -> None: ...
 
-    def __setitem__(
+    def __setitem__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
-        __index: Union[int, slice],
-        __value: Union[List[VariableValue], VariableValue],
+        __index: int | slice,
+        __value: list[VariableValue] | VariableValue,
     ) -> None:
         """Set item by index."""
         self._data[__index] = __value  # type: ignore
@@ -547,7 +542,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
 
     def __repr__(self) -> str:
         """Object string representation."""
-        return f"List[{', '.join(repr(i) for i in self._data)}]"
+        return f"list[{', '.join(repr(i) for i in self._data)}]"
 
 
 class VariableValueLiteral(Generic[_LiteralValue], VariableValue):
@@ -609,9 +604,9 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
-    def dependencies(self) -> Set[str]:
+    def dependencies(self) -> set[str]:
         """Stack names that this variable depends on."""
-        deps: Set[str] = set()
+        deps: set[str] = set()
         for item in self:
             deps.update(item.dependencies)
         return deps
@@ -632,7 +627,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         nested concatenations.
 
         """
-        concat: List[VariableValue] = []
+        concat: list[VariableValue] = []
         for item in self:
             if isinstance(item, VariableValueLiteral) and item.value == "":
                 pass
@@ -666,7 +661,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         if len(self) == 1:
             return self[0].value
 
-        values: List[str] = []
+        values: list[str] = []
         for value in self:
             resolved_value = value.value
             if isinstance(resolved_value, bool) or not isinstance(resolved_value, (int, str)):
@@ -676,9 +671,9 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
 
     def resolve(
         self,
-        context: Union[CfnginContext, RunwayContext],
-        provider: Optional[Provider] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        context: CfnginContext | RunwayContext,
+        provider: Provider | None = None,
+        variables: RunwayVariablesDefinition | None = None,
         **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
@@ -687,6 +682,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
             context: The current context object.
             provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         for value in self:
@@ -700,11 +696,9 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
     def __getitem__(self, __index: int) -> _VariableValue: ...
 
     @overload
-    def __getitem__(self, __index: slice) -> List[_VariableValue]: ...
+    def __getitem__(self, __index: slice) -> list[_VariableValue]: ...
 
-    def __getitem__(
-        self, __index: Union[int, slice]
-    ) -> Union[List[_VariableValue], _VariableValue]:
+    def __getitem__(self, __index: int | slice) -> list[_VariableValue] | _VariableValue:
         """Get item by index."""
         return self._data[__index]
 
@@ -712,12 +706,12 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
     def __setitem__(self, __index: int, __value: _VariableValue) -> None: ...
 
     @overload
-    def __setitem__(self, __index: slice, __value: List[_VariableValue]) -> None: ...
+    def __setitem__(self, __index: slice, __value: list[_VariableValue]) -> None: ...
 
     def __setitem__(
         self,
-        __index: Union[int, slice],
-        __value: Union[List[_VariableValue], _VariableValue],
+        __index: int | slice,
+        __value: list[_VariableValue] | _VariableValue,
     ) -> None:
         """Set item by index."""
         self._data[__index] = __value
@@ -738,7 +732,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
 class VariableValueLookup(VariableValue):
     """A lookup variable value."""
 
-    handler: Type[LookupHandler]
+    handler: type[LookupHandler]
     lookup_name: VariableValueLiteral[str]
     lookup_query: VariableValue
 
@@ -747,8 +741,8 @@ class VariableValueLookup(VariableValue):
     def __init__(
         self,
         lookup_name: VariableValueLiteral[str],
-        lookup_query: Union[str, VariableValue],
-        handler: Optional[Type[LookupHandler]] = None,
+        lookup_query: str | VariableValue,
+        handler: type[LookupHandler] | None = None,
         variable_type: VariableTypeLiteralTypeDef = "cfngin",
     ) -> None:
         """Initialize class.
@@ -788,7 +782,7 @@ class VariableValueLookup(VariableValue):
         self.handler = handler
 
     @property
-    def dependencies(self) -> Set[str]:
+    def dependencies(self) -> set[str]:
         """Stack names that this variable depends on."""
         if hasattr(self.handler, "dependencies"):
             return self.handler.dependencies(self.lookup_query)
@@ -823,9 +817,9 @@ class VariableValueLookup(VariableValue):
 
     def resolve(
         self,
-        context: Union[CfnginContext, RunwayContext],
-        provider: Optional[Provider] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        context: CfnginContext | RunwayContext,
+        provider: Provider | None = None,
+        variables: RunwayVariablesDefinition | None = None,
         **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
@@ -834,6 +828,7 @@ class VariableValueLookup(VariableValue):
             context: The current context object.
             provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
+            **kwargs: Arbitrary keyword arguments.
 
         Raises:
             FailedLookup: A lookup failed for any reason.
@@ -859,8 +854,8 @@ class VariableValueLookup(VariableValue):
     def __repr__(self) -> str:
         """Return object representation."""
         if self._resolved:
-            return f"Lookup[{self._data} ({self.lookup_name} {repr(self.lookup_query)})]"
-        return f"Lookup[{self.lookup_name} {repr(self.lookup_query)}]"
+            return f"Lookup[{self._data} ({self.lookup_name} {self.lookup_query!r})]"
+        return f"Lookup[{self.lookup_name} {self.lookup_query!r}]"
 
     def __str__(self) -> str:
         """Object displayed as a string."""
@@ -882,16 +877,16 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
             variable_type: Type of variable (cfngin|runway).
 
         """
-        self._data: Dict[str, VariableValue] = {
+        self._data: dict[str, VariableValue] = {
             k: self.parse_obj(v, variable_type=variable_type) for k, v in data
         }
         self._model_class = type(data)
         self.variable_type: VariableTypeLiteralTypeDef = variable_type
 
     @property
-    def dependencies(self) -> Set[str]:
+    def dependencies(self) -> set[str]:
         """Stack names that this variable depends on."""
-        deps: Set[str] = set()
+        deps: set[str] = set()
         for value in self._data.values():
             deps.update(value.dependencies)
         return deps
@@ -905,7 +900,7 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
         return accumulator
 
     @property
-    def simplified(self) -> Dict[str, Any]:
+    def simplified(self) -> dict[str, Any]:
         """Return a simplified version of the value.
 
         This can be used to concatenate two literals into one literal or
@@ -928,9 +923,9 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
 
     def resolve(
         self,
-        context: Union[CfnginContext, RunwayContext],
-        provider: Optional[Provider] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        context: CfnginContext | RunwayContext,
+        provider: Provider | None = None,
+        variables: RunwayVariablesDefinition | None = None,
         **kwargs: Any,
     ) -> None:
         """Resolve the variable value.
@@ -939,6 +934,7 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
             context: The current context object.
             provider: Subclass of the base provider.
             variables: Object containing variables passed to Runway.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         for item in self._data.values():

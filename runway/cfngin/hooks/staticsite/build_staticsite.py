@@ -7,7 +7,7 @@ import os
 import tempfile
 import zipfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union  # noqa: UP035
 
 import boto3
 from boto3.s3.transfer import S3Transfer  # type: ignore
@@ -33,7 +33,7 @@ class HookArgsOptions(HookArgsBaseModel):
     build_output: Optional[str] = None
     """Path were the build static site will be stored locally before upload."""
 
-    build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]] = []
+    build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]] = []  # noqa: UP006
     """Steps to execute to build the static site."""
 
     name: str = "undefined"
@@ -45,7 +45,9 @@ class HookArgsOptions(HookArgsBaseModel):
     path: str
     """Working directory/path to the static site's source code."""
 
-    pre_build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]] = []
+    pre_build_steps: List[  # noqa: UP006
+        Union[str, List[str], Dict[str, Union[str, List[str]]]]  # noqa: UP006
+    ] = []
     """Steps to run before building the static site."""
 
     source_hashing: RunwayStaticSiteSourceHashingDataModel = (
@@ -74,26 +76,25 @@ def zip_and_upload(
     filedes, temp_file = tempfile.mkstemp()
     os.close(filedes)
     LOGGER.info("archiving %s to s3://%s/%s", app_dir, bucket, key)
-    with zipfile.ZipFile(temp_file, "w", zipfile.ZIP_DEFLATED) as filehandle:
-        with change_dir(app_dir):
-            for dirname, _subdirs, files in os.walk("./"):
-                if dirname != "./":
-                    filehandle.write(dirname)
-                for filename in files:
-                    filehandle.write(os.path.join(dirname, filename))
+    with zipfile.ZipFile(temp_file, "w", zipfile.ZIP_DEFLATED) as filehandle, change_dir(app_dir):
+        for dirname, _subdirs, files in os.walk("./"):
+            if dirname != "./":
+                filehandle.write(dirname)
+            for filename in files:
+                filehandle.write(os.path.join(dirname, filename))  # noqa: PTH118
     transfer.upload_file(temp_file, bucket, key)
-    os.remove(temp_file)
+    os.remove(temp_file)  # noqa: PTH107
 
 
 class OptionsArgTypeDef(TypedDict, total=False):
     """Options argument type definition."""
 
     build_output: str
-    build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+    build_steps: list[Union[str, list[str], dict[str, Union[str, list[str]]]]]
     name: str
     namespace: str
     path: str
-    pre_build_steps: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]]
+    pre_build_steps: list[Union[str, list[str], dict[str, Union[str, list[str]]]]]
 
 
 def build(
@@ -102,7 +103,7 @@ def build(
     *,
     options: Optional[OptionsArgTypeDef] = None,
     **kwargs: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build static site.
 
     Arguments parsed by :class:`~runway.cfngin.hooks.staticsite.build_staticsite.HookArgs`.
@@ -114,12 +115,12 @@ def build(
     args = HookArgs.parse_obj({"options": options, **kwargs})
     session = context.get_session()
 
-    context_dict: Dict[str, Any] = {
+    context_dict: dict[str, Any] = {
         "artifact_key_prefix": f"{args.options.namespace}-{args.options.name}-"
     }
 
     if args.options.build_output:
-        build_output = os.path.join(args.options.path, args.options.build_output)
+        build_output = os.path.join(args.options.path, args.options.build_output)  # noqa: PTH118
     else:
         build_output = args.options.path
 

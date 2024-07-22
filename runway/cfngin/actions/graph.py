@@ -5,18 +5,20 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Iterable, List, TextIO, Tuple, Union
+from typing import TYPE_CHECKING, Any, TextIO
 
 from ..plan import merge_graphs
 from .base import BaseAction
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from ..plan import Graph, Step
 
 LOGGER = logging.getLogger(__name__)
 
 
-def each_step(graph: Graph) -> Iterable[Tuple[Step, List[Step]]]:
+def each_step(graph: Graph) -> Iterable[tuple[Step, list[Step]]]:
     """Yield each step and it's direct dependencies.
 
     Args:
@@ -82,12 +84,12 @@ class Action(BaseAction):
     def run(
         self,
         *,
-        concurrency: int = 0,
-        dump: Union[bool, str] = False,
-        force: bool = False,
-        outline: bool = False,
-        tail: bool = False,
-        upload_disabled: bool = False,
+        concurrency: int = 0,  # noqa: ARG002
+        dump: bool | str = False,  # noqa: ARG002
+        force: bool = False,  # noqa: ARG002
+        outline: bool = False,  # noqa: ARG002
+        tail: bool = False,  # noqa: ARG002
+        upload_disabled: bool = False,  # noqa: ARG002
         **kwargs: Any,
     ) -> None:
         """Generate the underlying graph and prints it."""

@@ -3,16 +3,14 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import Any, Optional
 
 from pydantic import Field, validator
 
+from ....context import CfnginContext
 from ....utils import BaseModel
 from .data_models import ElasticContainerRegistry
 from .hook_data import DockerHookData
-
-if TYPE_CHECKING:
-    from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -41,19 +39,19 @@ class LoginArgs(BaseModel):
     """The registry username."""
 
     @validator("ecr", pre=True, allow_reuse=True)
-    def _set_ecr(cls, v: Any, values: Dict[str, Any]) -> Any:
+    def _set_ecr(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Set the value of ``ecr``."""
         if v and isinstance(v, dict):
             return ElasticContainerRegistry.parse_obj({"context": values.get("context"), **v})
         return v
 
     @validator("registry", pre=True, always=True, allow_reuse=True)
-    def _set_registry(cls, v: Any, values: Dict[str, Any]) -> Any:
+    def _set_registry(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Set the value of ``registry``."""
         if v:
             return v
 
-        ecr: Optional[ElasticContainerRegistry] = values.get("ecr")
+        ecr: ElasticContainerRegistry | None = values.get("ecr")
         if ecr:
             return ecr.fqn
 

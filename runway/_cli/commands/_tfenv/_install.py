@@ -1,8 +1,10 @@
 """Install a version of Terraform."""
 
 # docs: file://./../../../../docs/source/commands.rst
+from __future__ import annotations
+
 import logging
-from typing import Any, Optional
+from typing import Any
 
 import click
 
@@ -19,7 +21,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def install(ctx: click.Context, version: Optional[str] = None, **_: Any) -> None:
+def install(ctx: click.Context, version: str | None = None, **_: Any) -> None:
     """Install the specified <version> of Terraform (e.g. 0.12.0).
 
     If no version is specified, Runway will attempt to find and read a
@@ -32,7 +34,7 @@ def install(ctx: click.Context, version: Optional[str] = None, **_: Any) -> None
     except ValueError as err:
         LOGGER.debug("terraform install failed", exc_info=True)
         if "unable to find" not in str(err):
-            LOGGER.error(
+            LOGGER.error(  # noqa: G201
                 "unexpected error encountered when trying to install Terraform",
                 exc_info=True,
             )

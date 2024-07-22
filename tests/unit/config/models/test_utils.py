@@ -66,6 +66,6 @@ def test_validate_string_is_lookup(provided: Any) -> None:
 )
 def test_validate_string_is_lookup_raises(provided: str) -> None:
     """Test validate_string_is_lookup."""
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
         validate_string_is_lookup(provided)
     assert excinfo.value == RUNWAY_LOOKUP_STRING_ERROR

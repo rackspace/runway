@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 from ..base import HookArgsBaseModel
 
@@ -41,9 +41,9 @@ class HookArgs(HookArgsBaseModel):
     """Name of the CloudFormation Stack as defined in the config file (no namespace)."""
 
 
-def get_replicated_function_names(outputs: List[OutputTypeDef]) -> List[str]:
+def get_replicated_function_names(outputs: list[OutputTypeDef]) -> list[str]:
     """Extract replicated function names from CFN outputs."""
-    function_names: List[str] = []
+    function_names: list[str] = []
     for i in REPLICATED_FUNCTION_OUTPUTS:
         function_arn = next(
             (output.get("OutputValue") for output in outputs if output.get("OutputKey") == i),
@@ -54,13 +54,14 @@ def get_replicated_function_names(outputs: List[OutputTypeDef]) -> List[str]:
     return function_names
 
 
-def warn(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
+def warn(context: CfnginContext, *_args: Any, **kwargs: Any) -> bool:
     """Notify the user of Lambda functions to delete.
 
     Arguments parsed by :class:`~runway.cfngin.hooks.staticsite.cleanup.HookArgs`.
 
     Args:
         context: The context instance.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     args = HookArgs.parse_obj(kwargs)
@@ -92,7 +93,7 @@ def warn(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
             LOGGER.warning("for x in %s; do %s; done", (" ").join(functions), cmd)
             LOGGER.warning("On Windows:")
             LOGGER.warning('Foreach ($x in "%s") { %s }', ('","').join(functions), cmd)
-    except Exception:
+    except Exception:  # noqa: S110, BLE001
         # There's no harm in continuing on in the event of an error
         # Orphaned functions have no cost
         pass

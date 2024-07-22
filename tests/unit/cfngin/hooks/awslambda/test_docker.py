@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, Optional
+from unittest.mock import Mock, call
 
 import pytest
 from docker.errors import DockerException, ImageNotFound
 from docker.models.images import Image
 from docker.types.services import Mount
-from mock import Mock, call
 
 from runway.cfngin.hooks.awslambda.constants import (
     AWS_SAM_BUILD_IMAGE_PREFIX,
@@ -25,7 +25,6 @@ from ....mock_docker.fake_api import FAKE_IMAGE_ID
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from runway.context import CfnginContext
@@ -269,11 +268,10 @@ class TestDockerDependencyInstaller:
         build_image = mocker.patch.object(DockerDependencyInstaller, "build_image")
         pull_image = mocker.patch.object(DockerDependencyInstaller, "pull_image")
         obj = DockerDependencyInstaller(project, client=Mock())
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="docker.file, docker.image, or runtime is required"):
             assert not obj.image
         build_image.assert_not_called()
         pull_image.assert_not_called()
-        assert str(excinfo.value) == "docker.file, docker.image, or runtime is required"
 
     def test_install(self, mocker: MockerFixture) -> None:
         """Test install."""
@@ -302,7 +300,8 @@ class TestDockerDependencyInstaller:
     def test_install_commands(self) -> None:
         """Test install_commands."""
         obj = DockerDependencyInstaller(Mock(), client=Mock())
-        assert not obj.install_commands and isinstance(obj.install_commands, list)
+        assert not obj.install_commands
+        assert isinstance(obj.install_commands, list)
 
     @pytest.mark.parametrize("level", [logging.INFO, logging.DEBUG])
     def test_log_docker_msg_bytes(self, level: int, mocker: MockerFixture) -> None:
@@ -337,7 +336,7 @@ class TestDockerDependencyInstaller:
     def test_post_install_commands(
         self,
         mocker: MockerFixture,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
     ) -> None:
         """Test post_install_commands."""
         # these methods don't exist on windows so they need to be mocked
@@ -353,7 +352,7 @@ class TestDockerDependencyInstaller:
     def test_post_install_commands_cache_dir(
         self,
         mocker: MockerFixture,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
     ) -> None:
         """Test post_install_commands with cache_dir."""
         # these methods don't exist on windows so they need to be mocked
@@ -368,7 +367,7 @@ class TestDockerDependencyInstaller:
     def test_post_install_commands_extra_files(
         self,
         mocker: MockerFixture,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
     ) -> None:
         """Test post_install_commands with extra_files."""
         # these methods don't exist on windows so they need to be mocked
@@ -384,7 +383,7 @@ class TestDockerDependencyInstaller:
             f"chown -R {getuid.return_value}:{getgid.return_value} /var/task/lambda",
         ]
 
-    def test_post_install_commands_windows(self, platform_windows: None) -> None:
+    def test_post_install_commands_windows(self, platform_windows: None) -> None:  # noqa: ARG002
         """Test post_install_commands Windows."""
         obj = DockerDependencyInstaller(
             Mock(args=Mock(docker=Mock(extra_files=[])), cache_dir=False), client=Mock()
@@ -408,15 +407,16 @@ class TestDockerDependencyInstaller:
         "exists_locally, force",
         [(False, False), (False, True), (True, True), (True, False)],
     )
-    def test_pull_image(self, caplog: LogCaptureFixture, exists_locally: bool, force: bool) -> None:
+    def test_pull_image(
+        self, caplog: pytest.LogCaptureFixture, exists_locally: bool, force: bool
+    ) -> None:
         """Test pull_image."""
         caplog.set_level(logging.INFO, logger=MODULE)
         name = "foo:latest"
         image = Mock(spec=Image, id=FAKE_IMAGE_ID)
-        if exists_locally:
-            mock_get = Mock(return_value=image)
-        else:
-            mock_get = Mock(side_effect=ImageNotFound("test"))
+        mock_get = (
+            Mock(return_value=image) if exists_locally else Mock(side_effect=ImageNotFound("test"))
+        )
         mock_pull = Mock(return_value=image)
 
         assert (

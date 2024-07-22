@@ -6,9 +6,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
+from unittest.mock import MagicMock, Mock
 
 import pytest
-from mock import MagicMock, Mock
 
 from runway.cfngin.blueprints.raw import (
     RawTemplateBlueprint,
@@ -25,7 +25,6 @@ from runway.variables import Variable
 from ..factories import mock_context
 
 if TYPE_CHECKING:
-    from pytest import MonkeyPatch
     from pytest_mock import MockerFixture
 
     from runway.context import CfnginContext
@@ -139,7 +138,8 @@ class TestRawTemplateBlueprint:
     def test_parameter_values(self, cfngin_context: CfnginContext, tmp_path: Path) -> None:
         """Test parameter_values."""
         obj = RawTemplateBlueprint("test", cfngin_context, raw_template_path=tmp_path)
-        assert not obj.parameter_values and isinstance(obj.parameter_values, dict)
+        assert not obj.parameter_values
+        assert isinstance(obj.parameter_values, dict)
         obj._resolved_variables = {"var": "val"}
         del obj.parameter_values
         assert obj.parameter_values == {"var": "val"}
@@ -310,12 +310,12 @@ def test_get_template_path_local_file(tmp_path: Path) -> None:
         assert template_path.samefile(cast(Path, result))
 
 
-def test_get_template_path_invalid_file(cd_tmp_path: Path) -> None:
+def test_get_template_path_invalid_file(cd_tmp_path: Path) -> None:  # noqa: ARG001
     """Verify get_template_path with an invalid filename."""
     assert get_template_path(Path("cfn_template.json")) is None
 
 
-def test_get_template_path_file_in_syspath(tmp_path: Path, monkeypatch: MonkeyPatch) -> None:
+def test_get_template_path_file_in_syspath(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify get_template_path with a file in sys.path.
 
     This ensures templates are able to be retrieved from remote packages.

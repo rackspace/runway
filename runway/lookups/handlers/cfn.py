@@ -11,10 +11,9 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Final, NamedTuple, cast
 
 from botocore.exceptions import ClientError
-from typing_extensions import Final, Literal
 
 from ...cfngin.exceptions import StackDoesNotExist
 from ...exceptions import OutputDoesNotExist
@@ -22,6 +21,7 @@ from .base import LookupHandler
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
+    from typing_extensions import Literal
 
     from ...cfngin.providers.aws.default import Provider
     from ...context import CfnginContext, RunwayContext
@@ -43,7 +43,7 @@ class CfnLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @staticmethod
-    def should_use_provider(args: Dict[str, str], provider: Optional[Provider]) -> bool:
+    def should_use_provider(args: dict[str, str], provider: Provider | None) -> bool:
         """Determine if the provider should be used for the lookup.
 
         This will open happen when the lookup is used with CFNgin.
@@ -84,9 +84,9 @@ class CfnLookup(LookupHandler):
     def handle(
         cls,
         value: str,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *,
-        provider: Optional[Provider] = None,
+        provider: Provider | None = None,
         **_: Any,
     ) -> Any:
         """Retrieve a value from CloudFormation Stack outputs.

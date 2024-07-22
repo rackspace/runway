@@ -4,22 +4,24 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import pytest
 
 from runway._cli import cli
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from click.testing import CliRunner, Result
 
 CURRENT_DIR = Path(__file__).parent
 
 
 @pytest.fixture(scope="module")
-def deploy_promotezip_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
+def deploy_promotezip_result(cli_runner: CliRunner) -> Result:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
-    yield cli_runner.invoke(
+    return cli_runner.invoke(
         cli,
         ["deploy", "--tag", "sls"],
         env={"DEPLOY_ENVIRONMENT": "promotezip", "CI": "1"},
@@ -27,15 +29,15 @@ def deploy_promotezip_result(cli_runner: CliRunner) -> Generator[Result, None, N
 
 
 @pytest.fixture(scope="module")
-def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
+def deploy_result(cli_runner: CliRunner) -> Result:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
-    yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
+    return cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
 
 
 @pytest.fixture(scope="module")
-def destroy_promotezip_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
+def destroy_promotezip_result(cli_runner: CliRunner) -> Result:
     """Execute `runway destroy`."""
-    yield cli_runner.invoke(
+    return cli_runner.invoke(
         cli,
         ["destroy", "--tag", "sls"],
         env={"DEPLOY_ENVIRONMENT": "promotezip", "CI": "1"},

@@ -17,7 +17,6 @@ from runway.cfngin.hooks.utils import TagDataModel
 if TYPE_CHECKING:
     from botocore.stub import Stubber
     from mypy_boto3_ssm.client import SSMClient
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from runway.context import CfnginContext
@@ -140,7 +139,7 @@ class TestParameter:
 
     def test_delete(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         ssm_stubber: Stubber,
     ) -> None:
@@ -154,7 +153,7 @@ class TestParameter:
 
     def test_delete_handle_parameter_not_found(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         ssm_stubber: Stubber,
     ) -> None:
@@ -220,7 +219,7 @@ class TestParameter:
 
     def test_get_handle_parameter_not_found(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         ssm_stubber: Stubber,
     ) -> None:
@@ -333,7 +332,7 @@ class TestParameter:
 
     def test_put(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         mocker: MockerFixture,
         ssm_stubber: Stubber,
@@ -370,7 +369,7 @@ class TestParameter:
 
     def test_put_handle_parameter_already_exists(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         mocker: MockerFixture,
         ssm_stubber: Stubber,
@@ -391,7 +390,7 @@ class TestParameter:
 
     def test_put_no_value(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
     ) -> None:
         """Test put."""
@@ -539,7 +538,7 @@ class TestParameter:
 
     def test_update_tags_handle_invalid_resource_id(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         mocker: MockerFixture,
         ssm_stubber: Stubber,

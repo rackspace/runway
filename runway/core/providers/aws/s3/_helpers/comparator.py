@@ -8,9 +8,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Generator, Iterator, Optional, cast
+from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
+    from collections.abc import Generator, Iterator
+
     from .file_generator import FileStats
     from .sync_strategy.base import BaseSync
 
@@ -26,13 +28,13 @@ class Comparator:
         file_at_src_and_dest_sync_strategy: BaseSync,
         file_not_at_dest_sync_strategy: BaseSync,
         file_not_at_src_sync_strategy: BaseSync,
-    ):
+    ) -> None:
         """Instantiate class."""
         self._sync_strategy = file_at_src_and_dest_sync_strategy
         self._not_at_dest_sync_strategy = file_not_at_dest_sync_strategy
         self._not_at_src_sync_strategy = file_not_at_src_sync_strategy
 
-    def call(
+    def call(  # noqa: C901, PLR0912, PLR0915
         self, src_files: Iterator[FileStats], dest_files: Iterator[FileStats]
     ) -> Generator[FileStats, None, None]:
         """Preform the actual comparisons.
@@ -70,10 +72,10 @@ class Comparator:
             Yields the FilInfo objects of the files that need to be operated on.
 
         """
-        dest_file: Optional[FileStats] = None
+        dest_file: FileStats | None = None
         dest_done = False  # True if there are no more files form the dest left.
         dest_take = True  # Take the next dest file from the generated files if true
-        src_file: Optional[FileStats] = None
+        src_file: FileStats | None = None
         src_done = False  # True if there are no more files from the source left.
         src_take = True  # Take the next source file from the generated files if true
         while True:
@@ -131,7 +133,7 @@ class Comparator:
                 break  # cov: ignore
 
     @staticmethod
-    def compare_comp_key(src_file: Optional[FileStats], dest_file: Optional[FileStats]) -> str:
+    def compare_comp_key(src_file: FileStats | None, dest_file: FileStats | None) -> str:
         """Compare the source & destination compare_key."""
         src_comp_key = (src_file.compare_key if src_file else None) or ""
         dest_comp_key = (dest_file.compare_key if dest_file else None) or ""

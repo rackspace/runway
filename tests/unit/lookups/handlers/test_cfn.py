@@ -6,13 +6,13 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional
+from unittest.mock import MagicMock
 
 import boto3
 import pytest
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
-from mock import MagicMock
 
 from runway.cfngin.exceptions import StackDoesNotExist
 from runway.cfngin.providers.aws.default import Provider
@@ -21,7 +21,6 @@ from runway.lookups.handlers.cfn import CfnLookup, OutputQuery
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from ...factories import MockRunwayContext
@@ -29,10 +28,10 @@ if TYPE_CHECKING:
 
 def generate_describe_stacks_stack(
     stack_name: str,
-    outputs: Dict[str, str],
+    outputs: dict[str, str],
     creation_time: Optional[datetime] = None,
     stack_status: str = "CREATE_COMPLETE",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate describe stacks stack.
 
     Args:
@@ -59,7 +58,7 @@ def generate_describe_stacks_stack(
     }
 
 
-def setup_cfn_client() -> Tuple[CloudFormationClient, Stubber]:
+def setup_cfn_client() -> tuple[CloudFormationClient, Stubber]:
     """Create a CloudFormation client & Stubber."""
     client = boto3.client("cloudformation")
     return client, Stubber(client)
@@ -126,7 +125,7 @@ class TestCfnLookup:
     )
     def test_handle_exception(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         default: Optional[str],
         exception: Exception,
         mocker: MockerFixture,
@@ -182,7 +181,7 @@ class TestCfnLookup:
     )
     def test_handle_provider_exception(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         default: Optional[str],
         exception: Exception,
         mocker: MockerFixture,
@@ -227,11 +226,10 @@ class TestCfnLookup:
 
     def test_handle_valueerror(self, runway_context: MockRunwayContext) -> None:
         """Test handle raising ValueError."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="query must be <stack-name>.<output-name>"):
             assert CfnLookup.handle("something", runway_context)
-        assert str(excinfo.value) == 'query must be <stack-name>.<output-name>; got "something"'
 
-    def test_get_stack_output(self, caplog: LogCaptureFixture) -> None:
+    def test_get_stack_output(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test get_stack_output."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         client, stubber = setup_cfn_client()
@@ -252,7 +250,7 @@ class TestCfnLookup:
         assert f"describing stack: {stack_name}" in caplog.messages
         assert f"{stack_name} stack outputs: {json.dumps(outputs)}" in caplog.messages
 
-    def test_get_stack_output_clienterror(self, caplog: LogCaptureFixture) -> None:
+    def test_get_stack_output_clienterror(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test get_stack_output raising ClientError."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         client, stubber = setup_cfn_client()
@@ -272,7 +270,7 @@ class TestCfnLookup:
         stubber.assert_no_pending_responses()
         assert f"describing stack: {stack_name}" in caplog.messages
 
-    def test_get_stack_output_keyerror(self, caplog: LogCaptureFixture) -> None:
+    def test_get_stack_output_keyerror(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test get_stack_output raising KeyError."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
         client, stubber = setup_cfn_client()
@@ -302,8 +300,8 @@ class TestCfnLookup:
     )
     def test_should_use_provider_falsy(
         self,
-        args: Dict[str, Any],
-        caplog: LogCaptureFixture,
+        args: dict[str, Any],
+        caplog: pytest.LogCaptureFixture,
         provider: Optional[Provider],
     ) -> None:
         """Test should_use_provider with falsy cases."""
@@ -322,8 +320,8 @@ class TestCfnLookup:
     )
     def test_should_use_provider_truthy(
         self,
-        args: Dict[str, Any],
-        caplog: LogCaptureFixture,
+        args: dict[str, Any],
+        caplog: pytest.LogCaptureFixture,
         provider: Optional[Provider],
     ) -> None:
         """Test should_use_provider with truthy cases."""

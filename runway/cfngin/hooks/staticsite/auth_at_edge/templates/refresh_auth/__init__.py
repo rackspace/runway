@@ -115,7 +115,7 @@ def validate_refresh_request(current_nonce, original_nonce, tokens):
     Args:
         current_nonce (str): The current nonce code.
         original_nonce (str): The original nonce code.
-        tokens (Dict[str, str]): A dictionary of all the token_types
+        tokens (dict[str, str]): A dictionary of all the token_types
             and their corresponding token values (id, auth, refresh).
 
     """

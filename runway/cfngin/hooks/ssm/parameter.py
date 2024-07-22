@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, List, Optional, cast  # noqa: UP035
 
 from pydantic import Extra, validator
 from typing_extensions import Literal, TypedDict
@@ -26,10 +26,11 @@ else:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
+
 # PutParameterResultTypeDef but without metadata
-_PutParameterResultTypeDef = TypedDict(
-    "_PutParameterResultTypeDef", {"Tier": ParameterTierType, "Version": int}
-)
+class _PutParameterResultTypeDef(TypedDict):
+    Tier: ParameterTierType
+    Version: int
 
 
 class ArgsDataModel(BaseModel):
@@ -68,7 +69,7 @@ class ArgsDataModel(BaseModel):
     name: str
     overwrite: bool = True
     policies: Optional[str] = None
-    tags: Optional[List[TagDataModel]] = None
+    tags: Optional[List[TagDataModel]] = None  # noqa: UP006
     tier: ParameterTierType = "Standard"
     type: Literal["String", "StringList", "SecureString"]
     value: Optional[str] = None
@@ -93,28 +94,25 @@ class ArgsDataModel(BaseModel):
         }
 
     @validator("policies", allow_reuse=True, pre=True)
-    def _convert_policies(cls, v: Union[List[Dict[str, Any]], str, Any]) -> str:
+    def _convert_policies(cls, v: list[dict[str, Any]] | str | Any) -> str:  # noqa: N805
         """Convert policies to acceptable value."""
         if isinstance(v, str):
             return v
         if isinstance(v, list):
             return json.dumps(v, cls=JsonEncoder)
-        raise TypeError(
-            f"unexpected type {type(v)}; permitted: Optional[Union[List[Dict[str, Any]], str]]"
-        )
+        raise TypeError(f"unexpected type {type(v)}; permitted: list[dict[str, Any]] | str | None")
 
     @validator("tags", allow_reuse=True, pre=True)
     def _convert_tags(
-        cls, v: Union[Dict[str, str], List[Dict[str, str]], Any]
-    ) -> List[Dict[str, str]]:
+        cls, v: dict[str, str] | list[dict[str, str]] | Any  # noqa: N805
+    ) -> list[dict[str, str]]:
         """Convert tags to acceptable value."""
         if isinstance(v, list):
             return v
         if isinstance(v, dict):
             return [{"Key": k, "Value": v} for k, v in v.items()]
         raise TypeError(
-            f"unexpected type {type(v)}; permitted: "
-            "Optional[Union[Dict[str, str], List[Dict[str, str]]]"
+            f"unexpected type {type(v)}; permitted: dict[str, str] | list[dict[str, str] | None"
         )
 
 
@@ -128,7 +126,7 @@ class _Parameter(CfnginHookProtocol):
         context: CfnginContext,
         *,
         name: str,
-        type: Literal["String", "StringList", "SecureString"],
+        type: Literal["String", "StringList", "SecureString"],  # noqa: A002
         **kwargs: Any,
     ) -> None:
         """Instantiate class.
@@ -138,6 +136,7 @@ class _Parameter(CfnginHookProtocol):
             name: The fully qualified name of the parameter that you want to add to
                 the system.
             type: The type of parameter.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.args = ArgsDataModel.parse_obj({"name": name, "type": type, **kwargs})
@@ -169,7 +168,7 @@ class _Parameter(CfnginHookProtocol):
             LOGGER.verbose("parameter %s does not exist", self.args.name)
             return {}
 
-    def get_current_tags(self) -> List[TagTypeDef]:
+    def get_current_tags(self) -> list[TagTypeDef]:
         """Get Tags currently applied to Parameter."""
         try:
             return self.client.list_tags_for_resource(
@@ -289,6 +288,7 @@ class SecureString(_Parameter):
             context: CFNgin context object.
             name: The fully qualified name of the parameter that you want to add to
                 the system.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         for k in ["Type", "type"]:  # ensure neither of these are set

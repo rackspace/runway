@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import subprocess
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 import pytest
 import tomli_w
-from mock import Mock
 
 from runway.dependency_managers import Poetry, PoetryExportFailedError
 
@@ -42,7 +42,7 @@ class TestPoetry:
         ],
     )
     def test_dir_is_project(
-        self, build_system: Dict[str, Any], expected: bool, tmp_path: Path
+        self, build_system: dict[str, Any], expected: bool, tmp_path: Path
     ) -> None:
         """Test dir_is_project."""
         pyproject_contents = {"build-system": build_system}
@@ -69,7 +69,7 @@ class TestPoetry:
     )
     def test_export(
         self,
-        export_kwargs: Dict[str, Any],
+        export_kwargs: dict[str, Any],
         mocker: MockerFixture,
         tmp_path: Path,
     ) -> None:

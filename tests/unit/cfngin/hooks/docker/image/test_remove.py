@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import call
 
 from docker.errors import ImageNotFound
 from docker.models.images import Image
-from mock import call
 
 from runway.cfngin.hooks.docker.data_models import (
     DockerImage,
@@ -22,13 +22,13 @@ if TYPE_CHECKING:
     from docker import DockerClient
     from pytest_mock import MockerFixture
 
-    from .....factories import MockCFNginContext
+    from .....factories import MockCfnginContext
 
 MODULE = "runway.cfngin.hooks.docker.image._remove"
 
 
 def test_remove(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
     mock_docker_client: DockerClient,
     mocker: MockerFixture,
 ) -> None:
@@ -61,7 +61,7 @@ def test_remove(
 
 
 def test_remove_image_not_found(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
     mock_docker_client: DockerClient,
     mocker: MockerFixture,
 ) -> None:

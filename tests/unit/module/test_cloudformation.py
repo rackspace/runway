@@ -3,7 +3,7 @@
 # pyright: basic
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from runway.core.components import DeployEnvironment
 from runway.module.cloudformation import CloudFormation
@@ -25,7 +25,7 @@ class TestCloudFormation:
     """Test runway.module.cloudformation.CloudFormation."""
 
     @property
-    def generic_parameters(self) -> Dict[str, Any]:
+    def generic_parameters(self) -> dict[str, Any]:
         """Return generic module options."""
         return {"test_key": "test-value"}
 

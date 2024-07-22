@@ -8,21 +8,16 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
+from typing import (  # noqa: UP035
     Any,
     Dict,
-    Iterator,
     List,
     Optional,
-    Tuple,
-    Union,
-    cast,
 )
 
-from docker.models.images import Image
 from pydantic import DirectoryPath, Field, validator
 
+from .....context import CfnginContext
 from .....utils import BaseModel
 from ..data_models import (
     DockerImage,
@@ -31,22 +26,19 @@ from ..data_models import (
 )
 from ..hook_data import DockerHookData
 
-if TYPE_CHECKING:
-    from .....context import CfnginContext
-
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class DockerImageBuildApiOptions(BaseModel):
     """Options for controlling Docker."""
 
-    buildargs: Dict[str, Any] = {}
+    buildargs: Dict[str, Any] = {}  # noqa: UP006
     """Dict of build-time variables that will be passed to Docker."""
 
     custom_context: bool = False
     """Whether to use custom context when providing a file object."""
 
-    extra_hosts: Dict[str, str] = {}
+    extra_hosts: Dict[str, str] = {}  # noqa: UP006
     """Extra hosts to add to `/etc/hosts` in the build containers.
     Defined as a mapping of hostname to IP address.
 
@@ -124,14 +116,14 @@ class ImageBuildArgs(BaseModel):
     docker: DockerImageBuildApiOptions = DockerImageBuildApiOptions()  # depends on repo
     """Options for ``docker image build``."""
 
-    tags: List[str] = ["latest"]
+    tags: List[str] = ["latest"]  # noqa: UP006
     """List of tags to apply to the image."""
 
     @validator("docker", pre=True, always=True, allow_reuse=True)
     def _set_docker(
-        cls,
-        v: Union[Dict[str, Any], DockerImageBuildApiOptions, Any],
-        values: Dict[str, Any],
+        cls,  # noqa: N805
+        v: dict[str, Any] | DockerImageBuildApiOptions | Any,
+        values: dict[str, Any],
     ) -> Any:
         """Set the value of ``docker``."""
         repo = values["repo"]
@@ -143,7 +135,7 @@ class ImageBuildArgs(BaseModel):
         return v
 
     @validator("ecr_repo", pre=True, allow_reuse=True)
-    def _set_ecr_repo(cls, v: Any, values: Dict[str, Any]) -> Any:
+    def _set_ecr_repo(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Set the value of ``ecr_repo``."""
         if v and isinstance(v, dict):
             return ElasticContainerRegistryRepository.parse_obj(
@@ -162,19 +154,19 @@ class ImageBuildArgs(BaseModel):
         return v
 
     @validator("repo", pre=True, always=True, allow_reuse=True)
-    def _set_repo(cls, v: Optional[str], values: Dict[str, Any]) -> Optional[str]:
+    def _set_repo(cls, v: str | None, values: dict[str, Any]) -> str | None:  # noqa: N805
         """Set the value of ``repo``."""
         if v:
             return v
 
-        ecr_repo: Optional[ElasticContainerRegistryRepository] = values.get("ecr_repo")
+        ecr_repo: ElasticContainerRegistryRepository | None = values.get("ecr_repo")
         if ecr_repo:
             return ecr_repo.fqn
 
         return None
 
     @validator("dockerfile", pre=True, always=True, allow_reuse=True)
-    def _validate_dockerfile(cls, v: Any, values: Dict[str, Any]) -> Any:
+    def _validate_dockerfile(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Validate ``dockerfile``."""
         path: Path = values["path"]
         dockerfile = path / v
@@ -193,10 +185,7 @@ def build(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     """
     args = ImageBuildArgs.parse_obj({"context": context, **kwargs})
     docker_hook_data = DockerHookData.from_cfngin_context(context)
-    image, logs = cast(
-        Tuple[Image, Iterator[Dict[str, str]]],
-        docker_hook_data.client.images.build(path=str(args.path), **args.docker.dict()),
-    )
+    image, logs = docker_hook_data.client.images.build(path=str(args.path), **args.docker.dict())
     for msg in logs:  # iterate through JSON log messages
         if "stream" in msg:  # log if they contain a message
             LOGGER.info(msg["stream"].strip())  # remove any new line characters

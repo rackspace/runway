@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from troposphere import NoValue
 from troposphere.iam import User
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class AdminUser(Blueprint):
     """Blueprint for an admin user."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "PermissionsBoundary": {"type": str},
         "UserName": {"type": str, "default": ""},
     }
@@ -42,7 +42,7 @@ class AdminUser(Blueprint):
         return user
 
     @cached_property
-    def username(self) -> Optional[str]:
+    def username(self) -> str | None:
         """Name of the user being created."""
         val = self.variables["UserName"]
         if val == "":
@@ -53,4 +53,4 @@ class AdminUser(Blueprint):
         """Create a template from the Blueprint."""
         self.template.set_description("Admin user")
         self.template.set_version("2010-09-09")
-        self.user
+        self.user  # noqa: B018

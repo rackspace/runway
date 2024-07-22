@@ -2,7 +2,7 @@
 
 import logging
 import os
-from typing import Any, Dict
+from typing import Any
 
 import coloredlogs
 
@@ -15,7 +15,7 @@ LOGGER = logging.getLogger("runway")
 
 LOG_FORMAT = "[runway] %(message)s"
 LOG_FORMAT_VERBOSE = logging.BASIC_FORMAT
-LOG_FIELD_STYLES: Dict[str, Dict[str, Any]] = {
+LOG_FIELD_STYLES: dict[str, dict[str, Any]] = {
     "asctime": {},
     "hostname": {},
     "levelname": {},
@@ -24,7 +24,7 @@ LOG_FIELD_STYLES: Dict[str, Dict[str, Any]] = {
     "prefix": {},
     "programname": {},
 }
-LOG_LEVEL_STYLES: Dict[str, Dict[str, Any]] = {
+LOG_LEVEL_STYLES: dict[str, dict[str, Any]] = {
     "critical": {"color": "red", "bold": True},
     "debug": {"color": "green"},
     "error": {"color": "red"},
@@ -46,7 +46,7 @@ class LogSettings:
         "level_styles": os.getenv("RUNWAY_LOG_LEVEL_STYLES"),
     }
 
-    def __init__(self, *, debug: int = 0, no_color: bool = False, verbose: bool = False):
+    def __init__(self, *, debug: int = 0, no_color: bool = False, verbose: bool = False) -> None:
         """Instantiate class.
 
         Args:
@@ -60,7 +60,7 @@ class LogSettings:
         self.verbose = verbose
 
     @property
-    def coloredlogs(self) -> Dict[str, Any]:
+    def coloredlogs(self) -> dict[str, Any]:
         """Return settings for coloredlogs."""
         return {
             "fmt": self.fmt,
@@ -83,7 +83,7 @@ class LogSettings:
         return LOG_FORMAT
 
     @cached_property
-    def field_styles(self) -> Dict[str, Any]:
+    def field_styles(self) -> dict[str, Any]:
         """Return log field styles.
 
         If "RUNWAY_LOG_FIELD_STYLES" exists in the environment, it will be
@@ -101,7 +101,7 @@ class LogSettings:
         return result
 
     @cached_property
-    def level_styles(self) -> Dict[str, Any]:
+    def level_styles(self) -> dict[str, Any]:
         """Return log level styles.
 
         If "RUNWAY_LOG_LEVEL_STYLES" exists in the environment, it will be

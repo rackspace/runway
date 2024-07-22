@@ -1,11 +1,13 @@
 """'Git type Path Source."""
 
+from __future__ import annotations
+
 import logging
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .source import Source
 
@@ -23,7 +25,7 @@ class Git(Source):
     def __init__(
         self,
         *,
-        arguments: Optional[Dict[str, str]] = None,
+        arguments: dict[str, str] | None = None,
         location: str = "",
         uri: str = "",
         **kwargs: Any,
@@ -38,6 +40,7 @@ class Git(Source):
                 module resides. Leaving this as an empty string, ``/``, or ``./``
                 will have runway look in the root folder.
             uri: The uniform resource identifier that targets the remote git repository
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.args = arguments or {}

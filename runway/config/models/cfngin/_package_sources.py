@@ -1,5 +1,6 @@
 """CFNgin package source models."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -55,7 +56,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         title = "CFNgin Git Repository Package Source Definition"
 
     @root_validator
-    def _validate_one_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_one_ref(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Ensure that only one ref is defined."""
         ref_keys = ["branch", "commit", "tag"]
         count_ref_defs = sum(bool(values.get(i)) for i in ref_keys)

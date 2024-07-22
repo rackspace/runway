@@ -1,5 +1,6 @@
 """Response data models."""
 
+# ruff: noqa: UP006, UP035
 from typing import List, Optional
 
 from pydantic import Extra

@@ -33,7 +33,6 @@ repository = "https://github.com/onicagroup/runway"
 [tool.poetry.dependencies]
 python = ">=3.9, <3.13"
 awacs = "*"
-"backports.cached_property" = {python = "<3.8", version = "*"}
 boto3 = "^1.16"
 cfn-lint = "*"
 cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
@@ -43,7 +42,6 @@ docker = ">=3.0.0"  # used in runway.cfngin.hooks
 formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
 igittigitt = ">=2.0.5"
-importlib-metadata = {python = "<3.8", version = "*"}
 jinja2 = ">=2.7"  # used in runway.cfngin.blueprints.raw
 moto = "3.0.5"
 packaging = "*"  # component of setuptools needed for version compare
@@ -95,6 +93,7 @@ sphinxcontrib-programoutput = "^0.17"
 
 [tool.poetry.group.lint.dependencies]
 black = "^24.4.2"
+ruff = "^0.5.4"
 
 [tool.poetry.group.types.dependencies]
 mypy-boto3 = "^1.16"  # importable boto3 type annotations
@@ -229,6 +228,118 @@ python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 testpaths = ["tests"]
+
+[tool.ruff]  # https://docs.astral.sh/ruff/settings/#top-level
+extend-exclude = [
+  "runway/aws_sso_botocore",  # NOTE (kyle): ignoring vendored code
+  "runway/cfngin/hooks/staticsite/auth_at_edge/templates",  # TODO (kyle): resolve lint error
+  "typings",
+]
+force-exclude = true
+line-length = 120
+show-fixes = true
+target-version = "py39"  # important to set before applying fixes
+
+[tool.ruff.lint]  # https://docs.astral.sh/ruff/settings/#lint
+extend-safe-fixes = [
+  "UP007",
+  "UP038",
+  "UP040",
+]
+ignore = [
+  "ANN101",  # Missing type annotation for `self` in method
+  "ANN102",  # Missing type annotation for `cls` in classmethod
+  "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed  # TODO (kyle): improve type annotations
+  "COM812",  # Trailing comma missing
+  "D203",  # 1 blank line required before class docstring
+  "D213",  # Multi-line docstring summary should start at the second line
+  "D215",  # Section underline is over-indented
+  "D403",  # First word of the first line should be capitalized
+  "D406",  # Section name should end with a newline
+  "D407",  # Missing dashed underline after section
+  "D408",  # Section underline should be in the line following the section's name
+  "D409",  # Section underline should match the length of its name
+  "DTZ",  # flake8-datetimez  # NOTE (kyle): this is fine here
+  "EM",  # flake8-errmsg
+  "ERA001",  # Found commented-out code  # NOTE (kyle): incorrectly detects cspell
+  "FA100",  # Missing `from __future__ import annotations`, but uses `typing.Optional`
+  "FBT001",  # Boolean positional arg in function definition
+  "FBT002",  # Boolean default value in function definition
+  "FBT003",  # Boolean positional value in function call
+  "FIX002",  # Line contains TODO
+  "N818",  # Exception name should be named with an Error suffix  # TODO (kyle): resolve in next major release
+  "PERF203",  # `try`-`except` within a loop incurs performance overhead
+  "PGH003",  # Use specific rule codes when ignoring type issues  # TODO (kyle): resolve this eventually
+  "RUF012",  # TODO (kyle): remove when resolved - https://github.com/astral-sh/ruff/issues/5243
+  "S105",  # (hardcoded-password-string) Possible hardcoded password
+  "S106",  # (hardcoded-password-func-arg) Possible hardcoded password
+  "S107",  # (hardcoded-password-default) Possible hardcoded password
+  "S108",  # Probable insecure usage of temporary file or directory
+  "S301",  # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data
+  "S60",  # flake8-bandit   # NOTE (kyle): most of these are for subprocess which we don't care about right now
+  "S604",  # Function call with `shell=True` parameter identified   # NOTE (kyle): required for runway
+  "TD003",  # Missing issue link on the line following this TODO
+  "TID252",  # Relative imports from parent modules are banned
+  "TRY",  # tryceratops
+]
+select = ["ALL"]
+
+[tool.ruff.lint.extend-per-file-ignores]  # https://docs.astral.sh/ruff/settings/#lintextend-per-file-ignores
+"*.py" = [
+  "PYI024",  # Use `typing.NamedTuple` instead of `collections.namedtuple`  # NOTE (kyle): should only apply to pyi
+]
+"runway/templates/*" = [
+  "N999",  # Invalid module name  # NOTE (kyle): these are fine here
+]
+"tests/*" = [
+  "PT004",  # Fixture does not return anything, add leading underscore
+  "S101",  # Use of `assert` detected  # NOTE (kyle): this is fine here
+  "SLF001",  # Private member accessed  # NOTE (kyle): fine in tests
+]
+
+[tool.ruff.lint.flake8-annotations]  # https://docs.astral.sh/ruff/settings/#lintflake8-annotations
+allow-star-arg-any = true
+
+[tool.ruff.lint.flake8-pytest-style]  # https://docs.astral.sh/ruff/settings/#lintflake8-pytest-style
+parametrize-names-type = "csv"  # TODO (kyle): update tests to remove the need for this
+
+[tool.ruff.lint.flake8-self]
+ignore-names = [
+  "_Environ",
+  "_Hash",
+  "_session",
+]
+
+[tool.ruff.lint.flake8-type-checking]  # https://docs.astral.sh/ruff/settings/#lint_flake8-type-checking_runtime-evaluated-base-classes
+runtime-evaluated-base-classes = [
+  "pydantic.BaseModel",
+  "pydantic.BeforeValidator",
+  "runway.cfngin.hooks.base.HookArgsBaseModel",
+  "runway.config.models.base.ConfigProperty",
+  "runway.utils.BaseModel",
+]
+
+[tool.ruff.lint.isort]  # https://docs.astral.sh/ruff/settings/#lintisort
+known-local-folder = [
+  "jwks_rsa",
+  "shared",
+  "update_urls",
+]
+known-third-party = [
+  "docker",  # NOTE (kyle): the `docker/` directory confuses isort
+]
+
+[tool.ruff.lint.pydocstyle]  # https://docs.astral.sh/ruff/settings/#lintpydocstyle
+convention = "google"
+
+[tool.ruff.lint.pylint]  # https://docs.astral.sh/ruff/settings/#lintpylint
+allow-magic-value-types = ["bytes", "int", "str"]
+max-args = 15
+max-returns = 10
+max-statements = 50
+
+[tool.ruff.lint.pyupgrade]  # https://docs.astral.sh/ruff/settings/#pyupgrade-keep-runtime-typing
+keep-runtime-typing = true  # TODO (kyle): remove when dropping support for python 3.9
 
 [tool.tomlsort]
 all = true

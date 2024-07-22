@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from ..factories import MockRunwayContext
 
 VALUES = {"str_val": "test"}
-CONTEXT = MutableMap(**{"env_vars": VALUES})
+CONTEXT = MutableMap(env_vars=VALUES)
 VARIABLES = MutableMap(**VALUES)
 
 

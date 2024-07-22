@@ -2,9 +2,10 @@
 
 # pyright: basic
 import unittest
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import botocore.exceptions
-from mock import MagicMock, PropertyMock, patch
+import pytest
 
 from runway.cfngin.actions.base import BaseAction
 from runway.cfngin.blueprints.base import Blueprint
@@ -82,7 +83,7 @@ class TestBaseAction(unittest.TestCase):
             context=mock_context("mynamespace"),
             provider_builder=MockProviderBuilder(provider=Provider(get_session("us-east-1"))),
         )
-        with self.assertRaises(CfnginBucketNotFound):
+        with pytest.raises(CfnginBucketNotFound):
             assert action.ensure_cfn_bucket()
         mock_ensure_s3_bucket.assert_called_once_with(
             action.s3_conn, action.bucket_name, None, create=False
@@ -109,14 +110,14 @@ class TestBaseAction(unittest.TestCase):
         plan = action._generate_plan(include_persistent_graph=False)
 
         mock_tags.assert_not_called()
-        self.assertIsInstance(plan, Plan)
+        assert isinstance(plan, Plan)
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
-        self.assertEqual(2, len(result_graph_dict))
-        self.assertEqual(set(), result_graph_dict["stack1"])
-        self.assertEqual({"stack1"}, result_graph_dict["stack2"])
-        self.assertEqual(BaseAction.DESCRIPTION, plan.description)
-        self.assertTrue(plan.require_unlocked)
+        assert len(result_graph_dict) == 2
+        assert set() == result_graph_dict["stack1"]
+        assert {"stack1"} == result_graph_dict["stack2"]
+        assert plan.description == BaseAction.DESCRIPTION
+        assert plan.require_unlocked
 
     @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
     @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
@@ -139,14 +140,14 @@ class TestBaseAction(unittest.TestCase):
         plan = action._generate_plan(include_persistent_graph=True)
 
         mock_tags.assert_not_called()
-        self.assertIsInstance(plan, Plan)
+        assert isinstance(plan, Plan)
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
-        self.assertEqual(2, len(result_graph_dict))
-        self.assertEqual(set(), result_graph_dict["stack1"])
-        self.assertEqual({"stack1"}, result_graph_dict["stack2"])
-        self.assertEqual(BaseAction.DESCRIPTION, plan.description)
-        self.assertTrue(plan.require_unlocked)
+        assert len(result_graph_dict) == 2
+        assert set() == result_graph_dict["stack1"]
+        assert {"stack1"} == result_graph_dict["stack2"]
+        assert plan.description == BaseAction.DESCRIPTION
+        assert plan.require_unlocked
 
     @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
     @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
@@ -168,14 +169,14 @@ class TestBaseAction(unittest.TestCase):
 
         plan = action._generate_plan(include_persistent_graph=False)
 
-        self.assertIsInstance(plan, Plan)
+        assert isinstance(plan, Plan)
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
-        self.assertEqual(2, len(result_graph_dict))
-        self.assertEqual(set(), result_graph_dict["stack1"])
-        self.assertEqual({"stack1"}, result_graph_dict["stack2"])
-        self.assertEqual(BaseAction.DESCRIPTION, plan.description)
-        self.assertTrue(plan.require_unlocked)
+        assert len(result_graph_dict) == 2
+        assert set() == result_graph_dict["stack1"]
+        assert {"stack1"} == result_graph_dict["stack2"]
+        assert plan.description == BaseAction.DESCRIPTION
+        assert plan.require_unlocked
 
     @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
     @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
@@ -197,16 +198,16 @@ class TestBaseAction(unittest.TestCase):
 
         plan = action._generate_plan(include_persistent_graph=True)
 
-        self.assertIsInstance(plan, Plan)
+        assert isinstance(plan, Plan)
         mock_tags.assert_called_once()
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
-        self.assertEqual(3, len(result_graph_dict))
-        self.assertEqual(set(), result_graph_dict["stack1"])
-        self.assertEqual({"stack1"}, result_graph_dict["stack2"])
-        self.assertEqual(set(), result_graph_dict["removed"])
-        self.assertEqual(BaseAction.DESCRIPTION, plan.description)
-        self.assertTrue(plan.require_unlocked)
+        assert len(result_graph_dict) == 3
+        assert set() == result_graph_dict["stack1"]
+        assert {"stack1"} == result_graph_dict["stack2"]
+        assert set() == result_graph_dict["removed"]
+        assert plan.description == BaseAction.DESCRIPTION
+        assert plan.require_unlocked
 
     @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
     @patch("runway.cfngin.actions.base.BaseAction._stack_action", new_callable=PropertyMock)
@@ -228,21 +229,21 @@ class TestBaseAction(unittest.TestCase):
 
         plan = action._generate_plan(include_persistent_graph=True, require_unlocked=False)
 
-        self.assertIsInstance(plan, Plan)
+        assert isinstance(plan, Plan)
         mock_tags.assert_called_once()
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
-        self.assertEqual(3, len(result_graph_dict))
-        self.assertEqual(set(), result_graph_dict["stack1"])
-        self.assertEqual({"stack1"}, result_graph_dict["stack2"])
-        self.assertEqual(set(), result_graph_dict["removed"])
-        self.assertEqual(BaseAction.DESCRIPTION, plan.description)
-        self.assertFalse(plan.require_unlocked)
+        assert len(result_graph_dict) == 3
+        assert set() == result_graph_dict["stack1"]
+        assert {"stack1"} == result_graph_dict["stack2"]
+        assert set() == result_graph_dict["removed"]
+        assert plan.description == BaseAction.DESCRIPTION
+        assert not plan.require_unlocked
 
     def test_stack_template_url(self) -> None:
         """Test stack template url."""
         context = mock_context("mynamespace")
-        blueprint = MockBlueprint(name="myblueprint", context=context)
+        blueprint = MockBlueprint(name="test-blueprint", context=context)
 
         region = "us-east-1"
         endpoint = "https://example.com"
@@ -258,8 +259,8 @@ class TestBaseAction(unittest.TestCase):
             autospec=True,
             return_value=endpoint,
         ):
-            self.assertEqual(
-                action.stack_template_url(blueprint),
-                f"{endpoint}/cfngin-{context.namespace}-{region}/stack_templates/"
-                f"{context.namespace}-{blueprint.name}/{blueprint.name}-{MOCK_VERSION}.json",
+            assert (
+                action.stack_template_url(blueprint)
+                == f"{endpoint}/cfngin-{context.namespace}-{region}/stack_templates/"
+                f"{context.namespace}-{blueprint.name}/{blueprint.name}-{MOCK_VERSION}.json"
             )

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union, overload
+from typing import TYPE_CHECKING, Any, overload
 
 from ....exceptions import UnresolvedVariable
 from ....variables import Variable
@@ -28,26 +28,26 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 class RunwayDeploymentDefinition(ConfigComponentDefinition):
     """Runway deployment definition."""
 
-    account_alias: Optional[str]
-    account_id: Optional[str]
+    account_alias: str | None
+    account_id: str | None
     assume_role: RunwayAssumeRoleDefinitionModel
     environments: RunwayEnvironmentsType
     env_vars: RunwayEnvVarsType
-    module_options: Dict[str, Any]
+    module_options: dict[str, Any]
     name: str
-    parallel_regions: List[str]
-    parameters: Dict[str, Any]
-    regions: List[str]
+    parallel_regions: list[str]
+    parameters: dict[str, Any]
+    regions: list[str]
 
     _data: RunwayDeploymentDefinitionModel
-    _pre_process_vars: Tuple[str, ...] = (
+    _pre_process_vars: tuple[str, ...] = (
         "account_alias",
         "account_id",
         "assume_role",
         "env_vars",
         "regions",
     )
-    _supports_vars: Tuple[str, ...] = (
+    _supports_vars: tuple[str, ...] = (
         "account_alias",
         "account_id",
         "assume_role",
@@ -81,12 +81,12 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         )
 
     @property
-    def modules(self) -> List[RunwayModuleDefinition]:
+    def modules(self) -> list[RunwayModuleDefinition]:
         """List of Runway modules."""
         return [RunwayModuleDefinition(module) for module in self._data.modules]
 
     @modules.setter
-    def modules(self, modules: List[RunwayModuleDefinition]) -> None:
+    def modules(self, modules: list[RunwayModuleDefinition]) -> None:
         """Set the value of the property.
 
         Args:
@@ -97,10 +97,10 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
         """
         if not all(isinstance(i, RunwayModuleDefinition) for i in modules):  # type: ignore
-            raise TypeError("modules must be type List[RunwayModuleDefinition]")
+            raise TypeError("modules must be type list[RunwayModuleDefinition]")
         self._data.modules = [RunwayModuleDefinitionModel.parse_obj(mod.data) for mod in modules]
 
-    def reverse(self):
+    def reverse(self) -> None:
         """Reverse the order of modules and regions."""
         self._data.modules.reverse()
         for mod in self._data.modules:
@@ -110,7 +110,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
                 prop.reverse()
 
     def set_modules(
-        self, modules: List[Union[RunwayModuleDefinition, RunwayModuleDefinitionModel]]
+        self, modules: list[RunwayModuleDefinition | RunwayModuleDefinitionModel]
     ) -> None:
         """Set the value of modules.
 
@@ -122,8 +122,8 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
         """
         if not isinstance(modules, list):  # type: ignore
-            raise TypeError(f"expected List[RunwayModuleDefinition]; got {type(modules)}")
-        sanitized: List[RunwayModuleDefinitionModel] = []
+            raise TypeError(f"expected list[RunwayModuleDefinition]; got {type(modules)}")
+        sanitized: list[RunwayModuleDefinitionModel] = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
                 sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
@@ -152,25 +152,23 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
     @overload
     @classmethod
-    def parse_obj(cls, obj: List[Dict[str, Any]]) -> List[RunwayDeploymentDefinition]: ...
+    def parse_obj(cls, obj: list[dict[str, Any]]) -> list[RunwayDeploymentDefinition]: ...
 
     @overload
     @classmethod
     def parse_obj(
         cls,
-        obj: Union[List[ConfigProperty], Set[ConfigProperty], Tuple[ConfigProperty, ...]],
-    ) -> List[RunwayDeploymentDefinition]: ...
+        obj: list[ConfigProperty] | set[ConfigProperty] | tuple[ConfigProperty, ...],
+    ) -> list[RunwayDeploymentDefinition]: ...
 
     @overload
     @classmethod
-    def parse_obj(
-        cls, obj: Union[Dict[str, Any], ConfigProperty]
-    ) -> RunwayDeploymentDefinition: ...
+    def parse_obj(cls, obj: dict[str, Any] | ConfigProperty) -> RunwayDeploymentDefinition: ...
 
     @classmethod
     def parse_obj(  # type: ignore
         cls, obj: Any
-    ) -> Union[RunwayDeploymentDefinition, List[RunwayDeploymentDefinition]]:
+    ) -> RunwayDeploymentDefinition | list[RunwayDeploymentDefinition]:
         """Parse a python object into this class.
 
         Args:

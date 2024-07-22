@@ -1,5 +1,10 @@
 {
     "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports": "always"
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.detectIndentation": false,
         "editor.formatOnSave": true,
         "editor.insertSpaces": true,
@@ -35,9 +40,7 @@
         "**/__pycache__": true
     },
     "files.insertFinalNewline": true,
-    "python.analysis.typeCheckingMode": "strict",
-    "python.formatting.provider": "black",
-    "python.linting.mypyEnabled": false,
+    "python.analysis.typeCheckingMode": "off",
     "python.pythonPath": "${workspaceFolder}/.venv/",
     "python.testing.pytestArgs": [
         "tests",

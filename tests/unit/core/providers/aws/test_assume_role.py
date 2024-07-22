@@ -12,7 +12,6 @@ import pytest
 from runway.core.providers.aws import AssumeRole
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
 
     from ....factories import MockRunwayContext
 
@@ -102,7 +101,9 @@ def test_assume_role_no_revert_on_exit(runway_context: MockRunwayContext) -> Non
     assert runway_context.env.aws_credentials == NEW_CREDENTIALS
 
 
-def test_assume_role_no_role(caplog: LogCaptureFixture, runway_context: MockRunwayContext) -> None:
+def test_assume_role_no_role(
+    caplog: pytest.LogCaptureFixture, runway_context: MockRunwayContext
+) -> None:
     """Test AssumeRole with no role_arn."""
     caplog.set_level(logging.DEBUG, logger="runway")
     with AssumeRole(runway_context) as result:
@@ -124,6 +125,9 @@ def test_assume_role_raise_value_error(runway_context: MockRunwayContext) -> Non
         {"RoleArn": ROLE_ARN, "RoleSessionName": "runway", "DurationSeconds": 3600},
     )
 
-    with stubber, pytest.raises(ValueError, match="assume_role did not return Credentials"):
-        with AssumeRole(runway_context, role_arn=ROLE_ARN):
-            raise AssertionError
+    with (
+        stubber,
+        pytest.raises(ValueError, match="assume_role did not return Credentials"),
+        AssumeRole(runway_context, role_arn=ROLE_ARN),
+    ):
+        raise AssertionError

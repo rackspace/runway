@@ -2,7 +2,7 @@
 
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any, Tuple
+from typing import Any
 
 import click
 from pydantic import ValidationError
@@ -23,7 +23,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def destroy(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> None:
+def destroy(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) -> None:
     """Destroy infrastructure as code.
 
     \b
@@ -42,7 +42,7 @@ def destroy(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) ->
         - (non-interactive) all
     3. Destroys selected deployments/modules in reverse the order defined.
 
-    """
+    """  # noqa: D301
     if not ctx.obj.env.ci:
         click.secho(
             "[WARNING] Runway is about to be run in DESTROY mode. [WARNING]",

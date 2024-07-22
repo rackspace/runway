@@ -3,13 +3,13 @@
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Union
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final
 
 from .base import LookupHandler
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ...context import CfnginContext, RunwayContext
 
 
@@ -23,7 +23,7 @@ class EnvLookup(LookupHandler):
     def handle(
         cls,
         value: str,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *__args: Any,
         **__kwargs: Any,
     ) -> Any:

@@ -5,16 +5,17 @@ from __future__ import annotations
 
 import operator
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Final, List, Optional, Union  # noqa: UP035
 
 from pydantic import validator
-from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ....context import CfnginContext
 
 
@@ -26,10 +27,10 @@ class ArgsDataModel(BaseModel):
 
     """
 
-    executable_users: Optional[List[str]] = None
+    executable_users: Optional[List[str]] = None  # noqa: UP006
     """List of executable users."""
 
-    owners: List[str]
+    owners: List[str]  # noqa: UP006
     """At least one owner is required.
 
     Should be ``amazon``, ``self``, or an AWS account ID.
@@ -40,7 +41,7 @@ class ArgsDataModel(BaseModel):
     """AWS region."""
 
     @validator("executable_users", "owners", allow_reuse=True, pre=True)
-    def _convert_str_to_list(cls, v: Union[List[str], str]) -> List[str]:
+    def _convert_str_to_list(cls, v: Union[list[str], str]) -> list[str]:  # noqa: N805
         """Convert str to list."""
         if isinstance(v, str):
             return v.split(",")
@@ -65,7 +66,7 @@ class AmiLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+    def parse(cls, value: str) -> tuple[str, dict[str, str]]:
         """Parse the value passed to the lookup.
 
         This overrides the default parsing to account for special requirements.
@@ -78,7 +79,7 @@ class AmiLookup(LookupHandler):
 
         """
         raw_value = read_value_from_path(value)
-        args: Dict[str, str] = {}
+        args: dict[str, str] = {}
 
         if "@" in raw_value:
             args["region"], raw_value = raw_value.split("@", 1)
@@ -116,7 +117,7 @@ class AmiLookup(LookupHandler):
         args = ArgsDataModel.parse_obj(raw_args)
         ec2 = context.get_session(region=args.region).client("ec2")
 
-        describe_args: Dict[str, Any] = {
+        describe_args: dict[str, Any] = {
             "Filters": [
                 {"Name": key, "Values": val.split(",") if val else val}
                 for key, val in {

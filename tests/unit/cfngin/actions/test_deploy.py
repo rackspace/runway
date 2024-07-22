@@ -1,14 +1,14 @@
 """Tests for runway.cfngin.actions.deploy."""
 
-# pyright: basic
 from __future__ import annotations
 
 import unittest
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from datetime import datetime
+from typing import TYPE_CHECKING, Any, Optional, cast
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
-from mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin import exceptions
 from runway.cfngin.actions import deploy
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     from runway.cfngin.status import Status
 
 
-def mock_stack_parameters(parameters: Dict[str, Any]) -> StackTypeDef:
+def mock_stack_parameters(parameters: dict[str, Any]) -> StackTypeDef:
     """Mock stack parameters."""
     return {  # type: ignore
         "Parameters": [{"ParameterKey": k, "ParameterValue": v} for k, v in parameters.items()]
@@ -59,25 +59,25 @@ def mock_stack_parameters(parameters: Dict[str, Any]) -> StackTypeDef:
 class MockProvider(BaseProvider):
     """Mock provider."""
 
-    _outputs: Dict[str, Dict[str, str]]
+    _outputs: dict[str, dict[str, str]]
 
-    def __init__(self, *, outputs: Optional[Dict[str, Dict[str, str]]] = None, **_: Any) -> None:
+    def __init__(self, *, outputs: dict[str, dict[str, str]] | None = None, **_: Any) -> None:
         """Instantiate class."""
         self._outputs = outputs or {}
 
-    def set_outputs(self, outputs: Dict[str, Dict[str, str]]) -> None:
+    def set_outputs(self, outputs: dict[str, dict[str, str]]) -> None:
         """Set outputs."""
         self._outputs = outputs
 
     def get_stack(
         self, stack_name: str, *_args: Any, **_kwargs: Any
-    ) -> Dict[str, Union[Dict[str, str], str]]:
+    ) -> dict[str, dict[str, str] | str]:
         """Get stack."""
         if stack_name not in self._outputs:
             raise exceptions.StackDoesNotExist(stack_name)
         return {"name": stack_name, "outputs": self._outputs[stack_name]}
 
-    def get_outputs(self, stack_name: str, *args: Any, **kwargs: Any) -> Dict[str, Any]:
+    def get_outputs(self, stack_name: str, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
         """Get outputs."""
         stack = self.get_stack(stack_name)
         return stack["outputs"]  # type: ignore
@@ -89,9 +89,9 @@ class MockStack:
     def __init__(
         self,
         name: str,
-        in_progress_behavior: Optional[str] = None,
-        tags: Any = None,
-        **_: Any,
+        in_progress_behavior: str | None = None,
+        *_args: Any,
+        **_kwargs: Any,
     ) -> None:
         """Instantiate class."""
         self.name = name
@@ -151,7 +151,7 @@ class TestAction:
             Action(cfngin_context).upload_disabled = False
 
 
-class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestAction class
+class TestBuildAction(unittest.TestCase):  # TODO (kyle): refactor tests into the TestAction class
     """Tests for runway.cfngin.actions.deploy.BuildAction."""
 
     def setUp(self) -> None:
@@ -164,10 +164,10 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
         )
 
     def _get_context(
-        self, extra_config_args: Optional[Dict[str, Any]] = None, **kwargs: Any
+        self, extra_config_args: Optional[dict[str, Any]] = None, **kwargs: Any
     ) -> CfnginContext:
         """Get context."""
-        config: Dict[str, Any] = {
+        config: dict[str, Any] = {
             "namespace": "namespace",
             "stacks": [
                 {"name": "vpc", "template_path": "."},
@@ -226,22 +226,22 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
         deploy_action = deploy.Action(context=context)
         plan = cast(Plan, deploy_action._Action__generate_plan())  # type: ignore
 
-        self.assertIsInstance(plan, Plan)
-        self.assertEqual(deploy.Action.DESCRIPTION, plan.description)
+        assert isinstance(plan, Plan)
+        assert plan.description == deploy.Action.DESCRIPTION
         mock_graph_tags.assert_called_once()
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
-        self.assertEqual(5, len(result_graph_dict))
-        self.assertEqual(set(), result_graph_dict["other"])
-        self.assertEqual(set(), result_graph_dict["removed"])
-        self.assertEqual(set(), result_graph_dict["vpc"])
-        self.assertEqual({"vpc"}, result_graph_dict["bastion"])
-        self.assertEqual({"bastion", "vpc"}, result_graph_dict["db"])
-        self.assertEqual(deploy_action._destroy_stack, plan.graph.steps["removed"].fn)
-        self.assertEqual(deploy_action._launch_stack, plan.graph.steps["vpc"].fn)
-        self.assertEqual(deploy_action._launch_stack, plan.graph.steps["bastion"].fn)
-        self.assertEqual(deploy_action._launch_stack, plan.graph.steps["db"].fn)
-        self.assertEqual(deploy_action._launch_stack, plan.graph.steps["other"].fn)
+        assert len(result_graph_dict) == 5
+        assert set() == result_graph_dict["other"]
+        assert set() == result_graph_dict["removed"]
+        assert set() == result_graph_dict["vpc"]
+        assert {"vpc"} == result_graph_dict["bastion"]
+        assert {"bastion", "vpc"} == result_graph_dict["db"]
+        assert deploy_action._destroy_stack == plan.graph.steps["removed"].fn
+        assert deploy_action._launch_stack == plan.graph.steps["vpc"].fn
+        assert deploy_action._launch_stack == plan.graph.steps["bastion"].fn
+        assert deploy_action._launch_stack == plan.graph.steps["db"].fn
+        assert deploy_action._launch_stack == plan.graph.steps["other"].fn
 
     def test_handle_missing_params(self) -> None:
         """Test handle missing params."""
@@ -257,17 +257,17 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
         result = _handle_missing_parameters(
             parameter_values, all_params, required, existing_stack_params
         )
-        self.assertEqual(sorted(result), sorted(expected_params.items()))
+        assert sorted(result) == sorted(expected_params.items())
 
     def test_missing_params_no_existing_stack(self) -> None:
         """Test missing params no existing stack."""
         all_params = ["Address", "StackName"]
         required = ["Address"]
-        parameter_values: Dict[str, Any] = {}
-        with self.assertRaises(exceptions.MissingParameterException) as result:
+        parameter_values: dict[str, Any] = {}
+        with pytest.raises(exceptions.MissingParameterException) as result:
             _handle_missing_parameters(parameter_values, all_params, required)
 
-        self.assertEqual(result.exception.parameters, required)
+        assert result.value.parameters == required
 
     def test_existing_stack_params_does_not_override_given_params(self) -> None:
         """Test existing stack params does not override given params."""
@@ -279,22 +279,19 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
         result = _handle_missing_parameters(
             parameter_values, all_params, required, existing_stack_params
         )
-        self.assertEqual(sorted(result), sorted(parameter_values.items()))
+        assert sorted(result) == sorted(parameter_values.items())
 
     def test_generate_plan(self) -> None:
         """Test generate plan."""
         context = self._get_context()
         deploy_action = deploy.Action(context, cancel=MockThreadingEvent())  # type: ignore
         plan = cast(Plan, deploy_action._Action__generate_plan())  # type: ignore
-        self.assertEqual(
-            {
-                "db": {"bastion", "vpc"},
-                "bastion": {"vpc"},
-                "other": set(),
-                "vpc": set(),
-            },
-            plan.graph.to_dict(),
-        )
+        assert plan.graph.to_dict() == {
+            "db": {"bastion", "vpc"},
+            "bastion": {"vpc"},
+            "other": set(),
+            "vpc": set(),
+        }
 
     def test_does_not_execute_plan_when_outline_specified(self) -> None:
         """Test does not execute plan when outline specified."""
@@ -302,7 +299,7 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
         deploy_action = deploy.Action(context, cancel=MockThreadingEvent())  # type: ignore
         with patch.object(deploy_action, "_generate_plan") as mock_generate_plan:
             deploy_action.run(outline=True)
-            self.assertEqual(mock_generate_plan().execute.call_count, 0)
+            assert mock_generate_plan().execute.call_count == 0
 
     def test_execute_plan_when_outline_not_specified(self) -> None:
         """Test execute plan when outline not specified."""
@@ -310,7 +307,7 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
         deploy_action = deploy.Action(context, cancel=MockThreadingEvent())  # type: ignore
         with patch.object(deploy_action, "_generate_plan") as mock_generate_plan:
             deploy_action.run(outline=False)
-            self.assertEqual(mock_generate_plan().execute.call_count, 1)
+            assert mock_generate_plan().execute.call_count == 1
 
     @patch("runway.context.CfnginContext.persistent_graph_tags", new_callable=PropertyMock)
     @patch("runway.context.CfnginContext.lock_persistent_graph", new_callable=MagicMock)
@@ -349,7 +346,7 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
         for test in test_scenarios:
             mock_stack.locked = test.locked
             mock_stack.force = test.force
-            self.assertEqual(deploy.should_update(mock_stack), test.result)  # type: ignore
+            assert deploy.should_update(mock_stack) == test.result  # type: ignore
 
     def test_should_ensure_cfn_bucket(self) -> None:
         """Test should ensure cfn bucket."""
@@ -366,9 +363,7 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
             dump = scenario["dump"]
             result = scenario["result"]
             try:
-                self.assertEqual(
-                    deploy.should_ensure_cfn_bucket(outline, dump), result  # type: ignore
-                )
+                assert deploy.should_ensure_cfn_bucket(outline, dump) == result  # type: ignore
             except AssertionError as err:
                 err.args += ("scenario", str(scenario))
                 raise
@@ -385,10 +380,10 @@ class TestBuildAction(unittest.TestCase):  # TODO: refactor tests into the TestA
         mock_stack.name = "test-stack"
         for test in test_scenarios:
             mock_stack.enabled = test.enabled
-            self.assertEqual(deploy.should_submit(mock_stack), test.result)  # type: ignore
+            assert deploy.should_submit(mock_stack) == test.result  # type: ignore
 
 
-class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tests
+class TestLaunchStack(TestBuildAction):  # TODO (kyle): refactor tests to be pytest tests
     """Tests for runway.cfngin.actions.deploy.BuildAction launch stack."""
 
     def setUp(self) -> None:
@@ -420,7 +415,7 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
             self.addCleanup(mock_object.stop)
             mock_object.start()
 
-        def get_stack(name: str, *_args: Any, **_kwargs: Any) -> Dict[str, Any]:
+        def get_stack(name: str, *_args: Any, **_kwargs: Any) -> dict[str, Any]:
             if name != self.stack.name or not self.stack_status:
                 raise StackDoesNotExist(name)
 
@@ -431,11 +426,12 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
                 "Tags": [],
             }
 
-        def get_events(name: str, *_args: Any, **_kwargs: Any) -> List[Dict[str, str]]:
+        def get_events(*_args: Any, **_kwargs: Any) -> list[dict[str, Any]]:
             return [
                 {
                     "ResourceStatus": "ROLLBACK_IN_PROGRESS",
                     "ResourceStatusReason": "CFN fail",
+                    "Timestamp": datetime(2015, 1, 1),
                 }
             ]
 
@@ -456,12 +452,12 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
         """Advance."""
         self.stack_status = new_provider_status
         status = self.step._run_once()
-        self.assertEqual(status, expected_status)
-        self.assertEqual(status.reason, expected_reason)
+        assert status == expected_status
+        assert status.reason == expected_reason
 
     def test_launch_stack_disabled(self) -> None:
         """Test launch stack disabled."""
-        self.assertEqual(self.step.status, PENDING)
+        assert self.step.status == PENDING
 
         self.stack.enabled = False
         self._advance(None, NotSubmittedStatus(), "disabled")
@@ -469,7 +465,7 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
     def test_launch_stack_create(self) -> None:
         """Test launch stack create."""
         # initial status should be PENDING
-        self.assertEqual(self.step.status, PENDING)
+        assert self.step.status == PENDING
 
         # initial run should return SUBMITTED since we've passed off to CF
         self._advance(None, SUBMITTED, "creating new stack")
@@ -483,7 +479,7 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
     def test_launch_stack_create_rollback(self) -> None:
         """Test launch stack create rollback."""
         # initial status should be PENDING
-        self.assertEqual(self.step.status, PENDING)
+        assert self.step.status == PENDING
 
         # initial run should return SUBMITTED since we've passed off to CF
         self._advance(None, SUBMITTED, "creating new stack")
@@ -505,7 +501,7 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
         self.provider.recreate_failed = True
 
         # initial status should be PENDING
-        self.assertEqual(self.step.status, PENDING)
+        assert self.step.status == PENDING
 
         # first action with an existing failed stack should be deleting it
         self._advance("ROLLBACK_COMPLETE", SUBMITTED, "destroying stack for re-creation")
@@ -525,7 +521,7 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
     def test_launch_stack_update_skipped(self) -> None:
         """Test launch stack update skipped."""
         # initial status should be PENDING
-        self.assertEqual(self.step.status, PENDING)
+        assert self.step.status == PENDING
 
         # start the upgrade, that will be skipped
         self.provider.update_stack.side_effect = StackDidNotChange  # type: ignore
@@ -534,7 +530,7 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
     def test_launch_stack_update_rollback(self) -> None:
         """Test launch stack update rollback."""
         # initial status should be PENDING
-        self.assertEqual(self.step.status, PENDING)
+        assert self.step.status == PENDING
 
         # initial run should return SUBMITTED since we've passed off to CF
         self._advance("CREATE_COMPLETE", SUBMITTED, "updating existing stack")
@@ -551,7 +547,7 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
     def test_launch_stack_update_success(self) -> None:
         """Test launch stack update success."""
         # initial status should be PENDING
-        self.assertEqual(self.step.status, PENDING)
+        assert self.step.status == PENDING
 
         # initial run should return SUBMITTED since we've passed off to CF
         self._advance("CREATE_COMPLETE", SUBMITTED, "updating existing stack")
@@ -563,7 +559,7 @@ class TestLaunchStack(TestBuildAction):  # TODO: refactor tests to be pytest tes
         self._advance("UPDATE_COMPLETE", COMPLETE, "updating existing stack")
 
 
-class TestFunctions(unittest.TestCase):  # TODO: refactor tests to be pytest tests
+class TestFunctions(unittest.TestCase):  # TODO (kyle): refactor tests to be pytest tests
     """Tests for runway.cfngin.actions.deploy module level functions."""
 
     def setUp(self) -> None:
@@ -580,8 +576,8 @@ class TestFunctions(unittest.TestCase):  # TODO: refactor tests to be pytest tes
         }
         params = {"a": "Apple", "c": "Carrot"}
         resolved_params = _resolve_parameters(params, self.blueprint)
-        self.assertNotIn("c", resolved_params)
-        self.assertIn("a", resolved_params)
+        assert "c" not in resolved_params
+        assert "a" in resolved_params
 
     def test_resolve_parameters_none_conversion(self) -> None:
         """Test resolve parameters none conversion."""
@@ -591,7 +587,7 @@ class TestFunctions(unittest.TestCase):  # TODO: refactor tests to be pytest tes
         }
         params = {"a": None, "c": "Carrot"}
         resolved_params = _resolve_parameters(params, self.blueprint)
-        self.assertNotIn("a", resolved_params)
+        assert "a" not in resolved_params
 
     def test_resolve_parameters_booleans(self) -> None:
         """Test resolve parameters booleans."""
@@ -601,5 +597,5 @@ class TestFunctions(unittest.TestCase):  # TODO: refactor tests to be pytest tes
         }
         params = {"a": True, "b": False}
         resolved_params = _resolve_parameters(params, self.blueprint)
-        self.assertEqual("true", resolved_params["a"])
-        self.assertEqual("false", resolved_params["b"])
+        assert resolved_params["a"] == "true"
+        assert resolved_params["b"] == "false"

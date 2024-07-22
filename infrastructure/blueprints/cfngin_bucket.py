@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 from troposphere import And, Equals, If, Not, NoValue, s3
 
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class CfnginBucket(Blueprint):
     """Blueprint for a CFNgin Bucket."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "BucketName": {
             "type": CFNString,
             "description": "Name for the S3 bucket",

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -18,6 +17,8 @@ from runway.module.utils import (
 )
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
 
@@ -34,7 +35,7 @@ MODULE = "runway.module.utils"
     ],
 )
 def test_format_npm_command_for_logging_darwin(
-    command: List[str], expected: str, platform_darwin: None
+    command: list[str], expected: str, platform_darwin: None  # noqa: ARG001
 ) -> None:
     """Test format_npm_command_for_logging on Darwin/macOS."""
     assert format_npm_command_for_logging(command) == expected
@@ -50,7 +51,7 @@ def test_format_npm_command_for_logging_darwin(
     ],
 )
 def test_format_npm_command_for_logging_windows(
-    command: List[str], expected: str, platform_windows: None
+    command: list[str], expected: str, platform_windows: None  # noqa: ARG001
 ) -> None:
     """Test format_npm_command_for_logging on windows."""
     assert format_npm_command_for_logging(command) == expected
@@ -60,7 +61,7 @@ def test_format_npm_command_for_logging_windows(
     "command, opts", [("test", []), ("test", ["arg1"]), ("test", ["arg1", "arg2"])]
 )
 def test_generate_node_command(
-    command: str, mocker: MockerFixture, opts: List[str], tmp_path: Path
+    command: str, mocker: MockerFixture, opts: list[str], tmp_path: Path
 ) -> None:
     """Test generate_node_command."""
     mock_which = mocker.patch(f"{MODULE}.which", return_value=False)
@@ -81,9 +82,9 @@ def test_generate_node_command(
 )
 def test_generate_node_command_npx(
     command: str,
-    expected: List[str],
+    expected: list[str],
     mocker: MockerFixture,
-    opts: List[str],
+    opts: list[str],
     tmp_path: Path,
 ) -> None:
     """Test generate_node_command."""
@@ -166,7 +167,7 @@ def test_use_npm_ci(
         (tmp_path / "package-lock.json").touch()
     if has_shrinkwrap:
         (tmp_path / "package-lock.json").touch()
-    cmd: List[Any] = [NPM_BIN, "ci", "-h"]
+    cmd: list[Any] = [NPM_BIN, "ci", "-h"]
     fake_process.register_subprocess(cmd, returncode=exit_code)
 
     assert use_npm_ci(tmp_path) is expected

@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 from click.testing import CliRunner
-from mock import patch
 
 from runway._cli import cli
 
 if TYPE_CHECKING:
-    from mock import MagicMock
+    from unittest.mock import MagicMock
 
 DOCS_URL = "https://docs.onica.com/projects/runway/"
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 import pytest
 import yaml
@@ -17,7 +17,6 @@ from runway.module.k8s import K8s, K8sOptions
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
 
@@ -86,9 +85,9 @@ class TestK8s:
     )
     def test_gen_cmd(
         self,
-        args_list: Optional[List[str]],
+        args_list: Optional[list[str]],
         command: KubectlCommandTypeDef,
-        expected: List[str],
+        expected: list[str],
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -107,7 +106,7 @@ class TestK8s:
 
     def test_init(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -128,7 +127,7 @@ class TestK8s:
 
     def test_kubectl_apply(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -202,7 +201,7 @@ class TestK8s:
 
     def test_kubectl_delete(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -237,7 +236,7 @@ class TestK8s:
 
     def test_kubectl_kustomize(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fake_process: FakeProcess,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -280,7 +279,7 @@ class TestK8s:
     @pytest.mark.parametrize("skip", [False, True])
     def test_plan(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         skip: bool,
@@ -323,7 +322,7 @@ class TestK8sOptions:
             (["test2/kustomization.yaml"], "test"),
         ],
     )
-    def test_get_overlay_dir(self, expected: str, files: List[str], tmp_path: Path) -> None:
+    def test_get_overlay_dir(self, expected: str, files: list[str], tmp_path: Path) -> None:
         """Test get_overlay_dir."""
         for f in files:
             tmp_file = tmp_path / f

@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 import click
 
@@ -41,7 +41,7 @@ class DeployEnvironment(DelCachedPropMixin):
     def __init__(
         self,
         *,
-        environ: Optional[Dict[str, str]] = None,
+        environ: Optional[dict[str, str]] = None,
         explicit_name: Optional[str] = None,
         ignore_git_branch: bool = False,
         root_dir: Optional[Path] = None,
@@ -346,11 +346,11 @@ class DeployEnvironment(DelCachedPropMixin):
             return result
         return self.branch_name
 
-    def _update_vars(self, env_vars: Dict[str, str]) -> None:
+    def _update_vars(self, env_vars: dict[str, str]) -> None:
         """Update vars and log the change.
 
         Args:
-            env_vars (Dict[str, str]): Dict to update self.vars with.
+            env_vars: Dict to update self.vars with.
 
         """
         self.vars.update(env_vars)

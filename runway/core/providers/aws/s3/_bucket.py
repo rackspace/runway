@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from botocore.exceptions import ClientError
 
@@ -31,9 +31,9 @@ class Bucket(DelCachedPropMixin):
 
     def __init__(
         self,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         name: str,
-        region: Optional[str] = None,
+        region: str | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -63,7 +63,7 @@ class Bucket(DelCachedPropMixin):
         return self.head.metadata.forbidden
 
     @cached_property
-    def head(self):
+    def head(self) -> BaseResponse:
         """Check if a bucket exists and you have permission to access it.
 
         To use this operation, the user must have permissions to perform the
@@ -92,7 +92,7 @@ class Bucket(DelCachedPropMixin):
         """Create cached boto3 session."""
         return self.__ctx.get_session(region=self._region)
 
-    def create(self, **kwargs: Any) -> Optional[CreateBucketOutputTypeDef]:
+    def create(self, **kwargs: Any) -> CreateBucketOutputTypeDef | None:
         """Create an S3 Bucket if it does not already exist.
 
         Bucket creation will be skipped if it already exists or access is forbidden.
@@ -139,9 +139,7 @@ class Bucket(DelCachedPropMixin):
         )
         LOGGER.debug('enabled versioning for bucket "%s"', self.name)
 
-    def format_bucket_path_uri(
-        self, *, key: Optional[str] = None, prefix: Optional[str] = None
-    ) -> str:
+    def format_bucket_path_uri(self, *, key: str | None = None, prefix: str | None = None) -> str:
         """Format bucket path URI.
 
         Args:
@@ -176,10 +174,10 @@ class Bucket(DelCachedPropMixin):
         src_directory: str,
         *,
         delete: bool = False,
-        exclude: Optional[List[str]] = None,
+        exclude: list[str] | None = None,
         follow_symlinks: bool = False,
-        include: Optional[List[str]] = None,
-        prefix: Optional[str] = None,
+        include: list[str] | None = None,
+        prefix: str | None = None,
     ) -> None:
         """Sync local directory to the S3 Bucket.
 
@@ -209,10 +207,10 @@ class Bucket(DelCachedPropMixin):
         dest_directory: str,
         *,
         delete: bool = False,
-        exclude: Optional[List[str]] = None,
+        exclude: list[str] | None = None,
         follow_symlinks: bool = False,
-        include: Optional[List[str]] = None,
-        prefix: Optional[str] = None,
+        include: list[str] | None = None,
+        prefix: str | None = None,
     ) -> None:
         """Sync S3 bucket to local directory.
 

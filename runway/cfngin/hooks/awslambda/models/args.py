@@ -1,18 +1,16 @@
 """Argument data models."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import Any, List, Optional
 
 from pydantic import DirectoryPath, Extra, Field, FilePath, validator
 
 from .....config.models.utils import resolve_path_field
 from .....utils import BaseModel
 from ...base import HookArgsBaseModel
-
-if TYPE_CHECKING:
-    from typing import Callable
 
 
 class DockerOptions(BaseModel):
@@ -125,10 +123,7 @@ class DockerOptions(BaseModel):
 
         extra = Extra.ignore
 
-    _resolve_path_fields = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("file", allow_reuse=True)(resolve_path_field),
-    )
+    _resolve_path_fields = validator("file", allow_reuse=True)(resolve_path_field)  # type: ignore
 
 
 class AwsLambdaHookArgs(HookArgsBaseModel):
@@ -269,13 +264,12 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
     use_cache: bool = True
     """Whether to use a cache directory with pip that will persist builds (default ``True``)."""
 
-    _resolve_path_fields = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("cache_dir", "source_code", allow_reuse=True)(resolve_path_field),
-    )
+    _resolve_path_fields = validator("cache_dir", "source_code", allow_reuse=True)(resolve_path_field)  # type: ignore
 
     @validator("runtime", always=True, allow_reuse=True)
-    def _validate_runtime_or_docker(cls, v: Optional[str], values: Dict[str, Any]) -> Optional[str]:
+    def _validate_runtime_or_docker(
+        cls, v: str | None, values: dict[str, Any]  # noqa: N805
+    ) -> str | None:
         """Validate that either runtime is provided or Docker image is provided."""
         if v:  # if runtime was provided, we don't need to check anything else
             return v

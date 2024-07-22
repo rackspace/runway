@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 from pydantic import ValidationError
 
 from runway.cfngin.hooks.awslambda import PythonFunction, PythonLayer
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.awslambda._python_hooks"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def args(tmp_path: Path) -> PythonHookArgs:
     """Fixture for creating default function args."""
     return PythonHookArgs(
@@ -95,7 +95,7 @@ class TestPythonFunction:
             "deployment_package",
             Mock(upload=Mock(side_effect=Exception)),
         )
-        with pytest.raises(Exception, match=""):
+        with pytest.raises(Exception):  # noqa: B017, PT011
             assert PythonFunction(Mock(), **args.dict()).pre_deploy()
         deployment_package.upload.assert_called_once_with()
         build_response.assert_not_called()

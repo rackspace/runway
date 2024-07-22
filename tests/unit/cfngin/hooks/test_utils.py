@@ -1,14 +1,16 @@
 """Tests for runway.cfngin.hooks.utils."""
 
-# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
+# pyright: reportUnknownArgumentType=none, reportUnknownVariableType=none
 from __future__ import annotations
 
 import queue
 import unittest
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, ClassVar
+from unittest.mock import call, patch
 
-from mock import call, patch
+import pytest
 
+from runway.cfngin.hooks.base import HookArgsBaseModel
 from runway.cfngin.hooks.protocols import CfnginHookProtocol
 from runway.cfngin.hooks.utils import handle_hooks
 from runway.config.models.cfngin import CfnginHookDefinitionModel
@@ -16,7 +18,7 @@ from runway.config.models.cfngin import CfnginHookDefinitionModel
 from ..factories import mock_context, mock_provider
 
 if TYPE_CHECKING:
-    from mock import MagicMock
+    from unittest.mock import MagicMock
 
 HOOK_QUEUE = queue.Queue()
 
@@ -33,30 +35,34 @@ class TestHooks(unittest.TestCase):
         """Test empty hook stage."""
         hooks = []
         handle_hooks("fake", hooks, self.provider, self.context)
-        self.assertTrue(HOOK_QUEUE.empty())
+        assert HOOK_QUEUE.empty()
 
     def test_missing_required_hook(self) -> None:
         """Test missing required hook."""
         hooks = [CfnginHookDefinitionModel(path="not.a.real.path", required=True)]
-        with self.assertRaises(ImportError):
+        with pytest.raises(ImportError):
             handle_hooks("missing", hooks, self.provider, self.context)
 
     def test_missing_required_hook_method(self) -> None:
         """Test missing required hook method."""
-        with self.assertRaises(AttributeError):
-            hooks = [CfnginHookDefinitionModel(path="runway.cfngin.hooks.blah", required=True)]
-            handle_hooks("missing", hooks, self.provider, self.context)
+        with pytest.raises(AttributeError):
+            handle_hooks(
+                "missing",
+                [CfnginHookDefinitionModel(path="runway.cfngin.hooks.blah", required=True)],
+                self.provider,
+                self.context,
+            )
 
     def test_missing_non_required_hook_method(self) -> None:
         """Test missing non required hook method."""
         hooks = [CfnginHookDefinitionModel(path="runway.cfngin.hooks.blah", required=False)]
         handle_hooks("missing", hooks, self.provider, self.context)
-        self.assertTrue(HOOK_QUEUE.empty())
+        assert HOOK_QUEUE.empty()
 
     def test_default_required_hook(self) -> None:
         """Test default required hook."""
-        hooks = [CfnginHookDefinitionModel(**{"path": "runway.cfngin.hooks.blah"})]
-        with self.assertRaises(AttributeError):
+        hooks = [CfnginHookDefinitionModel(path="runway.cfngin.hooks.blah")]
+        with pytest.raises(AttributeError):
             handle_hooks("missing", hooks, self.provider, self.context)
 
     @patch("runway.cfngin.hooks.utils.load_object_from_string")
@@ -79,8 +85,8 @@ class TestHooks(unittest.TestCase):
             [call(hooks[0].path, try_reload=True), call(hooks[1].path, try_reload=True)]
         )
         good = HOOK_QUEUE.get_nowait()
-        self.assertEqual(good["provider"].region, "us-east-1")
-        with self.assertRaises(queue.Empty):
+        assert good["provider"].region == "us-east-1"
+        with pytest.raises(queue.Empty):
             HOOK_QUEUE.get_nowait()
 
     def test_valid_enabled_hook(self) -> None:
@@ -94,8 +100,8 @@ class TestHooks(unittest.TestCase):
         ]
         handle_hooks("missing", hooks, self.provider, self.context)
         good = HOOK_QUEUE.get_nowait()
-        self.assertEqual(good["provider"].region, "us-east-1")
-        with self.assertRaises(queue.Empty):
+        assert good["provider"].region == "us-east-1"
+        with pytest.raises(queue.Empty):
             HOOK_QUEUE.get_nowait()
 
     def test_valid_enabled_false_hook(self) -> None:
@@ -108,7 +114,7 @@ class TestHooks(unittest.TestCase):
             )
         ]
         handle_hooks("missing", hooks, self.provider, self.context)
-        self.assertTrue(HOOK_QUEUE.empty())
+        assert HOOK_QUEUE.empty()
 
     def test_context_provided_to_hook(self) -> None:
         """Test context provided to hook."""
@@ -128,7 +134,7 @@ class TestHooks(unittest.TestCase):
                 required=True,
             )
         ]
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             handle_hooks("fail", hooks, self.provider, self.context)
         hooks = [
             CfnginHookDefinitionModel(
@@ -136,7 +142,7 @@ class TestHooks(unittest.TestCase):
                 required=True,
             )
         ]
-        with self.assertRaises(Exception):
+        with pytest.raises(Exception):  # noqa: B017, PT011
             handle_hooks("fail", hooks, self.provider, self.context)
         hooks = [
             CfnginHookDefinitionModel(
@@ -159,9 +165,9 @@ class TestHooks(unittest.TestCase):
         ]
         handle_hooks("result", hooks, self.provider, self.context)
 
-        self.assertEqual(self.context.hook_data["my_hook_results"]["foo"], "bar")
+        assert self.context.hook_data["my_hook_results"]["foo"] == "bar"
         # Verify only the first hook resulted in stored data
-        self.assertEqual(list(self.context.hook_data.keys()), ["my_hook_results"])
+        assert list(self.context.hook_data.keys()) == ["my_hook_results"]
 
     def test_return_data_hook_duplicate_key(self) -> None:
         """Test return data hook duplicate key."""
@@ -176,7 +182,7 @@ class TestHooks(unittest.TestCase):
             ),
         ]
 
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             handle_hooks("result", hooks, self.provider, self.context)
 
     def test_resolve_lookups_in_args(self) -> None:
@@ -190,63 +196,63 @@ class TestHooks(unittest.TestCase):
         ]
         handle_hooks("lookups", hooks, self.provider, self.context)
 
-        self.assertEqual(
-            self.context.hook_data["my_hook_results"]["default_lookup"], "default_value"
-        )
+        assert self.context.hook_data["my_hook_results"]["default_lookup"] == "default_value"
 
 
 class MockHook(CfnginHookProtocol):
     """Mock hook class."""
 
-    args: Dict[str, Any]
+    ARGS_PARSER: ClassVar[type[HookArgsBaseModel]] = HookArgsBaseModel
 
-    def __init__(self, **kwargs: Any) -> None:
+    args: dict[str, Any]
+
+    def __init__(self, **_kwargs: Any) -> None:
         """Instantiate class."""
-        self.args = {}
+        self.args = {}  # type: ignore
 
-    def post_deploy(self) -> Dict[str, str]:
+    def post_deploy(self) -> dict[str, str]:
         """Run during the **post_deploy** stage."""
         return {"status": "success"}
 
-    def post_destroy(self) -> Dict[str, str]:
+    def post_destroy(self) -> dict[str, str]:
         """Run during the **post_destroy** stage."""
         return {"status": "success"}
 
-    def pre_deploy(self) -> Dict[str, str]:
+    def pre_deploy(self) -> dict[str, str]:
         """Run during the **pre_deploy** stage."""
         return {"status": "success"}
 
-    def pre_destroy(self) -> Dict[str, str]:
+    def pre_destroy(self) -> dict[str, str]:
         """Run during the **pre_destroy** stage."""
         return {"status": "success"}
 
 
-def mock_hook(*args: Any, **kwargs: Any) -> bool:
+def mock_hook(*_args: Any, **kwargs: Any) -> bool:
     """Mock hook."""
     HOOK_QUEUE.put(kwargs)
     return True
 
 
-def fail_hook(*args: Any, **kwargs: Any) -> None:
+def fail_hook(*_args: Any, **_kwargs: Any) -> None:
     """Fail hook."""
-    return None
+    return
 
 
-def exception_hook(*args: Any, **kwargs: Any) -> None:
+def exception_hook(*_args: Any, **_kwargs: Any) -> None:
     """Exception hook."""
     raise Exception
 
 
-def context_hook(*args: Any, **kwargs: Any) -> bool:
+def context_hook(*_args: Any, **kwargs: Any) -> bool:
     """Context hook."""
     return "context" in kwargs
 
 
-def result_hook(*args: Any, **kwargs: Any) -> Dict[str, str]:
+def result_hook(*_args: Any, **_kwargs: Any) -> dict[str, str]:
     """Results hook."""
     return {"foo": "bar"}
 
 
-def kwargs_hook(*args: Any, **kwargs: Any) -> Any:
+def kwargs_hook(*_args: Any, **kwargs: Any) -> Any:
     """Kwargs hook."""
     return kwargs

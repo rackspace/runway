@@ -6,14 +6,13 @@ import logging
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from typing_extensions import Literal
 
 from .._logging import PrefixAdaptor
 from ..compat import cached_property
 from ..config.models.runway.options.k8s import RunwayK8sModuleOptionsDataModel
-from ..core.components import DeployEnvironment
 from ..env_mgr.kbenv import KBEnvManager
 from ..exceptions import KubectlVersionNotSpecified
 from ..utils import which
@@ -23,6 +22,7 @@ from .utils import run_module_command
 if TYPE_CHECKING:
     from .._logging import RunwayLogger
     from ..context import RunwayContext
+    from ..core.components import DeployEnvironment
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
@@ -63,12 +63,12 @@ class K8s(RunwayModule):
         self,
         context: RunwayContext,
         *,
-        explicitly_enabled: Optional[bool] = False,
+        explicitly_enabled: bool | None = False,
         logger: RunwayLogger = LOGGER,
         module_root: Path,
-        name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        name: str | None = None,
+        options: dict[str, Any] | ModuleOptions | None = None,
+        parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -154,8 +154,8 @@ class K8s(RunwayModule):
     def gen_cmd(
         self,
         command: KubectlCommandTypeDef,
-        args_list: Optional[List[str]] = None,
-    ) -> List[str]:
+        args_list: list[str] | None = None,
+    ) -> list[str]:
         """Generate and log a kubectl command.
 
         This does not execute the command, only prepares it for use.
@@ -243,7 +243,7 @@ class K8sOptions(ModuleOptions):
 
     data: RunwayK8sModuleOptionsDataModel
     deploy_environment: DeployEnvironment
-    kubectl_version: Optional[str]
+    kubectl_version: str | None
     path: Path
 
     def __init__(
@@ -282,7 +282,7 @@ class K8sOptions(ModuleOptions):
         )
 
     @staticmethod
-    def gen_overlay_dirs(environment: str, region: str) -> List[str]:
+    def gen_overlay_dirs(environment: str, region: str) -> list[str]:
         """Generate possible overlay directories.
 
         Prefers more explicit directory name but falls back to environment name only.
@@ -309,7 +309,7 @@ class K8sOptions(ModuleOptions):
         cls,
         deploy_environment: DeployEnvironment,
         obj: object,
-        path: Optional[Path] = None,
+        path: Path | None = None,
     ) -> K8sOptions:
         """Parse options definition and return an options object.
 

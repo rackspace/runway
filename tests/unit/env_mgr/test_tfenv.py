@@ -6,12 +6,12 @@ from __future__ import annotations
 import json
 import re
 import subprocess
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Optional
+from unittest.mock import MagicMock, call
 
 import hcl
 import hcl2
 import pytest
-from mock import MagicMock, call
 
 from runway._logging import LogLevels
 from runway.env_mgr.tfenv import (
@@ -28,7 +28,6 @@ if TYPE_CHECKING:
     from pathlib import Path
     from types import ModuleType
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
 
@@ -64,7 +63,7 @@ terraform {
 def test_get_available_tf_versions(mocker: MockerFixture) -> None:
     """Test runway.env_mgr.tfenv.get_available_tf_versions."""
     mock_requests = mocker.patch(f"{MODULE}.requests")
-    response: Dict[str, Any] = {"terraform": {"versions": {"0.12.0": {}, "0.12.0-beta": {}}}}
+    response: dict[str, Any] = {"terraform": {"versions": {"0.12.0": {}, "0.12.0-beta": {}}}}
     mock_requests.get.return_value = MagicMock(text=json.dumps(response))
     assert get_available_tf_versions() == ["0.12.0"]
     assert get_available_tf_versions(include_prerelease=True) == [
@@ -92,7 +91,7 @@ def test_get_latest_tf_version(mocker: MockerFixture) -> None:
     ],
 )
 def test_load_terraform_module(
-    parser: ModuleType, expected: Dict[str, Any], tmp_path: Path
+    parser: ModuleType, expected: dict[str, Any], tmp_path: Path
 ) -> None:
     """Test runway.env_mgr.tfenv.load_terraform_module."""
     tf_file = tmp_path / "module.tf"
@@ -151,8 +150,8 @@ class TestTFEnvManager:
     def test_backend(
         self,
         mocker: MockerFixture,
-        response: Dict[str, Any],
-        expected: Dict[str, Any],
+        response: dict[str, Any],
+        expected: dict[str, Any],
         tmp_path: Path,
     ) -> None:
         """Test backend."""
@@ -384,10 +383,10 @@ class TestTFEnvManager:
     )
     def test_terraform_block(
         self,
-        caplog: LogCaptureFixture,
-        expected: Dict[str, Any],
+        caplog: pytest.LogCaptureFixture,
+        expected: dict[str, Any],
         mocker: MockerFixture,
-        response: List[Any],
+        response: list[Any],
         tmp_path: Path,
     ) -> None:
         """Test terraform_block."""

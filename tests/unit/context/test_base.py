@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
+from unittest.mock import MagicMock
 
 import boto3
 import pytest
-from mock import MagicMock
 
 from runway.context._base import BaseContext
 from runway.context.sys_info import SystemInfo
@@ -30,7 +30,7 @@ TEST_ENV_CREDS = {
 }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def mock_boto3_session(mocker: MockerFixture) -> MagicMock:
     """Mock boto3.Session."""
     mock_session = MagicMock(autospec=boto3.Session)
@@ -38,7 +38,7 @@ def mock_boto3_session(mocker: MockerFixture) -> MagicMock:
     return mock_session
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def mock_sso_botocore_session(mocker: MockerFixture) -> MagicMock:
     """Mock runway.aws_sso_botocore.session.Session."""
     return mocker.patch(f"{MODULE}.Session")

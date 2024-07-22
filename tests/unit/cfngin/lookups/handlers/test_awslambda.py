@@ -3,32 +3,26 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 from troposphere.awslambda import Code, Content
 
-from runway.cfngin.exceptions import CfnginOnlyLookupError
 from runway.cfngin.hooks.awslambda.base_classes import AwsLambdaHook
 from runway.cfngin.hooks.awslambda.models.responses import AwsLambdaHookDeployResponse
 from runway.cfngin.lookups.handlers.awslambda import AwsLambdaLookup
-from runway.config import CfnginConfig
-from runway.config.models.cfngin import (
-    CfnginConfigDefinitionModel,
-    CfnginHookDefinitionModel,
-)
 from runway.lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
-    from runway.context import CfnginContext, RunwayContext
+    from runway.context import CfnginContext
 
 MODULE = "runway.cfngin.lookups.handlers.awslambda"
 QUERY = "test::foo=bar"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def hook_data() -> AwsLambdaHookDeployResponse:
     """Fixture for hook response data."""
     return AwsLambdaHookDeployResponse(
@@ -51,7 +45,8 @@ class TestAwsLambdaLookup:
         data_key = "test.key"
         assert (
             AwsLambdaLookup.get_deployment_package_data(
-                Mock(hook_data={data_key: hook_data.dict(by_alias=True)}), data_key
+                Mock(hook_data={data_key: hook_data.dict(by_alias=True)}),
+                data_key,
             )
             == hook_data
         )
@@ -66,14 +61,12 @@ class TestAwsLambdaLookup:
         data_key = "test.key"
         hook = Mock(plan=Mock(return_value=hook_data.dict(by_alias=True)))
         init_hook_class = mocker.patch.object(AwsLambdaLookup, "init_hook_class", return_value=hook)
-        get_required_hook_definition = mocker.patch.object(
+        get_hook_definition = mocker.patch.object(
             AwsLambdaLookup, "get_required_hook_definition", return_value="hook_def"
         )
         assert AwsLambdaLookup.get_deployment_package_data(cfngin_context, data_key) == hook_data
-        get_required_hook_definition.assert_called_once_with(cfngin_context.config, data_key)
-        init_hook_class.assert_called_once_with(
-            cfngin_context, get_required_hook_definition.return_value
-        )
+        get_hook_definition.assert_called_once_with(cfngin_context.config, data_key)
+        init_hook_class.assert_called_once_with(cfngin_context, get_hook_definition.return_value)
         hook.plan.assert_called_once_with()
         assert cfngin_context.hook_data[data_key] == hook_data.dict(by_alias=True)
 
@@ -84,56 +77,6 @@ class TestAwsLambdaLookup:
                 Mock(hook_data={"test": {"invalid": True}}), "test"
             )
         assert "expected AwsLambdaHookDeployResponseTypedDict, not " in str(excinfo.value)
-
-    def test_get_required_hook_definition(self) -> None:
-        """Test get_required_hook_definition."""
-        data_key = "test.data"
-        expected_hook = CfnginHookDefinitionModel(data_key=data_key, path="foo.bar")
-        config = CfnginConfig(
-            CfnginConfigDefinitionModel(
-                namespace="test",
-                pre_deploy=[
-                    expected_hook,
-                    CfnginHookDefinitionModel(data_key="foo", path="foo"),
-                ],
-                pre_destroy=[CfnginHookDefinitionModel(data_key=data_key, path="pre_destroy")],
-                post_deploy=[CfnginHookDefinitionModel(data_key=data_key, path="post_deploy")],
-                post_destroy=[CfnginHookDefinitionModel(data_key=data_key, path="post_destroy")],
-            )
-        )
-        assert AwsLambdaLookup.get_required_hook_definition(config, data_key) == expected_hook
-
-    def test_get_required_hook_definition_raise_value_error_more_than_one(self) -> None:
-        """Test get_required_hook_definition raise ValueError for more than one."""
-        data_key = "test.data"
-        expected_hook = CfnginHookDefinitionModel(data_key=data_key, path="foo.bar")
-        config = CfnginConfig(
-            CfnginConfigDefinitionModel(
-                namespace="test",
-                pre_deploy=[expected_hook, expected_hook],
-            )
-        )
-        with pytest.raises(ValueError) as excinfo:
-            assert not AwsLambdaLookup.get_required_hook_definition(config, data_key)
-        assert str(excinfo.value) == f"more than one hook definition found with data_key {data_key}"
-
-    def test_get_required_hook_definition_raise_value_error_none(self) -> None:
-        """Test get_required_hook_definition raise ValueError none found."""
-        data_key = "test.data"
-        config = CfnginConfig(
-            CfnginConfigDefinitionModel(
-                namespace="test",
-                pre_deploy=[
-                    CfnginHookDefinitionModel(data_key="foo", path="foo"),
-                ],
-                pre_destroy=[CfnginHookDefinitionModel(data_key=data_key, path="pre_destroy")],
-                post_deploy=[CfnginHookDefinitionModel(data_key=data_key, path="post_deploy")],
-                post_destroy=[CfnginHookDefinitionModel(data_key=data_key, path="post_destroy")],
-            )
-        )
-        with pytest.raises(ValueError) as excinfo:
-            assert not AwsLambdaLookup.get_required_hook_definition(config, data_key)
-        assert str(excinfo.value) == f"no hook definition found with data_key {data_key}"
 
     def test_handle(self, mocker: MockerFixture) -> None:
         """Test handle."""
@@ -153,11 +96,6 @@ class TestAwsLambdaLookup:
             context, mock_parse.return_value[0]
         )
         mock_format_results.assert_not_called()
-
-    def test_handle_raise_cfngin_only_lookup_error(self, runway_context: RunwayContext) -> None:
-        """Test handle raise CfnginOnlyLookupError."""
-        with pytest.raises(CfnginOnlyLookupError):
-            AwsLambdaLookup.handle("test", runway_context)
 
     def test_init_hook_class(self, mocker: MockerFixture) -> None:
         """Test init_hook_class."""
@@ -219,21 +157,21 @@ class TestAwsLambdaLookupCode:
             LookupHandler, "format_results", return_value="success"
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
-        result = AwsLambdaLookup.Code.handle(QUERY, context, "arg", foo="bar")
+        result = AwsLambdaLookup.Code.handle(QUERY, context, foo="bar")
         assert isinstance(result, Code)
         assert not hasattr(result, "ImageUri")
         assert result.S3Bucket == hook_data.bucket_name
         assert result.S3Key == hook_data.object_key
         assert result.S3ObjectVersion == hook_data.object_version_id
         assert not hasattr(result, "ZipFile")
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_not_called()
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.Code.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.Code.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.Code.__name__}"
+            == AwsLambdaLookup.Code.TYPE_NAME
         )
 
 
@@ -247,18 +185,15 @@ class TestAwsLambdaLookupCodeSha256:
             LookupHandler, "format_results", return_value="success"
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
-        assert (
-            AwsLambdaLookup.CodeSha256.handle(QUERY, context, "arg", foo="bar")
-            == hook_data.code_sha256
-        )
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        assert AwsLambdaLookup.CodeSha256.handle(QUERY, context, foo="bar") == hook_data.code_sha256
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_not_called()
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.CodeSha256.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.CodeSha256.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.CodeSha256.__name__}"
+            == AwsLambdaLookup.CodeSha256.TYPE_NAME
         )
 
 
@@ -273,17 +208,17 @@ class TestAwsLambdaLookupCompatibleArchitectures:
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
         assert (
-            AwsLambdaLookup.CompatibleArchitectures.handle(QUERY, context, "arg", foo="bar")
+            AwsLambdaLookup.CompatibleArchitectures.handle(QUERY, context, foo="bar")
             == mock_format_results.return_value
         )
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_called_once_with(hook_data.compatible_architectures, foo="bar")
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.CompatibleArchitectures.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.CompatibleArchitectures.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.CompatibleArchitectures.__name__}"
+            == AwsLambdaLookup.CompatibleArchitectures.TYPE_NAME
         )
 
 
@@ -298,17 +233,17 @@ class TestAwsLambdaLookupCompatibleRuntimes:
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
         assert (
-            AwsLambdaLookup.CompatibleRuntimes.handle(QUERY, context, "arg", foo="bar")
+            AwsLambdaLookup.CompatibleRuntimes.handle(QUERY, context, foo="bar")
             == mock_format_results.return_value
         )
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_called_once_with(hook_data.compatible_runtimes, foo="bar")
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.CompatibleRuntimes.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.CompatibleRuntimes.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.CompatibleRuntimes.__name__}"
+            == AwsLambdaLookup.CompatibleRuntimes.TYPE_NAME
         )
 
 
@@ -322,20 +257,20 @@ class TestAwsLambdaLookupContent:
             LookupHandler, "format_results", return_value="success"
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
-        result = AwsLambdaLookup.Content.handle(QUERY, context, "arg", foo="bar")
+        result = AwsLambdaLookup.Content.handle(QUERY, context, foo="bar")
         assert isinstance(result, Content)
         assert not hasattr(result, "ImageUri")
         assert result.S3Bucket == hook_data.bucket_name
         assert result.S3Key == hook_data.object_key
         assert result.S3ObjectVersion == hook_data.object_version_id
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_not_called()
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.Content.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.Content.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.Content.__name__}"
+            == AwsLambdaLookup.Content.TYPE_NAME
         )
 
 
@@ -350,17 +285,17 @@ class TestAwsLambdaLookupLicenseInfo:
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
         assert (
-            AwsLambdaLookup.LicenseInfo.handle(QUERY, context, "arg", foo="bar")
+            AwsLambdaLookup.LicenseInfo.handle(QUERY, context, foo="bar")
             == mock_format_results.return_value
         )
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_called_once_with(hook_data.license, foo="bar")
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.LicenseInfo.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.LicenseInfo.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.LicenseInfo.__name__}"
+            == AwsLambdaLookup.LicenseInfo.TYPE_NAME
         )
 
 
@@ -374,15 +309,15 @@ class TestAwsLambdaLookupRuntime:
             LookupHandler, "format_results", return_value="success"
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
-        assert AwsLambdaLookup.Runtime.handle(QUERY, context, "arg", foo="bar") == hook_data.runtime
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        assert AwsLambdaLookup.Runtime.handle(QUERY, context, foo="bar") == hook_data.runtime
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_not_called()
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.Runtime.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.Runtime.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.Runtime.__name__}"
+            == AwsLambdaLookup.Runtime.TYPE_NAME
         )
 
 
@@ -396,18 +331,15 @@ class TestAwsLambdaLookupS3Bucket:
             LookupHandler, "format_results", return_value="success"
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
-        assert (
-            AwsLambdaLookup.S3Bucket.handle(QUERY, context, "arg", foo="bar")
-            == hook_data.bucket_name
-        )
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        assert AwsLambdaLookup.S3Bucket.handle(QUERY, context, foo="bar") == hook_data.bucket_name
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_not_called()
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.S3Bucket.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.S3Bucket.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.S3Bucket.__name__}"
+            == AwsLambdaLookup.S3Bucket.TYPE_NAME
         )
 
 
@@ -421,17 +353,15 @@ class TestAwsLambdaLookupS3Key:
             LookupHandler, "format_results", return_value="success"
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
-        assert (
-            AwsLambdaLookup.S3Key.handle(QUERY, context, "arg", foo="bar") == hook_data.object_key
-        )
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        assert AwsLambdaLookup.S3Key.handle(QUERY, context, foo="bar") == hook_data.object_key
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_not_called()
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.S3Key.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.S3Key.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.S3Key.__name__}"
+            == AwsLambdaLookup.S3Key.TYPE_NAME
         )
 
 
@@ -446,15 +376,15 @@ class TestAwsLambdaLookupS3ObjectVersion:
         )
         mock_handle = mocker.patch.object(AwsLambdaLookup, "handle", return_value=hook_data)
         assert (
-            AwsLambdaLookup.S3ObjectVersion.handle(QUERY, context, "arg", foo="bar")
+            AwsLambdaLookup.S3ObjectVersion.handle(QUERY, context, foo="bar")
             == hook_data.object_version_id
         )
-        mock_handle.assert_called_once_with(QUERY, context, "arg", foo="bar")
+        mock_handle.assert_called_once_with(QUERY, context, foo="bar")
         mock_format_results.assert_not_called()
 
     def test_type_name(self) -> None:
         """Test TYPE_NAME."""
         assert (
-            AwsLambdaLookup.S3ObjectVersion.TYPE_NAME
-            == f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.S3ObjectVersion.__name__}"
+            f"{AwsLambdaLookup.TYPE_NAME}.{AwsLambdaLookup.S3ObjectVersion.__name__}"
+            == AwsLambdaLookup.S3ObjectVersion.TYPE_NAME
         )

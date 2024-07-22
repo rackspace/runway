@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import pytest
 
 from runway._cli import cli
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from click.testing import CliRunner, Result
 
 CURRENT_DIR = Path(__file__).parent

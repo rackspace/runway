@@ -7,24 +7,27 @@ import base64
 import collections.abc
 import json
 import re
-from typing import Any, Callable, Dict, List, Mapping, Sequence, Tuple, Union, overload
+from collections.abc import Mapping, Sequence
+from typing import TYPE_CHECKING, Any, Callable, Final, Union, overload
 
 import yaml
 from pydantic import validator
 from troposphere import Base64, GenericHelperFn
-from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import BaseModel
 from ...utils import read_value_from_path
 
+if TYPE_CHECKING:
+    from typing_extensions import Literal
+
 _PARAMETER_PATTERN = re.compile(r"{{([::|\w]+)}}")
 
 ParameterizedObjectTypeDef = Union[str, Mapping[str, Any], Sequence[Any], Any]
 ParameterizedObjectReturnTypeDef = Union[
-    Dict[str, "ParameterizedObjectReturnTypeDef"],
+    dict[str, "ParameterizedObjectReturnTypeDef"],
     GenericHelperFn,
-    List["ParameterizedObjectReturnTypeDef"],
+    list["ParameterizedObjectReturnTypeDef"],
 ]
 
 
@@ -35,7 +38,7 @@ class ArgsDataModel(BaseModel):
     """Codec that will be used to parse and/or manipulate the data."""
 
     @validator("codec", allow_reuse=True)
-    def _validate_supported_codec(cls, v: str) -> str:
+    def _validate_supported_codec(cls, v: str) -> str:  # noqa: N805
         """Validate that the selected codec is supported."""
         if v in CODECS:
             return v
@@ -49,7 +52,7 @@ class FileLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+    def parse(cls, value: str) -> tuple[str, dict[str, str]]:
         """Parse the value passed to the lookup.
 
         This overrides the default parsing to account for special requirements.
@@ -64,12 +67,12 @@ class FileLookup(LookupHandler):
             ValueError: The value provided does not match the expected regex.
 
         """
-        args: Dict[str, str] = {}
+        args: dict[str, str] = {}
         try:
             args["codec"], data_or_path = value.split(":", 1)
         except ValueError:
             raise ValueError(
-                f"Query '{value}' doesn't match regex: " rf"^(?P<codec>[{'|'.join(CODECS)}]:.+$)"
+                rf"Query '{value}' doesn't match regex: ^(?P<codec>[{'|'.join(CODECS)}]:.+$)"
             ) from None
         return read_value_from_path(data_or_path), args
 
@@ -95,7 +98,7 @@ def _parameterize_string(raw: str) -> GenericHelperFn:
         are found, and a composition of CloudFormation calls otherwise.
 
     """
-    parts: List[Any] = []
+    parts: list[Any] = []
     s_index = 0
 
     for match in _PARAMETER_PATTERN.finditer(raw):
@@ -146,7 +149,7 @@ def _parameterize_obj(obj: Mapping[str, Any]) -> ParameterizedObjectReturnTypeDe
 
 
 @overload
-def _parameterize_obj(obj: List[Any]) -> ParameterizedObjectReturnTypeDef: ...
+def _parameterize_obj(obj: list[Any]) -> ParameterizedObjectReturnTypeDef: ...
 
 
 def _parameterize_obj(
@@ -187,7 +190,7 @@ def json_codec(raw: str, parameterized: bool = False) -> Any:
     return _parameterize_obj(data) if parameterized else data
 
 
-CODECS: Dict[str, Callable[[str], Any]] = {
+CODECS: dict[str, Callable[[str], Any]] = {
     "base64": lambda x: base64.b64encode(x.encode("utf8")).decode("utf-8"),
     "json": lambda x: json_codec(x, parameterized=False),
     "json-parameterized": lambda x: json_codec(x, parameterized=True),

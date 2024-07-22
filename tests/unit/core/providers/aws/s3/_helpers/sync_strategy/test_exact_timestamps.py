@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import datetime
-from typing import Optional
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.core.providers.aws.s3._helpers.file_generator import FileStats
 from runway.core.providers.aws.s3._helpers.sync_strategy.exact_timestamps import (
@@ -45,12 +44,11 @@ class TestExactTimestampsSync:
 
     @pytest.mark.parametrize("src, dest", [(None, None), (Mock(), None), (None, Mock())])
     def test_compare_time_raise_value_error(
-        self, dest: Optional[FileStats], src: Optional[FileStats]
+        self, dest: FileStats | None, src: FileStats | None
     ) -> None:
         """Test compare_time."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="src_file and dest_file must not be None"):
             ExactTimestampsSync().compare_time(src, dest)
-        assert str(excinfo.value) == "src_file and dest_file must not be None"
 
     def test_compare_time_same(self) -> None:
         """Test compare_time."""

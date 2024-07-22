@@ -20,7 +20,7 @@ from runway.cfngin.hooks.staticsite.upload_staticsite import (
 from runway.module.staticsite.options.models import RunwayStaticSiteExtraFileDataModel
 
 if TYPE_CHECKING:
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 
 @pytest.mark.parametrize(
@@ -97,7 +97,7 @@ def test_get_content_yaml() -> None:
 
 def test_get_content_unknown() -> None:
     """Get content unknown."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         get_content(RunwayStaticSiteExtraFileDataModel(content={"a": 0}, name=""))
 
 
@@ -131,7 +131,7 @@ def test_calculate_hash_of_extra_files(
     assert calculate_hash_of_extra_files([a]) != calculate_hash_of_extra_files([b])
 
 
-def test_sync_extra_files_json_content(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_json_content(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files json content is put in s3."""
     s3_stub = cfngin_context.add_stubber("s3")
 
@@ -155,7 +155,7 @@ def test_sync_extra_files_json_content(cfngin_context: MockCFNginContext) -> Non
         stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_yaml_content(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_yaml_content(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files yaml content is put in s3."""
     s3_stub = cfngin_context.add_stubber("s3")
 
@@ -179,7 +179,7 @@ def test_sync_extra_files_yaml_content(cfngin_context: MockCFNginContext) -> Non
         stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_empty_content(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_empty_content(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files empty content is not uploaded."""
     s3_stub = cfngin_context.add_stubber("s3")
 
@@ -196,7 +196,7 @@ def test_sync_extra_files_empty_content(cfngin_context: MockCFNginContext) -> No
         stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_file_reference(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_file_reference(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files file is uploaded."""
     s3_stub = cfngin_context.add_stubber("s3")
 
@@ -222,7 +222,7 @@ def test_sync_extra_files_file_reference(cfngin_context: MockCFNginContext) -> N
 
 
 def test_sync_extra_files_file_reference_with_content_type(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
 ) -> None:
     """Test sync_extra_files file is uploaded with the content type."""
     s3_stub = cfngin_context.add_stubber("s3")
@@ -245,7 +245,7 @@ def test_sync_extra_files_file_reference_with_content_type(
         stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_hash_unchanged(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_hash_unchanged(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files upload is skipped if the has was unchanged."""
     s3_stub = cfngin_context.add_stubber("s3")
     ssm_stub = cfngin_context.add_stubber("ssm")
@@ -272,7 +272,7 @@ def test_sync_extra_files_hash_unchanged(cfngin_context: MockCFNginContext) -> N
         ssm_stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_hash_updated(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_hash_updated(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files extra files hash is updated."""
     s3_stub = cfngin_context.add_stubber("s3")
     ssm_stub = cfngin_context.add_stubber("ssm")
@@ -306,7 +306,7 @@ def test_sync_extra_files_hash_updated(cfngin_context: MockCFNginContext) -> Non
         {
             "Bucket": "bucket",
             "Key": "test",
-            "Body": "test".encode(),
+            "Body": b"test",
             "ContentType": "text/plain",
         },
     )

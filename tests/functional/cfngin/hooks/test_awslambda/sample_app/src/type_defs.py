@@ -2,13 +2,7 @@
 
 from __future__ import annotations
 
-import sys
-from typing import Any, Dict, Optional
-
-if sys.version_info < (3, 8):
-    from typing_extensions import Literal, TypedDict  # type: ignore
-else:
-    from typing import Literal, TypedDict  # type: ignore
+from typing import Any, Literal, Optional, TypedDict  # type: ignore
 
 
 class _LambdaResponseOptional(TypedDict, total=False):
@@ -21,7 +15,7 @@ class _LambdaResponseRequired(TypedDict):
     """Required fields for a Lambda Response."""
 
     code: int
-    data: Dict[str, Any]
+    data: dict[str, Any]
     message: Optional[str]
     status: Literal["error", "success"]
 

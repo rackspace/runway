@@ -28,7 +28,7 @@ def whichenv(ctx: click.Context, **_: Any) -> None:
       - git branch name (strips "ENV-" prefix, master => common)
       - current working directory
 
-    """
+    """  # noqa: D301
     if not (ctx.obj.debug or ctx.obj.verbose):
         logging.getLogger("runway").setLevel(logging.ERROR)  # suppress warnings
     with SafeHaven(environ={"CI": "1"}):  # prevent prompts

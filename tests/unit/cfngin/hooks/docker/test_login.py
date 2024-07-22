@@ -17,13 +17,13 @@ if TYPE_CHECKING:
     from docker import DockerClient
     from pytest_mock import MockerFixture
 
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 MODULE = "runway.cfngin.hooks.docker._login"
 
 
 def test_login(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
     mock_docker_client: DockerClient,
     mocker: MockerFixture,
 ) -> None:

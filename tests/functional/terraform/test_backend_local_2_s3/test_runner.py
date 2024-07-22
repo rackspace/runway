@@ -5,7 +5,7 @@ from __future__ import annotations
 import locale
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
@@ -13,6 +13,8 @@ from runway._cli import cli
 from runway.env_mgr.tfenv import TF_VERSION_FILENAME
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from _pytest.fixtures import SubRequest
     from click.testing import CliRunner, Result
 
@@ -44,14 +46,18 @@ def tf_version(request: SubRequest) -> Iterator[str]:
     file_path.unlink(missing_ok=True)
 
 
-@pytest.fixture(scope="function")
-def deploy_local_backend_result(cli_runner: CliRunner, local_backend: Path) -> Iterator[Result]:
+@pytest.fixture()
+def deploy_local_backend_result(
+    cli_runner: CliRunner, local_backend: Path  # noqa: ARG001
+) -> Result:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
-    yield cli_runner.invoke(cli, ["deploy", "--tag", "local"], env={"CI": "1"})
+    return cli_runner.invoke(cli, ["deploy", "--tag", "local"], env={"CI": "1"})
 
 
-@pytest.fixture(scope="function")
-def deploy_s3_backend_result(cli_runner: CliRunner, s3_backend: Path) -> Iterator[Result]:
+@pytest.fixture()
+def deploy_s3_backend_result(
+    cli_runner: CliRunner, s3_backend: Path  # noqa: ARG001
+) -> Iterator[Result]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "test"], env={"CI": "1"})
     # cleanup files

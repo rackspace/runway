@@ -1,7 +1,7 @@
 """Test runway.config.components.runway._deployment_dev."""
 
 # pyright: basic
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -71,7 +71,7 @@ class TestRunwayDeploymentDefinition:
             ),
         ],
     )
-    def test_menu_entry(self, data: Dict[str, Any], expected: str) -> None:
+    def test_menu_entry(self, data: dict[str, Any], expected: str) -> None:
         """Test menu_entry."""
         assert RunwayDeploymentDefinition.parse_obj(data).menu_entry == expected
 
@@ -112,19 +112,19 @@ class TestRunwayDeploymentDefinition:
 
     def test_models_setter_invalid_list_item(self) -> None:
         """Test modules.setter when list item is now supported."""
+        obj = RunwayDeploymentDefinition.parse_obj({"regions": ["us-east-1"]})
         with pytest.raises(TypeError):
-            obj = RunwayDeploymentDefinition.parse_obj({"regions": ["us-east-1"]})
             obj.modules = [RunwayModuleDefinitionModel(path="./"), "invalid"]  # type: ignore
 
     def test_parse_obj(self) -> None:
         """Test parse_obj."""
-        data: Dict[str, Any] = {"name": "test", "modules": [], "regions": ["us-east-1"]}
+        data: dict[str, Any] = {"name": "test", "modules": [], "regions": ["us-east-1"]}
         obj = RunwayDeploymentDefinition.parse_obj(data)
         assert obj._data.dict(exclude_unset=True) == data
 
     def test_parse_obj_list(self) -> None:
         """Test parse_obj list."""
-        data: List[Dict[str, Any]] = [{"name": "test", "modules": [], "regions": ["us-east-1"]}]
+        data: list[dict[str, Any]] = [{"name": "test", "modules": [], "regions": ["us-east-1"]}]
         result = RunwayDeploymentDefinition.parse_obj(data)
 
         assert isinstance(result, list)

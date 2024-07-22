@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+from typing import Any, Optional, cast
 
 import pytest
 from pydantic import ValidationError
@@ -81,13 +81,13 @@ class TestRunwayStaticSiteExtraFileDataModel:
     @pytest.mark.parametrize(
         "data",
         [
-            cast(Dict[str, str], {}),
+            cast(dict[str, str], {}),
             {"name": "test"},
             {"content": "test"},
             {"file": "test"},
         ],
     )
-    def test_init_required(self, data: Dict[str, Any]) -> None:
+    def test_init_required(self, data: dict[str, Any]) -> None:
         """Test init required fields."""
         with pytest.raises(ValidationError):
             RunwayStaticSiteExtraFileDataModel(**data)
@@ -100,9 +100,12 @@ class TestRunwayStaticSiteModuleOptionsDataModel:
         """Test init default."""
         obj = RunwayStaticSiteModuleOptionsDataModel()
         assert obj.build_output == "./"
-        assert not obj.build_steps and isinstance(obj.build_steps, list)
-        assert not obj.extra_files and isinstance(obj.extra_files, list)
-        assert not obj.pre_build_steps and isinstance(obj.pre_build_steps, list)
+        assert not obj.build_steps
+        assert isinstance(obj.build_steps, list)
+        assert not obj.extra_files
+        assert isinstance(obj.extra_files, list)
+        assert not obj.pre_build_steps
+        assert isinstance(obj.pre_build_steps, list)
         assert obj.source_hashing == RunwayStaticSiteSourceHashingDataModel()
 
     def test_init_extra(self) -> None:
@@ -201,7 +204,8 @@ class TestRunwayStaticSiteSourceHashingDirectoryDataModel:
     def test_init_default(self, tmp_path: Path) -> None:
         """Test init default."""
         obj = RunwayStaticSiteSourceHashingDirectoryDataModel(path=tmp_path)
-        assert not obj.exclusions and isinstance(obj.exclusions, list)
+        assert not obj.exclusions
+        assert isinstance(obj.exclusions, list)
         assert obj.path == tmp_path
 
     def test_init_extra(self, tmp_path: Path) -> None:

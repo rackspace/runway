@@ -6,14 +6,16 @@ from __future__ import annotations
 import logging
 import secrets
 import string
-from typing import TYPE_CHECKING, Any, Callable, List, Sequence, Union
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Callable, Final
 
 from ...utils import BaseModel
 from .base import LookupHandler
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from typing_extensions import Literal
+
     from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
@@ -83,7 +85,7 @@ class RandomStringLookup(LookupHandler):
             value: Value to check.
 
         """
-        checks: List[Callable[[str], bool]] = []
+        checks: list[Callable[[str], bool]] = []
         if args.digits:
             checks.append(cls.has_digit)
         if args.lowercase:
@@ -98,7 +100,7 @@ class RandomStringLookup(LookupHandler):
     def handle(
         cls,
         value: str,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,  # noqa: ARG003
         *__args: Any,
         **__kwargs: Any,
     ) -> Any:

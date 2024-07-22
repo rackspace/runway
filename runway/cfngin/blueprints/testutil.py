@@ -8,7 +8,7 @@ import os.path
 import unittest
 from glob import glob
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterator, List, Optional, Type, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from ...config import CfnginConfig
 from ...context import CfnginContext
@@ -16,6 +16,8 @@ from ...utils import load_object_from_string
 from ...variables import Variable
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from ...config.models.cfngin import CfnginStackDefinitionModel
     from .base import Blueprint
 
@@ -30,7 +32,7 @@ class BlueprintTestCase(unittest.TestCase):
 
     OUTPUT_PATH: str = "tests/fixtures/blueprints"
 
-    def assertRenderedBlueprint(self, blueprint: Blueprint) -> None:
+    def assertRenderedBlueprint(self, blueprint: Blueprint) -> None:  # noqa: N802
         """Test that the rendered blueprint json matches the expected result.
 
         Result files are to be stored in the repo as
@@ -42,14 +44,16 @@ class BlueprintTestCase(unittest.TestCase):
         rendered_dict = blueprint.template.to_dict()
         rendered_text = json.dumps(rendered_dict, indent=4, sort_keys=True)
 
-        with open(expected_output + "-result", "w", encoding="utf-8") as expected_output_file:
+        with open(  # noqa: PTH123
+            expected_output + "-result", "w", encoding="utf-8"
+        ) as expected_output_file:
             expected_output_file.write(rendered_text)
 
-        with open(expected_output, encoding="utf-8") as expected_output_file:
+        with open(expected_output, encoding="utf-8") as expected_output_file:  # noqa: PTH123
             expected_dict = json.loads(expected_output_file.read())
             expected_text = json.dumps(expected_dict, indent=4, sort_keys=True)
 
-        self.assertEqual(rendered_dict, expected_dict, diff(rendered_text, expected_text))
+        assert rendered_dict == expected_dict, diff(rendered_text, expected_text)  # noqa: S101
 
 
 class YamlDirTestGenerator:
@@ -99,17 +103,17 @@ class YamlDirTestGenerator:
     def __init__(self) -> None:
         """Instantiate class."""
         self.classdir = os.path.relpath(self.__class__.__module__.replace(".", "/"))
-        if not os.path.isdir(self.classdir):
-            self.classdir = os.path.dirname(self.classdir)
+        if not os.path.isdir(self.classdir):  # noqa: PTH112
+            self.classdir = os.path.dirname(self.classdir)  # noqa: PTH120
 
     # These properties can be overridden from the test generator subclass.
     @property
-    def base_class(self) -> Type[BlueprintTestCase]:
+    def base_class(self) -> type[BlueprintTestCase]:
         """Return the baseclass."""
         return BlueprintTestCase
 
     @property
-    def yaml_dirs(self) -> List[str]:
+    def yaml_dirs(self) -> list[str]:
         """Yaml directories."""
         return ["."]
 
@@ -123,9 +127,11 @@ class YamlDirTestGenerator:
     ) -> Iterator[BlueprintTestCase]:
         """Test generator."""
         # Search for tests in given paths
-        configs: List[str] = []
+        configs: list[str] = []
         for directory in self.yaml_dirs:
-            configs.extend(glob(f"{self.classdir}/{directory}/{self.yaml_filename}"))
+            configs.extend(
+                glob(f"{self.classdir}/{directory}/{self.yaml_filename}")  # noqa: PTH207
+            )
 
         class ConfigTest(self.base_class):  # type: ignore
             """Config test."""
@@ -162,13 +168,15 @@ class YamlDirTestGenerator:
                 blueprint.create_template()
                 self.assertRenderedBlueprint(blueprint)
 
-            def assertEqual(self, first: Any, second: Any, msg: Optional[str] = None) -> None:
+            def assertEqual(  # noqa: N802
+                self, first: Any, second: Any, msg: str | None = None
+            ) -> None:
                 """Test that first and second are equal.
 
                 If the values do not compare equal, the test will fail.
 
                 """
-                assert first == second, msg
+                assert first == second, msg  # noqa: S101
 
         for config_file in configs:
             config_path = Path(config_file)

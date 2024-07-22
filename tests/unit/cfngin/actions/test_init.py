@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway._logging import LogLevels
 from runway.cfngin.actions.init import Action
@@ -14,7 +14,6 @@ from runway.config.models.cfngin import CfnginStackDefinitionModel
 from runway.core.providers.aws.s3 import Bucket
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from runway.context import CfnginContext
@@ -75,7 +74,7 @@ class TestAction:
 
     def test_run(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         mocker: MockerFixture,
     ) -> None:
@@ -104,7 +103,7 @@ class TestAction:
 
     def test_run_cfngin_bucket_region(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         mocker: MockerFixture,
     ) -> None:
@@ -136,7 +135,7 @@ class TestAction:
 
     def test_run_exists(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         mocker: MockerFixture,
     ) -> None:
@@ -164,7 +163,7 @@ class TestAction:
 
     def test_run_get_stack(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         mocker: MockerFixture,
     ) -> None:
@@ -193,7 +192,7 @@ class TestAction:
 
     def test_run_no_cfngin_bucket(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         cfngin_context: CfnginContext,
         mocker: MockerFixture,
     ) -> None:

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Dict
-
 import pytest
 from s3transfer.manager import TransferConfig
 
@@ -64,7 +62,7 @@ class TestRuntimeConfig:
             {"max_queue_size": "not an int"},
         ],
     )
-    def test_build_config_validates_integer_types(self, kwargs: Dict[str, str]) -> None:
+    def test_build_config_validates_integer_types(self, kwargs: dict[str, str]) -> None:
         """Test build_config."""
         with pytest.raises(InvalidConfigError):
             RuntimeConfig.build_config(**kwargs)
@@ -79,7 +77,7 @@ class TestRuntimeConfig:
             {"multipart_threshold": -15},
         ],
     )
-    def test_build_config_validates_positive_integers(self, kwargs: Dict[str, str]) -> None:
+    def test_build_config_validates_positive_integers(self, kwargs: dict[str, str]) -> None:
         """Test build_config."""
         with pytest.raises(InvalidConfigError):
             RuntimeConfig.build_config(**kwargs)

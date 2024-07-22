@@ -8,7 +8,7 @@ For more information on protocols, refer to
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, TypeVar, overload
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -30,14 +30,14 @@ class CfnginHookArgsProtocol(Protocol):
 
     @overload
     @abstractmethod
-    def get(self, __name: str) -> Optional[Any]: ...
+    def get(self, __name: str) -> Any | None: ...
 
     @overload
     @abstractmethod
-    def get(self, __name: str, __default: Union[Any, _T]) -> Union[Any, _T]: ...
+    def get(self, __name: str, __default: Any | _T) -> Any | _T: ...
 
     @abstractmethod
-    def get(self, __name: str, __default: Union[Any, _T] = None) -> Union[Any, _T]:
+    def get(self, __name: str, __default: Any | _T = None) -> Any | _T:
         """Safely get the value of an attribute.
 
         Args:
@@ -48,19 +48,19 @@ class CfnginHookArgsProtocol(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def __contains__(self, __name: str) -> bool:
+    def __contains__(self, __name: str) -> bool:  # noqa: D105
         raise NotImplementedError
 
     @abstractmethod
-    def __getattribute__(self, __name: str) -> Any:
+    def __getattribute__(self, __name: str) -> Any:  # noqa: D105
         raise NotImplementedError
 
     @abstractmethod
-    def __getitem__(self, __name: str) -> Any:
+    def __getitem__(self, __name: str) -> Any:  # noqa: D105
         raise NotImplementedError
 
     @abstractmethod
-    def __setitem__(self, __name: str, _value: Any) -> None:
+    def __setitem__(self, __name: str, _value: Any) -> None:  # noqa: D105
         raise NotImplementedError
 
 

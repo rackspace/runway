@@ -8,7 +8,7 @@ import logging
 import os
 import time
 from operator import itemgetter
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, List, Optional, cast  # noqa: UP035
 
 import yaml
 
@@ -43,14 +43,14 @@ class HookArgs(HookArgsBaseModel):
     distribution_path: str = "/*"
     """Path in the CloudFront distribution to invalidate."""
 
-    extra_files: List[RunwayStaticSiteExtraFileDataModel] = []
+    extra_files: List[RunwayStaticSiteExtraFileDataModel] = []  # noqa: UP006
     """Extra files to sync to the S3 bucket."""
 
     website_url: Optional[str] = None
     """S3 bucket website URL."""
 
 
-def get_archives_to_prune(archives: List[Dict[str, Any]], hook_data: Dict[str, Any]) -> List[str]:
+def get_archives_to_prune(archives: list[dict[str, Any]], hook_data: dict[str, Any]) -> list[str]:
     """Return list of keys to delete.
 
     Args:
@@ -77,6 +77,7 @@ def sync(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
 
     Args:
         context: The context instance.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     args = HookArgs.parse_obj(kwargs)
@@ -191,7 +192,7 @@ def prune_archives(context: CfnginContext, session: Session) -> bool:
 
     """
     LOGGER.info("cleaning up old site archives...")
-    archives: List[Dict[str, Any]] = []
+    archives: list[dict[str, Any]] = []
     s3_client = session.client("s3")
     list_objects_v2_paginator = s3_client.get_paginator("list_objects_v2")
     response_iterator = list_objects_v2_paginator.paginate(
@@ -227,7 +228,7 @@ def auto_detect_content_type(filename: Optional[str]) -> Optional[str]:
     if not filename:
         return None
 
-    _, ext = os.path.splitext(filename)
+    _, ext = os.path.splitext(filename)  # noqa: PTH122
 
     if ext == ".json":
         return "application/json"
@@ -279,7 +280,7 @@ def get_content(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]
 
 
 def calculate_hash_of_extra_files(
-    extra_files: List[RunwayStaticSiteExtraFileDataModel],
+    extra_files: list[RunwayStaticSiteExtraFileDataModel],
 ) -> str:
     """Return a hash of all of the given extra files.
 
@@ -293,7 +294,7 @@ def calculate_hash_of_extra_files(
         The hash of all the files.
 
     """
-    file_hash = hashlib.md5()
+    file_hash = hashlib.md5()  # noqa: S324
 
     for extra_file in sorted(extra_files, key=lambda x: x.name):
         file_hash.update((extra_file.name + "\0").encode())
@@ -306,13 +307,13 @@ def calculate_hash_of_extra_files(
             file_hash.update((cast(str, extra_file.content) + "\0").encode())
 
         if extra_file.file:
-            with open(extra_file.file, "rb") as f:
+            with open(extra_file.file, "rb") as f:  # noqa: PTH123
                 LOGGER.debug("hashing file: %s", extra_file.file)
                 for chunk in iter(lambda: f.read(4096), ""):
                     if not chunk:
                         break
                     file_hash.update(chunk)
-                file_hash.update("\0".encode())
+                file_hash.update(b"\0")
 
     return file_hash.hexdigest()
 
@@ -353,18 +354,19 @@ def set_ssm_value(session: Session, name: str, value: Any, description: str = ""
     )
 
 
-def sync_extra_files(
+def sync_extra_files(  # noqa: C901
     context: CfnginContext,
     bucket: str,
-    extra_files: List[RunwayStaticSiteExtraFileDataModel],
+    extra_files: list[RunwayStaticSiteExtraFileDataModel],
     **kwargs: Any,
-) -> List[str]:
+) -> list[str]:
     """Sync static website extra files to S3 bucket.
 
     Args:
         context: The context instance.
         bucket: The static site bucket name.
         extra_files: List of files and file content that should be uploaded.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     LOGGER.debug("extra_files to sync: %s", json.dumps(extra_files, cls=JsonEncoder))
@@ -374,7 +376,7 @@ def sync_extra_files(
 
     session = context.get_session()
     s3_client = session.client("s3")
-    uploaded: List[str] = []
+    uploaded: list[str] = []
 
     hash_param = cast(str, kwargs.get("hash_tracking_parameter", ""))
     hash_new = None

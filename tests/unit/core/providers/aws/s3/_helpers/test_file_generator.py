@@ -6,13 +6,12 @@ import datetime
 import os
 import platform
 import stat
-from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
 from botocore.exceptions import ClientError
 from dateutil.tz import tzlocal
-from mock import Mock
 
 from runway.core.providers.aws.s3._helpers.file_generator import (
     FileGenerator,
@@ -24,6 +23,8 @@ from runway.core.providers.aws.s3._helpers.format_path import FormatPath
 from runway.core.providers.aws.s3._helpers.utils import EPOCH_TIME
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest_mock import MockerFixture
 
     from runway.core.providers.aws.s3._helpers.file_generator import (
@@ -342,7 +343,7 @@ class TestFileGenerator:
         )
         mock_create_warning.assert_called_once_with(
             path=tmp_path,
-            error_message="File has an invalid timestamp. Passing epoch " "time as timestamp.",
+            error_message="File has an invalid timestamp. Passing epoch time as timestamp.",
             skip_file=False,
         )
         assert obj.result_queue.get() == "warning"

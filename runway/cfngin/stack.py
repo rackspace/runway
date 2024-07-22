@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, cast
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Any, cast
 
 from runway.utils import load_object_from_string
 from runway.variables import Variable, resolve_variables
@@ -13,6 +11,8 @@ from runway.variables import Variable, resolve_variables
 from .blueprints.raw import RawTemplateBlueprint
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ..config.models.cfngin import CfnginStackDefinitionModel
     from ..context import CfnginContext
     from .blueprints.base import Blueprint
@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 
 
 def _initialize_variables(
-    stack_def: CfnginStackDefinitionModel, variables: Optional[Dict[str, Any]] = None
-) -> List[Variable]:
+    stack_def: CfnginStackDefinitionModel, variables: dict[str, Any] | None = None
+) -> list[Variable]:
     """Convert defined variables into a list of ``Variable`` for consumption.
 
     Args:
@@ -65,36 +65,36 @@ class Stack:
 
     """
 
-    _blueprint: Optional[Blueprint]
-    _stack_policy: Optional[str]
+    _blueprint: Blueprint | None
+    _stack_policy: str | None
 
     context: CfnginContext
     definition: CfnginStackDefinitionModel
     enabled: bool
     force: bool
     fqn: str
-    in_progress_behavior: Optional[Literal["wait"]]
+    in_progress_behavior: Literal["wait"] | None
     locked: bool
     logging: bool
-    mappings: Dict[str, Dict[str, Dict[str, Any]]]
+    mappings: dict[str, dict[str, dict[str, Any]]]
     name: str
-    outputs: Dict[str, Any]
+    outputs: dict[str, Any]
     protected: bool
     termination_protection: bool
-    variables: List[Variable]
+    variables: list[Variable]
 
     def __init__(
         self,
         definition: CfnginStackDefinitionModel,
         context: CfnginContext,
         *,
-        variables: Optional[Dict[str, Any]] = None,
-        mappings: Dict[str, Dict[str, Dict[str, Any]]] = None,
+        variables: dict[str, Any] | None = None,
+        mappings: dict[str, dict[str, dict[str, Any]]] | None = None,
         locked: bool = False,
         force: bool = False,
         enabled: bool = True,
         protected: bool = False,
-    ):
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -127,12 +127,12 @@ class Stack:
         self.variables = _initialize_variables(definition, variables)
 
     @property
-    def required_by(self) -> Set[str]:
+    def required_by(self) -> set[str]:
         """Return a list of stack names that depend on this stack."""
         return set(self.definition.required_by)
 
     @property
-    def requires(self) -> Set[str]:
+    def requires(self) -> set[str]:
         """Return a list of stack names this stack depends on."""
         requires = set(self.definition.requires or [])
 
@@ -147,21 +147,17 @@ class Stack:
         return requires
 
     @property
-    def stack_policy(self) -> Optional[str]:
+    def stack_policy(self) -> str | None:
         """Return the Stack Policy to use for this stack."""
-        if not self._stack_policy:
-            self._stack_policy = None
-            if self.definition.stack_policy_path:
-                with open(self.definition.stack_policy_path, encoding="utf-8") as file_:
-                    self._stack_policy = file_.read()
-
-        return self._stack_policy
+        if self.definition.stack_policy_path:
+            return self.definition.stack_policy_path.read_text() or None
+        return None
 
     @property
     def blueprint(self) -> Blueprint:
         """Return the blueprint associated with this stack."""
         if not self._blueprint:
-            kwargs: Dict[str, Any] = {}
+            kwargs: dict[str, Any] = {}
             if self.definition.class_path:
                 class_path = self.definition.class_path
                 blueprint_class = load_object_from_string(class_path)
@@ -188,7 +184,7 @@ class Stack:
         return self._blueprint
 
     @property
-    def tags(self) -> Dict[str, Any]:
+    def tags(self) -> dict[str, Any]:
         """Return the tags that should be set on this stack.
 
         Includes both the global tags, as well as any stack specific tags
@@ -199,7 +195,7 @@ class Stack:
         return dict(self.context.tags, **tags)
 
     @property
-    def parameter_values(self) -> Dict[str, Any]:
+    def parameter_values(self) -> dict[str, Any]:
         """Return all CloudFormation Parameters for the stack.
 
         CloudFormation Parameters can be specified via Blueprint Variables
@@ -213,16 +209,16 @@ class Stack:
         return self.blueprint.parameter_values
 
     @property
-    def all_parameter_definitions(self) -> Dict[str, Any]:
+    def all_parameter_definitions(self) -> dict[str, Any]:
         """Return all parameters in the blueprint/template."""
         return self.blueprint.parameter_definitions
 
     @property
-    def required_parameter_definitions(self) -> Dict[str, Any]:
+    def required_parameter_definitions(self) -> dict[str, Any]:
         """Return all CloudFormation Parameters without a default value."""
         return self.blueprint.required_parameter_definitions
 
-    def resolve(self, context: CfnginContext, provider: Optional[Provider] = None) -> None:
+    def resolve(self, context: CfnginContext, provider: Provider | None = None) -> None:
         """Resolve the Stack variables.
 
         This resolves the Stack variables and then prepares the Blueprint for
@@ -236,7 +232,7 @@ class Stack:
         resolve_variables(self.variables, context, provider)
         self.blueprint.resolve_variables(self.variables)
 
-    def set_outputs(self, outputs: Dict[str, Any]) -> None:
+    def set_outputs(self, outputs: dict[str, Any]) -> None:
         """Set stack outputs to the provided value.
 
         Args:

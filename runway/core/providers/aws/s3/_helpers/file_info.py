@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from ......compat import cached_property
 from .utils import EPOCH_TIME
@@ -35,18 +35,18 @@ class FileInfo:
         self,
         src: AnyPath,
         *,
-        client: Optional[S3Client] = None,
-        compare_key: Optional[str] = None,
-        dest_type: Optional[SupportedPathType] = None,
-        dest: Optional[AnyPath] = None,
+        client: S3Client | None = None,
+        compare_key: str | None = None,
+        dest_type: SupportedPathType | None = None,
+        dest: AnyPath | None = None,
         is_stream: bool = False,
-        last_update: Optional[datetime.datetime] = None,
-        operation_name: Optional[str] = None,
-        parameters: Optional[Dict[str, Any]] = None,
-        response_data: Optional[Union[HeadObjectOutputTypeDef, ObjectTypeDef]] = None,
-        size: Optional[int] = None,
-        source_client: Optional[S3Client] = None,
-        src_type: Optional[SupportedPathType] = None,
+        last_update: datetime.datetime | None = None,
+        operation_name: str | None = None,
+        parameters: dict[str, Any] | None = None,
+        response_data: HeadObjectOutputTypeDef | ObjectTypeDef | None = None,
+        size: int | None = None,
+        source_client: S3Client | None = None,
+        src_type: SupportedPathType | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -108,19 +108,18 @@ class FileInfo:
         return True
 
     def _is_glacier_object(
-        self, response_data: Optional[Union[HeadObjectOutputTypeDef, ObjectTypeDef]]
+        self, response_data: HeadObjectOutputTypeDef | ObjectTypeDef | None
     ) -> bool:
         """Determine if a file info object is glacier compatible."""
         glacier_storage_classes = ["GLACIER", "DEEP_ARCHIVE"]
-        if response_data:
-            if response_data.get(
-                "StorageClass"
-            ) in glacier_storage_classes and not self._is_restored(response_data):
-                return True
-        return False
+        return bool(
+            response_data
+            and response_data.get("StorageClass") in glacier_storage_classes
+            and not self._is_restored(response_data)
+        )
 
     @staticmethod
-    def _is_restored(response_data: Union[HeadObjectOutputTypeDef, ObjectTypeDef]) -> bool:
+    def _is_restored(response_data: HeadObjectOutputTypeDef | ObjectTypeDef) -> bool:
         """Return True is this is a glacier object that has been restored back to S3."""
         # 'Restore' looks like: 'ongoing-request="false", expiry-date="..."'
         return 'ongoing-request="false"' in response_data.get("Restore", "")

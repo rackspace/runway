@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 
@@ -12,9 +12,9 @@ from runway.exceptions import NpmNotFound
 from runway.module.base import NPM_BIN, ModuleOptions, RunwayModule, RunwayModuleNpm
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
 
@@ -44,7 +44,9 @@ class TestModuleOptions:
 class TestRunwayModuleNpm:
     """Test runway.module.base.RunwayModuleNpm."""
 
-    def test_check_for_npm_missing(self, caplog: LogCaptureFixture, mocker: MockerFixture) -> None:
+    def test_check_for_npm_missing(
+        self, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
+    ) -> None:
         """Test check_for_npm missing."""
         caplog.set_level(logging.ERROR, logger=MODULE)
         mock_which = mocker.patch(f"{MODULE}.which", return_value=False)
@@ -101,7 +103,7 @@ class TestRunwayModuleNpm:
 
     def test_log_npm_command(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -121,7 +123,7 @@ class TestRunwayModuleNpm:
     @pytest.mark.parametrize("colorize", [True, False])
     def test_npm_install_ci(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         colorize: bool,
         fake_process: FakeProcess,
         mocker: MockerFixture,
@@ -135,7 +137,7 @@ class TestRunwayModuleNpm:
         mocker.patch.object(RunwayModuleNpm, "warn_on_boto_env_vars")
         runway_context.env.ci = True
         runway_context.env.vars["RUNWAY_COLORIZE"] = str(colorize)
-        cmd: List[Any] = [NPM_BIN, "ci"]
+        cmd: list[Any] = [NPM_BIN, "ci"]
         if not colorize:
             cmd.append("--no-color")
         fake_process.register_subprocess(cmd, returncode=0)
@@ -157,7 +159,7 @@ class TestRunwayModuleNpm:
     )
     def test_npm_install_install(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         colorize: bool,
         fake_process: FakeProcess,
         is_noninteractive: bool,
@@ -173,7 +175,7 @@ class TestRunwayModuleNpm:
         mocker.patch.object(RunwayModuleNpm, "warn_on_boto_env_vars")
         runway_context.env.ci = is_noninteractive
         runway_context.env.vars["RUNWAY_COLORIZE"] = str(colorize)
-        cmd: List[Any] = [NPM_BIN, "install"]
+        cmd: list[Any] = [NPM_BIN, "install"]
         if not colorize:
             cmd.append("--no-color")
         fake_process.register_subprocess(cmd, returncode=0)
@@ -183,7 +185,7 @@ class TestRunwayModuleNpm:
 
     def test_npm_install_skip(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -199,7 +201,7 @@ class TestRunwayModuleNpm:
 
     def test_package_json_missing(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -211,12 +213,12 @@ class TestRunwayModuleNpm:
         obj = RunwayModuleNpm(context=runway_context, module_root=tmp_path)
 
         assert obj.package_json_missing()
-        assert ["module is missing package.json"] == caplog.messages
+        assert caplog.messages == ["module is missing package.json"]
 
         (tmp_path / "package.json").touch()
         assert not obj.package_json_missing()
 
-    def test_warn_on_boto_env_vars(self, caplog: LogCaptureFixture) -> None:
+    def test_warn_on_boto_env_vars(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test warn_on_boto_env_vars."""
         caplog.set_level(logging.WARNING, logger=MODULE)
         RunwayModuleNpm.warn_on_boto_env_vars({"AWS_DEFAULT_PROFILE": "something"})
@@ -229,13 +231,13 @@ class TestRunwayModuleNpm:
     @pytest.mark.parametrize(
         "env_vars",
         [
-            cast(Dict[str, str], {}),
+            cast(dict[str, str], {}),
             {"AWS_PROFILE": "something"},
             {"AWS_DEFAULT_PROFILE": "something", "AWS_PROFILE": "something"},
         ],
     )
     def test_warn_on_boto_env_vars_no_warn(
-        self, caplog: LogCaptureFixture, env_vars: Dict[str, str]
+        self, caplog: pytest.LogCaptureFixture, env_vars: dict[str, str]
     ) -> None:
         """Test warn_on_boto_env_vars no warn."""
         caplog.set_level(logging.WARNING, logger=MODULE)

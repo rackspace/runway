@@ -7,7 +7,7 @@ import json
 import logging
 import multiprocessing
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 import yaml
 
@@ -74,7 +74,7 @@ class Module:
         self.logger = PrefixAdaptor(self.fqn, LOGGER)
 
     @cached_property
-    def child_modules(self) -> List[Module]:
+    def child_modules(self) -> list[Module]:
         """Return child modules."""
         return [
             self.__class__(
@@ -107,14 +107,14 @@ class Module:
         return tmp
 
     @cached_property
-    def fqn(self):
+    def fqn(self) -> str:
         """Fully qualified name."""
         if not self.__deployment:
             return self.name
         return f"{self.__deployment.name}.{self.name}"
 
     @cached_property
-    def opts_from_file(self) -> Dict[str, Any]:
+    def opts_from_file(self) -> dict[str, Any]:
         """Load module options from local file."""
         opts_file = self.path.module_root / "runway.module.yml"
         if opts_file.is_file():
@@ -132,9 +132,9 @@ class Module:
         )
 
     @cached_property
-    def payload(self) -> Dict[str, Any]:  # lazy load the payload
+    def payload(self) -> dict[str, Any]:  # lazy load the payload
         """Return payload to be passed to module class handler class."""
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if self.__deployment:
             payload.update(
                 {
@@ -290,7 +290,7 @@ class Module:
         cls,
         action: RunwayActionTypeDef,
         context: RunwayContext,
-        modules: List[RunwayModuleDefinition],
+        modules: list[RunwayModuleDefinition],
         variables: RunwayVariablesDefinition,
         deployment: RunwayDeploymentDefinition = None,
         future: Optional[RunwayFutureDefinitionModel] = None,
@@ -327,7 +327,7 @@ class Module:
 
 def validate_environment(
     context: RunwayContext,
-    env_def: Optional[Union[bool, Dict[str, Any], int, str, List[str]]],
+    env_def: Optional[Union[bool, dict[str, Any], int, str, list[str]]],
     logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
 ) -> Optional[bool]:
     """Check if an environment should be deployed to.

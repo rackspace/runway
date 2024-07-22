@@ -2,7 +2,7 @@
 
 # pyright: basic
 import threading
-from typing import Any, List
+from typing import Any
 
 import pytest
 
@@ -65,7 +65,7 @@ def test_walk(empty_dag: DAG) -> None:
     # b and c should be executed at the same time.
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
 
-    nodes: List[Any] = []
+    nodes: list[Any] = []
 
     def walk_func(node: Any) -> bool:
         nodes.append(node)
@@ -204,7 +204,7 @@ def test_threaded_walker(empty_dag: DAG) -> None:
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
 
     lock = threading.Lock()  # Protects nodes from concurrent access
-    nodes: List[Any] = []
+    nodes: list[Any] = []
 
     def walk_func(node: Any) -> bool:
         with lock:

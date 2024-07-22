@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock, call
 
 from runway.cfngin.hooks.awslambda.python_requirements import PythonDeploymentPackage
 

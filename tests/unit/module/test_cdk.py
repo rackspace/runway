@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import logging
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
-from unittest.mock import call
+from typing import TYPE_CHECKING, Any, Optional
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock
 
 from runway.config.models.runway.options.cdk import RunwayCdkModuleOptionsDataModel
 from runway.module.cdk import CloudDevelopmentKit, CloudDevelopmentKitOptions
@@ -16,7 +15,6 @@ from runway.module.cdk import CloudDevelopmentKit, CloudDevelopmentKitOptions
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
     from pytest_subprocess.fake_popen import FakePopen
@@ -33,7 +31,7 @@ class TestCloudDevelopmentKit:
 
     def test_cdk_bootstrap(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: RunwayContext,
         tmp_path: Path,
@@ -70,7 +68,7 @@ class TestCloudDevelopmentKit:
 
     def test_cdk_deploy(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: RunwayContext,
         tmp_path: Path,
@@ -105,7 +103,7 @@ class TestCloudDevelopmentKit:
 
     def test_cdk_destroy(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: RunwayContext,
         tmp_path: Path,
@@ -140,7 +138,7 @@ class TestCloudDevelopmentKit:
 
     def test_cdk_diff(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: RunwayContext,
         tmp_path: Path,
@@ -245,7 +243,7 @@ class TestCloudDevelopmentKit:
     def test_cli_args(
         self,
         debug: bool,
-        expected: List[str],
+        expected: list[str],
         no_color: bool,
         tmp_path: Path,
         verbose: bool,
@@ -273,9 +271,9 @@ class TestCloudDevelopmentKit:
     )
     def test_cli_args_context(
         self,
-        expected: List[str],
+        expected: list[str],
         runway_context: RunwayContext,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         tmp_path: Path,
     ) -> None:
         """Test cli_args_context."""
@@ -383,10 +381,10 @@ class TestCloudDevelopmentKit:
     )
     def test_gen_cmd(
         self,
-        args_list: Optional[List[str]],
+        args_list: Optional[list[str]],
         command: CdkCommandTypeDef,
         env_ci: bool,
-        expected: List[str],
+        expected: list[str],
         include_context: bool,
         mocker: MockerFixture,
         runway_context: RunwayContext,
@@ -467,8 +465,8 @@ class TestCloudDevelopmentKit:
 
     def test_run_build_steps_empty(
         self,
-        caplog: LogCaptureFixture,
-        fake_process: FakeProcess,
+        caplog: pytest.LogCaptureFixture,
+        fake_process: FakeProcess,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -482,10 +480,10 @@ class TestCloudDevelopmentKit:
 
     def test_run_build_steps_linux(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fake_process: FakeProcess,
         mocker: MockerFixture,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -505,9 +503,9 @@ class TestCloudDevelopmentKit:
 
     def test_run_build_steps_raise_file_not_found(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fake_process: FakeProcess,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -531,7 +529,7 @@ class TestCloudDevelopmentKit:
     def test_run_build_steps_raise_called_process_error(
         self,
         fake_process: FakeProcess,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -547,10 +545,10 @@ class TestCloudDevelopmentKit:
 
     def test_run_build_steps_windows(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fake_process: FakeProcess,
         mocker: MockerFixture,
-        platform_windows: None,
+        platform_windows: None,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -581,7 +579,7 @@ class TestCloudDevelopmentKit:
     )
     def test_skip(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         expected: bool,
         explicitly_enabled: bool,
         mocker: MockerFixture,

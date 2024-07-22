@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import subprocess
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Optional
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.compat import cached_property
 from runway.mixins import CliInterfaceMixin, DelCachedPropMixin
@@ -34,7 +34,7 @@ class TestCliInterfaceMixin:
 
     @pytest.mark.parametrize("env", [None, {"foo": "bar"}])
     def test__run_command(
-        self, env: Optional[Dict[str, str]], mocker: MockerFixture, tmp_path: Path
+        self, env: Optional[dict[str, str]], mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test _run_command."""
         ctx_env = {"foo": "bar", "bar": "foo"}
@@ -104,9 +104,9 @@ class TestCliInterfaceMixin:
     )
     def test_generate_command(
         self,
-        expected: List[str],
+        expected: list[str],
         mocker: MockerFixture,
-        provided: Dict[str, Any],
+        provided: dict[str, Any],
     ) -> None:
         """Test generate_command."""
         exe = mocker.patch.object(self.Kls, "EXECUTABLE", "test.exe", create=True)
@@ -116,7 +116,9 @@ class TestCliInterfaceMixin:
             *expected,
         ]
 
-    def test_list2cmdline_darwin(self, mocker: MockerFixture, platform_darwin: None) -> None:
+    def test_list2cmdline_darwin(
+        self, mocker: MockerFixture, platform_darwin: None  # noqa: ARG002
+    ) -> None:
         """Test list2cmdline on Darwin/macOS systems."""
         mock_list2cmdline = mocker.patch(f"{MODULE}.subprocess.list2cmdline")
         mock_join = mocker.patch(f"{MODULE}.shlex_join", return_value="success")
@@ -124,7 +126,9 @@ class TestCliInterfaceMixin:
         mock_list2cmdline.assert_not_called()
         mock_join.assert_called_once_with("foo")
 
-    def test_list2cmdline_linus(self, mocker: MockerFixture, platform_linux: None) -> None:
+    def test_list2cmdline_linus(
+        self, mocker: MockerFixture, platform_linux: None  # noqa: ARG002
+    ) -> None:
         """Test list2cmdline on Linux systems."""
         mock_list2cmdline = mocker.patch(f"{MODULE}.subprocess.list2cmdline")
         mock_join = mocker.patch(f"{MODULE}.shlex_join", return_value="success")
@@ -132,7 +136,9 @@ class TestCliInterfaceMixin:
         mock_list2cmdline.assert_not_called()
         mock_join.assert_called_once_with("foo")
 
-    def test_list2cmdline_windows(self, mocker: MockerFixture, platform_windows: None) -> None:
+    def test_list2cmdline_windows(
+        self, mocker: MockerFixture, platform_windows: None  # noqa: ARG002
+    ) -> None:
         """Test list2cmdline on Windows systems."""
         mock_list2cmdline = mocker.patch(
             f"{MODULE}.subprocess.list2cmdline", return_value="success"

@@ -1,9 +1,9 @@
 """Tests for runway.cfngin.lookups.handlers.default."""
 
-# pyright: basic
 import unittest
+from unittest.mock import MagicMock
 
-from mock import MagicMock
+import pytest
 
 from runway.cfngin.lookups.handlers.default import DefaultLookup
 from runway.context import CfnginContext
@@ -31,6 +31,5 @@ class TestDefaultLookup(unittest.TestCase):
 
     def test_invalid_value(self) -> None:
         """Test invalid value."""
-        with self.assertRaises(ValueError):
-            value = "env_var:fallback"
-            DefaultLookup.handle(value, provider=self.provider, context=self.context)
+        with pytest.raises(ValueError):  # noqa: PT011
+            DefaultLookup.handle("env_var:fallback", provider=self.provider, context=self.context)

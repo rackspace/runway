@@ -3,13 +3,13 @@
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Optional
 
 from ....lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ....context import CfnginContext
 
 

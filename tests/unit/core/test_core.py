@@ -4,15 +4,14 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock, call
 
 import pytest
-from mock import MagicMock, call
 
 from runway.core import Runway
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture, MonkeyPatch
     from pytest_mock import MockerFixture
 
     from ..factories import MockRunwayConfig, MockRunwayContext
@@ -38,8 +37,8 @@ class TestRunway:
 
     def test___init___undetermined_version(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -51,7 +50,7 @@ class TestRunway:
 
     def test___init___unsupported_version(
         self,
-        monkeypatch: MonkeyPatch,
+        monkeypatch: pytest.MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -220,8 +219,8 @@ class TestRunway:
 
     def test_test(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -281,14 +280,14 @@ class TestRunway:
 
     def test_test_keyerror(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
         """Test test with handler not found."""
         caplog.set_level(logging.ERROR, logger="runway")
-        test_handlers: Dict[str, Any] = {}
+        test_handlers: dict[str, Any] = {}
         monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
         obj = Runway(runway_config, runway_context)  # type: ignore
 
@@ -308,7 +307,7 @@ class TestRunway:
 
     def test_test_no_tests(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:

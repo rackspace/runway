@@ -5,9 +5,9 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, call, patch
 
 import pytest
-from mock import MagicMock, call, patch
 
 from runway.cfngin.exceptions import StackFailed
 from runway.cfngin.hooks.base import Hook, HookDeployAction, HookDestroyAction
@@ -21,9 +21,8 @@ from runway.cfngin.status import (
 )
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture, MonkeyPatch
 
-    from ...factories import MockCFNginContext
+    from ...factories import MockCfnginContext
 
 COMPLETE_W_REASON = CompleteStatus("test successful")
 
@@ -31,7 +30,7 @@ COMPLETE_W_REASON = CompleteStatus("test successful")
 class TestHook:
     """Tests for runway.cfngin.hooks.base.Hook."""
 
-    def test_attributes(self, cfngin_context: MockCFNginContext) -> None:
+    def test_attributes(self, cfngin_context: MockCfnginContext) -> None:
         """Test attributes set during __init__."""
         provider = MagicMock()
         args = {"tags": {"key": "val"}}
@@ -45,18 +44,18 @@ class TestHook:
         assert not result.stack
         assert result.stack_name == "stack"
 
-    def test_tags(self, cfngin_context: MockCFNginContext) -> None:
+    def test_tags(self, cfngin_context: MockCfnginContext) -> None:
         """Test tags property."""
         cfngin_context.config.tags = {"context_tag": "val"}
 
-        hook = Hook(cfngin_context, MagicMock(), **{"tags": {"arg_tag": "val"}})
+        hook = Hook(cfngin_context, MagicMock(), tags={"arg_tag": "val"})
 
         assert hook.tags.to_dict() == [
             {"Key": "arg_tag", "Value": "val"},
             {"Key": "context_tag", "Value": "val"},
         ]
 
-    def test_get_template_description(self, cfngin_context: MockCFNginContext) -> None:
+    def test_get_template_description(self, cfngin_context: MockCfnginContext) -> None:
         """Test for get_template_description."""
         hook = Hook(cfngin_context, MagicMock())
 
@@ -70,7 +69,7 @@ class TestHook:
         MagicMock(return_value=COMPLETE),
     )
     def test_deploy_stack(
-        self, cfngin_context: MockCFNginContext, caplog: LogCaptureFixture
+        self, cfngin_context: MockCfnginContext, caplog: pytest.LogCaptureFixture
     ) -> None:
         """Test for deploy_stack."""
         hook = Hook(cfngin_context, MagicMock())
@@ -87,7 +86,7 @@ class TestHook:
         MagicMock(side_effect=[SUBMITTED, COMPLETE]),
     )
     def test_deploy_stack_wait(
-        self, cfngin_context: MockCFNginContext, caplog: LogCaptureFixture
+        self, cfngin_context: MockCfnginContext, caplog: pytest.LogCaptureFixture
     ) -> None:
         """Test for deploy_stack with wait."""
         hook = Hook(cfngin_context, MagicMock())
@@ -106,7 +105,7 @@ class TestHook:
         MagicMock(side_effect=[SKIPPED]),
     )
     def test_deploy_stack_wait_skipped(
-        self, cfngin_context: MockCFNginContext, caplog: LogCaptureFixture
+        self, cfngin_context: MockCfnginContext, caplog: pytest.LogCaptureFixture
     ) -> None:
         """Test for deploy_stack with wait and skip."""
         hook = Hook(cfngin_context, MagicMock())
@@ -119,7 +118,7 @@ class TestHook:
         assert caplog.records[0].message == f"{stack.name}:{SKIPPED.name}"
 
     @patch("runway.cfngin.hooks.base.HookDeployAction.run", MagicMock(side_effect=[FAILED]))
-    def test_deploy_stack_wait_failed(self, cfngin_context: MockCFNginContext) -> None:
+    def test_deploy_stack_wait_failed(self, cfngin_context: MockCfnginContext) -> None:
         """Test for deploy_stack with wait and skip."""
         hook = Hook(cfngin_context, MagicMock())
         stack = MagicMock()
@@ -133,7 +132,7 @@ class TestHook:
         MagicMock(side_effect=[SUBMITTED, COMPLETE_W_REASON]),
     )
     def test_destroy_stack(
-        self, cfngin_context: MockCFNginContext, caplog: LogCaptureFixture
+        self, cfngin_context: MockCfnginContext, caplog: pytest.LogCaptureFixture
     ) -> None:
         """Test for destroy_stack with wait."""
         hook = Hook(cfngin_context, MagicMock())
@@ -150,7 +149,7 @@ class TestHook:
             == f"{stack.name}:{COMPLETE_W_REASON.name} ({COMPLETE_W_REASON.reason})"
         )
 
-    def test_wait_for_stack_till_reason(self, cfngin_context: MockCFNginContext) -> None:
+    def test_wait_for_stack_till_reason(self, cfngin_context: MockCfnginContext) -> None:
         """Test _wait_for_stack till_reason option."""
         hook = Hook(cfngin_context, MagicMock())
         stack = MagicMock(fqn="test-stack", name="stack")
@@ -167,7 +166,7 @@ class TestHook:
         assert result.reason == "catch"
 
     def test_wait_for_stack_log_change(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test _wait_for_stack log status change."""
         hook = Hook(cfngin_context, MagicMock())
@@ -189,28 +188,28 @@ class TestHook:
         mock_log.assert_has_calls([call(stack, new_status), call(stack, COMPLETE)])
         assert mock_log.call_count == 2
 
-    def test_post_deploy(self, cfngin_context: MockCFNginContext) -> None:
+    def test_post_deploy(self, cfngin_context: MockCfnginContext) -> None:
         """Test post_deploy."""
         hook = Hook(cfngin_context, MagicMock())
 
         with pytest.raises(NotImplementedError):
             hook.post_deploy()
 
-    def test_post_destroy(self, cfngin_context: MockCFNginContext) -> None:
+    def test_post_destroy(self, cfngin_context: MockCfnginContext) -> None:
         """Test post_destroy."""
         hook = Hook(cfngin_context, MagicMock())
 
         with pytest.raises(NotImplementedError):
             hook.post_destroy()
 
-    def test_pre_deploy(self, cfngin_context: MockCFNginContext) -> None:
+    def test_pre_deploy(self, cfngin_context: MockCfnginContext) -> None:
         """Test pre_deploy."""
         hook = Hook(cfngin_context, MagicMock())
 
         with pytest.raises(NotImplementedError):
             hook.pre_deploy()
 
-    def test_pre_destroy(self, cfngin_context: MockCFNginContext):
+    def test_pre_destroy(self, cfngin_context: MockCfnginContext) -> None:
         """Test pre_destroy."""
         hook = Hook(cfngin_context, MagicMock())
 
@@ -221,21 +220,21 @@ class TestHook:
 class TestHookDeployAction:
     """Tests for runway.cfngin.hooks.base.HookDeployAction."""
 
-    def test_provider(self, cfngin_context: MockCFNginContext) -> None:
+    def test_provider(self, cfngin_context: MockCfnginContext) -> None:
         """Test provider property."""
         provider = MagicMock()
         obj = HookDeployAction(cfngin_context, provider)
 
         assert obj.provider == provider
 
-    def test_build_provider(self, cfngin_context: MockCFNginContext) -> None:
+    def test_build_provider(self, cfngin_context: MockCfnginContext) -> None:
         """Test build_provider."""
         provider = MagicMock()
         obj = HookDeployAction(cfngin_context, provider)
 
         assert obj.build_provider() == provider
 
-    def test_run(self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch) -> None:
+    def test_run(self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test run."""
         obj = HookDeployAction(cfngin_context, MagicMock())
         monkeypatch.setattr(obj, "_launch_stack", lambda: "success")
@@ -246,7 +245,7 @@ class TestHookDeployAction:
 class TestHookDestroyAction:
     """Tests for runway.cfngin.hooks.base.HookDestroyAction."""
 
-    def test_run(self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch) -> None:
+    def test_run(self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test run."""
         obj = HookDestroyAction(cfngin_context, MagicMock())
         monkeypatch.setattr(obj, "_destroy_stack", lambda: "success")

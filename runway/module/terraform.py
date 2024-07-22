@@ -8,7 +8,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import hcl
 from send2trash import send2trash
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-def gen_workspace_tfvars_files(environment: str, region: str) -> List[str]:
+def gen_workspace_tfvars_files(environment: str, region: str) -> list[str]:
     """Generate possible Terraform workspace tfvars filenames."""
     return [
         # Give preference to explicit environment-region files
@@ -45,9 +45,9 @@ def gen_workspace_tfvars_files(environment: str, region: str) -> List[str]:
 
 
 def update_env_vars_with_tf_var_values(
-    os_env_vars: Dict[str, str],
-    tf_vars: Dict[str, Union[Dict[str, Any], List[Any], str]],
-) -> Dict[str, str]:
+    os_env_vars: dict[str, str],
+    tf_vars: dict[str, dict[str, Any] | list[Any] | str],
+) -> dict[str, str]:
     """Return os_env_vars with TF_VAR values for each tf_var."""
     # https://www.terraform.io/docs/commands/environment-variables.html#tf_var_name
     for key, val in tf_vars.items():
@@ -85,12 +85,12 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         self,
         context: RunwayContext,
         *,
-        explicitly_enabled: Optional[bool] = False,
+        explicitly_enabled: bool | None = False,
         logger: RunwayLogger = LOGGER,
         module_root: Path,
-        name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        name: str | None = None,
+        options: dict[str, Any] | ModuleOptions | None = None,
+        parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -149,9 +149,9 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         return self.terraform_workspace_show()
 
     @cached_property
-    def env_file(self) -> List[str]:
+    def env_file(self) -> list[str]:
         """Find the environment file for the module."""
-        result: List[str] = []
+        result: list[str] = []
         for name in gen_workspace_tfvars_files(self.ctx.env.name, self.ctx.env.aws_region):
             test_path = self.path / name
             if test_path.is_file():
@@ -222,7 +222,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
             return
 
         self.logger.verbose(
-            ".terraform directory exists from a previous run; " "removing some of its contents"
+            ".terraform directory exists from a previous run; removing some of its contents"
         )
         for child in dot_terraform.iterdir():
             if child.name == "plugins" and child.is_dir():
@@ -241,14 +241,15 @@ class Terraform(RunwayModule, DelCachedPropMixin):
 
     def gen_command(
         self,
-        command: Union[List[str], str, Tuple[str, ...]],
-        args_list: Optional[List[str]] = None,
-    ) -> List[str]:
+        command: list[str] | str | tuple[str, ...],
+        args_list: list[str] | None = None,
+    ) -> list[str]:
         """Generate Terraform command."""
-        if isinstance(command, (list, tuple)):
-            cmd = [self.tf_bin, *command]
-        else:
-            cmd = [self.tf_bin, command]
+        cmd = (
+            [self.tf_bin, *command]
+            if isinstance(command, (list, tuple))
+            else [self.tf_bin, command]
+        )
         cmd.extend(args_list or [])
         if self.ctx.no_color:
             cmd.append("-no-color")
@@ -263,7 +264,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         """
         if not self.tfenv.backend["type"]:
             self.logger.info(
-                "unable to determine backend for module; no special handling " "will be applied"
+                "unable to determine backend for module; no special handling will be applied"
             )
             return
         handler = f"_{self.tfenv.backend['type']}_backend_handler"
@@ -370,7 +371,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
 
         """
         return run_module_command(
-            self.gen_command("destroy", ["-auto-approve"] + self.env_file),
+            self.gen_command("destroy", ["-auto-approve", *self.env_file]),
             env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
@@ -382,7 +383,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
 
         """
         return run_module_command(
-            self.gen_command("apply", ["-destroy", "-auto-approve"] + self.env_file),
+            self.gen_command("apply", ["-destroy", "-auto-approve", *self.env_file]),
             env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
@@ -394,7 +395,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
 
         """
         return run_module_command(
-            self.gen_command("destroy", ["-force"] + self.env_file),
+            self.gen_command("destroy", ["-force", *self.env_file]),
             env_vars=self.ctx.env.vars,
             logger=self.logger,
         )
@@ -420,7 +421,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         """
         cmd = self.gen_command(
             "init",
-            ["-reconfigure"] + self.options.backend_config.init_args + self.options.args.init,
+            ["-reconfigure", *self.options.backend_config.init_args, *self.options.args.init],
         )
         try:
             run_module_command(
@@ -528,7 +529,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
             self.logger.info("init (in progress)")
             self.terraform_init()
             if self.current_workspace != self.required_workspace:
-                if re.compile(f"^[*\\s]\\s{self.required_workspace}$", re.M).search(
+                if re.compile(f"^[*\\s]\\s{self.required_workspace}$", re.MULTILINE).search(
                     self.terraform_workspace_list()
                 ):
                     self.terraform_workspace_select(self.required_workspace)
@@ -565,7 +566,7 @@ class TerraformOptions(ModuleOptions):
         self,
         data: RunwayTerraformModuleOptionsDataModel,
         deploy_environment: DeployEnvironment,
-        path: Optional[Path] = None,
+        path: Path | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -597,7 +598,7 @@ class TerraformOptions(ModuleOptions):
         cls,
         deploy_environment: DeployEnvironment,
         obj: object,
-        path: Optional[Path] = None,
+        path: Path | None = None,
     ) -> TerraformOptions:
         """Parse options definition and return an options object.
 
@@ -641,14 +642,14 @@ class TerraformBackendConfig(ModuleOptions):
         self.region = data.region
 
     @cached_property
-    def config_file(self) -> Optional[Path]:
+    def config_file(self) -> Path | None:
         """Backend configuration file."""
         return self.get_backend_file(self.path, self.env.name, self.env.aws_region)
 
     @cached_property
-    def init_args(self) -> List[str]:
+    def init_args(self) -> list[str]:
         """Return command line arguments for init."""
-        result: List[str] = []
+        result: list[str] = []
         for k, v in self.data.dict(exclude_none=True).items():
             result.extend(["-backend-config", f"{k}={v}"])
         if not result:
@@ -664,16 +665,16 @@ class TerraformBackendConfig(ModuleOptions):
         LOGGER.debug("provided backend values: %s", json.dumps(result))
         return result
 
-    def get_full_configuration(self) -> Dict[str, str]:
+    def get_full_configuration(self) -> dict[str, str]:
         """Get full backend configuration."""
         if not self.config_file:
             return self.data.dict(exclude_none=True)
-        result = cast(Dict[str, str], hcl.loads(self.config_file.read_text()))
+        result = cast(dict[str, str], hcl.loads(self.config_file.read_text()))
         result.update(self.data.dict(exclude_none=True))
         return result
 
     @classmethod
-    def get_backend_file(cls, path: Path, environment: str, region: str) -> Optional[Path]:
+    def get_backend_file(cls, path: Path, environment: str, region: str) -> Path | None:
         """Determine Terraform backend file.
 
         Args:
@@ -690,7 +691,7 @@ class TerraformBackendConfig(ModuleOptions):
         return None
 
     @staticmethod
-    def gen_backend_filenames(environment: str, region: str) -> List[str]:
+    def gen_backend_filenames(environment: str, region: str) -> list[str]:
         """Generate possible Terraform backend filenames.
 
         Args:
@@ -704,10 +705,12 @@ class TerraformBackendConfig(ModuleOptions):
             "backend-{region}.{extension}",
             "backend.{extension}",
         ]
-        result: List[str] = []
+        result: list[str] = []
         for fmt in formats:
             for ext in ["hcl", "tfvars"]:
-                result.append(fmt.format(environment=environment, extension=ext, region=region))
+                result.append(  # noqa: PERF401
+                    fmt.format(environment=environment, extension=ext, region=region)
+                )
         return result
 
     @classmethod
@@ -715,7 +718,7 @@ class TerraformBackendConfig(ModuleOptions):
         cls,
         deploy_environment: DeployEnvironment,
         obj: object,
-        path: Optional[Path] = None,
+        path: Path | None = None,
     ) -> TerraformBackendConfig:
         """Parse options definition and return an options object.
 

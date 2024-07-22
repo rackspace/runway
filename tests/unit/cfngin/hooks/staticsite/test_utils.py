@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Optional, Union, cast
+from unittest.mock import Mock, call
 
 import igittigitt
 import pytest
-from mock import Mock, call
 
 from runway.cfngin.hooks.staticsite.utils import (
     calculate_hash_of_files,
@@ -39,7 +39,7 @@ def test_calculate_hash_of_files(mocker: MockerFixture, tmp_path: Path) -> None:
     "directories", [None, [{"path": "./"}], [{"path": "./", "exclusions": ["foobar"]}]]
 )
 def test_get_hash_of_files(
-    directories: Optional[List[Dict[str, Union[List[str], str]]]],
+    directories: Optional[list[dict[str, Union[list[str], str]]]],
     mocker: MockerFixture,
     tmp_path: Path,
 ) -> None:
@@ -85,7 +85,7 @@ def test_get_hash_of_files(
 
 @pytest.mark.parametrize("additional_exclusions", [None, [], ["foo"], ["foo", "bar"]])
 def test_get_ignorer(
-    additional_exclusions: Optional[List[str]], mocker: MockerFixture, tmp_path: Path
+    additional_exclusions: Optional[list[str]], mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test get_ignorer."""
     ignore_parser = mocker.patch(f"{MODULE}.igittigitt.IgnoreParser")

@@ -13,7 +13,7 @@ from runway.utils import MutableMap
 if TYPE_CHECKING:
     from ...factories import MockRunwayContext
 
-VARIABLES = MutableMap(**{"str_val": "test", "false_val": False})
+VARIABLES = MutableMap(str_val="test", false_val=False)
 
 
 class TestVarLookup:
@@ -29,5 +29,5 @@ class TestVarLookup:
 
     def test_handle_not_found(self, runway_context: MockRunwayContext) -> None:
         """Validate exception when lookup cannot be resolved."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="does not exist in the variable definition"):
             VarLookup.handle("NOT_VALID", context=runway_context, variables=VARIABLES)

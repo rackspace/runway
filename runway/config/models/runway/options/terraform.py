@@ -1,8 +1,9 @@
 """Runway Terraform Module options."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import Extra, Field, validator
 
@@ -62,7 +63,9 @@ class RunwayTerraformModuleOptionsDataModel(ConfigProperty):
         title = "Runway Terraform Module options"
 
     @validator("args", pre=True)
-    def _convert_args(cls, v: Union[List[str], Dict[str, List[str]]]) -> Dict[str, List[str]]:
+    def _convert_args(
+        cls, v: Union[list[str], dict[str, list[str]]]  # noqa: N805
+    ) -> dict[str, list[str]]:
         """Convert args from list to dict."""
         if isinstance(v, list):
             return {"apply": v}

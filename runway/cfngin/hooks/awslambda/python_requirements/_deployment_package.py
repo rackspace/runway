@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from igittigitt import IgnoreParser
 
@@ -11,6 +10,8 @@ from .....compat import cached_property
 from ..deployment_package import DeploymentPackage
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from . import PythonProject
 
 
@@ -20,7 +21,7 @@ class PythonDeploymentPackage(DeploymentPackage["PythonProject"]):
     project: PythonProject
 
     @cached_property
-    def gitignore_filter(self) -> Optional[IgnoreParser]:
+    def gitignore_filter(self) -> IgnoreParser | None:
         """Filter to use when zipping dependencies.
 
         This should be overridden by subclasses if a filter should be used.

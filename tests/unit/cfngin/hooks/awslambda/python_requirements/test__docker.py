@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING, Optional
+from unittest.mock import Mock
 
 import pytest
 from docker.types.services import Mount
-from mock import Mock
 
 from runway.cfngin.hooks.awslambda.python_requirements import (
     PythonDockerDependencyInstaller,
@@ -90,7 +90,8 @@ class TestPythonDockerDependencyInstaller:
         result = PythonDockerDependencyInstaller(
             Mock(requirements_txt=None), client=Mock()
         ).install_commands
-        assert not result and isinstance(result, list)
+        assert not result
+        assert isinstance(result, list)
 
     def test_python_version(self, mocker: MockerFixture) -> None:
         """Test python_version."""

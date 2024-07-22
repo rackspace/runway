@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import pytest
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from _pytest.fixtures import SubRequest
 
 
@@ -18,7 +20,7 @@ def fixture_dir() -> Path:
     return Path(__file__).parent / "fixtures"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def local_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, None]:
     """Copy local_backend.tf into the test directory."""
     file_name = "local_backend.tf"
@@ -29,7 +31,7 @@ def local_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, Non
     new_file.unlink()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def no_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, None]:
     """Copy no_backend.tf into the test directory."""
     file_name = "no_backend.tf"
@@ -40,7 +42,7 @@ def no_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, 
     new_file.unlink()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def s3_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, None]:
     """Copy s3_backend.tf into the test directory."""
     file_name = "s3_backend.tf"

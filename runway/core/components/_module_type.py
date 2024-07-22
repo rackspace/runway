@@ -5,14 +5,15 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Type, cast
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from typing_extensions import Literal
 
 from ...utils import load_object_from_string
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from ...config.models.runway import RunwayModuleTypeTypeDef
     from ...module.base import RunwayModule
 
@@ -60,7 +61,7 @@ class RunwayModuleType:
 
     """
 
-    EXTENSION_MAP: ClassVar[Dict[str, str]] = {
+    EXTENSION_MAP: ClassVar[dict[str, str]] = {
         "cdk": "runway.module.cdk.CloudDevelopmentKit",
         "cfn": "runway.module.cloudformation.CloudFormation",
         "k8s": "runway.module.k8s.K8s",
@@ -69,7 +70,7 @@ class RunwayModuleType:
         "web": "runway.module.staticsite.handler.StaticSite",
     }
 
-    TYPE_MAP: ClassVar[Dict[str, str]] = {
+    TYPE_MAP: ClassVar[dict[str, str]] = {
         "cdk": EXTENSION_MAP["cdk"],
         "cloudformation": EXTENSION_MAP["cfn"],
         "kubernetes": EXTENSION_MAP["k8s"],
@@ -81,8 +82,8 @@ class RunwayModuleType:
     def __init__(
         self,
         path: Path,
-        class_path: Optional[str] = None,
-        type_str: Optional[RunwayModuleTypeTypeDef] = None,
+        class_path: str | None = None,
+        type_str: RunwayModuleTypeTypeDef | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -97,7 +98,7 @@ class RunwayModuleType:
         self.type_str = type_str
         self.module_class = self._determine_module_class()
 
-    def _determine_module_class(self) -> Type[RunwayModule]:
+    def _determine_module_class(self) -> type[RunwayModule]:
         """Determine type of module and return deployment module class.
 
         Returns:
@@ -126,15 +127,15 @@ class RunwayModuleType:
         if not self.class_path:
             LOGGER.error(
                 'module class could not be determined from path "%s"',
-                os.path.basename(self.path),
+                self.path.name,
             )
             sys.exit(1)
 
-        return cast(Type["RunwayModule"], load_object_from_string(self.class_path))
+        return cast(type["RunwayModule"], load_object_from_string(self.class_path))
 
     def _set_class_path_based_on_extension(self) -> None:
         """Based on the directory suffix set the class_path."""
-        basename = os.path.basename(self.path)
+        basename = self.path.name
         basename_split = basename.split(".")
         extension = basename_split[len(basename_split) - 1]
         self.class_path = self.EXTENSION_MAP.get(extension, None)

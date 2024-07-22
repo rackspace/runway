@@ -7,24 +7,24 @@
 
 from __future__ import annotations
 
-from typing import Any, ClassVar, Dict, List, NoReturn, Optional, Union
+from typing import Any, ClassVar, NoReturn
 
 from s3transfer.manager import TransferConfig
 from typing_extensions import TypedDict
 
 from .utils import human_readable_to_bytes
 
+
 # If the user does not specify any overrides,
 # these are the default values we use for the s3 transfer
 # commands.
-TransferConfigDict = TypedDict(
-    "TransferConfigDict",
-    max_bandwidth=Optional[Union[int, str]],
-    max_concurrent_requests=int,
-    max_queue_size=int,
-    multipart_chunksize=Union[int, str],
-    multipart_threshold=Union[int, str],
-)
+class TransferConfigDict(TypedDict):
+    max_bandwidth: int | str | None
+    max_concurrent_requests: int
+    max_queue_size: int
+    multipart_chunksize: int | str
+    multipart_threshold: int | str
+
 
 DEFAULTS: TransferConfigDict = {
     "max_bandwidth": None,
@@ -42,18 +42,18 @@ class InvalidConfigError(Exception):
 class RuntimeConfig:
     """Runtime configuration."""
 
-    POSITIVE_INTEGERS: ClassVar[List[str]] = [
+    POSITIVE_INTEGERS: ClassVar[list[str]] = [
         "max_bandwidth",
         "max_concurrent_requests",
         "max_queue_size",
         "multipart_chunksize",
         "multipart_threshold",
     ]
-    HUMAN_READABLE_SIZES: ClassVar[List[str]] = [
+    HUMAN_READABLE_SIZES: ClassVar[list[str]] = [
         "multipart_chunksize",
         "multipart_threshold",
     ]
-    HUMAN_READABLE_RATES: ClassVar[List[str]] = ["max_bandwidth"]
+    HUMAN_READABLE_RATES: ClassVar[list[str]] = ["max_bandwidth"]
 
     @staticmethod
     def defaults() -> TransferConfigDict:
@@ -64,11 +64,11 @@ class RuntimeConfig:
     def build_config(
         cls,
         *,
-        max_bandwidth: Optional[Union[int, str]] = None,
-        max_concurrent_requests: Optional[Union[int, str]] = None,
-        max_queue_size: Optional[Union[int, str]] = None,
-        multipart_chunksize: Optional[Union[int, str]] = None,
-        multipart_threshold: Optional[Union[int, str]] = None,
+        max_bandwidth: int | str | None = None,
+        max_concurrent_requests: int | str | None = None,
+        max_queue_size: int | str | None = None,
+        multipart_chunksize: int | str | None = None,
+        multipart_threshold: int | str | None = None,
     ) -> TransferConfigDict:
         """Create and convert a runtime config dictionary.
 
@@ -147,7 +147,7 @@ def create_transfer_config_from_runtime_config(
         "multipart_chunksize": "multipart_chunksize",
         "multipart_threshold": "multipart_threshold",
     }
-    kwargs: Dict[str, Any] = {}
+    kwargs: dict[str, Any] = {}
     for key, value in runtime_config.items():
         if key not in translation_map:
             continue

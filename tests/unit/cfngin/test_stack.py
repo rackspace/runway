@@ -1,115 +1,193 @@
 """Tests for runway.cfngin.stack."""
 
-# pyright: basic
-import unittest
-from typing import Any
+from __future__ import annotations
 
-from mock import MagicMock
+from typing import TYPE_CHECKING, Any, ClassVar
+from unittest.mock import Mock
+
+import pytest
 
 from runway.cfngin.lookups.registry import (
     register_lookup_handler,
     unregister_lookup_handler,
 )
 from runway.cfngin.stack import Stack
-from runway.config import CfnginConfig
-from runway.context import CfnginContext
+from runway.config import CfnginStackDefinitionModel
 from runway.lookups.handlers.base import LookupHandler
 
-from .factories import generate_definition
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from pathlib import Path
+
+    from pytest_mock import MockerFixture
+
+    from ..factories import MockCfnginContext
+
+MODULE = "runway.cfngin.stack"
 
 
-class TestStack(unittest.TestCase):
-    """Tests for runway.cfngin.stack.Stack."""
+@pytest.fixture(autouse=True, scope="module")
+def fake_lookup() -> Iterator[None]:
+    """Register a fake lookup handler for testing."""
 
-    def setUp(self) -> None:
-        """Run before tests."""
-        self.sd = {"name": "test"}
-        self.config = CfnginConfig.parse_obj({"namespace": "namespace"})
-        self.context = CfnginContext(config=self.config)
-        self.stack = Stack(definition=generate_definition("vpc", 1), context=self.context)
+    class FakeLookup(LookupHandler):
+        """False Lookup."""
 
-        class FakeLookup(LookupHandler):
-            """False Lookup."""
+        TYPE_NAME: ClassVar[str] = "fake"
 
-            @classmethod
-            def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
-                """Perform the lookup."""
-                return "test"
+        @classmethod
+        def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore  # noqa: ARG003
+            """Perform the lookup."""
+            return "test"
 
-        register_lookup_handler("noop", FakeLookup)
+    register_lookup_handler(FakeLookup.TYPE_NAME, FakeLookup)
+    yield
+    unregister_lookup_handler(FakeLookup.TYPE_NAME)
 
-    def tearDown(self) -> None:
-        """Run after tests."""
-        unregister_lookup_handler("noop")
-        return super().tearDown()
 
-    def test_stack_requires(self) -> None:
-        """Test stack requires."""
-        definition = generate_definition(
-            base_name="vpc",
-            stack_id=1,
-            variables={
-                "Var1": "${noop fakeStack3::FakeOutput}",
-                "Var2": (
-                    "some.template.value:${output fakeStack2.FakeOutput}:"
-                    "${output fakeStack.FakeOutput}"
+def generate_stack_definition(
+    base_name: str, stack_id: Any = None, **overrides: Any
+) -> CfnginStackDefinitionModel:
+    """Generate stack definition."""
+    definition: dict[str, Any] = {
+        "name": f"{base_name}-{stack_id}" if stack_id else base_name,
+        "class_path": f"tests.unit.cfngin.fixtures.mock_blueprints.{base_name.upper()}",
+        "requires": [],
+    }
+    definition.update(overrides)
+    return CfnginStackDefinitionModel(**definition)
+
+
+class TestStack:
+    """Test Stack."""
+
+    def test_required_by(self, cfngin_context: MockCfnginContext) -> None:
+        """Test required_by."""
+        stack = Stack(
+            definition=generate_stack_definition(
+                base_name="vpc",
+                required_by=["fakeStack0"],
+                variables={"Param1": "${output fakeStack.FakeOutput}"},
+            ),
+            context=cfngin_context,
+        )
+        assert stack.required_by == {"fakeStack0"}
+
+    def test_requires(self, cfngin_context: MockCfnginContext) -> None:
+        """Test requires."""
+        stack = Stack(
+            definition=generate_stack_definition(
+                base_name="vpc",
+                variables={
+                    "Var1": "${fake fakeStack2::FakeOutput}",
+                    "Var2": (
+                        "some.template.value:${output fakeStack1.FakeOutput}:"
+                        "${output fakeStack0.FakeOutput}"
+                    ),
+                    "Var3": "${output fakeStack0.FakeOutput},${output fakeStack1.FakeOutput}",
+                },
+                requires=["fakeStack0"],
+            ),
+            context=cfngin_context,
+        )
+        assert len(stack.requires) == 2
+        assert "fakeStack0" in stack.requires
+        assert "fakeStack1" in stack.requires
+
+    def test_requires_cyclic_dependency(self, cfngin_context: MockCfnginContext) -> None:
+        """Test requires cyclic dependency."""
+        stack = Stack(
+            definition=generate_stack_definition(
+                base_name="vpc",
+                variables={"Var1": "${output vpc.FakeOutput}"},
+            ),
+            context=cfngin_context,
+        )
+        with pytest.raises(ValueError, match="has a circular reference"):
+            assert stack.requires
+
+    def test_resolve(self, cfngin_context: MockCfnginContext, mocker: MockerFixture) -> None:
+        """Test resolve."""
+        mock_resolve_variables = mocker.patch(f"{MODULE}.resolve_variables")
+        mock_provider = Mock()
+        stack = Stack(
+            definition=generate_stack_definition(base_name="vpc"),
+            context=cfngin_context,
+        )
+        stack._blueprint = Mock()
+        assert not stack.resolve(cfngin_context, mock_provider)
+        mock_resolve_variables.assert_called_once_with(
+            stack.variables, cfngin_context, mock_provider
+        )
+        stack._blueprint.resolve_variables.assert_called_once_with(stack.variables)
+
+    def test_set_outputs(self, cfngin_context: MockCfnginContext) -> None:
+        """Test set_outputs."""
+        stack = Stack(
+            definition=generate_stack_definition(base_name="vpc"),
+            context=cfngin_context,
+        )
+        assert not stack.outputs
+        outputs = {"foo": "bar"}
+        assert not stack.set_outputs(outputs)
+        assert stack.outputs == outputs
+
+    def test_stack_policy(self, cfngin_context: MockCfnginContext, tmp_path: Path) -> None:
+        """Test stack_policy."""
+        stack_policy_path = tmp_path / "stack_policy.json"
+        stack_policy_path.write_text("success")
+        assert (
+            Stack(
+                definition=generate_stack_definition(
+                    base_name="vpc", stack_policy_path=stack_policy_path
                 ),
-                "Var3": "${output fakeStack.FakeOutput}," "${output fakeStack2.FakeOutput}",
-            },
-            requires=["fakeStack"],
+                context=cfngin_context,
+            ).stack_policy
+            == "success"
         )
-        stack = Stack(definition=definition, context=self.context)
-        self.assertEqual(len(stack.requires), 2)
-        self.assertIn("fakeStack", stack.requires)
-        self.assertIn("fakeStack2", stack.requires)
 
-    def test_stack_requires_circular_ref(self) -> None:
-        """Test stack requires circular ref."""
-        definition = generate_definition(
-            base_name="vpc",
-            stack_id=1,
-            variables={"Var1": "${output vpc-1.FakeOutput}"},
+    def test_stack_policy_not_provided(self, cfngin_context: MockCfnginContext) -> None:
+        """Test stack_policy."""
+        assert not Stack(
+            definition=generate_stack_definition(base_name="vpc"),
+            context=cfngin_context,
+        ).stack_policy
+
+    def test_tags(self, cfngin_context: MockCfnginContext) -> None:
+        """Test tags."""
+        cfngin_context.config.tags = {"environment": "prod"}
+        assert Stack(
+            definition=generate_stack_definition(
+                base_name="vpc", tags={"app": "graph", "environment": "stage"}
+            ),
+            context=cfngin_context,
+        ).tags == {"app": "graph", "environment": "stage"}
+
+    def test_tags_default(self, cfngin_context: MockCfnginContext) -> None:
+        """Test tags."""
+        cfngin_context.config.tags = {"environment": "prod"}
+        assert Stack(
+            definition=generate_stack_definition(base_name="vpc"),
+            context=cfngin_context,
+        ).tags == {"environment": "prod"}
+
+    @pytest.mark.parametrize(
+        "termination_protection, expected",
+        [(False, False), (True, True)],
+    )
+    def test_termination_protection(
+        self,
+        cfngin_context: MockCfnginContext,
+        expected: str,
+        termination_protection: bool | str,
+    ) -> None:
+        """Test termination_protection."""
+        assert (
+            Stack(
+                definition=generate_stack_definition(
+                    base_name="vpc", termination_protection=termination_protection
+                ),
+                context=cfngin_context,
+            ).termination_protection
+            is expected
         )
-        stack = Stack(definition=definition, context=self.context)
-        with self.assertRaises(ValueError):
-            stack.requires
-
-    def test_stack_cfn_parameters(self) -> None:
-        """Test stack cfn parameters."""
-        definition = generate_definition(
-            base_name="vpc",
-            stack_id=1,
-            variables={"Param1": "${output fakeStack.FakeOutput}"},
-        )
-        stack = Stack(definition=definition, context=self.context)
-        stack._blueprint = MagicMock()
-        stack._blueprint.parameter_values = {
-            "Param2": "Some Resolved Value",
-        }
-        param = stack.parameter_values["Param2"]
-        self.assertEqual(param, "Some Resolved Value")
-
-    def test_stack_tags_default(self) -> None:
-        """Test stack tags default."""
-        self.config.tags = {"environment": "prod"}
-        definition = generate_definition(base_name="vpc", stack_id=1)
-        stack = Stack(definition=definition, context=self.context)
-        self.assertEqual(stack.tags, {"environment": "prod"})
-
-    def test_stack_tags_override(self) -> None:
-        """Test stack tags override."""
-        self.config.tags = {"environment": "prod"}
-        definition = generate_definition(base_name="vpc", stack_id=1, tags={"environment": "stage"})
-        stack = Stack(definition=definition, context=self.context)
-        self.assertEqual(stack.tags, {"environment": "stage"})
-
-    def test_stack_tags_extra(self) -> None:
-        """Test stack tags extra."""
-        self.config.tags = {"environment": "prod"}
-        definition = generate_definition(base_name="vpc", stack_id=1, tags={"app": "graph"})
-        stack = Stack(definition=definition, context=self.context)
-        self.assertEqual(stack.tags, {"environment": "prod", "app": "graph"})
-
-
-if __name__ == "__main__":
-    unittest.main()

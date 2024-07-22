@@ -3,7 +3,7 @@
 # docs: file://./../../../../docs/source/commands.rst
 import logging
 import subprocess
-from typing import Any, Tuple
+from typing import Any
 
 import click
 
@@ -20,7 +20,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def run(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
+def run(ctx: click.Context, args: tuple[str, ...], **_: Any) -> None:
     """Run a Terraform command.
 
     Uses the version of Terraform specified in the ".terraform-version" file
@@ -31,11 +31,11 @@ def run(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
 
     """
     try:
-        ctx.exit(subprocess.call([TFEnvManager().install()] + list(args)))
+        ctx.exit(subprocess.call([TFEnvManager().install(), *list(args)]))
     except ValueError as err:
         LOGGER.debug("terraform install failed", exc_info=True)
         if "unable to find" not in str(err):
-            LOGGER.error(
+            LOGGER.error(  # noqa: G201
                 "unexpected error encountered when trying to install Terraform",
                 exc_info=True,
             )

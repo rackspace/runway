@@ -5,10 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
-import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-def get_template_path(file_path: Path) -> Optional[Path]:
+def get_template_path(file_path: Path) -> Path | None:
     """Find raw template in working directory or in sys.path.
 
     template_path from config may refer to templates co-located with the CFNgin
@@ -32,7 +31,7 @@ def get_template_path(file_path: Path) -> Optional[Path]:
     loading to find the path to the template.
 
     Args:
-        filename: Template path.
+        file_path: Template path.
 
     Returns:
         Path to file, or None if no file found
@@ -47,7 +46,7 @@ def get_template_path(file_path: Path) -> Optional[Path]:
     return None
 
 
-def resolve_variable(provided_variable: Optional[Variable], blueprint_name: str) -> Any:
+def resolve_variable(provided_variable: Variable | None, blueprint_name: str) -> Any:
     """Resolve a provided variable value against the variable definition.
 
     This acts as a subset of resolve_variable logic in the base module, leaving
@@ -94,8 +93,8 @@ class RawTemplateBlueprint(Blueprint):
         name: str,
         context: CfnginContext,
         *,
-        description: Optional[str] = None,
-        mappings: Optional[Dict[str, Any]] = None,
+        description: str | None = None,
+        mappings: dict[str, Any] | None = None,
         raw_template_path: Path,
         **_: Any,
     ) -> None:
@@ -116,7 +115,7 @@ class RawTemplateBlueprint(Blueprint):
         self.raw_template_path = raw_template_path
 
     @property
-    def output_definitions(self) -> Dict[str, Dict[str, Any]]:
+    def output_definitions(self) -> dict[str, dict[str, Any]]:
         """Get the output definitions.
 
         .. versionadded:: 2.0.0
@@ -129,7 +128,7 @@ class RawTemplateBlueprint(Blueprint):
         return self.to_dict().get("Outputs", {})
 
     @cached_property
-    def parameter_definitions(self) -> Dict[str, Any]:
+    def parameter_definitions(self) -> dict[str, Any]:
         """Get the parameter definitions to submit to CloudFormation.
 
         .. versionadded:: 2.0.0
@@ -142,7 +141,7 @@ class RawTemplateBlueprint(Blueprint):
         return self.to_dict().get("Parameters", {})
 
     @cached_property
-    def parameter_values(self) -> Dict[str, Union[List[Any], str]]:
+    def parameter_values(self) -> dict[str, Union[list[Any], str]]:
         """Return a dict of variables with type :class:`~runway.cfngin.blueprints.variables.types.CFNType`.
 
         .. versionadded:: 2.0.0
@@ -156,18 +155,16 @@ class RawTemplateBlueprint(Blueprint):
 
     @property
     def rendered(self) -> str:
-        """Return (generating first if needed) rendered template."""
+        """Return (generating first if needed) rendered Template."""
         if not self._rendered:
             template_path = get_template_path(self.raw_template_path)
             if template_path:
-                if len(os.path.splitext(template_path)) == 2 and (
-                    os.path.splitext(template_path)[1] == ".j2"
-                ):
+                if template_path.suffix == ".j2":
                     self._rendered = (
-                        Environment(
-                            loader=FileSystemLoader(searchpath=os.path.dirname(template_path))
+                        Environment(  # noqa: S701
+                            loader=FileSystemLoader(searchpath=template_path.parent)
                         )
-                        .get_template(os.path.basename(template_path))
+                        .get_template(template_path.name)
                         .render(
                             context=self.context,
                             mappings=self.mappings,
@@ -176,10 +173,10 @@ class RawTemplateBlueprint(Blueprint):
                         )
                     )
                 else:
-                    with open(template_path, "r", encoding="utf-8") as template:
+                    with template_path.open(encoding="utf-8") as template:
                         self._rendered = template.read()
             else:
-                raise InvalidConfig(f"Could not find template {self.raw_template_path}")
+                raise InvalidConfig(f"Could not find Template {self.raw_template_path}")
             # clear cached properties that rely on this property
             self._del_cached_property("parameter_definitions")
 
@@ -194,10 +191,10 @@ class RawTemplateBlueprint(Blueprint):
     def version(self) -> str:
         """Return (generating first if needed) version hash."""
         if not self._version:
-            self._version = hashlib.md5(self.rendered.encode()).hexdigest()[:8]
+            self._version = hashlib.md5(self.rendered.encode()).hexdigest()[:8]  # noqa: S324
         return self._version
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the template as a python dictionary.
 
         Returns:
@@ -206,7 +203,7 @@ class RawTemplateBlueprint(Blueprint):
         """
         return parse_cloudformation_template(self.rendered)
 
-    def to_json(self, variables: Optional[Dict[str, Any]] = None) -> str:
+    def to_json(self, variables: dict[str, Any] | None = None) -> str:  # noqa: ARG002
         """Return the template in JSON.
 
         Args:
@@ -216,11 +213,11 @@ class RawTemplateBlueprint(Blueprint):
         # load -> dumps will produce json from json or yaml templates
         return json.dumps(self.to_dict(), sort_keys=True, indent=4)
 
-    def render_template(self) -> Tuple[str, str]:
+    def render_template(self) -> tuple[str, str]:
         """Load template and generate its md5 hash."""
         return (self.version, self.rendered)
 
-    def resolve_variables(self, provided_variables: List[Variable]) -> None:
+    def resolve_variables(self, provided_variables: list[Variable]) -> None:
         """Resolve the values of the blueprint variables.
 
         This will resolve the values of the template parameters with values
@@ -235,7 +232,7 @@ class RawTemplateBlueprint(Blueprint):
         # Pass 1 to set resolved_variables to provided variables
         self._resolved_variables = {}
         variable_dict = {var.name: var for var in provided_variables}
-        for var_name, _var_def in variable_dict.items():
+        for var_name in variable_dict:
             value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
                 self._resolved_variables[var_name] = value
@@ -246,7 +243,7 @@ class RawTemplateBlueprint(Blueprint):
         defined_variables = self.parameter_definitions.copy()
         self._resolved_variables = {}
         variable_dict = {var.name: var for var in provided_variables}
-        for var_name, _var_def in defined_variables.items():
+        for var_name in defined_variables:
             value = resolve_variable(variable_dict.get(var_name), self.name)
             if value is not None:
                 self._resolved_variables[var_name] = value

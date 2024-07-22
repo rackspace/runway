@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import json
-from typing import Dict, Optional
+from typing import Optional
+from unittest.mock import MagicMock
 
 import pytest
 import yaml
-from mock import MagicMock
 
 from runway.lookups.handlers.base import LookupHandler
 from runway.utils import MutableMap
@@ -117,8 +117,8 @@ class TestLookupHandler:
     def test_parse(
         self,
         query: str,
-        raw_args: Optional[Dict[str, str]],
-        expected_args: Dict[str, str],
+        raw_args: Optional[dict[str, str]],
+        expected_args: dict[str, str],
     ) -> None:
         """Test parse."""
         value = f"{query}::{raw_args}"
@@ -131,7 +131,8 @@ class TestLookupHandler:
         result_true = LookupHandler.transform(True, to_type="bool")
         result_false = LookupHandler.transform(False, to_type="bool")
 
-        assert isinstance(result_true, bool) and isinstance(result_false, bool)
+        assert isinstance(result_true, bool)
+        assert isinstance(result_false, bool)
         assert result_true
         assert not result_false
 
@@ -146,7 +147,8 @@ class TestLookupHandler:
         result_true = LookupHandler.transform("true", to_type="bool")
         result_false = LookupHandler.transform("false", to_type="bool")
 
-        assert isinstance(result_true, bool) and isinstance(result_false, bool)
+        assert isinstance(result_true, bool)
+        assert isinstance(result_false, bool)
         assert result_true
         assert not result_false
 
@@ -178,7 +180,7 @@ class TestLookupHandler:
     def test_transform_str_list(self) -> None:
         """Test list type joined to create string."""
         assert LookupHandler.transform(["val1", "val2"], to_type="str") == "val1,val2"
-        assert LookupHandler.transform({"val", "val"}, to_type="str") == "val"
+        assert LookupHandler.transform({"val"}, to_type="str") == "val"
         assert LookupHandler.transform(("val1", "val2"), to_type="str") == "val1,val2"
 
     def test_transform_str_list_delimiter(self) -> None:

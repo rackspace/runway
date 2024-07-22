@@ -1,5 +1,6 @@
 """Runway config test definition."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Generic, Tuple, TypeVar, Union
@@ -59,11 +60,11 @@ class RunwayTestDefinition(Generic[_DataModel], ConfigComponentDefinition):
         if cls is not RunwayTestDefinition:
             return super().__new__(cls)
         if isinstance(data, CfnLintRunwayTestDefinitionModel):
-            return super().__new__(CfnLintRunwayTestDefinition)
+            return super().__new__(CfnLintRunwayTestDefinition)  # type: ignore
         if isinstance(data, ScriptRunwayTestDefinitionModel):
-            return super().__new__(ScriptRunwayTestDefinition)
+            return super().__new__(ScriptRunwayTestDefinition)  # type: ignore
         if isinstance(data, YamlLintRunwayTestDefinitionModel):
-            return super().__new__(YamlLintRunwayTestDefinition)
+            return super().__new__(YamlLintRunwayTestDefinition)  # type: ignore
         raise TypeError(
             "expected data of type CfnLintRunwayTestDefinitionModel, "
             "ScriptRunwayTestDefinitionModel, or YamlLintRunwayTestDefinitionModel; "

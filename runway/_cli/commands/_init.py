@@ -2,7 +2,7 @@
 
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any, Tuple
+from typing import Any
 
 import click
 from pydantic import ValidationError
@@ -23,7 +23,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def init(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> None:
+def init(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) -> None:
     """Run initialization/bootstrap steps.
 
     \b
@@ -52,7 +52,7 @@ def init(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> No
       "terraform init" again if the workspace was changed, and finally
       downloads/updates Terraform modules.
 
-    """
+    """  # noqa: D301
     try:
         Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).init(
             select_deployments(ctx, ctx.obj.runway_config.deployments, tags)

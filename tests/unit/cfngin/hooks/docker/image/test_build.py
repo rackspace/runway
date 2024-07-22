@@ -3,12 +3,11 @@
 # pyright: basic
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING, Optional
+from unittest.mock import MagicMock
 
 import pytest
 from docker.models.images import Image
-from mock import MagicMock
 from pydantic import ValidationError
 
 from runway.cfngin.hooks.docker.data_models import (
@@ -26,15 +25,17 @@ from runway.cfngin.hooks.docker.image._build import (
 from .....mock_docker.fake_api import FAKE_IMAGE_ID
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pytest_mock import MockerFixture
 
-    from .....factories import MockCFNginContext
+    from .....factories import MockCfnginContext
 
 
 MODULE = "runway.cfngin.hooks.docker.image._build"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def tmp_dockerfile(cd_tmp_path: Path) -> Path:
     """Create temporary Dockerfile."""
     dockerfile = cd_tmp_path / "Dockerfile"
@@ -42,7 +43,7 @@ def tmp_dockerfile(cd_tmp_path: Path) -> Path:
     return dockerfile
 
 
-def test_build(cfngin_context: MockCFNginContext, mocker: MockerFixture, tmp_path: Path) -> None:
+def test_build(cfngin_context: MockCfnginContext, mocker: MockerFixture, tmp_path: Path) -> None:
     """Test build."""
     (tmp_path / "Dockerfile").touch()
     mock_image = MagicMock(spec=Image, id=FAKE_IMAGE_ID, tags=MagicMock(return_value=["latest"]))
@@ -75,7 +76,8 @@ class TestDockerImageBuildApiOptions:
     def test_field_defaults(self) -> None:
         """Test field defaults."""
         obj = DockerImageBuildApiOptions()
-        assert not obj.buildargs and isinstance(obj.buildargs, dict)
+        assert not obj.buildargs
+        assert isinstance(obj.buildargs, dict)
         assert obj.custom_context is False
         assert not obj.extra_hosts
         assert obj.forcerm is False

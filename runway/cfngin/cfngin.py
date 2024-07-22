@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from .._logging import PrefixAdaptor
 from ..compat import cached_property
@@ -52,8 +51,8 @@ class CFNgin:
     def __init__(
         self,
         ctx: RunwayContext,
-        parameters: Optional[Dict[str, Any]] = None,
-        sys_path: Optional[Path] = None,
+        parameters: dict[str, Any] | None = None,
+        sys_path: Path | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -84,21 +83,21 @@ class CFNgin:
     @cached_property
     def env_file(self) -> MutableMap:
         """Contents of a CFNgin environment file."""
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         supported_names = [
             f"{self.__ctx.env.name}.env",
             f"{self.__ctx.env.name}-{self.region}.env",
         ]
         for _, file_name in enumerate(supported_names):
-            file_path = os.path.join(self.sys_path, file_name)
-            if os.path.isfile(file_path):
+            file_path = self.sys_path / file_name
+            if file_path.is_file():
                 LOGGER.info("found environment file: %s", file_path)
                 self._env_file_name = file_path
-                with open(file_path, "r", encoding="utf-8") as file_:
+                with file_path.open(encoding="utf-8") as file_:
                     result.update(parse_environment(file_.read()))
         return MutableMap(**result)
 
-    def deploy(self, force: bool = False, sys_path: Optional[Path] = None) -> None:
+    def deploy(self, force: bool = False, sys_path: Path | None = None) -> None:
         """Run the CFNgin deploy action.
 
         Args:
@@ -115,7 +114,7 @@ class CFNgin:
 
         with SafeHaven(environ=self.__ctx.env.vars, sys_modules_exclude=["awacs", "troposphere"]):
             for config_path in config_file_paths:
-                logger = PrefixAdaptor(os.path.basename(config_path), LOGGER)
+                logger = PrefixAdaptor(config_path.name, LOGGER)
                 logger.notice("deploy (in progress)")
                 with SafeHaven(sys_modules_exclude=["awacs", "troposphere"]):
                     ctx = self.load(config_path)
@@ -126,7 +125,7 @@ class CFNgin:
                     action.execute(concurrency=self.concurrency, tail=self.tail)
                 logger.success("deploy (complete)")
 
-    def destroy(self, force: bool = False, sys_path: Optional[Path] = None) -> None:
+    def destroy(self, force: bool = False, sys_path: Path | None = None) -> None:
         """Run the CFNgin destroy action.
 
         Args:
@@ -156,7 +155,7 @@ class CFNgin:
                     action.execute(concurrency=self.concurrency, force=True, tail=self.tail)
                 logger.success("destroy (complete)")
 
-    def init(self, force: bool = False, sys_path: Optional[Path] = None) -> None:
+    def init(self, force: bool = False, sys_path: Path | None = None) -> None:
         """Initialize environment."""
         if self.should_skip(force):
             return
@@ -165,7 +164,7 @@ class CFNgin:
 
         with SafeHaven(environ=self.__ctx.env.vars, sys_modules_exclude=["awacs", "troposphere"]):
             for config_path in config_file_paths:
-                logger = PrefixAdaptor(os.path.basename(config_path), LOGGER)
+                logger = PrefixAdaptor(config_path.name, LOGGER)
                 logger.notice("init (in progress)")
                 with SafeHaven(sys_modules_exclude=["awacs", "troposphere"]):
                     ctx = self.load(config_path)
@@ -198,7 +197,7 @@ class CFNgin:
         config.load()
         return self._get_context(config, config_path)
 
-    def plan(self, force: bool = False, sys_path: Optional[Path] = None):
+    def plan(self, force: bool = False, sys_path: Path | None = None) -> None:
         """Run the CFNgin plan action.
 
         Args:
@@ -270,7 +269,7 @@ class CFNgin:
             work_dir=self.__ctx.work_dir,
         )
 
-    def _get_provider_builder(self, service_role: Optional[str] = None) -> ProviderBuilder:
+    def _get_provider_builder(self, service_role: str | None = None) -> ProviderBuilder:
         """Initialize provider builder.
 
         Args:
@@ -314,8 +313,8 @@ class CFNgin:
 
     @classmethod
     def find_config_files(
-        cls, exclude: Optional[List[str]] = None, sys_path: Optional[Path] = None
-    ) -> List[Path]:
+        cls, exclude: list[str] | None = None, sys_path: Path | None = None
+    ) -> list[Path]:
         """Find CFNgin config files.
 
         Args:

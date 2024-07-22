@@ -13,14 +13,7 @@ import os
 from typing import (
     TYPE_CHECKING,
     ClassVar,
-    Generator,
-    Iterable,
-    Iterator,
-    List,
     NamedTuple,
-    Optional,
-    Set,
-    Tuple,
     cast,
 )
 
@@ -29,6 +22,8 @@ from typing_extensions import Literal
 from .utils import split_s3_bucket_key
 
 if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable, Iterator
+
     from .file_generator import FileStats
     from .parameters import ParametersDataModel
 
@@ -36,14 +31,22 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 _FilterType = Literal["exclude", "include"]
-FileStatus = NamedTuple("FileStatus", [("file_stats", "FileStats"), ("include", bool)])
-FilterPattern = NamedTuple("FilterPattern", [("type", _FilterType), ("pattern", str)])
+
+
+class FileStatus(NamedTuple):
+    file_stats: FileStats
+    include: bool
+
+
+class FilterPattern(NamedTuple):
+    type: _FilterType
+    pattern: str
 
 
 class Filter:
     """Universal exclude/include filter."""
 
-    FILTER_TYPES: ClassVar[Tuple[_FilterType, ...]] = (
+    FILTER_TYPES: ClassVar[tuple[_FilterType, ...]] = (
         "exclude",
         "include",
     )
@@ -51,8 +54,8 @@ class Filter:
     def __init__(
         self,
         patterns: Iterable[FilterPattern],
-        src_rootdir: Optional[str],
-        dest_rootdir: Optional[str],
+        src_rootdir: str | None,
+        dest_rootdir: str | None,
     ) -> None:
         """Instantiate class.
 
@@ -70,8 +73,8 @@ class Filter:
 
     @staticmethod
     def _full_path_patterns(
-        patterns: Iterable[FilterPattern], rootdir: Optional[str]
-    ) -> List[FilterPattern]:
+        patterns: Iterable[FilterPattern], rootdir: str | None
+    ) -> list[FilterPattern]:
         """Prefix each pattern with the root directory.
 
         Args:
@@ -82,7 +85,9 @@ class Filter:
         if rootdir:
             return sorted(  # sort for consistency
                 [
-                    FilterPattern(type=f.type, pattern=os.path.join(rootdir, f.pattern))
+                    FilterPattern(
+                        type=f.type, pattern=os.path.join(rootdir, f.pattern)  # noqa: PTH118
+                    )
                     for f in patterns
                 ]
             )
@@ -119,9 +124,7 @@ class Filter:
                 yield file_stats
 
     @staticmethod
-    def _match_pattern(
-        filter_pattern: FilterPattern, file_stats: FileStats
-    ) -> Optional[FileStatus]:
+    def _match_pattern(filter_pattern: FilterPattern, file_stats: FileStats) -> FileStatus | None:
         """Match file to pattern.
 
         Args:
@@ -155,7 +158,7 @@ class Filter:
         """Parse parameters to create a Filter instance."""
         if not (parameters.exclude or parameters.include):
             return Filter([], None, None)
-        filter_patterns: Set[FilterPattern] = set()
+        filter_patterns: set[FilterPattern] = set()
         for filter_type in cls.FILTER_TYPES:
             for pat in parameters[filter_type]:
                 filter_patterns.add(FilterPattern(type=cast(_FilterType, filter_type), pattern=pat))
@@ -188,8 +191,8 @@ class Filter:
 
         """
         if dir_op:
-            return os.path.abspath(path)
-        return os.path.abspath(os.path.dirname(path))
+            return os.path.abspath(path)  # noqa: PTH100
+        return os.path.abspath(os.path.dirname(path))  # noqa: PTH100, PTH120
 
     @staticmethod
     def _parse_rootdir_s3(path: str, dir_op: bool = True) -> str:
@@ -203,4 +206,4 @@ class Filter:
         bucket, key = split_s3_bucket_key(path)
         if not (dir_op or key.endswith("/")):
             key = "/".join(key.split("/")[:-1])
-        return "/".join([bucket, key])
+        return f"{bucket}/{key}"

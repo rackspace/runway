@@ -6,12 +6,15 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Sequence, cast
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
 
 import boto3
 from botocore.exceptions import ClientError
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Sequence
+
     from mypy_boto3_s3.client import S3Client
     from mypy_boto3_s3.service_resource import S3ServiceResource
     from mypy_boto3_s3.type_defs import ObjectTypeDef
@@ -21,20 +24,20 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-def _get_client(session: Optional[boto3.Session] = None, region: Optional[str] = None) -> S3Client:
+def _get_client(session: boto3.Session | None = None, region: str | None = None) -> S3Client:
     """Get S3 boto client."""
     return session.client("s3") if session else boto3.client("s3", region_name=region)
 
 
 def _get_resource(
-    session: Optional[boto3.Session] = None, region: Optional[str] = None
+    session: boto3.Session | None = None, region: str | None = None
 ) -> S3ServiceResource:
     """Get S3 boto resource."""
     return session.resource("s3") if session else boto3.resource("s3", region_name=region)
 
 
 def purge_and_delete_bucket(
-    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+    bucket_name: str, region: str = "us-east-1", session: boto3.Session | None = None
 ) -> None:
     """Delete all objects and versions in bucket, then delete bucket."""
     purge_bucket(bucket_name, region, session)
@@ -42,7 +45,7 @@ def purge_and_delete_bucket(
 
 
 def purge_bucket(
-    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+    bucket_name: str, region: str = "us-east-1", session: boto3.Session | None = None
 ) -> None:
     """Delete all objects and versions in bucket."""
     if does_bucket_exist(bucket_name, region, session):
@@ -54,7 +57,7 @@ def purge_bucket(
 
 
 def delete_bucket(
-    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+    bucket_name: str, region: str = "us-east-1", session: boto3.Session | None = None
 ) -> None:
     """Delete bucket."""
     if does_bucket_exist(bucket_name, region, session):
@@ -68,7 +71,7 @@ def delete_bucket(
 
 
 def does_bucket_exist(
-    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+    bucket_name: str, region: str = "us-east-1", session: boto3.Session | None = None
 ) -> bool:
     """Check if bucket exists in S3."""
     s3_resource = _get_resource(session, region)
@@ -86,14 +89,14 @@ def does_bucket_exist(
 
 
 def ensure_bucket_exists(
-    bucket_name: str, region: str = "us-east-1", session: Optional[boto3.Session] = None
+    bucket_name: str, region: str = "us-east-1", session: boto3.Session | None = None
 ) -> None:
     """Ensure S3 bucket exists."""
     if not does_bucket_exist(bucket_name, region, session):
         LOGGER.info('creating bucket "%s" (in progress)', bucket_name)
         s3_client = _get_client(session, region)
         if region == "us-east-1":
-            create_bucket_opts: Dict[str, Any] = {}
+            create_bucket_opts: dict[str, Any] = {}
         else:
             create_bucket_opts = {"CreateBucketConfiguration": {"LocationConstraint": region}}
         s3_client.create_bucket(Bucket=bucket_name, **create_bucket_opts)
@@ -117,7 +120,7 @@ def ensure_bucket_exists(
 def does_s3_object_exist(
     bucket: str,
     key: str,
-    session: Optional[boto3.Session] = None,
+    session: boto3.Session | None = None,
     region: str = "us-east-1",
 ) -> bool:
     """Determine if object exists on s3."""
@@ -133,14 +136,14 @@ def does_s3_object_exist(
     return True
 
 
-def upload(bucket: str, key: str, filename: str, session: Optional[boto3.Session] = None) -> None:
+def upload(bucket: str, key: str, filename: str, session: boto3.Session | None = None) -> None:
     """Upload file to S3 bucket."""
     s3_client = _get_client(session)
     LOGGER.info("uploading %s to s3://%s/%s...", filename, bucket, key)
     s3_client.upload_file(Filename=filename, Bucket=bucket, Key=key)
 
 
-def download(bucket: str, key: str, file_path: str, session: Optional[boto3.Session] = None) -> str:
+def download(bucket: str, key: str, file_path: str, session: boto3.Session | None = None) -> str:
     """Download a file from S3 to the given path."""
     s3_client = _get_client(session)
 
@@ -150,7 +153,7 @@ def download(bucket: str, key: str, file_path: str, session: Optional[boto3.Sess
 
 
 def download_and_extract_to_mkdtemp(
-    bucket: str, key: str, session: Optional[boto3.Session] = None
+    bucket: str, key: str, session: boto3.Session | None = None
 ) -> str:
     """Download zip archive and extract it to temporary directory."""
     filedes, temp_file = tempfile.mkstemp()
@@ -160,7 +163,7 @@ def download_and_extract_to_mkdtemp(
     output_dir = tempfile.mkdtemp()
     with zipfile.ZipFile(temp_file, "r") as zip_ref:
         zip_ref.extractall(output_dir)
-    os.remove(temp_file)
+    Path(temp_file).unlink()
     LOGGER.verbose("extracted %s to %s", temp_file, output_dir)
     return output_dir
 
@@ -169,7 +172,7 @@ def get_matching_s3_objects(
     bucket: str,
     prefix: Sequence[str] = "",
     suffix: str = "",
-    session: Optional[boto3.Session] = None,
+    session: boto3.Session | None = None,
 ) -> Iterator[ObjectTypeDef]:
     """Generate objects in an S3 bucket.
 
@@ -208,7 +211,7 @@ def get_matching_s3_keys(
     bucket: str,
     prefix: str = "",
     suffix: str = "",
-    session: Optional[boto3.Session] = None,
+    session: boto3.Session | None = None,
 ) -> Iterator[str]:
     """Generate the keys in an S3 bucket.
 

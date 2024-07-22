@@ -3,6 +3,7 @@
 # pyright: basic
 import unittest
 
+import pytest
 from troposphere import ecr
 
 from runway.cfngin.blueprints.base import Blueprint
@@ -48,7 +49,7 @@ class TestRepositories(BlueprintTestCase):
             [Variable("Repositories", ["repo1", "repo2", "repo3"], "cfngin")]
         )
         blueprint.create_template()
-        with self.assertRaises(AssertionError):
+        with pytest.raises(AssertionError):
             self.assertRenderedBlueprint(blueprint)
 
 

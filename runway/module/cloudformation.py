@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from .._logging import PrefixAdaptor
 from ..cfngin.cfngin import CFNgin
 from .base import RunwayModule
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from .._logging import RunwayLogger
     from ..context import RunwayContext
     from .base import ModuleOptions
@@ -25,12 +26,12 @@ class CloudFormation(RunwayModule):
         self,
         context: RunwayContext,
         *,
-        explicitly_enabled: Optional[bool] = False,
+        explicitly_enabled: bool | None = False,
         logger: RunwayLogger = LOGGER,
         module_root: Path,
-        name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        name: str | None = None,
+        options: dict[str, Any] | ModuleOptions | None = None,
+        parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import os
 from typing import TYPE_CHECKING
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock, call
 
 from runway.core.providers.aws.s3._helpers.action_architecture import ActionArchitecture
 from runway.core.providers.aws.s3._helpers.parameters import ParametersDataModel

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from docker.types.services import Mount
 
@@ -42,7 +42,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         super().__init__(project, client=client, context=context)
 
     @cached_property
-    def bind_mounts(self) -> List[Mount]:
+    def bind_mounts(self) -> list[Mount]:
         """Bind mounts that will be used by the container."""
         mounts = [*super().bind_mounts]
         if self.project.requirements_txt:
@@ -56,7 +56,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         return mounts
 
     @cached_property
-    def environment_variables(self) -> Dict[str, str]:
+    def environment_variables(self) -> dict[str, str]:
         """Environment variables to pass to the docker container.
 
         This is a subset of the environment variables stored in the context
@@ -68,7 +68,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         return {**docker_env_vars, **pip_env_vars}
 
     @cached_property
-    def install_commands(self) -> List[str]:
+    def install_commands(self) -> list[str]:
         """Commands to run to install dependencies."""
         if self.project.requirements_txt:
             return [

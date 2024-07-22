@@ -3,15 +3,13 @@
 from __future__ import annotations
 
 import zipfile
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
+from unittest.mock import MagicMock, Mock, PropertyMock, call
 from urllib.parse import urlencode
 
 import igittigitt
 import pytest
 from botocore.exceptions import ClientError
-from mock import MagicMock, Mock, PropertyMock, call
-from typing_extensions import Literal
 
 from runway._logging import LogLevels
 from runway.cfngin.hooks.awslambda.base_classes import Project
@@ -35,10 +33,12 @@ from runway.exceptions import RequiredTagNotFoundError
 from .factories import MockProject
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from botocore.stub import Stubber
     from mypy_boto3_s3.type_defs import PutObjectOutputTypeDef
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
+    from typing_extensions import Literal
 
     from runway.context import CfnginContext
 
@@ -47,7 +47,7 @@ MODULE = "runway.cfngin.hooks.awslambda.deployment_package"
 ProjectTypeAlias = Project[AwsLambdaHookArgs]
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def project(cfngin_context: CfnginContext, tmp_path: Path) -> ProjectTypeAlias:
     """Mock project object."""
     args = AwsLambdaHookArgs(
@@ -229,7 +229,7 @@ class TestDeploymentPackage:
 
     def test_build(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:
@@ -271,7 +271,7 @@ class TestDeploymentPackage:
         archive_file = project.build_directory / "foobar.zip"
         mocker.patch.object(DeploymentPackage, "archive_file", archive_file)
 
-        def _write_zip(package: DeploymentPackage[Any], archive_file: Mock) -> None:
+        def _write_zip(package: DeploymentPackage[Any], archive_file: Mock) -> None:  # noqa: ARG001
             package.archive_file.touch()
 
         mock_build_zip_dependencies = mocker.patch.object(
@@ -289,7 +289,7 @@ class TestDeploymentPackage:
 
     def test_build_file_exists(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:
@@ -329,7 +329,7 @@ class TestDeploymentPackage:
         mock_build_zip_source_code.assert_not_called()
         mock_build_fix_file_permissions.assert_not_called()
 
-    @pytest.mark.parametrize("url_encoded", [False, True, False, True])
+    @pytest.mark.parametrize("url_encoded", [False, True])
     def test_build_tag_set(
         self,
         mocker: MockerFixture,
@@ -432,7 +432,7 @@ class TestDeploymentPackage:
 
     def test_init_runtime_change(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:
@@ -522,7 +522,7 @@ class TestDeploymentPackage:
         expected: Optional[str],
         mocker: MockerFixture,
         project: ProjectTypeAlias,
-        response: Dict[str, Any],
+        response: dict[str, Any],
     ) -> None:
         """Test object_version_id."""
         mocker.patch.object(DeploymentPackage, "_put_object_response", response)
@@ -606,7 +606,7 @@ class TestDeploymentPackageS3Object:
 
     def test_build_exists(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:
@@ -743,7 +743,7 @@ class TestDeploymentPackageS3Object:
     def test_exists(
         self,
         expected: bool,
-        head: Dict[str, Any],
+        head: dict[str, Any],
         project: ProjectTypeAlias,
         mocker: MockerFixture,
     ) -> None:
@@ -773,7 +773,7 @@ class TestDeploymentPackageS3Object:
 
     def test_head_403(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:
@@ -799,7 +799,7 @@ class TestDeploymentPackageS3Object:
 
     def test_head_404(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:
@@ -871,10 +871,10 @@ class TestDeploymentPackageS3Object:
     )
     def test_object_tags(
         self,
-        expected: Dict[str, str],
+        expected: dict[str, str],
         mocker: MockerFixture,
         project: ProjectTypeAlias,
-        response: Dict[str, List[Dict[str, str]]],
+        response: dict[str, list[dict[str, str]]],
     ) -> None:
         """Test object_tags."""
         mocker.patch.object(
@@ -901,7 +901,7 @@ class TestDeploymentPackageS3Object:
     def test_object_version_id(
         self,
         expected: Optional[str],
-        head: Dict[str, str],
+        head: dict[str, str],
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:
@@ -966,7 +966,7 @@ class TestDeploymentPackageS3Object:
 
     def test_update_tags_no_change(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:
@@ -993,7 +993,7 @@ class TestDeploymentPackageS3Object:
     def test_upload_exists(
         self,
         build: bool,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
     ) -> None:

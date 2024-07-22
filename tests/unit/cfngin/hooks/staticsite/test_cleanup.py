@@ -16,10 +16,9 @@ from runway.cfngin.hooks.staticsite.cleanup import (
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.type_defs import OutputTypeDef
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 MODULE = "runway.cfngin.hooks.staticsite.cleanup"
 
@@ -41,7 +40,7 @@ def test_get_replicated_function_names(expected: list[str], outputs: list[Output
 
 
 def test_warn(
-    caplog: LogCaptureFixture, cfngin_context: MockCFNginContext, mocker: MockerFixture
+    caplog: pytest.LogCaptureFixture, cfngin_context: MockCfnginContext, mocker: MockerFixture
 ) -> None:
     """Test warn."""
     caplog.set_level(LogLevels.WARNING, MODULE)
@@ -76,7 +75,7 @@ def test_warn(
 
 
 def test_warn_ignore_client_error(
-    caplog: LogCaptureFixture, cfngin_context: MockCFNginContext
+    caplog: pytest.LogCaptureFixture, cfngin_context: MockCfnginContext
 ) -> None:
     """Test warn ignore ClientError."""
     caplog.set_level(LogLevels.WARNING, MODULE)

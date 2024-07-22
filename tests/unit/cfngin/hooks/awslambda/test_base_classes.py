@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.cfngin.hooks.awslambda.base_classes import AwsLambdaHook, Project
 from runway.cfngin.hooks.awslambda.deployment_package import DeploymentPackage
@@ -16,7 +15,8 @@ from runway.cfngin.hooks.awslambda.models.args import AwsLambdaHookArgs
 from runway.cfngin.hooks.awslambda.models.responses import AwsLambdaHookDeployResponse
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
+    from pathlib import Path
+
     from pytest_mock import MockerFixture
 
     from runway.context import CfnginContext
@@ -132,25 +132,25 @@ class TestAwsLambdaHook:
         build_response.assert_called_once_with("plan")
         response_obj.dict.assert_called_once_with(by_alias=True)
 
-    def test_post_deploy(self, caplog: LogCaptureFixture) -> None:
+    def test_post_deploy(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test post_deploy."""
         caplog.set_level(logging.WARNING, logger=MODULE)
         assert AwsLambdaHook(Mock()).post_deploy()
         assert f"post_deploy not implimented for {AwsLambdaHook.__name__}" in caplog.messages
 
-    def test_post_destroy(self, caplog: LogCaptureFixture) -> None:
+    def test_post_destroy(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test post_destroy."""
         caplog.set_level(logging.WARNING, logger=MODULE)
         assert AwsLambdaHook(Mock()).post_destroy()
         assert f"post_destroy not implimented for {AwsLambdaHook.__name__}" in caplog.messages
 
-    def test_pre_deploy(self, caplog: LogCaptureFixture) -> None:
+    def test_pre_deploy(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test pre_deploy."""
         caplog.set_level(logging.WARNING, logger=MODULE)
         assert AwsLambdaHook(Mock()).pre_deploy()
         assert f"pre_deploy not implimented for {AwsLambdaHook.__name__}" in caplog.messages
 
-    def test_pre_destroy(self, caplog: LogCaptureFixture) -> None:
+    def test_pre_destroy(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test pre_destroy."""
         caplog.set_level(logging.WARNING, logger=MODULE)
         assert AwsLambdaHook(Mock()).pre_destroy()
@@ -195,7 +195,7 @@ class TestProject:
         )
         assert Project(args, Mock()).cache_dir == cache_dir
 
-    def test_cache_dir_default(self, mocker: MockerFixture, tmp_path: Path) -> None:
+    def test_cache_dir_default(self, tmp_path: Path) -> None:
         """Test cache_dir default."""
         cache_dir = tmp_path / Project.DEFAULT_CACHE_DIR_NAME
         cache_dir.mkdir()
@@ -242,14 +242,14 @@ class TestProject:
             "foobar"
         ]
 
-    def test_compatible_runtimes_raise_value_error(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_compatible_runtimes_raise_value_error(self, mocker: MockerFixture) -> None:
         """Test compatible_runtimes raise ValueError."""
         mocker.patch.object(Project, "runtime", "foobar")
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(
+            ValueError,
+            match=r"runtime \(foobar\) not in compatible runtimes \(foo, bar\)",
+        ):
             assert Project(Mock(compatible_runtimes=["foo", "bar"]), Mock()).compatible_runtimes
-        assert str(excinfo.value) == "runtime (foobar) not in compatible runtimes (foo, bar)"
 
     def test_dependency_directory(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test dependency_directory."""
@@ -276,7 +276,8 @@ class TestProject:
     def test_metadata_files(self) -> None:
         """Test metadata_files."""
         result = Project(Mock(), Mock()).metadata_files
-        assert not result and isinstance(result, tuple)
+        assert not result
+        assert isinstance(result, tuple)
 
     def test_project_root(self, tmp_path: Path) -> None:
         """Test project_root."""
@@ -294,7 +295,7 @@ class TestProject:
         )
 
     def test_project_root_config_path_not_parent_of_source_code(
-        self, caplog: LogCaptureFixture, tmp_path: Path
+        self, caplog: pytest.LogCaptureFixture, tmp_path: Path
     ) -> None:
         """Test project_root ctx.config_path is not a parent of args.source_code."""
         caplog.set_level(logging.INFO)
@@ -308,7 +309,7 @@ class TestProject:
             == src_path
         )
         assert (
-            "ignoring project directory; " "source code located outside of project directory"
+            "ignoring project directory; source code located outside of project directory"
         ) in caplog.messages
 
     @pytest.mark.parametrize("create_metadata_file", [False, True])
@@ -352,9 +353,10 @@ class TestProject:
     def test_runtime_raise_value_error(self, mocker: MockerFixture) -> None:
         """Test runtime raise ValueError."""
         mocker.patch.object(Project, "docker", None, create=True)
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(
+            ValueError, match="runtime could not be determined from the build system"
+        ):
             assert not Project(Mock(runtime=None), Mock()).runtime
-        assert str(excinfo.value) == "runtime could not be determined from the build system"
 
     def test_source_code(self, mocker: MockerFixture) -> None:
         """Test source_code."""

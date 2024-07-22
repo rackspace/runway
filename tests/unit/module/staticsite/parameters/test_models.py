@@ -1,7 +1,7 @@
 """Test runway.module.staticsite.parameters.models."""
 
 # pyright: basic
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
@@ -57,12 +57,12 @@ class TestRunwayStaticSiteLambdaFunctionAssociationDataModel:
     @pytest.mark.parametrize(
         "data",
         [
-            cast(Dict[str, Any], {}),
+            cast(dict[str, Any], {}),
             {"arn": "aws:arn:lambda:us-east-1:function:test"},
             {"type": "origin-request"},
         ],
     )
-    def test_init_required(self, data: Dict[str, Any]) -> None:
+    def test_init_required(self, data: dict[str, Any]) -> None:
         """Test init required."""
         with pytest.raises(ValidationError):
             RunwayStaticSiteLambdaFunctionAssociationDataModel.parse_obj(data)
@@ -115,7 +115,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
             "font-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; "
             "object-src 'none'; "
             "connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com",
-            "Strict-Transport-Security": "max-age=31536000; " "includeSubdomains; " "preload",
+            "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
             "Referrer-Policy": "same-origin",
             "X-XSS-Protection": "1; mode=block",
             "X-Frame-Options": "DENY",

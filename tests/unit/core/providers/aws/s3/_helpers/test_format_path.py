@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING
+from unittest.mock import call
 
 import pytest
-from mock import call
 
 from runway.core.providers.aws.s3._helpers.format_path import FormatPath
 
@@ -82,7 +82,7 @@ class TestFormatPath:
             ("s3://bucket/key.txt", False, ("s3://bucket/key.txt", False)),
         ],
     )
-    def test_format_s3_path(self, dir_op: bool, expected: Tuple[str, bool], path: str) -> None:
+    def test_format_s3_path(self, dir_op: bool, expected: tuple[str, bool], path: str) -> None:
         """Test format_s3_path."""
         assert FormatPath.format_s3_path(path, dir_op) == expected
 
@@ -97,6 +97,6 @@ class TestFormatPath:
             ("s3://test", ("s3", "test")),
         ],
     )
-    def test_identify_path_type(self, expected: Tuple[SupportedPathType, str], path: str) -> None:
+    def test_identify_path_type(self, expected: tuple[SupportedPathType, str], path: str) -> None:
         """Test identify_path_type."""
         assert FormatPath.identify_path_type(path) == expected

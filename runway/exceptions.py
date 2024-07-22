@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from .utils import DOC_SITE
 
 if TYPE_CHECKING:
+    from pathlib import Path
     from types import ModuleType
 
     from .variables import (
@@ -35,11 +35,11 @@ class RunwayError(Exception):
 class ConfigNotFound(RunwayError):
     """Configuration file could not be found."""
 
-    looking_for: List[str]
+    looking_for: list[str]
     message: str
     path: Path
 
-    def __init__(self, *, looking_for: Optional[List[str]] = None, path: Path) -> None:
+    def __init__(self, *, looking_for: list[str] | None = None, path: Path) -> None:
         """Instantiate class.
 
         Args:
@@ -51,9 +51,7 @@ class ConfigNotFound(RunwayError):
         self.path = path
 
         if looking_for:
-            self.message = (
-                f"config file not found at path {path}; " f"looking for one of {looking_for}"
-            )
+            self.message = f"config file not found at path {path}; looking for one of {looking_for}"
         else:
             self.message = f"config file not found at path {path}"
         super().__init__(self.path, self.looking_for)
@@ -91,7 +89,7 @@ class DockerExecFailedError(RunwayError):
     exit_code: int
     """The ``StatusCode`` returned by Docker."""
 
-    def __init__(self, response: Dict[str, Any]) -> None:
+    def __init__(self, response: dict[str, Any]) -> None:
         """Instantiate class.
 
         Args:
@@ -102,7 +100,7 @@ class DockerExecFailedError(RunwayError):
 
         """
         self.exit_code = response.get("StatusCode", 1)  # we can assume this will be > 0
-        error = response.get("Error") or {}  # value from dict could be NoneType
+        error: dict[Any, Any] = response.get("Error") or {}  # value from dict could be NoneType
         self.message = error.get("Message", "error message undefined")
         super().__init__()
 
@@ -129,6 +127,8 @@ class FailedLookup(RunwayError):
             lookup: The variable value lookup that was attempted and
                 resulted in an exception being raised.
             cause: The exception that was raised.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.cause = cause
@@ -155,12 +155,14 @@ class FailedVariableLookup(RunwayError):
         Args:
             variable: The variable containing the failed lookup.
             lookup_error: The exception that was raised directly before this one.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.cause = lookup_error
         self.variable = variable
         self.message = (
-            f'Could not resolve lookup "{lookup_error.lookup}" ' f'for variable "{variable.name}"'
+            f'Could not resolve lookup "{lookup_error.lookup}" for variable "{variable.name}"'
         )
         super().__init__(*args, **kwargs)
 
@@ -173,8 +175,8 @@ class HclParserError(RunwayError):
     def __init__(
         self,
         exc: Exception,
-        file_path: Union[Path, str],
-        parser: Optional[ModuleType] = None,
+        file_path: Path | str,
+        parser: ModuleType | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -269,6 +271,8 @@ class OutputDoesNotExist(RunwayError):
         Args:
             stack_name: Name of the stack.
             output: The output that does not exist.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.stack_name = stack_name
@@ -317,6 +321,8 @@ class UnknownLookupType(RunwayError):
 
         Args:
             lookup: Variable value lookup that could not find a handler.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.message = f'Unknown lookup type "{lookup.lookup_name.value}" in "{lookup}"'
@@ -333,6 +339,8 @@ class UnresolvedVariable(RunwayError):
 
         Args:
             variable: The unresolved variable.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.message = f'Attempted to use variable "{variable.name}" before it was resolved'
@@ -357,6 +365,8 @@ class UnresolvedVariableValue(RunwayError):
 
         Args:
             lookup: The variable value lookup that is not resolved.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.lookup = lookup

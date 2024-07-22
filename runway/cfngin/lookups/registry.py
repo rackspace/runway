@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, Type, Union, cast
+from typing import cast
 
 from ...lookups.handlers.base import LookupHandler
 from ...lookups.handlers.cfn import CfnLookup
@@ -25,13 +25,11 @@ from .handlers.rxref import RxrefLookup
 from .handlers.split import SplitLookup
 from .handlers.xref import XrefLookup
 
-CFNGIN_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
+CFNGIN_LOOKUP_HANDLERS: dict[str, type[LookupHandler]] = {}
 LOGGER = logging.getLogger(__name__)
 
 
-def register_lookup_handler(
-    lookup_type: str, handler_or_path: Union[str, Type[LookupHandler]]
-) -> None:
+def register_lookup_handler(lookup_type: str, handler_or_path: str | type[LookupHandler]) -> None:
     """Register a lookup handler.
 
     Args:
@@ -52,7 +50,7 @@ def register_lookup_handler(
             CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
             return
     # Handler is a not a new-style handler
-    except Exception:
+    except Exception:  # noqa: BLE001
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     LOGGER.error(
         'lookup "%s" uses an unsupported format; to learn how to write '

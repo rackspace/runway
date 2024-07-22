@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import shutil
 from typing import TYPE_CHECKING
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock, call
 from yaml.constructor import ConstructorError
 
 from runway.cfngin.cfngin import CFNgin
@@ -31,7 +31,7 @@ def copy_basic_fixtures(cfngin_fixtures: Path, tmp_path: Path) -> None:
     copy_fixture(src=cfngin_fixtures / "configs" / "basic.yml", dest=tmp_path / "basic.yml")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def patch_safehaven(mocker: MockerFixture) -> Mock:
     """Patch SafeHaven."""
     mock_haven = mocker.patch("runway.cfngin.cfngin.SafeHaven")

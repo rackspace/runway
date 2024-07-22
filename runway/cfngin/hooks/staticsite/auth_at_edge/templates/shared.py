@@ -56,7 +56,7 @@ def as_cloud_front_headers(headers):
     """Convert a series of headers to CloudFront compliant ones.
 
     Args:
-         headers (Dict[str, str]): The request/response headers in
+         headers (dict[str, str]): The request/response headers in
             dictionary format.
 
     """
@@ -70,7 +70,7 @@ def extract_and_parse_cookies(headers, client_id, cookie_compatibility="amplify"
     """Extract and parse the Cognito cookies from the headers.
 
     Args:
-        headers (Dict[str, str]): The request/response headers in
+        headers (dict[str, str]): The request/response headers in
             dictionary format.
         client_id (str): The Cognito UserPool Client ID.
         cookie_compatibility (str): "amplify" or "elasticsearch".
@@ -103,7 +103,7 @@ def extract_cookies_from_headers(headers):
     """Extract all cookies from the response headers.
 
     Args:
-         headers (Dict[str, Dict[str, str]]): The request/response headers in
+         headers (dict[str, dict[str, str]]): The request/response headers in
             dictionary format.
 
     """
@@ -197,11 +197,11 @@ def generate_cookie_headers(
         event (str): "new_tokens" | "sign_out" | "refresh_failed".
         client_id (str): The Cognito UserPool Client ID.
         oauth_scopes (List): The scopes for oauth validation.
-        tokens (Dict[str, str]): The tokens received from
+        tokens (dict[str, str]): The tokens received from
             the Cognito Request (id, access, refresh).
         domain_name (str): The Domain name the cookies are
             to be associated with.
-        cookie_settings (Dict[str, str]): The various settings
+        cookie_settings (dict[str, str]): The various settings
             that we would like for the various tokens.
         cookie_compatibility (str): "amplify" | "elasticsearch".
 
@@ -307,9 +307,9 @@ def http_post_with_retry(url, data, headers):
 
     Args:
         url (str): The URL to make the POST request to.
-        data (Dict[str, str]): The dictionary of data elements to
+        data (dict[str, str]): The dictionary of data elements to
             send with the request (urlencoded internally).
-        headers (Dict[str, str]): Any headers to send with
+        headers (dict[str, str]): Any headers to send with
             the POST request.
 
     """

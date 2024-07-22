@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 from click.testing import CliRunner
-from mock import Mock
 
 from runway._cli import cli
 from runway.config import RunwayConfig
@@ -21,7 +21,7 @@ from runway.core import Runway
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture, MonkeyPatch
+    import pytest
     from pytest_mock import MockerFixture
 
     from ...conftest import CpConfigTypeDef
@@ -96,10 +96,10 @@ def test_destroy_options_deploy_environment(
 
 
 def test_destroy_options_tag(
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Test destroy option --tag."""
     caplog.set_level(logging.ERROR, logger="runway.cli.commands.destroy")
@@ -131,7 +131,7 @@ def test_destroy_options_tag(
 
 
 def test_destroy_select_deployment(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test destroy select from two deployments."""
     cp_config("min_required_multi", cd_tmp_path)
@@ -149,7 +149,7 @@ def test_destroy_select_deployment(
 
 
 def test_destroy_select_deployment_all(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test destroy select all deployments."""
     cp_config("min_required_multi", cd_tmp_path)
@@ -167,7 +167,7 @@ def test_destroy_select_deployment_all(
 
 
 def test_destroy_select_module(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test destroy select from two modules."""
     cp_config("min_required_multi", cd_tmp_path)
@@ -183,7 +183,7 @@ def test_destroy_select_module(
 
 
 def test_destroy_select_module_all(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test destroy select all modules."""
     cp_config("min_required_multi", cd_tmp_path)
@@ -200,7 +200,7 @@ def test_destroy_select_module_all(
 
 
 def test_destroy_select_module_child_modules(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test destroy select child module."""
     cp_config("simple_child_modules.1", cd_tmp_path)
@@ -216,7 +216,7 @@ def test_destroy_select_module_child_modules(
 
 
 def test_destroy_select_module_child_modules_all(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test destroy select all child module."""
     cp_config("simple_child_modules.1", cd_tmp_path)

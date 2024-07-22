@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 import awacs.sts
 from awacs.aws import Allow, AWSPrincipal, PolicyDocument, Statement
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class AdminRole(Blueprint):
     """Blueprint for an admin role."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "CrossAccountAccessAccountIds": {"type": list, "default": []},
         "PermissionsBoundary": {"type": str},
         "RoleName": {"type": str, "default": ""},

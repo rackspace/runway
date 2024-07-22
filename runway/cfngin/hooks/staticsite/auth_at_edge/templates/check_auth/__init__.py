@@ -41,7 +41,7 @@ def handler(event, _context):
     """Handle the request passed in.
 
     Args:
-        event (Dict[str, Any]): The Lambda Event.
+        event (dict[str, Any]): The Lambda Event.
         _context (Any): Lambda context object.
 
     """

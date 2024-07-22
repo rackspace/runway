@@ -17,9 +17,12 @@ class TestRunwayTerraformArgsDataModel:
     def test_init_default(self) -> None:
         """Test init default."""
         obj = RunwayTerraformArgsDataModel()
-        assert not obj.apply and isinstance(obj.apply, list)
-        assert not obj.init and isinstance(obj.init, list)
-        assert not obj.plan and isinstance(obj.plan, list)
+        assert not obj.apply
+        assert isinstance(obj.apply, list)
+        assert not obj.init
+        assert isinstance(obj.init, list)
+        assert not obj.plan
+        assert isinstance(obj.plan, list)
 
     def test_init_extra(self) -> None:
         """Test init extra."""
@@ -82,8 +85,10 @@ class TestRunwayTerraformModuleOptionsDataModel:
         """Test _convert_args."""
         obj = RunwayTerraformModuleOptionsDataModel.parse_obj({"args": ["test"]})
         assert obj.args.apply == ["test"]
-        assert not obj.args.init and isinstance(obj.args.init, list)
-        assert not obj.args.plan and isinstance(obj.args.plan, list)
+        assert not obj.args.init
+        assert isinstance(obj.args.init, list)
+        assert not obj.args.plan
+        assert isinstance(obj.args.plan, list)
 
     def test_init_default(self) -> None:
         """Test init default."""

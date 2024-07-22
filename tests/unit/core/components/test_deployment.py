@@ -1,24 +1,24 @@
-"""Test runway.core.components.deployment."""
+"""Test runway.core.components._deployment."""
 
+# ruff: noqa: SLF001
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, cast
+from typing import TYPE_CHECKING, Any, cast
+from unittest.mock import ANY, MagicMock, Mock, PropertyMock, call
 
 import pytest
-from mock import ANY, MagicMock, Mock, PropertyMock, call
 
 from runway.config.components.runway import (
     RunwayDeploymentDefinition,
     RunwayVariablesDefinition,
 )
 from runway.config.models.runway import RunwayFutureDefinitionModel
-from runway.core.components import Deployment
+from runway.core.components._deployment import Deployment
 from runway.exceptions import UnresolvedVariable
 from runway.variables import Variable
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from runway.core.type_defs import RunwayActionTypeDef
@@ -100,7 +100,7 @@ class TestDeployment:
     def test_assume_role_config(
         self,
         config: str,
-        expected: Dict[str, Any],
+        expected: dict[str, Any],
         fx_deployments: YamlLoaderDeployment,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -129,13 +129,12 @@ class TestDeployment:
         )
 
         with pytest.raises(UnresolvedVariable):
-            obj = Deployment(
+            assert not Deployment(
                 context=runway_context,
                 definition=RunwayDeploymentDefinition.parse_obj(
-                    cast(Dict[str, Any], fx_deployments.get("min_required"))
+                    cast(dict[str, Any], fx_deployments.get("min_required"))
                 ),
-            )
-            assert not obj.env_vars_config
+            ).env_vars_config
 
     def test_env_vars_config_unresolved(
         self,
@@ -162,7 +161,7 @@ class TestDeployment:
         )
         variable = Mock(value=expected)
 
-        raw_deployment: Dict[str, Any] = cast(Dict[str, Any], fx_deployments.get("min_required"))
+        raw_deployment: dict[str, Any] = cast(dict[str, Any], fx_deployments.get("min_required"))
         deployment = RunwayDeploymentDefinition.parse_obj(raw_deployment)
         obj = Deployment(context=runway_context, definition=deployment)
         obj.definition._vars.update({"env_vars": variable})
@@ -183,7 +182,7 @@ class TestDeployment:
     def test_regions(
         self,
         config: str,
-        expected: List[str],
+        expected: list[str],
         fx_deployments: YamlLoaderDeployment,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -228,7 +227,7 @@ class TestDeployment:
 
     def test_deploy_async(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -263,7 +262,7 @@ class TestDeployment:
 
     def test_deploy_sync(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -313,7 +312,7 @@ class TestDeployment:
     def test_init(
         self,
         async_used: bool,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -342,7 +341,7 @@ class TestDeployment:
     def test_plan(
         self,
         async_used: bool,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -407,11 +406,9 @@ class TestDeployment:
     ) -> None:
         """Test run async."""
         mocker.patch(f"{MODULE}.aws")
-        # ensure that mock.MagicMock is used for backported features
         mock_module = mocker.patch(f"{MODULE}.Module", MagicMock())
         definition = fx_deployments.load("simple_parallel_regions")
         runway_context._use_concurrent = True
-        # ensure that mock.MagicMock is used for backported features
         mock_resolve = mocker.patch.object(definition, "resolve", MagicMock())
         mocker.patch.object(Deployment, "validate_account_credentials")
         obj = Deployment(context=runway_context, definition=definition)
@@ -420,15 +417,15 @@ class TestDeployment:
 
         new_ctx = mock_resolve.call_args.args[0]
         assert new_ctx != runway_context
-        assert new_ctx.command == "destroy" and runway_context.command != "destroy"
-        assert (
-            new_ctx.env.aws_region == "us-west-2" and runway_context.env.aws_region != "us-west-2"
-        )
+        assert new_ctx.command == "destroy"
+        assert runway_context.command != "destroy"
+        assert new_ctx.env.aws_region == "us-west-2"
+        assert runway_context.env.aws_region != "us-west-2"
         assert mock_module.run_list.call_args.kwargs["context"] == new_ctx
 
     def test_validate_account_credentials(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         fx_deployments: YamlLoaderDeployment,
         runway_context: MockRunwayContext,

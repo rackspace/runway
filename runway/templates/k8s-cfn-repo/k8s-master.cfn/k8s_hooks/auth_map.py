@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 from runway.cfngin.lookups.handlers.output import OutputLookup
 
@@ -36,7 +36,9 @@ def get_principal_arn(context: CfnginContext) -> str:
     return assumed_role_to_principle(caller_identity_arn)
 
 
-def generate(context: CfnginContext, *, filename: str, path: List[str], stack: str, **_: Any):
+def generate(
+    context: CfnginContext, *, filename: str, path: list[str], stack: str, **_: Any
+) -> bool:
     """Generate an EKS auth_map for worker connection.
 
     Args:
@@ -51,7 +53,7 @@ def generate(context: CfnginContext, *, filename: str, path: List[str], stack: s
     """
     overlay_path = Path(*path)
     file_path = overlay_path / filename
-    if os.path.exists(filename):
+    if os.path.exists(filename):  # noqa: PTH110
         LOGGER.info("%s file present; skipping initial creation", file_path)
         return True
     LOGGER.info("Creating auth_map at %s", file_path)
@@ -67,7 +69,7 @@ def generate(context: CfnginContext, *, filename: str, path: List[str], stack: s
     return True
 
 
-def remove(*, path: List[str], filename: str, **_: Any) -> bool:
+def remove(*, path: list[str], filename: str, **_: Any) -> bool:
     """Remove an EKS auth_map for worker connection.
 
     For use after destroying a cluster.

@@ -17,7 +17,7 @@ class TestRunwayVariablesDefinition:
         """Test init with no file."""
         assert not RunwayVariablesDefinition.parse_obj({"sys_path": cd_tmp_path})
 
-    @pytest.mark.parametrize("filename", ("runway.variables.yml", "runway.variables.yaml"))
+    @pytest.mark.parametrize("filename", ["runway.variables.yml", "runway.variables.yaml"])
     def test_init_autofind_file(self, cd_tmp_path: Path, filename: str) -> None:
         """Test init autofind file."""
         data = {"key": "val"}

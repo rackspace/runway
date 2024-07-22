@@ -4,14 +4,14 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final
 
 from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ...providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)

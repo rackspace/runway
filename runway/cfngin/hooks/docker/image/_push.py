@@ -7,10 +7,11 @@ Replicates the functionality of the ``docker image push`` CLI command.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import Any, List, Optional  # noqa: UP035
 
 from pydantic import Field, validator
 
+from .....context import CfnginContext
 from .....utils import BaseModel
 from ..data_models import (
     DockerImage,
@@ -18,9 +19,6 @@ from ..data_models import (
     ElasticContainerRegistryRepository,
 )
 from ..hook_data import DockerHookData
-
-if TYPE_CHECKING:
-    from .....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
@@ -46,11 +44,11 @@ class ImagePushArgs(BaseModel):
     repo: Optional[str] = None  # depends on ecr_repo & image
     """URI of a non Docker Hub repository where the image will be stored."""
 
-    tags: List[str] = []  # depends on image
+    tags: List[str] = []  # depends on image  # noqa: UP006
     """List of tags to push."""
 
     @validator("ecr_repo", pre=True, allow_reuse=True)
-    def _set_ecr_repo(cls, v: Any, values: Dict[str, Any]) -> Any:
+    def _set_ecr_repo(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Set the value of ``ecr_repo``."""
         if v and isinstance(v, dict):
             return ElasticContainerRegistryRepository.parse_obj(
@@ -69,28 +67,28 @@ class ImagePushArgs(BaseModel):
         return v
 
     @validator("repo", pre=True, always=True, allow_reuse=True)
-    def _set_repo(cls, v: Optional[str], values: Dict[str, Any]) -> Optional[str]:
+    def _set_repo(cls, v: str | None, values: dict[str, Any]) -> str | None:  # noqa: N805
         """Set the value of ``repo``."""
         if v:
             return v
 
-        image: Optional[DockerImage] = values.get("image")
+        image: DockerImage | None = values.get("image")
         if image:
             return image.repo
 
-        ecr_repo: Optional[ElasticContainerRegistryRepository] = values.get("ecr_repo")
+        ecr_repo: ElasticContainerRegistryRepository | None = values.get("ecr_repo")
         if ecr_repo:
             return ecr_repo.fqn
 
         return None
 
     @validator("tags", pre=True, always=True, allow_reuse=True)
-    def _set_tags(cls, v: List[str], values: Dict[str, Any]) -> List[str]:
+    def _set_tags(cls, v: list[str], values: dict[str, Any]) -> list[str]:  # noqa: N805
         """Set the value of ``tags``."""
         if v:
             return v
 
-        image: Optional[DockerImage] = values.get("image")
+        image: DockerImage | None = values.get("image")
         if image:
             return image.tags
 

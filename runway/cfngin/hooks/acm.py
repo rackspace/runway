@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional  # noqa: UP035
 
 from botocore.exceptions import ClientError
 from troposphere import Ref
 from troposphere.certificatemanager import Certificate as CertificateResource
-from typing_extensions import Literal
 
 from ...utils import MutableMap
 from ..blueprints.variables.types import CFNString
@@ -23,6 +22,7 @@ if TYPE_CHECKING:
     from mypy_boto3_acm.type_defs import ResourceRecordTypeDef
     from mypy_boto3_route53.client import Route53Client
     from mypy_boto3_route53.type_defs import ChangeTypeDef
+    from typing_extensions import Literal
 
     from ...context import CfnginContext
     from ..blueprints.base import Blueprint
@@ -36,7 +36,7 @@ LOGGER = logging.getLogger(__name__)
 class HookArgs(HookArgsBaseModel):
     """Hook arguments."""
 
-    alt_names: List[str] = []
+    alt_names: List[str] = []  # noqa: UP006
     domain: str
     hosted_zone_id: str
     stack_name: Optional[str] = None
@@ -47,7 +47,7 @@ class Certificate(Hook):
     r"""Hook for managing a **AWS::CertificateManager::Certificate**.
 
     Keyword Args:
-        alt_names (Optional[List[str]]): Additional FQDNs to be included in the
+        alt_names (Optional[list[str]]): Additional FQDNs to be included in the
             Subject Alternative Name extension of the ACM certificate. For
             example, you can add www.example.net to a certificate for which the
             domain field is www.example.com if users can reach your site by
@@ -80,7 +80,7 @@ class Certificate(Hook):
 
     """
 
-    ARGS_PARSER: ClassVar[Type[HookArgs]] = HookArgs
+    ARGS_PARSER: ClassVar[type[HookArgs]] = HookArgs
 
     acm_client: ACMClient
     args: HookArgs
@@ -95,6 +95,7 @@ class Certificate(Hook):
         Args:
             context: Context instance. (passed in by CFNgin)
             provider: Provider instance. (passed in by CFNgin)
+            **kwargs: Arbitrary keyword arguments.
 
         """
         super().__init__(context, provider, **kwargs)
@@ -103,12 +104,10 @@ class Certificate(Hook):
         self.stack_name = self.args.stack_name or self.args.domain.replace(".", "-")
 
         self.properties = MutableMap(
-            **{
-                "DomainName": self.args.domain,
-                "SubjectAlternativeNames": self.args.alt_names,
-                "Tags": self.tags,
-                "ValidationMethod": "DNS",
-            }
+            DomainName=self.args.domain,
+            SubjectAlternativeNames=self.args.alt_names,
+            Tags=self.tags,
+            ValidationMethod="DNS",
         )
         self.blueprint = self._create_blueprint()
 
@@ -165,7 +164,7 @@ class Certificate(Hook):
                 return False
             if self.args.domain != self.provider.get_outputs(self.stack.fqn)["DomainName"]:
                 LOGGER.error(
-                    '"domain" can\'t be changed for existing ' 'certificate in stack "%s"',
+                    '"domain" can\'t be changed for existing certificate in stack "%s"',
                     self.stack.fqn,
                 )
                 return True
@@ -191,10 +190,9 @@ class Certificate(Hook):
         response = self.provider.cloudformation.describe_stack_resources(
             StackName=self.stack.fqn, LogicalResourceId="Certificate"
         )["StackResources"]
-        if response:
-            # can be returned without having a PhysicalResourceId
-            if "PhysicalResourceId" in response[0]:
-                return response[0]["PhysicalResourceId"]
+        # can be returned without having a PhysicalResourceId
+        if response and "PhysicalResourceId" in response[0]:
+            return response[0]["PhysicalResourceId"]
         LOGGER.debug("waiting for certificate to be created...")
         time.sleep(interval)
         return self.get_certificate(interval=interval)
@@ -228,7 +226,7 @@ class Certificate(Hook):
             ]
         except KeyError:
             LOGGER.debug(
-                "waiting for DomainValidationOptions to become " "available for the certificate..."
+                "waiting for DomainValidationOptions to become available for the certificate..."
             )
             time.sleep(interval)
             return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
@@ -264,7 +262,7 @@ class Certificate(Hook):
         self.__change_record_set("CREATE", [record_set])
 
     def remove_validation_records(
-        self, records: Optional[List[ResourceRecordTypeDef]] = None
+        self, records: Optional[list[ResourceRecordTypeDef]] = None
     ) -> None:
         """Remove all record set entries used to validate an ACM Certificate.
 
@@ -305,7 +303,7 @@ class Certificate(Hook):
     def __change_record_set(
         self,
         action: Literal["CREATE", "DELETE", "UPSERT"],
-        record_sets: List[ResourceRecordTypeDef],
+        record_sets: list[ResourceRecordTypeDef],
     ) -> None:
         """Wrap boto3.client('acm').change_resource_record_sets.
 
@@ -317,7 +315,7 @@ class Certificate(Hook):
         if not record_sets:
             raise ValueError("Must provide one of more record sets")
 
-        changes: List[ChangeTypeDef] = [
+        changes: list[ChangeTypeDef] = [
             {
                 "Action": action,
                 "ResourceRecordSet": {
@@ -341,7 +339,7 @@ class Certificate(Hook):
             ChangeBatch={"Comment": self.template_description, "Changes": changes},
         )
 
-    def deploy(self, status: Optional[Status] = None) -> Dict[str, str]:
+    def deploy(self, status: Optional[Status] = None) -> dict[str, str]:
         """Deploy an ACM Certificate."""
         record = None
         try:
@@ -406,7 +404,7 @@ class Certificate(Hook):
 
     def destroy(
         self,
-        records: Optional[List[ResourceRecordTypeDef]] = None,
+        records: Optional[list[ResourceRecordTypeDef]] = None,
         skip_r53: bool = False,
     ) -> bool:
         """Destroy an ACM certificate.
@@ -440,7 +438,7 @@ class Certificate(Hook):
         self.destroy_stack(wait=True)
         return True
 
-    def post_deploy(self) -> Dict[str, str]:
+    def post_deploy(self) -> dict[str, str]:
         """Run during the **post_deploy** stage."""
         return self.deploy()
 
@@ -448,7 +446,7 @@ class Certificate(Hook):
         """Run during the **post_destroy** stage."""
         return self.destroy()
 
-    def pre_deploy(self) -> Dict[str, str]:
+    def pre_deploy(self) -> dict[str, str]:
         """Run during the **pre_deploy** stage."""
         return self.deploy()
 

@@ -2,7 +2,7 @@
 
 # pyright: basic
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 import yaml
@@ -214,7 +214,7 @@ class TestRunwayDeploymentDefinitionModel:
     )
     def test_fields_string_lookup_only(self, field: str) -> None:
         """Test fields that support strings only for lookups."""
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
         if field not in ["parallel_regions", "regions"]:
             data["regions"] = ["us-east-1"]
         data[field] = "something"

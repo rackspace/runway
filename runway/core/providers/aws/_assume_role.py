@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import logging
+from contextlib import AbstractContextManager
 from datetime import datetime
-from typing import TYPE_CHECKING, ContextManager, Optional, Type, cast
+from typing import TYPE_CHECKING, cast
 
 from typing_extensions import TypedDict
 
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from mypy_boto3_sts.type_defs import AssumedRoleUserTypeDef, CredentialsTypeDef
+    from typing_extensions import Self
 
     from ...._logging import RunwayLogger
     from ....context import RunwayContext
@@ -19,10 +21,14 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
-_KwargsTypeDef = TypedDict("_KwargsTypeDef", DurationSeconds=int, RoleArn=str, RoleSessionName=str)
+
+class _KwargsTypeDef(TypedDict):
+    DurationSeconds: int
+    RoleArn: str
+    RoleSessionName: str
 
 
-class AssumeRole(ContextManager["AssumeRole"]):
+class AssumeRole(AbstractContextManager["AssumeRole"]):
     """Context manager for assuming an AWS role."""
 
     assumed_role_user: AssumedRoleUserTypeDef
@@ -35,11 +41,11 @@ class AssumeRole(ContextManager["AssumeRole"]):
     def __init__(
         self,
         context: RunwayContext,
-        role_arn: Optional[str] = None,
-        duration_seconds: Optional[int] = None,
+        role_arn: str | None = None,
+        duration_seconds: int | None = None,
         revert_on_exit: bool = True,
-        session_name: Optional[str] = None,
-    ):
+        session_name: str | None = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -106,7 +112,7 @@ class AssumeRole(ContextManager["AssumeRole"]):
         if not self.role_arn:
             LOGGER.debug("no role was assumed; not reverting credentials")
             return
-        for k in self.ctx.current_aws_creds.keys():
+        for k in self.ctx.current_aws_creds:
             old = "OLD_" + k
             if self.ctx.env.vars.get(old):
                 self.ctx.env.vars[k] = self.ctx.env.vars.pop(old)
@@ -122,7 +128,7 @@ class AssumeRole(ContextManager["AssumeRole"]):
             LOGGER.debug('saving environment variable "%s" as "%s"', k, new)
             self.ctx.env.vars[new] = cast(str, v)
 
-    def __enter__(self) -> AssumeRole:
+    def __enter__(self) -> Self:
         """Enter the context manager."""
         LOGGER.debug("entering aws.AssumeRole context manager...")
         self.assume()
@@ -130,9 +136,9 @@ class AssumeRole(ContextManager["AssumeRole"]):
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         """Exit the context manager."""
         if self.revert_on_exit:

@@ -12,13 +12,13 @@ from runway.exceptions import FailedVariableLookup
 from runway.variables import Variable
 
 if TYPE_CHECKING:
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 
 class TestHookDataLookup:
     """Tests for runway.cfngin.lookups.handlers.hook_data.HookDataLookup."""
 
-    def test_handle(self, cfngin_context: MockCFNginContext) -> None:
+    def test_handle(self, cfngin_context: MockCfnginContext) -> None:
         """Test handle with simple usage."""
         cfngin_context.set_hook_data("fake_hook", {"nested": {"result": "good"}})
         var_top = Variable("test", "${hook_data fake_hook}", variable_type="cfngin")
@@ -31,7 +31,7 @@ class TestHookDataLookup:
         assert var_top.value == {"nested": {"result": "good"}}
         assert var_nested.value == "good"
 
-    def test_default(self, cfngin_context: MockCFNginContext) -> None:
+    def test_default(self, cfngin_context: MockCfnginContext) -> None:
         """Test handle with a default value."""
         cfngin_context.set_hook_data("fake_hook", {"nested": {"result": "good"}})
         var_top = Variable(
@@ -48,7 +48,7 @@ class TestHookDataLookup:
         assert var_top.value == "something"
         assert var_nested.value == "something"
 
-    def test_not_found(self, cfngin_context: MockCFNginContext) -> None:
+    def test_not_found(self, cfngin_context: MockCfnginContext) -> None:
         """Test value not found and no default."""
         variable = Variable("test", "${hook_data fake_hook.bad.result}", variable_type="cfngin")
         with pytest.raises(FailedVariableLookup) as err:
@@ -59,7 +59,7 @@ class TestHookDataLookup:
         )
         assert "Could not find a value for" in str(err.value.__cause__)
 
-    def test_troposphere(self, cfngin_context: MockCFNginContext) -> None:
+    def test_troposphere(self, cfngin_context: MockCfnginContext) -> None:
         """Test with troposphere object like returned from lambda hook."""
         bucket = "test-bucket"
         s3_key = "lambda_functions/my_function"

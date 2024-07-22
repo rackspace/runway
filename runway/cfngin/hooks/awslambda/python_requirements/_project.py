@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import logging
 import shutil
-from typing import TYPE_CHECKING, ClassVar, Optional, Set, Tuple
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from .....compat import cached_property
 from .....dependency_managers import (
@@ -23,6 +21,8 @@ from . import PythonDockerDependencyInstaller
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from typing_extensions import Literal
+
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
@@ -38,7 +38,7 @@ class PythonProject(Project[PythonHookArgs]):
         return PythonDockerDependencyInstaller.from_project(self)
 
     @cached_property
-    def metadata_files(self) -> Tuple[Path, ...]:
+    def metadata_files(self) -> tuple[Path, ...]:
         """Project metadata files.
 
         Files are only included in return value if they exist.
@@ -133,7 +133,7 @@ class PythonProject(Project[PythonHookArgs]):
         return None
 
     @cached_property
-    def supported_metadata_files(self) -> Set[str]:
+    def supported_metadata_files(self) -> set[str]:
         """Names of all supported metadata files.
 
         Returns:

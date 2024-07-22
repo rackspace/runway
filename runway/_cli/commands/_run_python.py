@@ -33,7 +33,7 @@ def run_python(filename: str, **_: Any) -> None:
     execglobals = globals().copy()
     # override name & file so script operates as if it were invoked directly
     execglobals.update({"__name__": "__main__", "__file__": filename})
-    exec(
+    exec(  # noqa: S102
         Path(filename).read_text(encoding=locale.getpreferredencoding(do_setlocale=False)),
         execglobals,
         execglobals,

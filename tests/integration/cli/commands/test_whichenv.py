@@ -13,10 +13,10 @@ from runway._cli import cli
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
+    import pytest
 
 
-def test_whichenv(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
+def test_whichenv(caplog: pytest.LogCaptureFixture, cd_tmp_path: Path) -> None:
     """Test ``runway whichenv``."""
     caplog.set_level(logging.DEBUG, logger="runway")
     runway_yml = cd_tmp_path / "runway.yml"
@@ -27,7 +27,7 @@ def test_whichenv(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
     assert result.output == cd_tmp_path.name + "\n"
 
 
-def test_whichenv_debug(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
+def test_whichenv_debug(caplog: pytest.LogCaptureFixture, cd_tmp_path: Path) -> None:
     """Test ``runway whichenv`` debug."""
     caplog.set_level(logging.DEBUG, logger="runway")
     runway_yml = cd_tmp_path / "runway.yml"
@@ -39,7 +39,7 @@ def test_whichenv_debug(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
     assert "set dependency log level to debug" not in caplog.messages
 
 
-def test_whichenv_debug_debug(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
+def test_whichenv_debug_debug(caplog: pytest.LogCaptureFixture, cd_tmp_path: Path) -> None:
     """Test ``runway whichenv`` debug."""
     caplog.set_level(logging.DEBUG, logger="runway")
     runway_yml = cd_tmp_path / "runway.yml"

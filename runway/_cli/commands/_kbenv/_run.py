@@ -3,7 +3,7 @@
 # docs: file://./../../../../docs/source/commands.rst
 import logging
 import subprocess
-from typing import Any, Tuple
+from typing import Any
 
 import click
 
@@ -19,7 +19,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.no_color
 @options.verbose
 @click.pass_context
-def run(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
+def run(ctx: click.Context, args: tuple[str, ...], **_: Any) -> None:
     """Run a kubectl command.
 
     Uses the version of kubectl specified in the ".kubectl-version" file
@@ -29,4 +29,4 @@ def run(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
     before the kubectl command.
 
     """
-    ctx.exit(subprocess.call([KBEnvManager().install()] + list(args)))
+    ctx.exit(subprocess.call([KBEnvManager().install(), *list(args)]))

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging as _logging
 import sys as _sys
 import traceback as _traceback
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml as _yaml
 
@@ -48,7 +48,7 @@ class Runway:
         self.__assert_config_version()
         self.ctx.env.log_name()
 
-    def deploy(self, deployments: Optional[List[RunwayDeploymentDefinition]] = None) -> None:
+    def deploy(self, deployments: list[RunwayDeploymentDefinition] | None = None) -> None:
         """Deploy action.
 
         Args:
@@ -58,7 +58,7 @@ class Runway:
         """
         self.__run_action("deploy", deployments if deployments is not None else self.deployments)
 
-    def destroy(self, deployments: Optional[List[RunwayDeploymentDefinition]] = None) -> None:
+    def destroy(self, deployments: list[RunwayDeploymentDefinition] | None = None) -> None:
         """Destroy action.
 
         Args:
@@ -79,8 +79,8 @@ class Runway:
             self.reverse_deployments(self.deployments)
 
     def get_env_vars(
-        self, deployments: Optional[List[RunwayDeploymentDefinition]] = None
-    ) -> Dict[str, Any]:
+        self, deployments: list[RunwayDeploymentDefinition] | None = None
+    ) -> dict[str, Any]:
         """Get env_vars defined in the config.
 
         Args:
@@ -91,7 +91,7 @@ class Runway:
 
         """
         deployments = deployments or self.deployments
-        result: Dict[str, str] = {}
+        result: dict[str, str] = {}
         for deployment in deployments:
             obj = components.Deployment(
                 context=self.ctx, definition=deployment, variables=self.variables
@@ -99,7 +99,7 @@ class Runway:
             result.update(obj.env_vars_config)
         return result
 
-    def init(self, deployments: Optional[List[RunwayDeploymentDefinition]] = None) -> None:
+    def init(self, deployments: list[RunwayDeploymentDefinition] | None = None) -> None:
         """Init action.
 
         Args:
@@ -109,7 +109,7 @@ class Runway:
         """
         self.__run_action("init", deployments if deployments is not None else self.deployments)
 
-    def plan(self, deployments: Optional[List[RunwayDeploymentDefinition]] = None) -> None:
+    def plan(self, deployments: list[RunwayDeploymentDefinition] | None = None) -> None:
         """Plan action.
 
         Args:
@@ -121,8 +121,8 @@ class Runway:
 
     @staticmethod
     def reverse_deployments(
-        deployments: List[RunwayDeploymentDefinition],
-    ) -> List[RunwayDeploymentDefinition]:
+        deployments: list[RunwayDeploymentDefinition],
+    ) -> list[RunwayDeploymentDefinition]:
         """Reverse deployments and the modules within them.
 
         Args:
@@ -132,7 +132,7 @@ class Runway:
             Deployments and modules in reverse order.
 
         """
-        result: List[RunwayDeploymentDefinition] = []
+        result: list[RunwayDeploymentDefinition] = []
         for deployment in deployments:
             deployment.reverse()
             result.insert(0, deployment)
@@ -166,7 +166,7 @@ class Runway:
             _sys.exit(1)
         self.ctx.command = "test"
 
-        failed_tests: List[str] = []
+        failed_tests: list[str] = []
 
         LOGGER.info("found %i test(s)", len(self.tests))
         for tst in self.tests:
@@ -203,7 +203,7 @@ class Runway:
             _sys.exit(1)
         LOGGER.success("all tests passed")
 
-    def __assert_config_version(self):
+    def __assert_config_version(self) -> None:
         """Assert the config supports this version of Runway."""
         if not self.required_version:
             LOGGER.debug("required Runway version not specified")
@@ -231,7 +231,7 @@ class Runway:
     def __run_action(
         self,
         action: type_defs.RunwayActionTypeDef,
-        deployments: Optional[List[RunwayDeploymentDefinition]],
+        deployments: list[RunwayDeploymentDefinition] | None,
     ) -> None:
         """Run an action on a list of deployments.
 

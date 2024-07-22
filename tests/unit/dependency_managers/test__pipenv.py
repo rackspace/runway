@@ -4,17 +4,16 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.dependency_managers import Pipenv, PipenvExportFailedError
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 MODULE = "runway.dependency_managers._pipenv"
@@ -33,7 +32,7 @@ class TestPipenv:
     )
     def test_dir_is_project(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         lock_exists: bool,
         pipfile_exists: bool,
         tmp_path: Path,
@@ -61,7 +60,7 @@ class TestPipenv:
     )
     def test_export(
         self,
-        export_kwargs: Dict[str, Any],
+        export_kwargs: dict[str, Any],
         mocker: MockerFixture,
         tmp_path: Path,
     ) -> None:

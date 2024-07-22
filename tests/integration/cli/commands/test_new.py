@@ -13,10 +13,10 @@ from runway._cli import cli
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
+    import pytest
 
 
-def test_new(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
+def test_new(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     """Test ``runway new`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
     runner = CliRunner()
@@ -36,7 +36,7 @@ def test_new(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
     ]
 
 
-def test_new_file_exists(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
+def test_new_file_exists(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     """Test ``runway new`` command with existing file."""
     caplog.set_level(logging.ERROR, logger="runway.cli")
     (cd_tmp_path / "runway.yml").touch()

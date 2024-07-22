@@ -4,25 +4,16 @@ from __future__ import annotations
 
 import collections
 import collections.abc
+import contextlib
 import logging
+from collections import OrderedDict
 from copy import copy, deepcopy
 from threading import Thread
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    List,
-    OrderedDict,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Callable, Union, cast
 
 if TYPE_CHECKING:
     import threading
+    from collections.abc import Iterable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +25,7 @@ class DAGValidationError(Exception):
 class DAG:
     """Directed acyclic graph implementation."""
 
-    graph: OrderedDict[str, Set[str]]
+    graph: OrderedDict[str, set[str]]
 
     def __init__(self) -> None:
         """Instantiate a new DAG with no nodes or edges."""
@@ -54,7 +45,7 @@ class DAG:
         graph = self.graph
         if node_name in graph:
             raise KeyError(f"node {node_name} already exists")
-        graph[node_name] = cast(Set[str], set())
+        graph[node_name] = cast(set[str], set())
 
     def add_node_if_not_exists(self, node_name: str) -> None:
         """Add a node if it does not exist yet, ignoring duplicates.
@@ -63,10 +54,8 @@ class DAG:
             node_name: The name of the node to add.
 
         """
-        try:
+        with contextlib.suppress(KeyError):
             self.add_node(node_name)
-        except KeyError:
-            pass
 
     def delete_node(self, node_name: str) -> None:
         """Delete this node and all edges referencing it.
@@ -83,7 +72,7 @@ class DAG:
             raise KeyError(f"node {node_name} does not exist")
         graph.pop(node_name)
 
-        for _node, edges in graph.items():
+        for edges in graph.values():
             if node_name in edges:
                 edges.remove(node_name)
 
@@ -97,10 +86,8 @@ class DAG:
             node_name: The name of the node to delete.
 
         """
-        try:
+        with contextlib.suppress(KeyError):
             self.delete_node(node_name)
-        except KeyError:
-            pass
 
     def add_edge(self, ind_node: str, dep_node: str) -> None:
         """Add an edge (dependency) between the specified nodes.
@@ -150,7 +137,7 @@ class DAG:
         """Build a new graph with the edges reversed."""
         graph = self.graph
         transposed = DAG()
-        for node, _edges in graph.items():
+        for node in graph:
             transposed.add_node(node)
         for node, edges in graph.items():
             # for each edge A -> B, transpose it so that B -> A
@@ -185,12 +172,12 @@ class DAG:
         See https://en.wikipedia.org/wiki/Transitive_reduction
 
         """
-        combinations: List[List[str]] = []
+        combinations: list[list[str]] = []
         for node, edges in self.graph.items():
             combinations += [[node, edge] for edge in edges]
 
         while True:
-            new_combinations: List[List[str]] = []
+            new_combinations: list[list[str]] = []
             for comb1 in combinations:
                 for comb2 in combinations:
                     if comb1[-1] != comb2[0]:
@@ -221,25 +208,24 @@ class DAG:
                 graph[new_node_name] = copy(edges)
                 del graph[old_node_name]
 
-            else:
-                if old_node_name in edges:
-                    edges.remove(old_node_name)
-                    edges.add(new_node_name)
+            elif old_node_name in edges:
+                edges.remove(old_node_name)
+                edges.add(new_node_name)
 
-    def predecessors(self, node: str) -> List[str]:
+    def predecessors(self, node: str) -> list[str]:
         """Return a list of all immediate predecessors of the given node.
 
         Args:
             node (str): The node whose predecessors you want to find.
 
         Returns:
-            List[str]: A list of nodes that are immediate predecessors to node.
+            list[str]: A list of nodes that are immediate predecessors to node.
 
         """
         graph = self.graph
         return [key for key in graph if node in graph[key]]
 
-    def downstream(self, node: str) -> List[str]:
+    def downstream(self, node: str) -> list[str]:
         """Return a list of all nodes this node has edges towards.
 
         Args:
@@ -254,7 +240,7 @@ class DAG:
             raise KeyError(f"node {node} is not in graph")
         return list(graph[node])
 
-    def all_downstreams(self, node: str) -> List[str]:
+    def all_downstreams(self, node: str) -> list[str]:
         """Return a list of all nodes downstream in topological order.
 
         Args:
@@ -265,7 +251,7 @@ class DAG:
 
         """
         nodes = [node]
-        nodes_seen: Set[str] = set()
+        nodes_seen: set[str] = set()
         nodes_iter = nodes
         for node__ in nodes_iter:
             downstreams = self.downstream(node__)
@@ -275,7 +261,7 @@ class DAG:
                     nodes.append(downstream_node)
         return [node_ for node_ in self.topological_sort() if node_ in nodes_seen]
 
-    def filter(self, nodes: List[str]) -> DAG:
+    def filter(self, nodes: list[str]) -> DAG:
         """Return a new DAG with only the given nodes and their dependencies.
 
         Args:
@@ -297,12 +283,12 @@ class DAG:
 
         return filtered_dag
 
-    def all_leaves(self) -> List[str]:
+    def all_leaves(self) -> list[str]:
         """Return a list of all leaves (nodes with no downstreams)."""
         graph = self.graph
         return [key for key in graph if not graph[key]]
 
-    def from_dict(self, graph_dict: Dict[str, Union[Iterable[str], Any]]) -> None:
+    def from_dict(self, graph_dict: dict[str, Union[Iterable[str], Any]]) -> None:
         """Reset the graph and build it from the passed dictionary.
 
         The dictionary takes the form of {node_name: [directed edges]}
@@ -327,7 +313,7 @@ class DAG:
         """Restore the graph to an empty state."""
         self.graph = collections.OrderedDict()
 
-    def ind_nodes(self) -> List[str]:
+    def ind_nodes(self) -> list[str]:
         """Return a list of all nodes in the graph with no dependencies."""
         graph = self.graph
 
@@ -335,7 +321,7 @@ class DAG:
 
         return [node_ for node_ in graph if node_ not in dependent_nodes]
 
-    def validate(self) -> Tuple[bool, str]:
+    def validate(self) -> tuple[bool, str]:
         """Return (Boolean, message) of whether DAG is valid."""
         if not self.ind_nodes():
             return (False, "no independent nodes detected")
@@ -345,7 +331,7 @@ class DAG:
             return False, str(err)
         return True, "valid"
 
-    def topological_sort(self) -> List[str]:
+    def topological_sort(self) -> list[str]:
         """Return a topological ordering of the DAG.
 
         Raises:
@@ -359,12 +345,12 @@ class DAG:
             for val in graph[node]:
                 in_degree[val] += 1
 
-        queue: "collections.deque[str]" = collections.deque()
+        queue: collections.deque[str] = collections.deque()
         for node, value in in_degree.items():
             if value == 0:
                 queue.appendleft(node)
 
-        sorted_graph: List[str] = []
+        sorted_graph: list[str] = []
         while queue:
             node = queue.pop()
             sorted_graph.append(node)
@@ -404,7 +390,7 @@ class UnlimitedSemaphore:
 class ThreadedWalker:
     """Walk a DAG as quickly as the graph topology allows, using threads."""
 
-    def __init__(self, semaphore: Union[threading.Semaphore, UnlimitedSemaphore]):
+    def __init__(self, semaphore: Union[threading.Semaphore, UnlimitedSemaphore]) -> None:
         """Instantiate class.
 
         Args:
@@ -431,11 +417,11 @@ class ThreadedWalker:
         nodes.reverse()
 
         # This maps a node name to a thread of execution.
-        threads: Dict[str, Any] = {}
+        threads: dict[str, Any] = {}
 
         # Blocks until all of the given nodes have completed execution (whether
         # successfully, or errored). Returns True if all nodes returned True.
-        def wait_for(nodes: List[str]):
+        def wait_for(nodes: list[str]) -> None:
             """Wait for nodes."""
             for node in nodes:
                 thread = threads[node]
@@ -447,7 +433,7 @@ class ThreadedWalker:
         # nodes dependencies have executed.
         for node in nodes:
 
-            def _fn(node_: str, deps: List[str]) -> Any:
+            def _fn(node_: str, deps: list[str]) -> Any:
                 if deps:
                     LOGGER.debug("%s waiting for %s to complete", node_, ", ".join(deps))
 

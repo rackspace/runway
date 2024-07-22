@@ -9,10 +9,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Generic,
-    List,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -64,14 +61,14 @@ class DictValue(Generic[_OV, _NV]):
         """Compare if self is equal to another object."""
         return self.__dict__ == other.__dict__
 
-    def changes(self) -> List[str]:
+    def changes(self) -> list[str]:
         """Return changes to represent the diff between old and new value.
 
         Returns:
             Representation of the change (if any) between old and new value.
 
         """
-        output: List[str] = []
+        output: list[str] = []
         if self.status() is self.UNMODIFIED:
             output = [self.formatter % (" ", self.key, self.old_value)]
         elif self.status() is self.ADDED:
@@ -95,8 +92,8 @@ class DictValue(Generic[_OV, _NV]):
 
 
 def diff_dictionaries(
-    old_dict: Dict[str, _OV], new_dict: Dict[str, _NV]
-) -> Tuple[int, List[DictValue[_OV, _NV]]]:
+    old_dict: dict[str, _OV], new_dict: dict[str, _NV]
+) -> tuple[int, list[DictValue[_OV, _NV]]]:
     """Calculate the diff two single dimension dictionaries.
 
     Args:
@@ -116,7 +113,7 @@ def diff_dictionaries(
     common_set = old_set & new_set
 
     changes = 0
-    output: List[DictValue[Any, Any]] = []
+    output: list[DictValue[Any, Any]] = []
     for key in added_set:
         changes += 1
         output.append(DictValue(key, None, new_dict[key]))
@@ -134,7 +131,7 @@ def diff_dictionaries(
     return changes, output
 
 
-def format_params_diff(parameter_diff: List[DictValue[Any, Any]]) -> str:
+def format_params_diff(parameter_diff: list[DictValue[Any, Any]]) -> str:
     """Handle the formatting of differences in parameters.
 
     Args:
@@ -155,8 +152,8 @@ def format_params_diff(parameter_diff: List[DictValue[Any, Any]]) -> str:
 
 
 def diff_parameters(
-    old_params: Dict[str, _OV], new_params: Dict[str, _NV]
-) -> List[DictValue[_OV, _NV]]:
+    old_params: dict[str, _OV], new_params: dict[str, _NV]
+) -> list[DictValue[_OV, _NV]]:
     """Compare the old vs. new parameters and returns a "diff".
 
     If there are no changes, we return an empty list.
@@ -195,7 +192,7 @@ class Action(deploy.Action):
         """Run against a step."""
         return self._diff_stack
 
-    def _diff_stack(self, stack: Stack, **_: Any) -> Status:
+    def _diff_stack(self, stack: Stack, **_: Any) -> Status:  # noqa: C901
         """Handle diffing a stack in CloudFormation vs our config."""
         if self.cancel.wait(0):
             return INTERRUPTED
@@ -240,7 +237,7 @@ class Action(deploy.Action):
                 and "length less than or equal to" in err.response["Error"]["Message"]
             ):
                 LOGGER.error(
-                    "%s:template is too large to provide directly to the API; " "S3 must be used",
+                    "%s:template is too large to provide directly to the API; S3 must be used",
                     stack.name,
                 )
                 return SkippedStatus("cfngin_bucket: existing bucket required")
@@ -251,11 +248,11 @@ class Action(deploy.Action):
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,
-        force: bool = False,
-        outline: bool = False,
-        tail: bool = False,
-        upload_disabled: bool = False,
+        dump: bool | str = False,  # noqa: ARG002
+        force: bool = False,  # noqa: ARG002
+        outline: bool = False,  # noqa: ARG002
+        tail: bool = False,  # noqa: ARG002
+        upload_disabled: bool = False,  # noqa: ARG002
         **_kwargs: Any,
     ) -> None:
         """Kicks off the diffing of the stacks in the stack_definitions."""
@@ -271,9 +268,9 @@ class Action(deploy.Action):
     def pre_run(
         self,
         *,
-        dump: Union[bool, str] = False,
-        outline: bool = False,
-        **__kwargs: Any,
+        dump: bool | str = False,  # noqa: ARG002
+        outline: bool = False,  # noqa: ARG002
+        **_kwargs: Any,
     ) -> None:
         """Any steps that need to be taken prior to running the action.
 
@@ -288,7 +285,7 @@ class Action(deploy.Action):
             sys.exit(1)
         if bucket.not_found:
             LOGGER.warning(
-                'cfngin_bucket "%s" does not exist and will be creating ' "during the next deploy",
+                'cfngin_bucket "%s" does not exist and will be creating during the next deploy',
                 bucket.name,
             )
             LOGGER.verbose("proceeding without a cfngin_bucket...")

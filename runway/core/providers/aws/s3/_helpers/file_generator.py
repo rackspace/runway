@@ -7,7 +7,6 @@
 
 from __future__ import annotations
 
-import datetime
 import os
 import stat
 from copy import deepcopy
@@ -17,11 +16,7 @@ from queue import Queue
 from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
-    Generator,
-    List,
     Optional,
-    Tuple,
     Union,
     cast,
 )
@@ -41,6 +36,9 @@ from .utils import (
 )
 
 if TYPE_CHECKING:
+    import datetime
+    from collections.abc import Generator
+
     from mypy_boto3_s3.client import S3Client
     from mypy_boto3_s3.type_defs import HeadObjectOutputTypeDef, ObjectTypeDef
 
@@ -62,7 +60,7 @@ def is_readable(path: Path) -> bool:
             return False
     else:
         try:
-            with open(path, "r", encoding="utf-8"):
+            with open(path, encoding="utf-8"):  # noqa: PTH123
                 pass
         except OSError:
             return False
@@ -87,23 +85,19 @@ def is_special_file(path: Path) -> bool:
     if stat.S_ISFIFO(mode):
         return True
     # Socket.
-    if stat.S_ISSOCK(mode):
-        return True
-    return False
+    return bool(stat.S_ISSOCK(mode))
 
 
-FileStatsDict = TypedDict(
-    "FileStatsDict",
-    src="AnyPath",
-    compare_key=Optional[str],
-    dest_type=Optional["SupportedPathType"],
-    dest=Optional[str],
-    last_update=datetime.datetime,
-    operation_name=Optional[str],
-    response_data=Optional[Union["HeadObjectOutputTypeDef", "ObjectTypeDef"]],
-    size=Optional[int],
-    src_type=Optional["SupportedPathType"],
-)
+class FileStatsDict(TypedDict):
+    src: AnyPath
+    compare_key: str | None
+    dest_type: SupportedPathType | None
+    dest: str | None
+    last_update: datetime.datetime
+    operation_name: str | None
+    response_data: HeadObjectOutputTypeDef | ObjectTypeDef | None
+    size: int | None
+    src_type: SupportedPathType | None
 
 
 @dataclass
@@ -126,21 +120,23 @@ class FileStats:
     """
 
     src: AnyPath
-    compare_key: Optional[str] = None
-    dest: Optional[str] = None
-    dest_type: Optional[SupportedPathType] = None
+    compare_key: str | None = None
+    dest: str | None = None
+    dest_type: SupportedPathType | None = None
     last_update: datetime.datetime = EPOCH_TIME
-    operation_name: Optional[str] = None
-    response_data: Optional[Union[HeadObjectOutputTypeDef, ObjectTypeDef]] = None
-    size: Optional[int] = None
-    src_type: Optional[SupportedPathType] = None
+    operation_name: str | None = None
+    response_data: HeadObjectOutputTypeDef | ObjectTypeDef | None = None
+    size: int | None = None
+    src_type: SupportedPathType | None = None
 
     def dict(self) -> FileStatsDict:
         """Dump contents of object to a dict."""
         return deepcopy(cast(FileStatsDict, self.__dict__))
 
 
-_LastModifiedAndSize = TypedDict("_LastModifiedAndSize", Size=int, LastModified=datetime.datetime)
+class _LastModifiedAndSize(TypedDict):
+    Size: int
+    LastModified: datetime.datetime
 
 
 class FileGenerator:
@@ -151,17 +147,17 @@ class FileGenerator:
 
     """
 
-    result_queue: "Queue[Any]"
+    result_queue: Queue[Any]
 
     def __init__(
         self,
         client: S3Client,
         operation_name: str,
         follow_symlinks: bool = True,
-        page_size: Optional[int] = None,
-        result_queue: Optional["Queue[Any]"] = None,
+        page_size: int | None = None,
+        result_queue: Queue[Any] | None = None,
         request_parameters: Any = None,
-    ):
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -208,7 +204,7 @@ class FileGenerator:
 
     def list_files(
         self, path: AnyPath, dir_op: bool
-    ) -> Generator[Tuple[Path, _LastModifiedAndSize], None, None]:
+    ) -> Generator[tuple[Path, _LastModifiedAndSize], None, None]:
         """Yield the appropriate local file or local files under a directory.
 
         For directories a depth first search is implemented in order to
@@ -228,24 +224,23 @@ class FileGenerator:
                 # using os.listdir instead of Path.iterdir so we can sort the list
                 # but not load the entire tree into memory
                 listdir_names = os.listdir(path)
-                names: List[str] = []
+                names: list[str] = []
                 for name in listdir_names:
                     if (path / name).is_dir():
-                        name = name + os.path.sep
+                        name = name + os.path.sep  # noqa: PLW2901
                     names.append(name)
                 self.normalize_sort(names, os.sep, "/")
                 for name in names:
                     file_path = path / name
                     if file_path.is_dir():
-                        for result in self.list_files(file_path, dir_op):
-                            yield result
+                        yield from self.list_files(file_path, dir_op)
                     else:
                         stats = self.safely_get_file_stats(file_path)
                         if stats:
                             yield stats
 
     @staticmethod
-    def normalize_sort(names: List[str], os_sep: str, character: str) -> None:
+    def normalize_sort(names: list[str], os_sep: str, character: str) -> None:
         """Ensure that the same path separator is used when sorting.
 
         On Windows, the path operator is a backslash as opposed to a forward slash
@@ -259,7 +254,7 @@ class FileGenerator:
         """
         names.sort(key=lambda item: item.replace(os_sep, character))
 
-    def safely_get_file_stats(self, path: Path) -> Optional[Tuple[Path, _LastModifiedAndSize]]:
+    def safely_get_file_stats(self, path: Path) -> tuple[Path, _LastModifiedAndSize] | None:
         """Get file stats with handling for some common errors.
 
         Args:
@@ -276,13 +271,13 @@ class FileGenerator:
         return None
 
     def _validate_update_time(
-        self, update_time: Optional[datetime.datetime], path: Path
+        self, update_time: datetime.datetime | None, path: Path
     ) -> datetime.datetime:
         """Handle missing last modified time."""
         if update_time is None:
             warning = create_warning(
                 path=path,
-                error_message="File has an invalid timestamp. Passing epoch " "time as timestamp.",
+                error_message="File has an invalid timestamp. Passing epoch time as timestamp.",
                 skip_file=False,
             )
             self.result_queue.put(warning)
@@ -296,14 +291,11 @@ class FileGenerator:
         warnings.
 
         """
-        if not self.follow_symlinks:
-            if path.is_dir() and path.is_symlink():
-                # is_symlink returns False if it does not exist
-                return True
-        warning_triggered = self.triggers_warning(path)
-        if warning_triggered:
+        if not self.follow_symlinks and path.is_dir() and path.is_symlink():
+            # is_symlink returns False if it does not exist
             return True
-        return False
+        warning_triggered = self.triggers_warning(path)
+        return bool(warning_triggered)
 
     def triggers_warning(self, path: Path) -> bool:
         """Check the specific types and properties of a file.
@@ -323,7 +315,7 @@ class FileGenerator:
         if is_special_file(path):
             warning = create_warning(
                 path,
-                ("File is character special device, " "block special device, FIFO, or socket."),
+                ("File is character special device, block special device, FIFO, or socket."),
             )
             self.result_queue.put(warning)
             return True
@@ -335,7 +327,7 @@ class FileGenerator:
 
     def list_objects(
         self, s3_path: str, dir_op: bool
-    ) -> Generator[Tuple[str, Union[HeadObjectOutputTypeDef, ObjectTypeDef]], None, None]:
+    ) -> Generator[tuple[str, HeadObjectOutputTypeDef | ObjectTypeDef], None, None]:
         """Yield the appropriate object or objects under a common prefix.
 
         It yields the file's source path, size, and last update.
@@ -375,7 +367,7 @@ class FileGenerator:
                 else:
                     yield source_path, response_data
 
-    def _list_single_object(self, s3_path: str) -> Tuple[str, HeadObjectOutputTypeDef]:
+    def _list_single_object(self, s3_path: str) -> tuple[str, HeadObjectOutputTypeDef]:
         """List single object."""
         # When we know we're dealing with a single object, we can avoid
         # a ListObjects operation (which causes concern for anyone setting
@@ -389,7 +381,7 @@ class FileGenerator:
             return s3_path, {"Size": None, "LastModified": None}  # type: ignore
         bucket, key = find_bucket_key(s3_path)
         try:
-            params: Dict[str, Any] = {"Bucket": bucket, "Key": key}
+            params: dict[str, Any] = {"Bucket": bucket, "Key": key}
             # params.update(self.request_parameters.get("HeadObject", {}))
             response = self._client.head_object(**params)
         except ClientError as exc:

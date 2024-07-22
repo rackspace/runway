@@ -2,7 +2,7 @@
 
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any, Tuple
+from typing import Any
 
 import click
 from pydantic import ValidationError
@@ -23,7 +23,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def plan(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> None:
+def plan(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) -> None:
     """Determine what infrastructure changes will occur during the next deploy.
 
     \b
@@ -42,7 +42,7 @@ def plan(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> No
         - (non-interactive) all
     3. Attempt to determine change for deployments/modules in the order defined.
 
-    """
+    """  # noqa: D301
     try:
         Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).plan(
             select_deployments(ctx, ctx.obj.runway_config.deployments, tags)

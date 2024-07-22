@@ -5,15 +5,16 @@ from __future__ import annotations
 import os
 import platform
 import sys
-from typing import Any, ClassVar, Optional, cast
+from typing import Any, ClassVar, cast, final
 
 from ..compat import cached_property
 
 
+@final
 class OsInfo:
     """Information about the operating system running on the current system."""
 
-    __instance: ClassVar[Optional[OsInfo]] = None
+    __instance: ClassVar[OsInfo | None] = None
 
     def __new__(cls, *args: Any, **kwargs: Any) -> OsInfo:
         """Create a new instance of class.
@@ -69,10 +70,11 @@ class OsInfo:
         cls.__instance = None
 
 
+@final
 class SystemInfo:
     """Information about the system running Runway."""
 
-    __instance: ClassVar[Optional[SystemInfo]] = None
+    __instance: ClassVar[SystemInfo | None] = None
 
     def __new__(cls, *args: Any, **kwargs: Any) -> SystemInfo:
         """Create a new instance of class.
@@ -87,9 +89,7 @@ class SystemInfo:
     @cached_property
     def is_frozen(self) -> bool:
         """Whether or not Runway is running from a frozen package (Pyinstaller)."""
-        if getattr(sys, "frozen", False):
-            return True
-        return False
+        return bool(getattr(sys, "frozen", False))
 
     @cached_property
     def os(self) -> OsInfo:

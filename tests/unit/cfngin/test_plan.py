@@ -1,16 +1,17 @@
 """Tests for runway.cfngin.plan."""
 
-# pyright: basic
+# ruff: noqa: SLF001
 from __future__ import annotations
 
 import json
-import os
 import shutil
 import tempfile
 import unittest
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+from unittest import mock
 
-import mock
+import pytest
 
 from runway.cfngin.dag import walk
 from runway.cfngin.exceptions import (
@@ -49,23 +50,23 @@ class TestStep(unittest.TestCase):
 
     def test_status(self) -> None:
         """Test status."""
-        self.assertFalse(self.step.submitted)
-        self.assertFalse(self.step.completed)
+        assert not self.step.submitted
+        assert not self.step.completed
 
         self.step.submit()
-        self.assertEqual(self.step.status, SUBMITTED)
-        self.assertTrue(self.step.submitted)
-        self.assertFalse(self.step.completed)
+        assert self.step.status == SUBMITTED
+        assert self.step.submitted
+        assert not self.step.completed
 
         self.step.complete()
-        self.assertEqual(self.step.status, COMPLETE)
-        self.assertNotEqual(self.step.status, SUBMITTED)
-        self.assertTrue(self.step.submitted)
-        self.assertTrue(self.step.completed)
+        assert self.step.status == COMPLETE
+        assert self.step.status != SUBMITTED
+        assert self.step.submitted
+        assert self.step.completed
 
-        self.assertNotEqual(self.step.status, True)
-        self.assertNotEqual(self.step.status, False)
-        self.assertNotEqual(self.step.status, "banana")
+        assert self.step.status is not True
+        assert self.step.status is not False
+        assert self.step.status != "banana"
 
     def test_from_stack_name(self) -> None:
         """Return step from step name."""
@@ -73,21 +74,21 @@ class TestStep(unittest.TestCase):
         stack_name = "test-stack"
         result = Step.from_stack_name(stack_name, context)
 
-        self.assertIsInstance(result, Step)
-        self.assertEqual(stack_name, result.stack.name)
+        assert isinstance(result, Step)
+        assert stack_name == result.stack.name
 
     def test_from_persistent_graph(self) -> None:
         """Return list of steps from graph dict."""
         context = mock_context()
-        graph_dict: Dict[str, Any] = {"stack1": [], "stack2": ["stack1"]}
+        graph_dict: dict[str, Any] = {"stack1": [], "stack2": ["stack1"]}
         result = Step.from_persistent_graph(graph_dict, context)
 
-        self.assertEqual(2, len(result))
-        self.assertIsInstance(result, list)
+        assert len(result) == 2
+        assert isinstance(result, list)
 
         for step in result:
-            self.assertIsInstance(step, Step)
-            self.assertIn(step.stack.name, graph_dict.keys())
+            assert isinstance(step, Step)
+            assert step.stack.name in graph_dict
 
 
 class TestGraph(unittest.TestCase):
@@ -96,7 +97,7 @@ class TestGraph(unittest.TestCase):
     def setUp(self) -> None:
         """Run before tests."""
         self.context = mock_context()
-        self.graph_dict: Dict[str, Any] = {"stack1": [], "stack2": ["stack1"]}
+        self.graph_dict: dict[str, Any] = {"stack1": [], "stack2": ["stack1"]}
         self.graph_dict_expected = {"stack1": set(), "stack2": {"stack1"}}
         self.steps = Step.from_persistent_graph(self.graph_dict, self.context)
 
@@ -105,9 +106,9 @@ class TestGraph(unittest.TestCase):
         graph = Graph()
         graph.add_steps(self.steps)
 
-        self.assertEqual(self.steps, list(graph.steps.values()))
-        self.assertEqual([step.name for step in self.steps], list(graph.steps.keys()))
-        self.assertEqual(self.graph_dict_expected, graph.to_dict())
+        assert self.steps == list(graph.steps.values())
+        assert [step.name for step in self.steps] == list(graph.steps.keys())
+        assert self.graph_dict_expected == graph.to_dict()
 
     def test_pop(self) -> None:
         """Test pop."""
@@ -116,31 +117,31 @@ class TestGraph(unittest.TestCase):
 
         stack2 = next(step for step in self.steps if step.name == "stack2")
 
-        self.assertEqual(stack2, graph.pop(stack2))
-        self.assertEqual({"stack1": set()}, graph.to_dict())
+        assert stack2 == graph.pop(stack2)
+        assert graph.to_dict() == {"stack1": set()}
 
     def test_dumps(self) -> None:
         """Test dumps."""
         graph = Graph()
         graph.add_steps(self.steps)
 
-        self.assertEqual(json.dumps(self.graph_dict), graph.dumps())
+        assert json.dumps(self.graph_dict) == graph.dumps()
 
     def test_from_dict(self) -> None:
         """Test from dict."""
         graph = Graph.from_dict(self.graph_dict, self.context)
 
-        self.assertIsInstance(graph, Graph)
-        self.assertEqual([step.name for step in self.steps], list(graph.steps.keys()))
-        self.assertEqual(self.graph_dict_expected, graph.to_dict())
+        assert isinstance(graph, Graph)
+        assert [step.name for step in self.steps] == list(graph.steps.keys())
+        assert self.graph_dict_expected == graph.to_dict()
 
     def test_from_steps(self) -> None:
         """Test from steps."""
         graph = Graph.from_steps(self.steps)
 
-        self.assertEqual(self.steps, list(graph.steps.values()))
-        self.assertEqual([step.name for step in self.steps], list(graph.steps.keys()))
-        self.assertEqual(self.graph_dict_expected, graph.to_dict())
+        assert self.steps == list(graph.steps.values())
+        assert [step.name for step in self.steps] == list(graph.steps.keys())
+        assert self.graph_dict_expected == graph.to_dict()
 
 
 class TestPlan(unittest.TestCase):
@@ -156,7 +157,7 @@ class TestPlan(unittest.TestCase):
             """False Lookup."""
 
             @classmethod
-            def handle(cls, value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
+            def handle(cls, _value: str, *__args: Any, **__kwargs: Any) -> str:  # type: ignore
                 """Perform the lookup."""
                 return "test"
 
@@ -177,7 +178,7 @@ class TestPlan(unittest.TestCase):
         graph = Graph.from_steps([Step(vpc, fn=None), Step(bastion, fn=None)])
         plan = Plan(description="Test", graph=graph)
 
-        self.assertEqual(plan.graph.to_dict(), {"bastion-1": {"vpc-1"}, "vpc-1": set()})
+        assert plan.graph.to_dict() == {"bastion-1": {"vpc-1"}, "vpc-1": set()}
 
     def test_plan_reverse(self) -> None:
         """Test plan reverse."""
@@ -191,8 +192,8 @@ class TestPlan(unittest.TestCase):
 
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = plan.graph.to_dict()
-        self.assertEqual(set(), result_graph_dict.get("bastion-1"))
-        self.assertEqual({"bastion-1"}, result_graph_dict.get("vpc-1"))
+        assert set() == result_graph_dict.get("bastion-1")
+        assert {"bastion-1"} == result_graph_dict.get("vpc-1")
 
     def test_plan_targeted(self) -> None:
         """Test plan targeted."""
@@ -206,7 +207,7 @@ class TestPlan(unittest.TestCase):
         graph = Graph.from_steps([Step(vpc, fn=None), Step(bastion, fn=None)])
         plan = Plan(description="Test", graph=graph, context=context)
 
-        self.assertEqual({vpc.name: set()}, plan.graph.to_dict())
+        assert plan.graph.to_dict() == {vpc.name: set()}
 
     def test_execute_plan(self) -> None:
         """Test execute plan."""
@@ -220,13 +221,13 @@ class TestPlan(unittest.TestCase):
         removed = Stack(definition=generate_definition("removed", 1, requires=[]), context=context)
         context._persistent_graph = Graph.from_steps([Step(removed)])
 
-        calls: List[str] = []
+        calls: list[str] = []
 
-        def _launch_stack(stack: Stack, status: Optional[Status] = None) -> Status:
+        def _launch_stack(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             return COMPLETE
 
-        def _destroy_stack(stack: Stack, status: Optional[Status] = None) -> Status:
+        def _destroy_stack(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             return COMPLETE
 
@@ -242,17 +243,17 @@ class TestPlan(unittest.TestCase):
         plan.execute(walk)
 
         # the order these are appended changes between python2/3
-        self.assertIn("namespace-vpc-1", calls)
-        self.assertIn("namespace-bastion-1", calls)
-        self.assertIn("namespace-removed-1", calls)
+        assert "namespace-vpc-1" in calls
+        assert "namespace-bastion-1" in calls
+        assert "namespace-removed-1" in calls
         context.put_persistent_graph.assert_called()
 
         # order is different between python2/3 so can't compare dicts
         result_graph_dict = context.persistent_graph.to_dict()  # type: ignore
-        self.assertEqual(2, len(result_graph_dict))
-        self.assertEqual(set(), result_graph_dict.get("vpc-1"))
-        self.assertEqual({"vpc-1"}, result_graph_dict.get("bastion-1"))
-        self.assertIsNone(result_graph_dict.get("namespace-removed-1"))
+        assert len(result_graph_dict) == 2
+        assert set() == result_graph_dict.get("vpc-1")
+        assert {"vpc-1"} == result_graph_dict.get("bastion-1")
+        assert result_graph_dict.get("namespace-removed-1") is None
 
     def test_execute_plan_no_persist(self) -> None:
         """Test execute plan with no persistent graph."""
@@ -264,9 +265,9 @@ class TestPlan(unittest.TestCase):
             context=context,
         )
 
-        calls: List[str] = []
+        calls: list[str] = []
 
-        def _launch_stack(stack: Stack, status: Optional[Status] = None) -> Status:
+        def _launch_stack(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             return COMPLETE
 
@@ -275,7 +276,7 @@ class TestPlan(unittest.TestCase):
 
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc-1", "namespace-bastion-1"])
+        assert calls == ["namespace-vpc-1", "namespace-bastion-1"]
         context.put_persistent_graph.assert_not_called()
 
     def test_execute_plan_locked(self) -> None:
@@ -287,14 +288,13 @@ class TestPlan(unittest.TestCase):
         """
         vpc = Stack(definition=generate_definition("vpc", 1), context=self.context)
         bastion = Stack(
-            definition=generate_definition("bastion", 1, requires=[vpc.name]),
-            locked=True,
+            definition=generate_definition("bastion", 1, locked=True, requires=[vpc.name]),
             context=self.context,
         )
 
-        calls: List[str] = []
+        calls: list[str] = []
 
-        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
+        def fn(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             return COMPLETE
 
@@ -302,7 +302,7 @@ class TestPlan(unittest.TestCase):
         plan = Plan(description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc-1", "namespace-bastion-1"])
+        assert calls == ["namespace-vpc-1", "namespace-bastion-1"]
 
     def test_execute_plan_filtered(self) -> None:
         """Test execute plan filtered."""
@@ -316,9 +316,9 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls: List[str] = []
+        calls: list[str] = []
 
-        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
+        def fn(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             return COMPLETE
 
@@ -329,7 +329,7 @@ class TestPlan(unittest.TestCase):
         plan = Plan(context=context, description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc-1", "namespace-db-1"])
+        assert calls == ["namespace-vpc-1", "namespace-db-1"]
 
     def test_execute_plan_exception(self) -> None:
         """Test execute plan exception."""
@@ -339,9 +339,9 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls: List[str] = []
+        calls: list[str] = []
 
-        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
+        def fn(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             if stack.name == vpc_step.name:
                 raise ValueError("Boom")
@@ -353,11 +353,11 @@ class TestPlan(unittest.TestCase):
         graph = Graph.from_steps([vpc_step, bastion_step])
         plan = Plan(description="Test", graph=graph)
 
-        with self.assertRaises(PlanFailed):
+        with pytest.raises(PlanFailed):
             plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc-1"])
-        self.assertEqual(vpc_step.status, FAILED)
+        assert calls == ["namespace-vpc-1"]
+        assert vpc_step.status == FAILED
 
     def test_execute_plan_skipped(self) -> None:
         """Test execute plan skipped."""
@@ -367,9 +367,9 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls: List[str] = []
+        calls: list[str] = []
 
-        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
+        def fn(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             if stack.fqn == vpc_step.name:
                 return SKIPPED
@@ -382,7 +382,7 @@ class TestPlan(unittest.TestCase):
         plan = Plan(description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc-1", "namespace-bastion-1"])
+        assert calls == ["namespace-vpc-1", "namespace-bastion-1"]
 
     def test_execute_plan_failed(self) -> None:
         """Test execute plan failed."""
@@ -393,9 +393,9 @@ class TestPlan(unittest.TestCase):
         )
         db = Stack(definition=generate_definition("db", 1), context=self.context)
 
-        calls: List[str] = []
+        calls: list[str] = []
 
-        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
+        def fn(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             if stack.name == vpc_step.name:
                 return FAILED
@@ -407,12 +407,12 @@ class TestPlan(unittest.TestCase):
 
         graph = Graph.from_steps([vpc_step, bastion_step, db_step])
         plan = Plan(description="Test", graph=graph)
-        with self.assertRaises(PlanFailed):
+        with pytest.raises(PlanFailed):
             plan.execute(walk)
 
         calls.sort()
 
-        self.assertEqual(calls, ["namespace-db-1", "namespace-vpc-1"])
+        assert calls == ["namespace-db-1", "namespace-vpc-1"]
 
     def test_execute_plan_cancelled(self) -> None:
         """Test execute plan cancelled."""
@@ -422,9 +422,9 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        calls: List[str] = []
+        calls: list[str] = []
 
-        def fn(stack: Stack, status: Optional[Status] = None) -> Status:
+        def fn(stack: Stack, status: Status | None = None) -> Status:  # noqa: ARG001
             calls.append(stack.fqn)
             if stack.fqn == vpc_step.name:
                 raise CancelExecution
@@ -437,7 +437,7 @@ class TestPlan(unittest.TestCase):
         plan = Plan(description="Test", graph=graph)
         plan.execute(walk)
 
-        self.assertEqual(calls, ["namespace-vpc-1", "namespace-bastion-1"])
+        assert calls == ["namespace-vpc-1", "namespace-bastion-1"]
 
     def test_execute_plan_graph_locked(self) -> None:
         """Test execute plan with locked persistent graph."""
@@ -445,7 +445,7 @@ class TestPlan(unittest.TestCase):
         context._persistent_graph = Graph.from_dict({"stack1": []}, context)
         context._persistent_graph_lock_code = "1111"
         plan = Plan(description="Test", graph=Graph(), context=context)
-        with self.assertRaises(PersistentGraphLocked):
+        with pytest.raises(PersistentGraphLocked):
             plan.execute()
 
     def test_build_graph_missing_dependency(self) -> None:
@@ -455,12 +455,12 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        with self.assertRaises(GraphError) as expected:
+        with pytest.raises(GraphError) as expected:
             Graph.from_steps([Step(bastion)])
         message_starts = "Error detected when adding 'vpc-1' as a dependency of 'bastion-1':"
         message_contains = "dependent node vpc-1 does not exist"
-        self.assertTrue(str(expected.exception).startswith(message_starts))
-        self.assertTrue(message_contains in str(expected.exception))
+        assert str(expected.value).startswith(message_starts)
+        assert message_contains in str(expected.value)
 
     def test_build_graph_cyclic_dependencies(self) -> None:
         """Test build graph cyclic dependencies."""
@@ -474,19 +474,19 @@ class TestPlan(unittest.TestCase):
             context=self.context,
         )
 
-        with self.assertRaises(GraphError) as expected:
+        with pytest.raises(GraphError) as expected:
             Graph.from_steps([Step(vpc), Step(db), Step(app)])
         message = (
             "Error detected when adding 'db-1' "
             "as a dependency of 'app-1': graph is "
             "not acyclic"
         )
-        self.assertEqual(str(expected.exception), message)
+        assert str(expected.value) == message
 
     def test_dump(self) -> None:
         """Test dump."""
-        requires: List[str] = []
-        steps: List[Step] = []
+        requires: list[str] = []
+        steps: list[Step] = []
 
         for i in range(5):
             overrides = {
@@ -515,9 +515,6 @@ class TestPlan(unittest.TestCase):
             plan.dump(directory=tmp_dir, context=self.context)
 
             for step in plan.steps:
-                template_path = os.path.join(
-                    tmp_dir, stack_template_key_name(step.stack.blueprint)  # type: ignore
-                )
-                self.assertTrue(os.path.isfile(template_path))
+                assert (Path(tmp_dir) / stack_template_key_name(step.stack.blueprint)).is_file()
         finally:
             shutil.rmtree(tmp_dir)

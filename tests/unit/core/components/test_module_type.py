@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Type
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -18,8 +18,6 @@ from runway.module.terraform import Terraform
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-    from pytest import LogCaptureFixture
 
     from runway.config.models.runway import RunwayModuleTypeTypeDef
     from runway.module.base import RunwayModule
@@ -43,7 +41,7 @@ class TestRunwayModuleType:
         ],
     )
     def test_autodetection(
-        self, files: List[str], expected: Type[RunwayModule], cd_tmp_path: Path
+        self, files: list[str], expected: type[RunwayModule], cd_tmp_path: Path
     ) -> None:
         """Test from autodetection."""
         for file_path in files:
@@ -57,7 +55,7 @@ class TestRunwayModuleType:
         assert not result.type_str
         assert result.module_class.__name__ == expected.__name__
 
-    def test_autodetection_fail(self, caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
+    def test_autodetection_fail(self, caplog: pytest.LogCaptureFixture, cd_tmp_path: Path) -> None:
         """Test autodetection fail."""
         caplog.set_level(logging.ERROR, logger="runway")
         with pytest.raises(SystemExit) as excinfo:
@@ -88,7 +86,7 @@ class TestRunwayModuleType:
         ],
     )
     def test_from_extension(
-        self, ext: str, expected: Type[RunwayModule], cd_tmp_path: Path
+        self, ext: str, expected: type[RunwayModule], cd_tmp_path: Path
     ) -> None:
         """Test from path extension."""
         filename = "filename." + ext
@@ -109,7 +107,7 @@ class TestRunwayModuleType:
     def test_from_type_str(
         self,
         type_str: RunwayModuleTypeTypeDef,
-        expected: Type[RunwayModule],
+        expected: type[RunwayModule],
         cd_tmp_path: Path,
     ) -> None:
         """Test from type_str."""

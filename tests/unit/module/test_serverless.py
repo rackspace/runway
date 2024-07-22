@@ -5,11 +5,11 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from unittest.mock import ANY, MagicMock, Mock, call
 
 import pytest
 import yaml
-from mock import ANY, MagicMock, Mock, call
 from pydantic import ValidationError
 
 from runway.config.models.runway.options.serverless import (
@@ -23,7 +23,6 @@ from runway.module.serverless import (
 )
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess.fake_process import FakeProcess
 
@@ -54,7 +53,7 @@ class TestServerless:
 
     def test__deploy_package(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tempfile_temporary_directory: MagicMock,
@@ -71,7 +70,7 @@ class TestServerless:
 
     def test__deploy_package_promotezip(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tempfile_temporary_directory: MagicMock,
@@ -272,7 +271,7 @@ class TestServerless:
 
     def test_extend_serverless_yml(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -356,7 +355,7 @@ class TestServerless:
 
     def test_init(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -371,7 +370,7 @@ class TestServerless:
 
     def test_plan(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -383,7 +382,7 @@ class TestServerless:
 
     def test_skip(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -391,7 +390,7 @@ class TestServerless:
         """Test skip."""
         caplog.set_level(logging.INFO, logger="runway")
         obj = Serverless(runway_context, module_root=tmp_path)
-        mocker.patch.object(obj, "package_json_missing", lambda: True)
+        mocker.patch.object(obj, "package_json_missing", return_value=True)
         mocker.patch.object(obj, "env_file", False)
 
         assert obj.skip
@@ -401,7 +400,7 @@ class TestServerless:
         ] == caplog.messages
         caplog.clear()
 
-        mocker.patch.object(obj, "package_json_missing", lambda: False)
+        mocker.patch.object(obj, "package_json_missing", return_value=False)
         assert obj.skip
         assert [
             f"{tmp_path.name}:skipped; config file for this stage/region not found"
@@ -623,7 +622,7 @@ class TestServerlessArtifact:
         self,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
-        service: Union[Dict[str, Any], str],
+        service: Union[dict[str, Any], str],
         service_name: str,
         tmp_path: Path,
     ) -> None:
@@ -653,7 +652,7 @@ class TestServerlessArtifact:
         self,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
-        service: Union[Dict[str, Any], str],
+        service: Union[dict[str, Any], str],
         tmp_path: Path,
     ) -> None:
         """Test source_hash."""
@@ -786,7 +785,7 @@ class TestServerlessOptions:
             (["-u"], ["-u"]),
         ],
     )
-    def test_args(self, args: List[str], expected: List[str]) -> None:
+    def test_args(self, args: list[str], expected: list[str]) -> None:
         """Test args."""
         obj = ServerlessOptions.parse_obj({"args": args})
         assert obj.args == expected
@@ -829,19 +828,19 @@ class TestServerlessOptions:
             ),
         ],
     )
-    def test_parse(self, config: Dict[str, Any]) -> None:
+    def test_parse(self, config: dict[str, Any]) -> None:
         """Test parse."""
         obj = ServerlessOptions.parse_obj(config)
 
         assert obj.args == config.get("args", [])
         assert obj.extend_serverless_yml == config.get(
-            "extend_serverless_yml", cast(Dict[str, Any], {})
+            "extend_serverless_yml", cast(dict[str, Any], {})
         )
         if config.get("promotezip"):
             assert obj.promotezip
         else:
             assert not obj.promotezip
-        assert obj.promotezip.bucketname == config.get("promotezip", cast(Dict[str, Any], {})).get(
+        assert obj.promotezip.bucketname == config.get("promotezip", cast(dict[str, Any], {})).get(
             "bucketname"
         )
         assert obj.skip_npm_ci == config.get("skip_npm_ci", False)

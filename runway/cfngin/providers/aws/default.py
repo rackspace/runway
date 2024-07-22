@@ -2,21 +2,18 @@
 
 from __future__ import annotations
 
+import functools
 import json
 import logging
+import operator
 import sys
 import threading
 import time
+from collections.abc import Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
     Union,
     cast,
 )
@@ -87,7 +84,7 @@ def get_cloudformation_client(session: boto3.Session) -> CloudFormationClient:
     return session.client("cloudformation", config=config)
 
 
-def get_output_dict(stack: StackTypeDef) -> Dict[str, str]:
+def get_output_dict(stack: StackTypeDef) -> dict[str, str]:
     """Return a dict of key/values for the outputs for a given CF stack.
 
     Args:
@@ -111,11 +108,11 @@ def get_output_dict(stack: StackTypeDef) -> Dict[str, str]:
 def s3_fallback(
     fqn: str,
     template: Template,
-    parameters: List[ParameterTypeDef],
-    tags: List[TagTypeDef],
+    parameters: list[ParameterTypeDef],
+    tags: list[TagTypeDef],
     method: Callable[..., Any],
-    change_set_name: Optional[str] = None,
-    service_role: Optional[str] = None,
+    change_set_name: str | None = None,
+    service_role: str | None = None,
 ) -> Any:
     """Falling back to legacy CFNgin S3 bucket region for templates."""
     LOGGER.warning(
@@ -131,7 +128,9 @@ def s3_fallback(
     template_url = template.url
     if template_url:
         template_url_parsed = urlparse(template_url)
-        template_url_parsed = template_url_parsed._replace(netloc="s3.amazonaws.com")
+        template_url_parsed = template_url_parsed._replace(  # noqa: SLF001
+            netloc="s3.amazonaws.com"
+        )
         template_url = urlunparse(template_url_parsed)
     LOGGER.debug("using template_url: %s", template_url)
     args = generate_cloudformation_args(
@@ -159,7 +158,7 @@ def get_change_set_name() -> str:
     return f"change-set-{int(time.time())}"
 
 
-def requires_replacement(changeset: List[ChangeTypeDef]) -> List[ChangeTypeDef]:
+def requires_replacement(changeset: list[ChangeTypeDef]) -> list[ChangeTypeDef]:
     """Return the changes within the changeset that require replacement.
 
     Args:
@@ -170,10 +169,10 @@ def requires_replacement(changeset: List[ChangeTypeDef]) -> List[ChangeTypeDef]:
 
 
 def output_full_changeset(
-    full_changeset: Optional[List[ChangeTypeDef]] = None,
-    params_diff: Optional[List[DictValue[Any, Any]]] = None,
-    answer: Optional[str] = None,
-    fqn: Optional[str] = None,
+    full_changeset: list[ChangeTypeDef] | None = None,
+    params_diff: list[DictValue[Any, Any]] | None = None,
+    answer: str | None = None,
+    fqn: str | None = None,
 ) -> None:
     """Optionally output full changeset.
 
@@ -206,10 +205,10 @@ def output_full_changeset(
 
 
 def ask_for_approval(
-    full_changeset: Optional[List[ChangeTypeDef]] = None,
-    params_diff: Optional[List[DictValue[Any, Any]]] = None,
+    full_changeset: list[ChangeTypeDef] | None = None,
+    params_diff: list[DictValue[Any, Any]] | None = None,
     include_verbose: bool = False,
-    fqn: Optional[str] = None,
+    fqn: str | None = None,
 ) -> None:
     """Prompt the user for approval to execute a change set.
 
@@ -247,8 +246,8 @@ def ask_for_approval(
 def output_summary(
     fqn: str,
     action: str,
-    changeset: List[ChangeTypeDef],
-    params_diff: List[DictValue[Any, Any]],
+    changeset: list[ChangeTypeDef],
+    params_diff: list[DictValue[Any, Any]],
     replacements_only: bool = False,
 ) -> None:
     """Log a summary of the changeset.
@@ -264,8 +263,8 @@ def output_summary(
             replacements.
 
     """
-    replacements: List[Any] = []
-    changes: List[Any] = []
+    replacements: list[Any] = []
+    changes: list[Any] = []
     for change in changeset:
         resource = change.get("ResourceChange", {})
         replacement = resource.get("Replacement", "") == "True"
@@ -292,12 +291,12 @@ def output_summary(
     LOGGER.info("%s %s:\n%s", fqn, action, summary)
 
 
-def format_params_diff(params_diff: List[DictValue[Any, Any]]) -> str:
+def format_params_diff(params_diff: list[DictValue[Any, Any]]) -> str:
     """Wrap :func:`runway.cfngin.actions.diff.format_params_diff` for testing."""
     return format_diff(params_diff)
 
 
-def summarize_params_diff(params_diff: List[DictValue[Any, Any]]) -> str:
+def summarize_params_diff(params_diff: list[DictValue[Any, Any]]) -> str:
     """Summarize parameter diff."""
     summary = ""
 
@@ -359,11 +358,11 @@ def create_change_set(
     cfn_client: CloudFormationClient,
     fqn: str,
     template: Template,
-    parameters: List[ParameterTypeDef],
-    tags: List[TagTypeDef],
+    parameters: list[ParameterTypeDef],
+    tags: list[TagTypeDef],
     change_set_type: str = "UPDATE",
-    service_role: Optional[str] = None,
-) -> Tuple[List[ChangeTypeDef], str]:
+    service_role: str | None = None,
+) -> tuple[list[ChangeTypeDef], str]:
     """Create CloudFormation change set."""
     LOGGER.debug("attempting to create change set of type %s for stack: %s", change_set_type, fqn)
     args = generate_cloudformation_args(
@@ -403,7 +402,7 @@ def create_change_set(
         ):
             LOGGER.debug("%s:stack did not change; not updating and removing changeset", fqn)
             cfn_client.delete_change_set(ChangeSetName=change_set_id)
-            raise exceptions.StackDidNotChange()
+            raise exceptions.StackDidNotChange
         LOGGER.warning(
             "got strange status, '%s' for changeset '%s'; not deleting for "
             "further investigation - you will need to delete the changeset manually",
@@ -420,7 +419,7 @@ def create_change_set(
     return changes, change_set_id
 
 
-def check_tags_contain(actual: List[TagTypeDef], expected: List[TagTypeDef]) -> bool:
+def check_tags_contain(actual: list[TagTypeDef], expected: list[TagTypeDef]) -> bool:
     """Check if a set of AWS resource tags is contained in another.
 
     Every tag key in ``expected`` must be present in ``actual``, and have the
@@ -442,15 +441,15 @@ def check_tags_contain(actual: List[TagTypeDef], expected: List[TagTypeDef]) -> 
 
 def generate_cloudformation_args(
     stack_name: str,
-    parameters: List[ParameterTypeDef],
-    tags: List[TagTypeDef],
+    parameters: list[ParameterTypeDef],
+    tags: list[TagTypeDef],
     template: Template,
-    capabilities: Optional[List[str]] = None,
-    change_set_type: Optional[str] = None,
-    service_role: Optional[str] = None,
-    stack_policy: Optional[Template] = None,
-    change_set_name: Optional[str] = None,
-) -> Dict[str, Any]:
+    capabilities: list[str] | None = None,
+    change_set_type: str | None = None,
+    service_role: str | None = None,
+    stack_policy: Template | None = None,
+    change_set_name: str | None = None,
+) -> dict[str, Any]:
     """Generate the args for common CloudFormation API interactions.
 
     This is used for ``create_stack``/``update_stack``/``create_change_set``
@@ -503,15 +502,15 @@ def generate_cloudformation_args(
 
 
 def generate_stack_policy_args(
-    stack_policy: Optional[Template] = None,
-) -> Dict[str, str]:
+    stack_policy: Template | None = None,
+) -> dict[str, str]:
     """Convert a stack policy object into keyword args.
 
     Args:
         stack_policy: A template object representing a stack policy.
 
     """
-    args: Dict[str, str] = {}
+    args: dict[str, str] = {}
     if stack_policy:
         LOGGER.debug("stack has a stack policy")
         if stack_policy.url:
@@ -529,19 +528,19 @@ def generate_stack_policy_args(
 class ProviderBuilder:
     """Implements a Memorized ProviderBuilder for the AWS provider."""
 
-    kwargs: Dict[str, Any]
+    kwargs: dict[str, Any]
     lock: threading.Lock
-    providers: Dict[str, Provider]
-    region: Optional[str]
+    providers: dict[str, Provider]
+    region: str | None
 
-    def __init__(self, *, region: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(self, *, region: str | None = None, **kwargs: Any) -> None:
         """Instantiate class."""
         self.region = region
         self.kwargs = kwargs
         self.providers = {}
         self.lock = threading.Lock()
 
-    def build(self, *, profile: Optional[str] = None, region: Optional[str] = None) -> Provider:
+    def build(self, *, profile: str | None = None, region: str | None = None) -> Provider:
         """Get or create the provider for the given region and profile."""
         with self.lock:
             # memorization lookup key derived from region + profile.
@@ -608,9 +607,9 @@ class Provider(BaseProvider):
     cloudformation: CloudFormationClient
     interactive: bool
     recreate_failed: bool
-    region: Optional[str]
+    region: str | None
     replacements_only: bool
-    service_role: Optional[str]
+    service_role: str | None
 
     def __init__(
         self,
@@ -618,12 +617,12 @@ class Provider(BaseProvider):
         *,
         interactive: bool = False,
         recreate_failed: bool = False,
-        region: Optional[str] = None,
+        region: str | None = None,
         replacements_only: bool = False,
-        service_role: Optional[str] = None,
-    ):
+        service_role: str | None = None,
+    ) -> None:
         """Instantiate class."""
-        self._outputs: Dict[str, Dict[str, str]] = {}
+        self._outputs: dict[str, dict[str, str]] = {}
         self.cloudformation = get_cloudformation_client(session)
         self.interactive = interactive
         self.recreate_failed = interactive or recreate_failed
@@ -639,7 +638,7 @@ class Provider(BaseProvider):
         except botocore.exceptions.ClientError as err:
             if "does not exist" not in str(err):
                 raise
-            raise exceptions.StackDoesNotExist(stack_name)
+            raise exceptions.StackDoesNotExist(stack_name) from None
 
     @staticmethod
     def get_stack_status(stack: StackTypeDef, *_args: Any, **_kwargs: Any) -> str:
@@ -647,7 +646,7 @@ class Provider(BaseProvider):
         return stack["StackStatus"]
 
     @staticmethod
-    def get_stack_status_reason(stack: StackTypeDef) -> Optional[str]:
+    def get_stack_status_reason(stack: StackTypeDef) -> str | None:
         """Get stack status reason."""
         return stack.get("StackStatusReason")
 
@@ -691,9 +690,9 @@ class Provider(BaseProvider):
         self,
         stack: Stack,
         cancel: threading.Event,
-        action: Optional[str] = None,
-        log_func: Optional[Callable[[StackEventTypeDef], None]] = None,
-        retries: Optional[int] = None,
+        action: str | None = None,
+        log_func: Callable[[StackEventTypeDef], None] | None = None,
+        retries: int | None = None,
     ) -> None:
         """Tail the events of a stack."""
 
@@ -737,9 +736,11 @@ class Provider(BaseProvider):
 
     @staticmethod
     def _tail_print(event: StackEventTypeDef) -> None:
-        print(f'{event.get("ResourceStatus")} {event.get("ResourceType")} {event.get("EventId")}')
+        print(  # noqa: T201
+            f'{event.get("ResourceStatus")} {event.get("ResourceType")} {event.get("EventId")}'
+        )
 
-    def get_delete_failed_status_reason(self, stack_name: str) -> Optional[str]:
+    def get_delete_failed_status_reason(self, stack_name: str) -> str | None:
         """Process events and return latest delete failed reason.
 
         Args:
@@ -749,14 +750,14 @@ class Provider(BaseProvider):
             Reason for the Stack's DELETE_FAILED status if one can be found.
 
         """
-        event: Union[Dict[str, str], StackEventTypeDef] = (
+        event: Union[dict[str, str], StackEventTypeDef] = (
             self.get_event_by_resource_status(stack_name, "DELETE_FAILED", chronological=True) or {}
         )
         return event.get("ResourceStatusReason")
 
     def get_event_by_resource_status(
         self, stack_name: str, status: str, *, chronological: bool = True
-    ) -> Optional[StackEventTypeDef]:
+    ) -> StackEventTypeDef | None:
         """Get Stack Event of a given set of resource status.
 
         Args:
@@ -783,7 +784,7 @@ class Provider(BaseProvider):
     ) -> Iterable[StackEventTypeDef]:
         """Get the events in batches and return in chronological order."""
         next_token = None
-        event_list: List[List[StackEventTypeDef]] = []
+        event_list: list[list[StackEventTypeDef]] = []
         while True:
             if next_token is not None:
                 events = self.cloudformation.describe_stack_events(
@@ -799,11 +800,11 @@ class Provider(BaseProvider):
         if chronological:
             return cast(
                 Iterable["StackEventTypeDef"],
-                reversed(cast(List["StackEventTypeDef"], sum(event_list, []))),  # type: ignore
+                reversed(cast("list[StackEventTypeDef]", functools.reduce(operator.iadd, event_list, []))),  # type: ignore
             )
-        return cast(Iterable["StackEventTypeDef"], sum(event_list, []))  # type: ignore
+        return cast(Iterable["StackEventTypeDef"], functools.reduce(operator.iadd, event_list, []))  # type: ignore
 
-    def get_rollback_status_reason(self, stack_name: str) -> Optional[str]:
+    def get_rollback_status_reason(self, stack_name: str) -> str | None:
         """Process events and returns latest roll back reason.
 
         Args:
@@ -813,7 +814,7 @@ class Provider(BaseProvider):
             Reason for the Stack's rollback status if one can be found.
 
         """
-        event: Union[Dict[str, str], StackEventTypeDef] = (
+        event: Union[dict[str, str], StackEventTypeDef] = (
             self.get_event_by_resource_status(
                 stack_name, "UPDATE_ROLLBACK_IN_PROGRESS", chronological=False
             )
@@ -835,7 +836,7 @@ class Provider(BaseProvider):
         """Show and then tail the event log."""
         # First dump the full list of events in chronological order and keep
         # track of the events we've seen already
-        seen: Set[str] = set()
+        seen: set[str] = set()
         initial_events = self.get_events(stack_name)
         for event in initial_events:
             if include_initial:
@@ -857,7 +858,7 @@ class Provider(BaseProvider):
         stack: StackTypeDef,
         *,
         action: str = "destroy",
-        approval: Optional[str] = None,
+        approval: str | None = None,
         force_interactive: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -868,6 +869,7 @@ class Provider(BaseProvider):
             action: Name of the action being executed. This impacts the log message used.
             approval: Response to approval prompt.
             force_interactive: Always ask for approval.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         fqn = self.get_stack_name(stack)
@@ -883,13 +885,13 @@ class Provider(BaseProvider):
         self,
         fqn: str,
         template: Template,
-        parameters: List[ParameterTypeDef],
-        tags: List[TagTypeDef],
+        parameters: list[ParameterTypeDef],
+        tags: list[TagTypeDef],
         *,
         force_change_set: bool = False,
-        stack_policy: Optional[Template] = None,
+        stack_policy: Template | None = None,
         termination_protection: bool = False,
-        timeout: Optional[int] = None,
+        timeout: int | None = None,
         **kwargs: Any,
     ) -> None:
         """Create a new Cloudformation stack.
@@ -907,6 +909,7 @@ class Provider(BaseProvider):
                 protection.
             timeout: The amount of time that can pass before the stack status becomes
                 ``CREATE_FAILED``.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         LOGGER.debug(
@@ -950,7 +953,7 @@ class Provider(BaseProvider):
                 self.cloudformation.create_stack(**args)
             except botocore.exceptions.ClientError as err:
                 if err.response["Error"]["Message"] == (
-                    "TemplateURL must reference a valid S3 object to which you " "have access."
+                    "TemplateURL must reference a valid S3 object to which you have access."
                 ):
                     s3_fallback(
                         fqn,
@@ -983,7 +986,7 @@ class Provider(BaseProvider):
             return self.noninteractive_changeset_update
         return self.default_update_stack
 
-    def prepare_stack_for_update(self, stack: StackTypeDef, tags: List[TagTypeDef]) -> bool:
+    def prepare_stack_for_update(self, stack: StackTypeDef, tags: list[TagTypeDef]) -> bool:
         """Prepare a stack for updating.
 
         It may involve deleting the stack if is has failed it's initial
@@ -1035,7 +1038,7 @@ class Provider(BaseProvider):
             raise exceptions.StackUpdateBadStatus(
                 stack_name,
                 stack_status,
-                "Tags differ from current configuration, possibly not created " "with CFNgin",
+                "Tags differ from current configuration, possibly not created with CFNgin",
             )
 
         if self.interactive:
@@ -1058,12 +1061,12 @@ class Provider(BaseProvider):
         self,
         fqn: str,
         template: Template,
-        old_parameters: List[ParameterTypeDef],
-        parameters: List[ParameterTypeDef],
-        tags: List[TagTypeDef],
+        old_parameters: list[ParameterTypeDef],
+        parameters: list[ParameterTypeDef],
+        tags: list[TagTypeDef],
         force_interactive: bool = False,
         force_change_set: bool = False,
-        stack_policy: Optional[Template] = None,
+        stack_policy: Template | None = None,
         termination_protection: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -1086,6 +1089,7 @@ class Provider(BaseProvider):
                 executed with a change set.
             stack_policy: A template object representing a stack policy.
             termination_protection: End state of the stack's termination protection.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         LOGGER.debug(
@@ -1131,7 +1135,7 @@ class Provider(BaseProvider):
             )
 
     def deal_with_changeset_stack_policy(
-        self, fqn: str, stack_policy: Optional[Template] = None
+        self, fqn: str, stack_policy: Template | None = None
     ) -> None:
         """Set a stack policy when using changesets.
 
@@ -1151,13 +1155,14 @@ class Provider(BaseProvider):
             self.cloudformation.set_stack_policy(**kwargs)
 
     def interactive_destroy_stack(
-        self, fqn: str, approval: Optional[str] = None, **kwargs: Any
+        self, fqn: str, approval: str | None = None, **kwargs: Any
     ) -> None:
         """Delete a CloudFormation stack in interactive mode.
 
         Args:
             fqn: A fully qualified stack name.
             approval: Response to approval prompt.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         LOGGER.debug("%s:using interactive provider mode", fqn)
@@ -1196,10 +1201,10 @@ class Provider(BaseProvider):
         self,
         fqn: str,
         template: Template,
-        old_parameters: List[ParameterTypeDef],
-        parameters: List[ParameterTypeDef],
+        old_parameters: list[ParameterTypeDef],
+        parameters: list[ParameterTypeDef],
         stack_policy: Template,
-        tags: List[TagTypeDef],
+        tags: list[TagTypeDef],
     ) -> None:
         """Update a Cloudformation stack in interactive mode.
 
@@ -1284,10 +1289,10 @@ class Provider(BaseProvider):
         self,
         fqn: str,
         template: Template,
-        old_parameters: List[ParameterTypeDef],
-        parameters: List[ParameterTypeDef],
-        stack_policy: Optional[Template],
-        tags: List[TagTypeDef],
+        old_parameters: list[ParameterTypeDef],  # noqa: ARG002
+        parameters: list[ParameterTypeDef],
+        stack_policy: Template | None,
+        tags: list[TagTypeDef],
     ) -> None:
         """Update a Cloudformation stack using a change set.
 
@@ -1339,10 +1344,10 @@ class Provider(BaseProvider):
         self,
         fqn: str,
         template: Template,
-        old_parameters: List[ParameterTypeDef],
-        parameters: List[ParameterTypeDef],
-        tags: List[TagTypeDef],
-        stack_policy: Optional[Template] = None,
+        old_parameters: list[ParameterTypeDef],  # noqa: ARG002
+        parameters: list[ParameterTypeDef],
+        tags: list[TagTypeDef],
+        stack_policy: Template | None = None,
     ) -> None:
         """Update a Cloudformation stack in default mode.
 
@@ -1373,7 +1378,7 @@ class Provider(BaseProvider):
         except botocore.exceptions.ClientError as err:
             if "No updates are to be performed." in str(err):
                 LOGGER.debug("%s:stack did not change; not updating", fqn)
-                raise exceptions.StackDidNotChange
+                raise exceptions.StackDidNotChange from None
             if err.response["Error"]["Message"] == (
                 "TemplateURL must reference a valid S3 object to which you have access."
             ):
@@ -1393,11 +1398,11 @@ class Provider(BaseProvider):
         return stack["StackName"]
 
     @staticmethod
-    def get_stack_tags(stack: StackTypeDef) -> List[TagTypeDef]:
+    def get_stack_tags(stack: StackTypeDef) -> list[TagTypeDef]:
         """Get stack tags."""
         return stack.get("Tags", [])
 
-    def get_outputs(self, stack_name: str, *_args: Any, **_kwargs: Any) -> Dict[str, str]:
+    def get_outputs(self, stack_name: str, *_args: Any, **_kwargs: Any) -> dict[str, str]:
         """Get stack outputs."""
         if not self._outputs.get(stack_name):
             stack = self.get_stack(stack_name)
@@ -1405,11 +1410,11 @@ class Provider(BaseProvider):
         return self._outputs[stack_name]
 
     @staticmethod
-    def get_output_dict(stack: StackTypeDef) -> Dict[str, str]:
+    def get_output_dict(stack: StackTypeDef) -> dict[str, str]:
         """Get stack outputs dict."""
         return get_output_dict(stack)
 
-    def get_stack_info(self, stack: StackTypeDef) -> Tuple[str, Dict[str, Union[List[str], str]]]:
+    def get_stack_info(self, stack: StackTypeDef) -> tuple[str, dict[str, Union[list[str], str]]]:
         """Get the template and parameters of the stack currently in AWS."""
         stack_name = stack.get("StackId", "None")
 
@@ -1418,7 +1423,7 @@ class Provider(BaseProvider):
         except botocore.exceptions.ClientError as err:
             if "does not exist" not in str(err):
                 raise
-            raise exceptions.StackDoesNotExist(stack_name)
+            raise exceptions.StackDoesNotExist(stack_name) from None
 
         parameters = self.params_as_dict(stack.get("Parameters", []))
 
@@ -1428,13 +1433,13 @@ class Provider(BaseProvider):
 
         return json.dumps(template, cls=JsonEncoder), parameters
 
-    def get_stack_changes(
+    def get_stack_changes(  # noqa: C901, PLR0912
         self,
         stack: Stack,
         template: Template,
-        parameters: List[ParameterTypeDef],
-        tags: List[TagTypeDef],
-    ) -> Dict[str, str]:
+        parameters: list[ParameterTypeDef],
+        tags: list[TagTypeDef],
+    ) -> dict[str, str]:
         """Get the changes from a ChangeSet.
 
         Args:
@@ -1455,10 +1460,10 @@ class Provider(BaseProvider):
             if self.get_stack_status(stack_details) == self.REVIEW_STATUS:
                 raise exceptions.StackDoesNotExist(stack.fqn)
             old_template_raw, old_params = self.get_stack_info(stack_details)
-            old_template: Dict[str, Any] = parse_cloudformation_template(old_template_raw)
+            old_template: dict[str, Any] = parse_cloudformation_template(old_template_raw)
             change_type = "UPDATE"
         except exceptions.StackDoesNotExist:
-            old_params: Dict[str, Union[List[str], str]] = {}
+            old_params: dict[str, Union[list[str], str]] = {}
             old_template = {}
             change_type = "CREATE"
 
@@ -1513,7 +1518,7 @@ class Provider(BaseProvider):
         self.get_outputs(stack.fqn)
 
         # infer which outputs may have changed
-        refs_to_invalidate: List[str] = []
+        refs_to_invalidate: list[str] = []
         for change in changes:
             resc_change = change.get("ResourceChange", {})
             if resc_change.get("Type") == "Add":
@@ -1573,8 +1578,8 @@ class Provider(BaseProvider):
 
     @staticmethod
     def params_as_dict(
-        parameters_list: List[ParameterTypeDef],
-    ) -> Dict[str, Union[List[str], str]]:
+        parameters_list: list[ParameterTypeDef],
+    ) -> dict[str, Union[list[str], str]]:
         """Parameters as dict."""
         return {
             param["ParameterKey"]: param["ParameterValue"]  # type: ignore

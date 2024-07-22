@@ -4,14 +4,13 @@ from __future__ import annotations
 
 import base64
 import logging
-from typing import TYPE_CHECKING, Any, Union
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final
 
 from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
     from mypy_boto3_ecr.client import ECRClient
+    from typing_extensions import Literal
 
     from ...context import CfnginContext, RunwayContext
 
@@ -38,7 +37,7 @@ class EcrLookup(LookupHandler):
     def handle(
         cls,
         value: str,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *__args: Any,
         **__kwargs: Any,
     ) -> Any:

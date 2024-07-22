@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
+from unittest.mock import MagicMock, call
 
 import pytest
 import yaml
-from mock import MagicMock, call
 
 from runway.core.components import Deployment, Module
 from runway.core.components._module import validate_environment
@@ -15,7 +15,6 @@ from runway.core.components._module import validate_environment
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from ...factories import MockRunwayContext, YamlLoaderDeployment
@@ -23,7 +22,7 @@ if TYPE_CHECKING:
 MODULE = "runway.core.components._module"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def empty_opts_from_file(mocker: MockerFixture) -> None:
     """Empty Module.opts_from_file."""
     mocker.patch.object(Module, "opts_from_file", {})
@@ -76,7 +75,7 @@ class TestModule:
 
     def test_environment_matches_defined(
         self,
-        cd_tmp_path: Path,
+        cd_tmp_path: Path,  # noqa: ARG002
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -98,7 +97,7 @@ class TestModule:
     def test_environments_deployment(
         self,
         cd_tmp_path: Path,
-        empty_opts_from_file: None,
+        empty_opts_from_file: None,  # noqa: ARG002
         fx_deployments: YamlLoaderDeployment,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -178,7 +177,7 @@ class TestModule:
     def test_payload_with_deployment(
         self,
         cd_tmp_path: Path,
-        empty_opts_from_file: None,
+        empty_opts_from_file: None,  # noqa: ARG002
         fx_deployments: YamlLoaderDeployment,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -328,7 +327,7 @@ class TestModule:
 
     def test_deploy_async(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -366,7 +365,7 @@ class TestModule:
 
     def test_deploy_sync(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -476,7 +475,7 @@ class TestModule:
     def test_plan(
         self,
         async_used: bool,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -504,7 +503,7 @@ class TestModule:
     def test_plan_no_children(
         self,
         async_used: bool,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -526,7 +525,7 @@ class TestModule:
 
     def test_run(
         self,
-        empty_opts_from_file: None,
+        empty_opts_from_file: None,  # noqa: ARG002
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -632,9 +631,9 @@ class TestModule:
     ],
 )
 def test_validate_environment(
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     env_def: Any,
-    expected_logs: List[str],
+    expected_logs: list[str],
     expected: Optional[bool],
     mocker: MockerFixture,
     runway_context: MockRunwayContext,

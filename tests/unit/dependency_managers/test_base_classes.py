@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.dependency_managers.base_classes import DependencyManager
 

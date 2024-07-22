@@ -5,10 +5,10 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
+from unittest.mock import MagicMock
 
 import pytest
-from mock import MagicMock
 from typing_extensions import TypedDict
 
 from runway.config.components.runway import RunwayModuleDefinition
@@ -23,20 +23,19 @@ if TYPE_CHECKING:
 MODULE = "runway.core.components._module_path"
 
 
-TypeDefTestDefinitionExpected = TypedDict(
-    "TypeDefTestDefinitionExpected",
-    arguments=Dict[str, str],
-    location=str,
-    source=str,
-    uri=str,
-)
-TypeDefTestDefinition = TypedDict(
-    "TypeDefTestDefinition",
-    definition=Optional[Union[Path, str]],
-    expected=TypeDefTestDefinitionExpected,
-)
+class TypeDefTestDefinitionExpected(TypedDict):  # noqa: D101
+    arguments: dict[str, str]
+    location: str
+    source: str
+    uri: str
 
-TESTS: List[TypeDefTestDefinition] = [
+
+class TypeDefTestDefinition(TypedDict):  # noqa: D101
+    definition: Optional[Union[Path, str]]
+    expected: TypeDefTestDefinitionExpected
+
+
+TESTS: list[TypeDefTestDefinition] = [
     {
         "definition": "git::git://github.com/onicagroup/foo/foo-bar.git",
         "expected": {

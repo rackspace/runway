@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -43,7 +43,7 @@ class TestAwsLambdaHookArgs:
         "kwargs", [{"image": "test"}, {"file": ""}, {"file": "", "image": "test"}]
     )
     def test__validate_runtime_or_docker_docker_no_runtime(
-        self, kwargs: Dict[str, Any], tmp_path: Path
+        self, kwargs: dict[str, Any], tmp_path: Path
     ) -> None:
         """Test _validate_runtime_or_docker no runtime if Docker."""
         if "file" in kwargs:
@@ -93,7 +93,8 @@ class TestAwsLambdaHookArgs:
             runtime="test",
             source_code=tmp_path,
         )
-        assert not obj.extend_gitignore and isinstance(obj.extend_gitignore, list)
+        assert not obj.extend_gitignore
+        assert isinstance(obj.extend_gitignore, list)
         assert not obj.object_prefix
 
     def test_source_code_is_file(self, tmp_path: Path) -> None:

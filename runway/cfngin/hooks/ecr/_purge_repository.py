@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 from ....utils import BaseModel
 
@@ -25,12 +25,12 @@ class HookArgs(BaseModel):
 
 def delete_ecr_images(
     client: ECRClient,
-    image_ids: List[ImageIdentifierTypeDef],
+    image_ids: list[ImageIdentifierTypeDef],
     repository_name: str,
 ) -> None:
     """Delete images from an ECR repository."""
     response = client.batch_delete_image(repositoryName=repository_name, imageIds=image_ids)
-    if "failures" in response and response["failures"]:
+    if response.get("failures"):
         for msg in response["failures"]:
             LOGGER.info(
                 "failed to delete image %s: (%s) %s",
@@ -41,9 +41,9 @@ def delete_ecr_images(
         raise ValueError("failures present in response")
 
 
-def list_ecr_images(client: ECRClient, repository_name: str) -> List[ImageIdentifierTypeDef]:
+def list_ecr_images(client: ECRClient, repository_name: str) -> list[ImageIdentifierTypeDef]:
     """List all images in an ECR repository."""
-    image_ids: List[ImageIdentifierTypeDef] = []
+    image_ids: list[ImageIdentifierTypeDef] = []
     try:
         response = client.list_images(repositoryName=repository_name, filter={"tagStatus": "ANY"})
         image_ids.extend(response["imageIds"])
@@ -63,11 +63,12 @@ def list_ecr_images(client: ECRClient, repository_name: str) -> List[ImageIdenti
         return []
 
 
-def purge_repository(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, str]:
+def purge_repository(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[str, str]:
     """Purge all images from an ECR repository.
 
     Args:
         context: CFNgin context object.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     args = HookArgs.parse_obj(kwargs)

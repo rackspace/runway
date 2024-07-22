@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 from runway.cfngin.hooks.cleanup_ssm import delete_param
 
 if TYPE_CHECKING:
-    from ...factories import MockCFNginContext
+    from ...factories import MockCfnginContext
 
 
-def test_delete_param(cfngin_context: MockCFNginContext) -> None:
+def test_delete_param(cfngin_context: MockCfnginContext) -> None:
     """Test delete_param."""
     stub = cfngin_context.add_stubber("ssm")
 
@@ -19,7 +19,7 @@ def test_delete_param(cfngin_context: MockCFNginContext) -> None:
         assert delete_param(cfngin_context, parameter_name="foo")
 
 
-def test_delete_param_not_found(cfngin_context: MockCFNginContext) -> None:
+def test_delete_param_not_found(cfngin_context: MockCfnginContext) -> None:
     """Test delete_param."""
     stub = cfngin_context.add_stubber("ssm")
 

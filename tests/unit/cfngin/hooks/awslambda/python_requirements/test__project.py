@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Sequence
+from typing import TYPE_CHECKING
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock, call
 
 from runway.cfngin.hooks.awslambda.exceptions import RuntimeMismatchError
 from runway.cfngin.hooks.awslambda.python_requirements import PythonProject
@@ -20,9 +20,9 @@ from runway.dependency_managers import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 
@@ -181,7 +181,7 @@ class TestPythonProject:
         )
 
     def test_install_dependencies_skip(
-        self, caplog: LogCaptureFixture, mocker: MockerFixture
+        self, caplog: pytest.LogCaptureFixture, mocker: MockerFixture
     ) -> None:
         """Test install_dependencies skip because no dependencies."""
         caplog.set_level(logging.INFO, logger=MODULE.replace("._", "."))
@@ -315,7 +315,7 @@ class TestPythonProject:
     )
     def test_project_type(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         expected: str,
         mocker: MockerFixture,
         pipenv_project: bool,
@@ -445,7 +445,7 @@ class TestPythonProject:
         ],
     )
     def test_supported_metadata_files(
-        self, update_expected: List[str], use_pipenv: bool, use_poetry: bool
+        self, update_expected: list[str], use_pipenv: bool, use_poetry: bool
     ) -> None:
         """Test supported_metadata_files."""
         expected = {*Pip.CONFIG_FILES}

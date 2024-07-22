@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.ecs."""
 
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -9,15 +8,17 @@ from runway._logging import LogLevels
 from runway.cfngin.hooks.ecs import create_clusters
 
 if TYPE_CHECKING:
+    import pytest
     from mypy_boto3_ecs.type_defs import ClusterTypeDef
-    from pytest import LogCaptureFixture
 
-    from ...factories import MockCFNginContext
+    from ...factories import MockCfnginContext
 
 MODULE = "runway.cfngin.hooks.ecs"
 
 
-def test_create_clusters(caplog: LogCaptureFixture, cfngin_context: MockCFNginContext) -> None:
+def test_create_clusters(
+    caplog: pytest.LogCaptureFixture, cfngin_context: MockCfnginContext
+) -> None:
     """Test create_clusters."""
     caplog.set_level(LogLevels.DEBUG, MODULE)
     stub = cfngin_context.add_stubber("ecs")
@@ -39,7 +40,7 @@ def test_create_clusters(caplog: LogCaptureFixture, cfngin_context: MockCFNginCo
         assert f"creating ECS cluster: {cluster}" in caplog.messages
 
 
-def test_create_clusters_str(cfngin_context: MockCFNginContext) -> None:
+def test_create_clusters_str(cfngin_context: MockCfnginContext) -> None:
     """Test create_clusters with ``clusters`` provided as str."""
     stub = cfngin_context.add_stubber("ecs")
     cluster_name = "foo"

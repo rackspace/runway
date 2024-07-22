@@ -1,25 +1,23 @@
 """Tests for runway.cfngin.providers.aws.default."""
 
-# pyright: basic
 from __future__ import annotations
 
 import copy
 import locale
-import os.path
 import random
 import string
 import threading
 import unittest
+from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Optional
+from unittest.mock import MagicMock, patch
 
 import boto3
 import pytest
 from botocore.exceptions import ClientError, UnStubbedResponseError
 from botocore.stub import Stubber
-from mock import MagicMock, patch
-from typing_extensions import Literal
 
 from runway.cfngin import exceptions
 from runway.cfngin.actions.diff import DictValue
@@ -48,6 +46,7 @@ if TYPE_CHECKING:
         StackTypeDef,
     )
     from pytest_mock import MockerFixture
+    from typing_extensions import Literal
 
     from runway.core.providers.aws.type_defs import TagSetTypeDef
 
@@ -59,7 +58,7 @@ def random_string(length: int = 12) -> str:
         length: The # of characters to use in the random string.
 
     """
-    return "".join([random.choice(string.ascii_letters) for _ in range(length)])
+    return "".join([random.choice(string.ascii_letters) for _ in range(length)])  # noqa: S311
 
 
 def generate_describe_stacks_stack(
@@ -105,18 +104,16 @@ def generate_describe_stacks_stack(
 
 
 def generate_get_template(
-    file_name: str = "cfn_template.json", stages_available: Optional[List[str]] = None
-) -> Dict[str, Any]:
+    file_name: str = "cfn_template.json", stages_available: list[str] | None = None
+) -> dict[str, Any]:
     """Generate get template."""
-    fixture_dir = os.path.join(os.path.dirname(__file__), "../../fixtures")
-    with open(os.path.join(fixture_dir, file_name), "r", encoding="utf-8") as _file:
-        return {
-            "StagesAvailable": stages_available or ["Original"],
-            "TemplateBody": _file.read(),
-        }
+    return {
+        "StagesAvailable": stages_available or ["Original"],
+        "TemplateBody": (Path(__file__).parent.parent.parent / "fixtures" / file_name).read_text(),
+    }
 
 
-def generate_stack_object(stack_name: str, outputs: Optional[Dict[str, Any]] = None) -> MagicMock:
+def generate_stack_object(stack_name: str, outputs: Optional[dict[str, Any]] = None) -> MagicMock:
     """Generate stack object."""
     mock_stack = MagicMock(["name", "fqn", "blueprint"])
     if not outputs:
@@ -148,9 +145,9 @@ def generate_resource_change(replacement: bool = True) -> ChangeTypeDef:
 def generate_change_set_response(
     status: str,
     execution_status: str = "AVAILABLE",
-    changes: Optional[List[Dict[str, Any]]] = None,
+    changes: Optional[list[dict[str, Any]]] = None,
     status_reason: str = "FAKE",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate change set response."""
     return {
         "ChangeSetName": "string",
@@ -182,7 +179,7 @@ def generate_change(
     resource_type: str = "EC2::Instance",
     replacement: str = "False",
     requires_recreation: str = "Never",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate a minimal change for a changeset."""
     return {
         "Type": "Resource",
@@ -225,9 +222,9 @@ class TestMethods(unittest.TestCase):
             generate_resource_change(),
         ]
         replacement = requires_replacement(changeset)
-        self.assertEqual(len(replacement), 2)
+        assert len(replacement) == 2
         for resource in replacement:
-            self.assertEqual(resource.get("ResourceChange", {}).get("Replacement"), "True")
+            assert resource.get("ResourceChange", {}).get("Replacement") == "True"
 
     def test_summarize_params_diff(self) -> None:
         """Test summarize params diff."""
@@ -242,54 +239,39 @@ class TestMethods(unittest.TestCase):
             added_param,
             removed_param,
         ]
-        self.assertEqual(summarize_params_diff([]), "")
-        self.assertEqual(
-            summarize_params_diff(params_diff),
-            "\n".join(
-                [
-                    "Parameters Added: ParamC",
-                    "Parameters Removed: ParamD",
-                    "Parameters Modified: ParamB\n",
-                ]
-            ),
+        assert summarize_params_diff([]) == ""
+        assert (
+            summarize_params_diff(params_diff)
+            == "Parameters Added: ParamC\nParameters Removed: ParamD\nParameters Modified: ParamB\n"
         )
 
         only_modified_params_diff = [modified_param]
-        self.assertEqual(
-            summarize_params_diff(only_modified_params_diff),
-            "Parameters Modified: ParamB\n",
-        )
+        assert summarize_params_diff(only_modified_params_diff) == "Parameters Modified: ParamB\n"
 
         only_added_params_diff = [added_param]
-        self.assertEqual(
-            summarize_params_diff(only_added_params_diff), "Parameters Added: ParamC\n"
-        )
+        assert summarize_params_diff(only_added_params_diff) == "Parameters Added: ParamC\n"
 
         only_removed_params_diff = [removed_param]
-        self.assertEqual(
-            summarize_params_diff(only_removed_params_diff),
-            "Parameters Removed: ParamD\n",
-        )
+        assert summarize_params_diff(only_removed_params_diff) == "Parameters Removed: ParamD\n"
 
     def test_ask_for_approval(self) -> None:
         """Test ask for approval."""
         get_input_path = "runway.cfngin.ui.get_raw_input"
         with patch(get_input_path, return_value="y"):
-            self.assertIsNone(ask_for_approval([], [], False))
+            assert ask_for_approval([], [], False) is None
 
         for v in ("n", "N", "x", "\n"):
-            with patch(get_input_path, return_value=v):
-                with self.assertRaises(exceptions.CancelExecution):
-                    ask_for_approval([], [])
+            with patch(get_input_path, return_value=v), pytest.raises(exceptions.CancelExecution):
+                ask_for_approval([], [])
 
         with patch(get_input_path, side_effect=["v", "n"]) as mock_get_input:
             with patch(
                 "runway.cfngin.providers.aws.default.output_full_changeset"
             ) as mock_full_changeset:
-                with self.assertRaises(exceptions.CancelExecution):
+                with pytest.raises(exceptions.CancelExecution):
                     ask_for_approval([], [], True)
-                self.assertEqual(mock_full_changeset.call_count, 1)
-            self.assertEqual(mock_get_input.call_count, 2)
+                assert mock_full_changeset.call_count == 1
+            assert mock_get_input.call_count == 2
 
     def test_ask_for_approval_with_params_diff(self) -> None:
         """Test ask for approval with params diff."""
@@ -299,21 +281,20 @@ class TestMethods(unittest.TestCase):
             DictValue("ParamB", "param-b-old-value", "param-b-new-value-delta"),
         ]
         with patch(get_input_path, return_value="y"):
-            self.assertIsNone(ask_for_approval([], params_diff, False))
+            assert ask_for_approval([], params_diff, False) is None
 
         for v in ("n", "N", "x", "\n"):
-            with patch(get_input_path, return_value=v):
-                with self.assertRaises(exceptions.CancelExecution):
-                    ask_for_approval([], params_diff)
+            with patch(get_input_path, return_value=v), pytest.raises(exceptions.CancelExecution):
+                ask_for_approval([], params_diff)
 
         with patch(get_input_path, side_effect=["v", "n"]) as mock_get_input:
             with patch(
                 "runway.cfngin.providers.aws.default.output_full_changeset"
             ) as mock_full_changeset:
-                with self.assertRaises(exceptions.CancelExecution):
+                with pytest.raises(exceptions.CancelExecution):
                     ask_for_approval([], params_diff, True)
-                self.assertEqual(mock_full_changeset.call_count, 1)
-            self.assertEqual(mock_get_input.call_count, 2)
+                assert mock_full_changeset.call_count == 1
+            assert mock_get_input.call_count == 2
 
     @patch("runway.cfngin.providers.aws.default.format_params_diff")
     @patch("runway.cfngin.providers.aws.default.yaml.safe_dump")
@@ -327,22 +308,20 @@ class TestMethods(unittest.TestCase):
 
         for v in ["y", "v", "Y", "V"]:
             with patch(get_input_path, return_value=v) as prompt:
-                self.assertIsNone(
-                    output_full_changeset(full_changeset=[], params_diff=[], fqn=None)
-                )
-                self.assertEqual(prompt.call_count, 1)
+                assert output_full_changeset(full_changeset=[], params_diff=[], fqn=None) is None
+                assert prompt.call_count == 1
                 safe_dump_counter += 1
-                self.assertEqual(mock_safe_dump.call_count, safe_dump_counter)
-                self.assertEqual(patched_format.call_count, 0)
+                assert mock_safe_dump.call_count == safe_dump_counter
+                assert patched_format.call_count == 0
 
         for v in ["n", "N"]:
             with patch(get_input_path, return_value=v) as prompt:
                 output_full_changeset(full_changeset=[], params_diff=[], answer=None, fqn=None)
-                self.assertEqual(prompt.call_count, 1)
-                self.assertEqual(mock_safe_dump.call_count, safe_dump_counter)
-                self.assertEqual(patched_format.call_count, 0)
+                assert prompt.call_count == 1
+                assert mock_safe_dump.call_count == safe_dump_counter
+                assert patched_format.call_count == 0
 
-        with self.assertRaises(exceptions.CancelExecution):
+        with pytest.raises(exceptions.CancelExecution):
             output_full_changeset(full_changeset=[], params_diff=[], answer="x", fqn=None)
 
         output_full_changeset(
@@ -352,8 +331,8 @@ class TestMethods(unittest.TestCase):
             fqn=None,
         )
         safe_dump_counter += 1
-        self.assertEqual(mock_safe_dump.call_count, safe_dump_counter)
-        self.assertEqual(patched_format.call_count, 1)
+        assert mock_safe_dump.call_count == safe_dump_counter
+        assert patched_format.call_count == 1
 
     def test_wait_till_change_set_complete_success(self) -> None:
         """Test wait till change set complete success."""
@@ -374,9 +353,8 @@ class TestMethods(unittest.TestCase):
             self.stubber.add_response(
                 "describe_change_set", generate_change_set_response("CREATE_PENDING")
             )
-        with self.stubber:
-            with self.assertRaises(exceptions.ChangesetDidNotStabilize):
-                wait_till_change_set_complete(self.cfn, "FAKEID", try_count=2, sleep_time=0.1)
+        with self.stubber, pytest.raises(exceptions.ChangesetDidNotStabilize):
+            wait_till_change_set_complete(self.cfn, "FAKEID", try_count=2, sleep_time=0.1)
 
     def test_create_change_set_stack_did_not_change(self) -> None:
         """Test create change set stack did not change."""
@@ -391,15 +369,14 @@ class TestMethods(unittest.TestCase):
             "delete_change_set", {}, expected_params={"ChangeSetName": "CHANGESETID"}
         )
 
-        with self.stubber:
-            with self.assertRaises(exceptions.StackDidNotChange):
-                create_change_set(
-                    cfn_client=self.cfn,
-                    fqn="my-fake-stack",
-                    template=Template(url="http://fake.template.url.com/"),
-                    parameters=[],
-                    tags=[],
-                )
+        with self.stubber, pytest.raises(exceptions.StackDidNotChange):
+            create_change_set(
+                cfn_client=self.cfn,
+                fqn="my-fake-stack",
+                template=Template(url="http://fake.template.url.com/"),
+                parameters=[],
+                tags=[],
+            )
 
     def test_create_change_set_unhandled_failed_status(self) -> None:
         """Test create change set unhandled failed status."""
@@ -410,15 +387,14 @@ class TestMethods(unittest.TestCase):
             generate_change_set_response("FAILED", status_reason="Some random bad thing."),
         )
 
-        with self.stubber:
-            with self.assertRaises(exceptions.UnhandledChangeSetStatus):
-                create_change_set(
-                    cfn_client=self.cfn,
-                    fqn="my-fake-stack",
-                    template=Template(url="http://fake.template.url.com/"),
-                    parameters=[],
-                    tags=[],
-                )
+        with self.stubber, pytest.raises(exceptions.UnhandledChangeSetStatus):
+            create_change_set(
+                cfn_client=self.cfn,
+                fqn="my-fake-stack",
+                template=Template(url="http://fake.template.url.com/"),
+                parameters=[],
+                tags=[],
+            )
 
     def test_create_change_set_bad_execution_status(self) -> None:
         """Test create change set bad execution status."""
@@ -429,28 +405,27 @@ class TestMethods(unittest.TestCase):
             generate_change_set_response(status="CREATE_COMPLETE", execution_status="UNAVAILABLE"),
         )
 
-        with self.stubber:
-            with self.assertRaises(exceptions.UnableToExecuteChangeSet):
-                create_change_set(
-                    cfn_client=self.cfn,
-                    fqn="my-fake-stack",
-                    template=Template(url="http://fake.template.url.com/"),
-                    parameters=[],
-                    tags=[],
-                )
+        with self.stubber, pytest.raises(exceptions.UnableToExecuteChangeSet):
+            create_change_set(
+                cfn_client=self.cfn,
+                fqn="my-fake-stack",
+                template=Template(url="http://fake.template.url.com/"),
+                parameters=[],
+                tags=[],
+            )
 
     def test_generate_cloudformation_args(self) -> None:
         """Test generate cloudformation args."""
         stack_name = "mystack"
         template_url = "http://fake.s3url.com/blah.json"
         template_body = '{"fake_body": "woot"}'
-        std_args: Dict[str, Any] = {
+        std_args: dict[str, Any] = {
             "stack_name": stack_name,
             "parameters": [],
             "tags": [],
             "template": Template(url=template_url),
         }
-        std_return: Dict[str, Any] = {
+        std_return: dict[str, Any] = {
             "StackName": stack_name,
             "Parameters": [],
             "Tags": [],
@@ -458,24 +433,24 @@ class TestMethods(unittest.TestCase):
             "TemplateURL": template_url,
         }
         result = generate_cloudformation_args(**std_args)
-        self.assertEqual(result, std_return)
+        assert result == std_return
 
         result = generate_cloudformation_args(service_role="FakeRole", **std_args)
         service_role_result = copy.deepcopy(std_return)
         service_role_result["RoleARN"] = "FakeRole"
-        self.assertEqual(result, service_role_result)
+        assert result == service_role_result
 
         result = generate_cloudformation_args(change_set_name="MyChanges", **std_args)
         change_set_result = copy.deepcopy(std_return)
         change_set_result["ChangeSetName"] = "MyChanges"
-        self.assertEqual(result, change_set_result)
+        assert result == change_set_result
 
         # Check stack policy
         stack_policy = Template(body="{}")
         result = generate_cloudformation_args(stack_policy=stack_policy, **std_args)
         stack_policy_result = copy.deepcopy(std_return)
         stack_policy_result["StackPolicyBody"] = "{}"
-        self.assertEqual(result, stack_policy_result)
+        assert result == stack_policy_result
 
         # If not TemplateURL is provided, use TemplateBody
         std_args["template"] = Template(body=template_body)
@@ -483,7 +458,7 @@ class TestMethods(unittest.TestCase):
         del template_body_result["TemplateURL"]
         template_body_result["TemplateBody"] = template_body
         result = generate_cloudformation_args(**std_args)
-        self.assertEqual(result, template_body_result)
+        assert result == template_body_result
 
 
 class TestProvider:
@@ -581,8 +556,8 @@ class TestProviderDefaultMode(unittest.TestCase):
         """Test create_stack, no changeset, template url."""
         stack_name = "fake_stack"
         template = Template(url="http://fake.template.url.com/")
-        parameters: List[Any] = []
-        tags: List[Any] = []
+        parameters: list[Any] = []
+        tags: list[Any] = []
 
         expected_args = generate_cloudformation_args(stack_name, parameters, tags, template)
         expected_args["EnableTerminationProtection"] = False
@@ -605,8 +580,8 @@ class TestProviderDefaultMode(unittest.TestCase):
         template = Template(
             body=template_path.read_text(encoding=locale.getpreferredencoding(do_setlocale=False))
         )
-        parameters: List[Any] = []
-        tags: List[Any] = []
+        parameters: list[Any] = []
+        tags: list[Any] = []
 
         changeset_id = "CHANGESETID"
 
@@ -643,7 +618,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.stubber.add_response("delete_stack", {}, stack)
 
         with self.stubber:
-            self.assertIsNone(self.provider.destroy_stack(stack))  # type: ignore
+            assert self.provider.destroy_stack(stack) is None  # type: ignore
             self.stubber.assert_no_pending_responses()
 
     def test_get_stack_stack_does_not_exist(self) -> None:
@@ -656,9 +631,8 @@ class TestProviderDefaultMode(unittest.TestCase):
             expected_params={"StackName": stack_name},
         )
 
-        with self.assertRaises(exceptions.StackDoesNotExist):
-            with self.stubber:
-                self.provider.get_stack(stack_name)
+        with pytest.raises(exceptions.StackDoesNotExist), self.stubber:
+            self.provider.get_stack(stack_name)
 
     def test_get_stack_stack_exists(self) -> None:
         """Test get stack stack exists."""
@@ -671,7 +645,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         with self.stubber:
             response = self.provider.get_stack(stack_name)
 
-        self.assertEqual(response["StackName"], stack_name)
+        assert response["StackName"] == stack_name
 
     def test_select_destroy_method(self) -> None:
         """Test select destroy method."""
@@ -679,7 +653,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             [{"force_interactive": False}, self.provider.noninteractive_destroy_stack],
             [{"force_interactive": True}, self.provider.interactive_destroy_stack],
         ]:
-            self.assertEqual(self.provider.select_destroy_method(**i[0]), i[1])  # type: ignore
+            assert self.provider.select_destroy_method(**i[0]) == i[1]  # type: ignore
 
     def test_select_update_method(self) -> None:
         """Test select update method."""
@@ -701,7 +675,7 @@ class TestProviderDefaultMode(unittest.TestCase):
                 self.provider.interactive_update_stack,
             ],
         ]:
-            self.assertEqual(self.provider.select_update_method(**i[0]), i[1])  # type: ignore
+            assert self.provider.select_update_method(**i[0]) == i[1]  # type: ignore
 
     def test_prepare_stack_for_update_completed(self) -> None:
         """Test prepare stack for update completed."""
@@ -709,42 +683,39 @@ class TestProviderDefaultMode(unittest.TestCase):
             stack_name = "MockStack"
             stack = generate_describe_stacks_stack(stack_name, stack_status="UPDATE_COMPLETE")
 
-            self.assertTrue(self.provider.prepare_stack_for_update(stack, []))
+            assert self.provider.prepare_stack_for_update(stack, [])
 
     def test_prepare_stack_for_update_in_progress(self) -> None:
         """Test prepare stack for update in progress."""
         stack_name = "MockStack"
         stack = generate_describe_stacks_stack(stack_name, stack_status="UPDATE_IN_PROGRESS")
 
-        with self.assertRaises(exceptions.StackUpdateBadStatus) as raised:
-            with self.stubber:
-                self.provider.prepare_stack_for_update(stack, [])
+        with self.stubber, pytest.raises(exceptions.StackUpdateBadStatus) as raised:
+            self.provider.prepare_stack_for_update(stack, [])
 
-            self.assertIn("in-progress", str(raised.exception))
+        assert "in-progress" in str(raised.value)
 
     def test_prepare_stack_for_update_non_recreatable(self) -> None:
         """Test prepare stack for update non recreatable."""
         stack_name = "MockStack"
         stack = generate_describe_stacks_stack(stack_name, stack_status="REVIEW_IN_PROGRESS")
 
-        with self.assertRaises(exceptions.StackUpdateBadStatus) as raised:
-            with self.stubber:
-                self.provider.prepare_stack_for_update(stack, [])
+        with pytest.raises(exceptions.StackUpdateBadStatus) as excinfo, self.stubber:
+            self.provider.prepare_stack_for_update(stack, [])
 
-        self.assertIn("Unsupported state", str(raised.exception))
+        assert "Unsupported state" in str(excinfo.value)
 
     def test_prepare_stack_for_update_disallowed(self) -> None:
         """Test prepare stack for update disallowed."""
         stack_name = "MockStack"
         stack = generate_describe_stacks_stack(stack_name, stack_status="ROLLBACK_COMPLETE")
 
-        with self.assertRaises(exceptions.StackUpdateBadStatus) as raised:
-            with self.stubber:
-                self.provider.prepare_stack_for_update(stack, [])
+        with pytest.raises(exceptions.StackUpdateBadStatus) as excinfo, self.stubber:
+            self.provider.prepare_stack_for_update(stack, [])
 
-        self.assertIn("re-creation is disabled", str(raised.exception))
+        assert "re-creation is disabled" in str(excinfo.value)
         # Ensure we point out to the user how to enable re-creation
-        self.assertIn("--recreate-failed", str(raised.exception))
+        assert "--recreate-failed" in str(excinfo.value)
 
     def test_prepare_stack_for_update_bad_tags(self) -> None:
         """Test prepare stack for update bad tags."""
@@ -753,13 +724,12 @@ class TestProviderDefaultMode(unittest.TestCase):
 
         self.provider.recreate_failed = True
 
-        with self.assertRaises(exceptions.StackUpdateBadStatus) as raised:
-            with self.stubber:
-                self.provider.prepare_stack_for_update(
-                    stack, tags=[{"Key": "cfngin_namespace", "Value": "test"}]
-                )
+        with pytest.raises(exceptions.StackUpdateBadStatus) as excinfo, self.stubber:
+            self.provider.prepare_stack_for_update(
+                stack, tags=[{"Key": "cfngin_namespace", "Value": "test"}]
+            )
 
-        self.assertIn("tags differ", str(raised.exception).lower())
+        assert "tags differ" in str(excinfo.value).lower()
 
     def test_prepare_stack_for_update_recreate(self) -> None:
         """Test prepare stack for update recreate."""
@@ -771,7 +741,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         self.provider.recreate_failed = True
 
         with self.stubber:
-            self.assertFalse(self.provider.prepare_stack_for_update(stack, []))
+            assert not self.provider.prepare_stack_for_update(stack, [])
 
     def test_noninteractive_changeset_update_no_stack_policy(self) -> None:
         """Test noninteractive changeset update no stack policy."""
@@ -825,7 +795,7 @@ class TestProviderDefaultMode(unittest.TestCase):
         """Test noninteractive_destroy_stack with termination protection."""
         self.stubber.add_client_error("delete_stack")
 
-        with self.stubber, self.assertRaises(ClientError):
+        with self.stubber, pytest.raises(ClientError):
             self.provider.noninteractive_destroy_stack("fake-stack")
         self.stubber.assert_no_pending_responses()
 
@@ -866,8 +836,8 @@ class TestProviderDefaultMode(unittest.TestCase):
         expected_outputs = {
             "FakeOutput": "<inferred-change: MockStack.FakeOutput={'Ref': 'FakeResource'}>"
         }
-        self.assertEqual(self.provider.get_outputs(stack_name), expected_outputs)
-        self.assertEqual(result, expected_outputs)
+        assert self.provider.get_outputs(stack_name) == expected_outputs
+        assert result == expected_outputs
 
     @patch("runway.cfngin.providers.aws.default.output_full_changeset")
     def test_get_stack_changes_create(self, mock_output_full_cs: MagicMock) -> None:
@@ -945,9 +915,8 @@ class TestProviderDefaultMode(unittest.TestCase):
             try:
                 self.provider.tail_stack(stack, threading.Event())
             except ClientError as exc:
-                self.assertEqual(
-                    exc.response.get("ResponseMetadata", {}).get("attempt"),
-                    MAX_TAIL_RETRIES,
+                assert (  # noqa: PT017
+                    exc.response.get("ResponseMetadata", {}).get("attempt") == MAX_TAIL_RETRIES
                 )
 
     def test_tail_stack_retry_on_missing_stack_eventual_success(self) -> None:
@@ -957,14 +926,13 @@ class TestProviderDefaultMode(unittest.TestCase):
         stack.fqn = f"my-namespace-{stack_name}"
 
         default.TAIL_RETRY_SLEEP = 0.01
-        default.GET_EVENTS_SLEEP = 0.01
 
-        received_events: List[Any] = []
+        received_events: list[Any] = []
 
         def mock_log_func(event: Any) -> None:
             received_events.append(event)
 
-        def valid_event_response(stack: Stack, event_id: str) -> Dict[str, Any]:
+        def valid_event_response(stack: Stack, event_id: str) -> dict[str, Any]:
             return {
                 "StackEvents": [
                     {
@@ -992,18 +960,15 @@ class TestProviderDefaultMode(unittest.TestCase):
 
         self.stubber.add_response("describe_stack_events", valid_event_response(stack, "Event1"))
 
-        with self.stubber:
-            try:
-                self.provider.tail_stack(stack, threading.Event(), log_func=mock_log_func)
-            except UnStubbedResponseError:
-                # Eventually we run out of responses - could not happen in
-                # regular execution
-                # normally this would just be dealt with when the threads were
-                # shutdown, but doing so here is a little difficult because
-                # we can't control the `tail_stack` loop
-                pass
+        with self.stubber, suppress(UnStubbedResponseError):
+            # Eventually we run out of responses - could not happen in
+            # regular execution
+            # normally this would just be dealt with when the threads were
+            # shutdown, but doing so here is a little difficult because
+            # we can't control the `tail_stack` loop
+            self.provider.tail_stack(stack, threading.Event(), log_func=mock_log_func)
 
-        self.assertEqual(received_events[0]["EventId"], "Event1")
+        assert received_events[0]["EventId"] == "Event1"
 
     def test_update_termination_protection(self) -> None:
         """Test update_termination_protection."""
@@ -1061,7 +1026,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
         self.stubber.add_response("delete_stack", {}, stack)
 
         with self.stubber:
-            self.assertIsNone(self.provider.interactive_destroy_stack(stack_name))
+            assert self.provider.interactive_destroy_stack(stack_name) is None
             self.stubber.assert_no_pending_responses()
 
     @patch("runway.cfngin.providers.aws.default.Provider.update_termination_protection")
@@ -1088,15 +1053,14 @@ class TestProviderInteractiveMode(unittest.TestCase):
         """Test destroy stack canceled."""
         patched_input.return_value = "n"
 
-        with self.assertRaises(exceptions.CancelExecution):
-            stack = {"StackName": "MockStack"}
-            self.provider.destroy_stack(stack)  # type: ignore
+        with pytest.raises(exceptions.CancelExecution):
+            self.provider.destroy_stack({"StackName": "MockStack"})  # type: ignore
 
     def test_successful_init(self) -> None:
         """Test successful init."""
         replacements = True
         provider = Provider(self.session, interactive=True, replacements_only=replacements)
-        self.assertEqual(provider.replacements_only, replacements)
+        assert provider.replacements_only == replacements
 
     @patch("runway.cfngin.providers.aws.default.Provider.update_termination_protection")
     @patch("runway.cfngin.providers.aws.default.ask_for_approval")
@@ -1175,7 +1139,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
             [{"force_interactive": False}, self.provider.interactive_destroy_stack],
             [{"force_interactive": True}, self.provider.interactive_destroy_stack],
         ]:
-            self.assertEqual(self.provider.select_destroy_method(**i[0]), i[1])  # type: ignore
+            assert self.provider.select_destroy_method(**i[0]) == i[1]  # type: ignore
 
     def test_select_update_method(self) -> None:
         """Test select update method."""
@@ -1197,7 +1161,7 @@ class TestProviderInteractiveMode(unittest.TestCase):
                 self.provider.interactive_update_stack,
             ],
         ]:
-            self.assertEqual(self.provider.select_update_method(**i[0]), i[1])  # type: ignore
+            assert self.provider.select_update_method(**i[0]) == i[1]  # type: ignore
 
     @patch("runway.cfngin.providers.aws.default.output_full_changeset")
     @patch("runway.cfngin.providers.aws.default.output_summary")

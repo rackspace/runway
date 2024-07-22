@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class DockerHookData(MutableMap):
     """Docker hook_data object."""
 
-    image: Optional["DockerImage"] = None
+    image: Optional[DockerImage] = None
 
     @cached_property
     def client(self) -> DockerClient:

@@ -10,7 +10,8 @@ class TestRunwayCdkModuleOptionsDataModel:
     def test_init_default(self) -> None:
         """Test init default."""
         obj = RunwayCdkModuleOptionsDataModel()
-        assert not obj.build_steps and isinstance(obj.build_steps, list)
+        assert not obj.build_steps
+        assert isinstance(obj.build_steps, list)
         assert not obj.skip_npm_ci
 
     def test_init_extra(self) -> None:

@@ -92,7 +92,7 @@ class JwksClient:
         """Initialize.
 
         Args:
-            options (Optional[Dict[str, str]]): Options for the client.
+            options (Optional[dict[str, str]]): Options for the client.
 
         """
         self.options = options
@@ -174,7 +174,7 @@ class JwksClient:
         """Filter to determine if this is a signing key.
 
         Args:
-            key (Dict[str, str]): The key.
+            key (dict[str, str]): The key.
 
         """
         if key.get("kty", "") != "RSA":

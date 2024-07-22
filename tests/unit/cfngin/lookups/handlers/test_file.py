@@ -156,13 +156,8 @@ class TestFileLookup:
 
     def test_handle_raise_value_error(self) -> None:
         """Test handle raise ValueError."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="Query 'foo' doesn't match regex: "):
             FileLookup.handle("foo")
-        assert (
-            str(excinfo.value) == "Query 'foo' doesn't match regex: "
-            "^(?P<codec>[base64|json|json-parameterized|parameterized|"
-            "parameterized-b64|plain|yaml|yaml-parameterized]:.+$)"
-        )
 
     def test_handle_yaml(self, tmp_path: Path) -> None:
         """Test handle yaml."""

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator
+from typing import TYPE_CHECKING, Any
 
 import boto3
 import pytest
@@ -14,6 +14,8 @@ from botocore.exceptions import ClientError
 from runway._cli import cli
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from click.testing import CliRunner, Result
 
 AWS_REGION = "us-east-1"
@@ -26,7 +28,7 @@ def assert_session_belongs_to_account(session: boto3.Session, account_id: str) -
 
 
 @pytest.fixture(scope="module")
-def assumed_session(main_session: boto3.Session, variables: Dict[str, Any]) -> boto3.Session:
+def assumed_session(main_session: boto3.Session, variables: dict[str, Any]) -> boto3.Session:
     """boto3 session for assumed account."""
     role_arn = variables["runner_role"]["test-alt"]
     sts_client = main_session.client("sts")
@@ -49,15 +51,15 @@ def main_session() -> boto3.Session:
 
 
 @pytest.fixture(scope="module")
-def variables() -> Dict[str, Any]:
+def variables() -> dict[str, Any]:
     """Contents of runway.variables.yml."""
     return yaml.safe_load((CURRENT_DIR / "runway.variables.yml").read_bytes())
 
 
 @pytest.fixture(scope="module")
-def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
+def deploy_result(cli_runner: CliRunner) -> Result:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
-    yield cli_runner.invoke(cli, ["deploy", "--debug"], env={"CI": "1"})
+    return cli_runner.invoke(cli, ["deploy", "--debug"], env={"CI": "1"})
 
 
 @pytest.fixture(scope="module")
@@ -74,7 +76,7 @@ def test_deploy_exit_code(deploy_result: Result) -> None:
 
 
 def test_does_not_exist_in_main_account(
-    main_session: boto3.Session, namespace: str, variables: Dict[str, Any]
+    main_session: boto3.Session, namespace: str, variables: dict[str, Any]
 ) -> None:
     """Test that the deployed stack does not exist in the main test account."""
     assert_session_belongs_to_account(main_session, variables["account_id"]["test"])
@@ -86,7 +88,7 @@ def test_does_not_exist_in_main_account(
 
 
 def test_exists_in_assumed_account(
-    assumed_session: boto3.Session, namespace: str, variables: Dict[str, Any]
+    assumed_session: boto3.Session, namespace: str, variables: dict[str, Any]
 ) -> None:
     """Test that the deployed stack exists in the assumed account."""
     assert_session_belongs_to_account(assumed_session, variables["account_id"]["test-alt"])

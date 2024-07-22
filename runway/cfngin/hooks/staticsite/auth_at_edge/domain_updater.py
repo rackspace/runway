@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any
 
 from ...base import HookArgsBaseModel
 
@@ -20,7 +20,7 @@ class HookArgs(HookArgsBaseModel):
     """The ID of the Cognito User Pool Client."""
 
 
-def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> Union[Dict[str, Any], bool]:
+def update(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[str, Any] | bool:
     """Retrieve/Update the domain name of the specified client.
 
     A domain name is required in order to make authorization and token
@@ -32,13 +32,14 @@ def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> Union[Dict[st
 
     Args:
         context: The context instance.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     args = HookArgs.parse_obj(kwargs)
     session = context.get_session()
     cognito_client = session.client("cognito-idp")
 
-    context_dict: Dict[str, Any] = {}
+    context_dict: dict[str, Any] = {}
 
     user_pool_id = context.hook_data["aae_user_pool_id_retriever"]["id"]
     user_pool = cognito_client.describe_user_pool(UserPoolId=user_pool_id).get("UserPool", {})
@@ -62,7 +63,7 @@ def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> Union[Dict[st
         return False
 
 
-def delete(context: CfnginContext, *__args: Any, **kwargs: Any) -> Union[Dict[str, Any], bool]:
+def delete(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[str, Any] | bool:
     """Delete the domain if the user pool was created by Runway.
 
     If a User Pool was created by Runway, and populated with a domain, that
@@ -75,6 +76,7 @@ def delete(context: CfnginContext, *__args: Any, **kwargs: Any) -> Union[Dict[st
 
     Args:
         context: The context instance.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     args = HookArgs.parse_obj(kwargs)

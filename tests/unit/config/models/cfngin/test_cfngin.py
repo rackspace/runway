@@ -112,8 +112,10 @@ class TestCfnginConfigDefinitionModel:
             cfngin_cache_dir="./cache",  # type: ignore
             sys_path="./something",  # type: ignore
         )
-        assert obj.cfngin_cache_dir and obj.cfngin_cache_dir.is_absolute()
-        assert obj.sys_path and obj.sys_path.is_absolute()
+        assert obj.cfngin_cache_dir
+        assert obj.cfngin_cache_dir.is_absolute()
+        assert obj.sys_path
+        assert obj.sys_path.is_absolute()
 
     def test_required_fields(self) -> None:
         """Test required fields."""
@@ -138,14 +140,15 @@ class TestCfnginConfigDefinitionModel:
     def test_validate_unique_stack_names_invalid(self) -> None:
         """Test _validate_unique_stack_names."""
         with pytest.raises(ValidationError) as excinfo:
-            data = {
-                "namespace": "test",
-                "stacks": [
-                    {"name": "stack0", "class_path": "stack0"},
-                    {"name": "stack0", "class_path": "stack0"},
-                ],
-            }
-            CfnginConfigDefinitionModel.parse_obj(data)
+            CfnginConfigDefinitionModel.parse_obj(
+                {
+                    "namespace": "test",
+                    "stacks": [
+                        {"name": "stack0", "class_path": "stack0"},
+                        {"name": "stack0", "class_path": "stack0"},
+                    ],
+                }
+            )
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("stacks",)

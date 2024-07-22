@@ -13,17 +13,18 @@ This allows the lookup to function during a ``runway plan``.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Final, Optional, Union, cast
 
 from pydantic import ValidationError
 from troposphere.awslambda import Code, Content
-from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import load_object_from_string
 from ...exceptions import CfnginOnlyLookupError
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ....config import CfnginConfig
     from ....config.models.cfngin import CfnginHookDefinitionModel
     from ....context import CfnginContext, RunwayContext
@@ -185,6 +186,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -217,6 +220,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -239,12 +244,14 @@ class AwsLambdaLookup(LookupHandler):
             context: Union[CfnginContext, RunwayContext],
             *args: Any,
             **kwargs: Any,
-        ) -> Optional[List[str]]:
+        ) -> Optional[list[str]]:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -275,6 +282,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -305,6 +314,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -337,6 +348,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -367,6 +380,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -393,6 +408,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -420,6 +437,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -447,6 +466,8 @@ class AwsLambdaLookup(LookupHandler):
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property

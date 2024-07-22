@@ -43,7 +43,7 @@ def validate_querystring_and_cookies(request, cookies):
 
     Args:
         request (Any): Cloudfront request.
-        cookies (Dict[str, Any]): Cookies.
+        cookies (dict[str, Any]): Cookies.
 
     """
     qsp = parse_qs(request.get("querystring"))

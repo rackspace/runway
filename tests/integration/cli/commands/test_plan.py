@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 from click.testing import CliRunner
-from mock import Mock
 
 from runway._cli import cli
 from runway.config import RunwayConfig
@@ -21,7 +21,7 @@ from runway.core import Runway
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
+    import pytest
     from pytest_mock import MockerFixture
 
     from ...conftest import CpConfigTypeDef
@@ -78,7 +78,7 @@ def test_plan_options_deploy_environment(
 
 
 def test_plan_options_tag(
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
     mocker: MockerFixture,

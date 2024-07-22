@@ -5,9 +5,8 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
-import boto3
 import pytest
 from pydantic import root_validator
 
@@ -16,6 +15,9 @@ from runway.compat import cached_property
 from runway.utils import BaseModel
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    import boto3
     from click.testing import CliRunner, Result
     from mypy_boto3_cloudformation.client import CloudFormationClient
     from mypy_boto3_cloudformation.type_defs import StackTypeDef
@@ -67,7 +69,7 @@ class AwslambdaStackOutputs(BaseModel):
     Runtime: str
 
     @root_validator(allow_reuse=True, pre=True)
-    def _convert_null_to_none(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_null_to_none(self, values: dict[str, Any]) -> dict[str, Any]:
         """Convert ``null`` to ``NoneType``."""
 
         def _handle_null(v: Any) -> Any:
@@ -248,7 +250,7 @@ def test_xmlsec_layer(deploy_result: Result, namespace: str, runway_context: Run
     assert response["data"]["dir_contents"] == ["index.py"]
 
 
-def test_plan(cli_runner: CliRunner, deploy_result: Result) -> None:
+def test_plan(cli_runner: CliRunner, deploy_result: Result) -> None:  # noqa: ARG001
     """Test ``runway plan`` - this was not possible with old hook.
 
     deploy_result required so cleanup does not start before this runs.

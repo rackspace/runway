@@ -3,12 +3,11 @@
 # pyright: basic
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, patch
 
 import pytest
 import yaml
-from mock import MagicMock, patch
 from pydantic import BaseModel
 
 from runway.cfngin.exceptions import MissingEnvironment
@@ -20,7 +19,8 @@ from runway.config.models.cfngin import (
 from runway.exceptions import ConfigNotFound
 
 if TYPE_CHECKING:
-    from pytest import MonkeyPatch
+    from pathlib import Path
+
 
 MODULE = "runway.config"
 
@@ -34,7 +34,7 @@ class ExampleModel(BaseModel):
 class TestBaseConfig:
     """Test runway.config.BaseConfig."""
 
-    def test_dump(self, monkeypatch: MonkeyPatch) -> None:
+    def test_dump(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test dump."""
         mock_dict = MagicMock(return_value={"name": "test"})
         monkeypatch.setattr(ExampleModel, "dict", mock_dict)
@@ -121,7 +121,9 @@ class TestCfnginConfig:
             CfnginConfig.parse_file(file_path=config_yml)
         assert excinfo.value.path == config_yml
 
-    def test_parse_file_find_config_file(self, monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+    def test_parse_file_find_config_file(
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
         """Test parse_file with path."""
         file_path = tmp_path / "test.yml"
         file_path.write_text("name: test\n")
@@ -136,30 +138,28 @@ class TestCfnginConfig:
         )
 
     def test_parse_file_find_config_file_value_error(
-        self, monkeypatch: MonkeyPatch, tmp_path: Path
+        self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
         """Test parse_file with path raise ValueError."""
         mock_find_config_file = MagicMock(return_value=[tmp_path / "01.yml", tmp_path / "02.yml"])
         monkeypatch.setattr(CfnginConfig, "find_config_file", mock_find_config_file)
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="more than one"):
             CfnginConfig.parse_file(path=tmp_path)
-        assert str(excinfo.value).startswith("more than one")
 
-    def test_parse_file_value_error(self):
+    def test_parse_file_value_error(self) -> None:
         """Test parse_file raise ValueError."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="must provide path or file_path"):
             CfnginConfig.parse_file()
-        assert str(excinfo.value) == "must provide path or file_path"
 
-    def test_parse_obj(self, monkeypatch: MonkeyPatch) -> None:
-        """Test parse_obj."""
+    def test_parse_obj(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Test model_validate."""
         monkeypatch.setattr(
             MODULE + ".CfnginConfigDefinitionModel.parse_obj",
-            lambda x: CfnginConfigDefinitionModel(namespace="success"),  # type: ignore
+            lambda x: CfnginConfigDefinitionModel(namespace="success"),  # type: ignore  # noqa: ARG005
         )
         assert CfnginConfig.parse_obj({}).namespace == "success"
 
-    def test_parse_raw(self, monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+    def test_parse_raw(self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         """Test parse_raw."""
         mock_resolve_raw_data = MagicMock()
         mock_parse_obj = MagicMock()
@@ -195,7 +195,7 @@ class TestCfnginConfig:
 
     @patch(MODULE + ".SourceProcessor")
     def test_process_package_sources(
-        self, mock_source_processor: MagicMock, monkeypatch: MonkeyPatch, tmp_path: Path
+        self, mock_source_processor: MagicMock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
         """Test process_package_sources."""
         mock_resolve_raw_data = MagicMock(return_value="rendered")
@@ -222,7 +222,7 @@ class TestCfnginConfig:
 
         data = {"namespace": "test", "package_sources": {"git": [{"uri": "something"}]}}
         raw_data = yaml.dump(data)
-        mock_source_processor.configs_to_merge = [str(other_config.resolve())]
+        mock_source_processor.configs_to_merge = [other_config.resolve()]
         assert (
             CfnginConfig.process_package_sources(
                 raw_data, parameters={"key": "val"}, work_dir=tmp_path
@@ -261,13 +261,13 @@ class TestCfnginConfig:
 class TestRunwayConfig:
     """Test runway.config.RunwayConfig."""
 
-    def test_find_config_file_yaml(self, tmp_path: Path):
+    def test_find_config_file_yaml(self, tmp_path: Path) -> None:
         """Test file_config_file runway.yaml."""
         runway_yaml = tmp_path / "runway.yaml"
         runway_yaml.touch()
         assert RunwayConfig.find_config_file(tmp_path) == runway_yaml
 
-    def test_find_config_file_yml(self, tmp_path: Path):
+    def test_find_config_file_yml(self, tmp_path: Path) -> None:
         """Test file_config_file runway.yml."""
         runway_yml = tmp_path / "runway.yml"
         runway_yml.touch()
@@ -291,9 +291,8 @@ class TestRunwayConfig:
         """Test file_config_file raise ValueError."""
         (tmp_path / "runway.yaml").touch()
         (tmp_path / "runway.yml").touch()
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="more than one"):
             RunwayConfig.find_config_file(tmp_path)
-        assert str(excinfo.value).startswith("more than one")
 
     def test_parse_obj(self) -> None:
         """Test parse_obj."""

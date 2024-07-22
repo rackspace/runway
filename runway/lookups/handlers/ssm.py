@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Union
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Union
 
 from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)

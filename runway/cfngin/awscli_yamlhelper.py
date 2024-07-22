@@ -15,14 +15,15 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, MutableMapping, MutableSequence, cast
+from collections.abc import MutableMapping, MutableSequence
+from typing import Any, cast
 
 import yaml
 
 
 def intrinsics_multi_constructor(
-    loader: yaml.Loader, tag_prefix: str, node: yaml.Node
-) -> Dict[str, Any]:
+    loader: yaml.Loader, tag_prefix: str, node: yaml.Node  # noqa: ARG001
+) -> dict[str, Any]:
     """YAML constructor to parse CloudFormation intrinsics.
 
     This will return a dictionary with key being the intrinsic name
@@ -59,12 +60,12 @@ def intrinsics_multi_constructor(
     return {cfntag: value}
 
 
-def yaml_dump(dict_to_dump: Dict[str, Any]) -> str:
+def yaml_dump(dict_to_dump: dict[str, Any]) -> str:
     """Dump the dictionary as a YAML document."""
     return yaml.safe_dump(dict_to_dump, default_flow_style=False)
 
 
-def yaml_parse(yamlstr: str) -> Dict[str, Any]:
+def yaml_parse(yamlstr: str) -> dict[str, Any]:
     """Parse a yaml string."""
     try:
         # PyYAML doesn't support json as well as it should, so if the input

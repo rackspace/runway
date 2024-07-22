@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Union
 
 import awacs.awslambda
 import awacs.iam
@@ -52,7 +52,7 @@ class _IndexRewriteFunctionInfoTypeDef(TypedDict):
 class StaticSite(Blueprint):
     """CFNgin blueprint for creating S3 bucket and CloudFront distribution."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "AcmCertificateArn": {
             "type": str,
             "default": "",
@@ -61,7 +61,7 @@ class StaticSite(Blueprint):
         "Aliases": {
             "type": list,
             "default": [],
-            "description": "(Optional) Domain aliases the " "distribution",
+            "description": "(Optional) Domain aliases the distribution",
         },
         "Compress": {
             "type": bool,
@@ -87,7 +87,7 @@ class StaticSite(Blueprint):
         "RewriteDirectoryIndex": {
             "type": str,
             "default": "",
-            "description": "(Optional) File name to " "append to directory " "requests.",
+            "description": "(Optional) File name to append to directory requests.",
         },
         "RoleBoundaryArn": {
             "type": str,
@@ -99,17 +99,17 @@ class StaticSite(Blueprint):
         "WAFWebACL": {
             "type": str,
             "default": "",
-            "description": "(Optional) WAF id to associate with the " "distribution.",
+            "description": "(Optional) WAF id to associate with the distribution.",
         },
         "custom_error_responses": {
             "type": list,
             "default": [],
-            "description": "(Optional) Custom error " "responses.",
+            "description": "(Optional) Custom error responses.",
         },
         "lambda_function_associations": {
             "type": list,
             "default": [],
-            "description": "(Optional) Lambda " "function " "associations.",
+            "description": "(Optional) Lambda function associations.",
         },
     }
 
@@ -174,7 +174,7 @@ class StaticSite(Blueprint):
         else:
             self.add_bucket_policy(bucket)
 
-    def get_lambda_associations(self) -> List[cloudfront.LambdaFunctionAssociation]:
+    def get_lambda_associations(self) -> list[cloudfront.LambdaFunctionAssociation]:
         """Retrieve any lambda associations from the instance variables."""
         # If custom associations defined, use them
         if self.variables["lambda_function_associations"]:
@@ -188,9 +188,9 @@ class StaticSite(Blueprint):
 
     @staticmethod
     def get_directory_index_lambda_association(
-        lambda_associations: List[cloudfront.LambdaFunctionAssociation],
+        lambda_associations: list[cloudfront.LambdaFunctionAssociation],
         directory_index_rewrite_version: awslambda.Version,
-    ) -> List[cloudfront.LambdaFunctionAssociation]:
+    ) -> list[cloudfront.LambdaFunctionAssociation]:
         """Retrieve the directory index lambda associations with the added rewriter.
 
         Args:
@@ -210,8 +210,8 @@ class StaticSite(Blueprint):
         self,
         bucket: s3.Bucket,
         oai: cloudfront.CloudFrontOriginAccessIdentity,
-        lambda_function_associations: List[cloudfront.LambdaFunctionAssociation],
-    ) -> Dict[str, Any]:
+        lambda_function_associations: list[cloudfront.LambdaFunctionAssociation],
+    ) -> dict[str, Any]:
         """Retrieve the options for our CloudFront distribution.
 
         Args:
@@ -271,7 +271,7 @@ class StaticSite(Blueprint):
             "ViewerCertificate": self.add_acm_cert(),
         }
 
-    def add_aliases(self) -> Union[List[str], Ref]:
+    def add_aliases(self) -> Union[list[str], Ref]:
         """Add aliases."""
         if self.aliases_specified:
             return self.variables["Aliases"]
@@ -487,11 +487,11 @@ class StaticSite(Blueprint):
 
         """
         code_str = ""
-        path = os.path.join(
-            os.path.dirname(__file__),
+        path = os.path.join(  # noqa: PTH118
+            os.path.dirname(__file__),  # noqa: PTH120
             "templates/cf_directory_index_rewrite.template.js",
         )
-        with open(path, encoding="utf-8") as file_:
+        with open(path, encoding="utf-8") as file_:  # noqa: PTH123
             code_str = file_.read().replace(
                 "{{RewriteDirectoryIndex}}", self.variables["RewriteDirectoryIndex"]
             )
@@ -530,7 +530,7 @@ class StaticSite(Blueprint):
             The CloudFront directory index rewrite version.
 
         """
-        code_hash = hashlib.md5(
+        code_hash = hashlib.md5(  # noqa: S324
             str(directory_index_rewrite.properties["Code"].properties["ZipFile"]).encode()
         ).hexdigest()
 
@@ -544,7 +544,7 @@ class StaticSite(Blueprint):
     def add_cloudfront_distribution(
         self,
         bucket_policy: s3.BucketPolicy,
-        cloudfront_distribution_options: Dict[str, Any],
+        cloudfront_distribution_options: dict[str, Any],
     ) -> cloudfront.Distribution:
         """Add the CloudFront distribution to the template / output the id and domain name.
 
@@ -582,7 +582,7 @@ class StaticSite(Blueprint):
     @staticmethod
     def _get_cloudfront_bucket_policy_statements(
         bucket: s3.Bucket, oai: cloudfront.CloudFrontOriginAccessIdentity
-    ) -> List[Statement]:
+    ) -> list[Statement]:
         return [
             Statement(
                 Action=[awacs.s3.GetObject],
@@ -607,4 +607,6 @@ class StaticSite(Blueprint):
 # Helper section to enable easy blueprint -> template generation
 # (just run `python <thisfile>` to output the json)
 if __name__ == "__main__":
-    print(StaticSite("test", CfnginContext(parameters={"namespace": "test"})).to_json())
+    print(  # noqa: T201
+        StaticSite("test", CfnginContext(parameters={"namespace": "test"})).to_json()
+    )

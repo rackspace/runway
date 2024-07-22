@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Union
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 from troposphere import Parameter, Ref, s3, sns
 
 from runway.cfngin.blueprints.base import (
@@ -46,14 +46,14 @@ MODULE = "runway.cfngin.blueprints.base"
 class SampleBlueprint(Blueprint):
     """Sample Blueprint to use for testing."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "Var0": {"type": CFNString, "default": "test"},
         "Var1": {"type": str, "default": ""},
     }
 
     def create_template(self) -> None:
         """Create template."""
-        return None
+        return
 
 
 def resolve_troposphere_var(tpe: Any, value: Any, **kwargs: Any) -> Any:
@@ -171,11 +171,11 @@ class TestBlueprint:
         """Test __init__."""
 
         class _Blueprint(Blueprint):
-            PARAMETERS: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {}
+            PARAMETERS: ClassVar[dict[str, BlueprintVariableTypeDef]] = {}
 
             def create_template(self) -> None:
                 """Create template."""
-                return None
+                return
 
         with pytest.raises(AttributeError):
             _Blueprint("test", cfngin_context)
@@ -226,7 +226,7 @@ class TestBlueprint:
         """Test required_parameter_definitions."""
 
         class _Blueprint(SampleBlueprint):
-            VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+            VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
                 "Var0": {"type": CFNString},
                 "Var1": {"type": str, "default": ""},
             }
@@ -269,7 +269,7 @@ class TestBlueprint:
         """Test to_json."""
 
         class _Blueprint(Blueprint):
-            VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+            VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
                 "Param1": {"default": "default", "type": CFNString},
                 "Param2": {"type": CFNNumber},
                 "Param3": {"type": CFNCommaDelimitedList},
@@ -307,7 +307,7 @@ class TestBlueprint:
         """Test variables."""
 
         class _Blueprint(Blueprint):
-            VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {"Var0": {"type": str}}
+            VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {"Var0": {"type": str}}
 
             def create_template(self) -> None:
                 """Create template."""
@@ -359,7 +359,7 @@ class TestCFNParameter:
             (1, "1"),
         ],
     )
-    def test_value(self, expected: Union[List[str], str], provided: Any) -> None:
+    def test_value(self, expected: Union[list[str], str], provided: Any) -> None:
         """Test value."""
         assert CFNParameter("myParameter", provided).value == expected
 
@@ -407,7 +407,7 @@ def test_resolve_variable_allowed_values() -> None:
     """Test resolve_variable."""
     var_name = "testVar"
     var_def: BlueprintVariableTypeDef = {"type": str, "allowed_values": ["allowed"]}
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         resolve_variable(var_name, var_def, Variable(var_name, "not_allowed", "cfngin"), "test")
     assert (
         resolve_variable(var_name, var_def, Variable(var_name, "allowed", "cfngin"), "test")

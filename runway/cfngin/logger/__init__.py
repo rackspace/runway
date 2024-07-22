@@ -1,11 +1,13 @@
 """CFNgin logger."""
 
+from __future__ import annotations
+
 import logging
 import sys
-from typing import Any, Dict, Optional
+from typing import Any
 
 DEBUG_FORMAT = (
-    "[%(asctime)s] %(levelname)s %(threadName)s " "%(name)s:%(lineno)d(%(funcName)s): %(message)s"
+    "[%(asctime)s] %(levelname)s %(threadName)s %(name)s:%(lineno)d(%(funcName)s): %(message)s"
 )
 INFO_FORMAT = "[%(asctime)s] %(message)s"
 COLOR_FORMAT = "[%(asctime)s] \033[%(color)sm%(message)s\033[39m"
@@ -23,7 +25,7 @@ class ColorFormatter(logging.Formatter):
         return super().format(record)
 
 
-def setup_logging(verbosity: int, formats: Optional[Dict[str, Any]] = None):
+def setup_logging(verbosity: int, formats: dict[str, Any] | None = None) -> None:
     """Configure a proper logger based on verbosity and optional log formats.
 
     Args:

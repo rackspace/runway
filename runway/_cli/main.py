@@ -3,7 +3,7 @@
 import argparse
 import logging
 import os
-from typing import Any, Dict
+from typing import Any
 
 import click
 
@@ -15,7 +15,7 @@ from .utils import CliContext
 
 LOGGER = logging.getLogger("runway.cli")
 
-CLICK_CONTEXT_SETTINGS: Dict[str, Any] = {
+CLICK_CONTEXT_SETTINGS: dict[str, Any] = {
     "help_option_names": ["-h", "--help"],
     "max_content_width": 999,
 }
@@ -34,7 +34,7 @@ class _CliGroup(click.Group):
         return super().invoke(ctx)
 
     @staticmethod
-    def __parse_global_options(ctx: click.Context) -> Dict[str, Any]:
+    def __parse_global_options(ctx: click.Context) -> dict[str, Any]:
         """Parse global options.
 
         These options are passed to subcommands but, should be parsed by the

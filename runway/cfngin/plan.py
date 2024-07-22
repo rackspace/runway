@@ -4,22 +4,16 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import threading
 import time
 import uuid
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
-    List,
     NoReturn,
-    Optional,
-    OrderedDict,
-    Set,
     TypeVar,
-    Union,
     overload,
 )
 
@@ -41,6 +35,8 @@ from .ui import ui
 from .utils import stack_template_key_name
 
 if TYPE_CHECKING:
+    from collections import OrderedDict
+
     from ..context import CfnginContext
     from .providers.aws.default import Provider
     from .status import Status
@@ -51,14 +47,14 @@ _T = TypeVar("_T")
 
 
 @overload
-def json_serial(obj: Set[_T]) -> List[_T]: ...
+def json_serial(obj: set[_T]) -> list[_T]: ...
 
 
 @overload
-def json_serial(obj: Union[Dict[Any, Any], int, List[Any], str]) -> NoReturn: ...
+def json_serial(obj: dict[Any, Any] | int | list[Any] | str) -> NoReturn: ...
 
 
-def json_serial(obj: Union[Set[Any], Any]) -> Any:
+def json_serial(obj: set[Any] | Any) -> Any:
     """Serialize json.
 
     Args:
@@ -82,7 +78,7 @@ def merge_graphs(graph1: Graph, graph2: Graph) -> Graph:
 
     """
     merged_graph_dict = merge_dicts(graph1.to_dict().copy(), graph2.to_dict())
-    steps = [graph1.steps.get(name, graph2.steps.get(name)) for name in merged_graph_dict.keys()]
+    steps = [graph1.steps.get(name, graph2.steps.get(name)) for name in merged_graph_dict]
     return Graph.from_steps([step for step in steps if step])
 
 
@@ -100,19 +96,19 @@ class Step:
 
     """
 
-    fn: Optional[Callable[..., Any]]
+    fn: Callable[..., Any] | None
     last_updated: float
     logger: PrefixAdaptor
     stack: Stack
     status: Status
-    watch_func: Optional[Callable[..., Any]]
+    watch_func: Callable[..., Any] | None
 
     def __init__(
         self,
         stack: Stack,
         *,
-        fn: Optional[Callable[..., Any]] = None,
-        watch_func: Optional[Callable[..., Any]] = None,
+        fn: Callable[..., Any] | None = None,
+        watch_func: Callable[..., Any] | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -172,12 +168,12 @@ class Step:
         return self.stack.name
 
     @property
-    def requires(self) -> Set[str]:
+    def requires(self) -> set[str]:
         """Return a list of step names this step depends on."""
         return self.stack.requires
 
     @property
-    def required_by(self) -> Set[str]:
+    def required_by(self) -> set[str]:
         """Return a list of step names that depend on this step."""
         return self.stack.required_by
 
@@ -260,9 +256,9 @@ class Step:
         cls,
         stack_name: str,
         context: CfnginContext,
-        requires: Optional[Union[List[str], Set[str]]] = None,
-        fn: Optional[Callable[..., Status]] = None,
-        watch_func: Optional[Callable[..., Any]] = None,
+        requires: list[str] | set[str] | None = None,
+        fn: Callable[..., Status] | None = None,
+        watch_func: Callable[..., Any] | None = None,
     ) -> Step:
         """Create a step using only a stack name.
 
@@ -286,11 +282,11 @@ class Step:
     @classmethod
     def from_persistent_graph(
         cls,
-        graph_dict: Union[Dict[str, List[str]], Dict[str, Set[str]], OrderedDict[str, Set[str]]],
+        graph_dict: dict[str, list[str]] | dict[str, set[str]] | OrderedDict[str, set[str]],
         context: CfnginContext,
-        fn: Optional[Callable[..., Status]] = None,
-        watch_func: Optional[Callable[..., Any]] = None,
-    ) -> List[Step]:
+        fn: Callable[..., Status] | None = None,
+        watch_func: Callable[..., Any] | None = None,
+    ) -> list[Step]:
         """Create a steps for a persistent graph dict.
 
         Args:
@@ -337,9 +333,9 @@ class Graph:
     """
 
     dag: DAG
-    steps: Dict[str, Step]
+    steps: dict[str, Step]
 
-    def __init__(self, steps: Optional[Dict[str, Step]] = None, dag: Optional[DAG] = None) -> None:
+    def __init__(self, steps: dict[str, Step] | None = None, dag: DAG | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -411,7 +407,7 @@ class Graph:
                 except GraphError:
                     continue
 
-    def add_steps(self, steps: List[Step]) -> None:
+    def add_steps(self, steps: list[Step]) -> None:
         """Add a list of steps.
 
         Args:
@@ -489,7 +485,7 @@ class Graph:
 
         return walker(self.dag, fn)
 
-    def downstream(self, step_name: str) -> List[Step]:
+    def downstream(self, step_name: str) -> list[Step]:
         """Return the direct dependencies of the given step."""
         return [self.steps[dep] for dep in self.dag.downstream(step_name)]
 
@@ -501,7 +497,7 @@ class Graph:
         """
         return Graph(steps=self.steps, dag=self.dag.transpose())
 
-    def filtered(self, step_names: List[str]) -> Graph:
+    def filtered(self, step_names: list[str]) -> Graph:
         """Return a "filtered" version of this graph.
 
         Args:
@@ -510,16 +506,16 @@ class Graph:
         """
         return Graph(steps=self.steps, dag=self.dag.filter(step_names))
 
-    def topological_sort(self) -> List[Step]:
+    def topological_sort(self) -> list[Step]:
         """Perform a topological sort of the underlying DAG."""
         nodes = self.dag.topological_sort()
         return [self.steps[step_name] for step_name in nodes]
 
-    def to_dict(self) -> OrderedDict[str, Set[str]]:
+    def to_dict(self) -> OrderedDict[str, set[str]]:
         """Return the underlying DAG as a dictionary."""
         return self.dag.graph
 
-    def dumps(self, indent: Optional[int] = None) -> str:
+    def dumps(self, indent: int | None = None) -> str:
         """Output the graph as a json serialized string for storage.
 
         Args:
@@ -531,7 +527,7 @@ class Graph:
     @classmethod
     def from_dict(
         cls,
-        graph_dict: Union[Dict[str, List[str]], Dict[str, Set[str]], OrderedDict[str, Set[str]]],
+        graph_dict: dict[str, list[str]] | dict[str, set[str]] | OrderedDict[str, set[str]],
         context: CfnginContext,
     ) -> Graph:
         """Create a Graph from a graph dict.
@@ -544,7 +540,7 @@ class Graph:
         return cls.from_steps(Step.from_persistent_graph(graph_dict, context))
 
     @classmethod
-    def from_steps(cls, steps: List[Step]) -> Graph:
+    def from_steps(cls, steps: list[Step]) -> Graph:
         """Create a Graph from Steps.
 
         Args:
@@ -574,7 +570,7 @@ class Plan:
 
     """
 
-    context: Optional[CfnginContext]
+    context: CfnginContext | None
     description: str
     graph: Graph
     id: uuid.UUID
@@ -585,7 +581,7 @@ class Plan:
         self,
         description: str,
         graph: Graph,
-        context: Optional[CfnginContext] = None,
+        context: CfnginContext | None = None,
         reverse: bool = False,
         require_unlocked: bool = True,
     ) -> None:
@@ -621,7 +617,7 @@ class Plan:
 
         self.graph = graph
 
-    def outline(self, level: int = logging.INFO, message: str = ""):
+    def outline(self, level: int = logging.INFO, message: str = "") -> None:
         """Print an outline of the actions the plan is going to take.
 
         The outline will represent the rough ordering of the steps that will be
@@ -651,7 +647,7 @@ class Plan:
         *,
         directory: str,
         context: CfnginContext,
-        provider: Optional[Provider] = None,
+        provider: Provider | None = None,
     ) -> Any:
         """Output the rendered blueprint for all stacks in the plan.
 
@@ -662,30 +658,26 @@ class Plan:
 
         """
         LOGGER.info('dumping "%s"...', self.description)
-        directory = os.path.expanduser(directory)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        dir_path = Path(directory).expanduser()
+        dir_path.mkdir(exist_ok=True, parents=True)
 
         def walk_func(step: Step) -> bool:
             """Walk function."""
             step.stack.resolve(context=context, provider=provider)
             blueprint = step.stack.blueprint
             filename = stack_template_key_name(blueprint)
-            path = os.path.join(directory, filename)
-
-            blueprint_dir = os.path.dirname(path)
-            if not os.path.exists(blueprint_dir):
-                os.makedirs(blueprint_dir)
+            path = dir_path / filename
+            path.parent.mkdir(exist_ok=True, parents=True)
 
             LOGGER.info('writing stack "%s" -> %s', step.name, path)
-            with open(path, "w", encoding="utf-8") as _file:
+            with Path(path).open("w", encoding="utf-8") as _file:
                 _file.write(blueprint.rendered)
 
             return True
 
         return self.graph.walk(walk, walk_func)
 
-    def execute(self, *args: Any, **kwargs: Any):
+    def execute(self, *args: Any, **kwargs: Any) -> None:
         """Walk each step in the underlying graph.
 
         Raises:
@@ -758,17 +750,17 @@ class Plan:
         return str(self.id)
 
     @property
-    def steps(self) -> List[Step]:
+    def steps(self) -> list[Step]:
         """Return a list of all steps in the plan."""
         steps = self.graph.topological_sort()
         steps.reverse()
         return steps
 
     @property
-    def step_names(self) -> List[str]:
+    def step_names(self) -> list[str]:
         """Return a list of all step names."""
         return [step.name for step in self.steps]
 
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         """Return a list of all step names."""
         return self.step_names

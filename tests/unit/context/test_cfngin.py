@@ -6,12 +6,12 @@ from __future__ import annotations
 import io
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from unittest.mock import MagicMock
 
 import pytest
 from botocore.response import StreamingBody
 from botocore.stub import Stubber
-from mock import MagicMock
 
 from runway.cfngin.exceptions import (
     PersistentGraphCannotLock,
@@ -41,12 +41,12 @@ BOTO3_CREDENTIALS: Boto3CredentialsTypeDef = {
 }
 
 
-def gen_tagset(tags: Dict[str, str]) -> TagSetTypeDef:
+def gen_tagset(tags: dict[str, str]) -> TagSetTypeDef:
     """Create TagSet value from a dict."""
     return [{"Key": key, "Value": value} for key, value in tags.items()]
 
 
-def gen_s3_object_content(content: Union[Dict[str, Any], str]) -> StreamingBody:
+def gen_s3_object_content(content: Union[dict[str, Any], str]) -> StreamingBody:
     """Convert a string or dict to S3 object body.
 
     Args:
@@ -97,7 +97,7 @@ class TestCFNginContext:
             {"name": "stack2", "template_path": ".", "requires": ["stack1"]},
         ],
     }
-    persist_graph_raw: Dict[str, Set[str]] = {"stack1": set(), "stack2": {"stack1"}}
+    persist_graph_raw: dict[str, set[str]] = {"stack1": set(), "stack2": {"stack1"}}
     persist_graph_config = CfnginConfig.parse_obj(persist_graph_raw_config)
 
     @pytest.mark.parametrize(
@@ -180,7 +180,8 @@ class TestCFNginContext:
         assert obj.config_path == tmp_path
         assert obj.env == self.env
         assert obj.force_stacks == ["stack-01"]
-        assert not obj.hook_data and isinstance(obj.hook_data, dict)
+        assert not obj.hook_data
+        assert isinstance(obj.hook_data, dict)
         assert obj.logger
         assert obj.parameters == {"key": "val"}
         assert obj.stack_names == ["stack-02"]
@@ -194,10 +195,13 @@ class TestCFNginContext:
         assert obj.config_path == Path.cwd()
         assert isinstance(obj.env, DeployEnvironment)
         assert obj.force_stacks == []
-        assert not obj.hook_data and isinstance(obj.hook_data, dict)
+        assert not obj.hook_data
+        assert isinstance(obj.hook_data, dict)
         assert obj.logger
-        assert not obj.parameters and isinstance(obj.parameters, dict)
-        assert not obj.stack_names and isinstance(obj.stack_names, list)
+        assert not obj.parameters
+        assert isinstance(obj.parameters, dict)
+        assert not obj.stack_names
+        assert isinstance(obj.stack_names, list)
 
     def test_lock_persistent_graph_locked(self, mocker: MockerFixture) -> None:
         """Test lock_persistent_graph no graph."""
@@ -301,7 +305,7 @@ class TestCFNginContext:
             "put_object",
             {},
             {
-                "Body": "{}".encode(),
+                "Body": b"{}",
                 "ServerSideEncryption": "AES256",
                 "ACL": "bucket-owner-full-control",
                 "ContentType": "application/json",
@@ -360,7 +364,7 @@ class TestCFNginContext:
             {"cfngin_bucket": "", "persistent_graph_key": "something"},
         ],
     )
-    def test_persistent_graph_location_empty(self, config_ext: Dict[str, str]) -> None:
+    def test_persistent_graph_location_empty(self, config_ext: dict[str, str]) -> None:
         """Test persistent_graph_location."""
         config = CfnginConfig.parse_obj({"namespace": "test", **config_ext})
         assert not CfnginContext(config=config).persistent_graph_location
@@ -621,7 +625,7 @@ class TestCFNginContext:
             ({"namespace": "test", "cfngin_bucket": "something"}, True),
         ],
     )
-    def test_upload_to_s3(self, config: Dict[str, Any], expected: bool) -> None:
+    def test_upload_to_s3(self, config: dict[str, Any], expected: bool) -> None:
         """Test upload_to_s3."""
         assert CfnginContext(config=CfnginConfig.parse_obj(config)).upload_to_s3 is expected
 
@@ -686,7 +690,7 @@ class TestCFNginContext:
         stubber = Stubber(obj.s3_client)
         stubber.add_response(
             "get_object",
-            {"Body": "{}".encode()},
+            {"Body": b"{}"},
             {
                 "ResponseContentType": "application/json",
                 **obj.persistent_graph_location,
@@ -696,9 +700,9 @@ class TestCFNginContext:
         with stubber:
             assert obj.unlock_persistent_graph("123")
 
-    @pytest.mark.parametrize("graph_dict", cast(List[Dict[str, List[str]]], [{"stack0": []}, {}]))
+    @pytest.mark.parametrize("graph_dict", cast(list[dict[str, list[str]]], [{"stack0": []}, {}]))
     def test_unlock_persistent_graph(
-        self, graph_dict: Dict[str, List[str]], mocker: MockerFixture
+        self, graph_dict: dict[str, list[str]], mocker: MockerFixture
     ) -> None:
         """Test unlock_persistent_graph."""
         mocker.patch.object(
@@ -714,7 +718,7 @@ class TestCFNginContext:
         if not graph_dict:
             stubber.add_response(
                 "get_object",
-                {"Body": "{}".encode()},
+                {"Body": b"{}"},
                 {
                     "ResponseContentType": "application/json",
                     **obj.persistent_graph_location,

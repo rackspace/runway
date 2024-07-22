@@ -6,10 +6,10 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
+from unittest.mock import MagicMock, Mock
 
 import pytest
-from mock import MagicMock, Mock
 
 from runway._logging import LogLevels
 from runway.module.terraform import (
@@ -24,7 +24,6 @@ from runway.utils import Version
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture, MonkeyPatch
     from pytest_mock import MockerFixture
 
     from ..factories import MockRunwayContext
@@ -89,7 +88,7 @@ class TestTerraform:
 
     def test_auto_tfvars(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -121,7 +120,7 @@ class TestTerraform:
 
     def test_auto_tfvars_unsupported_version(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -143,7 +142,7 @@ class TestTerraform:
 
     def test_cleanup_dot_terraform(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -193,7 +192,7 @@ class TestTerraform:
     )
     def test_env_file(
         self,
-        filename: Union[List[str], str],
+        filename: Union[list[str], str],
         expected: Optional[str],
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -212,10 +211,10 @@ class TestTerraform:
             assert not obj.env_file
 
     @pytest.mark.parametrize("action", ["deploy", "destroy", "init", "plan"])
-    def test_execute(
+    def test_execute(  # noqa: PLR0915
         self,
         action: str,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -301,9 +300,9 @@ class TestTerraform:
     )
     def test_gen_command(
         self,
-        command: Union[List[str], str],
-        args_list: Optional[List[str]],
-        expected: List[str],
+        command: Union[list[str], str],
+        args_list: Optional[list[str]],
+        expected: list[str],
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -322,7 +321,7 @@ class TestTerraform:
 
     def test_handle_backend_no_handler(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -330,7 +329,7 @@ class TestTerraform:
         """Test handle_backend with no handler."""
         caplog.set_level(LogLevels.DEBUG, logger=MODULE)
         mock_get_full_configuration = MagicMock(return_value={})
-        backend: Dict[str, Union[Dict[str, Any], str]] = {
+        backend: dict[str, Union[dict[str, Any], str]] = {
             "type": "unsupported",
             "config": {},
         }
@@ -350,7 +349,7 @@ class TestTerraform:
 
     def test_handle_backend_no_type(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -364,8 +363,8 @@ class TestTerraform:
 
     def test_handle_backend_remote_name(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -391,8 +390,8 @@ class TestTerraform:
 
     def test_handle_backend_remote_prefix(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -419,8 +418,8 @@ class TestTerraform:
 
     def test_handle_backend_remote_undetermined(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -428,7 +427,7 @@ class TestTerraform:
         caplog.set_level(LogLevels.WARNING, logger=MODULE)
         monkeypatch.delenv("TF_WORKSPACE", raising=False)
         mock_get_full_configuration = MagicMock(return_value={})
-        backend: Dict[str, Union[Dict[str, Any], str]] = {
+        backend: dict[str, Union[dict[str, Any], str]] = {
             "type": "remote",
             "config": {},
         }
@@ -524,7 +523,7 @@ class TestTerraform:
 
     def test_tf_bin_missing(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -593,7 +592,7 @@ class TestTerraform:
     )
     def test_terraform_destroy(
         self,
-        expected_options: List[str],
+        expected_options: list[str],
         expected_subcmd: str,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -643,7 +642,7 @@ class TestTerraform:
             Terraform, "gen_command", return_value=["mock_gen_command"]
         )
         mock_run_command = mocker.patch(f"{MODULE}.run_module_command")
-        options: Dict[str, Union[Dict[str, Any], str]] = {
+        options: dict[str, Union[dict[str, Any], str]] = {
             "args": {"init": ["init_arg"]},
             "terraform_backend_config": {"bucket": "name"},
         }
@@ -911,7 +910,7 @@ class TestTerraformOptions:
         ],
     )
     def test_parse_obj(
-        self, config: Dict[str, Any], runway_context: MockRunwayContext, tmp_path: Path
+        self, config: dict[str, Any], runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test parse_obj."""
         obj = TerraformOptions.parse_obj(
@@ -973,25 +972,17 @@ class TestTerraformBackendConfig:
                 },
                 ["bucket=test-bucket", "dynamodb_table=test-table", "region=us-east-1"],
             ),
-            (
-                {
-                    "bucket": "test-bucket",
-                    "dynamodb_table": "test-table",
-                    "region": "us-east-1",
-                },
-                ["bucket=test-bucket", "dynamodb_table=test-table", "region=us-east-1"],
-            ),
         ],
     )
     def test_init_args(
         self,
-        expected_items: List[str],
-        input_data: Dict[str, str],
+        expected_items: list[str],
+        input_data: dict[str, str],
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
         """Test init_args."""
-        expected: List[str] = []
+        expected: list[str] = []
         for i in expected_items:
             expected.extend(["-backend-config", i])
         assert (
@@ -1003,7 +994,7 @@ class TestTerraformBackendConfig:
 
     def test_init_args_file(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -1047,7 +1038,7 @@ class TestTerraformBackendConfig:
         ],
     )
     def test_get_backend_file(
-        self, tmp_path: Path, filename: Union[List[str], str], expected: Optional[str]
+        self, tmp_path: Path, filename: Union[list[str], str], expected: Optional[str]
     ) -> None:
         """Test get_backend_file."""
         if isinstance(filename, list):
@@ -1073,7 +1064,7 @@ class TestTerraformBackendConfig:
     )
     def test_parse_obj(
         self,
-        config: Dict[str, str],
+        config: dict[str, str],
         expected_region: str,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -1082,11 +1073,11 @@ class TestTerraformBackendConfig:
         """Test parse_obj."""
 
         def assert_get_backend_file_args(
-            _cls: Type[TerraformBackendConfig],
+            _cls: type[TerraformBackendConfig],
             path: Path,
             env_name: str,
             env_region: str,
-        ):
+        ) -> str:
             """Assert args passed to the method during parse."""
             assert path == tmp_path
             assert env_name == "test"

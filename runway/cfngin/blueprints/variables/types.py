@@ -2,19 +2,7 @@
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, overload
 
 from troposphere import BaseAWSObject
 
@@ -45,7 +33,7 @@ class TroposphereType(Generic[TroposphereT]):
 
     def __init__(
         self,
-        defined_type: Type[TroposphereT],
+        defined_type: type[TroposphereT],
         *,
         many: bool = False,
         optional: bool = False,
@@ -77,7 +65,7 @@ class TroposphereType(Generic[TroposphereT]):
         self._validate = validate
 
     @staticmethod
-    def _validate_type(defined_type: Type[TroposphereT]) -> None:
+    def _validate_type(defined_type: type[TroposphereT]) -> None:
         if not hasattr(defined_type, "from_dict"):
             raise ValueError("Type must have `from_dict` attribute")
 
@@ -87,17 +75,17 @@ class TroposphereType(Generic[TroposphereT]):
         return str(getattr(self._type, "resource_name", None) or self._type.__name__)
 
     @overload
-    def create(self, value: Dict[str, Any]) -> TroposphereT: ...
+    def create(self, value: dict[str, Any]) -> TroposphereT: ...
 
     @overload
-    def create(self, value: List[Dict[str, Any]]) -> List[TroposphereT]: ...
+    def create(self, value: list[dict[str, Any]]) -> list[TroposphereT]: ...
 
     @overload
     def create(self, value: None) -> None: ...
 
     def create(
-        self, value: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]
-    ) -> Optional[Union[TroposphereT, List[TroposphereT]]]:
+        self, value: dict[str, Any] | list[dict[str, Any]] | None
+    ) -> TroposphereT | list[TroposphereT] | None:
         """Create the troposphere type from the value.
 
         Args:
@@ -121,27 +109,24 @@ class TroposphereType(Generic[TroposphereT]):
                 raise ValueError("Resources must be specified as a dict of title to parameters")
             if not self._many and len(value) > 1:
                 raise ValueError(
-                    "Only one resource can be provided for this " "TroposphereType variable"
+                    "Only one resource can be provided for this TroposphereType variable"
                 )
 
             result = [self._type.from_dict(title, v) for title, v in value.items()]
+        elif self._many and isinstance(value, list):
+            result = [self._type.from_dict(None, v) for v in value]
+        elif not isinstance(value, dict):
+            raise ValueError(
+                "TroposphereType for a single non-resource"
+                "type must be specified as a dict of "
+                "parameters"
+            )
         else:
-            # Our type is for properties, not a resource, so don't use
-            # titles
-            if self._many and isinstance(value, list):
-                result = [self._type.from_dict(None, v) for v in value]
-            elif not isinstance(value, dict):
-                raise ValueError(
-                    "TroposphereType for a single non-resource"
-                    "type must be specified as a dict of "
-                    "parameters"
-                )
-            else:
-                result = [self._type.from_dict(None, value)]
+            result = [self._type.from_dict(None, value)]
 
         if self._validate:
             for v in result:
-                v._validate_props()
+                v._validate_props()  # noqa: SLF001
 
         return result[0] if not self._many else result
 

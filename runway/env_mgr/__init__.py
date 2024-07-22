@@ -8,12 +8,13 @@ import platform
 import shutil
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, Optional, Union, cast
+from typing import TYPE_CHECKING, Optional, Union, cast
 
 from ..compat import cached_property
 from ..mixins import DelCachedPropMixin
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
     from urllib.error import URLError
 
     from .._logging import RunwayLogger
@@ -84,7 +85,7 @@ class EnvManager(DelCachedPropMixin):
         self._bin_name = bin_name + self.command_suffix
         self.current_version = None
         self.env_dir_name = dir_name if platform.system() == "Windows" else "." + dir_name
-        self.path = Path.cwd() if not path else path
+        self.path = path if path else Path.cwd()
 
     @property
     def bin(self) -> Path:

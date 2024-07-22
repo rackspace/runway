@@ -6,10 +6,9 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Final, Optional
 
 import tomli
-from typing_extensions import Final, Literal
 
 from ..compat import cached_property
 from ..exceptions import RunwayError
@@ -18,6 +17,7 @@ from .base_classes import DependencyManager
 
 if TYPE_CHECKING:
     from _typeshed import StrPath
+    from typing_extensions import Literal
 
 LOGGER = logging.getLogger(__name__)
 
@@ -30,6 +30,8 @@ class PoetryExportFailedError(RunwayError):
 
         Args:
             output: The output from running ``poetry export``.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.message = f"poetry export failed with the following output:\n{output}"
@@ -52,7 +54,7 @@ class PoetryNotFoundError(RunwayError):
 class Poetry(DependencyManager):
     """Poetry dependency manager."""
 
-    CONFIG_FILES: Final[Tuple[Literal["poetry.lock"], Literal["pyproject.toml"]]] = (
+    CONFIG_FILES: Final[tuple[Literal["poetry.lock"], Literal["pyproject.toml"]]] = (
         "poetry.lock",
         "pyproject.toml",
     )
@@ -86,7 +88,7 @@ class Poetry(DependencyManager):
 
         # check for PEP-517 definition
         pyproject = tomli.loads(pyproject_path.read_text())
-        build_system_requires: Optional[List[str]] = pyproject.get("build-system", {}).get(
+        build_system_requires: Optional[list[str]] = pyproject.get("build-system", {}).get(
             "requires"
         )
 
@@ -101,7 +103,7 @@ class Poetry(DependencyManager):
         self,
         *,
         dev: bool = False,
-        extras: Optional[List[str]] = None,
+        extras: Optional[list[str]] = None,
         output: StrPath,
         output_format: str = "requirements.txt",
         with_credentials: bool = True,
