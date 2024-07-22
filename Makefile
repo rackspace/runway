@@ -31,8 +31,7 @@ build-pyinstaller-folder: clean create-tfenv-ver-file version ## build Pyinstall
 
 clean: ## remove generated file from the project directory
 	rm -rf ./build/ ./dist/ ./src/ ./tmp/ ./runway.egg-info/;
-	rm -rf ./.pytest_cache ./.venv;
-	find . -type d -name ".venv" -prune -exec rm -rf '{}' +;
+	rm -rf ./.pytest_cache
 	find . -type d -name "node_modules" -prune -exec rm -rf '{}' +;
 	find . -type d -name ".runway" -prune -exec rm -rf '{}' +;
 	find . -type f -name "*.py[co]" -delete;
