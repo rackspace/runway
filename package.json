@@ -13,7 +13,7 @@
   "description": "Simplify infrastructure/app testing/deployment",
   "devDependencies": {
     "cspell": "^8.12.1",
-    "pyright": "^1.1.223"
+    "pyright": "^1.1.372"
   },
   "files": [
     "src/osx/*",
