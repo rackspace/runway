@@ -13,12 +13,12 @@ from runway.env_mgr.tfenv import TFEnvManager
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
+    import pytest
     from pytest_mock import MockerFixture
 
 
 def test_tfenv_list(
-    caplog: LogCaptureFixture, mocker: MockerFixture, tmp_path: Path
+    caplog: pytest.LogCaptureFixture, mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test ``runway tfenv list``."""
     caplog.set_level(logging.INFO, logger="runway.cli.commands.tfenv")
@@ -31,13 +31,11 @@ def test_tfenv_list(
     result = runner.invoke(cli, ["tfenv", "list"])
     assert result.exit_code == 0
     assert caplog.messages == ["Terraform versions installed:"]
-    assert result.stdout == "\n".join(
-        ["[runway] Terraform versions installed:", "0.13.0", "1.0.0", ""]
-    )
+    assert result.stdout == "[runway] Terraform versions installed:\n0.13.0\n1.0.0\n"
 
 
 def test_tfenv_list_none(
-    caplog: LogCaptureFixture, mocker: MockerFixture, tmp_path: Path
+    caplog: pytest.LogCaptureFixture, mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test ``runway tfenv list`` no versions installed."""
     caplog.set_level(logging.WARNING, logger="runway.cli.commands.tfenv")

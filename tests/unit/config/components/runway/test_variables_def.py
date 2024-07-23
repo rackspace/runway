@@ -17,18 +17,13 @@ class TestRunwayVariablesDefinition:
         """Test init with no file."""
         assert not RunwayVariablesDefinition.parse_obj({"sys_path": cd_tmp_path})
 
-    @pytest.mark.parametrize(
-        "filename", ("runway.variables.yml", "runway.variables.yaml")
-    )
+    @pytest.mark.parametrize("filename", ["runway.variables.yml", "runway.variables.yaml"])
     def test_init_autofind_file(self, cd_tmp_path: Path, filename: str) -> None:
         """Test init autofind file."""
         data = {"key": "val"}
         (cd_tmp_path / filename).write_text(yaml.dump(data))
         (cd_tmp_path / "runway.yml").touch()
-        assert (
-            RunwayVariablesDefinition.parse_obj({"sys_path": cd_tmp_path})["key"]
-            == "val"
-        )
+        assert RunwayVariablesDefinition.parse_obj({"sys_path": cd_tmp_path})["key"] == "val"
 
     def test_init_defined_file_path(self, cd_tmp_path: Path) -> None:
         """Test init with file_path."""
@@ -36,10 +31,7 @@ class TestRunwayVariablesDefinition:
         file_path = cd_tmp_path / "anything.yml"
         file_path.write_text(yaml.dump(data))
         (cd_tmp_path / "runway.yml").touch()
-        assert (
-            RunwayVariablesDefinition.parse_obj({"file_path": file_path})["key"]
-            == "val"
-        )
+        assert RunwayVariablesDefinition.parse_obj({"file_path": file_path})["key"] == "val"
 
     def test_init_defined_file_path_no_found(self, cd_tmp_path: Path) -> None:
         """Test init with file_path not found."""

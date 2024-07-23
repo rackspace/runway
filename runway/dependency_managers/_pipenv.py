@@ -7,9 +7,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Tuple
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final
 
 from ..compat import cached_property
 from ..exceptions import RunwayError
@@ -18,6 +16,7 @@ from .base_classes import DependencyManager
 
 if TYPE_CHECKING:
     from _typeshed import StrPath
+    from typing_extensions import Literal
 
 LOGGER = logging.getLogger(__name__)
 
@@ -50,7 +49,7 @@ class PipenvNotFoundError(RunwayError):
 class Pipenv(DependencyManager):
     """Pipenv dependency manager."""
 
-    CONFIG_FILES: Final[Tuple[Literal["Pipfile"], Literal["Pipfile.lock"]]] = (
+    CONFIG_FILES: Final[tuple[Literal["Pipfile"], Literal["Pipfile.lock"]]] = (
         "Pipfile",
         "Pipfile.lock",
     )
@@ -65,9 +64,7 @@ class Pipenv(DependencyManager):
         cmd_output = self._run_command([self.EXECUTABLE, "--version"])
         match = re.search(r"^pipenv, version (?P<version>\S*)", cmd_output)
         if not match:
-            LOGGER.warning(
-                "unable to parse pipenv version from output:\n%s", cmd_output
-            )
+            LOGGER.warning("unable to parse pipenv version from output:\n%s", cmd_output)
             return Version("0.0.0")
         return Version(match.group("version"))
 
@@ -111,8 +108,5 @@ class Pipenv(DependencyManager):
         except subprocess.CalledProcessError as exc:
             raise PipenvExportFailedError from exc
         output.parent.mkdir(exist_ok=True, parents=True)  # ensure directory exists
-        # python3.7 w/ pylint 2.12.[12] crashes if result is not wrapped in str()
-        output.write_text(
-            str(result), encoding=locale.getpreferredencoding(do_setlocale=False)
-        )
+        output.write_text(str(result), encoding=locale.getpreferredencoding(do_setlocale=False))
         return output

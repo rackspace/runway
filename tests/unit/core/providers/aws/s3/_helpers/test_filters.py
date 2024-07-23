@@ -20,12 +20,8 @@ class TestFilter:
 
     def test_call_local(self, tmp_path: Path) -> None:
         """Test call."""
-        exclude_md = FileStats(
-            src=tmp_path / "exclude/README.md", src_type="local", dest=""
-        )
-        include_md = FileStats(
-            src=tmp_path / "include/README.md", src_type="local", dest=""
-        )
+        exclude_md = FileStats(src=tmp_path / "exclude/README.md", src_type="local", dest="")
+        include_md = FileStats(src=tmp_path / "include/README.md", src_type="local", dest="")
         other_file = FileStats(src=tmp_path / "/test.txt", src_type="local", dest="")
         params = ParametersDataModel(
             src=str(tmp_path),

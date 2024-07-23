@@ -5,24 +5,18 @@ can be used.
 
 """
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, cast
+from typing import Any, ClassVar, Optional, cast
 
 from docker.models.images import Image
 from pydantic import Field, root_validator
 
+from ....context import CfnginContext
 from ....core.providers.aws import AccountDetails
 from ....utils import BaseModel, MutableMap
 
-if TYPE_CHECKING:
-    from ....context import CfnginContext
-
-
-ECR_REPO_FQN_TEMPLATE = (
-    "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/{repo_name}"
-)
+ECR_REPO_FQN_TEMPLATE = "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/{repo_name}"
 
 
 class ElasticContainerRegistry(BaseModel):
@@ -51,18 +45,16 @@ class ElasticContainerRegistry(BaseModel):
         """Fully qualified ECR name."""
         if self.public:
             return self.PUBLIC_URI_TEMPLATE.format(registry_alias=self.alias)
-        return self.URI_TEMPLATE.format(
-            aws_account_id=self.account_id, aws_region=self.region
-        )
+        return self.URI_TEMPLATE.format(aws_account_id=self.account_id, aws_region=self.region)
 
     @root_validator(allow_reuse=True, pre=True)
-    def _set_defaults(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _set_defaults(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Set default values based on other values."""
         values.setdefault("public", bool(values.get("alias")))
 
         if not values["public"]:
             account_id = values.get("account_id")
-            ctx: Optional[CfnginContext] = values.get("context")
+            ctx: CfnginContext | None = values.get("context")
             region = values.get("aws_region")
             if not ctx and not (account_id or region):
                 raise ValueError("context is required to resolve values")
@@ -106,7 +98,7 @@ class DockerImage(BaseModel):
         return self.image.short_id
 
     @property
-    def tags(self) -> List[str]:
+    def tags(self) -> list[str]:
         """List of image tags."""
         self.image.reload()
         return [uri.split(":")[-1] for uri in self.image.tags]

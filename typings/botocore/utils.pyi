@@ -405,9 +405,7 @@ def check_dns_name(bucket_name):
     """
     ...
 
-def fix_s3_host(
-    request, signature_version, region_name, default_endpoint_url=..., **kwargs
-):
+def fix_s3_host(request, signature_version, region_name, default_endpoint_url=..., **kwargs):
     """
     This handler looks at S3 requests just before they are signed.
     If there is a bucket name on the path (true for everything except
@@ -419,9 +417,7 @@ def fix_s3_host(
     """
     ...
 
-def switch_to_virtual_host_style(
-    request, signature_version, default_endpoint_url=..., **kwargs
-):
+def switch_to_virtual_host_style(request, signature_version, default_endpoint_url=..., **kwargs):
     """
     This is a handler to force virtual host style s3 addressing no matter
     the signature version (which is taken in consideration for the default

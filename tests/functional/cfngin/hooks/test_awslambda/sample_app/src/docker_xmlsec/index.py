@@ -1,11 +1,10 @@
 """Lambda Function."""
 
-# pylint: disable=broad-except,import-error,import-outside-toplevel,unused-argument
 from __future__ import annotations
 
 import inspect
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from ..type_defs import LambdaResponse
@@ -13,7 +12,7 @@ if TYPE_CHECKING:
 PACKAGE_DIR = Path(__file__).parent
 
 
-def handler(event: Dict[str, Any], context: object) -> LambdaResponse:
+def handler(event: dict[str, Any], context: object) -> LambdaResponse:  # noqa: ARG001
     """Lambda Function entrypoint."""
     try:
         import lxml  # type: ignore
@@ -32,7 +31,7 @@ def handler(event: Dict[str, Any], context: object) -> LambdaResponse:
             "message": None,
             "status": "success",
         }
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         return {
             "code": 500,
             "data": {

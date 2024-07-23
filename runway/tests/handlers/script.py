@@ -6,7 +6,7 @@ import logging
 import subprocess
 import sys
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any
 
 from ..._logging import PrefixAdaptor
 from ...tests.handlers.base import TestHandler
@@ -22,7 +22,7 @@ class ScriptHandler(TestHandler):
     """Handle script tests.
 
     Args:
-        commands (List[str]): A list of commands to be executed in order.
+        commands: A list of commands to be executed in order.
             Each command is run in its own subprocess. The working directory
             will be the same as where the 'runway test' command was executed.
 
@@ -40,7 +40,7 @@ class ScriptHandler(TestHandler):
     """
 
     @classmethod
-    def handle(cls, name: str, args: Union[ConfigProperty, Dict[str, Any]]) -> None:
+    def handle(cls, name: str, args: ConfigProperty | dict[str, Any]) -> None:
         """Perform the actual test."""
         logger = PrefixAdaptor(name, LOGGER)
         for cmd in args["commands"]:

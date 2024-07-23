@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import datetime
-from typing import List, Optional
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.core.providers.aws.s3._helpers.comparator import Comparator
 from runway.core.providers.aws.s3._helpers.file_generator import FileStats
@@ -38,8 +37,7 @@ class TestComparator:
     def test_call_compare_key_equal_should_not_sync(self) -> None:
         """Test call compare key equal should not sync."""
         self.sync_strategy.determine_should_sync.return_value = False
-        ref_list: List[FileStats] = []
-        result_list: List[FileStats] = []
+        ref_list: list[FileStats] = []
         src_files = [
             FileStats(
                 src="",
@@ -64,30 +62,22 @@ class TestComparator:
                 operation_name="",
             )
         ]
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
         # Try when the sync strategy says to sync the file.
         self.sync_strategy.determine_should_sync.return_value = True
         ref_list = []
-        result_list = []
-        files = self.comparator.call(iter(src_files), iter(dest_files))
         ref_list.append(src_files[0])
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
-    def test_call_compare_key_greater(self):
+    def test_call_compare_key_greater(self) -> None:
         """Test call compare key greater."""
         self.not_at_dest_sync_strategy.determine_should_sync.return_value = False
         self.not_at_src_sync_strategy.determine_should_sync.return_value = True
 
-        src_files: List[FileStats] = []
-        dest_files: List[FileStats] = []
-        ref_list: List[FileStats] = []
-        result_list: List[FileStats] = []
+        src_files: list[FileStats] = []
+        dest_files: list[FileStats] = []
+        ref_list: list[FileStats] = []
         src_file = FileStats(
             src="",
             dest="",
@@ -111,32 +101,24 @@ class TestComparator:
         src_files.append(src_file)
         dest_files.append(dest_file)
         ref_list.append(dest_file)
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
         # Now try when the sync strategy says not to sync the file.
         self.not_at_src_sync_strategy.determine_should_sync.return_value = False
-        result_list = []
         ref_list = []
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
     def test_call_compare_key_less(self) -> None:
         """Test call compare key less."""
         self.not_at_src_sync_strategy.determine_should_sync.return_value = False
         self.not_at_dest_sync_strategy.determine_should_sync.return_value = True
-        ref_list: List[FileStats] = []
-        result_list: List[FileStats] = []
-        src_files: List[FileStats] = []
-        dest_files: List[FileStats] = []
+        ref_list: list[FileStats] = []
+        src_files: list[FileStats] = []
+        dest_files: list[FileStats] = []
         src_file = FileStats(
             src="",
             dest="",
-            compare_key="bomparator_test.py",
+            compare_key="bomparator_test.py",  # cspell: disable-line
             size=10,
             last_update=NOW,
             src_type="local",
@@ -156,27 +138,19 @@ class TestComparator:
         src_files.append(src_file)
         dest_files.append(dest_file)
         ref_list.append(src_file)
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
         # Now try when the sync strategy says not to sync the file.
         self.not_at_dest_sync_strategy.determine_should_sync.return_value = False
-        result_list = []
         ref_list = []
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
     def test_call_empty_dest(self) -> None:
         """Test call empty dest."""
         self.not_at_dest_sync_strategy.determine_should_sync.return_value = True
-        src_files: List[FileStats] = []
-        dest_files: List[FileStats] = []
-        ref_list: List[FileStats] = []
-        result_list: List[FileStats] = []
+        src_files: list[FileStats] = []
+        dest_files: list[FileStats] = []
+        ref_list: list[FileStats] = []
         src_file = FileStats(
             src="",
             dest="",
@@ -189,27 +163,19 @@ class TestComparator:
         )
         src_files.append(src_file)
         ref_list.append(src_file)
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
         # Now try when the sync strategy says not to sync the file.
         self.not_at_dest_sync_strategy.determine_should_sync.return_value = False
-        result_list = []
         ref_list = []
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
     def test_call_empty_src(self) -> None:
         """Test call empty src."""
         self.not_at_src_sync_strategy.determine_should_sync.return_value = True
-        src_files: List[FileStats] = []
-        dest_files: List[FileStats] = []
-        ref_list: List[FileStats] = []
-        result_list: List[FileStats] = []
+        src_files: list[FileStats] = []
+        dest_files: list[FileStats] = []
+        ref_list: list[FileStats] = []
         dest_file = FileStats(
             src="",
             dest="",
@@ -222,30 +188,19 @@ class TestComparator:
         )
         dest_files.append(dest_file)
         ref_list.append(dest_file)
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
         # Now try when the sync strategy says not to sync the file.
         self.not_at_src_sync_strategy.determine_should_sync.return_value = False
-        result_list = []
         ref_list = []
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
     def test_call_empty_src_dest(self) -> None:
         """Test call."""
-        src_files: List[FileStats] = []
-        dest_files: List[FileStats] = []
-        ref_list: List[FileStats] = []
-        result_list: List[FileStats] = []
-        files = self.comparator.call(iter(src_files), iter(dest_files))
-        for filename in files:
-            result_list.append(filename)
-        assert result_list == ref_list
+        src_files: list[FileStats] = []
+        dest_files: list[FileStats] = []
+        ref_list: list[FileStats] = []
+        assert list(self.comparator.call(iter(src_files), iter(dest_files))) == ref_list
 
     @pytest.mark.parametrize(
         "src_file, dest_file, expected",
@@ -260,9 +215,9 @@ class TestComparator:
     )
     def test_compare_comp_key(
         self,
-        dest_file: Optional[FileStats],
+        dest_file: FileStats | None,
         expected: str,
-        src_file: Optional[FileStats],
+        src_file: FileStats | None,
     ) -> None:
         """Test compare_comp_key."""
         assert Comparator.compare_comp_key(src_file, dest_file) == expected

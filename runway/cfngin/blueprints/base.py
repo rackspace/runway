@@ -6,18 +6,7 @@ import copy
 import hashlib
 import logging
 import string
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from troposphere import Output, Parameter, Ref, Template
 
@@ -54,15 +43,11 @@ PARAMETER_PROPERTIES = {
     "constraint_description": "ConstraintDescription",
 }
 
-_T = TypeVar("_T")
-
 
 class CFNParameter:
     """Wrapper around a value to indicate a CloudFormation Parameter."""
 
-    def __init__(
-        self, name: str, value: Union[bool, float, int, List[Any], str, Any]
-    ) -> None:
+    def __init__(self, name: str, value: bool | float | list[Any] | str | Any) -> None:
         """Instantiate class.
 
         Args:
@@ -82,7 +67,7 @@ class CFNParameter:
         else:
             raise TypeError(
                 f"CFNParameter ({name}) value must be one of bool, float, int, str, "
-                f"List[str] but got: {type(value)}"
+                f"list[str] but got: {type(value)}"
             )
 
     def __repr__(self) -> str:
@@ -94,7 +79,7 @@ class CFNParameter:
         """Ref the value of a parameter."""
         return Ref(self.name)
 
-    def to_parameter_value(self) -> Union[List[Any], str]:
+    def to_parameter_value(self) -> list[Any] | str:
         """Return the value to be submitted to CloudFormation."""
         return self.value
 
@@ -110,7 +95,7 @@ def build_parameter(name: str, properties: BlueprintVariableTypeDef) -> Paramete
     Returns:
         The created parameter object.
 
-    """  # noqa: E501
+    """
     param = Parameter(name, Type=properties.get("type"))
     for name_, attr in PARAMETER_PROPERTIES.items():
         if name_ in properties:
@@ -120,7 +105,7 @@ def build_parameter(name: str, properties: BlueprintVariableTypeDef) -> Paramete
 
 def validate_variable_type(
     var_name: str,
-    var_type: Union[Type[CFNType], TroposphereType[Any], type],
+    var_type: type[CFNType] | TroposphereType[Any] | type,
     value: Any,
 ) -> Any:
     """Ensure the value is the correct variable type.
@@ -143,21 +128,18 @@ def validate_variable_type(
         try:
             value = var_type.create(value)
         except Exception as exc:
-            raise ValidatorError(
-                var_name, f"{var_type.resource_name}.create", value, exc
-            ) from exc
+            raise ValidatorError(var_name, f"{var_type.resource_name}.create", value, exc) from exc
     elif issubclass(var_type, CFNType):
         value = CFNParameter(name=var_name, value=value)
-    else:
-        if not isinstance(value, var_type):
-            raise TypeError(
-                f"Value for variable {var_name} must be of type {var_type}. Actual "
-                f"type: {type(value)}"
-            )
+    elif not isinstance(value, var_type):
+        raise TypeError(
+            f"Value for variable {var_name} must be of type {var_type}. Actual "
+            f"type: {type(value)}"
+        )
     return value
 
 
-def validate_allowed_values(allowed_values: Optional[List[Any]], value: Any) -> bool:
+def validate_allowed_values(allowed_values: list[Any] | None, value: Any) -> bool:
     """Support a variable defining which values it allows.
 
     Args:
@@ -177,7 +159,7 @@ def validate_allowed_values(allowed_values: Optional[List[Any]], value: Any) -> 
 def resolve_variable(
     var_name: str,
     var_def: BlueprintVariableTypeDef,
-    provided_variable: Optional[Variable],
+    provided_variable: Variable | None,
     blueprint_name: str,
 ) -> Any:
     """Resolve a provided variable value against the variable definition.
@@ -241,9 +223,7 @@ def resolve_variable(
     return value
 
 
-def parse_user_data(
-    variables: Dict[str, Any], raw_user_data: str, blueprint_name: str
-) -> str:
+def parse_user_data(variables: dict[str, Any], raw_user_data: str, blueprint_name: str) -> str:
     """Parse the given user data and renders it as a template.
 
     It supports referencing template variables to create userdata
@@ -271,7 +251,7 @@ def parse_user_data(
             is not given in the blueprint
 
     """
-    variable_values: Dict[str, Any] = {}
+    variable_values: dict[str, Any] = {}
 
     for key, value in variables.items():
         if isinstance(value, CFNParameter):
@@ -311,11 +291,11 @@ class Blueprint(DelCachedPropMixin):
 
     """
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {}
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {}
 
     context: CfnginContext
-    description: Optional[str]
-    mappings: Optional[Dict[str, Dict[str, Any]]]
+    description: str | None
+    mappings: dict[str, dict[str, Any]] | None
     name: str
     template: Template
 
@@ -324,11 +304,11 @@ class Blueprint(DelCachedPropMixin):
         name: str,
         context: CfnginContext,
         *,
-        description: Optional[str] = None,
-        mappings: Optional[Dict[str, Dict[str, Any]]] = None,
-        template: Optional[Template] = None,
+        description: str | None = None,
+        mappings: dict[str, dict[str, Any]] | None = None,
+        template: Template | None = None,
         **_: Any,
-    ):
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -349,7 +329,7 @@ class Blueprint(DelCachedPropMixin):
 
         """
         self._rendered = None
-        self._resolved_variables: Optional[Dict[str, Any]] = None
+        self._resolved_variables: dict[str, Any] | None = None
         self._version = None
         self.context = context
         self.description = description
@@ -368,7 +348,7 @@ class Blueprint(DelCachedPropMixin):
             )
 
     @cached_property
-    def cfn_parameters(self) -> Dict[str, Union[List[Any], str]]:
+    def cfn_parameters(self) -> dict[str, list[Any] | str]:
         """Return a dict of variables with type :class:`~runway.cfngin.blueprints.variables.types.CFNType`.
 
         .. versionadded:: 2.0.0
@@ -376,8 +356,8 @@ class Blueprint(DelCachedPropMixin):
         Returns:
             Variables that need to be submitted as CloudFormation Parameters.
 
-        """  # noqa
-        output: Dict[str, Union[List[Any], str]] = {}
+        """
+        output: dict[str, list[Any] | str] = {}
         for key, value in self.variables.items():
             if hasattr(value, "to_parameter_value"):
                 output[key] = value.to_parameter_value()
@@ -388,7 +368,7 @@ class Blueprint(DelCachedPropMixin):
         raise NotImplementedError
 
     @property
-    def defined_variables(self) -> Dict[str, BlueprintVariableTypeDef]:
+    def defined_variables(self) -> dict[str, BlueprintVariableTypeDef]:
         """Return a copy of :attr:`VARIABLES` to avoid accidental modification of the ClassVar.
 
         .. versionchanged:: 2.0.0
@@ -398,7 +378,7 @@ class Blueprint(DelCachedPropMixin):
         return copy.deepcopy(self.VARIABLES)
 
     @property
-    def output_definitions(self) -> Dict[str, Dict[str, Any]]:
+    def output_definitions(self) -> dict[str, dict[str, Any]]:
         """Get the output definitions.
 
         .. versionadded:: 2.0.0
@@ -411,7 +391,7 @@ class Blueprint(DelCachedPropMixin):
         return {k: output.to_dict() for k, output in self.template.outputs.items()}
 
     @cached_property
-    def parameter_definitions(self) -> Dict[str, BlueprintVariableTypeDef]:
+    def parameter_definitions(self) -> dict[str, BlueprintVariableTypeDef]:
         """Get the parameter definitions to submit to CloudFormation.
 
         Any variable definition whose type is an instance of
@@ -425,7 +405,7 @@ class Blueprint(DelCachedPropMixin):
             containing key/values for various parameter properties.
 
         """
-        output: Dict[str, BlueprintVariableTypeDef] = {}
+        output: dict[str, BlueprintVariableTypeDef] = {}
         for var_name, attrs in self.defined_variables.items():
             var_type = attrs.get("type")
             if isinstance(var_type, type) and issubclass(var_type, CFNType):
@@ -435,7 +415,7 @@ class Blueprint(DelCachedPropMixin):
         return output
 
     @cached_property
-    def parameter_values(self) -> Dict[str, Union[List[Any], str]]:
+    def parameter_values(self) -> dict[str, list[Any] | str]:
         """Return a dict of variables with type :class:`~runway.cfngin.blueprints.variables.types.CFNType`.
 
         .. versionadded:: 2.0.0
@@ -444,8 +424,8 @@ class Blueprint(DelCachedPropMixin):
             Variables that need to be submitted as CloudFormation Parameters.
             Will be a dictionary of <parameter name>: <parameter value>.
 
-        """  # noqa
-        output: Dict[str, Any] = {}
+        """
+        output: dict[str, Any] = {}
         for key, value in self.variables.items():
             try:
                 output[key] = value.to_parameter_value()
@@ -461,7 +441,7 @@ class Blueprint(DelCachedPropMixin):
         return self._rendered
 
     @cached_property
-    def required_parameter_definitions(self) -> Dict[str, BlueprintVariableTypeDef]:
+    def required_parameter_definitions(self) -> dict[str, BlueprintVariableTypeDef]:
         """Return all template parameters that do not have a default value.
 
         .. versionadded:: 2.0.0
@@ -483,7 +463,7 @@ class Blueprint(DelCachedPropMixin):
         return self.template.transform is not None
 
     @property
-    def variables(self) -> Dict[str, Any]:
+    def variables(self) -> dict[str, Any]:
         """Return a Dict of variables available to the Template.
 
         These variables will have been defined within :attr:`VARIABLES` or
@@ -504,7 +484,7 @@ class Blueprint(DelCachedPropMixin):
         return self._resolved_variables
 
     @variables.setter
-    def variables(self, value: Dict[str, Any]) -> None:
+    def variables(self, value: dict[str, Any]) -> None:
         """Setter for :meth:`variables`.
 
         .. versionadded:: 2.0.0
@@ -533,7 +513,7 @@ class Blueprint(DelCachedPropMixin):
         """
         self.template.add_output(Output(name, Value=value))
 
-    def get_cfn_parameters(self) -> Dict[str, Union[List[Any], str]]:
+    def get_cfn_parameters(self) -> dict[str, list[Any] | str]:
         """Return a dictionary of variables with `type` :class:`CFNType`.
 
         .. deprecated:: 2.0.0
@@ -549,7 +529,7 @@ class Blueprint(DelCachedPropMixin):
         )
         return self.cfn_parameters
 
-    def get_output_definitions(self) -> Dict[str, Dict[str, Any]]:
+    def get_output_definitions(self) -> dict[str, dict[str, Any]]:
         """Get the output definitions.
 
         .. deprecated:: 2.0.0
@@ -566,7 +546,7 @@ class Blueprint(DelCachedPropMixin):
         )
         return self.output_definitions
 
-    def get_parameter_definitions(self) -> Dict[str, BlueprintVariableTypeDef]:
+    def get_parameter_definitions(self) -> dict[str, BlueprintVariableTypeDef]:
         """Get the parameter definitions to submit to CloudFormation.
 
         Any variable definition whose `type` is an instance of
@@ -587,7 +567,7 @@ class Blueprint(DelCachedPropMixin):
         )
         return self.parameter_definitions
 
-    def get_parameter_values(self) -> Dict[str, Union[List[Any], str]]:
+    def get_parameter_values(self) -> dict[str, list[Any] | str]:
         """Return a dict of variables with type :class:`~runway.cfngin.blueprints.variables.types.CFNType`.
 
         .. deprecated:: 2.0.0
@@ -597,14 +577,14 @@ class Blueprint(DelCachedPropMixin):
             Variables that need to be submitted as CloudFormation Parameters.
             Will be a dictionary of <parameter name>: <parameter value>.
 
-        """  # noqa
+        """
         LOGGER.warning(
             "%s.get_parameter_values is deprecated and will be removed in a future release",
             self.__class__.__name__,
         )
         return self.parameter_values
 
-    def get_required_parameter_definitions(self) -> Dict[str, BlueprintVariableTypeDef]:
+    def get_required_parameter_definitions(self) -> dict[str, BlueprintVariableTypeDef]:
         """Return all template parameters that do not have a default value.
 
         .. deprecated:: 2.0.0
@@ -622,7 +602,7 @@ class Blueprint(DelCachedPropMixin):
         )
         return self.required_parameter_definitions
 
-    def get_variables(self) -> Dict[str, Any]:
+    def get_variables(self) -> dict[str, Any]:
         """Return a dictionary of variables available to the template.
 
         These variables will have been defined within `VARIABLES` or
@@ -664,7 +644,7 @@ class Blueprint(DelCachedPropMixin):
         raw_user_data = read_value_from_path(user_data_path)
         return parse_user_data(self.variables, raw_user_data, self.name)
 
-    def render_template(self) -> Tuple[str, str]:
+    def render_template(self) -> tuple[str, str]:
         """Render the Blueprint to a CloudFormation template."""
         self.import_mappings()
         self.create_template()
@@ -672,7 +652,7 @@ class Blueprint(DelCachedPropMixin):
             self.set_template_description(self.description)
         self.setup_parameters()
         rendered = self.template.to_json(indent=self.context.template_indent)
-        version = hashlib.md5(rendered.encode()).hexdigest()[:8]
+        version = hashlib.md5(rendered.encode()).hexdigest()[:8]  # noqa: S324
         return version, rendered
 
     def reset_template(self) -> None:
@@ -681,7 +661,7 @@ class Blueprint(DelCachedPropMixin):
         self._rendered = None
         self._version = None
 
-    def resolve_variables(self, provided_variables: List[Variable]) -> None:
+    def resolve_variables(self, provided_variables: list[Variable]) -> None:
         """Resolve the values of the blueprint variables.
 
         This will resolve the values of the `VARIABLES` with values from the
@@ -694,9 +674,7 @@ class Blueprint(DelCachedPropMixin):
         self._resolved_variables = {}
         variable_dict = {var.name: var for var in provided_variables}
         for var_name, var_def in self.defined_variables.items():
-            value = resolve_variable(
-                var_name, var_def, variable_dict.get(var_name), self.name
-            )
+            value = resolve_variable(var_name, var_def, variable_dict.get(var_name), self.name)
             self._resolved_variables[var_name] = value
 
     def set_template_description(self, description: str) -> None:
@@ -720,14 +698,14 @@ class Blueprint(DelCachedPropMixin):
             built_param = build_parameter(name, attrs)
             template.add_parameter(built_param)
 
-    def to_json(self, variables: Optional[Dict[str, Any]] = None) -> str:
+    def to_json(self, variables: dict[str, Any] | None = None) -> str:
         """Render the blueprint and return the template in json form.
 
         Args:
             variables: Dictionary providing/overriding variable values.
 
         """
-        variables_to_resolve: List[Variable] = []
+        variables_to_resolve: list[Variable] = []
         if variables:
             for key, value in variables.items():
                 variables_to_resolve.append(Variable(key, value, "cfngin"))
@@ -736,7 +714,7 @@ class Blueprint(DelCachedPropMixin):
                 # The provided value for a CFN parameter has no effect in this
                 # context (generating the CFN template), so any string can be
                 # provided for its value - just needs to be something
-                variables_to_resolve.append(Variable(k, "unused_value", "cfngin"))
+                variables_to_resolve.append(Variable(k, "unused_value", "cfngin"))  # noqa: PERF401
         self.resolve_variables(variables_to_resolve)
 
         return self.render_template()[1]

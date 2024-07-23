@@ -21,9 +21,7 @@ logger = logging.getLogger(__name__)
 REGISTER_FIRST = object()
 REGISTER_LAST = object()
 VALID_BUCKET = re.compile(r"^[a-zA-Z0-9.\-_]{1,255}$")
-_ACCESSPOINT_ARN = (
-    r"^arn:(aws).*:s3:[a-z\-0-9]+:[0-9]{12}:accesspoint[/:]" r"[a-zA-Z0-9\-]{1,63}$"
-)
+_ACCESSPOINT_ARN = r"^arn:(aws).*:s3:[a-z\-0-9]+:[0-9]{12}:accesspoint[/:]" r"[a-zA-Z0-9\-]{1,63}$"
 _OUTPOST_ARN = (
     r"^arn:(aws).*:s3-outposts:[a-z\-0-9]+:[0-9]{12}:outpost[/:]"
     r"[a-zA-Z0-9\-]{1,63}[/:]accesspoint[/:][a-zA-Z0-9\-]{1,63}$"
@@ -266,8 +264,7 @@ BUILTIN_HANDLERS = [
         "docs.*.glacier.*.complete-section",
         AutoPopulatedParam(
             "accountId",
-            'Note: this parameter is set to "-" by'
-            "default if no value is not specified.",
+            'Note: this parameter is set to "-" by' "default if no value is not specified.",
         ).document_auto_populated_param,
     ),
     (

@@ -57,12 +57,8 @@ DescribeConnectionsOnInterconnect = Action("DescribeConnectionsOnInterconnect")
 DescribeDirectConnectGatewayAssociationProposals = Action(
     "DescribeDirectConnectGatewayAssociationProposals"
 )
-DescribeDirectConnectGatewayAssociations = Action(
-    "DescribeDirectConnectGatewayAssociations"
-)
-DescribeDirectConnectGatewayAttachments = Action(
-    "DescribeDirectConnectGatewayAttachments"
-)
+DescribeDirectConnectGatewayAssociations = Action("DescribeDirectConnectGatewayAssociations")
+DescribeDirectConnectGatewayAttachments = Action("DescribeDirectConnectGatewayAttachments")
 DescribeDirectConnectGateways = Action("DescribeDirectConnectGateways")
 DescribeHostedConnections = Action("DescribeHostedConnections")
 DescribeInterconnectLoa = Action("DescribeInterconnectLoa")

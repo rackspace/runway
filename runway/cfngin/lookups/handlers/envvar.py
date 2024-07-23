@@ -3,9 +3,9 @@
 # pyright: reportIncompatibleMethodOverride=none
 import logging
 import os
-from typing import Any
+from typing import Any, Final
 
-from typing_extensions import Final, Literal
+from typing_extensions import Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path
@@ -21,7 +21,7 @@ class EnvvarLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(cls, value: str, **_: Any) -> str:  # pylint: disable=arguments-differ
+    def handle(cls, value: str, **_: Any) -> str:
         """Retrieve an environment variable.
 
         Args:

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import collections.abc
 import logging
-import os
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List, cast
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
 
 import pydantic
 
@@ -30,7 +30,7 @@ class BlankBlueprint(Blueprint):
         """Create template without raising NotImplementedError."""
 
 
-# TODO BREAKING find a better place for this
+# TODO (kyle): BREAKING move to runway.providers.aws.models.TagModel
 class TagDataModel(BaseModel):
     """AWS Resource Tag data model."""
 
@@ -50,16 +50,16 @@ class TagDataModel(BaseModel):
 
 def full_path(path: str) -> str:
     """Return full path."""
-    return os.path.abspath(os.path.expanduser(path))
+    return str(Path(path).absolute())
 
 
-# TODO split up to reduce number of statements
-def handle_hooks(  # pylint: disable=too-many-statements
+# TODO (kyle): split up to reduce number of statements
+def handle_hooks(  # noqa: C901, PLR0912, PLR0915
     stage: str,
-    hooks: List[CfnginHookDefinitionModel],
+    hooks: list[CfnginHookDefinitionModel],
     provider: Provider,
     context: CfnginContext,
-):
+) -> None:
     """Handle pre/post_deploy hooks.
 
     These are pieces of code that we want to run before/after deploying
@@ -76,7 +76,7 @@ def handle_hooks(  # pylint: disable=too-many-statements
         LOGGER.debug("no %s hooks defined", stage)
         return
 
-    hook_paths: List[str] = []
+    hook_paths: list[str] = []
     for i, hook in enumerate(hooks):
         try:
             hook_paths.append(hook.path)
@@ -111,18 +111,16 @@ def handle_hooks(  # pylint: disable=too-many-statements
                         "does not exist yet"
                     )
                 raise
-            kwargs: Dict[str, Any] = {v.name: v.value for v in args}
+            kwargs: dict[str, Any] = {v.name: v.value for v in args}
         else:
             kwargs = {}
 
         try:
             if isinstance(method, type):
-                result: Any = getattr(
-                    method(context=context, provider=provider, **kwargs), stage
-                )()
+                result: Any = getattr(method(context=context, provider=provider, **kwargs), stage)()
             else:
                 result = cast(Any, method(context=context, provider=provider, **kwargs))
-        except Exception:  # pylint: disable=broad-except
+        except Exception:
             LOGGER.exception("hook %s threw an exception", hook.path)
             if hook.required:
                 raise
@@ -130,24 +128,19 @@ def handle_hooks(  # pylint: disable=too-many-statements
 
         if not result:
             if hook.required:
-                LOGGER.error(
-                    "required hook %s failed; return value: %s", hook.path, result
-                )
+                LOGGER.error("required hook %s failed; return value: %s", hook.path, result)
                 sys.exit(1)
-            LOGGER.warning(
-                "non-required hook %s failed; return value: %s", hook.path, result
-            )
-        else:
-            if isinstance(result, (collections.abc.Mapping, pydantic.BaseModel)):
-                if hook.data_key:
-                    LOGGER.debug(
-                        "adding result for hook %s to context in data_key %s",
-                        hook.path,
-                        hook.data_key,
-                    )
-                    context.set_hook_data(hook.data_key, result)
-                else:
-                    LOGGER.debug(
-                        "hook %s returned result data but no data key set; ignoring",
-                        hook.path,
-                    )
+            LOGGER.warning("non-required hook %s failed; return value: %s", hook.path, result)
+        elif isinstance(result, (collections.abc.Mapping, pydantic.BaseModel)):
+            if hook.data_key:
+                LOGGER.debug(
+                    "adding result for hook %s to context in data_key %s",
+                    hook.path,
+                    hook.data_key,
+                )
+                context.set_hook_data(hook.data_key, result)
+            else:
+                LOGGER.debug(
+                    "hook %s returned result data but no data key set; ignoring",
+                    hook.path,
+                )

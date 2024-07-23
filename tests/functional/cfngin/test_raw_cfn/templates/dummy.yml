@@ -16,10 +16,8 @@ Parameters:
 
 
 Conditions:
-  DeployOne:
-    !Or [ !Equals [ !Ref WaitConditionCount, 1 ], !Equals [ !Ref WaitConditionCount, 2 ] ]
-  DeployTwo:
-    !Equals [ !Ref WaitConditionCount, 2 ]
+  DeployOne: !Or [!Equals [!Ref WaitConditionCount, 1], !Equals [!Ref WaitConditionCount, 2]]
+  DeployTwo: !Equals [!Ref WaitConditionCount, 2]
 
 
 Resources:

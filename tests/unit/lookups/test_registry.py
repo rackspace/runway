@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from ..factories import MockRunwayContext
 
 VALUES = {"str_val": "test"}
-CONTEXT = MutableMap(**{"env_vars": VALUES})
+CONTEXT = MutableMap(env_vars=VALUES)
 VARIABLES = MutableMap(**VALUES)
 
 
@@ -30,9 +30,7 @@ def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
     mocker.patch.dict(RUNWAY_LOOKUP_HANDLERS, {})
     handlers = ["cfn", "ecr", "env", "random.string", "ssm", "var"]
     for handler in handlers:
-        assert (
-            handler in RUNWAY_LOOKUP_HANDLERS
-        ), f'Lookup handler: "{handler}" not registered'
+        assert handler in RUNWAY_LOOKUP_HANDLERS, f'Lookup handler: "{handler}" not registered'
     assert len(RUNWAY_LOOKUP_HANDLERS) == len(
         handlers
     ), f"expected {len(handlers)} autoloaded handlers but found {len(RUNWAY_LOOKUP_HANDLERS)}"

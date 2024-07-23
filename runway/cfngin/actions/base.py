@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Union
 
 import botocore.exceptions
 
@@ -66,7 +66,7 @@ def build_walker(concurrency: int) -> Callable[..., Any]:
     return ThreadedWalker(semaphore).walk
 
 
-def stack_template_url(bucket_name: str, blueprint: Blueprint, endpoint: str):
+def stack_template_url(bucket_name: str, blueprint: Blueprint, endpoint: str) -> str:
     """Produce an s3 url for a given blueprint.
 
     Args:
@@ -99,21 +99,21 @@ class BaseAction:
     """
 
     DESCRIPTION: ClassVar[str] = "Base action"
-    NAME: ClassVar[Optional[str]] = None
+    NAME: ClassVar[str | None] = None
 
-    bucket_name: Optional[str]
-    bucket_region: Optional[str]
+    bucket_name: str | None
+    bucket_region: str | None
     cancel: threading.Event
     context: CfnginContext
-    provider_builder: Optional[ProviderBuilder]
+    provider_builder: ProviderBuilder | None
     s3_conn: S3Client
 
     def __init__(
         self,
         context: CfnginContext,
-        provider_builder: Optional[ProviderBuilder] = None,
-        cancel: Optional[threading.Event] = None,
-    ):
+        provider_builder: ProviderBuilder | None = None,
+        cancel: threading.Event | None = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -158,9 +158,7 @@ class BaseAction:
         """CloudFormation bucket where templates will be stored."""
         if self.bucket_name:
             try:
-                ensure_s3_bucket(
-                    self.s3_conn, self.bucket_name, self.bucket_region, create=False
-                )
+                ensure_s3_bucket(self.s3_conn, self.bucket_name, self.bucket_region, create=False)
             except botocore.exceptions.ClientError:
                 raise CfnginBucketNotFound(bucket_name=self.bucket_name) from None
 
@@ -214,8 +212,7 @@ class BaseAction:
         template_url = self.stack_template_url(blueprint)
         try:
             template_exists = (
-                self.s3_conn.head_object(Bucket=self.bucket_name, Key=key_name)
-                is not None
+                self.s3_conn.head_object(Bucket=self.bucket_name, Key=key_name) is not None
             )
         except botocore.exceptions.ClientError as err:
             if err.response["Error"]["Code"] == "404":
@@ -240,9 +237,7 @@ class BaseAction:
         """S3 URL for CloudFormation template object."""
         if not self.bucket_name:
             raise ValueError("bucket_name required")
-        return stack_template_url(
-            self.bucket_name, blueprint, get_s3_endpoint(self.s3_conn)
-        )
+        return stack_template_url(self.bucket_name, blueprint, get_s3_endpoint(self.s3_conn))
 
     def _generate_plan(
         self,
@@ -266,8 +261,7 @@ class BaseAction:
         tail_fn = self._tail_stack if tail else None
 
         steps = [
-            Step(stack, fn=self._stack_action, watch_func=tail_fn)
-            for stack in self.context.stacks
+            Step(stack, fn=self._stack_action, watch_func=tail_fn) for stack in self.context.stacks
         ]
 
         graph = Graph.from_steps(steps)
@@ -295,6 +289,4 @@ class BaseAction:
     ) -> None:
         """Tail a stack's event stream."""
         provider = self.build_provider()
-        return provider.tail_stack(
-            stack, cancel, action=self.NAME, retries=retries, **kwargs
-        )
+        return provider.tail_stack(stack, cancel, action=self.NAME, retries=retries, **kwargs)

@@ -20,7 +20,7 @@ def convert_gitignore(src: Path) -> Path:
     """Rename a gitignore template.
 
     Keyword Args:
-        Path object for source file.
+        src: Path object for source file.
 
     Returns:
         The renamed file if it was created.

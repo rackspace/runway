@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from ...._logging import PrefixAdaptor
 from ....exceptions import UnresolvedVariable
@@ -23,9 +23,9 @@ class ConfigComponentDefinition(ABC):
     """Base class for Runway config components."""
 
     _data: ConfigProperty
-    _pre_process_vars: Tuple[str, ...] = ()
-    _supports_vars: Tuple[str, ...] = ()
-    _vars: Dict[str, Variable] = {}
+    _pre_process_vars: tuple[str, ...] = ()
+    _supports_vars: tuple[str, ...] = ()
+    _vars: dict[str, Variable] = {}
 
     def __init__(self, data: ConfigProperty) -> None:
         """Instantiate class."""
@@ -37,7 +37,7 @@ class ConfigComponentDefinition(ABC):
                 self._register_variable(var, self._data[var])
 
     @property
-    def data(self) -> Dict[str, Any]:
+    def data(self) -> dict[str, Any]:
         """Return the underlying data as a dict."""
         return self._data.dict()
 
@@ -96,9 +96,7 @@ class ConfigComponentDefinition(ABC):
                 as a variable if it contains a lookup.
 
         """
-        self._vars[var_name] = Variable(
-            name=var_name, value=var_value, variable_type="runway"
-        )
+        self._vars[var_name] = Variable(name=var_name, value=var_value, variable_type="runway")
 
     @classmethod
     @abstractmethod
@@ -117,7 +115,7 @@ class ConfigComponentDefinition(ABC):
             return name in self.__dict__
         return self._data.__contains__(name)
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> Any:
         """Implement evaluation of self.name.
 
         Args:
@@ -134,11 +132,9 @@ class ConfigComponentDefinition(ABC):
             raise UnresolvedVariable(self._vars[name])
         if name in super().__getattribute__("_data"):
             return super().__getattribute__("_data").__getattribute__(name)
-        raise AttributeError(
-            f"{self.__class__.__name__} object has not attribute {name}"
-        )
+        raise AttributeError(f"{self.__class__.__name__} object has not attribute {name}")
 
-    def __getitem__(self, name: str):
+    def __getitem__(self, name: str) -> Any:
         """Implement evaluation of self[name].
 
         Args:

@@ -3,7 +3,7 @@
 # docs: file://./../../../../docs/source/commands.rst
 import logging
 import subprocess
-from typing import Any, Tuple
+from typing import Any
 
 import click
 
@@ -13,15 +13,13 @@ from ... import options
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-@click.command(
-    "run", short_help="run kubectl", context_settings={"ignore_unknown_options": True}
-)
+@click.command("run", short_help="run kubectl", context_settings={"ignore_unknown_options": True})
 @click.argument("args", metavar="<args>", nargs=-1, required=True)
 @options.debug
 @options.no_color
 @options.verbose
 @click.pass_context
-def run(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
+def run(ctx: click.Context, args: tuple[str, ...], **_: Any) -> None:
     """Run a kubectl command.
 
     Uses the version of kubectl specified in the ".kubectl-version" file
@@ -31,4 +29,4 @@ def run(ctx: click.Context, args: Tuple[str, ...], **_: Any) -> None:
     before the kubectl command.
 
     """
-    ctx.exit(subprocess.call([KBEnvManager().install()] + list(args)))
+    ctx.exit(subprocess.call([KBEnvManager().install(), *list(args)]))

@@ -18,9 +18,7 @@ CreateLicenseConfiguration = Action("CreateLicenseConfiguration")
 DeleteLicenseConfiguration = Action("DeleteLicenseConfiguration")
 GetLicenseConfiguration = Action("GetLicenseConfiguration")
 GetServiceSettings = Action("GetServiceSettings")
-ListAssociationsForLicenseConfiguration = Action(
-    "ListAssociationsForLicenseConfiguration"
-)
+ListAssociationsForLicenseConfiguration = Action("ListAssociationsForLicenseConfiguration")
 ListLicenseConfigurations = Action("ListLicenseConfigurations")
 ListLicenseSpecificationsForResource = Action("ListLicenseSpecificationsForResource")
 ListResourceInventory = Action("ListResourceInventory")
@@ -29,7 +27,5 @@ ListUsageForLicenseConfiguration = Action("ListUsageForLicenseConfiguration")
 TagResource = Action("TagResource")
 UntagResource = Action("UntagResource")
 UpdateLicenseConfiguration = Action("UpdateLicenseConfiguration")
-UpdateLicenseSpecificationsForResource = Action(
-    "UpdateLicenseSpecificationsForResource"
-)
+UpdateLicenseSpecificationsForResource = Action("UpdateLicenseSpecificationsForResource")
 UpdateServiceSettings = Action("UpdateServiceSettings")

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import pytest
 import yaml
@@ -14,7 +14,7 @@ from runway.exceptions import FailedVariableLookup
 from runway.variables import Variable
 
 if TYPE_CHECKING:
-    from ...factories import MockCFNginContext, MockRunwayContext
+    from ...factories import MockCfnginContext, MockRunwayContext
 
 
 def get_parameter_response(
@@ -23,7 +23,7 @@ def get_parameter_response(
     value_type: str = "String",
     label: Optional[str] = None,
     version: int = 1,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate a mock ssm.get_parameter response."""
     selector = f"{name}/{label or version}"
     return {
@@ -40,9 +40,7 @@ def get_parameter_response(
     }
 
 
-def get_parameter_request(
-    name: str, decrypt: bool = True
-) -> Dict[str, Union[bool, str]]:
+def get_parameter_request(name: str, decrypt: bool = True) -> dict[str, Union[bool, str]]:
     """Generate the expected request parameters for ssm.get_parameter."""
     return {"Name": name, "WithDecryption": decrypt}
 
@@ -51,7 +49,7 @@ class TestSsmLookup:
     """Test runway.lookups.handlers.ssm.SsmLookup."""
 
     def test_basic(
-        self, cfngin_context: MockCFNginContext, runway_context: MockRunwayContext
+        self, cfngin_context: MockCfnginContext, runway_context: MockRunwayContext
     ) -> None:
         """Test resolution of a basic lookup."""
         name = "/test/param"
@@ -110,9 +108,7 @@ class TestSsmLookup:
         name = "/test/param"
         value = "test value"
         stubber = runway_context.add_stubber("ssm", region="us-west-2")
-        var = Variable(
-            "test_var", f"${{ssm {name}::region=us-west-2}}", variable_type="runway"
-        )
+        var = Variable("test_var", f"${{ssm {name}::region=us-west-2}}", variable_type="runway")
 
         stubber.add_response(
             "get_parameter",

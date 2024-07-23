@@ -1,7 +1,7 @@
 """Retrieve the ID of the Cognito User Pool."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from ...base import HookArgsBaseModel
 
@@ -18,7 +18,7 @@ class HookArgs(HookArgsBaseModel):
     """The ARN of the supplied User pool."""
 
 
-def get(*__args: Any, **kwargs: Any) -> Dict[str, Any]:
+def get(*__args: Any, **kwargs: Any) -> dict[str, Any]:
     """Retrieve the ID of the Cognito User Pool.
 
     The User Pool can either be supplied via an ARN or by being generated.

@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING, List, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.core.providers.aws.s3._helpers.file_generator import FileStats
 from runway.core.providers.aws.s3._helpers.sync_strategy.base import (
@@ -37,23 +37,20 @@ class TestBaseSync:
         dest_file = FileStats(src="", size=dest_size)
         assert BaseSync.compare_size(src_file, dest_file) is expected
 
-    @pytest.mark.parametrize(
-        "src, dest", [(None, None), (Mock(), None), (None, Mock())]
-    )
+    @pytest.mark.parametrize("src, dest", [(None, None), (Mock(), None), (None, Mock())])
     def test_compare_size_raise_value_error(
-        self, dest: Optional[FileStats], src: Optional[FileStats]
+        self, dest: FileStats | None, src: FileStats | None
     ) -> None:
         """Test compare_time."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="src_file and dest_file must not be None"):
             BaseSync().compare_size(src, dest)
-        assert str(excinfo.value) == "src_file and dest_file must not be None"
 
     def test_compare_time(self) -> None:
         """Test compare_time."""
-        obj = BaseSync()
+        obj: BaseSync[Any] = BaseSync()
         now = datetime.datetime.now()
         future = now + datetime.timedelta(0, 15)
-        kwargs = {"src": "", "operation_name": "invalid"}
+        kwargs: dict[str, Any] = {"src": "", "operation_name": "invalid"}
         assert (
             obj.compare_time(
                 FileStats(last_update=now, **kwargs),
@@ -79,10 +76,10 @@ class TestBaseSync:
     @pytest.mark.parametrize("operation_name", ["copy", "upload"])
     def test_compare_time_copy_or_upload(self, operation_name: str) -> None:
         """Test compare_time."""
-        obj = BaseSync()
+        obj: BaseSync[Any] = BaseSync()
         now = datetime.datetime.now()
         future = now + datetime.timedelta(0, 15)
-        kwargs = {"src": "", "operation_name": operation_name}
+        kwargs: dict[str, Any] = {"src": "", "operation_name": operation_name}
         assert (
             obj.compare_time(
                 FileStats(last_update=now, **kwargs),
@@ -107,10 +104,10 @@ class TestBaseSync:
 
     def test_compare_time_download(self) -> None:
         """Test compare_time."""
-        obj = BaseSync()
+        obj: BaseSync[Any] = BaseSync()
         now = datetime.datetime.now()
         future = now + datetime.timedelta(0, 15)
-        kwargs = {"src": "", "operation_name": "download"}
+        kwargs: dict[str, Any] = {"src": "", "operation_name": "download"}
         assert (
             obj.compare_time(
                 FileStats(last_update=now, **kwargs),
@@ -133,16 +130,13 @@ class TestBaseSync:
             is True
         )
 
-    @pytest.mark.parametrize(
-        "src, dest", [(None, None), (Mock(), None), (None, Mock())]
-    )
+    @pytest.mark.parametrize("src, dest", [(None, None), (Mock(), None), (None, Mock())])
     def test_compare_time_raise_value_error(
-        self, dest: Optional[FileStats], src: Optional[FileStats]
+        self, dest: FileStats | None, src: FileStats | None
     ) -> None:
         """Test compare_time."""
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="src_file and dest_file must not be None"):
             BaseSync().compare_time(src, dest)
-        assert str(excinfo.value) == "src_file and dest_file must not be None"
 
     def test_determine_should_sync(self) -> None:
         """Test determine_should_sync."""
@@ -151,16 +145,16 @@ class TestBaseSync:
 
     def test_init(self) -> None:
         """Test __init__."""
-        valid_sync_types: List[ValidSyncType] = [
+        valid_sync_types: list[ValidSyncType] = [
             "file_at_src_and_dest",
             "file_not_at_dest",
             "file_not_at_src",
         ]
         for sync_type in valid_sync_types:
-            strategy = BaseSync(sync_type)
+            strategy: BaseSync[Any] = BaseSync(sync_type)
             assert strategy.sync_type == sync_type
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Unknown sync_type"):
             BaseSync("invalid_sync_type")  # type: ignore
 
     def test_name(self) -> None:
@@ -170,23 +164,17 @@ class TestBaseSync:
     def test_register_strategy(self) -> None:
         """Test register_strategy."""
         session = Mock()
-        obj = BaseSync()
+        obj: BaseSync[Any] = BaseSync()
         obj.register_strategy(session)
         register_args = cast(Mock, session.register).call_args_list
         assert register_args[0][0][0] == "choosing-s3-sync-strategy"
-        # pylint: disable=comparison-with-callable
         assert register_args[0][0][1] == obj.use_sync_strategy
 
     def test_use_sync_strategy(self, mocker: MockerFixture) -> None:
         """Test use_sync_strategy."""
-        assert (
-            BaseSync().use_sync_strategy(
-                {"invalid_sync_strategy": True}  # type: ignore
-            )
-            is None
-        )
+        assert BaseSync().use_sync_strategy({"invalid_sync_strategy": True}) is None  # type: ignore
         mocker.patch.object(BaseSync, "name", "something")
-        obj = BaseSync()
+        obj: BaseSync[Any] = BaseSync()
         assert obj.use_sync_strategy({"something": True}) == obj  # type: ignore
 
 
@@ -213,9 +201,7 @@ class TestMissingFileSync:
             MissingFileSync, "compare_time", return_value=is_time
         )
         assert (
-            MissingFileSync().determine_should_sync(
-                FileStats(src=""), FileStats(src="")
-            )
+            MissingFileSync().determine_should_sync(FileStats(src=""), FileStats(src=""))
             is expected
         )
         mock_compare_size.assert_not_called()
@@ -246,16 +232,9 @@ class TestTestNeverSync:
         self, expected: bool, is_size: bool, is_time: bool, mocker: MockerFixture
     ) -> None:
         """Test determine_should_sync."""
-        mock_compare_size = mocker.patch.object(
-            NeverSync, "compare_size", return_value=is_size
-        )
-        mock_compare_time = mocker.patch.object(
-            NeverSync, "compare_time", return_value=is_time
-        )
-        assert (
-            NeverSync().determine_should_sync(FileStats(src=""), FileStats(src=""))
-            is expected
-        )
+        mock_compare_size = mocker.patch.object(NeverSync, "compare_size", return_value=is_size)
+        mock_compare_time = mocker.patch.object(NeverSync, "compare_time", return_value=is_time)
+        assert NeverSync().determine_should_sync(FileStats(src=""), FileStats(src="")) is expected
         mock_compare_size.assert_not_called()
         mock_compare_time.assert_not_called()
 
@@ -292,10 +271,7 @@ class TestSizeAndLastModifiedSync:
         mock_compare_time = mocker.patch.object(
             SizeAndLastModifiedSync, "compare_time", return_value=is_time
         )
-        assert (
-            SizeAndLastModifiedSync().determine_should_sync(src_file, dest_file)
-            is expected
-        )
+        assert SizeAndLastModifiedSync().determine_should_sync(src_file, dest_file) is expected
         mock_compare_size.assert_called_once_with(src_file, dest_file)
         mock_compare_time.assert_called_once_with(src_file, dest_file)
 

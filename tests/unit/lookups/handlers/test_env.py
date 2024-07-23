@@ -27,5 +27,5 @@ class TestEnvLookup:
     def test_handle_not_found(self, runway_context: MockRunwayContext) -> None:
         """Validate exception when lookup cannot be resolved."""
         runway_context.env.vars = ENV_VARS.copy()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="does not exist in the environment"):
             EnvLookup.handle("NOT_VALID", context=runway_context)

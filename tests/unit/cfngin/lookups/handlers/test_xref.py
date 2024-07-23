@@ -2,8 +2,7 @@
 
 # pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
 import unittest
-
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from runway.cfngin.lookups.handlers.xref import XrefLookup
 
@@ -24,8 +23,8 @@ class TestXrefHandler(unittest.TestCase):
             provider=self.provider,
             context=self.context,
         )
-        self.assertEqual(value, "Test Output")
-        self.assertEqual(self.context.get_fqn.call_count, 0)
+        assert value == "Test Output"
+        assert self.context.get_fqn.call_count == 0
         args = self.provider.get_output.call_args
-        self.assertEqual(args[0][0], "fully-qualified-stack-name")
-        self.assertEqual(args[0][1], "SomeOutput")
+        assert args[0][0] == "fully-qualified-stack-name"
+        assert args[0][1] == "SomeOutput"

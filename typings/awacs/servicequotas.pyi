@@ -23,22 +23,14 @@ GetAWSDefaultServiceQuota = Action("GetAWSDefaultServiceQuota")
 GetAssociationForServiceQuotaTemplate = Action("GetAssociationForServiceQuotaTemplate")
 GetRequestedServiceQuotaChange = Action("GetRequestedServiceQuotaChange")
 GetServiceQuota = Action("GetServiceQuota")
-GetServiceQuotaIncreaseRequestFromTemplate = Action(
-    "GetServiceQuotaIncreaseRequestFromTemplate"
-)
+GetServiceQuotaIncreaseRequestFromTemplate = Action("GetServiceQuotaIncreaseRequestFromTemplate")
 ListAWSDefaultServiceQuotas = Action("ListAWSDefaultServiceQuotas")
-ListRequestedServiceQuotaChangeHistory = Action(
-    "ListRequestedServiceQuotaChangeHistory"
-)
+ListRequestedServiceQuotaChangeHistory = Action("ListRequestedServiceQuotaChangeHistory")
 ListRequestedServiceQuotaChangeHistoryByQuota = Action(
     "ListRequestedServiceQuotaChangeHistoryByQuota"
 )
-ListServiceQuotaIncreaseRequestsInTemplate = Action(
-    "ListServiceQuotaIncreaseRequestsInTemplate"
-)
+ListServiceQuotaIncreaseRequestsInTemplate = Action("ListServiceQuotaIncreaseRequestsInTemplate")
 ListServiceQuotas = Action("ListServiceQuotas")
 ListServices = Action("ListServices")
-PutServiceQuotaIncreaseRequestIntoTemplate = Action(
-    "PutServiceQuotaIncreaseRequestIntoTemplate"
-)
+PutServiceQuotaIncreaseRequestIntoTemplate = Action("PutServiceQuotaIncreaseRequestIntoTemplate")
 RequestServiceQuotaIncrease = Action("RequestServiceQuotaIncrease")

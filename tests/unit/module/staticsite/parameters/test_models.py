@@ -1,7 +1,7 @@
 """Test runway.module.staticsite.parameters.models."""
 
 # pyright: basic
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
@@ -57,12 +57,12 @@ class TestRunwayStaticSiteLambdaFunctionAssociationDataModel:
     @pytest.mark.parametrize(
         "data",
         [
-            cast(Dict[str, Any], {}),
+            cast(dict[str, Any], {}),
             {"arn": "aws:arn:lambda:us-east-1:function:test"},
             {"type": "origin-request"},
         ],
     )
-    def test_init_required(self, data: Dict[str, Any]) -> None:
+    def test_init_required(self, data: dict[str, Any]) -> None:
         """Test init required."""
         with pytest.raises(ValidationError):
             RunwayStaticSiteLambdaFunctionAssociationDataModel.parse_obj(data)
@@ -115,9 +115,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
             "font-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; "
             "object-src 'none'; "
             "connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com",
-            "Strict-Transport-Security": "max-age=31536000; "
-            "includeSubdomains; "
-            "preload",
+            "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
             "Referrer-Policy": "same-origin",
             "X-XSS-Protection": "1; mode=block",
             "X-Frame-Options": "DENY",
@@ -193,10 +191,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         }
         obj = RunwayStaticSiteModuleParametersDataModel(**data)  # type: ignore
         assert obj.acmcert_arn == data["staticsite_acmcert_arn"]
-        assert (
-            obj.additional_redirect_domains
-            == data["staticsite_additional_redirect_domains"]
-        )
+        assert obj.additional_redirect_domains == data["staticsite_additional_redirect_domains"]
         assert obj.aliases == data["staticsite_aliases"]
         assert obj.auth_at_edge is data["staticsite_auth_at_edge"]
         assert obj.cf_disable is data["staticsite_cf_disable"]
@@ -221,10 +216,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         assert obj.namespace == data["namespace"]
         assert obj.non_spa is data["staticsite_non_spa"]
         assert obj.oauth_scopes == data["staticsite_oauth_scopes"]
-        assert (
-            obj.redirect_path_auth_refresh
-            == data["staticsite_redirect_path_auth_refresh"]
-        )
+        assert obj.redirect_path_auth_refresh == data["staticsite_redirect_path_auth_refresh"]
         assert obj.redirect_path_sign_in == data["staticsite_redirect_path_sign_in"]
         assert obj.redirect_path_sign_out == data["staticsite_redirect_path_sign_out"]
         assert obj.required_group == data["staticsite_required_group"]
@@ -232,9 +224,6 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         assert obj.role_boundary_arn == data["staticsite_role_boundary_arn"]
         assert obj.service_role == data["cloudformation_service_role"]
         assert obj.sign_out_url == data["staticsite_sign_out_url"]
-        assert (
-            obj.supported_identity_providers
-            == data["staticsite_supported_identity_providers"]
-        )
+        assert obj.supported_identity_providers == data["staticsite_supported_identity_providers"]
         assert obj.user_pool_arn == data["staticsite_user_pool_arn"]
         assert obj.web_acl == data["staticsite_web_acl"]

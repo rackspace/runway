@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 import awacs.sts
 from awacs.aws import Deny, PolicyDocument, Statement
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class TestRunnerUser(AdminUser):
     """Blueprint for a test runner user."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "DenyAssumeRoleNotResources": {"type": list, "default": []},
         "PermissionsBoundary": {"type": str},
         "UserName": {"type": str, "default": ""},
@@ -34,8 +34,7 @@ class TestRunnerUser(AdminUser):
                         Statement(
                             Action=[awacs.sts.AssumeRole],
                             Effect=Deny,
-                            NotResource=self.variables["DenyAssumeRoleNotResources"]
-                            or ["*"],
+                            NotResource=self.variables["DenyAssumeRoleNotResources"] or ["*"],
                         )
                     ],
                     Version="2012-10-17",

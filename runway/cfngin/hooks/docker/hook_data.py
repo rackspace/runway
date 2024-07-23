@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class DockerHookData(MutableMap):
     """Docker hook_data object."""
 
-    image: Optional["DockerImage"] = None
+    image: Optional[DockerImage] = None
 
     @cached_property
     def client(self) -> DockerClient:
@@ -25,16 +25,12 @@ class DockerHookData(MutableMap):
         return DockerClient.from_env()
 
     @overload
-    def update_context(self, context: CfnginContext = ...) -> DockerHookData:  # noqa
-        ...
+    def update_context(self, context: CfnginContext = ...) -> DockerHookData: ...
 
     @overload
-    def update_context(self, context: None = ...) -> None:  # noqa
-        ...
+    def update_context(self, context: None = ...) -> None: ...
 
-    def update_context(
-        self, context: Optional[CfnginContext] = None
-    ) -> Optional[DockerHookData]:
+    def update_context(self, context: Optional[CfnginContext] = None) -> Optional[DockerHookData]:
         """Update context object with new the current DockerHookData."""
         if not context:
             return None

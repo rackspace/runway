@@ -33,12 +33,8 @@ class TestSizeOnlySync:
         """Test determine_should_sync."""
         src_file = FileStats(src="")
         dest_file = FileStats(src="")
-        mock_compare_size = mocker.patch.object(
-            SizeOnlySync, "compare_size", return_value=is_size
-        )
-        mock_compare_time = mocker.patch.object(
-            SizeOnlySync, "compare_time", return_value=is_time
-        )
+        mock_compare_size = mocker.patch.object(SizeOnlySync, "compare_size", return_value=is_size)
+        mock_compare_time = mocker.patch.object(SizeOnlySync, "compare_time", return_value=is_time)
         assert SizeOnlySync().determine_should_sync(src_file, dest_file) is expected
         mock_compare_size.assert_called_once_with(src_file, dest_file)
         mock_compare_time.assert_not_called()

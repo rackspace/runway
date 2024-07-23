@@ -11,7 +11,7 @@ import sys
 import tempfile
 import uuid
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import IO, TYPE_CHECKING, Any, Callable, cast
 
 import yaml
 
@@ -34,15 +34,15 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-def gen_sls_config_files(stage: str, region: str) -> List[str]:
+def gen_sls_config_files(stage: str, region: str) -> list[str]:
     """Generate possible SLS config files names."""
-    names: List[str] = []
+    names: list[str] = []
     for ext in ["yml", "json"]:
         # Give preference to explicit stage-region files
-        names.append(os.path.join("env", f"{stage}-{region}.{ext}"))
+        names.append(os.path.join("env", f"{stage}-{region}.{ext}"))  # noqa: PTH118
         names.append(f"config-{stage}-{region}.{ext}")
         # Fallback to stage name only
-        names.append(os.path.join("env", f"{stage}.{ext}"))
+        names.append(os.path.join("env", f"{stage}.{ext}"))  # noqa: PTH118
         names.append(f"config-{stage}.{ext}")
     return names
 
@@ -56,12 +56,12 @@ class Serverless(RunwayModuleNpm):
         self,
         context: RunwayContext,
         *,
-        explicitly_enabled: Optional[bool] = False,
+        explicitly_enabled: bool | None = False,
         logger: RunwayLogger = LOGGER,
         module_root: Path,
-        name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        name: str | None = None,
+        options: dict[str, Any] | ModuleOptions | None = None,
+        parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -94,7 +94,7 @@ class Serverless(RunwayModuleNpm):
         self.stage = self.ctx.env.name
 
     @property
-    def cli_args(self) -> List[str]:
+    def cli_args(self) -> list[str]:
         """Generate CLI args from self used in all Serverless commands."""
         result = ["--region", self.region, "--stage", self.stage]
         if "DEBUG" in self.ctx.env.vars:
@@ -102,7 +102,7 @@ class Serverless(RunwayModuleNpm):
         return result
 
     @cached_property
-    def env_file(self) -> Optional[Path]:
+    def env_file(self) -> Path | None:
         """Find the environment file for the module."""
         for name in gen_sls_config_files(self.stage, self.region):
             test_path = self.path / name
@@ -117,8 +117,7 @@ class Serverless(RunwayModuleNpm):
             if self.parameters or self.explicitly_enabled or self.env_file:
                 return False
             self.logger.info(
-                "skipped; config file for this stage/region not found"
-                " -- looking for one of: %s",
+                "skipped; config file for this stage/region not found -- looking for one of: %s",
                 ", ".join(gen_sls_config_files(self.stage, self.region)),
             )
         else:
@@ -158,12 +157,11 @@ class Serverless(RunwayModuleNpm):
                 self.logger.debug("removed temporary Serverless config")
             except OSError:
                 self.logger.debug(
-                    "encountered an error when trying to delete the "
-                    "temporary Serverless config",
+                    "encountered an error when trying to delete the temporary Serverless config",
                     exc_info=True,
                 )
 
-    def gen_cmd(self, command: str, args_list: Optional[List[str]] = None) -> List[str]:
+    def gen_cmd(self, command: str, args_list: list[str] | None = None) -> list[str]:
         """Generate and log a Serverless command.
 
         This does not execute the command, only prepares it for use.
@@ -176,7 +174,7 @@ class Serverless(RunwayModuleNpm):
             The full command to be passed into a subprocess.
 
         """
-        args = [command] + self.cli_args + self.options.args
+        args = [command, *self.cli_args, *self.options.args]
         args.extend(args_list or [])
         if command not in ["remove", "package", "print"] and self.ctx.is_noninteractive:
             args.append("--conceal")  # hide secrets from serverless output
@@ -200,9 +198,7 @@ class Serverless(RunwayModuleNpm):
             command="sls", command_opts=args, path=self.path, logger=self.logger
         )
 
-    def sls_deploy(
-        self, *, package: Optional[AnyPath] = None, skip_install: bool = False
-    ) -> None:
+    def sls_deploy(self, *, package: AnyPath | None = None, skip_install: bool = False) -> None:
         """Execute ``sls deploy`` command.
 
         Args:
@@ -224,9 +220,9 @@ class Serverless(RunwayModuleNpm):
     def sls_package(
         self,
         *,
-        output_path: Optional[AnyPathConstrained] = None,
+        output_path: AnyPathConstrained | None = None,
         skip_install: bool = False,
-    ) -> Optional[AnyPathConstrained]:
+    ) -> AnyPathConstrained | None:
         """Execute ``sls package`` command.
 
         Args:
@@ -248,8 +244,8 @@ class Serverless(RunwayModuleNpm):
         return output_path
 
     def sls_print(
-        self, *, item_path: Optional[str] = None, skip_install: bool = False
-    ) -> Dict[str, Any]:
+        self, *, item_path: str | None = None, skip_install: bool = False
+    ) -> dict[str, Any]:
         """Execute ``sls print`` command.
 
         Keyword Args:
@@ -294,7 +290,7 @@ class Serverless(RunwayModuleNpm):
             self.npm_install()
         stack_missing = False  # track output for acceptable error
         self.logger.info("destroy (in progress)")
-        with subprocess.Popen(
+        with subprocess.Popen(  # noqa: SIM117
             self.gen_cmd("remove"),
             bufsize=1,
             env=self.ctx.env.vars,
@@ -353,9 +349,7 @@ class Serverless(RunwayModuleNpm):
 
     def init(self) -> None:
         """Run init."""
-        self.logger.warning(
-            "init not currently supported for %s", self.__class__.__name__
-        )
+        self.logger.warning("init not currently supported for %s", self.__class__.__name__)
 
     def plan(self) -> None:
         """Entrypoint for Runway's plan action."""
@@ -368,9 +362,9 @@ class ServerlessArtifact:
     def __init__(
         self,
         context: RunwayContext,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         *,
-        logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
+        logger: PrefixAdaptor | RunwayLogger = LOGGER,
         package_path: AnyPath,
         path: AnyPath,
     ) -> None:
@@ -388,33 +382,27 @@ class ServerlessArtifact:
         self.ctx = context
         self.config = config
         self.logger = logger
-        self.package_path = (
-            Path(package_path) if isinstance(package_path, str) else package_path
-        )
+        self.package_path = Path(package_path) if isinstance(package_path, str) else package_path
         self.path = Path(path) if isinstance(path, str) else path
 
     @cached_property
-    def source_hash(self) -> Dict[str, str]:
+    def source_hash(self) -> dict[str, str]:
         """File hash(es) of each service's source code."""
         if self.config.get("package", {"": ""}).get("individually"):
             return {
                 name: get_hash_of_files(
-                    self.path / os.path.dirname(detail.get("handler"))
+                    self.path / os.path.dirname(detail.get("handler"))  # noqa: PTH120
                 )
                 for name, detail in self.config.get("functions", {}).items()
             }
-        directories: List[Dict[str, Union[List[str], str]]] = []
-        for _name, detail in self.config.get("functions", {}).items():
-            func_path = {"path": os.path.dirname(detail.get("handler"))}
+        directories: list[dict[str, list[str] | str]] = []
+        for detail in self.config.get("functions", {}).values():
+            func_path = {"path": os.path.dirname(detail.get("handler"))}  # noqa: PTH120
             if func_path not in directories:
                 directories.append(func_path)
         if isinstance(self.config["service"], dict):
             # handle sls<3.0.0 potential service property object notation
-            return {
-                self.config["service"]["name"]: get_hash_of_files(
-                    self.path, directories
-                )
-            }
+            return {self.config["service"]["name"]: get_hash_of_files(self.path, directories)}
         return {self.config["service"]: get_hash_of_files(self.path, directories)}
 
     def sync_with_s3(self, bucket_name: str) -> None:
@@ -476,9 +464,7 @@ class ServerlessOptions(ModuleOptions):
 
         """
         self._arg_parser = self._create_arg_parser()
-        cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(
-            data.args.copy()
-        )
+        cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(data.args.copy())
         self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
 
         self.data = data
@@ -487,9 +473,9 @@ class ServerlessOptions(ModuleOptions):
         self.skip_npm_ci = data.skip_npm_ci
 
     @property
-    def args(self) -> List[str]:
+    def args(self) -> list[str]:
         """List of CLI arguments/options to pass to the Serverless Framework CLI."""
-        known_args: List[str] = []
+        known_args: list[str] = []
         for key, val in self._cli_args.items():
             if isinstance(val, str):
                 known_args.extend([f"--{key}", val])

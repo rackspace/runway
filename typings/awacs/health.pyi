@@ -14,13 +14,9 @@ class Action(BaseAction):
 class ARN(BaseARN):
     def __init__(self, resource=..., region=..., account=...) -> None: ...
 
-DescribeAffectedAccountsForOrganization = Action(
-    "DescribeAffectedAccountsForOrganization"
-)
+DescribeAffectedAccountsForOrganization = Action("DescribeAffectedAccountsForOrganization")
 DescribeAffectedEntities = Action("DescribeAffectedEntities")
-DescribeAffectedEntitiesForOrganization = Action(
-    "DescribeAffectedEntitiesForOrganization"
-)
+DescribeAffectedEntitiesForOrganization = Action("DescribeAffectedEntitiesForOrganization")
 DescribeEntityAggregates = Action("DescribeEntityAggregates")
 DescribeEventAggregates = Action("DescribeEventAggregates")
 DescribeEventDetails = Action("DescribeEventDetails")
@@ -28,12 +24,6 @@ DescribeEventDetailsForOrganization = Action("DescribeEventDetailsForOrganizatio
 DescribeEventTypes = Action("DescribeEventTypes")
 DescribeEvents = Action("DescribeEvents")
 DescribeEventsForOrganization = Action("DescribeEventsForOrganization")
-DescribeHealthServiceStatusForOrganization = Action(
-    "DescribeHealthServiceStatusForOrganization"
-)
-DisableHealthServiceAccessForOrganization = Action(
-    "DisableHealthServiceAccessForOrganization"
-)
-EnableHealthServiceAccessForOrganization = Action(
-    "EnableHealthServiceAccessForOrganization"
-)
+DescribeHealthServiceStatusForOrganization = Action("DescribeHealthServiceStatusForOrganization")
+DisableHealthServiceAccessForOrganization = Action("DisableHealthServiceAccessForOrganization")
+EnableHealthServiceAccessForOrganization = Action("EnableHealthServiceAccessForOrganization")

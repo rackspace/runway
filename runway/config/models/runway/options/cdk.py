@@ -1,5 +1,6 @@
 """Runway AWS Cloud Development Kit Module options."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from typing import List

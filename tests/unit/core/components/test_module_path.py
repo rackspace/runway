@@ -5,10 +5,10 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
+from unittest.mock import MagicMock
 
 import pytest
-from mock import MagicMock
 from typing_extensions import TypedDict
 
 from runway.config.components.runway import RunwayModuleDefinition
@@ -23,20 +23,19 @@ if TYPE_CHECKING:
 MODULE = "runway.core.components._module_path"
 
 
-TypeDefTestDefinitionExpected = TypedDict(
-    "TypeDefTestDefinitionExpected",
-    arguments=Dict[str, str],
-    location=str,
-    source=str,
-    uri=str,
-)
-TypeDefTestDefinition = TypedDict(
-    "TypeDefTestDefinition",
-    definition=Optional[Union[Path, str]],
-    expected=TypeDefTestDefinitionExpected,
-)
+class TypeDefTestDefinitionExpected(TypedDict):  # noqa: D101
+    arguments: dict[str, str]
+    location: str
+    source: str
+    uri: str
 
-TESTS: List[TypeDefTestDefinition] = [
+
+class TypeDefTestDefinition(TypedDict):  # noqa: D101
+    definition: Optional[Union[Path, str]]
+    expected: TypeDefTestDefinitionExpected
+
+
+TESTS: list[TypeDefTestDefinition] = [
     {
         "definition": "git::git://github.com/onicagroup/foo/foo-bar.git",
         "expected": {
@@ -92,7 +91,7 @@ TESTS: List[TypeDefTestDefinition] = [
         },
     },
     {
-        "definition": "git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo&bar=baz",  # noqa
+        "definition": "git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo&bar=baz",
         "expected": {
             "location": "src/foo/bar",
             "arguments": {"branch": "foo", "bar": "baz"},
@@ -245,10 +244,7 @@ class TestModulePath:
         if isinstance(test["definition"], (type(None), Path)):
             assert obj.module_root == test["definition"] or Path.cwd()
         elif test["expected"]["source"] == "local":
-            assert (
-                obj.module_root
-                == deploy_environment.root_dir / test["expected"]["location"]
-            )
+            assert obj.module_root == deploy_environment.root_dir / test["expected"]["location"]
         else:
             assert (
                 obj.module_root
@@ -297,19 +293,13 @@ class TestModulePath:
             == test["expected"]["uri"]
         )
 
-    def test_parse_obj_none(
-        self, deploy_environment: DeployEnvironment, tmp_path: Path
-    ) -> None:
+    def test_parse_obj_none(self, deploy_environment: DeployEnvironment, tmp_path: Path) -> None:
         """Test parse_obj None."""
-        obj = ModulePath.parse_obj(
-            None, cache_dir=tmp_path, deploy_environment=deploy_environment
-        )
+        obj = ModulePath.parse_obj(None, cache_dir=tmp_path, deploy_environment=deploy_environment)
         assert obj.definition == Path.cwd()
         assert obj.env == deploy_environment
 
-    def test_parse_obj_path(
-        self, deploy_environment: DeployEnvironment, tmp_path: Path
-    ) -> None:
+    def test_parse_obj_path(self, deploy_environment: DeployEnvironment, tmp_path: Path) -> None:
         """Test parse_obj Path."""
         obj = ModulePath.parse_obj(
             tmp_path, cache_dir=tmp_path, deploy_environment=deploy_environment
@@ -334,9 +324,7 @@ class TestModulePath:
         assert obj1.definition == model.path
         assert obj1.env == deploy_environment
 
-    def test_parse_obj_str(
-        self, deploy_environment: DeployEnvironment, tmp_path: Path
-    ) -> None:
+    def test_parse_obj_str(self, deploy_environment: DeployEnvironment, tmp_path: Path) -> None:
         """Test parse_obj str."""
         obj = ModulePath.parse_obj(
             "./test", cache_dir=tmp_path, deploy_environment=deploy_environment

@@ -1,6 +1,5 @@
 """Pytest configuration, fixtures, and plugins."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import shutil
@@ -17,8 +16,7 @@ TEST_ROOT = Path(__file__).parent
 CpConfigTypeDef = Callable[[str, Path], Path]
 
 
-# pylint: disable=unused-argument
-def pytest_ignore_collect(path: Any, config: Config) -> bool:
+def pytest_ignore_collect(path: Any, config: Config) -> bool:  # noqa: ARG001
     """Determine if this directory should have its tests collected."""
     if config.option.functional:
         return True
@@ -27,13 +25,13 @@ def pytest_ignore_collect(path: Any, config: Config) -> bool:
     return not (config.option.integration or config.option.integration_only)
 
 
-@pytest.fixture
+@pytest.fixture()
 def configs() -> Path:
     """Path to Runway config fixtures."""
     return TEST_ROOT.parent / "fixtures" / "configs"
 
 
-@pytest.fixture
+@pytest.fixture()
 def cp_config(configs: Path) -> Callable[[str, Path], Path]:
     """Copy a config file."""
 

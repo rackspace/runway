@@ -37,14 +37,10 @@ def new(ctx: click.Context, **_: Any) -> None:
 
     LOGGER.verbose("checking for preexisting runway.yml file...")
     if runway_yml.is_file():
-        LOGGER.error(
-            "There is already a %s file in the current directory", runway_yml.name
-        )
+        LOGGER.error("There is already a %s file in the current directory", runway_yml.name)
         ctx.exit(1)
 
-    runway_yml.write_text(
-        RUNWAY_YML, encoding=locale.getpreferredencoding(do_setlocale=False)
-    )
+    runway_yml.write_text(RUNWAY_YML, encoding=locale.getpreferredencoding(do_setlocale=False))
     LOGGER.success("runway.yml generated")
     LOGGER.notice(
         "See addition getting started information at "

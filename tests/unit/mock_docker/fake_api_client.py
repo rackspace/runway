@@ -1,11 +1,10 @@
 """Fake Docker API client."""
 
-# pylint: disable=attribute-defined-outside-init,protected-access
 import copy
-from typing import Any, Dict, Optional
+from typing import Any, Optional
+from unittest import mock
 
 import docker
-import mock
 from docker.constants import DEFAULT_DOCKER_API_VERSION
 
 from . import fake_api
@@ -14,18 +13,14 @@ from . import fake_api
 class CopyReturnMagicMock(mock.MagicMock):
     """A MagicMock which deep copies every return value."""
 
-    def _mock_call(  # pylint: disable=arguments-differ
-        self, *args: Any, **kwargs: Any
-    ) -> Any:
+    def _mock_call(self, *args: Any, **kwargs: Any) -> Any:
         ret = super()._mock_call(*args, **kwargs)  # type: ignore
         if isinstance(ret, (dict, list)):
             ret = copy.deepcopy(ret)  # type: ignore
         return ret  # type: ignore
 
 
-def make_fake_api_client(
-    overrides: Optional[Dict[str, Any]] = None
-) -> CopyReturnMagicMock:
+def make_fake_api_client(overrides: Optional[dict[str, Any]] = None) -> CopyReturnMagicMock:
     """Return non-complete fake APIClient.
 
     This returns most of the default cases correctly, but most arguments that
@@ -61,7 +56,7 @@ def make_fake_api_client(
     return mock_client
 
 
-def make_fake_client(overrides: Optional[Dict[str, Any]] = None) -> docker.DockerClient:
+def make_fake_client(overrides: Optional[dict[str, Any]] = None) -> docker.DockerClient:
     """Return a Client with a fake APIClient."""
     client = docker.DockerClient(version=DEFAULT_DOCKER_API_VERSION)
     client.api = make_fake_api_client(overrides)

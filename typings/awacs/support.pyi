@@ -25,9 +25,7 @@ DescribeIssueTypes = Action("DescribeIssueTypes")
 DescribeServices = Action("DescribeServices")
 DescribeSeverityLevels = Action("DescribeSeverityLevels")
 DescribeSupportLevel = Action("DescribeSupportLevel")
-DescribeTrustedAdvisorCheckRefreshStatuses = Action(
-    "DescribeTrustedAdvisorCheckRefreshStatuses"
-)
+DescribeTrustedAdvisorCheckRefreshStatuses = Action("DescribeTrustedAdvisorCheckRefreshStatuses")
 DescribeTrustedAdvisorCheckResult = Action("DescribeTrustedAdvisorCheckResult")
 DescribeTrustedAdvisorCheckSummaries = Action("DescribeTrustedAdvisorCheckSummaries")
 DescribeTrustedAdvisorChecks = Action("DescribeTrustedAdvisorChecks")

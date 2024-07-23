@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import logging
 import shutil
-from typing import TYPE_CHECKING, ClassVar, Optional, Set, Tuple
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar, Optional
 
 from .....compat import cached_property
 from .....dependency_managers import (
@@ -23,6 +21,8 @@ from . import PythonDockerDependencyInstaller
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from typing_extensions import Literal
+
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
@@ -38,24 +38,18 @@ class PythonProject(Project[PythonHookArgs]):
         return PythonDockerDependencyInstaller.from_project(self)
 
     @cached_property
-    def metadata_files(self) -> Tuple[Path, ...]:
+    def metadata_files(self) -> tuple[Path, ...]:
         """Project metadata files.
 
         Files are only included in return value if they exist.
 
         """
         if self.project_type == "poetry":
-            config_files = [
-                self.project_root / config_file for config_file in Poetry.CONFIG_FILES
-            ]
+            config_files = [self.project_root / config_file for config_file in Poetry.CONFIG_FILES]
         elif self.project_type == "pipenv":
-            config_files = [
-                self.project_root / config_file for config_file in Pipenv.CONFIG_FILES
-            ]
+            config_files = [self.project_root / config_file for config_file in Pipenv.CONFIG_FILES]
         else:
-            config_files = [
-                self.project_root / config_file for config_file in Pip.CONFIG_FILES
-            ]
+            config_files = [self.project_root / config_file for config_file in Pip.CONFIG_FILES]
         return tuple(path for path in config_files if path.exists())
 
     @cached_property
@@ -119,15 +113,11 @@ class PythonProject(Project[PythonHookArgs]):
         if Poetry.dir_is_project(self.project_root):
             if self.args.use_poetry:
                 return "poetry"
-            LOGGER.warning(
-                "poetry project detected but use of poetry is explicitly disabled"
-            )
+            LOGGER.warning("poetry project detected but use of poetry is explicitly disabled")
         if Pipenv.dir_is_project(self.project_root):
             if self.args.use_pipenv:
                 return "pipenv"
-            LOGGER.warning(
-                "pipenv project detected but use of pipenv is explicitly disabled"
-            )
+            LOGGER.warning("pipenv project detected but use of pipenv is explicitly disabled")
         return "pip"
 
     @cached_property
@@ -143,7 +133,7 @@ class PythonProject(Project[PythonHookArgs]):
         return None
 
     @cached_property
-    def supported_metadata_files(self) -> Set[str]:
+    def supported_metadata_files(self) -> set[str]:
         """Names of all supported metadata files.
 
         Returns:
@@ -190,8 +180,6 @@ class PythonProject(Project[PythonHookArgs]):
                     requirements=self.requirements_txt,
                     target=self.dependency_directory,
                 )
-            LOGGER.debug(
-                "dependencies successfully installed to %s", self.dependency_directory
-            )
+            LOGGER.debug("dependencies successfully installed to %s", self.dependency_directory)
         else:
             LOGGER.info("skipped installing dependencies; none found")

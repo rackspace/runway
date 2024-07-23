@@ -16,18 +16,14 @@ class ARN(BaseARN):
 
 AddApplicationCloudWatchLoggingOption = Action("AddApplicationCloudWatchLoggingOption")
 AddApplicationInput = Action("AddApplicationInput")
-AddApplicationInputProcessingConfiguration = Action(
-    "AddApplicationInputProcessingConfiguration"
-)
+AddApplicationInputProcessingConfiguration = Action("AddApplicationInputProcessingConfiguration")
 AddApplicationOutput = Action("AddApplicationOutput")
 AddApplicationReferenceDataSource = Action("AddApplicationReferenceDataSource")
 AddApplicationVpcConfiguration = Action("AddApplicationVpcConfiguration")
 CreateApplication = Action("CreateApplication")
 CreateApplicationSnapshot = Action("CreateApplicationSnapshot")
 DeleteApplication = Action("DeleteApplication")
-DeleteApplicationCloudWatchLoggingOption = Action(
-    "DeleteApplicationCloudWatchLoggingOption"
-)
+DeleteApplicationCloudWatchLoggingOption = Action("DeleteApplicationCloudWatchLoggingOption")
 DeleteApplicationInputProcessingConfiguration = Action(
     "DeleteApplicationInputProcessingConfiguration"
 )

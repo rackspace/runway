@@ -1,8 +1,7 @@
 """Test runway.config.components.runway._deployment_dev."""
 
-# pylint: disable=protected-access
 # pyright: basic
-from typing import Any, Dict, List
+from typing import Any
 
 import pytest
 
@@ -72,7 +71,7 @@ class TestRunwayDeploymentDefinition:
             ),
         ],
     )
-    def test_menu_entry(self, data: Dict[str, Any], expected: str) -> None:
+    def test_menu_entry(self, data: dict[str, Any], expected: str) -> None:
         """Test menu_entry."""
         assert RunwayDeploymentDefinition.parse_obj(data).menu_entry == expected
 
@@ -108,56 +107,46 @@ class TestRunwayDeploymentDefinition:
             obj.modules = None  # type: ignore
         with pytest.raises(TypeError):
             obj.modules = [  # type: ignore
-                RunwayDeploymentDefinitionModel(
-                    modules=[], name="test-01", regions=["us-east-1"]
-                )
+                RunwayDeploymentDefinitionModel(modules=[], name="test-01", regions=["us-east-1"])
             ]
 
     def test_models_setter_invalid_list_item(self) -> None:
         """Test modules.setter when list item is now supported."""
+        obj = RunwayDeploymentDefinition.parse_obj({"regions": ["us-east-1"]})
         with pytest.raises(TypeError):
-            obj = RunwayDeploymentDefinition.parse_obj({"regions": ["us-east-1"]})
             obj.modules = [RunwayModuleDefinitionModel(path="./"), "invalid"]  # type: ignore
 
     def test_parse_obj(self) -> None:
         """Test parse_obj."""
-        data: Dict[str, Any] = {"name": "test", "modules": [], "regions": ["us-east-1"]}
+        data: dict[str, Any] = {"name": "test", "modules": [], "regions": ["us-east-1"]}
         obj = RunwayDeploymentDefinition.parse_obj(data)
         assert obj._data.dict(exclude_unset=True) == data
 
     def test_parse_obj_list(self) -> None:
         """Test parse_obj list."""
-        data: List[Dict[str, Any]] = [
-            {"name": "test", "modules": [], "regions": ["us-east-1"]}
-        ]
+        data: list[dict[str, Any]] = [{"name": "test", "modules": [], "regions": ["us-east-1"]}]
         result = RunwayDeploymentDefinition.parse_obj(data)
 
         assert isinstance(result, list)
         assert len(result) == 1
-        # for some reason, the current version of pylint does not see this as list
-        # pylint: disable=unsubscriptable-object
         assert result[0]._data.dict(exclude_unset=True) == data[0]
 
     def test_register_variable(self) -> None:
         """Test _register_variable."""
-        obj = RunwayDeploymentDefinition.parse_obj(
-            {"name": "test", "regions": ["us-east-1"]}
-        )
+        obj = RunwayDeploymentDefinition.parse_obj({"name": "test", "regions": ["us-east-1"]})
         assert obj._vars["regions"].name == "test.regions"
 
     def test_reverse(self) -> None:
         """Test reverse."""
-        data: RunwayDeploymentDefinitionModel = (
-            RunwayDeploymentDefinitionModel.parse_obj(
-                {
-                    "name": "test",
-                    "modules": [
-                        {"name": "test-01", "path": "./"},
-                        {"name": "test-02", "path": "./"},
-                    ],
-                    "regions": ["us-east-1", "us-west-2"],
-                }
-            )
+        data: RunwayDeploymentDefinitionModel = RunwayDeploymentDefinitionModel.parse_obj(
+            {
+                "name": "test",
+                "modules": [
+                    {"name": "test-01", "path": "./"},
+                    {"name": "test-02", "path": "./"},
+                ],
+                "regions": ["us-east-1", "us-west-2"],
+            }
         )
         obj = RunwayDeploymentDefinition(data)
         assert not obj.reverse()
@@ -168,21 +157,19 @@ class TestRunwayDeploymentDefinition:
 
     def test_reverse_parallel_modules(self) -> None:
         """Test reverse parallel modules."""
-        data: RunwayDeploymentDefinitionModel = (
-            RunwayDeploymentDefinitionModel.parse_obj(
-                {
-                    "name": "test",
-                    "modules": [
-                        {
-                            "parallel": [
-                                {"name": "test-01", "path": "./"},
-                                {"name": "test-02", "path": "./"},
-                            ]
-                        },
-                    ],
-                    "regions": ["us-east-1", "us-west-2"],
-                }
-            )
+        data: RunwayDeploymentDefinitionModel = RunwayDeploymentDefinitionModel.parse_obj(
+            {
+                "name": "test",
+                "modules": [
+                    {
+                        "parallel": [
+                            {"name": "test-01", "path": "./"},
+                            {"name": "test-02", "path": "./"},
+                        ]
+                    },
+                ],
+                "regions": ["us-east-1", "us-west-2"],
+            }
         )
         obj = RunwayDeploymentDefinition(data)
         assert not obj.reverse()
@@ -194,14 +181,12 @@ class TestRunwayDeploymentDefinition:
 
     def test_reverse_parallel_regions(self) -> None:
         """Test reverse parallel regions."""
-        data: RunwayDeploymentDefinitionModel = (
-            RunwayDeploymentDefinitionModel.parse_obj(
-                {
-                    "name": "test",
-                    "modules": [{"name": "test-01", "path": "./"}],
-                    "parallel_regions": ["us-east-1", "us-west-2"],
-                }
-            )
+        data: RunwayDeploymentDefinitionModel = RunwayDeploymentDefinitionModel.parse_obj(
+            {
+                "name": "test",
+                "modules": [{"name": "test-01", "path": "./"}],
+                "parallel_regions": ["us-east-1", "us-west-2"],
+            }
         )
         obj = RunwayDeploymentDefinition(data)
         assert not obj.reverse()

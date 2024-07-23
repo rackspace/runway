@@ -1,4 +1,3 @@
----
 options:
   build_steps:
     - npm run build

@@ -10,7 +10,6 @@ ctypes
 distutils
 dunamai
 gitpython
-isort
 moto
 numpy
 pefile
@@ -22,7 +21,6 @@ pydantic
 pydocstyle
 pyhcl
 pyinstaller
-pylint
 pywin
 pyyaml
 runpy

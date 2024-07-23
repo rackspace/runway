@@ -63,9 +63,7 @@ ListTagsForResource = Action("ListTagsForResource")
 ListTagsForResources = Action("ListTagsForResources")
 ListTrafficPolicies = Action("ListTrafficPolicies")
 ListTrafficPolicyInstances = Action("ListTrafficPolicyInstances")
-ListTrafficPolicyInstancesByHostedZone = Action(
-    "ListTrafficPolicyInstancesByHostedZone"
-)
+ListTrafficPolicyInstancesByHostedZone = Action("ListTrafficPolicyInstancesByHostedZone")
 ListTrafficPolicyInstancesByPolicy = Action("ListTrafficPolicyInstancesByPolicy")
 ListTrafficPolicyVersions = Action("ListTrafficPolicyVersions")
 ListVPCAssociationAuthorizations = Action("ListVPCAssociationAuthorizations")

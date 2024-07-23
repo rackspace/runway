@@ -4,17 +4,16 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.dependency_managers import Pipenv, PipenvExportFailedError
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 MODULE = "runway.dependency_managers._pipenv"
@@ -33,7 +32,7 @@ class TestPipenv:
     )
     def test_dir_is_project(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         lock_exists: bool,
         pipfile_exists: bool,
         tmp_path: Path,
@@ -61,7 +60,7 @@ class TestPipenv:
     )
     def test_export(
         self,
-        export_kwargs: Dict[str, Any],
+        export_kwargs: dict[str, Any],
         mocker: MockerFixture,
         tmp_path: Path,
     ) -> None:
@@ -70,9 +69,7 @@ class TestPipenv:
         mock_generate_command = mocker.patch.object(
             Pipenv, "generate_command", return_value="generate_command"
         )
-        mock_run_command = mocker.patch.object(
-            Pipenv, "_run_command", return_value="_run_command"
-        )
+        mock_run_command = mocker.patch.object(Pipenv, "_run_command", return_value="_run_command")
         obj = Pipenv(Mock(), tmp_path)
         assert obj.export(output=expected, **export_kwargs) == expected
         assert expected.is_file()
@@ -116,9 +113,7 @@ class TestPipenv:
         self, cmd_output: str, expected: str, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test version."""
-        mock_run_command = mocker.patch.object(
-            Pipenv, "_run_command", return_value=cmd_output
-        )
+        mock_run_command = mocker.patch.object(Pipenv, "_run_command", return_value=cmd_output)
         version_cls = mocker.patch(f"{MODULE}.Version", return_value="success")
         assert Pipenv(Mock(), tmp_path).version == version_cls.return_value
         mock_run_command.assert_called_once_with([Pipenv.EXECUTABLE, "--version"])

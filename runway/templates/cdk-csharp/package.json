@@ -1,12 +1,12 @@
 {
-    "name": "sampleapp",
-    "version": "1.0.0",
-    "description": "Sample CDK Project",
-    "author": "Onica",
-    "homepage": "https://www.onica.com",
-    "private": true,
-    "main": "app.py",
-    "devDependencies": {
-        "aws-cdk": "^0.27.0"
-    }
+  "author": "Onica",
+  "description": "Sample CDK Project",
+  "devDependencies": {
+    "aws-cdk": "^0.27.0"
+  },
+  "homepage": "https://www.onica.com",
+  "main": "app.py",
+  "name": "sampleapp",
+  "private": true,
+  "version": "1.0.0"
 }

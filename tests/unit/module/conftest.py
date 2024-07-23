@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
-@pytest.fixture
+@pytest.fixture()
 def patch_module_npm(mocker: MockerFixture) -> None:
     """Patch methods and functions used during init of RunwayModuleNpm."""
     mocker.patch("runway.module.base.RunwayModuleNpm.check_for_npm")

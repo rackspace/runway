@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 import awacs
 import awacs.cloudformation
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 class FunctionalTests(Blueprint):
     """Creates a stack with an IAM user and access key for functional tests."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "Namespace": {
             "type": CFNString,
             "description": "The namespace that the tests will use. "
@@ -166,9 +166,7 @@ class FunctionalTests(Blueprint):
         template.add_output(Output("User", Value=Ref(user)))
         template.add_output(Output("AccessKeyId", Value=Ref(key)))
         template.add_output(
-            Output(
-                "SecretAccessKey", Value=GetAtt("FunctionalTestKey", "SecretAccessKey")
-            )
+            Output("SecretAccessKey", Value=GetAtt("FunctionalTestKey", "SecretAccessKey"))
         )
         template.add_output(Output("FunctionalTestRole", Value=GetAtt(role, "Arn")))
 
@@ -176,7 +174,7 @@ class FunctionalTests(Blueprint):
 class Dummy(Blueprint):
     """Dummy blueprint."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "StringVariable": {"type": str, "default": ""}
     }
 
@@ -194,7 +192,7 @@ class Dummy2(Blueprint):
 
     """
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "StringVariable": {"type": str, "default": ""}
     }
 
@@ -214,7 +212,7 @@ class LongRunningDummy(Blueprint):
 
     """
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "Count": {
             "type": int,
             "description": "The # of WaitConditionHandles to create.",
@@ -228,7 +226,7 @@ class LongRunningDummy(Blueprint):
         },
         "OutputValue": {
             "type": str,
-            "description": "The value to put in an output to allow for " "updates.",
+            "description": "The value to put in an output to allow for updates.",
             "default": "DefaultOutput",
         },
     }
@@ -271,7 +269,7 @@ class Broken(Blueprint):
 
     """
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "StringVariable": {"type": str, "default": ""}
     }
 
@@ -294,7 +292,7 @@ class Broken(Blueprint):
 class VPC(Blueprint):
     """VPC blueprint."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "AZCount": {"type": int, "default": 2},
         "PrivateSubnets": {
             "type": CFNCommaDelimitedList,
@@ -351,7 +349,7 @@ class VPC(Blueprint):
 class DiffTester(Blueprint):
     """Diff test blueprint."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "InstanceType": {
             "type": CFNString,
             "description": "NAT EC2 instance type.",
@@ -359,12 +357,11 @@ class DiffTester(Blueprint):
         },
         "WaitConditionCount": {
             "type": int,
-            "description": "Number of WaitConditionHandle resources "
-            "to add to the template",
+            "description": "Number of WaitConditionHandle resources to add to the template",
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         for i in range(self.variables["WaitConditionCount"]):
             self.template.add_resource(WaitConditionHandle(f"VPC{i}"))
@@ -373,7 +370,7 @@ class DiffTester(Blueprint):
 class Bastion(Blueprint):
     """Bastion blueprint."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "VpcId": {"type": EC2VPCId, "description": "Vpc Id"},
         "DefaultSG": {
             "type": EC2SecurityGroupId,
@@ -381,15 +378,15 @@ class Bastion(Blueprint):
         },
         "PublicSubnets": {
             "type": EC2SubnetIdList,
-            "description": "Subnets to deploy public " "instances in.",
+            "description": "Subnets to deploy public instances in.",
         },
         "PrivateSubnets": {
             "type": EC2SubnetIdList,
-            "description": "Subnets to deploy private " "instances in.",
+            "description": "Subnets to deploy private instances in.",
         },
         "AvailabilityZones": {
             "type": CFNCommaDelimitedList,
-            "description": "Availability Zones to deploy " "instances in.",
+            "description": "Availability Zones to deploy instances in.",
         },
         "InstanceType": {
             "type": CFNString,
@@ -419,7 +416,7 @@ class Bastion(Blueprint):
         },
     }
 
-    def create_template(self):
+    def create_template(self) -> None:
         """Create template."""
         return
 
@@ -427,7 +424,7 @@ class Bastion(Blueprint):
 class PreOneOhBastion(Blueprint):
     """Used to ensure old blueprints won't be usable in 1.0."""
 
-    PARAMETERS: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    PARAMETERS: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "VpcId": {"type": "AWS::EC2::VPC::Id", "description": "Vpc Id"},
         "DefaultSG": {
             "type": "AWS::EC2::SecurityGroup::Id",
@@ -435,15 +432,15 @@ class PreOneOhBastion(Blueprint):
         },
         "PublicSubnets": {
             "type": "List<AWS::EC2::Subnet::Id>",
-            "description": "Subnets to deploy public " "instances in.",
+            "description": "Subnets to deploy public instances in.",
         },
         "PrivateSubnets": {
             "type": "List<AWS::EC2::Subnet::Id>",
-            "description": "Subnets to deploy private " "instances in.",
+            "description": "Subnets to deploy private instances in.",
         },
         "AvailabilityZones": {
             "type": "CommaDelimitedList",
-            "description": "Availability Zones to deploy " "instances in.",
+            "description": "Availability Zones to deploy instances in.",
         },
         "InstanceType": {
             "type": "String",

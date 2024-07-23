@@ -16,9 +16,7 @@ class ARN(BaseARN):
 
 CloneReceiptRuleSet = Action("CloneReceiptRuleSet")
 CreateConfigurationSet = Action("CreateConfigurationSet")
-CreateConfigurationSetEventDestination = Action(
-    "CreateConfigurationSetEventDestination"
-)
+CreateConfigurationSetEventDestination = Action("CreateConfigurationSetEventDestination")
 CreateConfigurationSetTrackingOptions = Action("CreateConfigurationSetTrackingOptions")
 CreateCustomVerificationEmailTemplate = Action("CreateCustomVerificationEmailTemplate")
 CreateDedicatedIpPool = Action("CreateDedicatedIpPool")
@@ -29,9 +27,7 @@ CreateReceiptRule = Action("CreateReceiptRule")
 CreateReceiptRuleSet = Action("CreateReceiptRuleSet")
 CreateTemplate = Action("CreateTemplate")
 DeleteConfigurationSet = Action("DeleteConfigurationSet")
-DeleteConfigurationSetEventDestination = Action(
-    "DeleteConfigurationSetEventDestination"
-)
+DeleteConfigurationSetEventDestination = Action("DeleteConfigurationSetEventDestination")
 DeleteConfigurationSetTrackingOptions = Action("DeleteConfigurationSetTrackingOptions")
 DeleteCustomVerificationEmailTemplate = Action("DeleteCustomVerificationEmailTemplate")
 DeleteDedicatedIpPool = Action("DeleteDedicatedIpPool")
@@ -102,9 +98,7 @@ SendTemplatedEmail = Action("SendTemplatedEmail")
 SetActiveReceiptRuleSet = Action("SetActiveReceiptRuleSet")
 SetIdentityDkimEnabled = Action("SetIdentityDkimEnabled")
 SetIdentityFeedbackForwardingEnabled = Action("SetIdentityFeedbackForwardingEnabled")
-SetIdentityHeadersInNotificationsEnabled = Action(
-    "SetIdentityHeadersInNotificationsEnabled"
-)
+SetIdentityHeadersInNotificationsEnabled = Action("SetIdentityHeadersInNotificationsEnabled")
 SetIdentityMailFromDomain = Action("SetIdentityMailFromDomain")
 SetIdentityNotificationTopic = Action("SetIdentityNotificationTopic")
 SetReceiptRulePosition = Action("SetReceiptRulePosition")
@@ -112,9 +106,7 @@ TagResource = Action("TagResource")
 TestRenderTemplate = Action("TestRenderTemplate")
 UntagResource = Action("UntagResource")
 UpdateAccountSendingEnabled = Action("UpdateAccountSendingEnabled")
-UpdateConfigurationSetEventDestination = Action(
-    "UpdateConfigurationSetEventDestination"
-)
+UpdateConfigurationSetEventDestination = Action("UpdateConfigurationSetEventDestination")
 UpdateConfigurationSetReputationMetricsEnabled = Action(
     "UpdateConfigurationSetReputationMetricsEnabled"
 )

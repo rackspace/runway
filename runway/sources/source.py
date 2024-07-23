@@ -5,9 +5,11 @@ Allows us to specify specific remote sourced resources for out application
 
 """
 
+from __future__ import annotations
+
 import logging
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,12 +31,13 @@ class Source:
 
     cache_dir: Path
 
-    def __init__(self, *, cache_dir: Union[Path, str], **_: Any):
+    def __init__(self, *, cache_dir: Path | str, **_: Any) -> None:
         """Source.
 
         Args:
             cache_dir: The directory where the given remote resource should be
                 cached.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.cache_dir = cache_dir if isinstance(cache_dir, Path) else Path(cache_dir)

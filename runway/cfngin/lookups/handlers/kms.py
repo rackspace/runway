@@ -5,15 +5,15 @@ from __future__ import annotations
 
 import codecs
 import logging
-from typing import TYPE_CHECKING, Any, BinaryIO, Dict, Tuple, Union, cast
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, BinaryIO, Final, Union, cast
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import DOC_SITE
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class KmsLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def legacy_parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+    def legacy_parse(cls, value: str) -> tuple[str, dict[str, str]]:
         """Retain support for legacy lookup syntax.
 
         Format of value::
@@ -44,9 +44,7 @@ class KmsLookup(LookupHandler):
         return value, {"region": region}
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: CfnginContext, **_: Any
-    ) -> str:
+    def handle(cls, value: str, context: CfnginContext, **_: Any) -> str:
         r"""Decrypt the specified value with a master key in KMS.
 
         Args:

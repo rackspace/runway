@@ -1,15 +1,13 @@
 """Pytest configuration, fixtures, and plugins."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Generator
+from typing import TYPE_CHECKING, Any
+from unittest.mock import patch
 
 import pytest
-from click.testing import CliRunner
-from mock import patch
 
 from runway.config import CfnginConfig, RunwayConfig
 from runway.context import CfnginContext, RunwayContext
@@ -19,12 +17,14 @@ from runway.env_mgr.tfenv import TFEnvManager
 from ..factories import cli_runner_factory
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from _pytest.config import Config
     from _pytest.fixtures import SubRequest
+    from click.testing import CliRunner
 
 
-# pylint: disable=unused-argument
-def pytest_ignore_collect(path: Any, config: Config) -> bool:
+def pytest_ignore_collect(path: Any, config: Config) -> bool:  # noqa: ARG001
     """Determine if this directory should have its tests collected."""
     return not config.option.functional
 
@@ -58,9 +58,7 @@ def cfngin_config(
     request: SubRequest, runway_config: RunwayConfig, runway_context: RunwayContext
 ) -> CfnginConfig:
     """Find and return the CFNgin config."""
-    runway_config.deployments[0].resolve(
-        runway_context, variables=runway_config.variables
-    )
+    runway_config.deployments[0].resolve(runway_context, variables=runway_config.variables)
     return CfnginConfig.parse_file(
         path=request.path.parent / "cfngin.yml",
         parameters=runway_config.deployments[0].parameters,
@@ -84,7 +82,7 @@ def cfngin_context(
 
 
 @pytest.fixture(scope="module")
-def cli_runner(cd_test_dir: Path, request: SubRequest) -> CliRunner:
+def cli_runner(cd_test_dir: Path, request: SubRequest) -> CliRunner:  # noqa: ARG001
     """Initialize instance of `click.testing.CliRunner`."""
     return cli_runner_factory(request)
 

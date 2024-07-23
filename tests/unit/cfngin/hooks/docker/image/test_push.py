@@ -1,13 +1,12 @@
 """Test runway.cfngin.hooks.docker.image._push."""
 
-# pylint: disable=no-member
 # pyright: basic, reportFunctionMemberAccess=none
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import call
 
 from docker.models.images import Image
-from mock import call
 
 from runway.cfngin.hooks.docker.data_models import (
     DockerImage,
@@ -22,13 +21,13 @@ if TYPE_CHECKING:
     from docker import DockerClient
     from pytest_mock import MockerFixture
 
-    from .....factories import MockCFNginContext
+    from .....factories import MockCfnginContext
 
 MODULE = "runway.cfngin.hooks.docker.image._push"
 
 
 def test_push(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
     mock_docker_client: DockerClient,
     mocker: MockerFixture,
 ) -> None:
@@ -79,9 +78,7 @@ class TestImagePushArgs:
         """Test _set_repo ECR."""
         repo = ElasticContainerRegistryRepository(
             repo_name="test",
-            registry=ElasticContainerRegistry(
-                account_id="123456789012", aws_region="us-east-1"
-            ),
+            registry=ElasticContainerRegistry(account_id="123456789012", aws_region="us-east-1"),
         )
         assert ImagePushArgs(ecr_repo=repo).repo == repo.fqn
 

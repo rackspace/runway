@@ -30,14 +30,13 @@ build-pyinstaller-folder: clean create-tfenv-ver-file version ## build Pyinstall
 	bash ./.github/scripts/cicd/build_pyinstaller.sh folder
 
 clean: ## remove generated file from the project directory
-	rm -rf build/
-	rm -rf dist/
-	rm -rf runway.egg-info/
-	rm -rf tmp/
-	rm -rf src/
-	rm -rf postinstall.js preuninstall.js .coverage .npmignore
-	find . -name ".runway" -type d -prune -exec rm -rf '{}' +
-	@make -C docs clean
+	rm -rf ./build/ ./dist/ ./src/ ./tmp/ ./runway.egg-info/;
+	rm -rf ./.pytest_cache
+	find . -type d -name "node_modules" -prune -exec rm -rf '{}' +;
+	find . -type d -name ".runway" -prune -exec rm -rf '{}' +;
+	find . -type f -name "*.py[co]" -delete;
+	find . -type d -name "__pycache__" -prune -exec rm -rf '{}' +;
+	@$(MAKE) --no-print-directory -C docs clean;
 
 cov-report: ## display a report in the terminal of files missing coverage
 	@poetry run coverage report \
@@ -59,42 +58,40 @@ create-tfenv-ver-file: ## create a tfenv version file using the latest version
 	curl --silent https://releases.hashicorp.com/index.json | jq -r '.terraform.versions | to_entries | map(select(.key | contains ("-") | not)) | sort_by(.key | split(".") | map(tonumber))[-1].key' | egrep -o '^[0-9]*\.[0-9]*\.[0-9]*' > runway/templates/terraform/.terraform-version
 
 docs: ## delete current HTML docs & build fresh HTML docs
-	@make -C docs docs
+	@$(MAKE) --no-print-directory -C docs docs
 
 docs-changes: ## build HTML docs; only builds changes detected by Sphinx
-	@make -C docs html
+	@$(MAKE) --no-print-directory -C docs html
+
+fix: fix-ruff fix-black run-pre-commit ## run all automatic fixes
 
 fix-black: ## automatically fix all black errors
 	@poetry run black .
 
-fix-isort: ## automatically fix all isort errors
-	@poetry run isort .
+fix-imports: ## automatically fix all import sorting errors
+	@poetry run ruff check . --fix-only --fixable I001
 
-lint: lint-isort lint-black lint-pyright lint-flake8 lint-pylint ## run all linters
+fix-ruff: ## automatically fix everything ruff can fix (implies fix-imports)
+	@poetry run ruff check . --fix-only
+
+fix-ruff-tests:
+	@poetry run ruff check ./tests --fix-only --unsafe-fixes
+
+lint: lint-black lint-ruff lint-pyright ## run all linters
 
 lint-black: ## run black
 	@echo "Running black... If this fails, run 'make fix-black' to resolve."
 	@poetry run black . --check --color --diff
 	@echo ""
 
-lint-flake8: ## run flake8
-	@echo "Running flake8..."
-	@poetry run flake8 --config=setup.cfg
-	@echo ""
-
-lint-isort: ## run isort
-	@echo "Running isort... If this fails, run 'make fix-isort' to resolve."
-	@poetry run isort . --check-only
-	@echo ""
-
-lint-pylint: ## run pylint
-	@echo "Running pylint..."
-	@poetry run pylint runway tests --rcfile=pyproject.toml
-	@echo ""
-
 lint-pyright: ## run pyright
 	@echo "Running pyright..."
-	@npm run-script py-type-check
+	@npm exec --no -- pyright --venv-path ./
+	@echo ""
+
+lint-ruff: ## run ruff
+	@echo "Running ruff... If this fails, run 'make fix-ruff' to resolve some error automatically, other require manual action."
+	@poetry run ruff check .
 	@echo ""
 
 npm-ci: ## run "npm ci" with the option to ignore scripts - required to succeed for this project

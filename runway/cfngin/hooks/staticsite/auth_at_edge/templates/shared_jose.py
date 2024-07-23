@@ -7,7 +7,7 @@ import logging
 import re
 from urllib import request
 
-from jose import jwt  # noqa pylint: disable=import-error
+from jose import jwt
 
 LOGGER = logging.getLogger(__name__)
 
@@ -92,7 +92,7 @@ class JwksClient:
         """Initialize.
 
         Args:
-            options (Optional[Dict[str, str]]): Options for the client.
+            options (Optional[dict[str, str]]): Options for the client.
 
         """
         self.options = options
@@ -102,17 +102,14 @@ class JwksClient:
         LOGGER.info("Fetching keys from %s", self.options.get("jwks_uri"))
 
         try:
-            # pylint: disable=consider-using-with
             request_res = request.urlopen(self.options.get("jwks_uri"))
             data = json.loads(
-                request_res.read().decode(
-                    request_res.info().get_param("charset") or "utf-8"
-                )
+                request_res.read().decode(request_res.info().get_param("charset") or "utf-8")
             )
             keys = data["keys"]
             LOGGER.info("Keys: %s", keys)
             return keys
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             LOGGER.info("Failure: ConnectionError")
             LOGGER.info(err)
             return {}
@@ -167,7 +164,6 @@ class JwksClient:
         else:
             try:
                 jwk["rsaPublicKey"] = rsa_public_key_to_pem(key.get("n"), key.get("e"))
-            # pylint: disable=broad-except
             except Exception as err:
                 LOGGER.error(err)
                 jwk["rsaPublicKey"] = None
@@ -178,7 +174,7 @@ class JwksClient:
         """Filter to determine if this is a signing key.
 
         Args:
-            key (Dict[str, str]): The key.
+            key (dict[str, str]): The key.
 
         """
         if key.get("kty", "") != "RSA":
@@ -240,9 +236,7 @@ def validate_jwt(jwt_token, jwks_uri, issuer, audience):
     )
 
 
-def validate_and_check_id_token(
-    id_token, jwks_uri, issuer, audience, required_group=None
-):
+def validate_and_check_id_token(id_token, jwks_uri, issuer, audience, required_group=None):
     """Validate JWT and (optionally) check group membership."""
     id_token_payload = validate_jwt(id_token, jwks_uri, issuer, audience)
     if required_group:

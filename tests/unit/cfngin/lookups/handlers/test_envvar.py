@@ -1,8 +1,9 @@
 """Tests for runway.cfngin.lookups.handlers.envvar."""
 
-# pyright: basic
 import os
 import unittest
+
+import pytest
 
 from runway.cfngin.lookups.handlers.envvar import EnvvarLookup
 
@@ -20,9 +21,9 @@ class TestEnvVarHandler(unittest.TestCase):
     def test_valid_envvar(self) -> None:
         """Test valid envvar."""
         value = EnvvarLookup.handle(self.testkey)
-        self.assertEqual(value, self.testval)
+        assert value == self.testval
 
     def test_invalid_envvar(self) -> None:
         """Test invalid envvar."""
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             EnvvarLookup.handle(self.invalidtestkey)

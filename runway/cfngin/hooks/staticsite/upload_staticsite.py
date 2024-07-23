@@ -8,7 +8,7 @@ import logging
 import os
 import time
 from operator import itemgetter
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Any, List, Optional, cast  # noqa: UP035
 
 import yaml
 
@@ -43,16 +43,14 @@ class HookArgs(HookArgsBaseModel):
     distribution_path: str = "/*"
     """Path in the CloudFront distribution to invalidate."""
 
-    extra_files: List[RunwayStaticSiteExtraFileDataModel] = []
+    extra_files: List[RunwayStaticSiteExtraFileDataModel] = []  # noqa: UP006
     """Extra files to sync to the S3 bucket."""
 
     website_url: Optional[str] = None
     """S3 bucket website URL."""
 
 
-def get_archives_to_prune(
-    archives: List[Dict[str, Any]], hook_data: Dict[str, Any]
-) -> List[str]:
+def get_archives_to_prune(archives: list[dict[str, Any]], hook_data: dict[str, Any]) -> list[str]:
     """Return list of keys to delete.
 
     Args:
@@ -66,9 +64,7 @@ def get_archives_to_prune(
         if hook_data.get(i)
     ]
 
-    archives.sort(  # sort from oldest to newest
-        key=itemgetter("LastModified"), reverse=False
-    )
+    archives.sort(key=itemgetter("LastModified"), reverse=False)  # sort from oldest to newest
 
     # Drop all but last 15 files
     return [i["Key"] for i in archives[:-15] if i["Key"] not in files_to_skip]
@@ -81,6 +77,7 @@ def sync(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
 
     Args:
         context: The context instance.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     args = HookArgs.parse_obj(kwargs)
@@ -195,7 +192,7 @@ def prune_archives(context: CfnginContext, session: Session) -> bool:
 
     """
     LOGGER.info("cleaning up old site archives...")
-    archives: List[Dict[str, Any]] = []
+    archives: list[dict[str, Any]] = []
     s3_client = session.client("s3")
     list_objects_v2_paginator = s3_client.get_paginator("list_objects_v2")
     response_iterator = list_objects_v2_paginator.paginate(
@@ -231,7 +228,7 @@ def auto_detect_content_type(filename: Optional[str]) -> Optional[str]:
     if not filename:
         return None
 
-    _, ext = os.path.splitext(filename)
+    _, ext = os.path.splitext(filename)  # noqa: PTH122
 
     if ext == ".json":
         return "application/json"
@@ -274,9 +271,7 @@ def get_content(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]
             if extra_file.content_type == "text/yaml":
                 return yaml.safe_dump(extra_file.content)
 
-            raise ValueError(
-                '"content_type" must be json or yaml if "content" is not a string'
-            )
+            raise ValueError('"content_type" must be json or yaml if "content" is not a string')
 
         if not isinstance(extra_file.content, str):
             raise TypeError(f"unsupported content: {type(extra_file.content)}")
@@ -285,7 +280,7 @@ def get_content(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]
 
 
 def calculate_hash_of_extra_files(
-    extra_files: List[RunwayStaticSiteExtraFileDataModel],
+    extra_files: list[RunwayStaticSiteExtraFileDataModel],
 ) -> str:
     """Return a hash of all of the given extra files.
 
@@ -299,7 +294,7 @@ def calculate_hash_of_extra_files(
         The hash of all the files.
 
     """
-    file_hash = hashlib.md5()
+    file_hash = hashlib.md5()  # noqa: S324
 
     for extra_file in sorted(extra_files, key=lambda x: x.name):
         file_hash.update((extra_file.name + "\0").encode())
@@ -312,15 +307,13 @@ def calculate_hash_of_extra_files(
             file_hash.update((cast(str, extra_file.content) + "\0").encode())
 
         if extra_file.file:
-            with open(extra_file.file, "rb") as f:
+            with open(extra_file.file, "rb") as f:  # noqa: PTH123
                 LOGGER.debug("hashing file: %s", extra_file.file)
-                for chunk in iter(
-                    lambda: f.read(4096), ""  # pylint: disable=cell-var-from-loop
-                ):
+                for chunk in iter(lambda: f.read(4096), ""):
                     if not chunk:
                         break
                     file_hash.update(chunk)
-                file_hash.update("\0".encode())
+                file_hash.update(b"\0")
 
     return file_hash.hexdigest()
 
@@ -344,9 +337,7 @@ def get_ssm_value(session: Session, name: str) -> Optional[str]:
         return None
 
 
-def set_ssm_value(
-    session: Session, name: str, value: Any, description: str = ""
-) -> None:
+def set_ssm_value(session: Session, name: str, value: Any, description: str = "") -> None:
     """Set the ssm parameter.
 
     Args:
@@ -363,18 +354,19 @@ def set_ssm_value(
     )
 
 
-def sync_extra_files(
+def sync_extra_files(  # noqa: C901
     context: CfnginContext,
     bucket: str,
-    extra_files: List[RunwayStaticSiteExtraFileDataModel],
+    extra_files: list[RunwayStaticSiteExtraFileDataModel],
     **kwargs: Any,
-) -> List[str]:
+) -> list[str]:
     """Sync static website extra files to S3 bucket.
 
     Args:
         context: The context instance.
         bucket: The static site bucket name.
         extra_files: List of files and file content that should be uploaded.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     LOGGER.debug("extra_files to sync: %s", json.dumps(extra_files, cls=JsonEncoder))
@@ -384,7 +376,7 @@ def sync_extra_files(
 
     session = context.get_session()
     s3_client = session.client("s3")
-    uploaded: List[str] = []
+    uploaded: list[str] = []
 
     hash_param = cast(str, kwargs.get("hash_tracking_parameter", ""))
     hash_new = None
@@ -404,9 +396,7 @@ def sync_extra_files(
         hash_new = calculate_hash_of_extra_files(extra_files)
 
         if hash_new == hash_old:
-            LOGGER.info(
-                "skipped upload of extra files; latest version already deployed"
-            )
+            LOGGER.info("skipped upload of extra files; latest version already deployed")
             return []
 
     for extra_file in extra_files:
@@ -423,9 +413,7 @@ def sync_extra_files(
             uploaded.append(extra_file.name)
 
         if extra_file.file:
-            LOGGER.info(
-                "uploading extra file: %s as %s ", extra_file.file, extra_file.name
-            )
+            LOGGER.info("uploading extra file: %s as %s ", extra_file.file, extra_file.name)
 
             extra_args = ""
 
@@ -449,9 +437,7 @@ def sync_extra_files(
             uploaded.append(extra_file.name)
 
     if hash_new:
-        LOGGER.info(
-            "updating extra files SSM parameter %s with hash %s", hash_param, hash_new
-        )
+        LOGGER.info("updating extra files SSM parameter %s with hash %s", hash_param, hash_new)
         set_ssm_value(session, hash_param, hash_new)
 
     return uploaded

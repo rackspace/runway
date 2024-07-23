@@ -1,14 +1,13 @@
 """Test runway.cfngin.hooks.docker.data_models."""
 
-# pylint: disable=protected-access,redefined-outer-name
 # pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 import pytest
 from docker.models.images import Image
-from mock import MagicMock
 from pydantic import ValidationError
 
 from runway.cfngin.hooks.docker.data_models import (
@@ -19,7 +18,7 @@ from runway.cfngin.hooks.docker.data_models import (
 from runway.utils import MutableMap
 
 if TYPE_CHECKING:
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 MODULE = "runway.cfngin.hooks.docker.data_models"
 MOCK_IMAGE_REPO = "dkr.test.com/image"
@@ -31,7 +30,7 @@ MOCK_IMAGE_PROPS = {
 }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def mock_image() -> MagicMock:
     """Return a mock docker.models.images.Image."""
     return MagicMock(spec=Image, **MOCK_IMAGE_PROPS)
@@ -71,9 +70,7 @@ class TestElasticContainerRegistry:
 
     def test_fqn_private(self) -> None:
         """Test fqn private."""
-        obj = ElasticContainerRegistry(
-            account_id="123456789012", aws_region="us-east-1"
-        )
+        obj = ElasticContainerRegistry(account_id="123456789012", aws_region="us-east-1")
         assert obj.fqn == "123456789012.dkr.ecr.us-east-1.amazonaws.com/"
 
     def test_fqn_public(self) -> None:
@@ -81,7 +78,7 @@ class TestElasticContainerRegistry:
         obj = ElasticContainerRegistry(alias="test")
         assert obj.fqn == "public.ecr.aws/test/"
 
-    def test_init_default(self, cfngin_context: MockCFNginContext) -> None:
+    def test_init_default(self, cfngin_context: MockCfnginContext) -> None:
         """Test init default values."""
         account_id = "123456789012"
         sts_stubber = cfngin_context.add_stubber("sts")
@@ -133,7 +130,7 @@ class TestElasticContainerRegistry:
 class TestElasticContainerRegistryRepository:
     """Test runway.cfngin.hooks.docker._data_models.ElasticContainerRegistryRepository."""
 
-    def test_fqn(self, cfngin_context: MockCFNginContext) -> None:
+    def test_fqn(self, cfngin_context: MockCfnginContext) -> None:
         """Test init private."""
         account_id = "123456789012"
         region = "us-east-1"

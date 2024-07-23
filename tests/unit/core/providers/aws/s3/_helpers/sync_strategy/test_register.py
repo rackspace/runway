@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-from mock import Mock, call
+from unittest.mock import Mock, call
 
 from runway.core.providers.aws.s3._helpers.sync_strategy import (
     DeleteSync,

@@ -31,9 +31,7 @@ def purge_bucket(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
         s3_resource.meta.client.head_bucket(Bucket=args.bucket_name)
     except ClientError as exc:
         if exc.response["Error"]["Code"] == "404":
-            LOGGER.info(
-                'bucket "%s" does not exist; unable to complete purge', args.bucket_name
-            )
+            LOGGER.info('bucket "%s" does not exist; unable to complete purge', args.bucket_name)
             return True
         raise
 

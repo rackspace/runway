@@ -25,27 +25,27 @@ This repo represents a sample Terraform infrastructure deployment of EKS, featur
 1. Update the `kubectl-access-role-arn` parameter in [runway.yml](./runway.yml) to specify the IAM role to which cluster admin access should be granted.
    E.g., if you assume an IAM role for operating in your account `aws sts get-caller-identity --query 'Arn' --output text` will show you the assumed role principal like:
 
-    ```text
-    arn:aws:sts::123456789012:assumed-role/myIamRole/guy.incognito
-    ```
+   ```text
+   arn:aws:sts::123456789012:assumed-role/myIamRole/guy.incognito
+   ```
 
-    You can use that arn to determine the IAM role arn for runway.yml:
+   You can use that arn to determine the IAM role arn for runway.yml:
 
-    ```yaml
-    deployments:
-      ...
-      - modules:
-        ...
-        parameters:
-          ...
-          kubectl-access-role-arn: arn:aws:iam::123456789012:role/myIamRole
-    ```
+   ```yaml
+   deployments:
+     ...
+     - modules:
+       ...
+       parameters:
+         ...
+         kubectl-access-role-arn: arn:aws:iam::123456789012:role/myIamRole
+   ```
 
-    (to use IAM users instead, see `mapUsers` in `eks-base.tf/main.tf`)
+   (to use IAM users instead, see `mapUsers` in `eks-base.tf/main.tf`)
 
-2. After updating the role ARN, deploy to the dev environment (`runway deploy -e dev`).
+1. After updating the role ARN, deploy to the dev environment (`runway deploy -e dev`).
    This will take some time to complete.
-  (Terraform will prompt twice for confirmation; pass the `--ci` flag to prevent any prompting)
+   (Terraform will prompt twice for confirmation; pass the `--ci` flag to prevent any prompting)
 
 ### Post-Deployment
 

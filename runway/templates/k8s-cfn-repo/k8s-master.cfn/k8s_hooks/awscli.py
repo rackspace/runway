@@ -22,6 +22,7 @@ def aws_eks_update_kubeconfig(context: CfnginContext, **kwargs: Any) -> bool:
 
     Args:
         context: Context object.
+        **kwargs: Arbitrary keyword arguments.
 
     Returns:
         boolean for whether or not the hook succeeded
@@ -34,9 +35,7 @@ def aws_eks_update_kubeconfig(context: CfnginContext, **kwargs: Any) -> bool:
             f"{kwargs['stack']}::EksClusterName", context=context
         )
     LOGGER.info("writing kubeconfig...")
-    subprocess.check_output(
-        ["aws", "eks", "update-kubeconfig", "--name", eks_cluster_name]
-    )
+    subprocess.check_output(["aws", "eks", "update-kubeconfig", "--name", eks_cluster_name])
     LOGGER.info("kubeconfig written successfully...")
 
     # The newly-generated kubeconfig will have introduced a dependency on the
@@ -45,7 +44,7 @@ def aws_eks_update_kubeconfig(context: CfnginContext, **kwargs: Any) -> bool:
     if not os.environ.get("PIPENV_ACTIVE") and (
         not os.environ.get("VIRTUAL_ENV") and not which("aws")
     ):
-        print("", file=sys.stderr)  # noqa: T201
+        print(file=sys.stderr)  # noqa: T201
         print(  # noqa: T201
             "Warning: the generated kubeconfig uses the aws-cli for "
             "authentication, but it is not found in your environment. ",

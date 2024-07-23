@@ -2,7 +2,7 @@
 
 # pyright: basic
 import threading
-from typing import Any, List
+from typing import Any
 
 import pytest
 
@@ -65,7 +65,7 @@ def test_walk(empty_dag: DAG) -> None:
     # b and c should be executed at the same time.
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
 
-    nodes: List[Any] = []
+    nodes: list[Any] = []
 
     def walk_func(node: Any) -> bool:
         nodes.append(node)
@@ -172,9 +172,7 @@ def test_transitive_reduction(empty_dag: DAG) -> None:
     """Test transitive reduction."""
     dag = empty_dag
     # https://en.wikipedia.org/wiki/Transitive_reduction#/media/File:Tred-G.svg
-    dag.from_dict(
-        {"a": ["b", "c", "d", "e"], "b": ["d"], "c": ["d", "e"], "d": ["e"], "e": []}
-    )
+    dag.from_dict({"a": ["b", "c", "d", "e"], "b": ["d"], "c": ["d", "e"], "d": ["e"], "e": []})
     dag.transitive_reduction()
     # https://en.wikipedia.org/wiki/Transitive_reduction#/media/File:Tred-Gprime.svg
     assert dag.graph == {
@@ -206,7 +204,7 @@ def test_threaded_walker(empty_dag: DAG) -> None:
     dag.from_dict({"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []})
 
     lock = threading.Lock()  # Protects nodes from concurrent access
-    nodes: List[Any] = []
+    nodes: list[Any] = []
 
     def walk_func(node: Any) -> bool:
         with lock:

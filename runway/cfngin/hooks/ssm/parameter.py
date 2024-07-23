@@ -1,11 +1,10 @@
 """AWS SSM Parameter Store hooks."""
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, List, Optional, cast  # noqa: UP035
 
 from pydantic import Extra, validator
 from typing_extensions import Literal, TypedDict
@@ -27,10 +26,11 @@ else:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
+
 # PutParameterResultTypeDef but without metadata
-_PutParameterResultTypeDef = TypedDict(
-    "_PutParameterResultTypeDef", {"Tier": ParameterTierType, "Version": int}
-)
+class _PutParameterResultTypeDef(TypedDict):
+    Tier: ParameterTierType
+    Version: int
 
 
 class ArgsDataModel(BaseModel):
@@ -69,7 +69,7 @@ class ArgsDataModel(BaseModel):
     name: str
     overwrite: bool = True
     policies: Optional[str] = None
-    tags: Optional[List[TagDataModel]] = None
+    tags: Optional[List[TagDataModel]] = None  # noqa: UP006
     tier: ParameterTierType = "Standard"
     type: Literal["String", "StringList", "SecureString"]
     value: Optional[str] = None
@@ -94,28 +94,25 @@ class ArgsDataModel(BaseModel):
         }
 
     @validator("policies", allow_reuse=True, pre=True)
-    def _convert_policies(cls, v: Union[List[Dict[str, Any]], str, Any]) -> str:
+    def _convert_policies(cls, v: list[dict[str, Any]] | str | Any) -> str:  # noqa: N805
         """Convert policies to acceptable value."""
         if isinstance(v, str):
             return v
         if isinstance(v, list):
             return json.dumps(v, cls=JsonEncoder)
-        raise TypeError(
-            f"unexpected type {type(v)}; permitted: Optional[Union[List[Dict[str, Any]], str]]"
-        )
+        raise TypeError(f"unexpected type {type(v)}; permitted: list[dict[str, Any]] | str | None")
 
     @validator("tags", allow_reuse=True, pre=True)
     def _convert_tags(
-        cls, v: Union[Dict[str, str], List[Dict[str, str]], Any]
-    ) -> List[Dict[str, str]]:
+        cls, v: dict[str, str] | list[dict[str, str]] | Any  # noqa: N805
+    ) -> list[dict[str, str]]:
         """Convert tags to acceptable value."""
         if isinstance(v, list):
             return v
         if isinstance(v, dict):
             return [{"Key": k, "Value": v} for k, v in v.items()]
         raise TypeError(
-            f"unexpected type {type(v)}; permitted: "
-            "Optional[Union[Dict[str, str], List[Dict[str, str]]]"
+            f"unexpected type {type(v)}; permitted: dict[str, str] | list[dict[str, str] | None"
         )
 
 
@@ -124,14 +121,12 @@ class _Parameter(CfnginHookProtocol):
 
     args: ArgsDataModel
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(
         self,
         context: CfnginContext,
         *,
         name: str,
-        type: Literal[  # pylint: disable=redefined-builtin
-            "String", "StringList", "SecureString"
-        ],
+        type: Literal["String", "StringList", "SecureString"],  # noqa: A002
         **kwargs: Any,
     ) -> None:
         """Instantiate class.
@@ -141,6 +136,7 @@ class _Parameter(CfnginHookProtocol):
             name: The fully qualified name of the parameter that you want to add to
                 the system.
             type: The type of parameter.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.args = ArgsDataModel.parse_obj({"name": name, "type": type, **kwargs})
@@ -165,14 +161,14 @@ class _Parameter(CfnginHookProtocol):
         if self.args.force:  # bypass getting current value
             return {}
         try:
-            return self.client.get_parameter(
-                Name=self.args.name, WithDecryption=True
-            ).get("Parameter", {})
+            return self.client.get_parameter(Name=self.args.name, WithDecryption=True).get(
+                "Parameter", {}
+            )
         except self.client.exceptions.ParameterNotFound:
             LOGGER.verbose("parameter %s does not exist", self.args.name)
             return {}
 
-    def get_current_tags(self) -> List[TagTypeDef]:
+    def get_current_tags(self) -> list[TagTypeDef]:
         """Get Tags currently applied to Parameter."""
         try:
             return self.client.list_tags_for_resource(
@@ -216,9 +212,7 @@ class _Parameter(CfnginHookProtocol):
         if current_param.get("Value") != self.args.value:
             try:
                 result = self.client.put_parameter(
-                    **self.args.dict(
-                        by_alias=True, exclude_none=True, exclude={"force", "tags"}
-                    )
+                    **self.args.dict(by_alias=True, exclude_none=True, exclude={"force", "tags"})
                 )
             except self.client.exceptions.ParameterAlreadyExists:
                 LOGGER.warning(
@@ -242,9 +236,7 @@ class _Parameter(CfnginHookProtocol):
         """Update tags."""
         current_tags = self.get_current_tags()
         if self.args.tags and current_tags:
-            diff_tag_keys = list(
-                {i["Key"] for i in current_tags} ^ {i.key for i in self.args.tags}
-            )
+            diff_tag_keys = list({i["Key"] for i in current_tags} ^ {i.key for i in self.args.tags})
         elif self.args.tags:
             diff_tag_keys = []
         else:
@@ -258,14 +250,11 @@ class _Parameter(CfnginHookProtocol):
                     ResourceType="Parameter",
                     TagKeys=diff_tag_keys,
                 )
-                LOGGER.debug(
-                    "removed tags for parameter %s: %s", self.args.name, diff_tag_keys
-                )
+                LOGGER.debug("removed tags for parameter %s: %s", self.args.name, diff_tag_keys)
 
             if self.args.tags:
                 tags_to_add = [
-                    cast("TagTypeDef", tag.dict(by_alias=True))
-                    for tag in self.args.tags
+                    cast("TagTypeDef", tag.dict(by_alias=True)) for tag in self.args.tags
                 ]
                 self.client.add_tags_to_resource(
                     ResourceId=self.args.name,
@@ -278,9 +267,7 @@ class _Parameter(CfnginHookProtocol):
                     [tag["Key"] for tag in tags_to_add],
                 )
         except self.client.exceptions.InvalidResourceId:
-            LOGGER.info(
-                "skipped updating tags; parameter %s does not exist", self.args.name
-            )
+            LOGGER.info("skipped updating tags; parameter %s does not exist", self.args.name)
         else:
             LOGGER.info("updated tags for parameter %s", self.args.name)
 
@@ -301,6 +288,7 @@ class SecureString(_Parameter):
             context: CFNgin context object.
             name: The fully qualified name of the parameter that you want to add to
                 the system.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         for k in ["Type", "type"]:  # ensure neither of these are set

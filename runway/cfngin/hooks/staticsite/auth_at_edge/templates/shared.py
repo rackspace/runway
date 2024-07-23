@@ -1,6 +1,5 @@
 """Shared functionality for the Auth@Edge Lambda suite."""
 
-# pylint: disable=consider-using-f-string, inconsistent-return-statements
 import base64
 import hmac
 import json
@@ -57,7 +56,7 @@ def as_cloud_front_headers(headers):
     """Convert a series of headers to CloudFront compliant ones.
 
     Args:
-         headers (Dict[str, str]): The request/response headers in
+         headers (dict[str, str]): The request/response headers in
             dictionary format.
 
     """
@@ -71,7 +70,7 @@ def extract_and_parse_cookies(headers, client_id, cookie_compatibility="amplify"
     """Extract and parse the Cognito cookies from the headers.
 
     Args:
-        headers (Dict[str, str]): The request/response headers in
+        headers (dict[str, str]): The request/response headers in
             dictionary format.
         client_id (str): The Cognito UserPool Client ID.
         cookie_compatibility (str): "amplify" or "elasticsearch".
@@ -88,18 +87,12 @@ def extract_and_parse_cookies(headers, client_id, cookie_compatibility="amplify"
 
     return {
         "token_user_name": (
-            cookies.get(cookie_names["last_user_key"])
-            if "last_user_key" in cookie_names
-            else None
+            cookies.get(cookie_names["last_user_key"]) if "last_user_key" in cookie_names else None
         ),
         "id_token": cookies.get(cookie_names["id_token_key"]),
         "access_token": cookies.get(cookie_names["access_token_key"]),
         "refresh_token": cookies.get(cookie_names["refresh_token_key"]),
-        "scopes": (
-            cookies.get(cookie_names["scope_key"])
-            if "scope_key" in cookie_names
-            else None
-        ),
+        "scopes": (cookies.get(cookie_names["scope_key"]) if "scope_key" in cookie_names else None),
         "nonce": cookies.get("spa-auth-edge-nonce"),
         "nonce_hmac": cookies.get("spa-auth-edge-nonce-hmac"),
         "pkce": cookies.get("spa-auth-edge-pkce"),
@@ -110,7 +103,7 @@ def extract_cookies_from_headers(headers):
     """Extract all cookies from the response headers.
 
     Args:
-         headers (Dict[str, Dict[str, str]]): The request/response headers in
+         headers (dict[str, dict[str, str]]): The request/response headers in
             dictionary format.
 
     """
@@ -204,11 +197,11 @@ def generate_cookie_headers(
         event (str): "new_tokens" | "sign_out" | "refresh_failed".
         client_id (str): The Cognito UserPool Client ID.
         oauth_scopes (List): The scopes for oauth validation.
-        tokens (Dict[str, str]): The tokens received from
+        tokens (dict[str, str]): The tokens received from
             the Cognito Request (id, access, refresh).
         domain_name (str): The Domain name the cookies are
             to be associated with.
-        cookie_settings (Dict[str, str]): The various settings
+        cookie_settings (dict[str, str]): The various settings
             that we would like for the various tokens.
         cookie_compatibility (str): "amplify" | "elasticsearch".
 
@@ -249,9 +242,7 @@ def generate_cookie_headers(
         cookie_names = get_elasticsearch_cookie_names()
         cookies = {
             cookie_names["cognito_enabled_key"]: "True; "
-            + str(
-                with_cookie_domain(domain_name, cookie_settings.get("cognitoEnabled"))
-            ),
+            + str(with_cookie_domain(domain_name, cookie_settings.get("cognitoEnabled"))),
         }
     cookies[cookie_names["id_token_key"]] = f"{tokens.get('id_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("idToken")),
@@ -259,9 +250,8 @@ def generate_cookie_headers(
     cookies[cookie_names["access_token_key"]] = f"{tokens.get('access_token')}; " + str(
         with_cookie_domain(domain_name, cookie_settings.get("accessToken")),
     )
-    cookies[cookie_names["refresh_token_key"]] = (
-        f"{tokens.get('refresh_token')}; "
-        + str(with_cookie_domain(domain_name, cookie_settings.get("refreshToken")))
+    cookies[cookie_names["refresh_token_key"]] = f"{tokens.get('refresh_token')}; " + str(
+        with_cookie_domain(domain_name, cookie_settings.get("refreshToken"))
     )
     cookies_iter = cookies  # type: ignore
     if event == "sign_out":
@@ -278,9 +268,7 @@ def generate_cookie_headers(
             cookies[i] = expire_cookie(cookies[i])
 
     # Return cookies in the form of CF headers
-    return [
-        {"key": "set-cookie", "value": f"{key}={val}"} for key, val in cookies.items()
-    ]
+    return [{"key": "set-cookie", "value": f"{key}={val}"} for key, val in cookies.items()]
 
 
 def expire_cookie_filter(cookie):
@@ -319,9 +307,9 @@ def http_post_with_retry(url, data, headers):
 
     Args:
         url (str): The URL to make the POST request to.
-        data (Dict[str, str]): The dictionary of data elements to
+        data (dict[str, str]): The dictionary of data elements to
             send with the request (urlencoded internally).
-        headers (Dict[str, str]): Any headers to send with
+        headers (dict[str, str]): Any headers to send with
             the POST request.
 
     """
@@ -335,7 +323,6 @@ def http_post_with_retry(url, data, headers):
             read = res.decode("utf-8")
             json_data = json.loads(read)
             return json_data
-        # pylint: disable=broad-except
         except Exception as err:
             LOGGER.error("HTTP POST to %s failed (attempt %s)", url, attempts)
             LOGGER.error(err)

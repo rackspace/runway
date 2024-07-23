@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 from runway.cfngin.blueprints.base import Blueprint
 from runway.cfngin.blueprints.variables.types import (
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class FakeBastion(Blueprint):
     """Fake Bastion."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "VpcId": {"type": EC2VPCId, "description": "Vpc Id"},
         "DefaultSG": {
             "type": EC2SecurityGroupId,
@@ -30,15 +30,15 @@ class FakeBastion(Blueprint):
         },
         "PublicSubnets": {
             "type": EC2SubnetIdList,
-            "description": "Subnets to deploy public " "instances in.",
+            "description": "Subnets to deploy public instances in.",
         },
         "PrivateSubnets": {
             "type": EC2SubnetIdList,
-            "description": "Subnets to deploy private " "instances in.",
+            "description": "Subnets to deploy private instances in.",
         },
         "AvailabilityZones": {
             "type": CFNCommaDelimitedList,
-            "description": "Availability Zones to deploy " "instances in.",
+            "description": "Availability Zones to deploy instances in.",
         },
         "InstanceType": {
             "type": CFNString,

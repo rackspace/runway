@@ -8,6 +8,6 @@ def add_url_scheme(url: str) -> str:
         url (str): The current url.
 
     """
-    if url.startswith("https://") or url.startswith("http://"):
+    if url.startswith(("https://", "http://")):
         return url
     return f"https://{url}"

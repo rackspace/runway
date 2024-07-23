@@ -1,15 +1,12 @@
 """Test AWS Lambda hook."""
 
-# pylint: disable=no-self-argument
-# pylint: disable=redefined-outer-name,unexpected-keyword-arg,unused-argument
 from __future__ import annotations
 
 import json
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
-import boto3
 import pytest
 from pydantic import root_validator
 
@@ -18,6 +15,9 @@ from runway.compat import cached_property
 from runway.utils import BaseModel
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    import boto3
     from click.testing import CliRunner, Result
     from mypy_boto3_cloudformation.client import CloudFormationClient
     from mypy_boto3_cloudformation.type_defs import StackTypeDef
@@ -69,7 +69,7 @@ class AwslambdaStackOutputs(BaseModel):
     Runtime: str
 
     @root_validator(allow_reuse=True, pre=True)
-    def _convert_null_to_none(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_null_to_none(self, values: dict[str, Any]) -> dict[str, Any]:
         """Convert ``null`` to ``NoneType``."""
 
         def _handle_null(v: Any) -> Any:
@@ -166,15 +166,11 @@ def test_deploy_exit_code(deploy_result: Result) -> None:
 
 def test_deploy_log_messages(deploy_result: Result) -> None:
     """Test deploy log messages."""
-    build_skipped = [
-        line for line in deploy_result.stdout.split("\n") if "build skipped" in line
-    ]
+    build_skipped = [line for line in deploy_result.stdout.split("\n") if "build skipped" in line]
     assert not build_skipped, "\n".join(build_skipped)
 
 
-def test_docker(
-    deploy_result: Result, namespace: str, runway_context: RunwayContext
-) -> None:
+def test_docker(deploy_result: Result, namespace: str, runway_context: RunwayContext) -> None:
     """Test function built with Docker."""
     tester = AwslambdaTester(
         runway_context.get_session(region=AWS_REGION),
@@ -193,9 +189,7 @@ def test_docker(
     assert "certifi/__init__.py" in response["data"]["dir_contents"]
 
 
-def test_local(
-    deploy_result: Result, namespace: str, runway_context: RunwayContext
-) -> None:
+def test_local(deploy_result: Result, namespace: str, runway_context: RunwayContext) -> None:
     """Test function built with local python."""
     tester = AwslambdaTester(
         runway_context.get_session(region=AWS_REGION),
@@ -208,9 +202,7 @@ def test_local(
     assert response["data"]["dir_contents"] == ["index.py"]
 
 
-def test_mysql(
-    deploy_result: Result, namespace: str, runway_context: RunwayContext
-) -> None:
+def test_mysql(deploy_result: Result, namespace: str, runway_context: RunwayContext) -> None:
     """Test function built from Dockerfile for mysql."""
     tester = AwslambdaTester(
         runway_context.get_session(region=AWS_REGION),
@@ -225,9 +217,7 @@ def test_mysql(
     assert "Pipfile" not in response["data"]["dir_contents"]
 
 
-def test_xmlsec(
-    deploy_result: Result, namespace: str, runway_context: RunwayContext
-) -> None:
+def test_xmlsec(deploy_result: Result, namespace: str, runway_context: RunwayContext) -> None:
     """Test function built from Dockerfile for xmlsec."""
     tester = AwslambdaTester(
         runway_context.get_session(region=AWS_REGION),
@@ -244,9 +234,7 @@ def test_xmlsec(
     assert "poetry.lock" not in response["data"]["dir_contents"]
 
 
-def test_xmlsec_layer(
-    deploy_result: Result, namespace: str, runway_context: RunwayContext
-) -> None:
+def test_xmlsec_layer(deploy_result: Result, namespace: str, runway_context: RunwayContext) -> None:
     """Test layer built from Dockerfile for xmlsec."""
     tester = AwslambdaTester(
         runway_context.get_session(region=AWS_REGION),
@@ -262,7 +250,7 @@ def test_xmlsec_layer(
     assert response["data"]["dir_contents"] == ["index.py"]
 
 
-def test_plan(cli_runner: CliRunner, deploy_result: Result) -> None:
+def test_plan(cli_runner: CliRunner, deploy_result: Result) -> None:  # noqa: ARG001
     """Test ``runway plan`` - this was not possible with old hook.
 
     deploy_result required so cleanup does not start before this runs.
@@ -273,9 +261,7 @@ def test_plan(cli_runner: CliRunner, deploy_result: Result) -> None:
     (DOCKER_XMLSEC_DIR / "poetry.lock").unlink(missing_ok=True)
     plan_results = cli_runner.invoke(cli, ["plan"], env=ENV_VARS)
     assert plan_results.exit_code == 0, plan_results.output
-    matches = [
-        line for line in plan_results.stdout.split("\n") if line.endswith(":no changes")
-    ]
+    matches = [line for line in plan_results.stdout.split("\n") if line.endswith(":no changes")]
     a_list = [4, 5]
     # count needs to be updated if number of test stacks change
     assert len(matches) in a_list, "\n".join(matches)

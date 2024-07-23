@@ -27,8 +27,6 @@ class TestRunwayK8sModuleOptionsDataModel:
 
     def test_init(self, tmp_path: Path) -> None:
         """Test init."""
-        obj = RunwayK8sModuleOptionsDataModel(
-            kubectl_version="0.13.0", overlay_path=tmp_path
-        )
+        obj = RunwayK8sModuleOptionsDataModel(kubectl_version="0.13.0", overlay_path=tmp_path)
         assert obj.kubectl_version == "0.13.0"
         assert obj.overlay_path == tmp_path

@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final
 
 from .base import LookupHandler
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ...utils import MutableMap
 
 
@@ -25,9 +25,7 @@ class VarLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, *__args: Any, variables: MutableMap, **__kwargs: Any
-    ) -> Any:
+    def handle(cls, value: str, *__args: Any, variables: MutableMap, **__kwargs: Any) -> Any:
         """Retrieve a variable from the variable definition.
 
         The value is retrieved from the variables passed to Runway using

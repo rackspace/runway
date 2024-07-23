@@ -14,9 +14,7 @@ class Action(BaseAction):
 class ARN(BaseARN):
     def __init__(self, resource=..., region=..., account=...) -> None: ...
 
-AssociateConfigurationItemsToApplication = Action(
-    "AssociateConfigurationItemsToApplication"
-)
+AssociateConfigurationItemsToApplication = Action("AssociateConfigurationItemsToApplication")
 BatchDeleteImportData = Action("BatchDeleteImportData")
 CreateApplication = Action("CreateApplication")
 CreateTags = Action("CreateTags")

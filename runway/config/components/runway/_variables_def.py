@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 import yaml
 
@@ -32,9 +32,8 @@ class RunwayVariablesDefinition(MutableMap):
         data = RunwayVariablesDefinitionModel(**{**data.dict(), **self.__load_file()})
         super().__init__(**data.dict(exclude={"file_path", "sys_path"}))
 
-    def __load_file(self) -> Dict[str, Any]:
+    def __load_file(self) -> dict[str, Any]:
         """Load a variables file."""
-        # pylint: disable=protected-access
         if self._file_path:
             if self._file_path.is_file():
                 return yaml.safe_load(self._file_path.read_text())
@@ -52,7 +51,7 @@ class RunwayVariablesDefinition(MutableMap):
                 "could not find %s in the current directory; continuing without a variables file",
                 " or ".join(self.default_names),
             )
-            self.__class__._has_notified_missing_file = True
+            self.__class__._has_notified_missing_file = True  # noqa: SLF001
         return {}
 
     @classmethod

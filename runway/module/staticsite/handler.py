@@ -8,7 +8,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
 
@@ -44,12 +44,12 @@ class StaticSite(RunwayModule):
         self,
         context: RunwayContext,
         *,
-        explicitly_enabled: Optional[bool] = False,
+        explicitly_enabled: bool | None = False,
         logger: RunwayLogger = LOGGER,
         module_root: Path,
-        name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        name: str | None = None,
+        options: dict[str, Any] | ModuleOptions | None = None,
+        parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -78,9 +78,7 @@ class StaticSite(RunwayModule):
             options=StaticSiteOptions.parse_obj(options or {}),
             parameters=parameters,
         )
-        self.parameters = RunwayStaticSiteModuleParametersDataModel.parse_obj(
-            self.parameters
-        )
+        self.parameters = RunwayStaticSiteModuleParametersDataModel.parse_obj(self.parameters)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
         LOGGER.warning("%s:%s", self.name, self.DEPRECATION_MSG)
@@ -199,13 +197,11 @@ class StaticSite(RunwayModule):
             Path to the file that was created.
 
         """
-        pre_deploy: List[Any] = []
+        pre_deploy: list[Any] = []
 
         pre_destroy = [
             {
-                "args": {
-                    "bucket_name": f"${{rxref {self.sanitized_name}-dependencies::{i}}}"
-                },
+                "args": {"bucket_name": f"${{rxref {self.sanitized_name}-dependencies::{i}}}"},
                 "path": "runway.cfngin.hooks.cleanup_s3.purge_bucket",
                 "required": True,
             }
@@ -264,7 +260,7 @@ class StaticSite(RunwayModule):
                     }
                 )
 
-        content: Dict[str, Any] = {
+        content: dict[str, Any] = {
             "cfngin_bucket": "",
             "namespace": "${namespace}",
             "pre_deploy": pre_deploy,
@@ -279,11 +275,10 @@ class StaticSite(RunwayModule):
         }
 
         out_file = module_dir / "01-dependencies.yaml"
-        with open(out_file, "w", encoding="utf-8") as output_stream:
-            yaml.dump(content, output_stream, default_flow_style=False, sort_keys=True)
-        self.logger.debug(
-            "created %s:\n%s", out_file.name, yaml.dump(content, Dumper=YamlDumper)
+        out_file.write_text(
+            yaml.dump(content, default_flow_style=False, sort_keys=True), encoding="utf-8"
         )
+        self.logger.debug("created %s:\n%s", out_file.name, yaml.dump(content, Dumper=YamlDumper))
         return out_file
 
     def _create_staticsite_yaml(self, module_dir: Path) -> Path:
@@ -300,12 +295,10 @@ class StaticSite(RunwayModule):
         """
         # Default parameter name matches build_staticsite hook
         if not self.options.source_hashing.parameter:
-            self.options.source_hashing.parameter = (
-                f"${{namespace}}-{self.sanitized_name}-hash"
-            )
+            self.options.source_hashing.parameter = f"${{namespace}}-{self.sanitized_name}-hash"
         nonce_secret_param = f"${{namespace}}-{self.sanitized_name}-nonce-secret"
 
-        build_staticsite_args: Dict[str, Any] = {
+        build_staticsite_args: dict[str, Any] = {
             # ensures yaml.safe_load will work by using JSON to convert objects
             "options": json.loads(self.options.data.json(by_alias=True))
         }
@@ -314,9 +307,7 @@ class StaticSite(RunwayModule):
         )
         build_staticsite_args["options"]["namespace"] = "${namespace}"
         build_staticsite_args["options"]["name"] = self.sanitized_name
-        build_staticsite_args["options"]["path"] = os.path.join(
-            os.path.realpath(self.ctx.env.root_dir), self.path
-        )
+        build_staticsite_args["options"]["path"] = str(self.ctx.env.root_dir.resolve() / self.path)
 
         site_stack_variables = self._get_site_stack_variables()
 
@@ -351,9 +342,7 @@ class StaticSite(RunwayModule):
 
         pre_destroy = [
             {
-                "args": {
-                    "bucket_name": f"${{rxref {self.sanitized_name}::BucketName}}"
-                },
+                "args": {"bucket_name": f"${{rxref {self.sanitized_name}::BucketName}}"},
                 "path": "runway.cfngin.hooks.cleanup_s3.purge_bucket",
                 "required": True,
             }
@@ -453,11 +442,10 @@ class StaticSite(RunwayModule):
         }
 
         out_file = module_dir / "02-staticsite.yaml"
-        with open(out_file, "w", encoding="utf-8") as output_stream:
-            yaml.dump(content, output_stream, default_flow_style=False, sort_keys=True)
-        self.logger.debug(
-            "created 02-staticsite.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper)
+        out_file.write_text(
+            yaml.dump(content, default_flow_style=False, sort_keys=True), encoding="utf-8"
         )
+        self.logger.debug("created 02-staticsite.yaml:\n%s", yaml.dump(content, Dumper=YamlDumper))
         return out_file
 
     def _create_cleanup_yaml(self, module_dir: Path) -> Path:
@@ -478,23 +466,23 @@ class StaticSite(RunwayModule):
             "service_role": self.parameters.service_role,
             "stacks": {
                 f"{self.sanitized_name}-cleanup": {
-                    "template_path": os.path.join(
-                        tempfile.gettempdir(), "thisfileisnotused.yaml"
+                    "template_path": os.path.join(  # noqa: PTH118
+                        tempfile.gettempdir(),
+                        "thisfileisnotused.yaml",  # cspell: disable-line
                     ),
                 }
             },
         }
 
         out_file = module_dir / "03-cleanup.yaml"
-        with open(out_file, "w", encoding="utf-8") as output_stream:
-            yaml.dump(content, output_stream, default_flow_style=False, sort_keys=True)
-        self.logger.debug(
-            "created %s:\n%s", out_file.name, yaml.dump(content, Dumper=YamlDumper)
+        out_file.write_text(
+            yaml.dump(content, default_flow_style=False, sort_keys=True), encoding="utf-8"
         )
+        self.logger.debug("created %s:\n%s", out_file.name, yaml.dump(content, Dumper=YamlDumper))
         return out_file
 
-    def _get_site_stack_variables(self) -> Dict[str, Any]:
-        site_stack_variables: Dict[str, Any] = {
+    def _get_site_stack_variables(self) -> dict[str, Any]:
+        site_stack_variables: dict[str, Any] = {
             "Aliases": [],
             "Compress": self.parameters.compress,
             "DisableCloudFront": self.parameters.cf_disable,
@@ -527,8 +515,7 @@ class StaticSite(RunwayModule):
             site_stack_variables["OAuthScopes"] = self.parameters.oauth_scopes
         else:
             site_stack_variables["custom_error_responses"] = [
-                i.dict(exclude_none=True)
-                for i in self.parameters.custom_error_responses
+                i.dict(exclude_none=True) for i in self.parameters.custom_error_responses
             ]
             site_stack_variables["lambda_function_associations"] = [
                 i.dict() for i in self.parameters.lambda_function_associations
@@ -536,8 +523,8 @@ class StaticSite(RunwayModule):
 
         return site_stack_variables
 
-    def _get_dependencies_variables(self) -> Dict[str, Any]:
-        variables: Dict[str, Any] = {"OAuthScopes": self.parameters.oauth_scopes}
+    def _get_dependencies_variables(self) -> dict[str, Any]:
+        variables: dict[str, Any] = {"OAuthScopes": self.parameters.oauth_scopes}
         if self.parameters.auth_at_edge:
             self._ensure_auth_at_edge_requirements()
 
@@ -548,9 +535,7 @@ class StaticSite(RunwayModule):
                     "RedirectPathSignIn": (
                         "${default staticsite_redirect_path_sign_in::/parseauth}"
                     ),
-                    "RedirectPathSignOut": (
-                        "${default staticsite_redirect_path_sign_out::/}"
-                    ),
+                    "RedirectPathSignOut": ("${default staticsite_redirect_path_sign_out::/}"),
                 },
             )
 
@@ -558,17 +543,15 @@ class StaticSite(RunwayModule):
                 variables.update({"Aliases": self.parameters.aliases})
             if self.parameters.additional_redirect_domains:
                 variables.update(
-                    {
-                        "AdditionalRedirectDomains": self.parameters.additional_redirect_domains
-                    }
+                    {"AdditionalRedirectDomains": self.parameters.additional_redirect_domains}
                 )
             if self.parameters.create_user_pool:
                 variables.update({"CreateUserPool": self.parameters.create_user_pool})
 
         return variables
 
-    def _get_user_pool_id_retriever_variables(self) -> Dict[str, Any]:
-        args: Dict[str, Any] = {
+    def _get_user_pool_id_retriever_variables(self) -> dict[str, Any]:
+        args: dict[str, Any] = {
             "user_pool_arn": self.parameters.user_pool_arn,
         }
 
@@ -579,7 +562,7 @@ class StaticSite(RunwayModule):
 
         return args
 
-    def _get_domain_updater_variables(self) -> Dict[str, str]:
+    def _get_domain_updater_variables(self) -> dict[str, str]:
         return {
             "client_id_output_lookup": f"{self.sanitized_name}-dependencies::AuthAtEdgeClient",
             "client_id": f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeClient}}",
@@ -587,10 +570,10 @@ class StaticSite(RunwayModule):
 
     def _get_lambda_config_variables(
         self,
-        site_stack_variables: Dict[str, Any],
+        site_stack_variables: dict[str, Any],
         nonce_secret_param: str,
-        required_group: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        required_group: str | None = None,
+    ) -> dict[str, Any]:
         return {
             "client_id": f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeClient}}",
             "bucket": f"${{rxref {self.sanitized_name}-dependencies::ArtifactsBucketName}}",
@@ -605,12 +588,10 @@ class StaticSite(RunwayModule):
         }
 
     def _get_client_updater_variables(
-        self, name: str, site_stack_variables: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, name: str, site_stack_variables: dict[str, Any]
+    ) -> dict[str, Any]:
         return {
-            "alternate_domains": [
-                add_url_scheme(x) for x in site_stack_variables["Aliases"]
-            ],
+            "alternate_domains": [add_url_scheme(x) for x in site_stack_variables["Aliases"]],
             "client_id": f"${{rxref {self.sanitized_name}-dependencies::AuthAtEdgeClient}}",
             "distribution_domain": f"${{rxref {name}::CFDistributionDomainName}}",
             "oauth_scopes": site_stack_variables["OAuthScopes"],
@@ -641,8 +622,7 @@ class StaticSite(RunwayModule):
         """Exit if both the Auth@Edge and CloudFront disablement are true."""
         if self.parameters.cf_disable and self.parameters.auth_at_edge:
             self.logger.error(
-                'staticsite_cf_disable must be "false" if '
-                'staticsite_auth_at_edge is "true"'
+                'staticsite_cf_disable must be "false" if staticsite_auth_at_edge is "true"'
             )
             sys.exit(1)
 

@@ -1,12 +1,11 @@
 """Test runway.cfngin.hooks.awslambda._python_hooks."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 from pydantic import ValidationError
 
 from runway.cfngin.hooks.awslambda import PythonFunction, PythonLayer
@@ -20,7 +19,7 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.awslambda._python_hooks"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def args(tmp_path: Path) -> PythonHookArgs:
     """Fixture for creating default function args."""
     return PythonHookArgs(
@@ -52,9 +51,7 @@ class TestPythonFunction:
         assert not PythonFunction(Mock(), **args.dict()).cleanup()
         project.cleanup.assert_called_once_with()
 
-    def test_cleanup_on_error(
-        self, args: PythonHookArgs, mocker: MockerFixture
-    ) -> None:
+    def test_cleanup_on_error(self, args: PythonHookArgs, mocker: MockerFixture) -> None:
         """Test cleanup_on_error."""
         deployment_package = mocker.patch.object(PythonFunction, "deployment_package")
         project = mocker.patch.object(PythonFunction, "project")
@@ -62,9 +59,7 @@ class TestPythonFunction:
         deployment_package.delete.assert_called_once_with()
         project.cleanup_on_error.assert_called_once_with()
 
-    def test_deployment_package(
-        self, args: PythonHookArgs, mocker: MockerFixture
-    ) -> None:
+    def test_deployment_package(self, args: PythonHookArgs, mocker: MockerFixture) -> None:
         """Test deployment_package."""
         deployment_package_class = mocker.patch(f"{MODULE}.PythonDeploymentPackage")
         project = mocker.patch.object(PythonFunction, "project", "project")
@@ -77,25 +72,18 @@ class TestPythonFunction:
     def test_pre_deploy(self, args: PythonHookArgs, mocker: MockerFixture) -> None:
         """Test pre_deploy."""
         model = Mock(dict=Mock(return_value="success"))
-        build_response = mocker.patch.object(
-            PythonFunction, "build_response", return_value=(model)
-        )
+        build_response = mocker.patch.object(PythonFunction, "build_response", return_value=(model))
         cleanup = mocker.patch.object(PythonFunction, "cleanup")
         cleanup_on_error = mocker.patch.object(PythonFunction, "cleanup_on_error")
         deployment_package = mocker.patch.object(PythonFunction, "deployment_package")
-        assert (
-            PythonFunction(Mock(), **args.dict()).pre_deploy()
-            == model.dict.return_value
-        )
+        assert PythonFunction(Mock(), **args.dict()).pre_deploy() == model.dict.return_value
         deployment_package.upload.assert_called_once_with()
         build_response.assert_called_once_with("deploy")
         model.dict.assert_called_once_with(by_alias=True)
         cleanup_on_error.assert_not_called()
         cleanup.assert_called_once_with()
 
-    def test_pre_deploy_always_cleanup(
-        self, args: PythonHookArgs, mocker: MockerFixture
-    ) -> None:
+    def test_pre_deploy_always_cleanup(self, args: PythonHookArgs, mocker: MockerFixture) -> None:
         """Test pre_deploy always cleanup."""
         build_response = mocker.patch.object(
             PythonFunction, "build_response", return_value="success"
@@ -107,7 +95,7 @@ class TestPythonFunction:
             "deployment_package",
             Mock(upload=Mock(side_effect=Exception)),
         )
-        with pytest.raises(Exception, match=""):
+        with pytest.raises(Exception):  # noqa: B017, PT011
             assert PythonFunction(Mock(), **args.dict()).pre_deploy()
         deployment_package.upload.assert_called_once_with()
         build_response.assert_not_called()
@@ -125,9 +113,7 @@ class TestPythonFunction:
 class TestPythonLayer:
     """Test PythonLayer."""
 
-    def test_deployment_package(
-        self, args: PythonHookArgs, mocker: MockerFixture
-    ) -> None:
+    def test_deployment_package(self, args: PythonHookArgs, mocker: MockerFixture) -> None:
         """Test deployment_package."""
         deployment_package_class = mocker.patch(f"{MODULE}.PythonDeploymentPackage")
         project = mocker.patch.object(PythonLayer, "project", "project")

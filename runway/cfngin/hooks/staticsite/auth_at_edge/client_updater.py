@@ -8,7 +8,7 @@ distribution url + callback url paths.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, List  # noqa: UP035
 
 from ...base import HookArgsBaseModel
 
@@ -21,7 +21,7 @@ LOGGER = logging.getLogger(__name__)
 class HookArgs(HookArgsBaseModel):
     """Hook arguments."""
 
-    alternate_domains: List[str]
+    alternate_domains: List[str]  # noqa: UP006
     """A list of any alternate domains that need to be listed with the primary
     distribution domain.
 
@@ -33,7 +33,7 @@ class HookArgs(HookArgsBaseModel):
     distribution_domain: str
     """Distribution domain."""
 
-    oauth_scopes: List[str]
+    oauth_scopes: List[str]  # noqa: UP006
     """A list of all available validation scopes for oauth."""
 
     redirect_path_sign_in: str
@@ -42,13 +42,13 @@ class HookArgs(HookArgsBaseModel):
     redirect_path_sign_out: str
     """The redirect path after sign out."""
 
-    supported_identity_providers: List[str] = []
+    supported_identity_providers: List[str] = []  # noqa: UP006
     """Supported identity providers."""
 
 
 def get_redirect_uris(
-    domains: List[str], redirect_path_sign_in: str, redirect_path_sign_out: str
-) -> Dict[str, List[str]]:
+    domains: list[str], redirect_path_sign_in: str, redirect_path_sign_out: str
+) -> dict[str, list[str]]:
     """Create dict of redirect URIs for AppClient."""
     return {
         "sign_in": [f"{domain}{redirect_path_sign_in}" for domain in domains],
@@ -56,7 +56,7 @@ def get_redirect_uris(
     }
 
 
-def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
+def update(context: CfnginContext, *_args: Any, **kwargs: Any) -> bool:
     """Update the callback urls for the User Pool Client.
 
     Required to match the redirect_uri being sent which contains
@@ -67,6 +67,7 @@ def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
 
     Args:
         context: The context instance.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     args = HookArgs.parse_obj(kwargs)
@@ -74,7 +75,7 @@ def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
     cognito_client = session.client("cognito-idp")
 
     # Combine alternate domains with main distribution
-    redirect_domains = args.alternate_domains + ["https://" + args.distribution_domain]
+    redirect_domains = [*args.alternate_domains, "https://" + args.distribution_domain]
 
     # Create a list of all domains with their redirect paths
     redirect_uris = get_redirect_uris(
@@ -93,6 +94,6 @@ def update(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
             UserPoolId=context.hook_data["aae_user_pool_id_retriever"]["id"],
         )
         return True
-    except Exception:  # pylint: disable=broad-except
+    except Exception:
         LOGGER.exception("unable to update user pool client callback urls")
         return False

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import pytest
 
@@ -51,7 +51,7 @@ class TestInvalidConfig:
         [("error", "error"), (["error0", "error1"], "error0\nerror1")],
     )
     def test___init__(
-        self, errors: Union[str, List[Union[Exception, str]]], expected_msg: str
+        self, errors: Union[str, list[Union[Exception, str]]], expected_msg: str
     ) -> None:
         """Test __init__."""
         obj = InvalidConfig(errors)

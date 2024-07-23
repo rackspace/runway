@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import subprocess
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 import pytest
 import tomli_w
-from mock import Mock
 
 from runway.dependency_managers import Poetry, PoetryExportFailedError
 
@@ -42,7 +42,7 @@ class TestPoetry:
         ],
     )
     def test_dir_is_project(
-        self, build_system: Dict[str, Any], expected: bool, tmp_path: Path
+        self, build_system: dict[str, Any], expected: bool, tmp_path: Path
     ) -> None:
         """Test dir_is_project."""
         pyproject_contents = {"build-system": build_system}
@@ -69,7 +69,7 @@ class TestPoetry:
     )
     def test_export(
         self,
-        export_kwargs: Dict[str, Any],
+        export_kwargs: dict[str, Any],
         mocker: MockerFixture,
         tmp_path: Path,
     ) -> None:
@@ -78,18 +78,14 @@ class TestPoetry:
         mock_generate_command = mocker.patch.object(
             Poetry, "generate_command", return_value="generate_command"
         )
-        mock_run_command = mocker.patch.object(
-            Poetry, "_run_command", return_value="_run_command"
-        )
+        mock_run_command = mocker.patch.object(Poetry, "_run_command", return_value="_run_command")
         (tmp_path / "test.requirements.txt").touch()  # created by _run_command
 
         obj = Poetry(Mock(), tmp_path)
         assert obj.export(output=expected, **export_kwargs) == expected
         assert expected.is_file()
         export_kwargs.update({"output": expected.name})
-        export_kwargs.update(
-            {"format": export_kwargs.pop("output_format", "requirements.txt")}
-        )
+        export_kwargs.update({"format": export_kwargs.pop("output_format", "requirements.txt")})
         export_kwargs.setdefault("dev", False)
         export_kwargs.setdefault("extras", None)
         export_kwargs.setdefault("with_credentials", True)
@@ -120,10 +116,7 @@ class TestPoetry:
 
         with pytest.raises(PoetryExportFailedError) as excinfo:
             assert Poetry(Mock(), tmp_path).export(output=output)
-        assert (
-            excinfo.value.message
-            == "poetry export failed with the following output:\nstderr"
-        )
+        assert excinfo.value.message == "poetry export failed with the following output:\nstderr"
 
     def test_export_raise_when_output_does_not_exist(
         self,
@@ -133,9 +126,7 @@ class TestPoetry:
         """Test export raise PoetryExportFailedError from CalledProcessError."""
         output = tmp_path / "expected" / "test.requirements.txt"
         mocker.patch.object(Poetry, "generate_command", return_value="generate_command")
-        mock_run_command = mocker.patch.object(
-            Poetry, "_run_command", return_value="_run_command"
-        )
+        mock_run_command = mocker.patch.object(Poetry, "_run_command", return_value="_run_command")
 
         with pytest.raises(PoetryExportFailedError) as excinfo:
             assert Poetry(Mock(), tmp_path).export(output=output)
@@ -152,9 +143,7 @@ class TestPoetry:
         self, cmd_output: str, expected: str, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test version."""
-        mock_run_command = mocker.patch.object(
-            Poetry, "_run_command", return_value=cmd_output
-        )
+        mock_run_command = mocker.patch.object(Poetry, "_run_command", return_value=cmd_output)
         version_cls = mocker.patch(f"{MODULE}.Version", return_value="success")
         assert Poetry(Mock(), tmp_path).version == version_cls.return_value
         mock_run_command.assert_called_once_with([Poetry.EXECUTABLE, "--version"])

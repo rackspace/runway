@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Optional, Union, cast
+from unittest.mock import Mock, call
 
 import igittigitt
 import pytest
-from mock import Mock, call
 
 from runway.cfngin.hooks.staticsite.utils import (
     calculate_hash_of_files,
@@ -29,10 +29,7 @@ def test_calculate_hash_of_files(mocker: MockerFixture, tmp_path: Path) -> None:
 
     file0 = tmp_path / "nested" / "file0.txt"
     file1 = tmp_path / "file1.txt"
-    assert (
-        calculate_hash_of_files([file0, file1], tmp_path)
-        == mock_file_hash_obj.hexdigest
-    )
+    assert calculate_hash_of_files([file0, file1], tmp_path) == mock_file_hash_obj.hexdigest
     mock_file_hash_obj.add_files.assert_called_once_with(
         [str(file1), str(file0)], relative_to=tmp_path
     )
@@ -42,7 +39,7 @@ def test_calculate_hash_of_files(mocker: MockerFixture, tmp_path: Path) -> None:
     "directories", [None, [{"path": "./"}], [{"path": "./", "exclusions": ["foobar"]}]]
 )
 def test_get_hash_of_files(
-    directories: Optional[List[Dict[str, Union[List[str], str]]]],
+    directories: Optional[list[dict[str, Union[list[str], str]]]],
     mocker: MockerFixture,
     tmp_path: Path,
 ) -> None:
@@ -74,10 +71,7 @@ def test_get_hash_of_files(
     gitignore.add_rule("exclude/", tmp_path)
 
     if directories:
-        assert (
-            get_hash_of_files(tmp_path, directories)
-            == mock_calculate_hash_of_files.return_value
-        )
+        assert get_hash_of_files(tmp_path, directories) == mock_calculate_hash_of_files.return_value
     else:
         assert get_hash_of_files(tmp_path) == mock_calculate_hash_of_files.return_value
     mock_get_ignorer.assert_has_calls(
@@ -91,7 +85,7 @@ def test_get_hash_of_files(
 
 @pytest.mark.parametrize("additional_exclusions", [None, [], ["foo"], ["foo", "bar"]])
 def test_get_ignorer(
-    additional_exclusions: Optional[List[str]], mocker: MockerFixture, tmp_path: Path
+    additional_exclusions: Optional[list[str]], mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test get_ignorer."""
     ignore_parser = mocker.patch(f"{MODULE}.igittigitt.IgnoreParser")
@@ -103,8 +97,6 @@ def test_get_ignorer(
     ignore_parser.parse_rule_files.assert_called_once_with(tmp_path)
 
     if additional_exclusions:
-        ignore_parser.add_rule.assert_has_calls(
-            [call(i, tmp_path) for i in additional_exclusions]
-        )
+        ignore_parser.add_rule.assert_has_calls([call(i, tmp_path) for i in additional_exclusions])
     else:
         ignore_parser.add_rule.assert_not_called()

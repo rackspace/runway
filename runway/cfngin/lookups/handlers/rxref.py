@@ -4,9 +4,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Tuple
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final
 
 from ....lookups.handlers.base import LookupHandler
 from ....lookups.handlers.cfn import CfnLookup
@@ -14,6 +12,8 @@ from ....utils import DOC_SITE
 from .output import OutputQuery, deconstruct
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ....context import CfnginContext
     from ...providers.aws.default import Provider
 
@@ -32,7 +32,7 @@ class RxrefLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def legacy_parse(cls, value: str) -> Tuple[OutputQuery, Dict[str, str]]:
+    def legacy_parse(cls, value: str) -> tuple[OutputQuery, dict[str, str]]:
         """Retain support for legacy lookup syntax.
 
         Format of value:
@@ -43,9 +43,7 @@ class RxrefLookup(LookupHandler):
         return deconstruct(value), {}
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: CfnginContext, provider: Provider, **_: Any
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext, provider: Provider, **_: Any) -> Any:
         """Fetch an output from the designated stack in the current namespace.
 
         The ``output`` lookup supports fetching outputs from stacks created

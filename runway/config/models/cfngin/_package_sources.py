@@ -1,6 +1,6 @@
 """CFNgin package source models."""
 
-# pylint: disable=no-self-argument
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -38,9 +38,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         default=[],
         description="Array of paths relative to the root of the package source to add to $PATH.",
     )
-    tag: Optional[str] = Field(
-        default=None, title="Git Tag", examples=["1.0.0", "v1.0.0"]
-    )
+    tag: Optional[str] = Field(default=None, title="Git Tag", examples=["1.0.0", "v1.0.0"])
     uri: str = Field(
         ...,
         title="Git Repository URI",
@@ -58,7 +56,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         title = "CFNgin Git Repository Package Source Definition"
 
     @root_validator
-    def _validate_one_ref(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_one_ref(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Ensure that only one ref is defined."""
         ref_keys = ["branch", "commit", "tag"]
         count_ref_defs = sum(bool(values.get(i)) for i in ref_keys)
@@ -166,23 +164,17 @@ class CfnginPackageSourcesDefinitionModel(ConfigProperty):
     git: List[GitCfnginPackageSourceDefinitionModel] = Field(
         default=[],
         title="CFNgin Git Repository Package Source Definitions",
-        description=GitCfnginPackageSourceDefinitionModel.Config.schema_extra[
-            "description"
-        ],
+        description=GitCfnginPackageSourceDefinitionModel.Config.schema_extra["description"],
     )
     local: List[LocalCfnginPackageSourceDefinitionModel] = Field(
         default=[],
         title="CFNgin Local Package Source Definitions",
-        description=LocalCfnginPackageSourceDefinitionModel.Config.schema_extra[
-            "description"
-        ],
+        description=LocalCfnginPackageSourceDefinitionModel.Config.schema_extra["description"],
     )
     s3: List[S3CfnginPackageSourceDefinitionModel] = Field(
         default=[],
         title="CFNgin S3 Package Source Definitions",
-        description=S3CfnginPackageSourceDefinitionModel.Config.schema_extra[
-            "description"
-        ],
+        description=S3CfnginPackageSourceDefinitionModel.Config.schema_extra["description"],
     )
 
     class Config(ConfigProperty.Config):

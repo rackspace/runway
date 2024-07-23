@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+# ruff: noqa: UP006, UP035
 from typing import TYPE_CHECKING, Any, Dict, List, Union, cast
 
 from pydantic import Extra, Field, validator
@@ -40,7 +41,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
         title = "Runway Test Definition"
         use_enum_values = True
 
-    def __new__(cls, **kwargs: Any) -> RunwayTestDefinitionModel:
+    def __new__(cls, **kwargs: Any) -> RunwayTestDefinitionModel:  # noqa: PYI034
         """Create a new instance of a class.
 
         Returns:
@@ -50,20 +51,17 @@ class RunwayTestDefinitionModel(ConfigProperty):
         test_type = kwargs.get("type")
         if cls is RunwayTestDefinitionModel:
             if test_type == "cfn-lint":
-                return super().__new__(CfnLintRunwayTestDefinitionModel)
+                return super().__new__(CfnLintRunwayTestDefinitionModel)  # type: ignore
             if test_type == "script":
-                return super().__new__(ScriptRunwayTestDefinitionModel)
+                return super().__new__(ScriptRunwayTestDefinitionModel)  # type: ignore
             if test_type == "yamllint":
-                return super().__new__(YamlLintRunwayTestDefinitionModel)
-        return super().__new__(cls)
+                return super().__new__(YamlLintRunwayTestDefinitionModel)  # type: ignore
+        return super().__new__(cls)  # type: ignore
 
-    # TODO add regex to schema
-    _validate_string_is_lookup = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("args", "required", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
-    )
+    # TODO (kyle): add regex to schema
+    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+        "args", "required", allow_reuse=True, pre=True
+    )(utils.validate_string_is_lookup)
 
 
 class CfnLintRunwayTestArgs(ConfigProperty):
@@ -84,13 +82,10 @@ class CfnLintRunwayTestArgs(ConfigProperty):
         }
         title = "cfn-lint Runway Test Arguments"
 
-    # TODO add regex to schema
-    _validate_string_is_lookup = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("cli_args", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
-    )
+    # TODO (kyle): add regex to schema
+    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+        "cli_args", allow_reuse=True, pre=True
+    )(utils.validate_string_is_lookup)
 
 
 class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
@@ -106,9 +101,7 @@ class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         default=False,
         description="Whether the test must pass for subsequent tests to be run.",
     )
-    type: Literal["cfn-lint"] = Field(
-        default="cfn-lint", description="The type of test to run."
-    )
+    type: Literal["cfn-lint"] = Field(default="cfn-lint", description="The type of test to run.")
 
     class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
@@ -135,12 +128,10 @@ class ScriptRunwayTestArgs(ConfigProperty):
         }
         title = "Script Runway Test Arguments"
 
-    # TODO add regex to schema
+    # TODO (kyle): add regex to schema
     _validate_string_is_lookup = cast(
         "classmethod[Callable[..., Any]]",
-        validator("commands", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
+        validator("commands", allow_reuse=True, pre=True)(utils.validate_string_is_lookup),
     )
 
 
@@ -157,9 +148,7 @@ class ScriptRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         default=False,
         description="Whether the test must pass for subsequent tests to be run.",
     )
-    type: Literal["script"] = Field(
-        default="script", description="The type of test to run."
-    )
+    type: Literal["script"] = Field(default="script", description="The type of test to run.")
 
     class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""
@@ -178,9 +167,7 @@ class YamlLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):
         default=False,
         description="Whether the test must pass for subsequent tests to be run.",
     )
-    type: Literal["yamllint"] = Field(
-        default="yamllint", description="The type of test to run."
-    )
+    type: Literal["yamllint"] = Field(default="yamllint", description="The type of test to run.")
 
     class Config(RunwayTestDefinitionModel.Config):
         """Model configuration."""

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING
 
 from .....compat import cached_property
 from ._helpers.action_architecture import ActionArchitecture
@@ -23,15 +23,15 @@ class S3SyncHandler:
 
     def __init__(
         self,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *,
         delete: bool = False,
         dest: str,
-        exclude: Optional[List[str]] = None,
+        exclude: list[str] | None = None,
         follow_symlinks: bool = False,
-        include: Optional[List[str]] = None,
-        page_size: Optional[int] = None,
-        session: Optional[boto3.Session] = None,
+        include: list[str] | None = None,
+        page_size: int | None = None,
+        session: boto3.Session | None = None,
         src: str,
     ) -> None:
         """Instantiate class.

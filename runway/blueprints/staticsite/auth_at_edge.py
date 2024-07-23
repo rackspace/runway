@@ -8,7 +8,7 @@ https://aws.amazon.com/blogs/networking-and-content-delivery/authorizationedge-h
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional
 
 import awacs.logs
 import awacs.s3
@@ -27,7 +27,7 @@ LOGGER = logging.getLogger("runway")
 class AuthAtEdge(StaticSite):
     """Auth@Edge Blueprint."""
 
-    AUTH_VARIABLES: Dict[str, BlueprintVariableTypeDef] = {
+    AUTH_VARIABLES: dict[str, BlueprintVariableTypeDef] = {
         "OAuthScopes": {"type": list, "default": [], "description": "OAuth2 Scopes"},
         "PriceClass": {
             "type": str,
@@ -44,8 +44,7 @@ class AuthAtEdge(StaticSite):
         "RedirectPathAuthRefresh": {
             "type": str,
             "default": "/refreshauth",
-            "description": "The URL path that should "
-            "handle the JWT refresh request.",
+            "description": "The URL path that should handle the JWT refresh request.",
         },
         "NonSPAMode": {
             "type": bool,
@@ -59,13 +58,13 @@ class AuthAtEdge(StaticSite):
         },
     }
     IAM_ARN_PREFIX = "arn:aws:iam::aws:policy/service-role/"
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {}
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {}
 
     def __init__(
         self,
         name: str,
         context: CfnginContext,
-        mappings: Optional[Dict[str, Dict[str, Any]]] = None,
+        mappings: Optional[dict[str, dict[str, Any]]] = None,
         description: Optional[str] = None,
     ) -> None:
         """Initialize the Blueprint.
@@ -77,9 +76,7 @@ class AuthAtEdge(StaticSite):
             description: Used to describe the resulting CloudFormation template.
 
         """
-        super().__init__(
-            name=name, context=context, description=description, mappings=mappings
-        )
+        super().__init__(name=name, context=context, description=description, mappings=mappings)
         self.VARIABLES.update(StaticSite.VARIABLES)
         self.VARIABLES.update(self.AUTH_VARIABLES)
 
@@ -94,8 +91,8 @@ class AuthAtEdge(StaticSite):
         bucket = self.add_bucket()
         oai = self.add_origin_access_identity()
         bucket_policy = self.add_cloudfront_bucket_policy(bucket, oai)
-        # TODO Make this available in Auth@Edge
-        lambda_function_associations: List[cloudfront.LambdaFunctionAssociation] = []
+        # TODO (kyle): make this available in Auth@Edge
+        lambda_function_associations: list[cloudfront.LambdaFunctionAssociation] = []
 
         if self.directory_index_specified:
             index_rewrite = self._get_index_rewrite_role_function_and_version()
@@ -109,36 +106,28 @@ class AuthAtEdge(StaticSite):
             check_auth_name,
             "Check Authorization information for request",
             "check_auth",
-            self.add_lambda_execution_role(
-                "CheckAuthLambdaExecutionRole", check_auth_name
-            ),
+            self.add_lambda_execution_role("CheckAuthLambdaExecutionRole", check_auth_name),
         )
         http_headers_name = "HttpHeaders"
         http_headers_lambda = self.get_auth_at_edge_lambda_and_ver(
             http_headers_name,
             "Additional Headers added to every response",
             "http_headers",
-            self.add_lambda_execution_role(
-                "HttpHeadersLambdaExecutionRole", http_headers_name
-            ),
+            self.add_lambda_execution_role("HttpHeadersLambdaExecutionRole", http_headers_name),
         )
         parse_auth_name = "ParseAuth"
         parse_auth_lambda = self.get_auth_at_edge_lambda_and_ver(
             parse_auth_name,
             "Parse the Authorization Headers/Cookies for the request",
             "parse_auth",
-            self.add_lambda_execution_role(
-                "ParseAuthLambdaExecutionRole", parse_auth_name
-            ),
+            self.add_lambda_execution_role("ParseAuthLambdaExecutionRole", parse_auth_name),
         )
         refresh_auth_name = "RefreshAuth"
         refresh_auth_lambda = self.get_auth_at_edge_lambda_and_ver(
             refresh_auth_name,
             "Refresh the Authorization information when expired",
             "refresh_auth",
-            self.add_lambda_execution_role(
-                "RefreshAuthLambdaExecutionRole", refresh_auth_name
-            ),
+            self.add_lambda_execution_role("RefreshAuthLambdaExecutionRole", refresh_auth_name),
         )
         sign_out_name = "SignOut"
         sign_out_lambda = self.get_auth_at_edge_lambda_and_ver(
@@ -163,7 +152,7 @@ class AuthAtEdge(StaticSite):
 
     def get_auth_at_edge_lambda_and_ver(
         self, title: str, description: str, handle: str, role: iam.Role
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create a lambda function and its version.
 
         Args:
@@ -217,9 +206,7 @@ class AuthAtEdge(StaticSite):
 
         return lamb
 
-    def add_version(
-        self, title: str, lambda_function: awslambda.Function
-    ) -> awslambda.Version:
+    def add_version(self, title: str, lambda_function: awslambda.Function) -> awslambda.Version:
         """Create a version association with a Lambda@Edge function.
 
         In order to ensure different versions of the function
@@ -235,22 +222,20 @@ class AuthAtEdge(StaticSite):
         s3_key = lambda_function.properties["Code"].to_dict()["S3Key"]
         code_hash = s3_key.split(".")[0].split("-")[-1]
         return self.template.add_resource(
-            awslambda.Version(
-                title + "Ver" + code_hash, FunctionName=lambda_function.ref()
-            )
+            awslambda.Version(title + "Ver" + code_hash, FunctionName=lambda_function.ref())
         )
 
     def get_distribution_options(
         self,
         bucket: s3.Bucket,
         oai: cloudfront.CloudFrontOriginAccessIdentity,
-        lambda_funcs: List[cloudfront.LambdaFunctionAssociation],
+        lambda_funcs: list[cloudfront.LambdaFunctionAssociation],
         check_auth_lambda_version: awslambda.Version,
         http_headers_lambda_version: awslambda.Version,
         parse_auth_lambda_version: awslambda.Version,
         refresh_auth_lambda_version: awslambda.Version,
         sign_out_lambda_version: awslambda.Version,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Retrieve the options for our CloudFront distribution.
 
         Keyword Args:
@@ -353,7 +338,7 @@ class AuthAtEdge(StaticSite):
             "ViewerCertificate": self.add_acm_cert(),
         }
 
-    def _get_error_responses(self) -> List[cloudfront.CustomErrorResponse]:
+    def _get_error_responses(self) -> list[cloudfront.CustomErrorResponse]:
         """Return error response based on site stack variables.
 
         When custom_error_responses are defined return those, if running
@@ -379,9 +364,9 @@ class AuthAtEdge(StaticSite):
         ]
 
     # pyright: reportIncompatibleMethodOverride=none
-    def _get_cloudfront_bucket_policy_statements(  # pylint: disable=arguments-differ
+    def _get_cloudfront_bucket_policy_statements(
         self, bucket: s3.Bucket, oai: cloudfront.CloudFrontOriginAccessIdentity
-    ) -> List[Statement]:
+    ) -> list[Statement]:
         return [
             Statement(
                 Action=[awacs.s3.GetObject],

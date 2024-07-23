@@ -1,16 +1,13 @@
 """Test runway.module.cdk."""
 
-# pylint: disable=unused-argument
-# pyright: basic
 from __future__ import annotations
 
 import logging
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
-from unittest.mock import call
+from typing import TYPE_CHECKING, Any, Optional
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock
 
 from runway.config.models.runway.options.cdk import RunwayCdkModuleOptionsDataModel
 from runway.module.cdk import CloudDevelopmentKit, CloudDevelopmentKitOptions
@@ -18,7 +15,6 @@ from runway.module.cdk import CloudDevelopmentKit, CloudDevelopmentKitOptions
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
     from pytest_subprocess.fake_popen import FakePopen
@@ -35,7 +31,7 @@ class TestCloudDevelopmentKit:
 
     def test_cdk_bootstrap(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: RunwayContext,
         tmp_path: Path,
@@ -66,24 +62,20 @@ class TestCloudDevelopmentKit:
     ) -> None:
         """Test cdk_bootstrap raise CalledProcessError."""
         mocker.patch.object(CloudDevelopmentKit, "gen_cmd")
-        mocker.patch(
-            f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, "")
-        )
+        mocker.patch(f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, ""))
         with pytest.raises(CalledProcessError):
             CloudDevelopmentKit(runway_context, module_root=tmp_path).cdk_bootstrap()
 
     def test_cdk_deploy(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
         """Test cdk_deploy."""
         caplog.set_level(logging.INFO, logger=MODULE)
-        mock_gen_cmd = mocker.patch.object(
-            CloudDevelopmentKit, "gen_cmd", return_value=["deploy"]
-        )
+        mock_gen_cmd = mocker.patch.object(CloudDevelopmentKit, "gen_cmd", return_value=["deploy"])
         mock_run_module_command = mocker.patch(f"{MODULE}.run_module_command")
         obj = CloudDevelopmentKit(runway_context, module_root=tmp_path)
         assert not obj.cdk_deploy()
@@ -105,24 +97,20 @@ class TestCloudDevelopmentKit:
     ) -> None:
         """Test cdk_deploy raise CalledProcessError."""
         mocker.patch.object(CloudDevelopmentKit, "gen_cmd")
-        mocker.patch(
-            f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, "")
-        )
+        mocker.patch(f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, ""))
         with pytest.raises(CalledProcessError):
             CloudDevelopmentKit(runway_context, module_root=tmp_path).cdk_deploy()
 
     def test_cdk_destroy(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
         """Test cdk_destroy."""
         caplog.set_level(logging.INFO, logger=MODULE)
-        mock_gen_cmd = mocker.patch.object(
-            CloudDevelopmentKit, "gen_cmd", return_value=["destroy"]
-        )
+        mock_gen_cmd = mocker.patch.object(CloudDevelopmentKit, "gen_cmd", return_value=["destroy"])
         mock_run_module_command = mocker.patch(f"{MODULE}.run_module_command")
         obj = CloudDevelopmentKit(runway_context, module_root=tmp_path)
         assert not obj.cdk_destroy()
@@ -144,30 +132,24 @@ class TestCloudDevelopmentKit:
     ) -> None:
         """Test cdk_destroy raise CalledProcessError."""
         mocker.patch.object(CloudDevelopmentKit, "gen_cmd")
-        mocker.patch(
-            f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, "")
-        )
+        mocker.patch(f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, ""))
         with pytest.raises(CalledProcessError):
             CloudDevelopmentKit(runway_context, module_root=tmp_path).cdk_destroy()
 
     def test_cdk_diff(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
         """Test cdk_diff."""
         caplog.set_level(logging.INFO, logger=MODULE)
-        mock_gen_cmd = mocker.patch.object(
-            CloudDevelopmentKit, "gen_cmd", return_value=["diff"]
-        )
+        mock_gen_cmd = mocker.patch.object(CloudDevelopmentKit, "gen_cmd", return_value=["diff"])
         mock_run_module_command = mocker.patch(f"{MODULE}.run_module_command")
         obj = CloudDevelopmentKit(runway_context, module_root=tmp_path)
         assert not obj.cdk_diff()
-        mock_gen_cmd.assert_called_once_with(
-            "diff", args_list=None, include_context=True
-        )
+        mock_gen_cmd.assert_called_once_with("diff", args_list=None, include_context=True)
         mock_run_module_command.assert_called_once_with(
             cmd_list=mock_gen_cmd.return_value,
             env_vars=runway_context.env.vars,
@@ -178,9 +160,7 @@ class TestCloudDevelopmentKit:
         assert "plan (in progress)" in logs
         assert "plan (complete)" in logs
         assert not obj.cdk_diff("stack_name")
-        mock_gen_cmd.assert_called_with(
-            "diff", args_list=["stack_name"], include_context=True
-        )
+        mock_gen_cmd.assert_called_with("diff", args_list=["stack_name"], include_context=True)
 
     @pytest.mark.parametrize("return_code", [1, 2])
     def test_cdk_diff_catch_called_process_error_sys_exit(
@@ -208,9 +188,7 @@ class TestCloudDevelopmentKit:
         tmp_path: Path,
     ) -> None:
         """Test cdk_list."""
-        mock_gen_cmd = mocker.patch.object(
-            CloudDevelopmentKit, "gen_cmd", return_value=["list"]
-        )
+        mock_gen_cmd = mocker.patch.object(CloudDevelopmentKit, "gen_cmd", return_value=["list"])
         fake_process.register_subprocess(
             mock_gen_cmd.return_value, returncode=0, stdout="Stack0\nStack1"
         )
@@ -227,12 +205,8 @@ class TestCloudDevelopmentKit:
         tmp_path: Path,
     ) -> None:
         """Test cdk_list empty."""
-        mock_gen_cmd = mocker.patch.object(
-            CloudDevelopmentKit, "gen_cmd", return_value=["list"]
-        )
-        fake_process.register_subprocess(
-            mock_gen_cmd.return_value, returncode=0, stdout=""
-        )
+        mock_gen_cmd = mocker.patch.object(CloudDevelopmentKit, "gen_cmd", return_value=["list"])
+        fake_process.register_subprocess(mock_gen_cmd.return_value, returncode=0, stdout="")
         obj = CloudDevelopmentKit(runway_context, module_root=tmp_path)
         assert obj.cdk_list() == [""]
         assert fake_process.call_count(mock_gen_cmd.return_value) == 1
@@ -245,9 +219,7 @@ class TestCloudDevelopmentKit:
         tmp_path: Path,
     ) -> None:
         """Test cdk_list raise CalledProcessError."""
-        mock_gen_cmd = mocker.patch.object(
-            CloudDevelopmentKit, "gen_cmd", return_value=["list"]
-        )
+        mock_gen_cmd = mocker.patch.object(CloudDevelopmentKit, "gen_cmd", return_value=["list"])
         fake_process.register_subprocess(
             mock_gen_cmd.return_value,
             returncode=1,
@@ -271,7 +243,7 @@ class TestCloudDevelopmentKit:
     def test_cli_args(
         self,
         debug: bool,
-        expected: List[str],
+        expected: list[str],
         no_color: bool,
         tmp_path: Path,
         verbose: bool,
@@ -299,9 +271,9 @@ class TestCloudDevelopmentKit:
     )
     def test_cli_args_context(
         self,
-        expected: List[str],
+        expected: list[str],
         runway_context: RunwayContext,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         tmp_path: Path,
     ) -> None:
         """Test cli_args_context."""
@@ -409,10 +381,10 @@ class TestCloudDevelopmentKit:
     )
     def test_gen_cmd(
         self,
-        args_list: Optional[List[str]],
+        args_list: Optional[list[str]],
         command: CdkCommandTypeDef,
         env_ci: bool,
-        expected: List[str],
+        expected: list[str],
         include_context: bool,
         mocker: MockerFixture,
         runway_context: RunwayContext,
@@ -420,9 +392,7 @@ class TestCloudDevelopmentKit:
     ) -> None:
         """Test gen_cmd."""
         mocker.patch.object(CloudDevelopmentKit, "cli_args", ["cli_args"])
-        mocker.patch.object(
-            CloudDevelopmentKit, "cli_args_context", ["cli_args_context"]
-        )
+        mocker.patch.object(CloudDevelopmentKit, "cli_args_context", ["cli_args_context"])
         generate_node_command = mocker.patch(
             f"{MODULE}.generate_node_command", return_value=["success"]
         )
@@ -495,16 +465,14 @@ class TestCloudDevelopmentKit:
 
     def test_run_build_steps_empty(
         self,
-        caplog: LogCaptureFixture,
-        fake_process: FakeProcess,
+        caplog: pytest.LogCaptureFixture,
+        fake_process: FakeProcess,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
         """Test run_build_steps."""
         caplog.set_level(logging.INFO, logger=MODULE)
-        obj = CloudDevelopmentKit(
-            runway_context, module_root=tmp_path, options={"build_steps": []}
-        )
+        obj = CloudDevelopmentKit(runway_context, module_root=tmp_path, options={"build_steps": []})
         assert not obj.run_build_steps()
         logs = "\n".join(caplog.messages)
         assert "build steps (in progress)" not in logs
@@ -512,10 +480,10 @@ class TestCloudDevelopmentKit:
 
     def test_run_build_steps_linux(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fake_process: FakeProcess,
         mocker: MockerFixture,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -535,9 +503,9 @@ class TestCloudDevelopmentKit:
 
     def test_run_build_steps_raise_file_not_found(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fake_process: FakeProcess,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -561,7 +529,7 @@ class TestCloudDevelopmentKit:
     def test_run_build_steps_raise_called_process_error(
         self,
         fake_process: FakeProcess,
-        platform_linux: None,
+        platform_linux: None,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -577,10 +545,10 @@ class TestCloudDevelopmentKit:
 
     def test_run_build_steps_windows(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fake_process: FakeProcess,
         mocker: MockerFixture,
-        platform_windows: None,
+        platform_windows: None,  # noqa: ARG002
         runway_context: RunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -611,7 +579,7 @@ class TestCloudDevelopmentKit:
     )
     def test_skip(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         expected: bool,
         explicitly_enabled: bool,
         mocker: MockerFixture,
@@ -637,9 +605,7 @@ class TestCloudDevelopmentKit:
         if package_json_missing:
             assert "skipped; package.json" in "\n".join(caplog.messages)
         elif not explicitly_enabled:
-            assert "skipped; environment required but not defined" in "\n".join(
-                caplog.messages
-            )
+            assert "skipped; environment required but not defined" in "\n".join(caplog.messages)
 
 
 class TestCloudDevelopmentKitOptions:

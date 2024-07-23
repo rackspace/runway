@@ -2,9 +2,8 @@
 
 https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-"""
+"""  # noqa: INP001
 
-# pylint: skip-file
 import os
 from pathlib import Path
 
@@ -18,7 +17,7 @@ SRC_DIR = DOCS_DIR / "source"
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 project = "Runway"
-copyright = "2021, Onica Group"
+copyright = "2021, Onica Group"  # noqa: A001
 author = "Onica Group"
 release = Version.from_git().serialize(metadata=False, style=Style.SemVer)
 version = ".".join(release.split(".")[:2])  # short X.Y version
@@ -52,7 +51,7 @@ language = None
 master_doc = "index"
 needs_extensions = {}
 needs_sphinx = "3.5"
-nitpicky = False  # TODO enable nitpicky
+nitpicky = False  # TODO (kyle): enable nitpicky
 primary_domain = "py"
 pygments_style = "material"  # syntax highlighting style
 # Appended to the end of each rendered file

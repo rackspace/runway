@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Union
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, Final, Union
 
 from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ class SsmLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls,
         value: str,
         context: Union[CfnginContext, RunwayContext],
@@ -46,9 +46,7 @@ class SsmLookup(LookupHandler):
         client = session.client("ssm")
 
         try:
-            response = client.get_parameter(Name=query, WithDecryption=True)[
-                "Parameter"
-            ]
+            response = client.get_parameter(Name=query, WithDecryption=True)["Parameter"]
             return cls.format_results(
                 (
                     response["Value"].split(",")

@@ -84,9 +84,7 @@ DescribeModel = Action("DescribeModel")
 DescribeModelPackage = Action("DescribeModelPackage")
 DescribeMonitoringSchedule = Action("DescribeMonitoringSchedule")
 DescribeNotebookInstance = Action("DescribeNotebookInstance")
-DescribeNotebookInstanceLifecycleConfig = Action(
-    "DescribeNotebookInstanceLifecycleConfig"
-)
+DescribeNotebookInstanceLifecycleConfig = Action("DescribeNotebookInstanceLifecycleConfig")
 DescribeProcessingJob = Action("DescribeProcessingJob")
 DescribeSubscribedWorkteam = Action("DescribeSubscribedWorkteam")
 DescribeTrainingJob = Action("DescribeTrainingJob")
@@ -125,9 +123,7 @@ ListProcessingJobs = Action("ListProcessingJobs")
 ListSubscribedWorkteams = Action("ListSubscribedWorkteams")
 ListTags = Action("ListTags")
 ListTrainingJobs = Action("ListTrainingJobs")
-ListTrainingJobsForHyperParameterTuningJob = Action(
-    "ListTrainingJobsForHyperParameterTuningJob"
-)
+ListTrainingJobsForHyperParameterTuningJob = Action("ListTrainingJobsForHyperParameterTuningJob")
 ListTransformJobs = Action("ListTransformJobs")
 ListTrialComponents = Action("ListTrialComponents")
 ListTrials = Action("ListTrials")

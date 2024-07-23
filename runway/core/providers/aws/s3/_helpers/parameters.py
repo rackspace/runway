@@ -1,9 +1,10 @@
 """Parameters."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, List, Optional, cast
 
 from pydantic import validator
 from typing_extensions import Literal
@@ -77,8 +78,8 @@ class ParametersDataModel(BaseModel):
     @classmethod
     def _determine_paths_type(
         cls,
-        v: Optional[str],  # pylint: disable=unused-argument
-        values: Dict[str, Any],
+        v: str | None,  # noqa: ARG003
+        values: dict[str, Any],
     ) -> PathsType:
         """Determine paths type for the given src and dest."""
         # these have already been validated so it's "safe" to cast them
@@ -102,9 +103,7 @@ class ParametersDataModel(BaseModel):
 class Parameters:
     """Initial error based on the parameters and arguments passed to sync."""
 
-    def __init__(
-        self, action: str, parameters: Union[Dict[str, Any], ParametersDataModel]
-    ):
+    def __init__(self, action: str, parameters: dict[str, Any] | ParametersDataModel) -> None:
         """Instantiate class.
 
         Args:
@@ -139,8 +138,6 @@ class Parameters:
 
     def _same_path(self) -> bool:
         """Evaluate if the src and dest are the same path."""
-        if not self.data.paths_type == "s3s3":
+        if self.data.paths_type != "s3s3":
             return False
-        if self.data.src == self.data.dest:
-            return True
-        return False
+        return self.data.src == self.data.dest

@@ -1,18 +1,21 @@
-"""Tests for update_urls."""
+"""Tests for update_urls."""  # noqa: INP001
 
-# pylint: disable=no-member
+# ruff: noqa: S101
+from typing import TYPE_CHECKING
 from unittest.mock import ANY, Mock, call, patch
 
 import boto3
 import pytest
 from botocore.stub import Stubber
 from click.testing import CliRunner
-from mypy_boto3_dynamodb.service_resource import Table
 
 from update_urls import command, handler, put_item, sanitize_version
 
+if TYPE_CHECKING:
+    from mypy_boto3_dynamodb.service_resource import Table
 
-def test_sanitize_version():
+
+def test_sanitize_version() -> None:
     """Test sanitize_version."""
     assert sanitize_version(None, None, "1.0.0") == "1.0.0"
     assert sanitize_version(None, None, "v1.0.0") == "1.0.0"
@@ -20,11 +23,11 @@ def test_sanitize_version():
     assert sanitize_version(None, None, "refs/tags/v1.0.0") == "1.0.0"
     assert sanitize_version(None, None, "refs/tags/v1.0.0-dev1") == "1.0.0-dev1"
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         assert not sanitize_version(None, None, "refs/tags/stable")
 
 
-def test_put_item():
+def test_put_item() -> None:
     """Test put_item."""
     table_name = "test-table"
     id_val = "my_id"
@@ -32,16 +35,14 @@ def test_put_item():
     table: Table = boto3.resource("dynamodb").Table(table_name)
     stubber = Stubber(table.meta.client)
 
-    stubber.add_response(
-        "put_item", {"Attributes": {"id": {"S": id_val}, "target": {"S": target}}}
-    )
+    stubber.add_response("put_item", {"Attributes": {"id": {"S": id_val}, "target": {"S": target}}})
 
     with stubber:
         assert not put_item(table, id_val, target)
 
 
 @patch("update_urls.put_item")
-def test_handler(mock_put_item: Mock):
+def test_handler(mock_put_item: Mock) -> None:
     """Test handler."""
     table = Mock()
     assert not handler(table, "test-bucket", "us-west-2", "1.0.0", True)
@@ -49,26 +50,22 @@ def test_handler(mock_put_item: Mock):
         call(
             table=table,
             id_val="runway/latest/linux",
-            target="https://test-bucket.s3-us-west-2.amazonaws.com/"
-            "runway/1.0.0/linux/runway",
+            target="https://test-bucket.s3-us-west-2.amazonaws.com/runway/1.0.0/linux/runway",
         ),
         call(
             table=table,
             id_val="runway/1.0.0/linux",
-            target="https://test-bucket.s3-us-west-2.amazonaws.com/"
-            "runway/1.0.0/linux/runway",
+            target="https://test-bucket.s3-us-west-2.amazonaws.com/runway/1.0.0/linux/runway",
         ),
         call(
             table=table,
             id_val="runway/latest/osx",
-            target="https://test-bucket.s3-us-west-2.amazonaws.com/"
-            "runway/1.0.0/osx/runway",
+            target="https://test-bucket.s3-us-west-2.amazonaws.com/runway/1.0.0/osx/runway",
         ),
         call(
             table=table,
             id_val="runway/1.0.0/osx",
-            target="https://test-bucket.s3-us-west-2.amazonaws.com/"
-            "runway/1.0.0/osx/runway",
+            target="https://test-bucket.s3-us-west-2.amazonaws.com/runway/1.0.0/osx/runway",
         ),
         call(
             table=table,
@@ -89,16 +86,14 @@ def test_handler(mock_put_item: Mock):
         call(
             table=table,
             id_val="runway/1.1.0/linux",
-            target="https://test-bucket.s3-us-east-1.amazonaws.com/"
-            "runway/1.1.0/linux/runway",
+            target="https://test-bucket.s3-us-east-1.amazonaws.com/runway/1.1.0/linux/runway",
         )
     )
     calls.append(
         call(
             table=table,
             id_val="runway/1.1.0/osx",
-            target="https://test-bucket.s3-us-east-1.amazonaws.com/"
-            "runway/1.1.0/osx/runway",
+            target="https://test-bucket.s3-us-east-1.amazonaws.com/runway/1.1.0/osx/runway",
         )
     )
     calls.append(
@@ -114,7 +109,7 @@ def test_handler(mock_put_item: Mock):
 
 
 @patch("update_urls.handler")
-def test_command(mock_handler: Mock):
+def test_command(mock_handler: Mock) -> None:
     """Test command."""
     runner = CliRunner()
     result = runner.invoke(

@@ -2,18 +2,23 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import List
+from typing import TYPE_CHECKING
 
 import pytest
 from typing_extensions import TypedDict
 
-LocalFiles = TypedDict(
-    "LocalFiles", files=List[Path], local_dir=Path, local_file=Path, tmp_path=Path
-)
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
-@pytest.fixture(scope="function")
+class LocalFiles(TypedDict):
+    files: list[Path]
+    local_dir: Path
+    local_file: Path
+    tmp_path: Path
+
+
+@pytest.fixture()
 def loc_files(tmp_path: Path) -> LocalFiles:
     """Fixture for creating local files."""
     file0 = tmp_path / "some_directory" / "text0.txt"

@@ -98,12 +98,8 @@ class Dependencies(Blueprint):
                         Statement(
                             Action=[awacs.s3.PutObject],
                             Effect=Allow,
-                            Principal=AWSPrincipal(
-                                Join(":", ["arn:aws:iam:", AccountId, "root"])
-                            ),
-                            Resource=[
-                                Join("", ["arn:aws:s3:::", awslogbucket.ref(), "/*"])
-                            ],
+                            Principal=AWSPrincipal(Join(":", ["arn:aws:iam:", AccountId, "root"])),
+                            Resource=[Join("", ["arn:aws:s3:::", awslogbucket.ref(), "/*"])],
                         )
                     ],
                 ),
@@ -114,11 +110,7 @@ class Dependencies(Blueprint):
                 "Artifacts",
                 AccessControl=s3.Private,
                 LifecycleConfiguration=s3.LifecycleConfiguration(
-                    Rules=[
-                        s3.LifecycleRule(
-                            NoncurrentVersionExpirationInDays=90, Status="Enabled"
-                        )
-                    ]
+                    Rules=[s3.LifecycleRule(NoncurrentVersionExpirationInDays=90, Status="Enabled")]
                 ),
                 VersioningConfiguration=s3.VersioningConfiguration(Status="Enabled"),
             )
@@ -142,11 +134,8 @@ class Dependencies(Blueprint):
                     "SupportedIdentityProviders"
                 ]
 
-                redirect_domains = [
-                    add_url_scheme(x) for x in self.variables["Aliases"]
-                ] + [
-                    add_url_scheme(x)
-                    for x in self.variables["AdditionalRedirectDomains"]
+                redirect_domains = [add_url_scheme(x) for x in self.variables["Aliases"]] + [
+                    add_url_scheme(x) for x in self.variables["AdditionalRedirectDomains"]
                 ]
                 redirect_uris = get_redirect_uris(
                     redirect_domains,
@@ -161,9 +150,7 @@ class Dependencies(Blueprint):
                 ]["callback_urls"]
 
             if self.variables["CreateUserPool"]:
-                user_pool = template.add_resource(
-                    cognito.UserPool("AuthAtEdgeUserPool")
-                )
+                user_pool = template.add_resource(cognito.UserPool("AuthAtEdgeUserPool"))
 
                 user_pool_id = user_pool.ref()
 
@@ -175,9 +162,7 @@ class Dependencies(Blueprint):
                     )
                 )
             else:
-                user_pool_id = self.context.hook_data["aae_user_pool_id_retriever"][
-                    "id"
-                ]
+                user_pool_id = self.context.hook_data["aae_user_pool_id_retriever"]["id"]
             userpool_client_params["UserPoolId"] = user_pool_id
 
             client = template.add_resource(

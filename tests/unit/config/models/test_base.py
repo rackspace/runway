@@ -1,7 +1,7 @@
 """Test runway.config.models.base."""
 
 # pyright: basic
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import pytest
 from pydantic import Extra, ValidationError
@@ -33,7 +33,7 @@ class GoodObject(ConfigProperty):
 
     name: str
     bool_field: bool = True
-    dict_field: Dict[str, Any] = {}
+    dict_field: dict[str, Any] = {}
     optional_str_field: Optional[str] = None
 
     class Config(ConfigProperty.Config):
@@ -81,8 +81,7 @@ class TestConfigProperty:
     def test_validate_assignment(self) -> None:
         """Test Config.validate_assignment."""
         with pytest.raises(ValidationError) as excinfo:
-            obj = GoodObject(name="test")
-            obj.name = ("invalid",)  # type: ignore
+            GoodObject(name="test").name = ("invalid",)  # type: ignore
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("name",)

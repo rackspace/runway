@@ -1,9 +1,10 @@
 """Runway static site Module options."""
 
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, List, Optional, cast
 
 from pydantic import Extra, root_validator
 
@@ -37,23 +38,19 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
         title = "Runway static site Module extra_files option item."
 
     @root_validator
-    def _autofill_content_type(  # pylint: disable=no-self-argument
-        cls, values: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _autofill_content_type(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Attempt to fill content_type if not provided."""
         if values.get("content_type"):
             return values
         name = cast(str, values.get("name", ""))
         if name.endswith(".json"):
             values["content_type"] = "application/json"
-        elif name.endswith(".yaml") or name.endswith(".yml"):
+        elif name.endswith((".yaml", ".yml")):
             values["content_type"] = "text/yaml"
         return values
 
     @root_validator(pre=True)
-    def _validate_content_or_file(  # pylint: disable=no-self-argument
-        cls, values: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _validate_content_or_file(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate that content or file is provided."""
         if all(i in values and values[i] for i in ["content", "file"]):
             raise ValueError("only one of content or file can be provided")

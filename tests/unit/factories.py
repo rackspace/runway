@@ -1,48 +1,53 @@
 """Test classes."""
 
-# pyright: basic, reportIncompatibleMethodOverride=none
+# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Tuple
+from functools import cached_property
+from typing import TYPE_CHECKING, Any, cast
+from unittest.mock import MagicMock
 
 import boto3
 import yaml
 from botocore.stub import Stubber
-from mock import MagicMock
 from packaging.specifiers import SpecifierSet
 
 from runway.config.components.runway import RunwayDeploymentDefinition
 from runway.context import CfnginContext, RunwayContext
-from runway.core.components import DeployEnvironment
 from runway.utils import MutableMap
 
 if TYPE_CHECKING:
+    from collections.abc import MutableMapping
     from pathlib import Path
 
     from boto3.resources.base import ServiceResource
     from botocore.client import BaseClient
+    from mypy_boto3_s3.client import S3Client
 
     from runway.config import CfnginConfig
+    from runway.core.components import DeployEnvironment
     from runway.core.type_defs import RunwayActionTypeDef
 
 
 class MockBoto3Session:
-    """Mock class that acts like a boto3.session.
+    """Mock class that acts like a :class:`boto3.session.Session`.
 
-    Must be preloaded with stubbers.
+    Clients must be registered using :meth:`~pytest_runway.MockBoto3Session.register_client`
+    before the can be created with the usual :meth:`~pytest_runway.MockBoto3Session.client`
+    call. This is to ensure that all AWS calls are stubbed.
 
     """
 
     def __init__(
         self,
         *,
-        clients: Optional[MutableMap] = None,
-        aws_access_key_id: Optional[str] = None,
-        aws_secret_access_key: Optional[str] = None,
-        aws_session_token: Optional[str] = None,
-        profile_name: Optional[str] = None,
-        region_name: Optional[str] = None,
-    ):
+        clients: MutableMap | None = None,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        profile_name: str | None = None,
+        region_name: str | None = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -55,7 +60,6 @@ class MockBoto3Session:
 
         """
         self._clients = clients or MutableMap()
-        self._client_calls: Dict[str, Any] = {}
         self._session = MagicMock()
         self.aws_access_key_id = aws_access_key_id
         self.aws_secret_access_key = aws_secret_access_key
@@ -63,81 +67,95 @@ class MockBoto3Session:
         self.profile_name = profile_name
         self.region_name = region_name
 
-    def assert_client_called_with(self, service_name: str, **kwargs: Any) -> None:
-        """Assert a client was created with the provided kwargs."""
-        key = f"{service_name}.{kwargs.get('region_name', self.region_name)}"
-        assert self._client_calls[key] == kwargs
-
     def client(self, service_name: str, **kwargs: Any) -> BaseClient:
         """Return a stubbed client.
 
         Args:
             service_name: The name of a service, e.g. 's3' or 'ec2'.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Stubbed boto3 client.
 
         Raises:
-            KeyError: Client was not stubbed from Context before trying to use.
+            ValueError: Client was not stubbed from Context before trying to use.
 
         """
-        key = f"{service_name}.{kwargs.get('region_name', self.region_name)}"
-        self._client_calls[key] = kwargs
-        return self._clients[key]
+        key = f"{service_name}.{kwargs.get('region_name') or self.region_name}"
+        try:
+            return self._clients[key]
+        except AttributeError:
+            raise ValueError(f"client not registered for {key}") from None
 
     def register_client(
-        self, service_name: str, region_name: Optional[str] = None
-    ) -> Tuple[Any, Stubber]:
+        self, service_name: str, *, region: str | None = None
+    ) -> tuple[Any, Stubber]:
         """Register a client for the boto3 session.
 
         Args:
             service_name: The name of a service, e.g. 's3' or 'ec2'.
-            region_name: AWS region.
+            region: AWS region.
 
         """
-        key = f"{service_name}.{region_name or self.region_name}"
-        client = boto3.client(  # type: ignore
-            service_name,  # type: ignore
-            region_name=region_name or self.region_name,
+        key = f"{service_name}.{region or self.region_name}"
+        client = cast(
+            "BaseClient",
+            boto3.client(
+                service_name,  # pyright: ignore[reportCallIssue, reportArgumentType]
+                region_name=region or self.region_name,
+            ),
         )
-        stubber = Stubber(client)  # type: ignore
-        self._clients[key] = client  # type: ignore
-        return client, stubber  # type: ignore
+        stubber = Stubber(client)
+        self._clients[key] = client
+        return client, stubber
 
     def resource(self, service_name: str, **kwargs: Any) -> ServiceResource:
         """Return a stubbed resource."""
         kwargs.setdefault("region_name", self.region_name)
-        resource: ServiceResource = boto3.resource(service_name, **kwargs)  # type: ignore
-        resource.meta.client = self._clients[f"{service_name}.{kwargs['region_name']}"]
+        resource = cast(
+            "ServiceResource",
+            boto3.resource(
+                service_name,  # pyright: ignore[reportCallIssue, reportArgumentType]
+                **kwargs,
+            ),
+        )
+        resource.meta.client = self.client(service_name, **kwargs)
         return resource
 
-    def service(self, service_name: str, region_name: Optional[str] = None) -> None:
-        """Not implimented."""
+    def service(self, service_name: str, *, region_name: str | None = None) -> None:
+        """Not implemented."""
         raise NotImplementedError
 
 
-class MockCFNginContext(CfnginContext):
-    """Subclass CFNgin context object for tests."""
+class MockCfnginContext(CfnginContext):
+    """Subclass of :class:`~runway.context.CfnginContext` for tests."""
 
     def __init__(
         self,
         *,
-        config_path: Optional[Path] = None,
-        config: Optional[CfnginConfig] = None,
-        deploy_environment: Optional[DeployEnvironment] = None,
-        parameters: Optional[MutableMapping[str, Any]] = None,
-        force_stacks: Optional[List[str]] = None,
-        region: Optional[str] = "us-east-1",
-        stack_names: Optional[List[str]] = None,
-        work_dir: Optional[Path] = None,
+        config: CfnginConfig | None = None,
+        config_path: Path | None = None,
+        deploy_environment: DeployEnvironment,
+        force_stacks: list[str] | None = None,
+        parameters: MutableMapping[str, Any] | None = None,
+        stack_names: list[str] | None = None,
+        work_dir: Path | None = None,
         **_: Any,
     ) -> None:
-        """Instantiate class."""
-        self._boto3_test_client = MutableMap()
-        self._boto3_test_stubber = MutableMap()
+        """Instantiate class.
 
-        # used during init process
-        self.s3_stubber = self.add_stubber("s3", region=region)
+        Args:
+            config: The CFNgin configuration being operated on.
+            config_path: Path to the config file that was provided.
+            deploy_environment: The current deploy environment.
+            force_stacks: A list of stacks to force work on. Used to work on locked stacks.
+            parameters: Parameters passed from Runway or read from a file.
+            stack_names: A list of stack_names to operate on. If not passed,
+                all stacks defined in the config will be operated on.
+            work_dir: Working directory used by CFNgin.
+
+        """
+        self._boto3_sessions: dict[str, MockBoto3Session] = {}
 
         super().__init__(
             config_path=config_path,
@@ -149,41 +167,112 @@ class MockCFNginContext(CfnginContext):
             work_dir=work_dir,
         )
 
-    def add_stubber(self, service_name: str, region: Optional[str] = None) -> Stubber:
+    @cached_property
+    def s3_client(self) -> S3Client:
+        """AWS S3 client.
+
+        Adds an S3 stubber prior to returning from :attr:`~runway.context.CfnginContext.s3_client`.
+
+        """
+        self.add_stubber("s3", region=self.bucket_region)
+        return super().s3_client
+
+    def add_stubber(
+        self,
+        service_name: str,
+        *,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        profile: str | None = None,
+        region: str | None = None,
+    ) -> Stubber:
         """Add a stubber to context.
 
         Args:
-            service_name: The name of a service, e.g. 's3' or 'ec2'.
-            region: AWS region.
+            service_name: The name of the service to stub.
+            aws_access_key_id: AWS Access Key ID.
+            aws_secret_access_key: AWS secret Access Key.
+            aws_session_token: AWS session token.
+            profile: The profile for the session.
+            region: The region for the session.
 
         """
-        key = f"{service_name}.{region or self.env.aws_region}"
-
-        self._boto3_test_client[key] = boto3.client(  # type: ignore
-            service_name,  # type: ignore
-            region_name=region or self.env.aws_region,
+        session = self._get_mocked_session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            profile=profile,
+            region=region or self.env.aws_region,
         )
-        self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
-        return self._boto3_test_stubber[key]
+        _client, stubber = session.register_client(service_name, region=region)
+        return stubber
+
+    def _get_mocked_session(
+        self,
+        *,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        profile: str | None = None,
+        region: str | None = None,
+    ) -> MockBoto3Session:
+        """Get a mocked boto3 session."""
+        region = region or self.env.aws_region
+        if region not in self._boto3_sessions:
+            self._boto3_sessions[region] = MockBoto3Session(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                aws_session_token=aws_session_token,
+                profile_name=profile,
+                region_name=region or self.env.aws_region,
+            )
+        return self._boto3_sessions[region]
 
     def get_session(
         self,
         *,
-        aws_access_key_id: Optional[str] = None,
-        aws_secret_access_key: Optional[str] = None,
-        aws_session_token: Optional[str] = None,
-        profile: Optional[str] = None,
-        region: Optional[str] = None,
-    ) -> MockBoto3Session:
-        """Wrap get_session to enable stubbing."""
-        return MockBoto3Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            aws_session_token=aws_session_token,
-            clients=self._boto3_test_client,
-            profile_name=profile,
-            region_name=region or self.env.aws_region,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        profile: str | None = None,
+        region: str | None = None,
+    ) -> boto3.Session:
+        """Wrap get_session to enable stubbing.
+
+        A stubber must exist before ``get_session`` is called or an error will be raised.
+
+        Args:
+            aws_access_key_id: AWS Access Key ID.
+            aws_secret_access_key: AWS secret Access Key.
+            aws_session_token: AWS session token.
+            profile: The profile for the session.
+            region: The region for the session.
+
+        """
+        return cast(
+            boto3.Session,
+            self._get_mocked_session(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                aws_session_token=aws_session_token,
+                profile=profile,
+                region=region or self.env.aws_region,
+            ),
         )
+
+    def get_stubbed_client(self, service_name: str, *, region: str | None = None) -> BaseClient:
+        """Get an existing stubbed client.
+
+        This can be used after :meth:`~pytest_runway.MockCfnginContext.add_stubber` has
+        been called to get the stubber client.
+
+        Args:
+            service_name: The name of the service that was stubbed.
+            region: The region of the session.
+
+        """
+        return self._get_mocked_session(region=region).client(service_name, region_name=region)
 
 
 class MockRunwayConfig(MutableMap):
@@ -201,9 +290,7 @@ class MockRunwayConfig(MutableMap):
         self.variables = MutableMap()
 
         # classmethods
-        self.find_config_file = MagicMock(
-            name="find_config_file", return_value="./runway.yml"
-        )
+        self.find_config_file = MagicMock(name="find_config_file", return_value="./runway.yml")
         self.load_from_file = MagicMock(name="load_from_file", return_value=self)
 
     def __call__(self, **kwargs: Any) -> MockRunwayConfig:
@@ -213,72 +300,37 @@ class MockRunwayConfig(MutableMap):
 
 
 class MockRunwayContext(RunwayContext):
-    """Subclass Runway context object for tests."""
+    """Subclass of :class:`~runway.context.RunwayContext` for tests."""
 
-    _use_concurrent: bool
+    _use_concurrent: bool = True
 
     def __init__(
         self,
         *,
-        command: Optional[RunwayActionTypeDef] = None,
-        deploy_environment: Any = None,
-        work_dir: Optional[Path] = None,
+        command: RunwayActionTypeDef | None = None,
+        deploy_environment: DeployEnvironment,
+        work_dir: Path | None = None,
         **_: Any,
     ) -> None:
-        """Instantiate class."""
-        if not deploy_environment:
-            deploy_environment = DeployEnvironment(environ={}, explicit_name="test")
-        super().__init__(
-            command=command, deploy_environment=deploy_environment, work_dir=work_dir
-        )
-        self._boto3_test_client = MutableMap()
-        self._boto3_test_stubber = MutableMap()
-        self._use_concurrent = True
-
-    def add_stubber(self, service_name: str, region: Optional[str] = None) -> Stubber:
-        """Add a stubber to context.
+        """Instantiate class.
 
         Args:
-            service_name: The name of a service, e.g. 's3' or 'ec2'.
-            region: AWS region name.
+            command: Runway command/action being run.
+            deploy_environment: The current deploy environment.
+            work_dir: Working directory used by Runway.
 
         """
-        key = f"{service_name}.{region or self.env.aws_region}"
+        self._boto3_sessions: dict[str, MockBoto3Session] = {}
 
-        self._boto3_test_client[key] = boto3.client(  # type: ignore
-            service_name,  # type: ignore
-            region_name=region or self.env.aws_region,
-            **self.boto3_credentials,
-        )
-        self._boto3_test_stubber[key] = Stubber(self._boto3_test_client[key])
-        return self._boto3_test_stubber[key]
-
-    def get_session(
-        self,
-        *,
-        aws_access_key_id: Optional[str] = None,
-        aws_secret_access_key: Optional[str] = None,
-        aws_session_token: Optional[str] = None,
-        profile: Optional[str] = None,
-        region: Optional[str] = None,
-    ) -> MockBoto3Session:
-        """Wrap get_session to enable stubbing."""
-        return MockBoto3Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            aws_session_token=aws_session_token,
-            clients=self._boto3_test_client,
-            profile_name=profile,
-            region_name=region or self.env.aws_region,
-        )
+        super().__init__(command=command, deploy_environment=deploy_environment, work_dir=work_dir)
 
     @property
-    def use_concurrent(self) -> bool:  # pylint: disable=invalid-overridden-method
+    def use_concurrent(self) -> bool:
         """Override property of parent with something that can be set."""
         return self._use_concurrent
 
-    @use_concurrent.setter  # type: ignore
-    def use_concurrent(  # pylint: disable=invalid-overridden-method
+    @use_concurrent.setter
+    def use_concurrent(  # pyright: ignore[reportIncompatibleVariableOverride]
         self, value: bool
     ) -> None:
         """Override property of parent with something that can be set.
@@ -289,12 +341,109 @@ class MockRunwayContext(RunwayContext):
         """
         self._use_concurrent = value
 
+    def add_stubber(
+        self,
+        service_name: str,
+        *,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        profile: str | None = None,
+        region: str | None = None,
+    ) -> Stubber:
+        """Add a stubber to context.
+
+        Args:
+            service_name: The name of the service to stub.
+            aws_access_key_id: AWS Access Key ID.
+            aws_secret_access_key: AWS secret Access Key.
+            aws_session_token: AWS session token.
+            profile: The profile for the session.
+            region: The region for the session.
+
+        """
+        session = self._get_mocked_session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            profile=profile,
+            region=region or self.env.aws_region,
+        )
+        _client, stubber = session.register_client(service_name, region=region)
+        return stubber
+
+    def _get_mocked_session(
+        self,
+        *,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        profile: str | None = None,
+        region: str | None = None,
+    ) -> MockBoto3Session:
+        """Get a mocked boto3 session."""
+        region = region or self.env.aws_region
+        if region not in self._boto3_sessions:
+            self._boto3_sessions[region] = MockBoto3Session(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                aws_session_token=aws_session_token,
+                profile_name=profile,
+                region_name=region or self.env.aws_region,
+            )
+        return self._boto3_sessions[region]
+
+    def get_session(
+        self,
+        *,
+        aws_access_key_id: str | None = None,
+        aws_secret_access_key: str | None = None,
+        aws_session_token: str | None = None,
+        profile: str | None = None,
+        region: str | None = None,
+    ) -> boto3.Session:
+        """Wrap get_session to enable stubbing.
+
+        A stubber must exist before ``get_session`` is called or an error will be raised.
+
+        Args:
+            aws_access_key_id: AWS Access Key ID.
+            aws_secret_access_key: AWS secret Access Key.
+            aws_session_token: AWS session token.
+            profile: The profile for the session.
+            region: The region for the session.
+
+        """
+        return cast(
+            boto3.Session,
+            self._get_mocked_session(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key,
+                aws_session_token=aws_session_token,
+                profile=profile,
+                region=region or self.env.aws_region,
+            ),
+        )
+
+    def get_stubbed_client(self, service_name: str, *, region: str | None = None) -> BaseClient:
+        """Get an existing stubbed client.
+
+        This can be used after :meth:`~pytest_runway.MockCfnginContext.add_stubber` has
+        been called to get the stubber client.
+
+        Args:
+            service_name: The name of the service that was stubbed.
+            region: The region of the session.
+
+        """
+        return self._get_mocked_session(region=region).client(service_name, region_name=region)
+
 
 class YamlLoader:
     """Load YAML files from a directory."""
 
     def __init__(
-        self, root: Path, load_class: Optional[type] = None, load_type: str = "default"
+        self, root: Path, load_class: type | None = None, load_type: str = "default"
     ) -> None:
         """Instantiate class.
 

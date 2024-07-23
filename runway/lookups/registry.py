@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, Type, Union, cast
+from typing import cast
 
 from ..utils import load_object_from_string
 from .handlers.base import LookupHandler
@@ -14,13 +14,11 @@ from .handlers.random_string import RandomStringLookup
 from .handlers.ssm import SsmLookup
 from .handlers.var import VarLookup
 
-RUNWAY_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
+RUNWAY_LOOKUP_HANDLERS: dict[str, type[LookupHandler]] = {}
 LOGGER = logging.getLogger(__name__)
 
 
-def register_lookup_handler(
-    lookup_type: str, handler_or_path: Union[str, Type[LookupHandler]]
-) -> None:
+def register_lookup_handler(lookup_type: str, handler_or_path: str | type[LookupHandler]) -> None:
     """Register a lookup handler.
 
     Args:
@@ -39,7 +37,7 @@ def register_lookup_handler(
         if issubclass(handler, LookupHandler):
             RUNWAY_LOOKUP_HANDLERS[lookup_type] = handler
             return
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa: BLE001
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     raise TypeError(
         f"lookup {handler_or_path} must be a subclass of "

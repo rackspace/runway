@@ -1,9 +1,9 @@
 """Runway static site Module parameters."""
 
-# pylint: disable=no-self-argument
+# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 from pydantic import Extra, Field, validator
 
@@ -45,7 +45,7 @@ class RunwayStaticSiteLambdaFunctionAssociationDataModel(ConfigProperty):
         """Model configuration."""
 
         extra = Extra.forbid
-        title = "Runway static site Module staticsite_lambda_function_associations parameter item."  # noqa
+        title = "Runway static site Module staticsite_lambda_function_associations parameter item."
 
 
 class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
@@ -129,9 +129,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
             "font-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; "
             "object-src 'none'; "
             "connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com",
-            "Strict-Transport-Security": "max-age=31536000; "
-            "includeSubdomains; "
-            "preload",
+            "Strict-Transport-Security": "max-age=31536000; includeSubdomains; preload",
             "Referrer-Policy": "same-origin",
             "X-XSS-Protection": "1; mode=block",
             "X-Frame-Options": "DENY",
@@ -139,9 +137,9 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         },
         alias="staticsite_http_headers",
     )
-    lambda_function_associations: List[
-        RunwayStaticSiteLambdaFunctionAssociationDataModel
-    ] = Field(default=[], alias="staticsite_lambda_function_associations")
+    lambda_function_associations: List[RunwayStaticSiteLambdaFunctionAssociationDataModel] = Field(
+        default=[], alias="staticsite_lambda_function_associations"
+    )
     namespace: str
     non_spa: bool = Field(default=False, alias="staticsite_non_spa")
     oauth_scopes: List[str] = Field(
@@ -160,21 +158,13 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
     redirect_path_sign_in: str = Field(
         default="/parseauth", alias="staticsite_redirect_path_sign_in"
     )
-    redirect_path_sign_out: str = Field(
-        default="/", alias="staticsite_redirect_path_sign_out"
-    )
-    required_group: Optional[str] = Field(
-        default=None, alias="staticsite_required_group"
-    )
+    redirect_path_sign_out: str = Field(default="/", alias="staticsite_redirect_path_sign_out")
+    required_group: Optional[str] = Field(default=None, alias="staticsite_required_group")
     rewrite_directory_index: Optional[str] = Field(
         default=None, alias="staticsite_rewrite_directory_index"
     )
-    role_boundary_arn: Optional[str] = Field(
-        default=None, alias="staticsite_role_boundary_arn"
-    )
-    service_role: Optional[str] = Field(
-        default=None, alias="cloudformation_service_role"
-    )
+    role_boundary_arn: Optional[str] = Field(default=None, alias="staticsite_role_boundary_arn")
+    service_role: Optional[str] = Field(default=None, alias="cloudformation_service_role")
     sign_out_url: str = Field(default="/signout", alias="staticsite_sign_out_url")
     supported_identity_providers: List[str] = Field(
         default=["COGNITO"], alias="staticsite_supported_identity_providers"
@@ -194,7 +184,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         "supported_identity_providers",
         pre=True,
     )
-    def _convert_comma_delimited_list(cls, v: Union[List[str], str]) -> List[str]:
+    def _convert_comma_delimited_list(cls, v: list[str] | str) -> list[str]:  # noqa: N805
         """Convert comma delimited lists to a string."""
         if isinstance(v, str):
             return [i.strip() for i in v.split(",")]

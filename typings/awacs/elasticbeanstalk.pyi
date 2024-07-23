@@ -37,9 +37,7 @@ DescribeApplications = Action("DescribeApplications")
 DescribeConfigurationOptions = Action("DescribeConfigurationOptions")
 DescribeConfigurationSettings = Action("DescribeConfigurationSettings")
 DescribeEnvironmentHealth = Action("DescribeEnvironmentHealth")
-DescribeEnvironmentManagedActionHistory = Action(
-    "DescribeEnvironmentManagedActionHistory"
-)
+DescribeEnvironmentManagedActionHistory = Action("DescribeEnvironmentManagedActionHistory")
 DescribeEnvironmentManagedActions = Action("DescribeEnvironmentManagedActions")
 DescribeEnvironmentResources = Action("DescribeEnvironmentResources")
 DescribeEnvironments = Action("DescribeEnvironments")

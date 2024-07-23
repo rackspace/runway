@@ -1,9 +1,8 @@
 """Test runway.config.components.runway._module_def."""
 
-# pylint: disable=protected-access
 # pyright: basic
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -47,11 +46,11 @@ class TestRunwayModuleDefinition:
 
     def test_child_modules_setter_invalid_list_item(self) -> None:
         """Test child_modules.setter when list item is now supported."""
+        obj = RunwayModuleDefinition.parse_obj({"path": "./"})
         with pytest.raises(TypeError):
-            obj = RunwayModuleDefinition.parse_obj({"path": "./"})
-            obj.child_modules = [  # type: ignore
+            obj.child_modules = [
                 RunwayModuleDefinitionModel(path="./"),
-                "invalid",
+                "invalid",  # type: ignore
             ]
 
     @pytest.mark.parametrize(
@@ -81,7 +80,7 @@ class TestRunwayModuleDefinition:
             ),
         ],
     )
-    def test_is_parent(self, data: Dict[str, Any], expected: bool) -> None:
+    def test_is_parent(self, data: dict[str, Any], expected: bool) -> None:
         """Test is_parent."""
         assert RunwayModuleDefinition.parse_obj(data).is_parent is expected
 
@@ -115,7 +114,7 @@ class TestRunwayModuleDefinition:
             ),
         ],
     )
-    def test_menu_entry(self, data: Dict[str, Any], expected: str) -> None:
+    def test_menu_entry(self, data: dict[str, Any], expected: str) -> None:
         """Test menu entry."""
         assert RunwayModuleDefinition.parse_obj(data).menu_entry == expected
 

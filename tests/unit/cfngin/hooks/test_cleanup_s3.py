@@ -10,10 +10,10 @@ from botocore.exceptions import ClientError
 from runway.cfngin.hooks.cleanup_s3 import purge_bucket
 
 if TYPE_CHECKING:
-    from ...factories import MockCFNginContext
+    from ...factories import MockCfnginContext
 
 
-def test_purge_bucket(cfngin_context: MockCFNginContext) -> None:
+def test_purge_bucket(cfngin_context: MockCfnginContext) -> None:
     """Test purge_bucket."""
     stub = cfngin_context.add_stubber("s3")
 
@@ -24,7 +24,7 @@ def test_purge_bucket(cfngin_context: MockCFNginContext) -> None:
     stub.assert_no_pending_responses()
 
 
-def test_purge_bucket_does_not_exist(cfngin_context: MockCFNginContext) -> None:
+def test_purge_bucket_does_not_exist(cfngin_context: MockCfnginContext) -> None:
     """Test purge_bucket Bucket doesn't exist."""
     stub = cfngin_context.add_stubber("s3")
 
@@ -34,7 +34,7 @@ def test_purge_bucket_does_not_exist(cfngin_context: MockCFNginContext) -> None:
     stub.assert_no_pending_responses()
 
 
-def test_purge_bucket_unhandled_exception(cfngin_context: MockCFNginContext) -> None:
+def test_purge_bucket_unhandled_exception(cfngin_context: MockCfnginContext) -> None:
     """Test purge_bucket with unhandled exception."""
     stub = cfngin_context.add_stubber("s3")
 

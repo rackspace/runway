@@ -17,9 +17,12 @@ class TestRunwayTerraformArgsDataModel:
     def test_init_default(self) -> None:
         """Test init default."""
         obj = RunwayTerraformArgsDataModel()
-        assert not obj.apply and isinstance(obj.apply, list)
-        assert not obj.init and isinstance(obj.init, list)
-        assert not obj.plan and isinstance(obj.plan, list)
+        assert not obj.apply
+        assert isinstance(obj.apply, list)
+        assert not obj.init
+        assert isinstance(obj.init, list)
+        assert not obj.plan
+        assert isinstance(obj.plan, list)
 
     def test_init_extra(self) -> None:
         """Test init extra."""
@@ -28,9 +31,7 @@ class TestRunwayTerraformArgsDataModel:
 
     def test_init(self) -> None:
         """Test init."""
-        obj = RunwayTerraformArgsDataModel(
-            apply=["-apply"], init=["-init"], plan=["-plan"]
-        )
+        obj = RunwayTerraformArgsDataModel(apply=["-apply"], init=["-init"], plan=["-plan"])
         assert obj.apply == ["-apply"]
         assert obj.init == ["-init"]
         assert obj.plan == ["-plan"]
@@ -43,9 +44,7 @@ class TestRunwayTerraformBackendConfigDataModel:
         """Test __bool__."""
         assert RunwayTerraformBackendConfigDataModel(bucket="test")
         assert RunwayTerraformBackendConfigDataModel(dynamodb_table="test")
-        assert RunwayTerraformBackendConfigDataModel(
-            bucket="test", dynamodb_table="test"
-        )
+        assert RunwayTerraformBackendConfigDataModel(bucket="test", dynamodb_table="test")
         assert RunwayTerraformBackendConfigDataModel(
             bucket="test", dynamodb_table="test", workspace_key_prefix="state"
         )
@@ -86,8 +85,10 @@ class TestRunwayTerraformModuleOptionsDataModel:
         """Test _convert_args."""
         obj = RunwayTerraformModuleOptionsDataModel.parse_obj({"args": ["test"]})
         assert obj.args.apply == ["test"]
-        assert not obj.args.init and isinstance(obj.args.init, list)
-        assert not obj.args.plan and isinstance(obj.args.plan, list)
+        assert not obj.args.init
+        assert isinstance(obj.args.init, list)
+        assert not obj.args.plan
+        assert isinstance(obj.args.plan, list)
 
     def test_init_default(self) -> None:
         """Test init default."""
@@ -116,8 +117,7 @@ class TestRunwayTerraformModuleOptionsDataModel:
         obj = RunwayTerraformModuleOptionsDataModel.parse_obj(data)
         assert obj.args.init == data["args"]["init"]  # type: ignore
         assert (
-            obj.backend_config.bucket
-            == data["terraform_backend_config"]["bucket"]  # type: ignore
+            obj.backend_config.bucket == data["terraform_backend_config"]["bucket"]  # type: ignore
         )
         assert obj.version == data["terraform_version"]
         assert obj.workspace == data["terraform_workspace"]

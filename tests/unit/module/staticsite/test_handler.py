@@ -1,16 +1,14 @@
 """Test runway.module.staticsite.handler."""
 
-# pylint: disable=protected-access
-# pyright: basic
 from __future__ import annotations
 
 import logging
 import platform
 import string
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.module.staticsite.handler import StaticSite
 from runway.module.staticsite.options.components import StaticSiteOptions
@@ -21,7 +19,6 @@ from runway.module.staticsite.parameters.models import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
     from runway.context import RunwayContext
@@ -99,7 +96,7 @@ class TestStaticSite:
     def test_create_dependencies_yaml(
         self,
         expected_yaml: Path,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         runway_context: RunwayContext,
         test_file_number: str,
         tmp_path: Path,
@@ -137,7 +134,7 @@ class TestStaticSite:
     def test_create_staticsite_yaml(
         self,
         expected_yaml: Path,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         runway_context: RunwayContext,
         test_file_number: str,
         tmp_path: Path,
@@ -228,17 +225,13 @@ class TestStaticSite:
     ) -> None:
         """Test _ensure_valid_environment_config."""
         with pytest.raises(SystemExit):
-            StaticSite(
-                runway_context, module_root=tmp_path, parameters={"namespace": ""}
-            )
+            StaticSite(runway_context, module_root=tmp_path, parameters={"namespace": ""})
 
     def test_get_client_updater_variables(
         self, mocker: MockerFixture, runway_context: RunwayContext, tmp_path: Path
     ) -> None:
         """Test _get_client_updater_variables."""
-        mock_add_url_scheme = mocker.patch(
-            f"{MODULE}.add_url_scheme", return_value="success"
-        )
+        mock_add_url_scheme = mocker.patch(f"{MODULE}.add_url_scheme", return_value="success")
         obj = StaticSite(
             runway_context,
             module_root=tmp_path,
@@ -257,31 +250,18 @@ class TestStaticSite:
         assert "rxref test-" in result["client_id"]
         assert "rxref test::" in result["distribution_domain"]
         assert result["oauth_scopes"] == site_stack_variables["OAuthScopes"]
-        assert (
-            result["redirect_path_sign_in"]
-            == site_stack_variables["RedirectPathSignIn"]
-        )
-        assert (
-            result["redirect_path_sign_out"]
-            == site_stack_variables["RedirectPathSignOut"]
-        )
-        assert (
-            result["supported_identity_providers"]
-            == obj.parameters.supported_identity_providers
-        )
+        assert result["redirect_path_sign_in"] == site_stack_variables["RedirectPathSignIn"]
+        assert result["redirect_path_sign_out"] == site_stack_variables["RedirectPathSignOut"]
+        assert result["supported_identity_providers"] == obj.parameters.supported_identity_providers
 
     def test_init(
-        self, caplog: LogCaptureFixture, runway_context: RunwayContext, tmp_path: Path
+        self, caplog: pytest.LogCaptureFixture, runway_context: RunwayContext, tmp_path: Path
     ) -> None:
         """Test init."""
         caplog.set_level(logging.WARNING, logger=MODULE)
-        obj = StaticSite(
-            runway_context, module_root=tmp_path, parameters={"namespace": "test"}
-        )
+        obj = StaticSite(runway_context, module_root=tmp_path, parameters={"namespace": "test"})
         assert not obj.init()
-        assert (
-            f"init not currently supported for {StaticSite.__name__}" in caplog.messages
-        )
+        assert f"init not currently supported for {StaticSite.__name__}" in caplog.messages
 
     def test_plan(
         self, mocker: MockerFixture, runway_context: RunwayContext, tmp_path: Path
@@ -298,9 +278,7 @@ class TestStaticSite:
         assert not obj.plan()
         mock_setup_website_module.assert_called_once_with(command="plan")
 
-    @pytest.mark.parametrize(
-        "provided, expected", [("foo", "foo"), ("foo.bar", "foo-bar")]
-    )
+    @pytest.mark.parametrize("provided, expected", [("foo", "foo"), ("foo.bar", "foo-bar")])
     def test_sanitized_name(
         self,
         expected: str,

@@ -2,7 +2,7 @@
 """Module with Terraform state resources."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 import awacs.dynamodb
 import awacs.s3
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class TfState(Blueprint):
     """CFNgin blueprint for creating Terraform state resources."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "BucketDeletionPolicy": {
             "type": str,
             "allowed_values": ["Delete", "Retain"],
@@ -58,17 +58,13 @@ class TfState(Blueprint):
             dynamodb.Table(
                 "TerraformStateTable",
                 AttributeDefinitions=[
-                    dynamodb.AttributeDefinition(
-                        AttributeName="LockID", AttributeType="S"
-                    )
+                    dynamodb.AttributeDefinition(AttributeName="LockID", AttributeType="S")
                 ],
                 KeySchema=[dynamodb.KeySchema(AttributeName="LockID", KeyType="HASH")],
                 ProvisionedThroughput=dynamodb.ProvisionedThroughput(
                     ReadCapacityUnits=2, WriteCapacityUnits=2
                 ),
-                TableName=If(
-                    "TableNameOmitted", NoValue, self.variables["TableName"].ref
-                ),
+                TableName=If("TableNameOmitted", NoValue, self.variables["TableName"].ref),
             )
         )
         self.template.add_output(
@@ -84,15 +80,9 @@ class TfState(Blueprint):
                 "TerraformStateBucket",
                 DeletionPolicy=self.variables["BucketDeletionPolicy"],
                 AccessControl=s3.Private,
-                BucketName=If(
-                    "BucketNameOmitted", NoValue, self.variables["BucketName"].ref
-                ),
+                BucketName=If("BucketNameOmitted", NoValue, self.variables["BucketName"].ref),
                 LifecycleConfiguration=s3.LifecycleConfiguration(
-                    Rules=[
-                        s3.LifecycleRule(
-                            NoncurrentVersionExpirationInDays=90, Status="Enabled"
-                        )
-                    ]
+                    Rules=[s3.LifecycleRule(NoncurrentVersionExpirationInDays=90, Status="Enabled")]
                 ),
                 VersioningConfiguration=s3.VersioningConfiguration(Status="Enabled"),
             )
@@ -129,9 +119,7 @@ class TfState(Blueprint):
                         Statement(
                             Action=[awacs.s3.GetObject, awacs.s3.PutObject],
                             Effect=Allow,
-                            Resource=[
-                                Join("", [terraformstatebucket.get_att("Arn"), "/*"])
-                            ],
+                            Resource=[Join("", [terraformstatebucket.get_att("Arn"), "/*"])],
                         ),
                         Statement(
                             Action=[
@@ -160,6 +148,4 @@ class TfState(Blueprint):
 if __name__ == "__main__":
     from runway.context import CfnginContext
 
-    print(  # noqa: T201
-        TfState("test", CfnginContext(parameters={"namespace": "test"})).to_json()
-    )
+    print(TfState("test", CfnginContext(parameters={"namespace": "test"})).to_json())  # noqa: T201

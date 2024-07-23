@@ -6,7 +6,6 @@ import datetime
 from typing import TYPE_CHECKING
 
 import pytest
-from typing_extensions import Literal
 
 from runway.core.providers.aws.s3._helpers.file_info import FileInfo
 from runway.core.providers.aws.s3._helpers.utils import EPOCH_TIME
@@ -15,6 +14,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from mypy_boto3_s3.type_defs import ObjectTypeDef
+    from typing_extensions import Literal
 
 
 NOW = datetime.datetime.now()

@@ -40,7 +40,6 @@ class BootstrapValue(LookupHandler):
 
     """
 
-    # pylint: disable=arguments-differ
     @classmethod
     def handle(  # type: ignore
         cls,
@@ -58,16 +57,12 @@ class BootstrapValue(LookupHandler):
         if not stack:
             raise ValueError(f"stack {query} not defined in CFNgin config")
         try:
-            stack_des = provider.cloudformation.describe_stacks(StackName=stack.fqn)[
-                "Stacks"
-            ][0]
+            stack_des = provider.cloudformation.describe_stacks(StackName=stack.fqn)["Stacks"][0]
         except ClientError as exc:
             if "does not exist" not in str(exc):
                 raise
             return args.bootstrap
 
-        if provider.is_stack_completed(stack_des) or (
-            provider.is_stack_in_progress(stack_des)
-        ):
+        if provider.is_stack_completed(stack_des) or (provider.is_stack_in_progress(stack_des)):
             return args.post_bootstrap
         return args.bootstrap

@@ -1,7 +1,7 @@
 """Base class for AWS responses."""
 
 from http import HTTPStatus
-from typing import Any, Dict
+from typing import Any, Dict  # noqa: UP035
 
 from pydantic import Field
 
@@ -45,7 +45,7 @@ class ResponseMetadata(BaseModel):
     host_id: str = Field(default="", alias="HostId")
     """Host ID data."""
 
-    https_headers: Dict[str, Any] = Field(default={}, alias="HTTPHeaders")
+    https_headers: Dict[str, Any] = Field(default={}, alias="HTTPHeaders")  # noqa: UP006
     """A map of response header keys and their respective values."""
 
     http_status_code: int = Field(default=200, alias="HTTPStatusCode")
@@ -83,7 +83,5 @@ class BaseResponse(BaseModel):
     error: ResponseError = Field(default=ResponseError(), alias="Error")
     """Information about a service or networking error."""
 
-    metadata: ResponseMetadata = Field(
-        default=ResponseMetadata(), alias="ResponseMetadata"
-    )
+    metadata: ResponseMetadata = Field(default=ResponseMetadata(), alias="ResponseMetadata")
     """Information about the request."""

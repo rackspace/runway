@@ -4,15 +4,14 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock, call
 
 import pytest
-from mock import MagicMock, call
 
 from runway.core import Runway
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture, MonkeyPatch
     from pytest_mock import MockerFixture
 
     from ..factories import MockRunwayConfig, MockRunwayContext
@@ -38,8 +37,8 @@ class TestRunway:
 
     def test___init___undetermined_version(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -51,7 +50,7 @@ class TestRunway:
 
     def test___init___unsupported_version(
         self,
-        monkeypatch: MonkeyPatch,
+        monkeypatch: pytest.MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -220,8 +219,8 @@ class TestRunway:
 
     def test_test(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
@@ -229,12 +228,8 @@ class TestRunway:
         caplog.set_level(logging.ERROR, logger="runway")
         test_handlers = {
             "exception": MagicMock(handle=MagicMock(side_effect=Exception())),
-            "fail_system_exit_0": MagicMock(
-                handle=MagicMock(side_effect=SystemExit(0))
-            ),
-            "fail_system_exit_1": MagicMock(
-                handle=MagicMock(side_effect=SystemExit(1))
-            ),
+            "fail_system_exit_0": MagicMock(handle=MagicMock(side_effect=SystemExit(0))),
+            "fail_system_exit_1": MagicMock(handle=MagicMock(side_effect=SystemExit(1))),
             "success": MagicMock(),
         }
         monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
@@ -246,9 +241,7 @@ class TestRunway:
         ]
         assert not obj.test()
         assert "the following tests failed" not in "\n".join(caplog.messages)
-        test_handlers["success"].handle.assert_called_with(
-            obj.tests[0].name, obj.tests[0].args
-        )
+        test_handlers["success"].handle.assert_called_with(obj.tests[0].name, obj.tests[0].args)
         test_handlers["fail_system_exit_0"].handle.assert_called_with(
             obj.tests[1].name, obj.tests[1].args
         )
@@ -281,25 +274,20 @@ class TestRunway:
             assert not obj.test()
         assert excinfo.value.code == 1
         assert "exception:running test (fail)" in caplog.messages
-        assert (
-            "exception:test required; the remaining tests have been skipped"
-            in caplog.messages
-        )
-        test_handlers["exception"].handle.assert_called_with(
-            obj.tests[0].name, obj.tests[0].args
-        )
+        assert "exception:test required; the remaining tests have been skipped" in caplog.messages
+        test_handlers["exception"].handle.assert_called_with(obj.tests[0].name, obj.tests[0].args)
         assert test_handlers["success"].handle.call_count == 1
 
     def test_test_keyerror(
         self,
-        caplog: LogCaptureFixture,
-        monkeypatch: MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+        monkeypatch: pytest.MonkeyPatch,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:
         """Test test with handler not found."""
         caplog.set_level(logging.ERROR, logger="runway")
-        test_handlers: Dict[str, Any] = {}
+        test_handlers: dict[str, Any] = {}
         monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
         obj = Runway(runway_config, runway_context)  # type: ignore
 
@@ -319,7 +307,7 @@ class TestRunway:
 
     def test_test_no_tests(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         runway_config: MockRunwayConfig,
         runway_context: MockRunwayContext,
     ) -> None:

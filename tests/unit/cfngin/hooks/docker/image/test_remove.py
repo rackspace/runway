@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import call
 
 from docker.errors import ImageNotFound
 from docker.models.images import Image
-from mock import call
 
 from runway.cfngin.hooks.docker.data_models import (
     DockerImage,
@@ -22,13 +22,13 @@ if TYPE_CHECKING:
     from docker import DockerClient
     from pytest_mock import MockerFixture
 
-    from .....factories import MockCFNginContext
+    from .....factories import MockCfnginContext
 
 MODULE = "runway.cfngin.hooks.docker.image._remove"
 
 
 def test_remove(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
     mock_docker_client: DockerClient,
     mocker: MockerFixture,
 ) -> None:
@@ -54,17 +54,14 @@ def test_remove(
     )
     mock_from_cfngin_context.assert_called_once_with(cfngin_context)
     docker_hook_data.client.api.remove_image.assert_has_calls(  # type: ignore
-        [
-            call(force=True, image=f"{args.repo}:{tag}", noprune=False)
-            for tag in args.tags
-        ]
+        [call(force=True, image=f"{args.repo}:{tag}", noprune=False) for tag in args.tags]
     )
     assert docker_hook_data.image is None
     mock_update_context.assert_called_once_with(cfngin_context)
 
 
 def test_remove_image_not_found(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
     mock_docker_client: DockerClient,
     mocker: MockerFixture,
 ) -> None:
@@ -73,9 +70,7 @@ def test_remove_image_not_found(
     mocker.patch.object(ImageRemoveArgs, "parse_obj", return_value=args)
     mocker.patch.object(DockerHookData, "client", mock_docker_client)
     docker_hook_data = DockerHookData()
-    mocker.patch.object(
-        DockerHookData, "from_cfngin_context", return_value=docker_hook_data
-    )
+    mocker.patch.object(DockerHookData, "from_cfngin_context", return_value=docker_hook_data)
     mock_update_context = mocker.patch.object(
         DockerHookData, "update_context", return_value=docker_hook_data
     )
@@ -84,12 +79,8 @@ def test_remove_image_not_found(
         f"{args.repo}:latest"
     )
     assert remove(context=cfngin_context, **args.dict()) == docker_hook_data
-    # pylint: disable=no-member
     docker_hook_data.client.api.remove_image.assert_has_calls(  # type: ignore
-        [
-            call(force=False, image=f"{args.repo}:{tag}", noprune=False)
-            for tag in args.tags
-        ]
+        [call(force=False, image=f"{args.repo}:{tag}", noprune=False) for tag in args.tags]
     )
     mock_update_context.assert_called_once_with(cfngin_context)
 
@@ -121,9 +112,7 @@ class TestImageRemoveArgs:
         """Test _set_repo ECR."""
         repo = ElasticContainerRegistryRepository(
             repo_name="test",
-            registry=ElasticContainerRegistry(
-                account_id="123456789012", aws_region="us-east-1"
-            ),
+            registry=ElasticContainerRegistry(account_id="123456789012", aws_region="us-east-1"),
         )
         assert ImageRemoveArgs(ecr_repo=repo).repo == repo.fqn
 

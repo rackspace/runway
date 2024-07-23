@@ -58,5 +58,5 @@ def get_session(
     cred_provider = session._session.get_component("credential_provider")  # type: ignore
     provider = cred_provider.get_provider("assume-role")  # type: ignore
     provider.cache = BOTO3_CREDENTIAL_CACHE
-    provider._prompter = ui.getpass
+    provider._prompter = ui.getpass  # noqa: SLF001
     return session

@@ -6,13 +6,15 @@ import hashlib
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Optional, Union, cast
 
 import igittigitt
 
 from ....utils import FileHash, change_dir
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from _typeshed import StrPath
 
 LOGGER = logging.getLogger(__name__)
@@ -29,14 +31,14 @@ def calculate_hash_of_files(files: Iterable[StrPath], root: Path) -> str:
         A hash of the hashes of the given files.
 
     """
-    file_hash = FileHash(hashlib.md5())
+    file_hash = FileHash(hashlib.md5())  # noqa: S324
     file_hash.add_files(sorted(str(f) for f in files), relative_to=root)
     return file_hash.hexdigest
 
 
 def get_hash_of_files(
     root_path: Path,
-    directories: Optional[List[Dict[str, Union[List[str], str]]]] = None,
+    directories: Optional[list[dict[str, Union[list[str], str]]]] = None,
 ) -> str:
     """Generate md5 hash of files.
 
@@ -49,11 +51,11 @@ def get_hash_of_files(
     """
     directories = directories or [{"path": "./"}]
 
-    files_to_hash: List[StrPath] = []
+    files_to_hash: list[StrPath] = []
     for i in directories:
         gitignore = get_ignorer(
             root_path / cast(str, i["path"]),
-            cast(Optional[List[str]], i.get("exclusions")),
+            cast("list[str] | None", i.get("exclusions")),
         )
 
         with change_dir(root_path):
@@ -72,7 +74,7 @@ def get_hash_of_files(
 
 
 def get_ignorer(
-    path: Path, additional_exclusions: Optional[List[str]] = None
+    path: Path, additional_exclusions: list[str] | None = None
 ) -> igittigitt.IgnoreParser:
     """Create gitignore filter from directory ``.gitignore`` file.
 

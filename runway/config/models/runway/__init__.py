@@ -1,8 +1,8 @@
 """Runway config models."""
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
+# ruff: noqa: UP006, UP035
 import locale
 import logging
 from pathlib import Path
@@ -11,10 +11,8 @@ from typing import (
     Any,
     Callable,
     Dict,
-    Generator,
     List,
     Optional,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -39,6 +37,8 @@ from ._builtin_tests import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from pydantic import BaseModel
 
     Model = TypeVar("Model", bound=BaseModel)
@@ -110,7 +110,7 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
         """Model configuration."""
 
         extra = Extra.forbid
-        schema_extra: Dict[str, Any] = {
+        schema_extra: dict[str, Any] = {
             "description": "Used to defined a role to assume while Runway is "
             "processing each module.",
             "examples": [
@@ -126,13 +126,13 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
         title = "Runway Deployment.assume_role Definition"
 
     @validator("arn")
-    def _convert_arn_null_value(cls, v: Optional[str]) -> Optional[str]:
+    def _convert_arn_null_value(cls, v: Optional[str]) -> Optional[str]:  # noqa: N805
         """Convert a "nul" string into type(None)."""
         null_strings = ["null", "none", "undefined"]
         return None if isinstance(v, str) and v.lower() in null_strings else v
 
     @validator("duration", pre=True)
-    def _validate_duration(cls, v: Union[int, str]) -> Union[int, str]:
+    def _validate_duration(cls, v: Union[int, str]) -> Union[int, str]:  # noqa: N805
         """Validate duration is within the range allowed by AWS."""
         if isinstance(v, str):
             return v
@@ -142,12 +142,9 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
             raise ValueError("duration must be less than or equal to 43,200")
         return v
 
-    _validate_string_is_lookup = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("duration", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
-    )
+    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+        "duration", allow_reuse=True, pre=True
+    )(utils.validate_string_is_lookup)
 
 
 class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
@@ -172,12 +169,9 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
         }
         title = "Runway Deployment.regions Definition"
 
-    _validate_string_is_lookup = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("parallel", allow_reuse=True, pre=True)(
-            utils.validate_string_is_lookup
-        ),
-    )
+    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+        "parallel", allow_reuse=True, pre=True
+    )(utils.validate_string_is_lookup)
 
 
 class RunwayDeploymentDefinitionModel(ConfigProperty):
@@ -198,10 +192,10 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
     assume_role: Union[str, RunwayAssumeRoleDefinitionModel] = Field(
         default={},
         description="Assume a role when processing the deployment. (supports lookups)",
-        examples=["arn:aws:iam::123456789012:role/name"]
-        + cast(
-            List[Any], RunwayAssumeRoleDefinitionModel.Config.schema_extra["examples"]
-        ),
+        examples=[
+            "arn:aws:iam::123456789012:role/name",
+            *cast("list[Any]", RunwayAssumeRoleDefinitionModel.Config.schema_extra["examples"]),
+        ],
     )
     env_vars: RunwayEnvVarsUnresolvedType = Field(
         default={},
@@ -283,7 +277,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         title = "Runway Deployment Definition"
 
         @staticmethod
-        def schema_extra(schema: Dict[str, Any]) -> None:  # type: ignore
+        def schema_extra(schema: dict[str, Any]) -> None:  # type: ignore
             """Process the schema after it has been generated.
 
             Schema is modified in place. Return value is ignored.
@@ -302,10 +296,10 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             ]
 
     @root_validator(pre=True)
-    def _convert_simple_module(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _convert_simple_module(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Convert simple modules to dicts."""
         modules = values.get("modules", [])
-        result: List[Dict[str, Any]] = []
+        result: List[dict[str, Any]] = []
         for module in modules:
             if isinstance(module, str):
                 result.append({"path": module})
@@ -315,7 +309,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         return values
 
     @root_validator(pre=True)
-    def _validate_regions(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_regions(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate & simplify regions."""
         raw_regions = values.get("regions", [])
         parallel_regions = values.get("parallel_regions", [])
@@ -340,19 +334,16 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             values["parallel_regions"] = regions.parallel
         return values
 
-    _validate_string_is_lookup = cast(
-        "classmethod[Callable[..., Any]]",
-        validator(
-            "env_vars",
-            "environments",
-            "module_options",
-            "parallel_regions",
-            "parameters",
-            "regions",
-            allow_reuse=True,
-            pre=True,
-        )(utils.validate_string_is_lookup),
-    )
+    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+        "env_vars",
+        "environments",
+        "module_options",
+        "parallel_regions",
+        "parameters",
+        "regions",
+        allow_reuse=True,
+        pre=True,
+    )(utils.validate_string_is_lookup)
 
 
 class RunwayFutureDefinitionModel(ConfigProperty):
@@ -457,7 +448,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         use_enum_values = True
 
     @root_validator(pre=True)
-    def _validate_name(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_name(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate module name."""
         if "name" in values:
             return values
@@ -470,7 +461,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         return values
 
     @root_validator(pre=True)
-    def _validate_path(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_path(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate path and sets a default value if needed."""
         if not values.get("path") and not values.get("parallel"):
             values["path"] = Path.cwd()
@@ -478,12 +469,12 @@ class RunwayModuleDefinitionModel(ConfigProperty):
 
     @validator("parallel", pre=True)
     def _validate_parallel(
-        cls, v: List[Union[Dict[str, Any], str]], values: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+        cls, v: List[Union[dict[str, Any], str]], values: dict[str, Any]  # noqa: N805
+    ) -> List[dict[str, Any]]:
         """Validate parallel."""
         if v and values.get("path"):
             raise ValueError("only one of parallel or path can be defined")
-        result: List[Dict[str, Any]] = []
+        result: List[dict[str, Any]] = []
         for mod in v:
             if isinstance(mod, str):
                 result.append({"path": mod})
@@ -491,18 +482,15 @@ class RunwayModuleDefinitionModel(ConfigProperty):
                 result.append(mod)
         return result
 
-    # TODO add regex to schema
-    _validate_string_is_lookup = cast(
-        "classmethod[Callable[..., Any]]",
-        validator(
-            "env_vars",
-            "environments",
-            "options",
-            "parameters",
-            allow_reuse=True,
-            pre=True,
-        )(utils.validate_string_is_lookup),
-    )
+    # TODO (kyle): add regex to schema
+    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+        "env_vars",
+        "environments",
+        "options",
+        "parameters",
+        allow_reuse=True,
+        pre=True,
+    )(utils.validate_string_is_lookup)
 
 
 # https://pydantic-docs.helpmanual.io/usage/postponed_annotations/#self-referencing-models
@@ -534,10 +522,9 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
         }
         title = "Runway Variables Definition"
 
-    _convert_null_values = cast(
-        "classmethod[Callable[..., Any]]",
-        validator("*", allow_reuse=True)(utils.convert_null_values),
-    )
+    _convert_null_values = validator(  # pyright: ignore[reportUnknownVariableType]
+        "*", allow_reuse=True
+    )(utils.convert_null_values)
 
 
 class RunwayVersionField(SpecifierSet):
@@ -553,7 +540,7 @@ class RunwayVersionField(SpecifierSet):
         yield cls._convert_value
 
     @classmethod
-    def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
+    def __modify_schema__(cls, field_schema: dict[str, Any]) -> None:
         """Mutate the field schema in place.
 
         This is only called when output JSON schema from a model.
@@ -622,7 +609,7 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         validate_assignment = True
 
     @root_validator(pre=True)
-    def _add_deployment_names(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    def _add_deployment_names(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Add names to deployments that are missing them."""
         deployments = values.get("deployments", [])
         for i, deployment in enumerate(deployments):
@@ -633,21 +620,19 @@ class RunwayConfigDefinitionModel(ConfigProperty):
 
     @classmethod
     def parse_file(
-        cls: Type[Model],
+        cls: type[Model],
         path: Union[str, Path],
         *,
-        content_type: Optional[str] = None,
+        content_type: str | None = None,
         encoding: str = "utf8",
-        proto: Optional[Protocol] = None,
+        proto: Protocol | None = None,
         allow_pickle: bool = False,
     ) -> Model:
         """Parse a file."""
         return cast(
             "Model",
             cls.parse_raw(
-                Path(path).read_text(
-                    encoding=locale.getpreferredencoding(do_setlocale=False)
-                ),
+                Path(path).read_text(encoding=locale.getpreferredencoding(do_setlocale=False)),
                 content_type=content_type,  # type: ignore
                 encoding=encoding,
                 proto=proto,  # type: ignore
@@ -657,13 +642,13 @@ class RunwayConfigDefinitionModel(ConfigProperty):
 
     @classmethod
     def parse_raw(
-        cls: Type[Model],
+        cls: type[Model],
         b: Union[bytes, str],
         *,
-        content_type: Optional[str] = None,  # pylint: disable=unused-argument
-        encoding: str = "utf8",  # pylint: disable=unused-argument
-        proto: Optional[Protocol] = None,  # pylint: disable=unused-argument
-        allow_pickle: bool = False,  # pylint: disable=unused-argument
+        content_type: str | None = None,  # noqa: ARG003
+        encoding: str = "utf8",  # noqa: ARG003
+        proto: Protocol | None = None,  # noqa: ARG003
+        allow_pickle: bool = False,  # noqa: ARG003
     ) -> Model:
         """Parse raw data."""
         return cast("Model", cls.parse_obj(yaml.safe_load(b)))

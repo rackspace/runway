@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 CFNGIN_LOOKUP_STRING_REGEX = r"^\${.*}$"
 RUNWAY_LOOKUP_STRING_ERROR = ValueError("field can only be a string if it's a lookup")
@@ -17,7 +19,7 @@ def convert_null_values(v: Any) -> Any:
     return None if isinstance(v, str) and v.lower() in null_strings else v
 
 
-def resolve_path_field(v: Optional[Path]) -> Optional[Path]:
+def resolve_path_field(v: Path | None) -> Path | None:
     """Resolve sys_path."""
     return v.resolve() if v else v
 

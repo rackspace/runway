@@ -6,12 +6,12 @@ from __future__ import annotations
 import io
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from unittest.mock import MagicMock
 
 import pytest
 from botocore.response import StreamingBody
 from botocore.stub import Stubber
-from mock import MagicMock
 
 from runway.cfngin.exceptions import (
     PersistentGraphCannotLock,
@@ -41,12 +41,12 @@ BOTO3_CREDENTIALS: Boto3CredentialsTypeDef = {
 }
 
 
-def gen_tagset(tags: Dict[str, str]) -> TagSetTypeDef:
+def gen_tagset(tags: dict[str, str]) -> TagSetTypeDef:
     """Create TagSet value from a dict."""
     return [{"Key": key, "Value": value} for key, value in tags.items()]
 
 
-def gen_s3_object_content(content: Union[Dict[str, Any], str]) -> StreamingBody:
+def gen_s3_object_content(content: Union[dict[str, Any], str]) -> StreamingBody:
     """Convert a string or dict to S3 object body.
 
     Args:
@@ -73,7 +73,7 @@ def test_get_fqn(delim: str, expected: str, name: Optional[str]) -> None:
     assert get_fqn("test", delim, name) == expected
 
 
-class TestCFNginContext:  # pylint: disable=too-many-public-methods
+class TestCFNginContext:
     """Test runway.context._cfngin.CFNginContext."""
 
     config = CfnginConfig.parse_obj(
@@ -97,7 +97,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             {"name": "stack2", "template_path": ".", "requires": ["stack1"]},
         ],
     }
-    persist_graph_raw: Dict[str, Set[str]] = {"stack1": set(), "stack2": {"stack1"}}
+    persist_graph_raw: dict[str, set[str]] = {"stack1": set(), "stack2": {"stack1"}}
     persist_graph_config = CfnginConfig.parse_obj(persist_graph_raw_config)
 
     @pytest.mark.parametrize(
@@ -119,9 +119,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         mocker.patch.object(CfnginContext, "upload_to_s3", True)
         assert (
             CfnginContext(
-                config=CfnginConfig.parse_obj(
-                    {"namespace": "test", "cfngin_bucket": "test-bucket"}
-                )
+                config=CfnginConfig.parse_obj({"namespace": "test", "cfngin_bucket": "test-bucket"})
             ).bucket_name
             == "test-bucket"
         )
@@ -149,9 +147,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         mock_get_fqn = mocker.patch(f"{MODULE}.get_fqn", return_value="success")
         obj = CfnginContext(config=self.config)
         assert obj.get_fqn("name") == "success"
-        mock_get_fqn.assert_called_once_with(
-            obj.base_fqn, self.config.namespace_delimiter, "name"
-        )
+        mock_get_fqn.assert_called_once_with(obj.base_fqn, self.config.namespace_delimiter, "name")
 
     def test_get_stack(self) -> None:
         """Test get_stack."""
@@ -184,7 +180,8 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         assert obj.config_path == tmp_path
         assert obj.env == self.env
         assert obj.force_stacks == ["stack-01"]
-        assert not obj.hook_data and isinstance(obj.hook_data, dict)
+        assert not obj.hook_data
+        assert isinstance(obj.hook_data, dict)
         assert obj.logger
         assert obj.parameters == {"key": "val"}
         assert obj.stack_names == ["stack-02"]
@@ -198,10 +195,13 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         assert obj.config_path == Path.cwd()
         assert isinstance(obj.env, DeployEnvironment)
         assert obj.force_stacks == []
-        assert not obj.hook_data and isinstance(obj.hook_data, dict)
+        assert not obj.hook_data
+        assert isinstance(obj.hook_data, dict)
         assert obj.logger
-        assert not obj.parameters and isinstance(obj.parameters, dict)
-        assert not obj.stack_names and isinstance(obj.stack_names, list)
+        assert not obj.parameters
+        assert isinstance(obj.parameters, dict)
+        assert not obj.stack_names
+        assert isinstance(obj.stack_names, list)
 
     def test_lock_persistent_graph_locked(self, mocker: MockerFixture) -> None:
         """Test lock_persistent_graph no graph."""
@@ -245,10 +245,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             "put_object_tagging",
             {},
             {
-                "Tagging": {
-                    # pylint: disable=protected-access
-                    "TagSet": [{"Key": obj._persistent_graph_lock_tag, "Value": "123"}]
-                },
+                "Tagging": {"TagSet": [{"Key": obj._persistent_graph_lock_tag, "Value": "123"}]},
                 **obj.persistent_graph_location,
             },
         )
@@ -269,13 +266,8 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
 
     def test_namespace_delimiter(self) -> None:
         """Test namespace_delimiter."""
-        config = CfnginConfig.parse_obj(
-            {"namespace": "test", "namespace_delimiter": "."}
-        )
-        assert (
-            CfnginContext(config=config).namespace_delimiter
-            == config.namespace_delimiter
-        )
+        config = CfnginConfig.parse_obj({"namespace": "test", "namespace_delimiter": "."})
+        assert CfnginContext(config=config).namespace_delimiter == config.namespace_delimiter
 
     def test_persistent_graph_no_location(self, mocker: MockerFixture) -> None:
         """Test persistent_graph no persistent_graph_location."""
@@ -313,7 +305,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             "put_object",
             {},
             {
-                "Body": "{}".encode(),
+                "Body": b"{}",
                 "ServerSideEncryption": "AES256",
                 "ACL": "bucket-owner-full-control",
                 "ContentType": "application/json",
@@ -372,7 +364,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             {"cfngin_bucket": "", "persistent_graph_key": "something"},
         ],
     )
-    def test_persistent_graph_location_empty(self, config_ext: Dict[str, str]) -> None:
+    def test_persistent_graph_location_empty(self, config_ext: dict[str, str]) -> None:
         """Test persistent_graph_location."""
         config = CfnginConfig.parse_obj({"namespace": "test", **config_ext})
         assert not CfnginContext(config=config).persistent_graph_location
@@ -449,9 +441,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         obj = CfnginContext()
         stubber = Stubber(obj.s3_client)
 
-        stubber.add_response(
-            "get_object_tagging", {"TagSet": []}, obj.persistent_graph_location
-        )
+        stubber.add_response("get_object_tagging", {"TagSet": []}, obj.persistent_graph_location)
         stubber.add_response(
             "get_object_tagging",
             {"TagSet": [{"Key": "key", "Value": "val"}]},
@@ -476,9 +466,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         with stubber:
             assert not obj.put_persistent_graph("123")
 
-    def test_put_persistent_graph_lock_code_mismatch(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_put_persistent_graph_lock_code_mismatch(self, mocker: MockerFixture) -> None:
         """Test put_persistent_graph lock code mismatch."""
         mocker.patch.object(
             CfnginContext,
@@ -526,9 +514,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             "put_object",
             {},
             {
-                "Body": json.dumps(
-                    self.persist_graph_raw, default=json_serial, indent=4
-                ).encode(),
+                "Body": json.dumps(self.persist_graph_raw, default=json_serial, indent=4).encode(),
                 "ServerSideEncryption": "AES256",
                 "ACL": "bucket-owner-full-control",
                 "ContentType": "application/json",
@@ -610,16 +596,12 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
 
     def test_tags_empty(self) -> None:
         """Test tags empty."""
-        obj = CfnginContext(
-            config=CfnginConfig.parse_obj({"namespace": "test", "tags": {}})
-        )
+        obj = CfnginContext(config=CfnginConfig.parse_obj({"namespace": "test", "tags": {}}))
         assert obj.tags == {}
 
     def test_tags_none(self) -> None:
         """Test tags None."""
-        obj = CfnginContext(
-            config=CfnginConfig.parse_obj({"namespace": "test", "tags": None})
-        )
+        obj = CfnginContext(config=CfnginConfig.parse_obj({"namespace": "test", "tags": None}))
         assert obj.tags == {"cfngin_namespace": obj.config.namespace}
 
     def test_tags(self) -> None:
@@ -631,10 +613,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
 
     def test_template_indent(self) -> None:
         """Test template_indent."""
-        assert (
-            CfnginContext(config=self.config).template_indent
-            == self.config.template_indent
-        )
+        assert CfnginContext(config=self.config).template_indent == self.config.template_indent
 
     @pytest.mark.parametrize(
         "config, expected",
@@ -646,16 +625,11 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
             ({"namespace": "test", "cfngin_bucket": "something"}, True),
         ],
     )
-    def test_upload_to_s3(self, config: Dict[str, Any], expected: bool) -> None:
+    def test_upload_to_s3(self, config: dict[str, Any], expected: bool) -> None:
         """Test upload_to_s3."""
-        assert (
-            CfnginContext(config=CfnginConfig.parse_obj(config)).upload_to_s3
-            is expected
-        )
+        assert CfnginContext(config=CfnginConfig.parse_obj(config)).upload_to_s3 is expected
 
-    def test_unlock_persistent_graph_empty_no_such_key(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_unlock_persistent_graph_empty_no_such_key(self, mocker: MockerFixture) -> None:
         """Test unlock_persistent_graph empty graph NoSuchKey."""
         mocker.patch.object(
             CfnginContext,
@@ -669,9 +643,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         with stubber:
             assert obj.unlock_persistent_graph("123")
 
-    def test_unlock_persistent_graph_lock_code_mismatch(
-        self, mocker: MockerFixture
-    ) -> None:
+    def test_unlock_persistent_graph_lock_code_mismatch(self, mocker: MockerFixture) -> None:
         """Test unlock_persistent_graph lock code mismatch."""
         mocker.patch.object(
             CfnginContext,
@@ -718,7 +690,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         stubber = Stubber(obj.s3_client)
         stubber.add_response(
             "get_object",
-            {"Body": "{}".encode()},
+            {"Body": b"{}"},
             {
                 "ResponseContentType": "application/json",
                 **obj.persistent_graph_location,
@@ -728,11 +700,9 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         with stubber:
             assert obj.unlock_persistent_graph("123")
 
-    @pytest.mark.parametrize(
-        "graph_dict", cast(List[Dict[str, List[str]]], [{"stack0": []}, {}])
-    )
+    @pytest.mark.parametrize("graph_dict", cast(list[dict[str, list[str]]], [{"stack0": []}, {}]))
     def test_unlock_persistent_graph(
-        self, graph_dict: Dict[str, List[str]], mocker: MockerFixture
+        self, graph_dict: dict[str, list[str]], mocker: MockerFixture
     ) -> None:
         """Test unlock_persistent_graph."""
         mocker.patch.object(
@@ -748,7 +718,7 @@ class TestCFNginContext:  # pylint: disable=too-many-public-methods
         if not graph_dict:
             stubber.add_response(
                 "get_object",
-                {"Body": "{}".encode()},
+                {"Body": b"{}"},
                 {
                     "ResponseContentType": "application/json",
                     **obj.persistent_graph_location,

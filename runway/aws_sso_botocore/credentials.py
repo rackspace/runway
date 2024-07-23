@@ -248,7 +248,6 @@ class SSOProvider(CredentialProvider):
         "sso_account_id",
     ]
 
-    # pylint: disable=super-init-not-called
     def __init__(
         self, load_config, client_creator, profile_name, cache=None, token_cache=None
     ):

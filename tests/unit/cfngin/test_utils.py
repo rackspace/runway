@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.utils."""
 
-# pylint: disable=unused-argument,invalid-name, broad-exception-raised
 # pyright: basic
 from __future__ import annotations
 
@@ -11,10 +10,10 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, cast
+from typing import TYPE_CHECKING, Any, cast
+from unittest import mock
 
 import boto3
-import mock
 import pytest
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
@@ -41,7 +40,6 @@ from runway.cfngin.utils import (
 from runway.config.models.cfngin import GitCfnginPackageSourceDefinitionModel
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 AWS_REGIONS = [
@@ -60,7 +58,7 @@ AWS_REGIONS = [
 MODULE = "runway.cfngin.utils"
 
 
-def mock_create_cache_directories(self: Any, **kwargs: Any) -> int:
+def mock_create_cache_directories(self: Any, **kwargs: Any) -> int:  # noqa: ARG001
     """Mock create cache directories.
 
     Don't actually need the directories created in testing
@@ -79,7 +77,7 @@ def test_ensure_s3_bucket() -> None:
     stubber.assert_no_pending_responses()
 
 
-def test_ensure_s3_bucket_forbidden(caplog: LogCaptureFixture) -> None:
+def test_ensure_s3_bucket_forbidden(caplog: pytest.LogCaptureFixture) -> None:
     """Test ensure_s3_bucket."""
     caplog.set_level(logging.ERROR, logger=MODULE)
     s3_client = boto3.client("s3")
@@ -144,22 +142,20 @@ def test_ensure_s3_bucket_not_found_persist_graph() -> None:
     stubber.assert_no_pending_responses()
 
 
-def test_ensure_s3_bucket_persist_graph(caplog: LogCaptureFixture) -> None:
+def test_ensure_s3_bucket_persist_graph(caplog: pytest.LogCaptureFixture) -> None:
     """Test ensure_s3_bucket."""
     caplog.set_level(logging.WARNING, logger=MODULE)
     s3_client = boto3.client("s3")
     stubber = Stubber(s3_client)
     stubber.add_response("head_bucket", {}, {"Bucket": "test-bucket"})
-    stubber.add_response(
-        "get_bucket_versioning", {"Status": "Enabled"}, {"Bucket": "test-bucket"}
-    )
+    stubber.add_response("get_bucket_versioning", {"Status": "Enabled"}, {"Bucket": "test-bucket"})
     with stubber:
         assert not ensure_s3_bucket(s3_client, "test-bucket", persist_graph=True)
     stubber.assert_no_pending_responses()
     assert not caplog.messages
 
 
-def test_ensure_s3_bucket_persist_graph_mfa_delete(caplog: LogCaptureFixture) -> None:
+def test_ensure_s3_bucket_persist_graph_mfa_delete(caplog: pytest.LogCaptureFixture) -> None:
     """Test ensure_s3_bucket."""
     caplog.set_level(logging.WARNING, logger=MODULE)
     s3_client = boto3.client("s3")
@@ -175,8 +171,7 @@ def test_ensure_s3_bucket_persist_graph_mfa_delete(caplog: LogCaptureFixture) ->
     stubber.assert_no_pending_responses()
     assert (
         'MFADelete must be disabled on bucket "test-bucket" when using persistent '
-        "graphs to allow for proper management of the graphs"
-        in "\n".join(caplog.messages)
+        "graphs to allow for proper management of the graphs" in "\n".join(caplog.messages)
     )
 
 
@@ -184,26 +179,23 @@ def test_ensure_s3_bucket_persist_graph_mfa_delete(caplog: LogCaptureFixture) ->
     "versioning_response", [{"Status": "Disabled"}, {"Status": "Suspended"}, {}]
 )
 def test_ensure_s3_bucket_persist_graph_versioning_not_enabled(
-    caplog: LogCaptureFixture, versioning_response: Dict[str, Any]
+    caplog: pytest.LogCaptureFixture, versioning_response: dict[str, Any]
 ) -> None:
     """Test ensure_s3_bucket."""
     caplog.set_level(logging.WARNING, logger=MODULE)
     s3_client = boto3.client("s3")
     stubber = Stubber(s3_client)
     stubber.add_response("head_bucket", {}, {"Bucket": "test-bucket"})
-    stubber.add_response(
-        "get_bucket_versioning", versioning_response, {"Bucket": "test-bucket"}
-    )
+    stubber.add_response("get_bucket_versioning", versioning_response, {"Bucket": "test-bucket"})
     with stubber:
         assert not ensure_s3_bucket(s3_client, "test-bucket", persist_graph=True)
     stubber.assert_no_pending_responses()
-    assert (
-        "it is recommended to enable versioning when using persistent graphs"
-        in "\n".join(caplog.messages)
+    assert "it is recommended to enable versioning when using persistent graphs" in "\n".join(
+        caplog.messages
     )
 
 
-def test_ensure_s3_bucket_raise_client_error(caplog: LogCaptureFixture) -> None:
+def test_ensure_s3_bucket_raise_client_error(caplog: pytest.LogCaptureFixture) -> None:
     """Test ensure_s3_bucket."""
     caplog.set_level(logging.ERROR, logger=MODULE)
     s3_client = boto3.client("s3")
@@ -224,13 +216,13 @@ def test_read_value_from_path_abs(tmp_path: Path) -> None:
 
 def test_read_value_from_path_dir(tmp_path: Path) -> None:
     """Test read_value_from_path directory."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         read_value_from_path(f"file://{tmp_path.absolute()}")
 
 
 def test_read_value_from_path_not_exist(tmp_path: Path) -> None:
     """Test read_value_from_path does not exist."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         read_value_from_path(f"file://{(tmp_path / 'something.txt').absolute()}")
 
 
@@ -245,10 +237,7 @@ def test_read_value_from_path_root_path_dir(tmp_path: Path) -> None:
     """Test read_value_from_path root_path is dir."""
     test_file = tmp_path / "test.txt"
     test_file.write_text("success")
-    assert (
-        read_value_from_path(f"file://./{test_file.name}", root_path=tmp_path)
-        == "success"
-    )
+    assert read_value_from_path(f"file://./{test_file.name}", root_path=tmp_path) == "success"
 
 
 def test_read_value_from_path_root_path_file(tmp_path: Path) -> None:
@@ -256,9 +245,7 @@ def test_read_value_from_path_root_path_file(tmp_path: Path) -> None:
     test_file = tmp_path / "test.txt"
     test_file.write_text("success")
     assert (
-        read_value_from_path(
-            f"file://./{test_file.name}", root_path=tmp_path / "something.json"
-        )
+        read_value_from_path(f"file://./{test_file.name}", root_path=tmp_path / "something.json")
         == "success"
     )
 
@@ -283,7 +270,7 @@ class TestUtil(unittest.TestCase):
 
         # Create a tar file using the temporary directory
         with tarfile.open(self.tmp_path / self.tar_file, "w") as tar:
-            tar.add(self.tmp_path, arcname=os.path.basename(self.tmp_path))
+            tar.add(self.tmp_path, arcname=os.path.basename(self.tmp_path))  # noqa: PTH119
 
     def tearDown(self) -> None:
         """Tear down test case."""
@@ -293,7 +280,7 @@ class TestUtil(unittest.TestCase):
         """Test cf safe name."""
         tests = (("abc-def", "AbcDef"), ("GhI", "GhI"), ("jKlm.noP", "JKlmNoP"))
         for test in tests:
-            self.assertEqual(cf_safe_name(test[0]), test[1])
+            assert cf_safe_name(test[0]) == test[1]
 
     def test_camel_to_snake(self) -> None:
         """Test camel to snake."""
@@ -304,7 +291,7 @@ class TestUtil(unittest.TestCase):
             ("testtemplate", "testtemplate"),
         )
         for test in tests:
-            self.assertEqual(camel_to_snake(test[0]), test[1])
+            assert camel_to_snake(test[0]) == test[1]
 
     def test_yaml_to_ordered_dict(self) -> None:
         """Test yaml to ordered dict."""
@@ -316,27 +303,27 @@ class TestUtil(unittest.TestCase):
             path: foo1.bar1
         """
         config = yaml_to_ordered_dict(raw_config)
-        self.assertEqual(list(config["pre_deploy"].keys())[0], "hook2")
-        self.assertEqual(config["pre_deploy"]["hook2"]["path"], "foo.bar")
+        assert next(iter(config["pre_deploy"].keys())) == "hook2"
+        assert config["pre_deploy"]["hook2"]["path"] == "foo.bar"
 
     def test_get_client_region(self) -> None:
         """Test get client region."""
         regions = ["us-east-1", "us-west-1", "eu-west-1", "sa-east-1"]
         for region in regions:
             client = boto3.client("s3", region_name=region)
-            self.assertEqual(get_client_region(client), region)
+            assert get_client_region(client) == region
 
     def test_get_s3_endpoint(self) -> None:
         """Test get s3 endpoint."""
         endpoint_url = "https://example.com"
         client = boto3.client("s3", region_name="us-east-1", endpoint_url=endpoint_url)
-        self.assertEqual(get_s3_endpoint(client), endpoint_url)
+        assert get_s3_endpoint(client) == endpoint_url
 
     def test_s3_bucket_location_constraint(self) -> None:
         """Test s3 bucket location constraint."""
         tests = (("us-east-1", ""), ("us-west-1", "us-west-1"))
         for region, result in tests:
-            self.assertEqual(s3_bucket_location_constraint(region), result)
+            assert s3_bucket_location_constraint(region) == result
 
     def test_parse_cloudformation_template(self) -> None:
         """Test parse cloudformation template."""
@@ -374,54 +361,52 @@ Outputs:
                 }
             },
         }
-        self.assertEqual(parse_cloudformation_template(template), parsed_template)
+        assert parse_cloudformation_template(template) == parsed_template
 
-    def test_is_within_directory(self):
+    def test_is_within_directory(self) -> None:
         """Test is within directory."""
         directory = Path("my_directory")
 
         # Assert if the target is within the directory.
         target = "my_directory/sub_directory/file.txt"
-        self.assertTrue(is_within_directory(directory, target))
+        assert is_within_directory(directory, target)
 
         # Assert if the target is NOT within the directory.
         target = "other_directory/file.txt"
-        self.assertFalse(is_within_directory(directory, target))
+        assert not is_within_directory(directory, target)
 
         # Assert if the target is the directory.
         target = "my_directory"
-        self.assertTrue(is_within_directory(directory, target))
+        assert is_within_directory(directory, target)
 
-    def test_safe_tar_extract_all_within(self):
+    def test_safe_tar_extract_all_within(self) -> None:
         """Test when all tar file contents are within the specified directory."""
         path = self.tmp_path / "my_directory"
         with tarfile.open(self.tmp_path / self.tar_file, "r") as tar:
-            self.assertIsNone(safe_tar_extract(tar, path))
+            assert safe_tar_extract(tar, path) is None
 
-    def test_safe_tar_extract_path_traversal(self):
+    def test_safe_tar_extract_path_traversal(self) -> None:
         """Test when a tar file tries to go outside the specified area."""
         with tarfile.open(self.tmp_path / self.tar_file, "r") as tar:
             for member in tar.getmembers():
                 member.name = f"../{member.name}"
 
             path = self.tmp_path / "my_directory"
-            with self.assertRaises(Exception) as context:
+            with pytest.raises(Exception) as excinfo:  # noqa: PT011
                 safe_tar_extract(tar, path)
-            self.assertEqual(
-                str(context.exception), "Attempted Path Traversal in Tar File"
-            )
+            assert str(excinfo.value) == "Attempted Path Traversal in Tar File"  # type: ignore
 
-    def test_extractors(self):
+    def test_extractors(self) -> None:
         """Test extractors."""
-        self.assertEqual(Extractor(Path("test.zip")).archive, Path("test.zip"))
-        self.assertEqual(TarExtractor().extension, ".tar")
-        self.assertEqual(TarGzipExtractor().extension, ".tar.gz")
-        self.assertEqual(ZipExtractor().extension, ".zip")
+        assert Extractor(Path("test.zip")).archive == Path("test.zip")
+        assert TarExtractor().extension == ".tar"
+        assert TarGzipExtractor().extension == ".tar.gz"
+        assert ZipExtractor().extension == ".zip"
         for i in [TarExtractor(), ZipExtractor(), ZipExtractor()]:
             i.set_archive(Path("/tmp/foo"))
-            self.assertEqual(i.archive.name.endswith(i.extension), True)  # type: ignore
+            assert i.archive.name.endswith(i.extension) is True  # type: ignore
 
-    def test_SourceProcessor_helpers(self):  # noqa: N802
+    def test_SourceProcessor_helpers(self) -> None:  # noqa: N802
         """Test SourceProcessor helpers."""
         with mock.patch.object(
             SourceProcessor,
@@ -430,37 +415,34 @@ Outputs:
         ):
             sp = SourceProcessor(cache_dir=self.tmp_path, sources={})  # type: ignore
 
-            self.assertEqual(
-                sp.sanitize_git_path("git@github.com:foo/bar.git"),
-                "git_github.com_foo_bar",
+            assert sp.sanitize_git_path("git@github.com:foo/bar.git") == "git_github.com_foo_bar"
+            assert (
+                sp.sanitize_uri_path("http://example.com/foo/bar.gz@1")
+                == "http___example.com_foo_bar.gz_1"
             )
-            self.assertEqual(
-                sp.sanitize_uri_path("http://example.com/foo/bar.gz@1"),
-                "http___example.com_foo_bar.gz_1",
+            assert (
+                sp.sanitize_git_path("git@github.com:foo/bar.git", "v1")
+                == "git_github.com_foo_bar-v1"
             )
-            self.assertEqual(
-                sp.sanitize_git_path("git@github.com:foo/bar.git", "v1"),
-                "git_github.com_foo_bar-v1",
-            )
-            self.assertEqual(
+            assert (
                 sp.determine_git_ls_remote_ref(
                     GitCfnginPackageSourceDefinitionModel(branch="foo", uri="test")
-                ),
-                "refs/heads/foo",
+                )
+                == "refs/heads/foo"
             )
-            for i in [cast(Dict[str, Any], {}), {"tag": "foo"}, {"commit": "1234"}]:
-                self.assertEqual(
+            for i in [cast(dict[str, Any], {}), {"tag": "foo"}, {"commit": "1234"}]:
+                assert (
                     sp.determine_git_ls_remote_ref(
                         GitCfnginPackageSourceDefinitionModel(uri="git@foo", **i)
-                    ),
-                    "HEAD",
+                    )
+                    == "HEAD"
                 )
 
-            self.assertEqual(
+            assert (
                 sp.git_ls_remote(
                     "https://github.com/remind101/stacker.git", "refs/heads/release-1.0"
-                ),
-                "857b4834980e582874d70feef77bb064b60762d1",
+                )
+                == "857b4834980e582874d70feef77bb064b60762d1"
             )
 
             bad_configs = [
@@ -471,33 +453,28 @@ Outputs:
                 {"uri": "x", "commit": "1234", "branch": "x"},
             ]
             for i in bad_configs:
-                with self.assertRaises(ValidationError):
+                with pytest.raises(ValidationError):
                     sp.determine_git_ref(GitCfnginPackageSourceDefinitionModel(**i))
 
-            self.assertEqual(
+            assert (
                 sp.determine_git_ref(
                     GitCfnginPackageSourceDefinitionModel(
-                        uri="https://github.com/remind101/stacker.git",
-                        branch="release-1.0",
+                        uri="https://github.com/remind101/stacker.git", branch="release-1.0"
                     )
-                ),
-                "857b4834980e582874d70feef77bb064b60762d1",
+                )
+                == "857b4834980e582874d70feef77bb064b60762d1"
             )
-            self.assertEqual(
+            assert (
                 sp.determine_git_ref(
-                    GitCfnginPackageSourceDefinitionModel(
-                        **{"uri": "git@foo", "commit": "1234"}
-                    )
-                ),
-                "1234",
+                    GitCfnginPackageSourceDefinitionModel(uri="git@foo", commit="1234")
+                )
+                == "1234"
             )
-            self.assertEqual(
+            assert (
                 sp.determine_git_ref(
-                    GitCfnginPackageSourceDefinitionModel(
-                        **{"uri": "git@foo", "tag": "v1.0.0"}
-                    )
-                ),
-                "v1.0.0",
+                    GitCfnginPackageSourceDefinitionModel(uri="git@foo", tag="v1.0.0")
+                )
+                == "v1.0.0"
             )
 
 
@@ -516,25 +493,19 @@ class TestExceptionRetries(unittest.TestCase):
         """Run before tests."""
         self.counter = 0
 
-    def _works_immediately(
-        self, a: Any, b: Any, x: Any = None, y: Any = None
-    ) -> List[Any]:
+    def _works_immediately(self, a: Any, b: Any, x: Any = None, y: Any = None) -> list[Any]:
         """Works immediately."""
         self.counter += 1
         return [a, b, x, y]
 
-    def _works_second_attempt(
-        self, a: Any, b: Any, x: Any = None, y: Any = None
-    ) -> List[Any]:
+    def _works_second_attempt(self, a: Any, b: Any, x: Any = None, y: Any = None) -> list[Any]:
         """Works second_attempt."""
         self.counter += 1
         if self.counter == 2:
             return [a, b, x, y]
         raise Exception("Broke.")
 
-    def _second_raises_exception2(
-        self, a: Any, b: Any, x: Any = None, y: Any = None
-    ) -> List[Any]:
+    def _second_raises_exception2(self, a: Any, b: Any, x: Any = None, y: Any = None) -> list[Any]:
         """Second raises exception2."""
         self.counter += 1
         if self.counter == 2:
@@ -542,8 +513,8 @@ class TestExceptionRetries(unittest.TestCase):
         raise MockException("Broke.")
 
     def _throws_exception2(
-        self, a: Any, b: Any, x: Any = None, y: Any = None
-    ) -> List[Any]:
+        self, a: Any, b: Any, x: Any = None, y: Any = None  # noqa: ARG002
+    ) -> list[Any]:
         """Throws exception2."""
         self.counter += 1
         raise MockException("Broke.")

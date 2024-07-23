@@ -4,14 +4,15 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from ..exceptions import NpmNotFound
 from ..utils import which
 from .utils import NPM_BIN, format_npm_command_for_logging, use_npm_ci
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from .._logging import PrefixAdaptor, RunwayLogger
     from ..context import RunwayContext
 
@@ -22,22 +23,22 @@ class RunwayModule:
     """Base class for Runway modules."""
 
     ctx: RunwayContext
-    explicitly_enabled: Optional[bool]
-    logger: Union[PrefixAdaptor, RunwayLogger]
+    explicitly_enabled: bool | None
+    logger: PrefixAdaptor | RunwayLogger
     name: str
-    options: Union[Dict[str, Any], ModuleOptions]
+    options: dict[str, Any] | ModuleOptions
     region: str
 
     def __init__(
         self,
         context: RunwayContext,
         *,
-        explicitly_enabled: Optional[bool] = False,
+        explicitly_enabled: bool | None = False,
         logger: RunwayLogger = LOGGER,
         module_root: Path,
-        name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        name: str | None = None,
+        options: dict[str, Any] | ModuleOptions | None = None,
+        parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -92,19 +93,19 @@ class RunwayModule:
         return getattr(self, key)
 
 
-class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
+class RunwayModuleNpm(RunwayModule):
     """Base class for Runway modules that use npm."""
 
     def __init__(
         self,
         context: RunwayContext,
         *,
-        explicitly_enabled: Optional[bool] = False,
+        explicitly_enabled: bool | None = False,
         logger: RunwayLogger = LOGGER,
         module_root: Path,
-        name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        name: str | None = None,
+        options: dict[str, Any] | ModuleOptions | None = None,
+        parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -136,7 +137,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         self.check_for_npm(logger=self.logger)  # fail fast
         self.warn_on_boto_env_vars(self.ctx.env.vars, logger=logger)
 
-    def log_npm_command(self, command: List[str]) -> None:
+    def log_npm_command(self, command: list[str]) -> None:
         """Log an npm command that is going to be run.
 
         Args:
@@ -174,9 +175,7 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
         return False
 
     @staticmethod
-    def check_for_npm(
-        *, logger: Union[logging.Logger, PrefixAdaptor, RunwayLogger] = LOGGER
-    ) -> None:
+    def check_for_npm(*, logger: logging.Logger | PrefixAdaptor | RunwayLogger = LOGGER) -> None:
         """Ensure npm is installed and in the current path.
 
         Args:
@@ -192,9 +191,9 @@ class RunwayModuleNpm(RunwayModule):  # pylint: disable=abstract-method
 
     @staticmethod
     def warn_on_boto_env_vars(
-        env_vars: Dict[str, str],
+        env_vars: dict[str, str],
         *,
-        logger: Union[logging.Logger, PrefixAdaptor, RunwayLogger] = LOGGER,
+        logger: logging.Logger | PrefixAdaptor | RunwayLogger = LOGGER,
     ) -> None:
         """Inform user if boto-specific environment variables are in use.
 
@@ -219,7 +218,7 @@ class ModuleOptions:
         """Get a value or return the default."""
         return getattr(self, name, default)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Assess equality."""
         if isinstance(other, self.__class__):
             return self.__dict__ == other.__dict__

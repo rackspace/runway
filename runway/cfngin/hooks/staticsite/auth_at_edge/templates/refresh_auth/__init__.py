@@ -4,7 +4,7 @@ import logging
 import traceback
 from urllib.parse import parse_qs
 
-from shared import (  # noqa pylint: disable=import-error
+from shared import (
     create_error_html,
     extract_and_parse_cookies,
     generate_cookie_headers,
@@ -62,7 +62,7 @@ def handler(event, _context):
             tokens["id_token"] = res.get("id_token")
             tokens["access_token"] = res.get("access_token")
             cookie_headers_event_type = "new_tokens"
-        except Exception as err:  # pylint: disable=broad-except
+        except Exception as err:
             LOGGER.debug(err)
             cookie_headers_event_type = "refresh_failed"
 
@@ -88,7 +88,7 @@ def handler(event, _context):
 
     # Send a basic html error response and inform the user
     # why refresh was unsuccessful
-    except Exception as err:  # pylint: disable=broad-except
+    except Exception as err:
         LOGGER.info(err)
         LOGGER.info(traceback.print_exc())
 
@@ -101,9 +101,7 @@ def handler(event, _context):
             ),
             "status": "400",
             "headers": {
-                "content-type": [
-                    {"key": "Content-Type", "value": "text/html; charset=UTF-8"}
-                ],
+                "content-type": [{"key": "Content-Type", "value": "text/html; charset=UTF-8"}],
                 **CONFIG.get("cloud_front_headers", {}),
             },
         }
@@ -117,7 +115,7 @@ def validate_refresh_request(current_nonce, original_nonce, tokens):
     Args:
         current_nonce (str): The current nonce code.
         original_nonce (str): The original nonce code.
-        tokens (Dict[str, str]): A dictionary of all the token_types
+        tokens (dict[str, str]): A dictionary of all the token_types
             and their corresponding token values (id, auth, refresh).
 
     """

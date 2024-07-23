@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 from troposphere import Ref
 from troposphere.cloudformation import WaitCondition, WaitConditionHandle
@@ -20,7 +20,7 @@ class Broken(Blueprint):
 
     """
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "StringVariable": {"type": str, "default": ""}
     }
 

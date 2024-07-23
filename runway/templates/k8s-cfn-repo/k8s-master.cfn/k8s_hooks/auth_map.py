@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any
 
 from runway.cfngin.lookups.handlers.output import OutputLookup
 
@@ -37,8 +37,8 @@ def get_principal_arn(context: CfnginContext) -> str:
 
 
 def generate(
-    context: CfnginContext, *, filename: str, path: List[str], stack: str, **_: Any
-):
+    context: CfnginContext, *, filename: str, path: list[str], stack: str, **_: Any
+) -> bool:
     """Generate an EKS auth_map for worker connection.
 
     Args:
@@ -53,25 +53,23 @@ def generate(
     """
     overlay_path = Path(*path)
     file_path = overlay_path / filename
-    if os.path.exists(filename):
+    if os.path.exists(filename):  # noqa: PTH110
         LOGGER.info("%s file present; skipping initial creation", file_path)
         return True
     LOGGER.info("Creating auth_map at %s", file_path)
     overlay_path.mkdir(parents=True, exist_ok=True)
     principal_arn = get_principal_arn(context)
-    node_instancerole_arn = OutputLookup.handle(
-        f"{stack}::NodeInstanceRoleArn", context=context
-    )
+    node_instancerole_arn = OutputLookup.handle(f"{stack}::NodeInstanceRoleArn", context=context)
     aws_authmap_template = (Path(__file__).parent / "aws-auth-cm.yaml").read_text()
     file_path.write_text(
-        aws_authmap_template.replace(
-            "INSTANCEROLEARNHERE", node_instancerole_arn
-        ).replace("ORIGINALPRINCIPALARNHERE", principal_arn)
+        aws_authmap_template.replace("INSTANCEROLEARNHERE", node_instancerole_arn).replace(
+            "ORIGINALPRINCIPALARNHERE", principal_arn
+        )
     )
     return True
 
 
-def remove(*, path: List[str], filename: str, **_: Any) -> bool:
+def remove(*, path: list[str], filename: str, **_: Any) -> bool:
     """Remove an EKS auth_map for worker connection.
 
     For use after destroying a cluster.

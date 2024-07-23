@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, Type, Union, cast
+from typing import cast
 
 from ...lookups.handlers.base import LookupHandler
 from ...lookups.handlers.cfn import CfnLookup
@@ -25,13 +25,11 @@ from .handlers.rxref import RxrefLookup
 from .handlers.split import SplitLookup
 from .handlers.xref import XrefLookup
 
-CFNGIN_LOOKUP_HANDLERS: Dict[str, Type[LookupHandler]] = {}
+CFNGIN_LOOKUP_HANDLERS: dict[str, type[LookupHandler]] = {}
 LOGGER = logging.getLogger(__name__)
 
 
-def register_lookup_handler(
-    lookup_type: str, handler_or_path: Union[str, Type[LookupHandler]]
-) -> None:
+def register_lookup_handler(lookup_type: str, handler_or_path: str | type[LookupHandler]) -> None:
     """Register a lookup handler.
 
     Args:
@@ -52,7 +50,7 @@ def register_lookup_handler(
             CFNGIN_LOOKUP_HANDLERS[lookup_type] = handler
             return
     # Handler is a not a new-style handler
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa: BLE001
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     LOGGER.error(
         'lookup "%s" uses an unsupported format; to learn how to write '
@@ -82,9 +80,7 @@ def unregister_lookup_handler(lookup_type: str) -> None:
 register_lookup_handler(AmiLookup.TYPE_NAME, AmiLookup)
 register_lookup_handler(AwsLambdaLookup.TYPE_NAME, AwsLambdaLookup)
 register_lookup_handler(AwsLambdaLookup.Code.TYPE_NAME, AwsLambdaLookup.Code)
-register_lookup_handler(
-    AwsLambdaLookup.CodeSha256.TYPE_NAME, AwsLambdaLookup.CodeSha256
-)
+register_lookup_handler(AwsLambdaLookup.CodeSha256.TYPE_NAME, AwsLambdaLookup.CodeSha256)
 register_lookup_handler(
     AwsLambdaLookup.CompatibleArchitectures.TYPE_NAME,
     AwsLambdaLookup.CompatibleArchitectures,
@@ -93,15 +89,11 @@ register_lookup_handler(
     AwsLambdaLookup.CompatibleRuntimes.TYPE_NAME, AwsLambdaLookup.CompatibleRuntimes
 )
 register_lookup_handler(AwsLambdaLookup.Content.TYPE_NAME, AwsLambdaLookup.Content)
-register_lookup_handler(
-    AwsLambdaLookup.LicenseInfo.TYPE_NAME, AwsLambdaLookup.LicenseInfo
-)
+register_lookup_handler(AwsLambdaLookup.LicenseInfo.TYPE_NAME, AwsLambdaLookup.LicenseInfo)
 register_lookup_handler(AwsLambdaLookup.Runtime.TYPE_NAME, AwsLambdaLookup.Runtime)
 register_lookup_handler(AwsLambdaLookup.S3Bucket.TYPE_NAME, AwsLambdaLookup.S3Bucket)
 register_lookup_handler(AwsLambdaLookup.S3Key.TYPE_NAME, AwsLambdaLookup.S3Key)
-register_lookup_handler(
-    AwsLambdaLookup.S3ObjectVersion.TYPE_NAME, AwsLambdaLookup.S3ObjectVersion
-)
+register_lookup_handler(AwsLambdaLookup.S3ObjectVersion.TYPE_NAME, AwsLambdaLookup.S3ObjectVersion)
 register_lookup_handler(CfnLookup.TYPE_NAME, CfnLookup)
 register_lookup_handler(DefaultLookup.TYPE_NAME, DefaultLookup)
 register_lookup_handler(DynamodbLookup.TYPE_NAME, DynamodbLookup)

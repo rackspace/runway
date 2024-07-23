@@ -10,7 +10,8 @@ mappings:
     us-east-1:
       NAT: ami-ad227cc4
       ubuntu1404: &ubuntu1404 ami-74e27e1c # Setting an anchor
-      bastion: *ubuntu1404 # Using the anchor above
+      bastion: *ubuntu1404
+                           # Using the anchor above
     us-west-2:
       NAT: ami-290f4119
       ubuntu1404west2: &ubuntu1404west2 ami-5189a661
@@ -51,7 +52,7 @@ stacks:
       # parameters the stack actually needs and only submits those to each
       # stack. For example, most stacks are in the PrivateSubnets, but not
       # the PublicSubnets, but cfngin deals with it for you.
-      << : *vpc_parameters
+      <<: *vpc_parameters
       InstanceType: m3.medium
       OfficeNetwork: 203.0.113.0/24
       MinSize: 2

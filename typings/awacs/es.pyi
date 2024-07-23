@@ -14,29 +14,19 @@ class Action(BaseAction):
 class ARN(BaseARN):
     def __init__(self, resource=..., region=..., account=...) -> None: ...
 
-AcceptInboundCrossClusterSearchConnection = Action(
-    "AcceptInboundCrossClusterSearchConnection"
-)
+AcceptInboundCrossClusterSearchConnection = Action("AcceptInboundCrossClusterSearchConnection")
 AddTags = Action("AddTags")
 CreateElasticsearchDomain = Action("CreateElasticsearchDomain")
 CreateElasticsearchServiceRole = Action("CreateElasticsearchServiceRole")
-CreateOutboundCrossClusterSearchConnection = Action(
-    "CreateOutboundCrossClusterSearchConnection"
-)
+CreateOutboundCrossClusterSearchConnection = Action("CreateOutboundCrossClusterSearchConnection")
 DeleteElasticsearchDomain = Action("DeleteElasticsearchDomain")
 DeleteElasticsearchServiceRole = Action("DeleteElasticsearchServiceRole")
-DeleteInboundCrossClusterSearchConnection = Action(
-    "DeleteInboundCrossClusterSearchConnection"
-)
-DeleteOutboundCrossClusterSearchConnection = Action(
-    "DeleteOutboundCrossClusterSearchConnection"
-)
+DeleteInboundCrossClusterSearchConnection = Action("DeleteInboundCrossClusterSearchConnection")
+DeleteOutboundCrossClusterSearchConnection = Action("DeleteOutboundCrossClusterSearchConnection")
 DescribeElasticsearchDomain = Action("DescribeElasticsearchDomain")
 DescribeElasticsearchDomainConfig = Action("DescribeElasticsearchDomainConfig")
 DescribeElasticsearchDomains = Action("DescribeElasticsearchDomains")
-DescribeElasticsearchInstanceTypeLimits = Action(
-    "DescribeElasticsearchInstanceTypeLimits"
-)
+DescribeElasticsearchInstanceTypeLimits = Action("DescribeElasticsearchInstanceTypeLimits")
 DescribeInboundCrossClusterSearchConnections = Action(
     "DescribeInboundCrossClusterSearchConnections"
 )
@@ -46,9 +36,7 @@ DescribeOutboundCrossClusterSearchConnections = Action(
 DescribeReservedElasticsearchInstanceOfferings = Action(
     "DescribeReservedElasticsearchInstanceOfferings"
 )
-DescribeReservedElasticsearchInstances = Action(
-    "DescribeReservedElasticsearchInstances"
-)
+DescribeReservedElasticsearchInstances = Action("DescribeReservedElasticsearchInstances")
 ESCrossClusterGet = Action("ESCrossClusterGet")
 ESHttpDelete = Action("ESHttpDelete")
 ESHttpGet = Action("ESHttpGet")
@@ -68,9 +56,7 @@ PurchaseReservedElasticsearchInstance = Action("PurchaseReservedElasticsearchIns
 PurchaseReservedElasticsearchInstanceOffering = Action(
     "PurchaseReservedElasticsearchInstanceOffering"
 )
-RejectInboundCrossClusterSearchConnection = Action(
-    "RejectInboundCrossClusterSearchConnection"
-)
+RejectInboundCrossClusterSearchConnection = Action("RejectInboundCrossClusterSearchConnection")
 RemoveTags = Action("RemoveTags")
 UpdateElasticsearchDomainConfig = Action("UpdateElasticsearchDomainConfig")
 UpgradeElasticsearchDomain = Action("UpgradeElasticsearchDomain")

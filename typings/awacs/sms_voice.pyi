@@ -15,16 +15,10 @@ class ARN(BaseARN):
     def __init__(self, resource=..., region=..., account=...) -> None: ...
 
 CreateConfigurationSet = Action("CreateConfigurationSet")
-CreateConfigurationSetEventDestination = Action(
-    "CreateConfigurationSetEventDestination"
-)
+CreateConfigurationSetEventDestination = Action("CreateConfigurationSetEventDestination")
 DeleteConfigurationSet = Action("DeleteConfigurationSet")
-DeleteConfigurationSetEventDestination = Action(
-    "DeleteConfigurationSetEventDestination"
-)
+DeleteConfigurationSetEventDestination = Action("DeleteConfigurationSetEventDestination")
 GetConfigurationSetEventDestinations = Action("GetConfigurationSetEventDestinations")
 ListConfigurationSets = Action("ListConfigurationSets")
 SendVoiceMessage = Action("SendVoiceMessage")
-UpdateConfigurationSetEventDestination = Action(
-    "UpdateConfigurationSetEventDestination"
-)
+UpdateConfigurationSetEventDestination = Action("UpdateConfigurationSetEventDestination")

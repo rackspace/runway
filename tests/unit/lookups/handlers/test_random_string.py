@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import string
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.lookups.handlers.random_string import ArgsDataModel, RandomStringLookup
 
@@ -95,10 +95,7 @@ class TestRandomStringLookup:
     )
     def test_calculate_char_set(self, args: object, expected: str) -> None:
         """Test calculate_char_set."""
-        assert (
-            RandomStringLookup.calculate_char_set(ArgsDataModel.parse_obj(args))
-            == expected
-        )
+        assert RandomStringLookup.calculate_char_set(ArgsDataModel.parse_obj(args)) == expected
 
     @pytest.mark.parametrize(
         "args, value, expected",
@@ -127,8 +124,7 @@ class TestRandomStringLookup:
     def test_ensure_has_one_of(self, args: object, expected: bool, value: str) -> None:
         """Test ensure_has_one_of."""
         assert (
-            RandomStringLookup.ensure_has_one_of(ArgsDataModel.parse_obj(args), value)
-            is expected
+            RandomStringLookup.ensure_has_one_of(ArgsDataModel.parse_obj(args), value) is expected
         )
 
     @pytest.mark.parametrize("length", [1, 3, 5, 7, 8, 9])
@@ -137,10 +133,7 @@ class TestRandomStringLookup:
         char_set = "0123456789"
         choice = Mock(side_effect=list(char_set))
         mocker.patch(f"{MODULE}.secrets", choice=choice)
-        assert (
-            RandomStringLookup.generate_random_string(char_set, length)
-            == char_set[:length]
-        )
+        assert RandomStringLookup.generate_random_string(char_set, length) == char_set[:length]
         assert choice.call_count == length
         choice.assert_called_with(char_set)
 
@@ -161,12 +154,8 @@ class TestRandomStringLookup:
         )
         assert RandomStringLookup.handle("12", Mock()) == format_results.return_value
         calculate_char_set.assert_called_once_with(args)
-        generate_random_string.assert_called_once_with(
-            calculate_char_set.return_value, 12
-        )
-        ensure_has_one_of.assert_called_once_with(
-            args, generate_random_string.return_value
-        )
+        generate_random_string.assert_called_once_with(calculate_char_set.return_value, 12)
+        ensure_has_one_of.assert_called_once_with(args, generate_random_string.return_value)
         format_results.assert_called_once_with(generate_random_string.return_value)
 
     def test_handle_digit(self, mocker: MockerFixture) -> None:
@@ -200,7 +189,7 @@ class TestRandomStringLookup:
 
     def test_handle_raise_value_error(self) -> None:
         """Test handle."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             RandomStringLookup.handle("test", Mock())
 
     @pytest.mark.parametrize("value, expected", [(">!?test", False), ("t3st", True)])
