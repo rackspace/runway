@@ -69,7 +69,7 @@ class AwslambdaStackOutputs(BaseModel):
     Runtime: str
 
     @root_validator(allow_reuse=True, pre=True)
-    def _convert_null_to_none(self, values: dict[str, Any]) -> dict[str, Any]:
+    def _convert_null_to_none(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Convert ``null`` to ``NoneType``."""
 
         def _handle_null(v: Any) -> Any:
