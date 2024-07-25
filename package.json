@@ -8,7 +8,7 @@
     "url": "https://github.com/onicagroup/runway/issues"
   },
   "dependencies": {
-    "tar": "^7.4.1"
+    "tar": "^7.4.2"
   },
   "description": "Simplify infrastructure/app testing/deployment",
   "devDependencies": {
