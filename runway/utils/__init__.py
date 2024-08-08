@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from ..compat import Self
 
 AWS_ENV_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
-DOC_SITE = "https://docs.onica.com/projects/runway"
+DOC_SITE = "https://runway.readthedocs.io"
 EMBEDDED_LIB_PATH = str(Path(__file__).resolve().parent / "embedded")
 
 LOGGER = logging.getLogger(__name__)

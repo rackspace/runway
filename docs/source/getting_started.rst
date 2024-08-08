@@ -134,7 +134,7 @@ Deploying Your First Module
     :caption: runway.yml
 
     ---
-    # See full syntax at https://docs.onica.com/projects/runway
+    # See full syntax at https://runway.readthedocs.io
     deployments:
       - modules:
           - nameofmyfirstmodulefolder
@@ -155,7 +155,7 @@ Deploying Your First Module
     :caption: runway.yml
 
     ---
-    # See full syntax at https://docs.onica.com/projects/runway
+    # See full syntax at https://runway.readthedocs.io
     deployments:
       - modules:
           - sampleapp.cfn

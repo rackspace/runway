@@ -343,7 +343,7 @@ class Blueprint(DelCachedPropMixin):
                 "deprecated PARAMETERS or "
                 "LOCAL_PARAMETERS, rather than VARIABLES. "
                 "Please update your blueprints. See "
-                "https://docs.onica.com/projects/runway/page/cfngin/blueprints.html#variables "
+                "https://runway.readthedocs.io/page/cfngin/blueprints.html#variables "
                 "for additional information."
             )
 

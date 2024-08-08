@@ -94,6 +94,6 @@ $ poetry run runway new
 
 ## Documentation
 
-See the [doc site](https://docs.onica.com/projects/runway) for full documentation.
+See the [doc site](https://runway.readthedocs.io) for full documentation.
 
-Quickstart documentation, including CloudFormation templates and walkthrough can be found [here](https://docs.onica.com/projects/runway/page/quickstart/index.html)
+Quickstart documentation, including CloudFormation templates and walkthrough can be found [here](https://runway.readthedocs.io/page/quickstart/index.html)
