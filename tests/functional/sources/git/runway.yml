@@ -1,6 +1,6 @@
 deployments:
   - modules:
-      - path: git::https://github.com/onicagroup/runway.git//tests/functional/cfngin/test_simple_build/simple-build.cfn?branch=master
+      - path: git::https://github.com/rackspace/runway.git//tests/functional/cfngin/test_simple_build/simple-build.cfn?branch=master
         type: cloudformation
     environments:
       test: true

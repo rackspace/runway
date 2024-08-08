@@ -17,7 +17,7 @@ classifiers = [
 ]
 description = "Simplify infrastructure/app testing/deployment"
 documentation = "https://docs.onica.com/projects/runway"
-homepage = "https://github.com/onicagroup/runway"
+homepage = "https://github.com/rackspace/runway"
 keywords = ["cli"]
 license = "Apache-2.0"
 maintainers = [
@@ -28,7 +28,7 @@ packages = [
   {include = "runway"},
 ]
 readme = "README.md"
-repository = "https://github.com/onicagroup/runway"
+repository = "https://github.com/rackspace/runway"
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.13"
@@ -123,7 +123,7 @@ version = "^1.16"
 runway = "runway._cli.main:cli"
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/onicagroup/runway/issues"
+"Bug Tracker" = "https://github.com/rackspace/runway/issues"
 
 [tool.black]
 force-exclude = '''

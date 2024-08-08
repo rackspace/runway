@@ -163,7 +163,7 @@ Git Repository
       package_sources:
         git:
           - uri: git@github.com:onicagroup/runway.git  # ssh
-          - uri: https://github.com/onicagroup/runway.git  # https
+          - uri: https://github.com/rackspace/runway.git  # https
 
 
 *****

@@ -1,4 +1,4 @@
-.. _Runway blueprints: https://github.com/onicagroup/runway/tree/master/runway/blueprints
+.. _Runway blueprints: https://github.com/rackspace/runway/tree/master/runway/blueprints
 .. _troposphere: https://github.com/cloudtools/troposphere
 
 .. _Blueprint:

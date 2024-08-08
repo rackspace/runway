@@ -1,5 +1,5 @@
-.. _CloudFormation template: https://github.com/onicagroup/runway/blob/master/quickstarts/runway/runway-quickstart.yml
-.. _Dockerfile: https://github.com/onicagroup/runway/blob/master/quickstarts/runway/Dockerfile
+.. _CloudFormation template: https://github.com/rackspace/runway/blob/master/quickstarts/runway/runway-quickstart.yml
+.. _Dockerfile: https://github.com/rackspace/runway/blob/master/quickstarts/runway/Dockerfile
 
 ########################
 Other Ways to Use Runway

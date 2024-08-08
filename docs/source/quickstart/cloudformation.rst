@@ -29,7 +29,7 @@ CloudFormation Quickstart
         $ sed -i -e "s/CUSTOMERNAMEHERE/mydemo/g; s/ENVIRONMENTNAMEHERE/dev/g; s/cfngin-/cfngin-$(uuidgen|tr "[:upper:]" "[:lower:]")-/g" sampleapp.cfn/dev-us-east-1.env
         $ cat <<EOF >> runway.yml
         ---
-        # Full syntax at https://github.com/onicagroup/runway
+        # Full syntax at https://github.com/rackspace/runway
         deployments:
           - modules:
               - sampleapp.cfn
@@ -47,7 +47,7 @@ CloudFormation Quickstart
         $ (Get-Content sampleapp.cfn\dev-us-east-1.env).replace('cfngin-', 'cfngin-' + [guid]::NewGuid() + '-') | Set-Content sampleapp.cfn\dev-us-east-1.env
         $ $RunwayTemplate = @"
         ---
-        # Full syntax at https://github.com/onicagroup/runway
+        # Full syntax at https://github.com/rackspace/runway
         deployments:
           - modules:
               - sampleapp.cfn
