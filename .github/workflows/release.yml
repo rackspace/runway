@@ -25,13 +25,14 @@ jobs:
       # https://github.com/pyinstaller/pyinstaller/issues/4406
       PIP_NO_BINARY: pydantic
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-plugins: poetry-dynamic-versioning
           python-version: ${{ matrix.python-version }}
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
@@ -39,25 +40,15 @@ jobs:
         if: startsWith( matrix.os, 'ubuntu' )
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
-      - name: Install Dependencies (ubuntu)
+      - name: ⤵️ Install Dependencies (ubuntu)
         if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
-      - name: Install Dependencies (windows)
+      - name: ⤵️ Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Run Build
+      - name: 👷 Build
         run: make build-pyinstaller-file
-      - name: Upload Artifacts
+      - name: ⤴️ Upload distribution artifacts
         uses: actions/upload-artifact@v4
         with:
           name: pyinstaller-onefile-${{ matrix.os }}
@@ -76,13 +67,14 @@ jobs:
       # https://github.com/pyinstaller/pyinstaller/issues/4406
       PIP_NO_BINARY: pydantic
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-plugins: poetry-dynamic-versioning
           python-version: ${{ matrix.python-version }}
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
@@ -90,25 +82,15 @@ jobs:
         if: startsWith( matrix.os, 'ubuntu' )
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
-      - name: Install Dependencies (ubuntu)
+      - name: ⤵️ Install Dependencies (ubuntu)
         if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
-      - name: Install Dependencies (windows)
+      - name: ⤵️ Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Run Build
+      - name: 👷 Build
         run: make build-pyinstaller-folder
-      - name: Upload Artifacts
+      - name: ⤴️ Upload distribution artifact
         uses: actions/upload-artifact@v4
         with:
           name: pyinstaller-onefolder-${{ matrix.os }}
@@ -127,15 +109,17 @@ jobs:
         python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-plugins: poetry-dynamic-versioning
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v4
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v4
         with:
           always-auth: true
           node-version: ${{ env.NODE_VERSION }}
@@ -147,43 +131,33 @@ jobs:
         if: startsWith( matrix.os, 'ubuntu' )
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
-      - name: Install Dependencies (ubuntu)
+      - name: ⤵️ Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed tree -y
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Download Artifacts (macOS)
+      - name: ⤵️ Download distribution artifacts (macOS)
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-macos-12
           path: artifacts
-      - name: Download Artifacts (ubuntu)
+      - name: ⤵️ Download distribution artifacts (ubuntu)
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-ubuntu-latest
           path: artifacts
-      - name: Download Artifacts (windows)
+      - name: ⤵️ Download distribution artifacts (windows)
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-windows-latest
           path: artifacts
-      - name: List Artifacts
+      - name: ℹ️ List Artifacts
         run: tree artifacts/
-      - name: npm Prep
+      - name: 👷 npm Prep
         run: make npm-prep
-      - name: npm pack
+      - name: 👷 Build
         run: |
           npm pack
           rm -rf artifacts && mkdir -p artifacts
           find . -name 'onica-runway-*.*.*.tgz' -exec mv {} artifacts/ \;
-      - name: Upload Artifacts
+      - name: ⤴️ Upload distribution artifacts
         uses: actions/upload-artifact@v4
         with:
           name: npm-pack
@@ -204,16 +178,17 @@ jobs:
         python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/setup-node@v4
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
-      - name: Download Artifact
+      - name: ⤵️ Download distribution artifact
         uses: actions/download-artifact@v4
         with:
           name: npm-pack
           path: artifacts
-      - name: Publish Distribution 📦 to npm
+      - name: 🚀 Publish Distribution 📦 to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.npm_api_token }}
         run: |
@@ -222,34 +197,24 @@ jobs:
     name: Build PyPi 📦
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          python-version: 3.9
+          poetry-plugins: poetry-dynamic-versioning
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
       - name: Remove broken apt repos (ubuntu)
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
-      - name: Install Dependencies (ubuntu)
+      - name: ⤵️ Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Run Build
+      - name: 👷 Build
         run: make build
-      - name: Upload Distribution Artifact
+      - name: ⤴️ Upload distribution artifact
         uses: actions/upload-artifact@v4
         with:
           name: pypi-dist
@@ -260,31 +225,21 @@ jobs:
       - build-pypi
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Download Distribution Artifact
+      - name: ⤵️ Download distribution artifact
         uses: actions/download-artifact@v4
         with:
           name: pypi-dist
           path: dist
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          python-version: 3.9
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - run: make version
-      - name: Publish Distribution 📦 to PyPI
+          poetry-install: false
+          poetry-plugins: poetry-dynamic-versioning
+      - name: 🚀 Publish Distribution 📦 to PyPI
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
         run: poetry publish
@@ -299,26 +254,26 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          python-version: 3.9
-      - name: Download Artifacts (macOS)
+          poetry-install: false
+      - name: ⤵️ Download distribution artifacts (macOS)
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefile-macos-12
           path: artifacts
-      - name: Download Artifacts (ubuntu)
+      - name: ⤵️ Download distribution artifacts (ubuntu)
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefile-ubuntu-latest
           path: artifacts
-      - name: Download Artifacts (windows)
+      - name: ⤵️ Download distribution artifacts (windows)
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefile-windows-latest
           path: artifacts
-      - name: Install AWS CLI & Upload 📦
+      - name: 🚀 Install AWS CLI & Upload 📦
         run: |
           pip install "awscli~=1.18.19"
           aws s3 cp artifacts s3://$AWS_S3_BUCKET/runway/ --recursive --acl public-read
@@ -334,29 +289,19 @@ jobs:
       VERSION: ${{ github.ref }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
+      - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          python-version: 3.9
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Configure AWS Credentials
+          poetry-plugins: poetry-dynamic-versioning
+      - name: 🏗 Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.aws_access_key }}
           aws-secret-access-key: ${{ secrets.aws_secret_key }}
           aws-region: us-east-1
-      - name: Run Script
+      - name: 🚀 Run Script
         working-directory: .github/scripts/urlshortener
         run: |
           poetry run python update_urls.py \
@@ -374,8 +319,9 @@ jobs:
       - update-urlshortener
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Microsoft Teams Notification
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v4
+      - name: 🚀 Microsoft Teams Notification
         uses: skitionek/notify-microsoft-teams@v1.0.8
         if: always()
         with:

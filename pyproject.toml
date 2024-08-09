@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "runway"
-version = "2.0.0-dev"  # do not change
+version = "0.0.0"
 authors = [
   "Onica Group LLC <opensource@onica.com>",
 ]
@@ -65,7 +65,6 @@ yamllint = "*"
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = ">=6.3"}
 doc8 = ">=0.10"  # for linting with vscode rst extension
-dunamai = "^1.5"
 mock = ">=4.0"
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = ">=3.0"}
 pipenv = "^2022.1.8"  # only used in tests
@@ -82,7 +81,6 @@ testfixtures = "^7.0.3"  # TODO remove use of this dependency - was inherited
 tomli-w = ">=1.0"
 
 [tool.poetry.group.docs.dependencies]
-dunamai = "^1.5"
 jsx-lexer = "^1.0"
 sphinx = "^4.3"
 sphinx-github-changelog = "^1.1"
@@ -172,6 +170,14 @@ omit = [
   "*/runway/cfngin/hooks/staticsite/auth_at_edge/templates/*",
   "*/type_defs.py",
 ]
+
+[tool.poetry-dynamic-versioning]  # poetry self add "poetry-dynamic-versioning[plugin]"
+bump = true
+enable = true
+fix-shallow-repository = true
+metadata = false
+strict = true
+style = "pep440"
 
 [tool.pyright]
 exclude = [
@@ -354,5 +360,5 @@ overrides."tool.poetry".first = ["name", "version"]
 overrides."tool.poetry.dependencies".first = ["python"]
 
 [build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry_core>=1.0.7"]
+build-backend = "poetry_dynamic_versioning.backend"
+requires = ["poetry-core", "poetry-dynamic-versioning>=1.2.0,<2.0.0"]

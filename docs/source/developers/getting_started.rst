@@ -14,14 +14,21 @@ Before getting started, `fork this repo`_ and `clone your fork`_.
 Development Environment
 ***********************
 
-This project includes an optional `VSCode Dev Container <https://code.visualstudio.com/docs/remote/containers>`__. This is an Ubuntu 22.04 image that will launch with operating system pre-requisites already installed and VSCode configured for Python debugging. It's not required to use this for development work, but does provide an easy and consistent way to get started.
+This project includes an optional `VSCode Dev Container <https://code.visualstudio.com/docs/remote/containers>`__.
+This is an Ubuntu 22.04 image that will launch with operating system pre-requisites already installed and VSCode configured for Python debugging.
+It's not required to use this for development work, but does provide an easy and consistent way to get started.
 
-This project uses `poetry <https://python-poetry.org/>`__ to create Python virtual environment. This must be installed on your system before setting up your dev environment.
+This project uses poetry_ to create Python virtual environment.
+This must be installed on your system before setting up your dev environment.
+Additionally, the poetry-dynamic-versioning_ plugin should be installed.
+Refer to the documentation of poetry-dynamic-versioning_ for how to install it based on how you installed poetry_.
 
-With poetry installed, run ``make setup`` to setup your development environment.
+With poetry_ installed, run ``make setup`` to setup your development environment.
 This will create all the required virtual environments to work on Runway, build docs locally, and run integration tests locally.
 The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
 
+.. _poetry: https://python-poetry.org
+.. _poetry-dynamic-versioning: https://github.com/mtkennerly/poetry-dynamic-versioning
 
 pre-commit
 ==========

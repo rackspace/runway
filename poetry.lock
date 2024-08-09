@@ -1097,20 +1097,6 @@ files = [
 ]
 
 [[package]]
-name = "dunamai"
-version = "1.22.0"
-description = "Dynamic version generation"
-optional = false
-python-versions = ">=3.5"
-files = [
-    {file = "dunamai-1.22.0-py3-none-any.whl", hash = "sha256:eab3894b31e145bd028a74b13491c57db01986a7510482c9b5fff3b4e53d77b7"},
-    {file = "dunamai-1.22.0.tar.gz", hash = "sha256:375a0b21309336f0d8b6bbaea3e038c36f462318c68795166e31f9873fdad676"},
-]
-
-[package.dependencies]
-packaging = ">=20.9"
-
-[[package]]
 name = "ecdsa"
 version = "0.18.0"
 description = "ECDSA cryptographic signature library (pure python)"
@@ -3304,4 +3290,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "c2bf0dfcf1f2093cf1c4ecad97d68c84738bf2c447fb7b94f67bdea7726c4a47"
+content-hash = "509340a409a84ea437c99ac0b7d4e25bdad336db790a6d42630db61b69d1e8de"

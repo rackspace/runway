@@ -10,15 +10,20 @@ on:
       - master
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
 
 jobs:
   spell-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v4
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v4
         with:
+          cache: npm
           node-version: ${{ env.NODE_VERSION }}
-      - run: make npm-ci
-      - run: make spellcheck
+      - name: ⤵️ Install Node Dependencies
+        run: make npm-ci
+      - name: 🚀 Run spellcheck
+        run: make spellcheck

@@ -5,21 +5,28 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 """  # noqa: INP001
 
 import os
+import sys
 from pathlib import Path
 
-from dunamai import Style, Version
+if sys.version_info < (3, 11):
+    import tomli as tomllib
+else:
+    import tomllib
 
 DOCS_DIR = Path(__file__).parent.parent.resolve()
 ROOT_DIR = DOCS_DIR.parent
 SRC_DIR = DOCS_DIR / "source"
 
+PYPROJECT_TOML = tomllib.loads((ROOT_DIR / "pyproject.toml").read_text())
+"""Read in the contents of ``../../pyproject.toml`` to reuse it's values."""
+
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-project = "Runway"
+project = PYPROJECT_TOML["tool"]["poetry"]["name"].title()
 copyright = "2021, Onica Group"  # noqa: A001
-author = "Onica Group"
-release = Version.from_git().serialize(metadata=False, style=Style.SemVer)
+author = PYPROJECT_TOML["tool"]["poetry"]["authors"][0]
+release = PYPROJECT_TOML["tool"]["poetry"]["version"]
 version = ".".join(release.split(".")[:2])  # short X.Y version
 
 
