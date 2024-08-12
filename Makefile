@@ -1,37 +1,33 @@
-.PHONY: build clean docs help install lint list release test version
+.PHONY: build clean docs help install lint list release test
 
 SHELL := /bin/bash
 
+ifeq ($(CI), yes)
+	POETRY_OPTS = "-v"
+	PRE_COMMIT_OPTS = --show-diff-on-failure --verbose
+endif
 
 help: ## show this message
-	@IFS=$$'\n' ; \
-	help_lines=(`fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##/:/'`); \
-	printf "%-30s %s\n" "target" "help" ; \
-	printf "%-30s %s\n" "------" "----" ; \
-	for help_line in $${help_lines[@]}; do \
-		IFS=$$':' ; \
-		help_split=($$help_line) ; \
-		help_command=`echo $${help_split[0]} | sed -e 's/^ *//' -e 's/ *$$//'` ; \
-		help_info=`echo $${help_split[2]} | sed -e 's/^ *//' -e 's/ *$$//'` ; \
-		printf '\033[36m'; \
-		printf "%-30s %s" $$help_command ; \
-		printf '\033[0m'; \
-		printf "%s\n" $$help_info; \
-	done
+	@awk \
+		'BEGIN {FS = ":.*##"; printf "\nUsage: make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-30s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) }' \
+		$(MAKEFILE_LIST)
 
 
-build: clean create-tfenv-ver-file version ## build the PyPi release
-	poetry build
+build: clean create-tfenv-ver-file ## build the PyPi release
+	@poetry build
 
-build-pyinstaller-file: clean create-tfenv-ver-file version ## build Pyinstaller single file release (github)
+build-pyinstaller-file: clean create-tfenv-ver-file ## build Pyinstaller single file release (github)
+	@poetry dynamic-versioning
 	bash ./.github/scripts/cicd/build_pyinstaller.sh file
 
-build-pyinstaller-folder: clean create-tfenv-ver-file version ## build Pyinstaller folder release (github)
+build-pyinstaller-folder: clean create-tfenv-ver-file ## build Pyinstaller folder release (github)
+	@poetry dynamic-versioning
 	bash ./.github/scripts/cicd/build_pyinstaller.sh folder
 
 clean: ## remove generated file from the project directory
 	rm -rf ./build/ ./dist/ ./src/ ./tmp/ ./runway.egg-info/;
-	rm -rf ./.pytest_cache
+	rm -rf ./.pytest_cache ./.venv;
+	find . -type d -name ".venv" -prune -exec rm -rf '{}' +;
 	find . -type d -name "node_modules" -prune -exec rm -rf '{}' +;
 	find . -type d -name ".runway" -prune -exec rm -rf '{}' +;
 	find . -type f -name "*.py[co]" -delete;
@@ -101,9 +97,10 @@ npm-install: ## run "npm install" with the option to ignore scripts - required t
 	@npm install --ignore-scripts
 
 # copies artifacts to src & npm package files to the root of the repo
-npm-prep: version ## process that needs to be run before creating an npm package
+npm-prep: ## process that needs to be run before creating an npm package
 	mkdir -p tmp
 	mkdir -p src
+	npm version $$(poetry version --short) --allow-same-version --no-git-tag-version
 	cp -r artifacts/$$(poetry version --short)/* src/
 	cp npm/* . && cp npm/.[^.]* .
 	cp package.json tmp/package.json
@@ -114,23 +111,27 @@ open-docs: ## open docs (HTML files must already exists)
 	@make -C docs open
 
 run-pre-commit: ## run pre-commit for all files
-	@poetry run pre-commit run -a
+	@poetry run pre-commit run $(PRE_COMMIT_OPTS) \
+		--all-files \
+		--color always
 
 setup: setup-poetry setup-pre-commit setup-npm ## setup development environment
 
 setup-npm: npm-ci ## install node dependencies with npm
 
 setup-poetry: ## setup python virtual environment
-	@poetry install --sync
+	@poetry install $(POETRY_OPTS) --sync
 
 setup-pre-commit: ## install pre-commit git hooks
 	@poetry run pre-commit install
 
 spellcheck: ## run cspell
 	@echo "Running cSpell to checking spelling..."
-	@npx cspell "**/*" \
+	@npm exec --no -- cspell lint . \
 		--color \
 		--config .vscode/cspell.json \
+		--dot \
+		--gitignore \
 		--must-find-files \
 		--no-progress \
 		--relative \
@@ -180,9 +181,3 @@ test-unit: ## run unit tests only
 		--cov=runway \
 		--cov-config=tests/unit/.coveragerc \
 		--cov-report term-missing:skip-covered
-
-version: ## set project version using distance from last tag
-	@VERSION=$$(poetry run dunamai from git --style semver --no-metadata) && \
-	echo setting version to $${VERSION}... && \
-	poetry version $${VERSION} && \
-	npm version $${VERSION} --allow-same-version --no-git-tag-version

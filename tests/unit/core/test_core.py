@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, call
 
 import pytest
+from packaging.specifiers import SpecifierSet
 
 from runway.core import Runway
 
@@ -44,6 +45,7 @@ class TestRunway:
     ) -> None:
         """Test __init__ with unsupported version."""
         monkeypatch.setattr(MODULE + ".__version__", "0.1.0-dev1")
+        runway_config.runway_version = SpecifierSet(">=1.10")
         caplog.set_level(logging.WARNING, logger=MODULE)
         assert Runway(runway_config, runway_context)  # type: ignore
         assert "shallow clone of the repo" in "\n".join(caplog.messages)
@@ -56,6 +58,7 @@ class TestRunway:
     ) -> None:
         """Test __init__ with unsupported version."""
         monkeypatch.setattr(MODULE + ".__version__", "1.3")
+        runway_config.runway_version = SpecifierSet(">=1.10")
         with pytest.raises(SystemExit) as excinfo:
             assert not Runway(runway_config, runway_context)  # type: ignore
         assert excinfo.value.code == 1

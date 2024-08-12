@@ -48,7 +48,7 @@
     color: f0db4f
     description: Pull request that updates Javascript code
   - name: maintenance
-    color: fbca04
+    color: fbca04  # cspell:ignore fbca04
     description: General repo or CI/CD upkeep
   - name: npm
     color: cc3534

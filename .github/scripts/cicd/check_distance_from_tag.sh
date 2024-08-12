@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Checks for this distance from the last tag.
-# If there is no distence, return a non-zero exit code.
+# If there is no distance, return a non-zero exit code.
 #
 # This can be used in GitHub actions with the following steps using conditionals to handle either case.
 #
@@ -20,10 +20,10 @@ DESCRIBE=`git describe --tags --match "v*.*.*"`
 echo "Result from 'git describe': ${DESCRIBE}"
 DISTANCE=`echo ${DESCRIBE} | grep -P '\-(\d)*\-g(\d)*'`
 if [ -n "${DISTANCE}" ]; then
-    echo "Distance from last tag detected: ${DISTANCE}"
-    echo "It is safe to proceed with a pre-production release."
-    exit 0
+  echo "Distance from last tag detected: ${DISTANCE}"
+  echo "It is safe to proceed with a pre-production release."
+  exit 0
 else
-    echo "No distance from last tag; skipping pre-production release."
-    exit 1
+  echo "No distance from last tag; skipping pre-production release."
+  exit 1
 fi

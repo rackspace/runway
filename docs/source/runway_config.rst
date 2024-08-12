@@ -47,8 +47,8 @@ Top-Level Configuration
   .. note:: The existence of ``DEPLOY_ENVIRONMENT`` in the environment will automatically ignore the git branch.
 
 .. attribute:: runway_version
-  :type: str
-  :value: ">=1.10.0"
+  :type: str | None
+  :value: None
 
   Define the versions of Runway that can be used with this configuration file.
 

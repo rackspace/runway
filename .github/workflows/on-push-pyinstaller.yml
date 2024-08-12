@@ -31,13 +31,15 @@ jobs:
       # https://github.com/pyinstaller/pyinstaller/issues/4406
       PIP_NO_BINARY: pydantic
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-install: false
+          poetry-plugins: poetry-dynamic-versioning
           python-version: ${{ matrix.python-version }}
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
@@ -45,25 +47,15 @@ jobs:
         if: startsWith( matrix.os, 'ubuntu' )
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
-      - name: Install Dependencies (ubuntu)
+      - name: ⤵️ Install Dependencies (ubuntu)
         if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
-      - name: Install Dependencies (windows)
+      - name: ⤵️ Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Run Build
+      - name: 👷 Build
         run: make build-pyinstaller-file
-      - name: Upload Artifacts
+      - name: ⤴️ Upload distribution artifact
         uses: actions/upload-artifact@v4
         with:
           name: pyinstaller-onefile-${{ matrix.os }}
@@ -81,13 +73,15 @@ jobs:
       # https://github.com/pyinstaller/pyinstaller/issues/4406
       PIP_NO_BINARY: pydantic
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-install: false
+          poetry-plugins: poetry-dynamic-versioning
           python-version: ${{ matrix.python-version }}
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
@@ -95,25 +89,15 @@ jobs:
         if: startsWith( matrix.os, 'ubuntu' )
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
-      - name: Install Dependencies (ubuntu)
+      - name: ⤵️  Dependencies (ubuntu)
         if: startsWith( matrix.os, 'ubuntu' )
         run: sudo apt-get update && sudo apt-get install sed -y
-      - name: Install Dependencies (windows)
+      - name: ⤵️ Install Dependencies (windows)
         if: matrix.os == 'windows-latest'
         run: choco install make sed
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Run Build
+      - name: 👷 Build
         run: make build-pyinstaller-folder
-      - name: Upload Artifacts
+      - name: ⤴️ Upload distribution artifact
         uses: actions/upload-artifact@v4
         with:
           name: pyinstaller-onefolder-${{ matrix.os }}
@@ -124,7 +108,7 @@ jobs:
     needs:
       - build-pyinstaller-onefolder
     env:
-      NODE_VERSION: 18
+      NODE_VERSION: 20
       NPM_PACKAGE_NAME: '@onica/runway'
     strategy:
       fail-fast: false
@@ -133,20 +117,23 @@ jobs:
         python-version: [3.9]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - id: check_distance
-        name: Ensure Commit Is Not Tagged
+        name: 💂 Ensure Commit Is Not Tagged
         continue-on-error: true
         run: bash ./check_distance_from_tag.sh
         working-directory: .github/scripts/cicd
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-install: false
+          poetry-plugins: poetry-dynamic-versioning
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v4
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v4
         if: steps.check_distance.outcome == 'success'
         with:
           always-auth: true
@@ -159,53 +146,43 @@ jobs:
         if: startsWith( matrix.os, 'ubuntu' )
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
-      - name: Install Dependencies (ubuntu)
+      - name: ⤵️ Install Dependencies (ubuntu)
         if: steps.check_distance.outcome == 'success'
         run: sudo apt-get update && sudo apt-get install sed tree -y
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Download Artifacts (macOS)
+      - name: ⤵️ Download distribution artifacts (macOS)
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-macos-12
           path: artifacts
-      - name: Download Artifacts (ubuntu)
+      - name: ⤵️ Download distribution artifacts (ubuntu)
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-ubuntu-latest
           path: artifacts
-      - name: Download Artifacts (windows)
+      - name: ⤵️ Download distribution artifacts (windows)
         if: steps.check_distance.outcome == 'success'
         uses: actions/download-artifact@v4
         with:
           name: pyinstaller-onefolder-windows-latest
           path: artifacts
-      - name: List Artifacts
+      - name: ℹ️ List artifacts
         if: steps.check_distance.outcome == 'success'
         run: tree artifacts/
-      - name: npm Prep
+      - name: 👷 npm Prep
         if: steps.check_distance.outcome == 'success'
         run: make npm-prep
-      - name: npm pack
+      - name: 👷 Build
         if: steps.check_distance.outcome == 'success'
         run: |
           npm pack
           rm -rf artifacts && mkdir -p artifacts
           find . -name 'onica-runway-*.*.*.tgz' -exec mv {} artifacts/ \;
-      - name: Skipped Publishing
+      - name: ℹ️ Skipped Publishing
         if: steps.check_distance.outcome == 'failure'
         run: echo "A pre-production version was not published because the current commit is tagged for release."
-      - name: Upload Artifacts
+      - name: ⤴️ Upload distribution artifacts
         if: steps.check_distance.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:

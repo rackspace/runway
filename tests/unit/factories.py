@@ -286,7 +286,7 @@ class MockRunwayConfig(MutableMap):
         self.future = MagicMock()
         self.tests = []
         self.ignore_git_branch = False
-        self.runway_version = SpecifierSet(">=1.10", prereleases=True)
+        self.runway_version = SpecifierSet(">=0.0.0", prereleases=True)
         self.variables = MutableMap()
 
         # classmethods
