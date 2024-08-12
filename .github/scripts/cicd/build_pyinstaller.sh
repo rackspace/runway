@@ -27,6 +27,12 @@ if [[ -z "${GITHUB_ACTION}" ]]; then
 fi
 
 poetry build
+
+if [[ -z "${GITHUB_ACTION}" ]]; then
+  # NOTE (kyle): GitHub needs build tools reinstalled after `poetry build`
+  poetry install --only main,build --sync;
+fi
+
 poetry run pip install "$(find dist -type f -name 'runway-*.tar.gz' -print | tail -n 1)"
 find dist/* -exec rm -rfv "{}" +
 mkdir -p "artifacts/${RUNWAY_VERSION}/${LOCAL_OS_NAME}"

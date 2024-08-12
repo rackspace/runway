@@ -21,7 +21,7 @@ from zipfile import ZipFile
 import boto3
 import pytest
 from botocore.exceptions import ClientError
-from moto import mock_s3
+from moto.core.decorator import mock_aws
 from testfixtures.comparison import compare
 from testfixtures.shouldraise import ShouldRaise
 from testfixtures.tempdirectory import TempDirectory
@@ -127,14 +127,14 @@ class TestLambdaHooks(unittest.TestCase):
 
         return upload_lambda_functions(**real_kwargs)  # type: ignore
 
-    @mock_s3
+    @mock_aws
     def test_bucket_default(self) -> None:
         """Test bucket default."""
         assert self.run_hook(functions={}) is not None
 
         self.assert_s3_bucket("test")
 
-    @mock_s3
+    @mock_aws
     def test_bucket_custom(self) -> None:
         """Test bucket custom."""
         assert self.run_hook(bucket="custom", functions={}) is not None
@@ -142,7 +142,7 @@ class TestLambdaHooks(unittest.TestCase):
         self.assert_s3_bucket("test", present=False)
         self.assert_s3_bucket("custom")
 
-    @mock_s3
+    @mock_aws
     def test_prefix(self) -> None:
         """Test prefix."""
         with self.temp_directory_with_files() as temp_dir:
@@ -158,7 +158,7 @@ class TestLambdaHooks(unittest.TestCase):
         self.assert_s3_zip_file_list(code.S3Bucket, code.S3Key, F1_FILES)
         assert code.S3Key.startswith("cloudformation-custom-resources/lambda-MyFunction-")
 
-    @mock_s3
+    @mock_aws
     def test_prefix_missing(self) -> None:
         """Test prefix missing."""
         with self.temp_directory_with_files() as temp_dir:
@@ -171,14 +171,14 @@ class TestLambdaHooks(unittest.TestCase):
         self.assert_s3_zip_file_list(code.S3Bucket, code.S3Key, F1_FILES)
         assert code.S3Key.startswith("lambda-MyFunction-")
 
-    @mock_s3
+    @mock_aws
     def test_path_missing(self) -> None:
         """Test path missing."""
         msg = "missing required property 'path' in function 'MyFunction'"
         with ShouldRaise(ValueError(msg)):
             self.run_hook(functions={"MyFunction": {}})
 
-    @mock_s3
+    @mock_aws
     def test_path_relative(self) -> None:
         """Test path relative."""
         with self.temp_directory_with_files(["test/test.py"]) as temp_dir:
@@ -196,7 +196,7 @@ class TestLambdaHooks(unittest.TestCase):
         assert isinstance(code, Code)
         self.assert_s3_zip_file_list(code.S3Bucket, code.S3Key, ["test.py"])
 
-    @mock_s3
+    @mock_aws
     def test_path_home_relative(self) -> None:
         """Test path home relative."""
         orig_expanduser = os.path.expanduser
@@ -218,7 +218,7 @@ class TestLambdaHooks(unittest.TestCase):
         assert isinstance(code, Code)
         self.assert_s3_zip_file_list(code.S3Bucket, code.S3Key, ["test.py"])
 
-    @mock_s3
+    @mock_aws
     def test_multiple_functions(self) -> None:
         """Test multiple functions."""
         with self.temp_directory_with_files() as temp_dir:
@@ -239,7 +239,7 @@ class TestLambdaHooks(unittest.TestCase):
         assert isinstance(f2_code, Code)
         self.assert_s3_zip_file_list(f2_code.S3Bucket, f2_code.S3Key, F2_FILES)
 
-    @mock_s3
+    @mock_aws
     def test_patterns_invalid(self) -> None:
         """Test patterns invalid."""
         msg = "Invalid file patterns in key 'include': must be a string or list of strings"
@@ -249,7 +249,7 @@ class TestLambdaHooks(unittest.TestCase):
                 functions={"MyFunction": {"path": "test", "include": {"invalid": "invalid"}}}
             )
 
-    @mock_s3
+    @mock_aws
     def test_patterns_include(self) -> None:
         """Test patterns include."""
         with self.temp_directory_with_files() as temp_dir:
@@ -278,7 +278,7 @@ class TestLambdaHooks(unittest.TestCase):
             ],
         )
 
-    @mock_s3
+    @mock_aws
     def test_patterns_exclude(self) -> None:
         """Test patterns exclude."""
         with self.temp_directory_with_files() as temp_dir:
@@ -299,7 +299,7 @@ class TestLambdaHooks(unittest.TestCase):
             code.S3Bucket, code.S3Key, ["f1.py", "__init__.py", "test2/test.txt"]
         )
 
-    @mock_s3
+    @mock_aws
     def test_patterns_include_exclude(self) -> None:
         """Test patterns include exclude."""
         with self.temp_directory_with_files() as temp_dir:
@@ -319,7 +319,7 @@ class TestLambdaHooks(unittest.TestCase):
         assert isinstance(code, Code)
         self.assert_s3_zip_file_list(code.S3Bucket, code.S3Key, ["f1.py", "__init__.py"])
 
-    @mock_s3
+    @mock_aws
     def test_patterns_exclude_all(self) -> None:
         """Test patterns exclude all."""
         msg = (
@@ -334,7 +334,7 @@ class TestLambdaHooks(unittest.TestCase):
 
             assert results is None
 
-    @mock_s3
+    @mock_aws
     def test_idempotence(self) -> None:
         """Test idempotence."""
         with self.temp_directory_with_files() as temp_dir:
@@ -422,14 +422,14 @@ class TestLambdaHooks(unittest.TestCase):
         for args, result in tests:
             assert select_bucket_region(*args) == result  # type: ignore
 
-    @mock_s3
+    @mock_aws
     def test_follow_symlink_nonbool(self) -> None:
         """Test follow symlink nonbool."""
         msg = "follow_symlinks option must be a boolean"
         with ShouldRaise(ValueError(msg)):
             self.run_hook(follow_symlinks="raiseValueError", functions={"MyFunction": {}})
 
-    @mock_s3
+    @mock_aws
     def test_follow_symlink_true(self) -> None:
         """Testing if symlinks are followed."""
         with self.temp_directory_with_files() as temp_dir1:
@@ -466,7 +466,7 @@ class TestLambdaHooks(unittest.TestCase):
                 ],
             )
 
-    @mock_s3
+    @mock_aws
     def test_follow_symlink_false(self) -> None:
         """Testing if symlinks are present and not followed."""
         with self.temp_directory_with_files() as temp_dir1:
@@ -496,7 +496,7 @@ class TestLambdaHooks(unittest.TestCase):
                 ],
             )
 
-    @mock_s3
+    @mock_aws
     def test_follow_symlink_omitted(self) -> None:
         """Same as test_follow_symlink_false, but default behavior."""
         with self.temp_directory_with_files() as temp_dir1:
@@ -524,7 +524,7 @@ class TestLambdaHooks(unittest.TestCase):
                 ],
             )
 
-    @mock_s3
+    @mock_aws
     @patch("runway.cfngin.hooks.aws_lambda.subprocess")
     @patch(
         "runway.cfngin.hooks.aws_lambda.find_requirements",
