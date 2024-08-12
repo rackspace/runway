@@ -2292,13 +2292,13 @@ pytest = [
 
 [[package]]
 name = "pytest-subprocess"
-version = "1.5.0"
+version = "1.5.2"
 description = "A plugin to fake subprocess for pytest"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "pytest-subprocess-1.5.0.tar.gz", hash = "sha256:d7693b96f588f39b84c7b2b5c04287459246dfae6be1dd4098937a728ad4fbe3"},
-    {file = "pytest_subprocess-1.5.0-py3-none-any.whl", hash = "sha256:dfd75b10af6800a89a9b758f2e2eceff9de082a27bd1388521271b6e8bde298b"},
+    {file = "pytest_subprocess-1.5.2-py3-none-any.whl", hash = "sha256:23ac7732aa8bd45f1757265b1316eb72a7f55b41fb21e2ca22e149ba3629fa46"},
+    {file = "pytest_subprocess-1.5.2.tar.gz", hash = "sha256:ad3ca8a35e798bf9c82d9f16d88700b30d98c5a28236117b86c5d6e581a8ed97"},
 ]
 
 [package.dependencies]
@@ -2307,7 +2307,7 @@ pytest = ">=4.0.0"
 [package.extras]
 dev = ["changelogd", "nox"]
 docs = ["changelogd", "furo", "sphinx", "sphinx-autodoc-typehints", "sphinxcontrib-napoleon"]
-test = ["Pygments (>=2.0)", "anyio", "coverage", "docutils (>=0.12)", "pytest (>=4.0)", "pytest-asyncio (>=0.15.1)", "pytest-rerunfailures"]
+test = ["Pygments (>=2.0)", "anyio", "coverage", "docutils (>=0.12)", "pytest (>=4.0)", "pytest-asyncio (>=0.15.1)", "pytest-rerunfailures", "pytest-timeout"]
 
 [[package]]
 name = "pytest-sugar"
