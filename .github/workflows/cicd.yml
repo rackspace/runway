@@ -15,7 +15,7 @@ env:
   AWS_DEFAULT_REGION: us-east-1
   AWS_MAX_ATTEMPTS: 20  # retry attempts for AWS API calls
   AWS_RETRY_MODE: adaptive  # defaults to "legacy"; this handles more errors
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   PYTEST_ADDOPTS: --color=yes
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
   PIPENV_IGNORE_VIRTUALENVS: '1'
@@ -167,6 +167,7 @@ jobs:
         uses: finleyfamily/action-setup-python@v1.0.0
         with:
           poetry-plugins: poetry-dynamic-versioning
+          python-version: '3.10'
       - name: ⤵️ Install Ubuntu Dependencies
         run: |
           sudo apt update -y
