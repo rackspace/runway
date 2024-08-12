@@ -57,9 +57,11 @@ troposphere = ">=2.4, <5"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 yamllint = "*"
 
+[tool.poetry.group.build.dependencies]
+pyinstaller = "^6.2.0"
+
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
-pyinstaller = "^6.2.0"
 semver = "^2.13"  # only used in .github/scripts/urlshortener
 
 [tool.poetry.group.docs.dependencies]
