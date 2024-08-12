@@ -249,7 +249,7 @@ jobs:
       - build-pyinstaller-onefile
     env:
       AWS_DEFAULT_REGION: us-west-2
-      AWS_S3_BUCKET: common-runway-assets-bucket83908e77-u2xp1bj1tuhp
+      AWS_S3_BUCKET: common-runway-assets-bucket83908e77-u2xp1bj1tuhp  # cspell:ignore common-runway-assets-bucket83908e77-u2xp1bj1tuhp
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
     runs-on: ubuntu-latest
@@ -322,7 +322,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
       - name: 🚀 Microsoft Teams Notification
-        uses: skitionek/notify-microsoft-teams@v1.0.8
+        uses: skitionek/notify-microsoft-teams@v1.0.8  # cspell:ignore skitionek
         if: always()
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}

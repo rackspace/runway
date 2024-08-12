@@ -143,7 +143,7 @@ class TestRunwayConfigDefinitionModel:
         assert obj.deployments == []
         assert isinstance(obj.future, RunwayFutureDefinitionModel)
         assert not obj.ignore_git_branch
-        assert obj.runway_version == SpecifierSet(">1.10", prereleases=True)
+        assert obj.runway_version is None
         assert obj.tests == []
         assert isinstance(obj.variables, RunwayVariablesDefinitionModel)
 

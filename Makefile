@@ -126,9 +126,10 @@ setup-pre-commit: ## install pre-commit git hooks
 
 spellcheck: ## run cspell
 	@echo "Running cSpell to checking spelling..."
-	@npx cspell "**/*" \
+	@npm exec --no -- cspell lint . \
 		--color \
 		--config .vscode/cspell.json \
+		--dot \
 		--gitignore \
 		--must-find-files \
 		--no-progress \

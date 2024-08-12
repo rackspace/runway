@@ -586,7 +586,7 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         "current deploy environment.",
     )
     runway_version: Optional[RunwayVersionField] = Field(
-        default=">1.10",
+        default=None,
         description="Define the versions of Runway that can be used with this "
         "configuration file.",
         examples=['"<2.0.0"', '"==1.14.0"', '">=1.14.0,<2.0.0"'],

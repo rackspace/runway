@@ -27,20 +27,20 @@ poetry run pip install "$(find dist -type f -name 'runway-*.tar.gz' -print | tai
 find dist/* -exec rm -rfv "{}" +
 mkdir -p "artifacts/${RUNWAY_VERSION}/${LOCAL_OS_NAME}"
 poetry run pip show setuptools
-poetry run pyinstaller --noconfirm --clean runway.$1.spec
+poetry run pyinstaller --noconfirm --clean "runway.$1.spec"  # cspell:ignore noconfirm
 
 if [ "$1" == 'file' ]; then
     mv dist/* "artifacts/${RUNWAY_VERSION}/$LOCAL_OS_NAME"
     chmod +x "artifacts/${RUNWAY_VERSION}/$LOCAL_OS_NAME/runway"
     # quick functional test
-    ./artifacts/${RUNWAY_VERSION}/$LOCAL_OS_NAME/runway --version
+    "./artifacts/${RUNWAY_VERSION}/$LOCAL_OS_NAME/runway" --version
 else
     if [ "$OS_NAME" == "windows-latest" ]; then
-        7z a -ttar -so ./runway.tar ./dist/runway/* | 7z a -si "./artifacts/${RUNWAY_VERSION}/${LOCAL_OS_NAME}/runway.tar.gz"
+        7z a -ttar -so ./runway.tar ./dist/runway/* | 7z a -si "./artifacts/${RUNWAY_VERSION}/${LOCAL_OS_NAME}/runway.tar.gz"  # cspell:disable-line
     else
         chmod +x dist/runway/runway-cli
         # quick functional test
         ./dist/runway/runway-cli --version
-        tar -C dist/runway/ -czvf ."/artifacts/${RUNWAY_VERSION}/${LOCAL_OS_NAME}/runway.tar.gz" .
+        tar -C dist/runway/ -czvf ."/artifacts/${RUNWAY_VERSION}/${LOCAL_OS_NAME}/runway.tar.gz" .  # cspell:disable-line
     fi
 fi
