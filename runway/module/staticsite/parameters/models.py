@@ -178,7 +178,7 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         extra = Extra.ignore
         title = "Runway static site Module parameters."
 
-    @validator(
+    @validator(  # type: ignore
         "additional_redirect_domains",
         "aliases",
         "supported_identity_providers",

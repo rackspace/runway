@@ -55,7 +55,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
         }
         title = "CFNgin Git Repository Package Source Definition"
 
-    @root_validator
+    @root_validator  # type: ignore
     def _validate_one_ref(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Ensure that only one ref is defined."""
         ref_keys = ["branch", "commit", "tag"]

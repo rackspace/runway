@@ -266,7 +266,7 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
     _resolve_path_fields = validator("cache_dir", "source_code", allow_reuse=True)(resolve_path_field)  # type: ignore
 
-    @validator("runtime", always=True, allow_reuse=True)
+    @validator("runtime", always=True, allow_reuse=True)  # type: ignore
     def _validate_runtime_or_docker(
         cls, v: str | None, values: dict[str, Any]  # noqa: N805
     ) -> str | None:

@@ -37,7 +37,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
         extra = Extra.forbid
         title = "Runway static site Module extra_files option item."
 
-    @root_validator
+    @root_validator  # type: ignore
     def _autofill_content_type(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Attempt to fill content_type if not provided."""
         if values.get("content_type"):
@@ -49,7 +49,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
             values["content_type"] = "text/yaml"
         return values
 
-    @root_validator(pre=True)
+    @root_validator(pre=True)  # type: ignore
     def _validate_content_or_file(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate that content or file is provided."""
         if all(i in values and values[i] for i in ["content", "file"]):
