@@ -43,23 +43,19 @@ formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
 igittigitt = ">=2.0.5"
 jinja2 = ">=2.7"  # used in runway.cfngin.blueprints.raw
-moto = "3.0.5"
 packaging = "*"  # component of setuptools needed for version compare
 pipenv = "2022.1.8"
 pyOpenSSL = "*"  # For embedded hook & associated script usage
 pydantic = "^1.4"
 pyhcl = "^0.4"  # does not support HCL2, possibly move to extras_require in the future
-pyinstaller = "^6.2.0"
 python-hcl2 = ">=3.0.0"
 pyyaml = ">5.4"
 requests = "*"
 send2trash = "*"
-testfixtures = "^7.0.3"
 tomli = ">=1.2.2"
 troposphere = ">=2.4, <5"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
 urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
-wheel = "^0.42.0"
 yamllint = "*"
 
 [tool.poetry.group.dev.dependencies]
@@ -67,9 +63,10 @@ coverage = {extras = ["toml"], version = ">=6.3"}
 doc8 = ">=0.10"  # for linting with vscode rst extension
 dunamai = "^1.5"
 mock = ">=4.0"
-moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = ">=3.0"}
+moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^3.0.5"}
 pipenv = "^2022.1.8"  # only used in tests
 pre-commit = "^3.7.1"
+pyinstaller = "^6.2.0"
 pytest = ">=7.0"
 pytest-cov = ">=3.0"  # pytest plugin
 pytest-mock = ">=3.7"  # pytest plugin
