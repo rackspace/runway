@@ -38,14 +38,14 @@ class LoginArgs(BaseModel):
     username: str = "AWS"
     """The registry username."""
 
-    @validator("ecr", pre=True, allow_reuse=True)
+    @validator("ecr", pre=True, allow_reuse=True)  # type: ignore
     def _set_ecr(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Set the value of ``ecr``."""
         if v and isinstance(v, dict):
             return ElasticContainerRegistry.parse_obj({"context": values.get("context"), **v})
         return v
 
-    @validator("registry", pre=True, always=True, allow_reuse=True)
+    @validator("registry", pre=True, always=True, allow_reuse=True)  # type: ignore
     def _set_registry(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Set the value of ``registry``."""
         if v:

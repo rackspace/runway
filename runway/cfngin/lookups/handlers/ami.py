@@ -40,7 +40,7 @@ class ArgsDataModel(BaseModel):
     region: Optional[str] = None
     """AWS region."""
 
-    @validator("executable_users", "owners", allow_reuse=True, pre=True)
+    @validator("executable_users", "owners", allow_reuse=True, pre=True)  # type: ignore
     def _convert_str_to_list(cls, v: Union[list[str], str]) -> list[str]:  # noqa: N805
         """Convert str to list."""
         if isinstance(v, str):

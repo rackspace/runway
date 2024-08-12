@@ -125,13 +125,13 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
         }
         title = "Runway Deployment.assume_role Definition"
 
-    @validator("arn")
+    @validator("arn")  # type: ignore
     def _convert_arn_null_value(cls, v: Optional[str]) -> Optional[str]:  # noqa: N805
         """Convert a "nul" string into type(None)."""
         null_strings = ["null", "none", "undefined"]
         return None if isinstance(v, str) and v.lower() in null_strings else v
 
-    @validator("duration", pre=True)
+    @validator("duration", pre=True)  # type: ignore
     def _validate_duration(cls, v: Union[int, str]) -> Union[int, str]:  # noqa: N805
         """Validate duration is within the range allowed by AWS."""
         if isinstance(v, str):
@@ -142,9 +142,9 @@ class RunwayAssumeRoleDefinitionModel(ConfigProperty):
             raise ValueError("duration must be less than or equal to 43,200")
         return v
 
-    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
-        "duration", allow_reuse=True, pre=True
-    )(utils.validate_string_is_lookup)
+    _validate_string_is_lookup = validator("duration", allow_reuse=True, pre=True)(  # type: ignore
+        utils.validate_string_is_lookup
+    )
 
 
 class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
@@ -169,9 +169,9 @@ class RunwayDeploymentRegionDefinitionModel(ConfigProperty):
         }
         title = "Runway Deployment.regions Definition"
 
-    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
-        "parallel", allow_reuse=True, pre=True
-    )(utils.validate_string_is_lookup)
+    _validate_string_is_lookup = validator("parallel", allow_reuse=True, pre=True)(  # type: ignore
+        utils.validate_string_is_lookup
+    )
 
 
 class RunwayDeploymentDefinitionModel(ConfigProperty):
@@ -295,7 +295,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
                 {"type": "string"},
             ]
 
-    @root_validator(pre=True)
+    @root_validator(pre=True)  # type: ignore
     def _convert_simple_module(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Convert simple modules to dicts."""
         modules = values.get("modules", [])
@@ -308,7 +308,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
         values["modules"] = result
         return values
 
-    @root_validator(pre=True)
+    @root_validator(pre=True)  # type: ignore
     def _validate_regions(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate & simplify regions."""
         raw_regions = values.get("regions", [])
@@ -334,7 +334,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             values["parallel_regions"] = regions.parallel
         return values
 
-    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+    _validate_string_is_lookup = validator(  # type: ignore
         "env_vars",
         "environments",
         "module_options",
@@ -447,7 +447,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         title = "Runway Module Definition"
         use_enum_values = True
 
-    @root_validator(pre=True)
+    @root_validator(pre=True)  # type: ignore
     def _validate_name(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate module name."""
         if "name" in values:
@@ -460,14 +460,14 @@ class RunwayModuleDefinitionModel(ConfigProperty):
             return values
         return values
 
-    @root_validator(pre=True)
+    @root_validator(pre=True)  # type: ignore
     def _validate_path(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate path and sets a default value if needed."""
         if not values.get("path") and not values.get("parallel"):
             values["path"] = Path.cwd()
         return values
 
-    @validator("parallel", pre=True)
+    @validator("parallel", pre=True)  # type: ignore
     def _validate_parallel(
         cls, v: List[Union[dict[str, Any], str]], values: dict[str, Any]  # noqa: N805
     ) -> List[dict[str, Any]]:
@@ -483,7 +483,7 @@ class RunwayModuleDefinitionModel(ConfigProperty):
         return result
 
     # TODO (kyle): add regex to schema
-    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+    _validate_string_is_lookup = validator(  # type: ignore
         "env_vars",
         "environments",
         "options",
@@ -522,9 +522,9 @@ class RunwayVariablesDefinitionModel(ConfigProperty):
         }
         title = "Runway Variables Definition"
 
-    _convert_null_values = validator(  # pyright: ignore[reportUnknownVariableType]
-        "*", allow_reuse=True
-    )(utils.convert_null_values)
+    _convert_null_values = validator("*", allow_reuse=True)(  # type: ignore
+        utils.convert_null_values
+    )
 
 
 class RunwayVersionField(SpecifierSet):
@@ -608,7 +608,7 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         validate_all = True
         validate_assignment = True
 
-    @root_validator(pre=True)
+    @root_validator(pre=True)  # type: ignore
     def _add_deployment_names(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Add names to deployments that are missing them."""
         deployments = values.get("deployments", [])

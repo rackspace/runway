@@ -119,7 +119,7 @@ class ImageBuildArgs(BaseModel):
     tags: List[str] = ["latest"]  # noqa: UP006
     """List of tags to apply to the image."""
 
-    @validator("docker", pre=True, always=True, allow_reuse=True)
+    @validator("docker", pre=True, always=True, allow_reuse=True)  # type: ignore
     def _set_docker(
         cls,  # noqa: N805
         v: dict[str, Any] | DockerImageBuildApiOptions | Any,
@@ -134,7 +134,7 @@ class ImageBuildArgs(BaseModel):
                 v.tag = repo
         return v
 
-    @validator("ecr_repo", pre=True, allow_reuse=True)
+    @validator("ecr_repo", pre=True, allow_reuse=True)  # type: ignore
     def _set_ecr_repo(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Set the value of ``ecr_repo``."""
         if v and isinstance(v, dict):
@@ -153,7 +153,7 @@ class ImageBuildArgs(BaseModel):
             )
         return v
 
-    @validator("repo", pre=True, always=True, allow_reuse=True)
+    @validator("repo", pre=True, always=True, allow_reuse=True)  # type: ignore
     def _set_repo(cls, v: str | None, values: dict[str, Any]) -> str | None:  # noqa: N805
         """Set the value of ``repo``."""
         if v:
@@ -165,7 +165,7 @@ class ImageBuildArgs(BaseModel):
 
         return None
 
-    @validator("dockerfile", pre=True, always=True, allow_reuse=True)
+    @validator("dockerfile", pre=True, always=True, allow_reuse=True)  # type: ignore
     def _validate_dockerfile(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Validate ``dockerfile``."""
         path: Path = values["path"]

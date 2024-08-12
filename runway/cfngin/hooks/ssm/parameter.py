@@ -93,7 +93,7 @@ class ArgsDataModel(BaseModel):
             "value": {"alias": "Value"},
         }
 
-    @validator("policies", allow_reuse=True, pre=True)
+    @validator("policies", allow_reuse=True, pre=True)  # type: ignore
     def _convert_policies(cls, v: list[dict[str, Any]] | str | Any) -> str:  # noqa: N805
         """Convert policies to acceptable value."""
         if isinstance(v, str):
@@ -102,7 +102,7 @@ class ArgsDataModel(BaseModel):
             return json.dumps(v, cls=JsonEncoder)
         raise TypeError(f"unexpected type {type(v)}; permitted: list[dict[str, Any]] | str | None")
 
-    @validator("tags", allow_reuse=True, pre=True)
+    @validator("tags", allow_reuse=True, pre=True)  # type: ignore
     def _convert_tags(
         cls, v: dict[str, str] | list[dict[str, str]] | Any  # noqa: N805
     ) -> list[dict[str, str]]:

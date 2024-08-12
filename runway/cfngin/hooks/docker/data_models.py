@@ -47,7 +47,7 @@ class ElasticContainerRegistry(BaseModel):
             return self.PUBLIC_URI_TEMPLATE.format(registry_alias=self.alias)
         return self.URI_TEMPLATE.format(aws_account_id=self.account_id, aws_region=self.region)
 
-    @root_validator(allow_reuse=True, pre=True)
+    @root_validator(allow_reuse=True, pre=True)  # type: ignore
     def _set_defaults(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Set default values based on other values."""
         values.setdefault("public", bool(values.get("alias")))
