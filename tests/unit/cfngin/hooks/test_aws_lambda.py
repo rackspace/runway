@@ -745,8 +745,7 @@ class TestHandleRequirements:
             "",
         ]
         if platform.system() == "Windows":
-            expected_text.append("")
-            assert requirements_txt.read_text() == "\n".join(expected_text)
+            assert requirements_txt.read_text() == "\n\n".join(expected_text) + "\n\n"
         else:
             assert requirements_txt.read_text() == "\n".join(expected_text) + "\n"
 
@@ -797,8 +796,7 @@ class TestHandleRequirements:
             "",
         ]
         if platform.system() == "Windows":
-            expected_text.append("")
-            assert requirements_txt.read_text() == "\n".join(expected_text)
+            assert requirements_txt.read_text() == "\n\n".join(expected_text) + "\n\n"
         else:
             assert requirements_txt.read_text() == "\n".join(expected_text) + "\n"
 
