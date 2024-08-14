@@ -2,18 +2,16 @@
 Templates
 #########
 
-CloudFormation templates can be provided via :ref:`Blueprints <term-blueprint>` or JSON/YAML.
+CloudFormation templates can be provided via :term:`Blueprints <Blueprint>` or JSON/YAML.
 JSON/YAML templates are specified for :class:`stacks <cfngin.stack>` via the :attr:`~cfngin.stack.template_path` config.
 
-.. contents::
-  :depth: 4
 
 
 *****************
 Jinja2 Templating
 *****************
 
-Templates with a ``.j2`` extension will be parsed using `Jinja2 <http://jinja.pocoo.org/>`__.
+Templates with a ``.j2`` extension will be parsed using :link:`Jinja2 <jinja>`.
 The CFNgin ``context`` and ``mappings`` objects and stack ``variables`` objects are available for use in the template:
 
 .. code-block:: yaml

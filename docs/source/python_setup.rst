@@ -19,7 +19,7 @@ Perform the following to install/configure Python & package management tools.
         - Run ``source ~/.zshrc`` to use the updated PATH.
 
     - On Windows:
-        - Install `Python <https://www.python.org/>`_ (choose the latest ``Windows x86-64 executable installer`` and run it):
+        - Install :link:`Python` (choose the latest ``Windows x86-64 executable installer`` and run it):
             - On the initial setup page, click ``Customize installation``
             - Leave all Optional Features selected, and click Next
             - On the Advanced Options page change the following options and click Install:

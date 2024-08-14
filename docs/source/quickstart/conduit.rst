@@ -8,8 +8,6 @@ The `Medium.com-clone "RealWorld" demo app <https://github.com/gothinkster/realw
 named Conduit provides a simple demonstration of using Runway to deploy a
 Serverless Framework backend with an Angular frontend.
 
-.. contents::
-  :depth: 4
 
 
 *************
@@ -46,9 +44,9 @@ Setup
 
 #. Download the source files.
 
-   .. tabs::
+   .. tab-set::
 
-    .. tab:: POSIX
+    .. tab-item:: POSIX
 
       .. code-block:: sh
 
@@ -73,7 +71,7 @@ Setup
         $ cd ..
         $ curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/runway.yml
 
-    .. tab:: Windows
+    .. tab-item:: Windows
 
       .. highlight:: powershell
 
@@ -131,15 +129,15 @@ Execute ``runway destroy``, enter ``all``.
 The backend DynamoDB tables will still be retained after the destroy is complete.
 They must be deleted separately.
 
-.. tabs::
+.. tab-set::
 
-  .. tab:: POSIX
+  .. tab-item:: POSIX
 
     .. code-block:: sh
 
       for i in realworld-dev-articles realworld-dev-comments realworld-dev-users; do aws dynamodb delete-table --region us-east-1 --table-name $i; done
 
-  .. tab:: Windows
+  .. tab-item:: Windows
 
     .. code-block:: powershell
 

@@ -4,8 +4,6 @@
 Configuration
 #############
 
-.. contents::
-  :depth: 4
 
 
 *******

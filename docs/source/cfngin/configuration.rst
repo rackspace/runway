@@ -15,9 +15,6 @@ In addition to the :ref:`Runway Config File <runway-config>`, there are two file
   It has been replaced with an internal CloudFormation engin (CFNgin).
 
 
-.. contents::
-  :depth: 4
-
 
 **********
 runway.yml
@@ -48,10 +45,10 @@ CloudFormation modules do not have any module-specific options.
 Parameters
 ==========
 
-Runway can pass :ref:`Parameters <term-param>` to a CloudFormation module in place of or in addition to values in an :ref:`environment file <cfngin-env>`.
-When :ref:`Parameters <term-param>` are passed to the module, the data type is retained (e.g. ``array``, ``boolean``, ``mapping``).
+Runway can pass :term:`Parameters` to a CloudFormation module in place of or in addition to values in an :ref:`environment file <cfngin-env>`.
+When :term:`Parameters` are passed to the module, the data type is retained (e.g. ``array``, ``boolean``, ``mapping``).
 
-A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combination with :ref:`Parameters <term-param>` to pass :ref:`deploy environment <term-deploy-env>` and/or region specific values to the module from the :ref:`Runway Config File <runway-config>`.
+A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combination with :term:`Parameters` to pass :term:`Deploy Environment` and/or region specific values to the module from the :ref:`Runway Config File <runway-config>`.
 
 .. rubric:: Example
 .. code-block:: yaml
@@ -68,7 +65,7 @@ A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combi
 Common Parameters
 -----------------
 
-Runway automatically makes the following commonly used :ref:`Parameters <term-param>`  available to CloudFormation modules.
+Runway automatically makes the following commonly used :term:`Parameters`  available to CloudFormation modules.
 
 .. note::
   If these parameters are already being explicitly defined in :attr:`deployment.parameters`/:attr:`module.parameters` the value provided will be used instead of what would be automatically added.
@@ -77,7 +74,7 @@ Runway automatically makes the following commonly used :ref:`Parameters <term-pa
   :type: str
   :noindex:
 
-  Taken from the ``DEPLOY_ENVIRONMENT`` environment variable. This will the be current :ref:`deploy environment <term-deploy-env>`.
+  Taken from the ``DEPLOY_ENVIRONMENT`` environment variable. This will the be current :term:`Deploy Environment`.
 
 .. data:: region
   :type: str
@@ -259,7 +256,7 @@ Top-Level Fields
     In addition, this value can be used to create an S3 bucket that will be used to upload and store all CloudFormation templates.
     See :attr:`~cfngin.config.cfngin_bucket` for more detailed information.
 
-    In general, this is paired with the concept of :ref:`deploy environments <term-deploy-env>` to create a namespace per environment.
+    In general, this is paired with the concept of :term:`Deploy Environments <Deploy Environment>` to create a namespace per environment.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -816,8 +813,8 @@ Using Outputs as Variables
 ---------------------------
 
 Since CFNgin encourages the breaking up of your CloudFormation stacks into entirely separate stacks, sometimes you'll need to pass values from one stack to another.
-The way this is handled in CFNgin is by having one stack provide :ref:`Outputs <term-outputs>` for all the values that another stack may need, and then using those as the inputs for another stack's :attr:`~cfngin.stack.variables`.
-CFNgin makes this easier for you by providing a syntax for :attr:`~cfngin.stack.variables` that will cause CFNgin to automatically look up the values of :ref:`Outputs <term-outputs>` from another stack in its config.
+The way this is handled in CFNgin is by having one stack provide :term:`Outputs <Output>` for all the values that another stack may need, and then using those as the inputs for another stack's :attr:`~cfngin.stack.variables`.
+CFNgin makes this easier for you by providing a syntax for :attr:`~cfngin.stack.variables` that will cause CFNgin to automatically look up the values of :term:`Outputs <Output>` from another stack in its config.
 
 To do so, use the :ref:`output lookup` in the :attr:`~cfngin.stack.variables` on the target stack.
 
@@ -886,16 +883,16 @@ A pretty common use case is to have separate environments that you want to look 
 For example, you might want a **production** and a **staging** environment.
 
 The production environment likely needs more instances, and often those instances will be of a larger instance type.
-The parameters defined in an environment file, :attr:`deployment.parameters`, and/or :attr:`module.parameters` allow you to use your existing CFNgin config, but provide different values based on the current :ref:`deploy environment <term-deploy-env>`.
+The parameters defined in an environment file, :attr:`deployment.parameters`, and/or :attr:`module.parameters` allow you to use your existing CFNgin config, but provide different values based on the current :term:`Deploy Environment`.
 
 .. rubric:: Example
 .. code-block:: yaml
 
   vpcID: vpc-12345678
 
-Provided the key-value pair above, you will now be able to use this in your configs for a :ref:`deploy environment <term-deploy-env>`.
+Provided the key-value pair above, you will now be able to use this in your configs for a :term:`Deploy Environment`.
 They act as keys that can be used in your config file, providing a sort of templating ability.
-This allows you to change the values of your config based on the current :ref:`deploy environment <term-deploy-env>`.
+This allows you to change the values of your config based on the current :term:`Deploy Environment`.
 
 For example, if you have a **webserver** stack, and you need to provide it a variable for the instance size it should use, you would have something like this in your config file.
 

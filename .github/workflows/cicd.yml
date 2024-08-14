@@ -90,7 +90,7 @@ jobs:
       - name: 🏗 Setup Python
         uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          poetry-plugins: poetry-dynamic-versioning
+          poetry-plugins: poetry-dynamic-versioning[plugin]
       - name: 🏗 Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -126,7 +126,7 @@ jobs:
       - name: 🏗 Setup Python
         uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          poetry-plugins: poetry-dynamic-versioning
+          poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: ${{ matrix.python-version }}
       - name: ⤵️ Install Node Dependencies
         run: make npm-ci
@@ -167,7 +167,7 @@ jobs:
       - name: 🏗 Setup Python
         uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          poetry-plugins: poetry-dynamic-versioning
+          poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: '3.10'
       - name: ⤵️ Install Ubuntu Dependencies
         run: |
@@ -206,7 +206,7 @@ jobs:
       - name: 🏗 Setup Python
         uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          poetry-plugins: poetry-dynamic-versioning
+          poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: ${{ matrix.python-version }}
       - name: ⤵️ Install Node Dependencies
         run: make npm-install
@@ -239,7 +239,7 @@ jobs:
         uses: finleyfamily/action-setup-python@v1.0.0
         with:
           poetry-install: false
-          poetry-plugins: poetry-dynamic-versioning
+          poetry-plugins: poetry-dynamic-versioning[plugin]
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
       - name: Remove broken apt repos (ubuntu)

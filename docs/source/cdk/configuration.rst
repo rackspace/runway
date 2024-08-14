@@ -6,8 +6,6 @@ Configuration
 
 Standard `CDK <https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html>`__ rules apply but, we have some added prerequisites, recommendations, and caveats.
 
-.. contents::
-  :depth: 4
 
 
 *************

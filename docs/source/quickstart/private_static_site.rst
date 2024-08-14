@@ -5,8 +5,6 @@ Private Static Site (`Auth@Edge`) Quickstart
 The Runway built-in sample generation of a basic React app will be used as a
 simple demonstration of creating an authentication backed single page application.
 
-.. contents::
-  :depth: 4
 
 
 *************
