@@ -176,7 +176,7 @@ omit = [
 
 [tool.poetry-dynamic-versioning]  # poetry self add "poetry-dynamic-versioning[plugin]"
 bump = true
-enable = false
+enable = true
 fix-shallow-repository = true
 metadata = false
 strict = true
