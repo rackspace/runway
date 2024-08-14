@@ -7,9 +7,6 @@ Advanced Features
 Advanced features and detailed information for using Terraform with Runway.
 
 
-.. contents::
-  :depth: 4
-
 
 .. _tf-backend:
 

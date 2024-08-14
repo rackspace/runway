@@ -7,9 +7,6 @@ Examples
 Example uses of the :ref:`static site <mod-staticsite>` module
 
 
-.. contents::
-  :depth: 4
-
 
 ***********
 Angular SPA

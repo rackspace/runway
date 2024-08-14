@@ -6,8 +6,6 @@ Configuration
 
 Configuration options and parameters for :ref:`Kubernetes <mod-k8s>` modules.
 
-.. contents::
-  :depth: 4
 
 
 *******

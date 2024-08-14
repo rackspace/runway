@@ -6,8 +6,6 @@ Release Process
 
 Steps that should be taken when preparing for and executing a release.
 
-.. contents::
-  :depth: 4
 
 
 ***********

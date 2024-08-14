@@ -4,11 +4,11 @@
 Persistent Graph
 ################
 
-Each time Runway's CFNgin is run, it creates a dependency :ref:`graph <term-graph>` of :class:`stacks <cfngin.stack>`.
+Each time Runway's CFNgin is run, it creates a dependency :term:`graph` of :class:`stacks <cfngin.stack>`.
 This is used to determine the order in which to execute them.
-This :ref:`graph <term-graph>` can be persisted between runs to track the removal of :class:`stacks <cfngin.stack>` from the config file.
+This :term:`graph` can be persisted between runs to track the removal of :class:`stacks <cfngin.stack>` from the config file.
 
-When a |stack| is present in the persistent graph but not in the :ref:`graph <term-graph>` constructed from the config file, CFNgin will delete the Stack from CloudFormation.
+When a |Stack| is present in the persistent graph but not in the :term:`graph` constructed from the config file, CFNgin will delete the Stack from CloudFormation.
 This takes effect when running either the :ref:`deploy command <command-deploy>` or :ref:`destroy command <command-destroy>`.
 
 To enable persistent graph, define the :attr:`~cfngin.config.persistent_graph_key` field as a unique value that will be used to construct the path to the persistent graph object in S3.
@@ -36,7 +36,7 @@ The lock is a tag applied to the object at the start of one of these actions.
 The tag-key is **cfngin_lock_code** and the tag-value is UUID generated each time a config is processed.
 
 To lock a persistent graph object, the tag must not be present on the object.
-For CFNgin to act on the :ref:`graph <term-graph>` (modify or unlock) the value of the tag must match the UUID of the current CFNgin session.
+For CFNgin to act on the :term:`graph` (modify or unlock) the value of the tag must match the UUID of the current CFNgin session.
 If the object is locked or the code does not match, an error will be raised and no action will be taken.
 This prevents two parties from acting on the same persistent graph object concurrently which would create a race condition.
 

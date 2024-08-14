@@ -59,9 +59,6 @@ By defining these additional sources you are able to extend your *$PATH* to make
           ...
 
 
-.. contents::
-  :depth: 4
-
 
 **************
 Git Repository

@@ -6,8 +6,6 @@ Advanced Features
 
 Advanced features and detailed information for using Serverless Framework with Runway.
 
-.. contents::
-  :depth: 4
 
 
 .. _sls-skip-npm-ci:

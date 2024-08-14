@@ -6,6 +6,7 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
 import sys
+from datetime import date
 from pathlib import Path
 
 if sys.version_info < (3, 11):
@@ -24,7 +25,7 @@ PYPROJECT_TOML = tomllib.loads((ROOT_DIR / "pyproject.toml").read_text())
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 project = PYPROJECT_TOML["tool"]["poetry"]["name"].title()
-copyright = "2021, Onica Group"  # noqa: A001
+copyright = f"{date.today().year}, Onica Group"  # noqa: A001
 author = PYPROJECT_TOML["tool"]["poetry"]["authors"][0]
 release = PYPROJECT_TOML["tool"]["poetry"]["version"]
 version = ".".join(release.split(".")[:2])  # short X.Y version
@@ -37,62 +38,29 @@ add_module_names = True
 default_role = None
 exclude_patterns = []
 extensions = [
+    "notfound.extension",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
+    "sphinx_design",
     "sphinx_github_changelog",
-    "sphinx_tabs.tabs",
     "sphinxcontrib.apidoc",
+    "sphinxcontrib.external_links",
+    "sphinxcontrib.jquery",
     "sphinxcontrib.programoutput",
 ]
 highlight_language = "default"
-intersphinx_mapping = {
-    "docker": (
-        "https://docker-py.readthedocs.io/en/stable/",
-        None,
-    ),  # link to docker docs
-    "python": ("https://docs.python.org/3", None),  # link to python docs
-}
-language = None
+language = "en"
 master_doc = "index"
 needs_extensions = {}
-needs_sphinx = "3.5"
+needs_sphinx = "7.4"
 nitpicky = False  # TODO (kyle): enable nitpicky
 primary_domain = "py"
-pygments_style = "material"  # syntax highlighting style
-# Appended to the end of each rendered file
-rst_epilog = """
-.. |Blueprint| replace::
-  :class:`~runway.cfngin.blueprints.base.Blueprint`
-
-.. |Dict| replace::
-  :class:`~typing.Dict`
-
-.. |Protocol| replace::
-  :class:`~typing.Protocol`
-
-.. |Stack| replace::
-  :class:`~runway.cfngin.stack.Stack`
-
-.. |cfngin_bucket| replace::
-  :attr:`~cfngin.config.cfngin_bucket`
-
-.. |class_path| replace::
-  :attr:`~cfngin.stack.class_path`
-
-.. |namespace| replace::
-  :attr:`~cfngin.config.namespace`
-
-.. |stack| replace::
-  :class:`~cfngin.stack`
-
-.. |template_path| replace::
-  :attr:`~cfngin.stack.template_path`
-
-"""
-rst_prolog = ""
-
+pygments_style = "one-dark"  # syntax highlighting style
+pygments_dark_style = "one-dark"  # syntax highlighting style
 source_suffix = {".rst": "restructuredtext"}
 templates_path = ["_templates"]  # template dir relative to this dir
 
@@ -100,24 +68,28 @@ templates_path = ["_templates"]  # template dir relative to this dir
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 html_codeblock_linenos_style = "inline"
-html_css_files = ["css/custom.css"]  # files relative to html_static_path
+html_css_files = []  # files relative to html_static_path
 html_favicon = None
 html_logo = None
-html_theme = "sphinx_rtd_theme"  # theme to use for HTML and HTML Help pages
+html_theme = "furo"  # theme to use for HTML and HTML Help pages
 html_theme_options = {
-    "navigation_depth": -1,  # unlimited depth
+    "dark_css_variables": {
+        "font-stack--monospace": "Inconsolata, monospace",
+        "color-inline-code-background": "#24242d",
+    },
+    "light_css_variables": {
+        "font-stack--monospace": "Inconsolata, monospace",
+    },
 }
 html_short_title = f"{project} v{release}"
 html_title = f"{project} v{release}"
-html_show_copyright = True
-html_show_sphinx = True
+html_show_copyright = False
+html_show_sphinx = False
 html_static_path = ["_static"]  # dir with static files relative to this dir
-
 
 # -- Options for HTMLHelp output ---------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-help-output
 htmlhelp_basename = "runwaydoc"
-
 
 # -- Options for LaTeX output ------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
@@ -126,11 +98,9 @@ latex_documents = [
 ]
 latex_elements = {}
 
-
 # -- Options for manual page output ------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-manual-page-output
 man_pages = [(master_doc, "runway", "runway Documentation", [author], 1)]
-
 
 # -- Options for Texinfo output ----------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-texinfo-output
@@ -146,7 +116,6 @@ texinfo_documents = [
     ),
 ]
 
-
 # -- Options for Epub output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-epub-output
 epub_exclude_files = ["search.html"]
@@ -157,9 +126,12 @@ epub_title = project
 # https://www.sphinx-doc.org/en/master/man/sphinx-apidoc.html#environment
 os.environ["SPHINX_APIDOC_OPTIONS"] = "members"
 
-# -- Options for sphinx-github-changelog -------------------------------------
-# GitHub PAT with "repo.public_repo" access provided by @ITProKyle
-changelog_github_token = os.getenv("SPHINX_GITHUB_CHANGELOG_TOKEN", "")
+
+# -- Options of sphinx.ext.autosectionlabel ----------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html
+autosectionlabel_maxdepth = 2
+autosectionlabel_prefix_document = True
+
 
 # -- Options of sphinx.ext.autodoc -------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
@@ -167,10 +139,12 @@ autoclass_content = "class"
 autodoc_class_signature = "separated"
 autodoc_default_options = {
     "inherited-members": "dict",  # show all inherited members
-    "member-order": "bysource",
+    "member-order": "alphabetical",
     "members": True,
     "show-inheritance": True,
 }
+autodoc_inherit_docstrings = True
+autodoc_member_order = "alphabetical"
 autodoc_type_aliases = {
     "CfnginContext": "runway.context.CfnginContext",
     "DirectoryPath": "Path",
@@ -179,9 +153,23 @@ autodoc_type_aliases = {
     "RunwayContext": "runway.context.RunwayContext",
 }
 autodoc_typehints = "signature"
+autodoc_typehints_format = "short"
 
-# -- Options for napoleon  ---------------------------------------------------
-# https://www.sphinx-doc.org/en/3.x/usage/extensions/napoleon.html#configuration
+
+# -- Options of sphinx.ext.intersphinx ------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
+intersphinx_mapping = {
+    "docker": (
+        "https://docker-py.readthedocs.io/en/stable/",
+        None,
+    ),  # link to docker docs
+    "packaging": ("https://packaging.pypa.io/en/stable/", None),
+    "python": ("https://docs.python.org/3", None),  # link to python docs
+}
+
+
+# -- Options for sphinx.ext.napoleon  ----------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html#configuration
 napoleon_attr_annotations = True
 napoleon_google_docstring = True
 napoleon_include_init_with_doc = False
@@ -195,6 +183,20 @@ napoleon_use_ivar = False
 napoleon_use_param = False
 napoleon_use_rtype = True
 
+
+# -- Options for sphinx_copybutton ---------------------------------
+# https://sphinx-copybutton.readthedocs.io/en/latest/index.html
+copybutton_prompt_text = r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+copybutton_prompt_is_regexp = True
+copybutton_remove_prompts = True
+copybutton_line_continuation_character = "\\"
+
+
+# -- Options for sphinx-github-changelog -------------------------------------
+# GitHub PAT with "repo.public_repo" access provided by @ITProKyle
+changelog_github_token = os.getenv("SPHINX_GITHUB_CHANGELOG_TOKEN", "")
+
+
 # -- Options for sphinxcontrib.apidoc  ---------------------------------------
 # https://github.com/sphinx-contrib/apidoc
 apidoc_excluded_paths = [
@@ -207,3 +209,22 @@ apidoc_module_first = True
 apidoc_output_dir = "apidocs"
 apidoc_separate_modules = True
 apidoc_toc_file = "index"
+
+
+# -- Options for sphinxcontrib.external_links   ------------------------------
+# https://sphinxcontribexternal-links.readthedocs.io/latest/configuration.html
+external_links: dict[str, str] = {
+    "CloudFormation": "https://aws.amazon.com/cloudformation",
+    "troposphere": "https://github.com/cloudtools/troposphere",
+}
+external_links_substitutions: dict[str, str] = {
+    "Blueprint": ":class:`Blueprint <runway.cfngin.blueprints.base.GenericBlueprint>`",
+    "Dict": ":class:`~typing.Dict`",
+    "dict": ":class:`~typing.Dict`",
+    "Protocol": ":class:`~typing.Protocol`",
+    "Stack": ":class:`~cfngin.stack`",
+    "cfngin_bucket": ":attr:`~cfngin.config.cfngin_bucket`",
+    "class_path": ":attr:`~cfngin.stack.class_path`",
+    "namespace": ":attr:`~cfngin.config.namespace`",
+    "template_path": ":attr:`~cfngin.stack.template_path`",
+}

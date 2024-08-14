@@ -47,9 +47,6 @@ For example, if i use ``${var region}`` in my Runway config file to resolve the 
 Well, it can but it will resolve to the literal value provided, not an AWS region like you may expect.
 
 
-.. contents::
-  :depth: 4
-
 
 .. _lookup arguments:
 

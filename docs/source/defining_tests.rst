@@ -20,9 +20,6 @@ Tests are run in the order they are defined.
           - echo "Success!"
 
 
-.. contents::
-  :depth: 4
-
 
 *************
 Test Failures

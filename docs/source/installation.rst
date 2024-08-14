@@ -28,21 +28,21 @@ on your operating system.
 | Windows          | https://oni.ca/runway/latest/windows              |
 +------------------+---------------------------------------------------+
 
-.. tabs::
+.. tab-set::
 
-  .. tab:: Linux
+  .. tab-item:: Linux
 
     .. code-block:: sh
 
       curl -L https://oni.ca/runway/latest/linux -o runway
 
-  .. tab:: macOS
+  .. tab-item:: macOS
 
     .. code-block:: sh
 
         curl -L https://oni.ca/runway/latest/osx -o runway
 
-  .. tab:: Windows
+  .. tab-item:: Windows
 
     .. code-block:: powershell
 
@@ -105,15 +105,15 @@ See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
 
 **Suggested use:** Python projects
 
-.. tabs::
+.. tab-set::
 
-  .. tab:: poetry
+  .. tab-item:: poetry
 
     .. code-block:: sh
 
       poetry add runway
 
-  .. tab:: pip
+  .. tab-item:: pip
 
     .. code-block:: sh
 
@@ -123,15 +123,15 @@ See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
 
 .. rubric:: Usage
 
-.. tabs::
+.. tab-set::
 
-  .. tab:: poetry
+  .. tab-item:: poetry
 
     .. code-block:: sh
 
       poetry run runway --help
 
-  .. tab:: pip
+  .. tab-item:: pip
 
     .. code-block:: sh
 

@@ -7,9 +7,6 @@ Directory Structure
 Example directory structures for a ref:`static site <mod-staticsite>` module.
 
 
-.. contents::
-  :depth: 4
-
 
 ***********
 Angular SPA

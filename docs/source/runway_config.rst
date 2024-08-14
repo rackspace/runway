@@ -35,9 +35,9 @@ Top-Level Configuration
   :type: bool
   :value: false
 
-  Optionally exclude the git branch name when determining the current :ref:`deploy environment <term-deploy-env>`.
+  Optionally exclude the git branch name when determining the current :term:`Deploy Environment`.
 
-  This can be useful when using the directory name or environment variable to set the :ref:`deploy environment <term-deploy-env>` to ensure the correct value is used.
+  This can be useful when using the directory name or environment variable to set the :term:`Deploy Environment` to ensure the correct value is used.
 
   .. rubric:: Example
   .. code-block:: yaml

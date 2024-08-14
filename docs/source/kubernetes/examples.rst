@@ -6,8 +6,6 @@ Examples
 
 Example uses of the :ref:`Kubernetes <mod-k8s>` module
 
-.. contents::
-  :depth: 4
 
 
 ******************

@@ -2,8 +2,6 @@
 Getting Started Guide
 #####################
 
-.. contents::
-  :depth: 4
 
 
 **************
@@ -75,23 +73,23 @@ Deploying Your First Module
    that corresponds to your operating system. Then, change the downloaded
    file's permissions to allow execution.
 
-   .. tabs::
+   .. tab-set::
 
-    .. tab:: Linux
+    .. tab-item:: Linux
 
       .. code-block:: sh
 
         $ curl -L https://oni.ca/runway/latest/linux -o runway
         $ chmod +x runway
 
-    .. tab:: macOS
+    .. tab-item:: macOS
 
       .. code-block:: sh
 
         $ curl -L https://oni.ca/runway/latest/osx -o runway
         $ chmod +x runway
 
-    .. tab:: Windows
+    .. tab-item:: Windows
 
       .. code-block:: powershell
 

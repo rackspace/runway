@@ -84,9 +84,6 @@ Only the following actions allow pre/post hooks:
     Whether to stop execution if the hook fails.
 
 
-.. contents::
-  :depth: 4
-
 
 ----
 

@@ -1,8 +1,0 @@
-/* Change code blocks font and bump up font size slightly (normally 12px)*/
-.rst-content code.literal,
-.rst-content pre.literal-block,
-.rst-content div[class^="highlight"] pre,
-.rst-content .linenodiv pre {
-	font-family: 'Inconsolata', monospace !important;
-	font-size: 14px !important;
-}

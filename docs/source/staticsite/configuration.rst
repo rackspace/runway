@@ -9,9 +9,6 @@ Configuration options and parameters for :ref:`static site <mod-staticsite>` mod
 Example uses of the options and parameters can be found in the :ref:`Examples <staticsite-examples>` section.
 
 
-.. contents::
-  :depth: 4
-
 
 *******
 Options

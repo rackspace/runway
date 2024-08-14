@@ -11,8 +11,6 @@ option for some so we have provided a `CloudFormation`_ template for spinning
 up a deploy environment in AWS and a `Docker`_ image/Dockerfile that can be
 used to run Runway.
 
-.. contents::
-  :depth: 4
 
 
 **************

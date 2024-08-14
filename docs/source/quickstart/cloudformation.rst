@@ -19,9 +19,9 @@ CloudFormation Quickstart
    module<runway-module, edit the values in the environment file,
    and create a Runway config file to use the module.
 
-   .. tabs::
+   .. tab-set::
 
-    .. tab:: POSIX
+    .. tab-item:: POSIX
 
       .. code-block:: sh
 
@@ -37,7 +37,7 @@ CloudFormation Quickstart
               - us-east-1
         EOF
 
-    .. tab:: Windows
+    .. tab-item:: Windows
 
       .. code-block:: powershell
 

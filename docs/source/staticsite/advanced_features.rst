@@ -4,8 +4,7 @@
 Advanced Features
 #################
 
-.. contents::
-  :depth: 4
+
 
 .. _`Auth@Edge`:
 
