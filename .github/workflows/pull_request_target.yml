@@ -18,8 +18,8 @@ jobs:
         uses: finleyfamily/action-enforce-branch-name@v1.0.0
         with:
           allowed_prefixes: >-
-            bugfix,chore,dependabot,docs,feat,feature,fix,hotfix,
-            maint,maintain,maintenance,release,renovate,snyk
+            bugfix,chore,dep,depend,dependabot,deps,docs,feat,feature,fix,hotfix,
+            maint,maintain,maintenance,pre-commit,release,renovate,snyk
   label-pr:
     name: Label PR
     if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' }}

@@ -74,7 +74,7 @@ class ParametersDataModel(BaseModel):
     sse_c_key: Optional[str] = None
     storage_class: Optional[str] = None
 
-    @validator("paths_type", always=True, pre=True)
+    @validator("paths_type", always=True, pre=True)  # type: ignore
     @classmethod
     def _determine_paths_type(
         cls,
@@ -89,7 +89,7 @@ class ParametersDataModel(BaseModel):
         dest_type = "s3" if dest.startswith("s3://") else "local"
         return cast(PathsType, f"{src_type}{dest_type}")
 
-    @validator("dest", "src", pre=True)
+    @validator("dest", "src", pre=True)  # type: ignore
     @classmethod
     def _normalize_s3_trailing_slash(cls, v: str) -> str:
         """Add a trailing "/" if the root of an S3 bucket was provided."""

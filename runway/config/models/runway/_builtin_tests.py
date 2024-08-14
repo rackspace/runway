@@ -59,7 +59,7 @@ class RunwayTestDefinitionModel(ConfigProperty):
         return super().__new__(cls)  # type: ignore
 
     # TODO (kyle): add regex to schema
-    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
+    _validate_string_is_lookup = validator(  # type: ignore
         "args", "required", allow_reuse=True, pre=True
     )(utils.validate_string_is_lookup)
 
@@ -83,9 +83,9 @@ class CfnLintRunwayTestArgs(ConfigProperty):
         title = "cfn-lint Runway Test Arguments"
 
     # TODO (kyle): add regex to schema
-    _validate_string_is_lookup = validator(  # pyright: ignore[reportUnknownVariableType]
-        "cli_args", allow_reuse=True, pre=True
-    )(utils.validate_string_is_lookup)
+    _validate_string_is_lookup = validator("cli_args", allow_reuse=True, pre=True)(  # type: ignore
+        utils.validate_string_is_lookup
+    )
 
 
 class CfnLintRunwayTestDefinitionModel(RunwayTestDefinitionModel):

@@ -47,7 +47,7 @@ class ImagePushArgs(BaseModel):
     tags: List[str] = []  # depends on image  # noqa: UP006
     """List of tags to push."""
 
-    @validator("ecr_repo", pre=True, allow_reuse=True)
+    @validator("ecr_repo", pre=True, allow_reuse=True)  # type: ignore
     def _set_ecr_repo(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
         """Set the value of ``ecr_repo``."""
         if v and isinstance(v, dict):
@@ -66,7 +66,7 @@ class ImagePushArgs(BaseModel):
             )
         return v
 
-    @validator("repo", pre=True, always=True, allow_reuse=True)
+    @validator("repo", pre=True, always=True, allow_reuse=True)  # type: ignore
     def _set_repo(cls, v: str | None, values: dict[str, Any]) -> str | None:  # noqa: N805
         """Set the value of ``repo``."""
         if v:
@@ -82,7 +82,7 @@ class ImagePushArgs(BaseModel):
 
         return None
 
-    @validator("tags", pre=True, always=True, allow_reuse=True)
+    @validator("tags", pre=True, always=True, allow_reuse=True)  # type: ignore
     def _set_tags(cls, v: list[str], values: dict[str, Any]) -> list[str]:  # noqa: N805
         """Set the value of ``tags``."""
         if v:

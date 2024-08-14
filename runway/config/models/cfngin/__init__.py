@@ -167,18 +167,18 @@ class CfnginStackDefinitionModel(ConfigProperty):
                     {"type": "string", "pattern": utils.CFNGIN_LOOKUP_STRING_REGEX},
                 ]
 
-    _resolve_path_fields = validator(  # pyright: ignore[reportUnknownVariableType]
+    _resolve_path_fields = validator(  # type: ignore
         "stack_policy_path", "template_path", allow_reuse=True
     )(utils.resolve_path_field)
 
-    @root_validator(pre=True)
+    @root_validator(pre=True)  # type: ignore
     def _validate_class_and_template(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Validate class_path and template_path are not both provided."""
         if values.get("class_path") and values.get("template_path"):
             raise ValueError("only one of class_path or template_path can be defined")
         return values
 
-    @root_validator(pre=True)
+    @root_validator(pre=True)  # type: ignore
     def _validate_class_or_template(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
         """Ensure that either class_path or template_path is defined."""
         # if the stack is disabled or locked, it is ok that these are missing
@@ -287,11 +287,11 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         schema_extra = {"description": "Configuration file for Runway's CFNgin."}
         title = "CFNgin Config File"
 
-    _resolve_path_fields = validator(  # pyright: ignore[reportUnknownVariableType]
+    _resolve_path_fields = validator(  # type: ignore
         "cfngin_cache_dir", "sys_path", allow_reuse=True
     )(utils.resolve_path_field)
 
-    @validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", pre=True)
+    @validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", pre=True)  # type: ignore
     def _convert_hook_definitions(
         cls, v: Union[dict[str, Any], list[dict[str, Any]]]  # noqa: N805
     ) -> list[dict[str, Any]]:
@@ -300,7 +300,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
             return v
         return list(v.values())
 
-    @validator("stacks", pre=True)
+    @validator("stacks", pre=True)  # type: ignore
     def _convert_stack_definitions(
         cls, v: Union[dict[str, Any], list[dict[str, Any]]]  # noqa: N805
     ) -> list[dict[str, Any]]:
@@ -313,7 +313,7 @@ class CfnginConfigDefinitionModel(ConfigProperty):
             result.append(stack)
         return result
 
-    @validator("stacks")
+    @validator("stacks")  # type: ignore
     def _validate_unique_stack_names(
         cls, stacks: list[CfnginStackDefinitionModel]  # noqa: N805
     ) -> list[CfnginStackDefinitionModel]:

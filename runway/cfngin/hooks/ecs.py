@@ -24,7 +24,7 @@ class CreateClustersHookArgs(BaseModel):
     clusters: List[str]  # noqa: UP006
     """List of cluster names to create."""
 
-    @validator("clusters", allow_reuse=True, pre=True)
+    @validator("clusters", allow_reuse=True, pre=True)  # type: ignore
     def _convert_clusters(cls, v: list[str] | str) -> list[str]:  # noqa: N805
         """Convert value of ``clusters`` from str to list."""
         if isinstance(v, str):

@@ -62,7 +62,7 @@ class RunwayTerraformModuleOptionsDataModel(ConfigProperty):
         extra = Extra.ignore
         title = "Runway Terraform Module options"
 
-    @validator("args", pre=True)
+    @validator("args", pre=True)  # type: ignore
     def _convert_args(
         cls, v: Union[list[str], dict[str, list[str]]]  # noqa: N805
     ) -> dict[str, list[str]]:

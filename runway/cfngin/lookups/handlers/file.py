@@ -37,7 +37,7 @@ class ArgsDataModel(BaseModel):
     codec: str
     """Codec that will be used to parse and/or manipulate the data."""
 
-    @validator("codec", allow_reuse=True)
+    @validator("codec", allow_reuse=True)  # type: ignore
     def _validate_supported_codec(cls, v: str) -> str:  # noqa: N805
         """Validate that the selected codec is supported."""
         if v in CODECS:
