@@ -2918,13 +2918,13 @@ test = ["cython", "html5lib", "pytest", "pytest-cov", "typed-ast"]
 
 [[package]]
 name = "sphinx-github-changelog"
-version = "1.3.0"
+version = "1.4.0"
 description = "Build a sphinx changelog from GitHub Releases"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "sphinx_github_changelog-1.3.0-py3-none-any.whl", hash = "sha256:eb5424d590ae7866e77b8db7eecf283678cba76b74d90b17bc4f3872976407eb"},
-    {file = "sphinx_github_changelog-1.3.0.tar.gz", hash = "sha256:b898adc52131147305b9cb893c2a4cad0ba2912178ed8f88b62bf6f43a2baaa4"},
+    {file = "sphinx_github_changelog-1.4.0-py3-none-any.whl", hash = "sha256:cdf2099ea3e4587ae8637be7ba609738bfdeca4bd80c5df6fc45046735ae5c2f"},
+    {file = "sphinx_github_changelog-1.4.0.tar.gz", hash = "sha256:204745e93a1f280e4664977b5fee526b0a011c92ca19c304bd01fd641ddb6393"},
 ]
 
 [package.dependencies]
