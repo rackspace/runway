@@ -68,9 +68,6 @@
   - name: priority:medium
     color: fbca04
     description: Medium priority issue or pull request
-  - name: pyinstaller
-    color: ffffff
-    description: Update to Pyinstaller configuration
   - name: python
     color: '306998'
     description: Update to Python code

@@ -32,7 +32,5 @@ Execution
 #. Publish the release.
 
 
-At this point, GitHub Actions will begin building the deployment packages & automatically publishing them to npm, PyPi, and AWS S3.
+At this point, GitHub Actions will begin building the deployment package & automatically publishing it to PyPI.
 The **Publish Release** workflow can be monitored for progress.
-It can take around 20 minutes for the process to complete.
-At which time, the logs and package repositories should be checked to verify that the release was published successfully.

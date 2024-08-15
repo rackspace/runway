@@ -4,7 +4,7 @@
 Configuration
 #############
 
-In addition to the :ref:`Runway Config File <runway-config>`, there are two files that can be used for configuration:
+In addition to the :ref:`runway_config:Runway Config File`, there are two files that can be used for configuration:
 
 - a YAML :ref:`configuration file <cfngin-config>` **[REQUIRED]**
 - a key/value :ref:`environment file <cfngin-env>`
@@ -48,7 +48,7 @@ Parameters
 Runway can pass :term:`Parameters` to a CloudFormation module in place of or in addition to values in an :ref:`environment file <cfngin-env>`.
 When :term:`Parameters` are passed to the module, the data type is retained (e.g. ``array``, ``boolean``, ``mapping``).
 
-A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combination with :term:`Parameters` to pass :term:`Deploy Environment` and/or region specific values to the module from the :ref:`Runway Config File <runway-config>`.
+A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combination with :term:`Parameters` to pass :term:`Deploy Environment` and/or region specific values to the module from the :ref:`runway_config:Runway Config File`.
 
 .. rubric:: Example
 .. code-block:: yaml
@@ -313,7 +313,7 @@ Top-Level Fields
     :type: Optional[List[cfngin.hook]]
     :value: []
 
-    Python functions/methods that are executed after processing the stacks in the config while using the :ref:`deploy command <command-deploy>`.
+    Python functions/methods that are executed after processing the stacks in the config while using the :ref:`commands:deploy` command.
 
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
@@ -333,7 +333,7 @@ Top-Level Fields
     :type: Optional[List[cfngin.hook]]
     :value: []
 
-    Python functions/methods that are executed after processing the stacks in the config while using the :ref:`destroy command <command-destroy>`.
+    Python functions/methods that are executed after processing the stacks in the config while using the :ref:`commands:destroy` command.
 
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
@@ -347,7 +347,7 @@ Top-Level Fields
     :type: Optional[List[cfngin.hook]]
     :value: []
 
-    Python functions/methods that are executed before processing the stacks in the config while using the :ref:`deploy command <command-deploy>`.
+    Python functions/methods that are executed before processing the stacks in the config while using the :ref:`commands:deploy` command.
 
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
@@ -364,7 +364,7 @@ Top-Level Fields
     :type: Optional[List[cfngin.hook]]
     :value: []
 
-    Python functions/methods that are executed before processing the stacks in the config while using the :ref:`destroy command <command-destroy>`.
+    Python functions/methods that are executed before processing the stacks in the config while using the :ref:`commands:destroy` command.
 
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
@@ -873,7 +873,7 @@ The files must also be stored at the root of the module's directory.
   The region can optionally be omitted to apply a single file to all regions.
 
 Files following both naming schemes may be used. The file with the most specific name takes precedence.
-Values passed in as ``parameters`` from the :ref:`Runway Config File <runway-config>` take precedence over those provided in an environment file.
+Values passed in as ``parameters`` from the :ref:`runway_config:Runway Config File` take precedence over those provided in an environment file.
 
 
 Usage

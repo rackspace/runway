@@ -4,7 +4,7 @@
 Examples
 ########
 
-Example uses of the :ref:`static site <mod-staticsite>` module
+Example uses of the :ref:`index:Static Site` :term:`Module`
 
 
 

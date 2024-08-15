@@ -105,7 +105,7 @@ Stages
 Runway's concept of a :term:`Deploy Environment` has a 1-to-1 mapping to Serverless's **stage**.
 For example, if the deploy environment is **dev**, Serverless will be run with ``--stage dev``.
 
-Each stage requires either its own variables file (even if empty for a particular stage) following a specific `File Naming`_ scheme and/or a configured ``environment`` for the module or deployment (see :ref:`Runway Config File <runway-config>` for details).
+Each stage requires either its own variables file (even if empty for a particular stage) following a specific `File Naming`_ scheme and/or a configured ``environment`` for the module or deployment (see :ref:`runway_config:Runway Config File` for details).
 
 File Naming
 ===========

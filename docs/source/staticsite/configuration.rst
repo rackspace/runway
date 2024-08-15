@@ -5,7 +5,7 @@
 Configuration
 #############
 
-Configuration options and parameters for :ref:`static site <mod-staticsite>` modules.
+Configuration options and parameters for :ref:`index:Static Site` :term:`Modules <module>`.
 Example uses of the options and parameters can be found in the :ref:`Examples <staticsite-examples>` section.
 
 

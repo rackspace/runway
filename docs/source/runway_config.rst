@@ -1,5 +1,3 @@
-.. _runway-config:
-
 ##################
 Runway Config File
 ##################
@@ -76,7 +74,7 @@ Top-Level Configuration
   :type: Optional[List[test]]
   :value: []
 
-  List of Runway test definitions that are executed with the :ref:`test command <command-test>` command.
+  List of Runway test definitions that are executed with the :ref:`test command <commands:test>`.
   See Test_ for detailed information about defining this value.
 
   .. rubric:: Example
@@ -159,7 +157,6 @@ Top-Level Configuration
 ----
 
 
-.. _runway-deployment:
 
 **********
 Deployment
@@ -169,10 +166,10 @@ Deployment
 
   A deployment defines modules and options that affect the modules.
 
-  Deployments are processed during a :ref:`deploy <command-deploy>`/:ref:`destroy <command-destroy>`/:ref:`plan <command-plan>` action.
+  Deployments are processed during a :ref:`commands:deploy`/:ref:`commands:destroy`/:ref:`commands:plan` action.
   If the processing of one deployment fails, the action will end.
 
-  During a :ref:`deploy <command-deploy>`/:ref:`destroy <command-destroy>` action, the user has the option to select which deployment will run unless the ``CI`` environment variable (``--ci`` cli option) is set, the ``--tag <tag>...`` cli option was provided, or only one deployment is defined.
+  During a :ref:`commands:deploy`/:ref:`commands:destroy` action, the user has the option to select which deployment will run unless the ``CI`` environment variable (``--ci`` cli option) is set, the ``--tag <tag>...`` cli option was provided, or only one deployment is defined.
 
   .. rubric:: Lookup Support
 
@@ -570,7 +567,6 @@ Deployment
 ----
 
 
-.. _runway-module:
 
 ******
 Module
@@ -578,31 +574,31 @@ Module
 
 .. class:: module
 
-  A module defines the directory to be processed and applicable options.
+  A :term:`Module` defines the directory to be processed and applicable options.
 
-  It can consist of :ref:`CloudFormation <mod-cfn>`, :ref:`Terraform <mod-tf>`, :ref:`Serverless Framework <mod-sls>`, :ref:`AWS CDK <mod-cdk>`, :ref:`Kubernetes <mod-k8s>`, or a :ref:`Static Site<mod-staticsite>`.
+  It can consist of :ref:`index:CloudFormation & Troposphere`, :ref:`index:Terraform`, :ref:`index:Serverless Framework`, :ref:`index:AWS Cloud Development Kit (CDK)`, :ref:`index:Kubernetes`, or a :ref:`index:Static Site`.
   It is recommended to place the appropriate extension on each directory for identification (but it is not required).
-  See :ref:`Repo Structure<repo-structure>` for examples of a module directory structure.
+  See :ref:`repo_structure:Repo Structure` for examples of a module directory structure.
 
-  +------------------+-----------------------------------------------+
-  | Suffix/Extension | IaC Tool/Framework                            |
-  +==================+===============================================+
-  | ``.cdk``         | :ref:`AWS CDK <mod-cdk>`                      |
-  +------------------+-----------------------------------------------+
-  | ``.cfn``         | :ref:`CloudFormation <mod-cfn>`               |
-  +------------------+-----------------------------------------------+
-  | ``.k8s``         | :ref:`Kubernetes <mod-k8s>`                   |
-  +------------------+-----------------------------------------------+
-  | ``.sls``         | :ref:`Serverless Framework <mod-sls>`         |
-  +------------------+-----------------------------------------------+
-  | ``.tf``          | :ref:`Terraform <mod-tf>`                     |
-  +------------------+-----------------------------------------------+
-  | ``.web``         | :ref:`Static Site<mod-staticsite>`            |
-  +------------------+-----------------------------------------------+
+  +------------------+---------------------------------------------------------+
+  | Suffix/Extension | IaC Tool/Framework                                      |
+  +==================+=========================================================+
+  | ``.cdk``         | :ref:`index:AWS Cloud Development Kit (CDK)`            |
+  +------------------+---------------------------------------------------------+
+  | ``.cfn``         | :ref:`index:CloudFormation & Troposphere`               |
+  +------------------+---------------------------------------------------------+
+  | ``.k8s``         | :ref:`index:Kubernetes`                                 |
+  +------------------+---------------------------------------------------------+
+  | ``.sls``         | :ref:`index:Serverless Framework`                       |
+  +------------------+---------------------------------------------------------+
+  | ``.tf``          | :ref:`index:Terraform`                                  |
+  +------------------+---------------------------------------------------------+
+  | ``.web``         | :ref:`index:Static Site`                                |
+  +------------------+---------------------------------------------------------+
 
   A module is only deployed if there is a corresponding environment file present, it is explicitly enabled via :attr:`deployment.environments`/:attr:`module.environments`, or :attr:`deployment.parameters`/:attr:`module.parameters` is defined.
   The naming format of an environment file varies per module type.
-  See :ref:`Module Configurations<module-configurations>` for acceptable environment file name formats.
+  See :ref:`index:Module Configuration` for acceptable environment file name formats.
 
   Modules can be defined as a string or a mapping.
   The minimum requirement for a module is a string that is equal to the name of the module directory.
@@ -630,7 +626,7 @@ Module
       It is only used for custom module type handlers.
 
     Import path to a custom Runway module handler class.
-    See :ref:`Module Configurations<module-configurations>` for detailed usage.
+    See :ref:`index:Module Configuration` for detailed usage.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -740,7 +736,7 @@ Module
     Options that are passed directly to the module type handler class.
 
     The options that can be used with each module vary.
-    For detailed information about options for each type of module, see :ref:`Module Configurations<module-configurations>`.
+    For detailed information about options for each type of module, see :ref:`index:Module Configuration`.
 
     Anything defined here is merged with the value of :attr:`deployment.module_options`.
     Values defined here take precedence.
@@ -887,7 +883,6 @@ Module
     .. versionadded:: 1.4.0
 
 
-.. _runway-module-path:
 
 path
 ====
@@ -929,7 +924,6 @@ The syntax is based on that of `Terraform module sources <https://www.terraform.
 Remote Location Sources
 -----------------------
 
-.. _runway-module-path-git:
 
 Git Repository
 ^^^^^^^^^^^^^^
@@ -982,7 +976,6 @@ Below is an example of using a module in a git repository as well as a breakdown
 ----
 
 
-.. _runway-test:
 
 ****
 Test
@@ -992,12 +985,12 @@ Test
 
   Tests can be defined as part of the Runway config file.
   This is to remove the need for complex Makefiles or scripts to initiate test runners.
-  Simply define all tests for a project in the Runway config file and use the :ref:`test command<command-test>` to execute them.
+  Simply define all tests for a project in the Runway config file and use the :ref:`test command <commands:test>` to execute them.
 
   .. rubric:: Lookup Support
 
   .. note::
-    Runway does not set ``AWS_REGION`` or ``AWS_DEFAULT_REGION`` environment variables when using the :ref:`test command<command-test>`.
+    Runway does not set ``AWS_REGION`` or ``AWS_DEFAULT_REGION`` environment variables when using the :ref:`test command <commands:test>`.
 
   The following fields support lookups:
 
@@ -1039,7 +1032,7 @@ Test
     Whether the test must pass for subsequent tests to be run.
     If ``false``, testing will continue if the test fails.
 
-    If the test fails, the :ref:`test command <command-test>` will always return a non-zero exit code regardless of this value.
+    If the test fails, the :ref:`test command <commands:test>` will always return a non-zero exit code regardless of this value.
 
     .. rubric:: Example
     .. code-block:: yaml

@@ -24,6 +24,6 @@ jobs:
           cache: npm
           node-version: ${{ env.NODE_VERSION }}
       - name: ⤵️ Install Node Dependencies
-        run: make npm-ci
+        run: make setup-npm
       - name: 🚀 Run spellcheck
         run: make spellcheck

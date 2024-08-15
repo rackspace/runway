@@ -38,10 +38,6 @@ autolabeler:  # cspell:ignore autolabeler
       - poetry.lock
       - poetry.toml
       - pyproject.toml
-  - label: pyinstaller
-    files:
-      - runway.file.spec
-      - runway.folder.spec
   - label: python
     files:
       - '**/*.py'

@@ -16,14 +16,6 @@ help: ## show this message
 build: clean create-tfenv-ver-file ## build the PyPi release
 	@poetry build
 
-build-pyinstaller-file: clean create-tfenv-ver-file ## build Pyinstaller single file release (github)
-	@poetry dynamic-versioning
-	bash ./.github/scripts/cicd/build_pyinstaller.sh file
-
-build-pyinstaller-folder: clean create-tfenv-ver-file ## build Pyinstaller folder release (github)
-	@poetry dynamic-versioning
-	bash ./.github/scripts/cicd/build_pyinstaller.sh folder
-
 clean: ## remove generated file from the project directory
 	rm -rf ./build/ ./dist/ ./src/ ./tmp/ ./runway.egg-info/;
 	rm -rf ./.pytest_cache ./.venv;
@@ -90,23 +82,6 @@ lint-ruff: ## run ruff
 	@poetry run ruff check .
 	@echo ""
 
-npm-ci: ## run "npm ci" with the option to ignore scripts - required to succeed for this project
-	@npm ci --ignore-scripts
-
-npm-install: ## run "npm install" with the option to ignore scripts - required to succeed for this project
-	@npm install --ignore-scripts
-
-# copies artifacts to src & npm package files to the root of the repo
-npm-prep: ## process that needs to be run before creating an npm package
-	mkdir -p tmp
-	mkdir -p src
-	npm version $$(poetry version --short) --allow-same-version --no-git-tag-version
-	cp -r artifacts/$$(poetry version --short)/* src/
-	cp npm/* . && cp npm/.[^.]* .
-	cp package.json tmp/package.json
-	jq ".name = \"$${NPM_PACKAGE_NAME-undefined}\"" tmp/package.json > package.json
-	rm -rf tmp/package.json
-
 open-docs: ## open docs (HTML files must already exists)
 	@make -C docs open
 
@@ -117,7 +92,8 @@ run-pre-commit: ## run pre-commit for all files
 
 setup: setup-poetry setup-pre-commit setup-npm ## setup development environment
 
-setup-npm: npm-ci ## install node dependencies with npm
+setup-npm: ## install node dependencies with npm
+	@npm ci
 
 setup-poetry: ## setup python virtual environment
 	@poetry install $(POETRY_OPTS) --sync

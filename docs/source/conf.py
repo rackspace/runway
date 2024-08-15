@@ -129,7 +129,7 @@ os.environ["SPHINX_APIDOC_OPTIONS"] = "members"
 
 # -- Options of sphinx.ext.autosectionlabel ----------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autosectionlabel.html
-autosectionlabel_maxdepth = 2
+# autosectionlabel_maxdepth = 4
 autosectionlabel_prefix_document = True
 
 
