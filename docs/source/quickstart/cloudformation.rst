@@ -4,8 +4,7 @@
 CloudFormation Quickstart
 #########################
 
-#. Prepare the project directory. See :ref:`Repo Structure<repo-structure>`
-   for more details.
+#. Prepare the project directory. See :ref:`repo_structure:Repo Structure` for more details.
 
    .. code-block:: sh
 
@@ -13,11 +12,9 @@ CloudFormation Quickstart
     $ git init && git checkout -b ENV-dev
 
 #. Download/install Runway.
-   To see available install methods, see :ref:`Installation<install>`.
+   To see available install methods, see :ref:`installation:Installation`.
 
-#. Use Runway to :ref:`generate a sample<command-gen-sample>` CloudFormation
-   module<runway-module, edit the values in the environment file,
-   and create a Runway config file to use the module.
+#. Use Runway to :ref:`generate a sample <commands:gen-sample>` CloudFormation :ref:`Module <runway_config:Module>`, edit the values in the environment file, and create a :ref:`runway_config:Runway Config File` to use the :term:`Module`.
 
    .. tab-set::
 
@@ -56,7 +53,7 @@ CloudFormation Quickstart
         "@
         $RunwayTemplate | Out-File -FilePath runway.yml -Encoding ASCII
 
-#. :ref:`Deploy<command-deploy>` the stack.
+#. :ref:`Deploy <commands:deploy>` the stack.
 
    .. code-block:: sh
 

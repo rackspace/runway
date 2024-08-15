@@ -1,144 +1,54 @@
-.. _install:
-
 ############
 Installation
 ############
 
-To enable Runway to conform to our users' varying use cases, we have made it
-available via three different install methods - `cURL`_, `npm`_, and `pip`_.
 
-
-.. _install-curl:
-
-****
-cURL
-****
-
-Arguably the easiest way to install Runway is by using curl. Use one of the
-endpoints below to download a single-binary executable version of Runway based
-on your operating system.
-
-+------------------+---------------------------------------------------+
-| Operating System | Endpoint                                          |
-+==================+===================================================+
-| Linux            | https://oni.ca/runway/latest/linux                |
-+------------------+---------------------------------------------------+
-| macOS            | https://oni.ca/runway/latest/osx                  |
-+------------------+---------------------------------------------------+
-| Windows          | https://oni.ca/runway/latest/windows              |
-+------------------+---------------------------------------------------+
+Runway can be installed like any other Python package, but we instead strongly recommend using it per-project with :link:`poetry`.
+See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
 
 .. tab-set::
 
-  .. tab-item:: Linux
+  .. tab-item:: poetry (recommended)
+    :sync: poetry
 
-    .. code-block:: sh
+    .. code-block:: console
 
-      curl -L https://oni.ca/runway/latest/linux -o runway
-
-  .. tab-item:: macOS
-
-    .. code-block:: sh
-
-        curl -L https://oni.ca/runway/latest/osx -o runway
-
-  .. tab-item:: Windows
-
-    .. code-block:: powershell
-
-      Invoke-WebRequest -Uri "https://oni.ca/runway/latest/windows" -OutFile runway
-
-.. note:: To install a specific version of Runway, you can replace ``latest``
-          with a version number.
-
-.. rubric:: Usage
-
-To use the single-binary, run it directly as shown below. Please note that
-after download, you may need to adjust the permissions before it can be
-executed. (eg. Linux/macOS:``chmod +x runway``)
-
-.. code-block:: sh
-
-    $ ./runway deploy
-
-**Suggested use:** CloudFormation or Terraform projects
-
-
-.. _install-npm:
-
-***
-npm
-***
-
-Runway is published on npm as ``@onica/runway``.
-It currently contains binaries to support macOS, Ubuntu, and Windows.
-
-While Runway can be installed globally like any other npm package, we strongly
-recommend using it per-project as a dev dependency.
-See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
-
-.. code-block:: shell
-
-    $ npm i -D @onica/runway
-
-.. rubric:: Usage
-
-.. code-block:: shell
-
-    $ npx runway deploy
-
-**Suggested use:** Serverless or AWS CDK projects
-
-
-.. _install-python:
-
-***
-pip
-***
-
-Runway runs on Python 2.7 and Python 3.5+.
-
-Runway is hosted on PyPI as the package named ``runway``.
-It can be installed like any other Python package, but we instead strongly recommend using it
-per-project with `poetry <https://python-poetry.org/>`_.
-See `Why Version Lock Per-Project`_ for more info regarding this suggestion.
-
-**Suggested use:** Python projects
-
-.. tab-set::
-
-  .. tab-item:: poetry
-
-    .. code-block:: sh
-
-      poetry add runway
+      $ poetry add runway
 
   .. tab-item:: pip
+    :sync: pip
 
-    .. code-block:: sh
+    .. code-block:: console
 
-      pip install --user runway
+      $ pip install --user runway
       # or (depending on how Python was installed)
-      pip install runway
+      $ pip install runway
 
 .. rubric:: Usage
 
 .. tab-set::
 
   .. tab-item:: poetry
+    :sync: poetry
 
-    .. code-block:: sh
+    .. code-block:: console
 
-      poetry run runway --help
+      $ poetry run runway --help
 
   .. tab-item:: pip
+    :sync: pip
 
-    .. code-block:: sh
+    .. code-block:: console
 
-      runway --help
+      $ runway --help
 
 
-.. _why-version-lock:
+.. versionremoved:: 2.8.0
+  Support for installation via cURL and npm was removed.
+  Prior versions published to npm will remain, in a deprecated/unsupported state, indefinably.
+  Prior versions published to S3 will be removed at a date yet to be determined.
+
+
 
 ****************************
 Why Version Lock Per-Project

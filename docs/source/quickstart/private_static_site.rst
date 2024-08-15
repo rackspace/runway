@@ -27,7 +27,7 @@ Project Setup
 =============
 
 #. Download/install Runway.
-   To see available install methods, see :ref:`Installation<install>`.
+   To see available install methods, see :ref:`installation:Installation`.
 
 #. From a directory of your choosing run the following to generate a sample React project:
 
@@ -43,7 +43,7 @@ Project Setup
       $ mv static-react my-static-site
 
 #. Change directories into the new project folder and prepare the project directory.
-   See :ref:`Repo Structure<repo-structure>` for more details.
+   See :ref:`repo_structure:Repo Structure` for more details.
 
    .. code-block:: shell
 

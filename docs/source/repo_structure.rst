@@ -1,5 +1,3 @@
-.. _repo-structure:
-
 ##############
 Repo Structure
 ##############

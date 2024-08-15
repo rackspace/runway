@@ -24,17 +24,17 @@ Terminology
     If this is found, Runway knows that it should always use the value that follows the prefix.
 
   Deployment
-    A :ref:`Deployment <runway-deployment>` contains a list of :term:`Modules <Module>` and options for all the :term:`Modules <Module>` in the :term:`Deployment`.
-    A :ref:`runway-config` can contain multiple :ref:`deployments <runway-deployment>` and a :term:`Deployment` can contain multiple :term:`Modules <Module>`.
+    A :ref:`Deployment <runway_config:Deployment>` contains a list of :term:`Modules <Module>` and options for all the :term:`Modules <Module>` in the :term:`Deployment`.
+    A :ref:`runway_config:Runway Config File` can contain multiple :ref:`Deployments <runway_config:Deployment>` and a :term:`Deployment` can contain multiple :term:`Modules <Module>`.
 
   Lookup
-    In the context of Runway, a :term:`Lookup` is a method for expanding values in the :ref:`runway-config` file when processing a :term:`Deployment`/:term:`Module`.
-    These are only supported in select areas of the :ref:`runway-config` (see the config docs for more details).
+    In the context of Runway, a :term:`Lookup` is a method for expanding values in the :ref:`runway_config:Runway Config File` file when processing a :term:`Deployment`/:term:`Module`.
+    These are only supported in select areas of the :ref:`runway_config:Runway Config File` (see the config docs for more details).
 
     In the context of :term:`CFNgin`, a :term:`Lookup` is method for expanding values in the :class:`~cfngin.config` at runtime.
 
   Module
-    A :ref:`Module <runway-module>` is a directory containing a single Infrastructure-as-Code tool configuration of an application, a component, or some infrastructure (e.g. a set of :link:`CloudFormation` Templates).
+    A :ref:`Module <runway_config:Module>` is a directory containing a single Infrastructure-as-Code tool configuration of an application, a component, or some infrastructure (e.g. a set of :link:`CloudFormation` Templates).
     It is defined in a :term:`Deployment` by path.
     :term:`Modules <Module>` can also contain granular options that only pertain to it based on its :attr:`module.type`.
 

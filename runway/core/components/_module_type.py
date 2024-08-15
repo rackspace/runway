@@ -33,7 +33,7 @@ class RunwayModuleType:
     Runway determines the type of module you are trying to
     deploy in 3 different ways. First, it will check for the
     ``type`` property as described here, next it will look
-    for a suffix as described in :ref:`Module Definition<runway-module>`,
+    for a suffix as described in :ref:`Module Definition <runway_config:Module>`,
     and finally it will attempt to autodetect your module
     type by scanning the files of the project. If none of
     those settings produces a valid result an error will
@@ -52,7 +52,7 @@ class RunwayModuleType:
     +--------------------+-----------------------------------------------+
     | ``kubernetes``     | Kubernetes                                    |
     +--------------------+-----------------------------------------------+
-    | ``static``         | :ref:`Static Site<mod-staticsite>`            |
+    | ``static``         | :ref:`index:Static Site`                      |
     +--------------------+-----------------------------------------------+
 
     Even when specifying a module ``type`` the module structure

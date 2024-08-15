@@ -30,7 +30,7 @@ Setup
 *****
 
 #. Prepare the project directory.
-   See :ref:`Repo Structure<repo-structure>` for more details.
+   See :ref:`repo_structure:Repo Structure` for more details.
 
    .. code-block:: sh
 
@@ -40,7 +40,7 @@ Setup
     $ git checkout -b ENV-dev
 
 #. Download/install Runway.
-   To see available install methods, see :ref:`Installation<install>`.
+   To see available install methods, see :ref:`installation:Installation`.
 
 #. Download the source files.
 

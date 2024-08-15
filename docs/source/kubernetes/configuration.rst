@@ -4,7 +4,7 @@
 Configuration
 #############
 
-Configuration options and parameters for :ref:`Kubernetes <mod-k8s>` modules.
+Configuration options and parameters for :ref:`index:Kubernetes` :term:`Modules <module>`.
 
 
 
@@ -46,4 +46,4 @@ Options
 Parameters
 **********
 
-:ref:`Kubernetes <mod-k8s>` does not support the use of :attr:`deployment.parameters`/:attr:`module.parameters` at this time.
+:ref:`index:Kubernetes` does not support the use of :attr:`deployment.parameters`/:attr:`module.parameters` at this time.

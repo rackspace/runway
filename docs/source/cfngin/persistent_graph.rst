@@ -9,7 +9,7 @@ This is used to determine the order in which to execute them.
 This :term:`graph` can be persisted between runs to track the removal of :class:`stacks <cfngin.stack>` from the config file.
 
 When a |Stack| is present in the persistent graph but not in the :term:`graph` constructed from the config file, CFNgin will delete the Stack from CloudFormation.
-This takes effect when running either the :ref:`deploy command <command-deploy>` or :ref:`destroy command <command-destroy>`.
+This takes effect when running either the :ref:`commands:deploy` command or :ref:`commands:destroy` command.
 
 To enable persistent graph, define the :attr:`~cfngin.config.persistent_graph_key` field as a unique value that will be used to construct the path to the persistent graph object in S3.
 This object is stored in the |cfngin_bucket| which is also used for CloudFormation templates.
