@@ -92,7 +92,7 @@ run-pre-commit: ## run pre-commit for all files
 
 setup: setup-poetry setup-pre-commit setup-npm ## setup development environment
 
-setup-npm: npm-ci ## install node dependencies with npm
+setup-npm: ## install node dependencies with npm
 	@npm ci
 
 setup-poetry: ## setup python virtual environment

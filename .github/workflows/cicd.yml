@@ -129,7 +129,7 @@ jobs:
           poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: ${{ matrix.python-version }}
       - name: ⤵️ Install Node Dependencies
-        run: make npm-ci
+        run: make setup-npm
       - name: 🚀 Run Linters
         run: make lint
   pre-commit:
