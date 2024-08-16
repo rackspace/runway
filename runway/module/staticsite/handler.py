@@ -78,7 +78,7 @@ class StaticSite(RunwayModule):
             options=StaticSiteOptions.parse_obj(options or {}),
             parameters=parameters,
         )
-        self.parameters = RunwayStaticSiteModuleParametersDataModel.parse_obj(self.parameters)
+        self.parameters = RunwayStaticSiteModuleParametersDataModel.model_validate(self.parameters)
         # logger needs to be created here to use the correct logger
         self.logger = PrefixAdaptor(self.name, LOGGER)
         LOGGER.warning("%s:%s", self.name, self.DEPRECATION_MSG)
@@ -164,7 +164,7 @@ class StaticSite(RunwayModule):
         # have any costs when unused.
         if command == "destroy" and (
             self.parameters.auth_at_edge
-            or self.parameters.dict().get("staticsite_rewrite_index_index")
+            or self.parameters.model_dump().get("staticsite_rewrite_index_index")
         ):
             self._create_cleanup_yaml(module_dir)
 
@@ -173,8 +173,8 @@ class StaticSite(RunwayModule):
             explicitly_enabled=self.explicitly_enabled,
             module_root=module_dir,
             name=self.name,
-            options=self.options.data.dict(),
-            parameters=self.parameters.dict(by_alias=True),
+            options=self.options.data.model_dump(),
+            parameters=self.parameters.model_dump(by_alias=True),
         )
         self.logger.info("%s (in progress)", command)
         getattr(cfn, command)()
@@ -300,7 +300,7 @@ class StaticSite(RunwayModule):
 
         build_staticsite_args: dict[str, Any] = {
             # ensures yaml.safe_load will work by using JSON to convert objects
-            "options": json.loads(self.options.data.json(by_alias=True))
+            "options": json.loads(self.options.data.model_dump_json(by_alias=True))
         }
         build_staticsite_args["artifact_bucket_rxref_lookup"] = (
             f"{self.sanitized_name}-dependencies::ArtifactsBucketName"
@@ -331,7 +331,7 @@ class StaticSite(RunwayModule):
                     "CFDistributionDomainName::default=undefined}",
                     "distribution_id": f"${{cfn ${{namespace}}-{self.sanitized_name}"
                     ".CFDistributionId::default=undefined}",
-                    "extra_files": [i.dict() for i in self.options.extra_files],
+                    "extra_files": [i.model_dump() for i in self.options.extra_files],
                     "website_url": f"${{cfn ${{namespace}}-{self.sanitized_name}"
                     ".BucketWebsiteURL::default=undefined}",
                 },
@@ -419,10 +419,10 @@ class StaticSite(RunwayModule):
             site_stack_variables["RoleBoundaryArn"] = self.parameters.role_boundary_arn
 
         site_stack_variables["custom_error_responses"] = [
-            i.dict(exclude_none=True) for i in self.parameters.custom_error_responses
+            i.model_dump(exclude_none=True) for i in self.parameters.custom_error_responses
         ]
         site_stack_variables["lambda_function_associations"] = [
-            i.dict() for i in self.parameters.lambda_function_associations
+            i.model_dump() for i in self.parameters.lambda_function_associations
         ]
 
         content = {
@@ -515,10 +515,10 @@ class StaticSite(RunwayModule):
             site_stack_variables["OAuthScopes"] = self.parameters.oauth_scopes
         else:
             site_stack_variables["custom_error_responses"] = [
-                i.dict(exclude_none=True) for i in self.parameters.custom_error_responses
+                i.model_dump(exclude_none=True) for i in self.parameters.custom_error_responses
             ]
             site_stack_variables["lambda_function_associations"] = [
-                i.dict() for i in self.parameters.lambda_function_associations
+                i.model_dump() for i in self.parameters.lambda_function_associations
             ]
 
         return site_stack_variables

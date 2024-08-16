@@ -520,4 +520,4 @@ class ServerlessOptions(ModuleOptions):
             obj: Object to parse.
 
         """
-        return cls(data=RunwayServerlessModuleOptionsDataModel.parse_obj(obj))
+        return cls(data=RunwayServerlessModuleOptionsDataModel.model_validate(obj))

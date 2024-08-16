@@ -80,7 +80,7 @@ class Bucket(DelCachedPropMixin):
                 self.name,
                 exc_info=True,
             )
-            return BaseResponse.parse_obj(err.response)
+            return BaseResponse.model_validate(err.response)
 
     @property
     def not_found(self) -> bool:

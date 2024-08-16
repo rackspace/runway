@@ -1,11 +1,8 @@
 """Runway AWS Cloud Development Kit Module options."""
 
-# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
-from typing import List
-
-from pydantic import Extra
+from pydantic import ConfigDict
 
 from ...base import ConfigProperty
 
@@ -13,11 +10,12 @@ from ...base import ConfigProperty
 class RunwayCdkModuleOptionsDataModel(ConfigProperty):
     """Model for Runway AWS Cloud Development Kit Module options."""
 
-    build_steps: List[str] = []
+    model_config = ConfigDict(
+        extra="ignore",
+        title="Runway AWS Cloud Development Kit Module options",
+        validate_default=True,
+        validate_assignment=True,
+    )
+
+    build_steps: list[str] = []
     skip_npm_ci: bool = False
-
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.ignore
-        title = "Runway AWS Cloud Development Kit Module options."

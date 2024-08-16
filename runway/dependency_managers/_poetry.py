@@ -6,7 +6,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Final, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional
 
 import tomli
 
@@ -17,7 +17,6 @@ from .base_classes import DependencyManager
 
 if TYPE_CHECKING:
     from _typeshed import StrPath
-    from typing_extensions import Literal
 
 LOGGER = logging.getLogger(__name__)
 
@@ -54,13 +53,13 @@ class PoetryNotFoundError(RunwayError):
 class Poetry(DependencyManager):
     """Poetry dependency manager."""
 
-    CONFIG_FILES: Final[tuple[Literal["poetry.lock"], Literal["pyproject.toml"]]] = (
+    CONFIG_FILES: ClassVar[tuple[str, ...]] = (
         "poetry.lock",
         "pyproject.toml",
     )
     """Configuration files used by poetry."""
 
-    EXECUTABLE: Final[Literal["poetry"]] = "poetry"
+    EXECUTABLE: ClassVar[str] = "poetry"
     """CLI executable."""
 
     @cached_property

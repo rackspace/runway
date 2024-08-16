@@ -80,7 +80,9 @@ class S3SyncHandler:
     def transfer_config(self) -> TransferConfigDict:
         """Get runtime transfer config."""
         return RuntimeConfig.build_config(
-            **self._botocore_session.get_scoped_config().get("s3", {})
+            **self._botocore_session.get_scoped_config().get(  # pyright: ignore[reportUnknownArgumentType]
+                "s3", {}
+            )
         )
 
     def run(self) -> None:

@@ -1,9 +1,7 @@
 """Split lookup."""
 
 # pyright: reportIncompatibleMethodOverride=none
-from typing import Any, Final
-
-from typing_extensions import Literal
+from typing import Any, ClassVar
 
 from ....lookups.handlers.base import LookupHandler
 
@@ -11,7 +9,7 @@ from ....lookups.handlers.base import LookupHandler
 class SplitLookup(LookupHandler):
     """Split lookup."""
 
-    TYPE_NAME: Final[Literal["split"]] = "split"
+    TYPE_NAME: ClassVar[str] = "split"
     """Name that the Lookup is registered as."""
 
     @classmethod

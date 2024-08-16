@@ -1,6 +1,5 @@
 """Test runway.module.k8s."""
 
-# pyright: basic
 from __future__ import annotations
 
 import logging

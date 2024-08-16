@@ -625,4 +625,4 @@ class TestCloudDevelopmentKitOptions:
         assert isinstance(obj.data, RunwayCdkModuleOptionsDataModel)
         assert obj.data.build_steps == config["build_steps"]
         assert obj.data.skip_npm_ci == config["skip_npm_ci"]
-        assert "key" not in obj.data.dict()
+        assert "key" not in obj.data.model_dump()

@@ -240,9 +240,7 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         self.run("destroy")
 
     def gen_command(
-        self,
-        command: list[str] | str | tuple[str, ...],
-        args_list: list[str] | None = None,
+        self, command: list[str] | str | tuple[str, ...], args_list: list[str] | None = None
     ) -> list[str]:
         """Generate Terraform command."""
         cmd = (
@@ -609,7 +607,7 @@ class TerraformOptions(ModuleOptions):
 
         """
         return cls(
-            data=RunwayTerraformModuleOptionsDataModel.parse_obj(obj),
+            data=RunwayTerraformModuleOptionsDataModel.model_validate(obj),
             deploy_environment=deploy_environment,
             path=path or Path.cwd(),
         )
@@ -650,7 +648,7 @@ class TerraformBackendConfig(ModuleOptions):
     def init_args(self) -> list[str]:
         """Return command line arguments for init."""
         result: list[str] = []
-        for k, v in self.data.dict(exclude_none=True).items():
+        for k, v in self.data.model_dump(exclude_none=True).items():
             result.extend(["-backend-config", f"{k}={v}"])
         if not result:
             if self.config_file:
@@ -668,9 +666,9 @@ class TerraformBackendConfig(ModuleOptions):
     def get_full_configuration(self) -> dict[str, str]:
         """Get full backend configuration."""
         if not self.config_file:
-            return self.data.dict(exclude_none=True)
+            return self.data.model_dump(exclude_none=True)
         result = cast(dict[str, str], hcl.loads(self.config_file.read_text()))
-        result.update(self.data.dict(exclude_none=True))
+        result.update(self.data.model_dump(exclude_none=True))
         return result
 
     @classmethod
@@ -729,7 +727,7 @@ class TerraformBackendConfig(ModuleOptions):
 
         """
         return cls(
-            data=RunwayTerraformBackendConfigDataModel.parse_obj(obj),
+            data=RunwayTerraformBackendConfigDataModel.model_validate(obj),
             deploy_environment=deploy_environment,
             path=path or Path.cwd(),
         )

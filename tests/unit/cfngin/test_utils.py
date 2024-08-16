@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.utils."""
 
-# pyright: basic
 from __future__ import annotations
 
 import logging

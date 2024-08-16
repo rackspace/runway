@@ -363,8 +363,7 @@ class AuthAtEdge(StaticSite):
             )
         ]
 
-    # pyright: reportIncompatibleMethodOverride=none
-    def _get_cloudfront_bucket_policy_statements(
+    def _get_cloudfront_bucket_policy_statements(  # pyright: ignore [reportIncompatibleMethodOverride]
         self, bucket: s3.Bucket, oai: cloudfront.CloudFrontOriginAccessIdentity
     ) -> list[Statement]:
         return [

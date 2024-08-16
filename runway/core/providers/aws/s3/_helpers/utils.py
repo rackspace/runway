@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from queue import Queue
 
     from mypy_boto3_s3.client import S3Client
-    from mypy_boto3_s3.type_defs import ObjectTypeDef
+    from mypy_boto3_s3.type_defs import DeleteObjectRequestRequestTypeDef, ObjectTypeDef
     from s3transfer.futures import TransferFuture
     from s3transfer.utils import CallArgs
 
@@ -210,7 +210,7 @@ class DeleteSourceObjectSubscriber(DeleteSourceSubscriber):
     def _delete_source(self, future: TransferFuture) -> None:
         """Delete source."""
         call_args = future.meta.call_args
-        delete_object_kwargs = {
+        delete_object_kwargs: DeleteObjectRequestRequestTypeDef = {
             "Bucket": self._get_bucket(call_args),
             "Key": self._get_key(call_args),
         }

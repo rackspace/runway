@@ -320,7 +320,7 @@ class K8sOptions(ModuleOptions):
 
         """
         return cls(
-            data=RunwayK8sModuleOptionsDataModel.parse_obj(obj),
+            data=RunwayK8sModuleOptionsDataModel.model_validate(obj),
             deploy_environment=deploy_environment,
             path=path or Path.cwd(),
         )

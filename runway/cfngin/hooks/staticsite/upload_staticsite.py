@@ -8,12 +8,12 @@ import logging
 import os
 import time
 from operator import itemgetter
-from typing import TYPE_CHECKING, Any, List, Optional, cast  # noqa: UP035
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 import yaml
 
 from ....core.providers.aws.s3 import Bucket
-from ....module.staticsite.options.models import RunwayStaticSiteExtraFileDataModel
+from ....module.staticsite.options import RunwayStaticSiteExtraFileDataModel
 from ....utils import JsonEncoder
 from ..base import HookArgsBaseModel
 
@@ -43,10 +43,10 @@ class HookArgs(HookArgsBaseModel):
     distribution_path: str = "/*"
     """Path in the CloudFront distribution to invalidate."""
 
-    extra_files: List[RunwayStaticSiteExtraFileDataModel] = []  # noqa: UP006
+    extra_files: list[RunwayStaticSiteExtraFileDataModel] = []
     """Extra files to sync to the S3 bucket."""
 
-    website_url: Optional[str] = None
+    website_url: str | None = None
     """S3 bucket website URL."""
 
 
@@ -80,7 +80,7 @@ def sync(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
         **kwargs: Arbitrary keyword arguments.
 
     """
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     session = context.get_session()
     build_context = context.hook_data["staticsite"]
     invalidate_cache = False
@@ -215,7 +215,7 @@ def prune_archives(context: CfnginContext, session: Session) -> bool:
     return True
 
 
-def auto_detect_content_type(filename: Optional[str]) -> Optional[str]:
+def auto_detect_content_type(filename: str | None) -> str | None:
     """Auto detects the content type based on the filename.
 
     Args:
@@ -318,7 +318,7 @@ def calculate_hash_of_extra_files(
     return file_hash.hexdigest()
 
 
-def get_ssm_value(session: Session, name: str) -> Optional[str]:
+def get_ssm_value(session: Session, name: str) -> str | None:
     """Get the ssm parameter value.
 
     Args:
@@ -332,7 +332,7 @@ def get_ssm_value(session: Session, name: str) -> Optional[str]:
     ssm_client = session.client("ssm")
 
     try:
-        return ssm_client.get_parameter(Name=name)["Parameter"]["Value"]
+        return ssm_client.get_parameter(Name=name)["Parameter"].get("Value")
     except ssm_client.exceptions.ParameterNotFound:
         return None
 

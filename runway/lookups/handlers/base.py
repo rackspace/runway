@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, TypedDict, cast
 
 import yaml
 from troposphere import BaseAWSObject
@@ -27,6 +27,21 @@ TransformToTypeLiteral = Literal["bool", "str"]
 def str2bool(v: str) -> bool:
     """Return boolean value of string."""
     return v.lower() in ("yes", "true", "t", "1", "on", "y")
+
+
+class ParsedArgsTypeDef(TypedDict, total=False):
+    """Partial type definition for the args returned by :meth:`LookupHandler.parse`.
+
+    This class can be subclassed to model all expected arguments if needed.
+
+    """
+
+    default: str
+    get: str
+    indent: str
+    load: Literal["json", "troposphere", "yaml"]
+    region: str
+    transform: TransformToTypeLiteral
 
 
 class LookupHandler:
@@ -120,7 +135,7 @@ class LookupHandler:
         raise NotImplementedError
 
     @classmethod
-    def parse(cls, value: str) -> tuple[str, dict[str, str]]:
+    def parse(cls, value: str) -> tuple[str, ParsedArgsTypeDef]:
         """Parse the value passed to a lookup in a standardized way.
 
         Args:
@@ -135,9 +150,9 @@ class LookupHandler:
         colon_split = raw_value.split("::", 1)
 
         query = colon_split.pop(0)
-        args: dict[str, str] = cls._parse_args(colon_split[0]) if colon_split else {}
+        args = cls._parse_args(colon_split[0]) if colon_split else {}
 
-        return query, args
+        return query, cast(ParsedArgsTypeDef, args)
 
     @classmethod
     def _parse_args(cls, args: str) -> dict[str, str]:

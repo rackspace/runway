@@ -5,16 +5,15 @@ from __future__ import annotations
 
 import operator
 import re
-from typing import TYPE_CHECKING, Any, Final, List, Optional, Union  # noqa: UP035
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from pydantic import validator
+from pydantic import field_validator
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ....context import CfnginContext
 
@@ -27,21 +26,22 @@ class ArgsDataModel(BaseModel):
 
     """
 
-    executable_users: Optional[List[str]] = None  # noqa: UP006
+    executable_users: list[str] | None = None
     """List of executable users."""
 
-    owners: List[str]  # noqa: UP006
+    owners: list[str]
     """At least one owner is required.
 
     Should be ``amazon``, ``self``, or an AWS account ID.
 
     """
 
-    region: Optional[str] = None
+    region: str | None = None
     """AWS region."""
 
-    @validator("executable_users", "owners", allow_reuse=True, pre=True)  # type: ignore
-    def _convert_str_to_list(cls, v: Union[list[str], str]) -> list[str]:  # noqa: N805
+    @field_validator("executable_users", "owners", mode="before")
+    @classmethod
+    def _convert_str_to_list(cls, v: list[str] | str) -> list[str]:
         """Convert str to list."""
         if isinstance(v, str):
             return v.split(",")
@@ -62,7 +62,7 @@ class ImageNotFound(Exception):
 class AmiLookup(LookupHandler):
     """AMI lookup."""
 
-    TYPE_NAME: Final[Literal["ami"]] = "ami"
+    TYPE_NAME: ClassVar[str] = "ami"
     """Name that the Lookup is registered as."""
 
     @classmethod
@@ -114,14 +114,14 @@ class AmiLookup(LookupHandler):
 
         """
         query, raw_args = cls.parse(value)
-        args = ArgsDataModel.parse_obj(raw_args)
+        args = ArgsDataModel.model_validate(raw_args)
         ec2 = context.get_session(region=args.region).client("ec2")
 
         describe_args: dict[str, Any] = {
             "Filters": [
                 {"Name": key, "Values": val.split(",") if val else val}
                 for key, val in {
-                    k: v for k, v in raw_args.items() if k not in ArgsDataModel.__fields__
+                    k: v for k, v in raw_args.items() if k not in ArgsDataModel.model_fields
                 }.items()
             ],
             "Owners": args.owners,

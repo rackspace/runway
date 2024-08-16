@@ -200,7 +200,7 @@ class TFEnvManager(EnvManager):
             """
             if not isinstance(data, dict):
                 return data
-            copy_data = cast("dict[str, Any]", data.copy())
+            copy_data = data.copy()
             for attr, val in copy_data.items():
                 if isinstance(val, list):
                     if len(cast("list[Any]", val)) == 1:

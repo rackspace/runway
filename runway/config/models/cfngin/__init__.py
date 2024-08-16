@@ -1,24 +1,14 @@
 """CFNgin config models."""
 
-# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 import copy
 import locale
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Annotated, Any, cast
 
 import yaml
-from pydantic import Extra, Field, Protocol, root_validator, validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 from typing_extensions import Literal
 
 from .. import utils
@@ -31,9 +21,8 @@ from ._package_sources import (
 )
 
 if TYPE_CHECKING:
-    from pydantic import BaseModel
-
-    Model = TypeVar("Model", bound=BaseModel)
+    from pydantic.config import JsonDict
+    from typing_extensions import Self
 
 __all__ = [
     "CfnginConfigDefinitionModel",
@@ -49,139 +38,195 @@ __all__ = [
 class CfnginHookDefinitionModel(ConfigProperty):
     """Model for a CFNgin hook definition."""
 
-    args: Dict[str, Any] = Field(
-        default={},
-        title="Arguments",
-        description="Arguments that will be passed to the hook. (supports lookups)",
-    )
-    data_key: Optional[str] = Field(
-        default=None,
-        description="Key to use when storing the returned result of the hook.",
-    )
-    enabled: bool = Field(default=True, description="Whether the hook will be run.")
-    path: str = Field(..., description="Python importable path to the hook.")
-    required: bool = Field(
-        default=True,
-        description="Whether to continue execution if the hook results in an error.",
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={
+            "description": "Python classes or functions run before or after deploy/destroy actions."
+        },
+        title="CFNgin Hook Definition",
+        validate_default=True,
+        validate_assignment=True,
     )
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
+    args: Annotated[
+        dict[str, Any],
+        Field(
+            title="Arguments",
+            description="Arguments that will be passed to the hook. (supports lookups)",
+        ),
+    ] = {}
+    data_key: Annotated[
+        str | None, Field(description="Key to use when storing the returned result of the hook.")
+    ] = None
+    enabled: Annotated[bool, Field(description="Whether the hook will be run.")] = True
+    path: Annotated[str, Field(description="Python importable path to the hook.")]
+    required: Annotated[
+        bool, Field(description="Whether to continue execution if the hook results in an error.")
+    ] = True
 
-        extra = Extra.forbid
-        schema_extra = {
-            "description": "Python classes or functions run before or after "
-            "deploy/destroy actions."
-        }
-        title = "CFNgin Hook Definition"
+
+@staticmethod
+def _stack_json_schema_extra(schema: JsonDict) -> None:
+    """Process the schema after it has been generated.
+
+    Schema is modified in place. Return value is ignored.
+
+    https://pydantic-docs.helpmanual.io/usage/schema/#schema-customization
+
+    """
+    schema["description"] = "Define CloudFormation stacks using a Blueprint or Template."
+
+    # prevents a false error when defining stacks as a dict
+    if "required" in schema and isinstance(schema["required"], list):
+        schema["required"].remove("name")
+
+    # fields that can be bool or lookup
+    if "properties" in schema and isinstance(schema["properties"], dict):
+        properties = schema["properties"]
+        for field_name in ["enabled", "locked", "protected", "termination_protection"]:
+            if field_name in properties and isinstance(properties[field_name], dict):
+                field_schema = cast("JsonDict", properties[field_name])
+                field_schema.pop("type")
+                field_schema["anyOf"] = [
+                    {"type": "boolean"},
+                    {"type": "string", "pattern": utils.CFNGIN_LOOKUP_STRING_REGEX},
+                ]
 
 
 class CfnginStackDefinitionModel(ConfigProperty):
     """Model for a CFNgin stack definition."""
 
-    class_path: Optional[str] = Field(
-        default=None,
-        title="Blueprint Class Path",
-        description="Python importable path to a blueprint class.",
-    )
-    description: Optional[str] = Field(
-        default=None,
-        title="Stack Description",
-        description="A description that will be applied to the stack in CloudFormation.",
-    )
-    enabled: bool = Field(default=True, description="Whether the stack will be deployed.")
-    in_progress_behavior: Optional[Literal["wait"]] = Field(
-        default=None,
-        title="Stack In Progress Behavior",
-        description="The action to take when a stack's status is "
-        "CREATE_IN_PROGRESS or UPDATE_IN_PROGRESS when trying to update it.",
-    )
-    locked: bool = Field(default=False, description="Whether to limit updating of the stack.")
-    name: str = Field(..., title="Stack Name", description="Name of the stack.")
-    protected: bool = Field(
-        default=False,
-        description="Whether to force all updates to the stack to be performed interactively.",
-    )
-    required_by: List[str] = Field(
-        default=[], description="Array of stacks (by name) that require this stack."
-    )
-    requires: List[str] = Field(
-        default=[], description="Array of stacks (by name) that this stack requires."
-    )
-    stack_name: Optional[str] = Field(
-        default=None,
-        title="Explicit Stack Name",
-        description="Explicit name of the stack (namespace will still be prepended).",
-    )
-    stack_policy_path: Optional[Path] = Field(
-        default=None,
-        description="Path to a stack policy document that will be applied to the "
-        "CloudFormation stack.",
-    )
-    tags: Dict[str, Any] = Field(
-        default={}, description="Tags that will be applied to the CloudFormation stack."
-    )
-    template_path: Optional[Path] = Field(
-        default=None,
-        description="Path to a JSON or YAML formatted CloudFormation Template.",
-    )
-    termination_protection: bool = Field(
-        default=False,
-        description="Set the value of termination protection on the CloudFormation stack.",
-    )
-    timeout: Optional[int] = Field(
-        default=None,
-        description="The amount of time (in minutes) that can pass before the "
-        "Stack status becomes CREATE_FAILED.",
-    )
-    variables: Dict[str, Any] = Field(
-        default={},
-        description="Parameter values that will be passed to the "
-        "Blueprint/CloudFormation stack. (supports lookups)",
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra=_stack_json_schema_extra,
+        title="CFNgin Stack Definition",
+        validate_default=True,
+        validate_assignment=True,
     )
 
-    class Config(ConfigProperty.Config):
-        """Model configuration options."""
+    class_path: Annotated[
+        str | None,
+        Field(
+            title="Blueprint Class Path", description="Python importable path to a blueprint class."
+        ),
+    ] = None
+    """Python importable path to a blueprint class."""
 
-        extra = Extra.forbid
-        title = "CFNgin Stack Definition"
+    description: Annotated[
+        str | None,
+        Field(
+            title="Stack Description",
+            description="A description that will be applied to the stack in CloudFormation.",
+        ),
+    ] = None
+    """A description that will be applied to the stack in CloudFormation."""
 
-        @staticmethod
-        def schema_extra(schema: dict[str, Any]) -> None:  # type: ignore
-            """Process the schema after it has been generated.
+    enabled: Annotated[bool, Field(description="Whether the stack will be deployed.")] = True
+    """Whether the stack will be deployed."""
 
-            Schema is modified in place. Return value is ignored.
+    in_progress_behavior: Annotated[
+        Literal["wait"] | None,
+        Field(
+            title="Stack In Progress Behavior",
+            description="The action to take when a stack's status is "
+            "CREATE_IN_PROGRESS or UPDATE_IN_PROGRESS when trying to update it.",
+        ),
+    ] = None
+    """The action to take when a Stack's status is ``CREATE_IN_PROGRESS`` or
+    ``UPDATE_IN_PROGRESS`` when trying to update it.
 
-            https://pydantic-docs.helpmanual.io/usage/schema/#schema-customization
+    """
 
-            """
-            schema["description"] = "Define CloudFormation stacks using a Blueprint or Template."
-            # prevents a false error when defining stacks as a dict
-            schema.get("required", ["name"]).remove("name")
+    locked: Annotated[bool, Field(description="Whether to limit updating of the stack.")] = False
+    """Whether to limit updating of the stack."""
 
-            # fields that can be bool or lookup
-            for prop in ["enabled", "locked", "protected", "termination_protection"]:
-                schema["properties"][prop].pop("type")
-                schema["properties"][prop]["anyOf"] = [
-                    {"type": "boolean"},
-                    {"type": "string", "pattern": utils.CFNGIN_LOOKUP_STRING_REGEX},
-                ]
+    name: Annotated[str, Field(title="Stack Name", description="Name of the stack.")]
+    """Name of the stack."""
 
-    _resolve_path_fields = validator(  # type: ignore
-        "stack_policy_path", "template_path", allow_reuse=True
-    )(utils.resolve_path_field)
+    protected: Annotated[
+        bool,
+        Field(
+            description="Whether to force all updates to the stack to be performed interactively."
+        ),
+    ] = False
+    """Whether to force all updates to the stack to be performed interactively."""
 
-    @root_validator(pre=True)  # type: ignore
-    def _validate_class_and_template(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
+    required_by: Annotated[
+        list[str], Field(description="Array of stacks (by name) that require this stack.")
+    ] = []
+    """Array of stacks (by name) that require this stack."""
+
+    requires: Annotated[
+        list[str], Field(description="Array of stacks (by name) that this stack requires.")
+    ] = []
+    """Array of stacks (by name) that this stack requires."""
+
+    stack_name: Annotated[
+        str | None,
+        Field(
+            title="Explicit Stack Name",
+            description="Explicit name of the stack (namespace will still be prepended).",
+        ),
+    ] = None
+    """Explicit name of the stack (namespace will still be prepended)."""
+
+    stack_policy_path: Annotated[
+        Path | None,
+        Field(
+            description="Path to a stack policy document that will be applied to the CloudFormation stack."
+        ),
+    ] = None
+    """Path to a stack policy document that will be applied to the CloudFormation stack."""
+
+    tags: Annotated[
+        dict[str, Any], Field(description="Tags that will be applied to the CloudFormation stack.")
+    ] = {}
+    """Tags that will be applied to the CloudFormation stack."""
+
+    template_path: Annotated[
+        Path | None, Field(description="Path to a JSON or YAML formatted CloudFormation Template.")
+    ] = None
+    """Path to a JSON or YAML formatted CloudFormation Template."""
+
+    termination_protection: Annotated[
+        bool,
+        Field(description="Set the value of termination protection on the CloudFormation stack."),
+    ] = False
+    """Set the value of termination protection on the CloudFormation stack."""
+
+    timeout: Annotated[
+        int | None,
+        Field(
+            description="The amount of time (in minutes) that can pass before the Stack status becomes CREATE_FAILED."
+        ),
+    ] = None
+    """The amount of time (in minutes) that can pass before the Stack status becomes CREATE_FAILED."""
+
+    variables: Annotated[
+        dict[str, Any],
+        Field(
+            description="Parameter values that will be passed to the Blueprint/CloudFormation stack. (supports lookups)"
+        ),
+    ] = {}
+    """Parameter values that will be passed to the Blueprint/CloudFormation stack. (supports lookups)"""
+
+    _resolve_path_fields = field_validator("stack_policy_path", "template_path")(
+        utils.resolve_path_field
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_class_and_template(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Validate class_path and template_path are not both provided."""
         if values.get("class_path") and values.get("template_path"):
             raise ValueError("only one of class_path or template_path can be defined")
         return values
 
-    @root_validator(pre=True)  # type: ignore
-    def _validate_class_or_template(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_class_or_template(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Ensure that either class_path or template_path is defined."""
-        # if the stack is disabled or locked, it is ok that these are missing
+        # if the Stack is disabled or locked, it is ok that these are missing
         required = values.get("enabled", True) and not values.get("locked", False)
         if not values.get("class_path") and not values.get("template_path") and required:
             raise ValueError("either class_path or template_path must be defined")
@@ -191,120 +236,147 @@ class CfnginStackDefinitionModel(ConfigProperty):
 class CfnginConfigDefinitionModel(ConfigProperty):
     """Model for a CFNgin config definition."""
 
-    cfngin_bucket: Optional[str] = Field(
-        default=None,
-        title="CFNgin Bucket",
-        description="Name of an AWS S3 bucket to use for caching CloudFormation templates. "
-        "Set as an empty string to disable caching.",
-    )
-    cfngin_bucket_region: Optional[str] = Field(
-        default=None,
-        title="CFNgin Bucket Region",
-        description="AWS Region where the CFNgin Bucket is located. "
-        "If not provided, the current region is used.",
-    )
-    cfngin_cache_dir: Optional[Path] = Field(
-        default=None,
-        title="CFNgin Cache Directory",
-        description="Path to a local directory that CFNgin will use for local caching.",
-    )
-    log_formats: Dict[str, str] = Field(  # TODO (kyle): create model
-        default={}, description="Customize log message formatting by log level."
-    )
-    lookups: Dict[str, str] = Field(
-        default={},
-        description="Mapping of custom lookup names to a python importable path "
-        "for the class that will be used to resolve the lookups.",
-    )
-    mappings: Dict[str, Dict[str, Dict[str, Any]]] = Field(
-        default={}, description="Mappings that will be appended to all stack templates."
-    )
-    namespace: str = Field(
-        ...,
-        description="The namespace used to prefix stack names to create separation "
-        "within an AWS account.",
-    )
-    namespace_delimiter: str = Field(
-        default="-",
-        description="Character used to separate the namespace and stack name "
-        "when the namespace is prepended.",
-    )
-    package_sources: CfnginPackageSourcesDefinitionModel = Field(
-        default=CfnginPackageSourcesDefinitionModel(),
-        description=CfnginPackageSourcesDefinitionModel.Config.schema_extra["description"],
-    )
-    persistent_graph_key: Optional[str] = Field(
-        default=None,
-        description="Key for an AWS S3 object used to track a graph of stacks "
-        "between executions.",
-    )
-    post_deploy: Union[
-        List[CfnginHookDefinitionModel],  # final type after parsing
-        Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
-    ] = Field(default=[], title="Post Deploy Hooks")
-    post_destroy: Union[
-        List[CfnginHookDefinitionModel],  # final type after parsing
-        Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
-    ] = Field(default=[], title="Pre Destroy Hooks")
-    pre_deploy: Union[
-        List[CfnginHookDefinitionModel],  # final type after parsing
-        Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
-    ] = Field(default=[], title="Pre Deploy Hooks")
-    pre_destroy: Union[
-        List[CfnginHookDefinitionModel],  # final type after parsing
-        Dict[str, CfnginHookDefinitionModel],  # recommended when writing config
-    ] = Field(default=[], title="Pre Destroy Hooks")
-    service_role: Optional[str] = Field(
-        default=None,
-        title="Service Role ARN",
-        description="Specify an IAM Role for CloudFormation to use.",
-    )
-    stacks: Union[
-        List[CfnginStackDefinitionModel],  # final type after parsing
-        Dict[str, CfnginStackDefinitionModel],  # recommended when writing config
-    ] = Field(
-        default=[],
-        description="Define CloudFormation stacks using a Blueprint or Template.",
-    )
-    sys_path: Optional[Path] = Field(
-        default=None,
-        title="sys.path",
-        description="Path to append to $PATH. This is also the root of relative paths.",
-    )
-    tags: Optional[Dict[str, str]] = Field(
-        default=None,  # None is significant here
-        description="Tags to try to apply to all resources created from this configuration file.",
-    )
-    template_indent: int = Field(
-        default=4,
-        description="Number of spaces per indentation level to use when "
-        "rendering/outputting CloudFormation templates.",
+    model_config = ConfigDict(
+        extra="ignore",
+        json_schema_extra={"description": "Configuration file for Runway's CFNgin."},
+        title="CFNgin Config File",
+        validate_default=True,
+        validate_assignment=True,
     )
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
+    cfngin_bucket: Annotated[
+        str | None,
+        Field(
+            title="CFNgin Bucket",
+            description="Name of an AWS S3 bucket to use for caching CloudFormation templates. "
+            "Set as an empty string to disable caching.",
+        ),
+    ] = None
+    cfngin_bucket_region: Annotated[
+        str | None,
+        Field(
+            title="CFNgin Bucket Region",
+            description="AWS Region where the CFNgin Bucket is located. "
+            "If not provided, the current region is used.",
+        ),
+    ] = None
+    cfngin_cache_dir: Annotated[
+        Path | None,
+        Field(
+            title="CFNgin Cache Directory",
+            description="Path to a local directory that CFNgin will use for local caching.",
+        ),
+    ] = None
+    log_formats: Annotated[  # TODO (kyle): create model
+        dict[str, str], Field(description="Customize log message formatting by log level.")
+    ] = {}
+    lookups: Annotated[
+        dict[str, str],
+        Field(
+            description="Mapping of custom lookup names to a python importable path "
+            "for the class that will be used to resolve the lookups.",
+        ),
+    ] = {}
+    mappings: Annotated[
+        dict[str, dict[str, dict[str, Any]]],
+        Field(description="Mappings that will be appended to all stack templates."),
+    ] = {}
+    namespace: Annotated[
+        str,
+        Field(
+            description="The namespace used to prefix stack names to create separation "
+            "within an AWS account.",
+        ),
+    ]
+    namespace_delimiter: Annotated[
+        str,
+        Field(
+            description="Character used to separate the namespace and stack name "
+            "when the namespace is prepended.",
+        ),
+    ] = "-"
+    package_sources: Annotated[
+        CfnginPackageSourcesDefinitionModel,
+        Field(
+            description="Map of additional package sources to include when "
+            "processing this configuration file.",
+        ),
+    ] = CfnginPackageSourcesDefinitionModel()
+    persistent_graph_key: Annotated[
+        str | None,
+        Field(
+            description="Key for an AWS S3 object used to track a graph of stacks "
+            "between executions.",
+        ),
+    ] = None
+    post_deploy: Annotated[
+        list[CfnginHookDefinitionModel] | dict[str, CfnginHookDefinitionModel],
+        Field(title="Post Deploy Hooks"),
+    ] = []
+    post_destroy: Annotated[
+        list[CfnginHookDefinitionModel] | dict[str, CfnginHookDefinitionModel],
+        Field(title="Pre Destroy Hooks"),
+    ] = []
+    pre_deploy: Annotated[
+        list[CfnginHookDefinitionModel] | dict[str, CfnginHookDefinitionModel],
+        Field(title="Pre Deploy Hooks"),
+    ] = []
+    pre_destroy: Annotated[
+        list[CfnginHookDefinitionModel] | dict[str, CfnginHookDefinitionModel],
+        Field(title="Pre Destroy Hooks"),
+    ] = []
+    service_role: Annotated[
+        str | None,
+        Field(
+            title="Service Role ARN",
+            description="Specify an IAM Role for CloudFormation to use.",
+        ),
+    ] = None
+    stacks: Annotated[
+        list[CfnginStackDefinitionModel] | dict[str, CfnginStackDefinitionModel],
+        Field(
+            description="Define CloudFormation stacks using a Blueprint or Template.",
+        ),
+    ] = []
+    sys_path: Annotated[
+        Path | None,
+        Field(
+            title="sys.path",
+            description="Path to append to $PATH. This is also the root of relative paths.",
+        ),
+    ] = None
+    tags: Annotated[
+        dict[str, str] | None,
+        Field(
+            description="Tags to try to apply to all resources created from this configuration file.",
+        ),
+    ] = None  # NOTE (kyle): `None` is significant here
+    template_indent: Annotated[
+        int,
+        Field(
+            description="Number of spaces per indentation level to use when "
+            "rendering/outputting CloudFormation templates.",
+        ),
+    ] = 4
 
-        schema_extra = {"description": "Configuration file for Runway's CFNgin."}
-        title = "CFNgin Config File"
+    _resolve_path_fields = field_validator("cfngin_cache_dir", "sys_path")(utils.resolve_path_field)
 
-    _resolve_path_fields = validator(  # type: ignore
-        "cfngin_cache_dir", "sys_path", allow_reuse=True
-    )(utils.resolve_path_field)
-
-    @validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", pre=True)  # type: ignore
+    @field_validator("post_deploy", "post_destroy", "pre_deploy", "pre_destroy", mode="before")
+    @classmethod
     def _convert_hook_definitions(
-        cls, v: Union[dict[str, Any], list[dict[str, Any]]]  # noqa: N805
+        cls, v: dict[str, Any] | list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
         """Convert hooks defined as a dict to a list."""
         if isinstance(v, list):
             return v
         return list(v.values())
 
-    @validator("stacks", pre=True)  # type: ignore
+    @field_validator("stacks", mode="before")
+    @classmethod
     def _convert_stack_definitions(
-        cls, v: Union[dict[str, Any], list[dict[str, Any]]]  # noqa: N805
+        cls, v: dict[str, Any] | list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        """Convert stacks defined as a dict to a list."""
+        """Convert ``stacks`` defined as a dict to a list."""
         if isinstance(v, list):
             return v
         result: list[dict[str, Any]] = []
@@ -313,11 +385,12 @@ class CfnginConfigDefinitionModel(ConfigProperty):
             result.append(stack)
         return result
 
-    @validator("stacks")  # type: ignore
+    @field_validator("stacks")
+    @classmethod
     def _validate_unique_stack_names(
-        cls, stacks: list[CfnginStackDefinitionModel]  # noqa: N805
+        cls, stacks: list[CfnginStackDefinitionModel]
     ) -> list[CfnginStackDefinitionModel]:
-        """Validate that each stack has a unique name."""
+        """Validate that each Stack has a unique name."""
         stack_names = [stack.name for stack in stacks]
         if len(set(stack_names)) != len(stack_names):
             for i, name in enumerate(stack_names):
@@ -326,36 +399,12 @@ class CfnginConfigDefinitionModel(ConfigProperty):
         return stacks
 
     @classmethod
-    def parse_file(
-        cls: type[Model],
-        path: Union[str, Path],
-        *,
-        content_type: str | None = None,
-        encoding: str = "utf8",
-        proto: Protocol | None = None,
-        allow_pickle: bool = False,
-    ) -> Model:
+    def parse_file(  # pyright: ignore[reportIncompatibleMethodOverride]
+        cls: type[Self], path: str | Path
+    ) -> Self:
         """Parse a file."""
-        return cast(
-            "Model",
-            cls.parse_raw(
-                Path(path).read_text(encoding=locale.getpreferredencoding(do_setlocale=False)),
-                content_type=content_type,  # type: ignore
-                encoding=encoding,
-                proto=proto,  # type: ignore
-                allow_pickle=allow_pickle,
-            ),
+        return cls.model_validate(
+            yaml.safe_load(
+                Path(path).read_text(encoding=locale.getpreferredencoding(do_setlocale=False))
+            )
         )
-
-    @classmethod
-    def parse_raw(
-        cls: type[Model],
-        b: Union[bytes, str],
-        *,
-        content_type: str | None = None,  # noqa: ARG003
-        encoding: str = "utf8",  # noqa: ARG003
-        proto: Protocol | None = None,  # noqa: ARG003
-        allow_pickle: bool = False,  # noqa: ARG003
-    ) -> Model:
-        """Parse raw data."""
-        return cast("Model", cls.parse_obj(yaml.safe_load(b)))

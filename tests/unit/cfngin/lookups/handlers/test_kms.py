@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.kms."""
 
-# pyright: basic
 from __future__ import annotations
 
 import codecs

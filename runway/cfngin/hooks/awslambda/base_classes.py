@@ -452,7 +452,7 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
         """Run during the **plan** stage."""
         return cast(
             "AwsLambdaHookDeployResponseTypedDict",
-            self.build_response("plan").dict(by_alias=True),
+            self.build_response("plan").model_dump(by_alias=True),
         )
 
     def post_deploy(self) -> Any:

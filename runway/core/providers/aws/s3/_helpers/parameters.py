@@ -1,16 +1,18 @@
 """Parameters."""
 
-# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
-from pydantic import validator
+from pydantic import field_validator, model_validator
 from typing_extensions import Literal
 
 from ......utils import BaseModel
 from .utils import find_bucket_key
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 PathsType = Literal["local", "locallocal", "locals3", "s3", "s3local", "s3s3"]
 
@@ -50,46 +52,39 @@ class ParametersDataModel(BaseModel):
     dest: str
     src: str
     # these need to be set after dest & src so their validators can access the value if needed
-    content_type: Optional[str] = None
+    content_type: str | None = None
     delete: bool = False
     dir_op: bool = False
     dryrun: bool = False
     exact_timestamps: bool = False
-    exclude: List[str] = []
-    expected_size: Optional[int] = None
+    exclude: list[str] = []
+    expected_size: int | None = None
     follow_symlinks: bool = False
     force_glacier_transfer: bool = False
     guess_mime_type: bool = True
     ignore_glacier_warnings: bool = False
-    include: List[str] = []
+    include: list[str] = []
     is_move: bool = False
     is_stream: bool = False
     no_progress: bool = False
     only_show_errors: bool = False
-    page_size: Optional[int] = None
+    page_size: int | None = None
     paths_type: PathsType = "local"  # will be overwritten
     quiet: bool = False
     size_only: bool = False
-    sse_c: Optional[str] = None
-    sse_c_key: Optional[str] = None
-    storage_class: Optional[str] = None
+    sse_c: str | None = None
+    sse_c_key: str | None = None
+    storage_class: str | None = None
 
-    @validator("paths_type", always=True, pre=True)  # type: ignore
-    @classmethod
-    def _determine_paths_type(
-        cls,
-        v: str | None,  # noqa: ARG003
-        values: dict[str, Any],
-    ) -> PathsType:
+    @model_validator(mode="after")
+    def _determine_paths_type(self: Self) -> Self:
         """Determine paths type for the given src and dest."""
-        # these have already been validated so it's "safe" to cast them
-        dest = cast(str, values.get("dest", ""))
-        src = cast(str, values.get("src", ""))
-        src_type = "s3" if src.startswith("s3://") else "local"
-        dest_type = "s3" if dest.startswith("s3://") else "local"
-        return cast(PathsType, f"{src_type}{dest_type}")
+        src_type = "s3" if self.src.startswith("s3://") else "local"
+        dest_type = "s3" if self.dest.startswith("s3://") else "local"
+        self.paths_type = cast(PathsType, f"{src_type}{dest_type}")
+        return self
 
-    @validator("dest", "src", pre=True)  # type: ignore
+    @field_validator("dest", "src", mode="before")
     @classmethod
     def _normalize_s3_trailing_slash(cls, v: str) -> str:
         """Add a trailing "/" if the root of an S3 bucket was provided."""
@@ -112,7 +107,7 @@ class Parameters:
 
         """
         self.action = action
-        self.data = ParametersDataModel.parse_obj(parameters)
+        self.data = ParametersDataModel.model_validate(parameters)
         if self.action in ["sync", "mb", "rb"]:
             self.data.dir_op = True
         if self.action == "mv":

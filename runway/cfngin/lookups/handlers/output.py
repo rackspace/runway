@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Final, NamedTuple
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple
 
 from ....exceptions import OutputDoesNotExist
 from ....lookups.handlers.base import LookupHandler
@@ -13,9 +13,9 @@ from ....utils import DOC_SITE
 from ...exceptions import StackDoesNotExist
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ....context import CfnginContext
+    from ....lookups.handlers.base import ParsedArgsTypeDef
     from ....variables import VariableValue
 
 LOGGER = logging.getLogger(__name__)
@@ -36,11 +36,11 @@ class OutputLookup(LookupHandler):
         "to learn how to use the new lookup query syntax visit "
         f"{DOC_SITE}/page/cfngin/lookups/output.html"
     )
-    TYPE_NAME: Final[Literal["output"]] = "output"
+    TYPE_NAME: ClassVar[str] = "output"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def legacy_parse(cls, value: str) -> tuple[OutputQuery, dict[str, str]]:
+    def legacy_parse(cls, value: str) -> tuple[OutputQuery, ParsedArgsTypeDef]:
         """Retain support for legacy lookup syntax.
 
         Format of value:

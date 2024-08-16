@@ -317,4 +317,4 @@ class CloudDevelopmentKitOptions(ModuleOptions):
             obj: Object to parse.
 
         """
-        return cls(data=RunwayCdkModuleOptionsDataModel.parse_obj(obj))
+        return cls(data=RunwayCdkModuleOptionsDataModel.model_validate(obj))

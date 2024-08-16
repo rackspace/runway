@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List  # noqa: UP035
+from typing import TYPE_CHECKING, Any
 
-from pydantic import validator
+from pydantic import field_validator
 from typing_extensions import TypedDict
 
 from ...utils import BaseModel
@@ -21,11 +21,12 @@ LOGGER = logging.getLogger(__name__)
 class CreateClustersHookArgs(BaseModel):
     """Hook arguments for ``create_clusters``."""
 
-    clusters: List[str]  # noqa: UP006
+    clusters: list[str]
     """List of cluster names to create."""
 
-    @validator("clusters", allow_reuse=True, pre=True)  # type: ignore
-    def _convert_clusters(cls, v: list[str] | str) -> list[str]:  # noqa: N805
+    @field_validator("clusters", mode="before")
+    @classmethod
+    def _convert_clusters(cls, v: list[str] | str) -> list[str]:
         """Convert value of ``clusters`` from str to list."""
         if isinstance(v, str):
             return [v]
@@ -48,7 +49,7 @@ def create_clusters(
         **kwargs: Arbitrary keyword arguments.
 
     """
-    args = CreateClustersHookArgs.parse_obj(kwargs)
+    args = CreateClustersHookArgs.model_validate(kwargs)
     ecs_client = context.get_session().client("ecs")
 
     cluster_info: dict[str, Any] = {}

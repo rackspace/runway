@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.actions.destroy."""
 
-# pyright: basic
 from __future__ import annotations
 
 import unittest

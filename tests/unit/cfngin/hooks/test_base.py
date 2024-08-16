@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.base."""
 
-# pyright: basic
 from __future__ import annotations
 
 import logging

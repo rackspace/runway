@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.blueprints.raw."""
 
-# pyright: basic
 from __future__ import annotations
 
 import json

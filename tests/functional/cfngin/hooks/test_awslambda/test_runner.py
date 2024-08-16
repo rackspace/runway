@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
 import pytest
-from pydantic import root_validator
+from pydantic import model_validator
 
 from runway._cli import cli
 from runway.compat import cached_property
@@ -22,9 +22,10 @@ if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
     from mypy_boto3_cloudformation.type_defs import StackTypeDef
     from mypy_boto3_lambda.client import LambdaClient
-    from sample_app.src.type_defs import LambdaResponse
 
     from runway.context import RunwayContext
+
+    from .sample_app.src.type_defs import LambdaResponse
 
 AWS_REGION = "us-east-1"
 PYTHON_RUNTIME = "python3.10"
@@ -68,8 +69,9 @@ class AwslambdaStackOutputs(BaseModel):
     LayerVersion: Optional[str] = None
     Runtime: str
 
-    @root_validator(allow_reuse=True, pre=True)  # type: ignore
-    def _convert_null_to_none(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: N805
+    @model_validator(mode="before")
+    @classmethod
+    def _convert_null_to_none(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Convert ``null`` to ``NoneType``."""
 
         def _handle_null(v: Any) -> Any:
@@ -101,7 +103,7 @@ class AwslambdaTester:
     @cached_property
     def outputs(self) -> AwslambdaStackOutputs:
         """Stack outputs."""
-        return AwslambdaStackOutputs.parse_obj(
+        return AwslambdaStackOutputs.model_validate(
             {
                 output["OutputKey"]: output["OutputValue"]
                 for output in self.stack.get("Outputs", [])
@@ -124,7 +126,7 @@ class AwslambdaTester:
         response = self.client.invoke(
             FunctionName=self.outputs.LambdaFunction,
             InvocationType="RequestResponse",
-            **{"Payload": payload} if payload else {},
+            **{"Payload": payload} if payload else {},  # pyright: ignore[reportArgumentType]
         )
         if "Payload" in response:
             return json.load(response["Payload"])

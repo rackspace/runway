@@ -917,7 +917,7 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
         into a pydantic model.
 
         """
-        return self._model_class.parse_obj(
+        return self._model_class.model_validate(
             {field: value.value for field, value in self._data.items()}
         )
 

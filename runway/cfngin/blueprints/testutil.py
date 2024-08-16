@@ -149,7 +149,7 @@ class YamlDirTestGenerator:
                 self.stack = stack
                 self.description = f"{stack.name} ({filepath})"
 
-            def __call__(self) -> None:
+            def __call__(self) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
                 """Run when the class instance is called directly."""
                 # Use the context property of the baseclass, if present.
                 # If not, default to a basic context.

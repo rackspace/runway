@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import locale
 import logging
 from pathlib import Path
@@ -45,7 +46,7 @@ def runway(indent: int, output: Optional[str], **_: Any) -> None:
     and suggestions within configuration files.
 
     """
-    content = RunwayConfigDefinitionModel.schema_json(indent=indent)
+    content = json.dumps(RunwayConfigDefinitionModel.model_json_schema(), indent=indent)
     if output:
         file_path = Path(output).absolute()
         file_path.write_text(  # append empty line to end of file

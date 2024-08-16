@@ -349,14 +349,12 @@ def validate_environment(
         else:
             logger.verbose("environment not defined; module will determine deployment")
             env_def = None
-        return cast(Optional[bool], env_def)
+        return env_def
     if isinstance(env_def, dict):
         if context.env.name not in env_def:
             logger.info("skipped; environment not in definition")
             return False
-        return validate_environment(
-            context, cast(Any, env_def.get(context.env.name, False)), logger=logger
-        )
+        return validate_environment(context, env_def.get(context.env.name, False), logger=logger)
 
     account = aws.AccountDetails(context)
     accepted_values = [

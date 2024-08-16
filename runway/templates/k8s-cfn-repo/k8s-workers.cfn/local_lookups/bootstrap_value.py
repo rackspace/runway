@@ -51,7 +51,7 @@ class BootstrapValue(LookupHandler):
     ) -> str:
         """Handle lookup."""
         query, raw_args = cls.parse(value)
-        args = HookArgs.parse_obj(raw_args)
+        args = HookArgs.model_validate(raw_args)
 
         stack = context.get_stack(query)
         if not stack:

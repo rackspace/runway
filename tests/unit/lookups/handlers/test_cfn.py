@@ -1,6 +1,6 @@
 """Test runway.lookups.handlers.cfn."""
 
-# pyright: basic, reportFunctionMemberAccess=none
+# pyright: reportFunctionMemberAccess=none
 from __future__ import annotations
 
 import json

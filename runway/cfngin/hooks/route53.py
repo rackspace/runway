@@ -32,7 +32,7 @@ def create_domain(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[st
         Dict containing ``domain`` and ``zone_id``.
 
     """
-    args = CreateDomainHookArgs.parse_obj(kwargs)
+    args = CreateDomainHookArgs.model_validate(kwargs)
     client = context.get_session().client("route53")
     zone_id = create_route53_zone(client, args.domain)
     return {"domain": args.domain, "zone_id": zone_id}

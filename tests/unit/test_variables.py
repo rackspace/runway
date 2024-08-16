@@ -1,6 +1,5 @@
 """Tests for runway.variables."""
 
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Union
@@ -37,6 +36,12 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from .factories import MockCfnginContext
+
+
+class ExampleModel(BaseModel):
+    """Example model used for testing."""
+
+    test: Any = "val"
 
 
 class MockLookupHandler(LookupHandler):
@@ -290,7 +295,7 @@ class TestVariableValue:
 
     def test_parse_obj_pydantic_model(self) -> None:
         """Test parse_obj pydantic model."""
-        assert isinstance(VariableValue.parse_obj(BaseModel()), VariableValuePydanticModel)
+        assert isinstance(VariableValue.parse_obj(ExampleModel()), VariableValuePydanticModel)
 
     def test_repr(self) -> None:
         """Test __repr__."""

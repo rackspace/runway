@@ -45,7 +45,7 @@ class TestAwsLambdaLookup:
         data_key = "test.key"
         assert (
             AwsLambdaLookup.get_deployment_package_data(
-                Mock(hook_data={data_key: hook_data.dict(by_alias=True)}),
+                Mock(hook_data={data_key: hook_data.model_dump(by_alias=True)}),
                 data_key,
             )
             == hook_data
@@ -59,7 +59,7 @@ class TestAwsLambdaLookup:
     ) -> None:
         """Test get_deployment_package_data set hook_data when it's missing."""
         data_key = "test.key"
-        hook = Mock(plan=Mock(return_value=hook_data.dict(by_alias=True)))
+        hook = Mock(plan=Mock(return_value=hook_data.model_dump(by_alias=True)))
         init_hook_class = mocker.patch.object(AwsLambdaLookup, "init_hook_class", return_value=hook)
         get_hook_definition = mocker.patch.object(
             AwsLambdaLookup, "get_required_hook_definition", return_value="hook_def"
@@ -68,7 +68,7 @@ class TestAwsLambdaLookup:
         get_hook_definition.assert_called_once_with(cfngin_context.config, data_key)
         init_hook_class.assert_called_once_with(cfngin_context, get_hook_definition.return_value)
         hook.plan.assert_called_once_with()
-        assert cfngin_context.hook_data[data_key] == hook_data.dict(by_alias=True)
+        assert cfngin_context.hook_data[data_key] == hook_data.model_dump(by_alias=True)
 
     def test_get_deployment_package_data_raise_type_error(self) -> None:
         """Test get_deployment_package_data."""

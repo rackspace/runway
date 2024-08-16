@@ -1,7 +1,8 @@
 """CFNgin session caching."""
 
+from __future__ import annotations
+
 import logging
-from typing import Optional
 
 import boto3
 
@@ -15,11 +16,11 @@ DEFAULT_PROFILE = None
 
 
 def get_session(
-    region: Optional[str] = None,
-    profile: Optional[str] = None,
-    access_key: Optional[str] = None,
-    secret_key: Optional[str] = None,
-    session_token: Optional[str] = None,
+    region: str | None = None,
+    profile: str | None = None,
+    access_key: str | None = None,
+    secret_key: str | None = None,
+    session_token: str | None = None,
 ) -> boto3.Session:
     """Create a thread-safe boto3 session.
 

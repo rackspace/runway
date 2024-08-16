@@ -39,6 +39,7 @@ cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
 click = "^8.0"
 coloredlogs = "*, !=15.0.1"
 docker = ">=3.0.0"  # used in runway.cfngin.hooks
+eval-type-backport = {python = "< 3.10", version = "*"}  # TODO (kyle): remove when dropping support for python 3.9
 formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
 igittigitt = ">=2.0.5"
@@ -46,7 +47,7 @@ jinja2 = ">=2.7"  # used in runway.cfngin.blueprints.raw
 packaging = "*"  # component of setuptools needed for version compare
 pipenv = "2022.1.8"
 pyOpenSSL = "*"  # For embedded hook & associated script usage
-pydantic = "^1.4"
+pydantic = "^2.8.0"
 pyhcl = "^0.4"  # does not support HCL2, possibly move to extras_require in the future
 python-hcl2 = ">=3.0.0"
 pyyaml = ">5.4"
@@ -243,6 +244,7 @@ target-version = "py39"  # important to set before applying fixes
 
 [tool.ruff.lint]  # https://docs.astral.sh/ruff/settings/#lint
 extend-safe-fixes = [
+  "UP006",
   "UP007",
   "UP038",
   "UP040",

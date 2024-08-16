@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from ...._logging import PrefixAdaptor
 from ....exceptions import UnresolvedVariable
 from ....variables import Variable
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ...._logging import RunwayLogger
     from ....context import RunwayContext
     from ...models.base import ConfigProperty
@@ -29,7 +31,7 @@ class ConfigComponentDefinition(ABC):
 
     def __init__(self, data: ConfigProperty) -> None:
         """Instantiate class."""
-        self._data = data.copy(deep=True)
+        self._data = data.model_copy(deep=True)
 
         self._vars = {}
         for var in self._supports_vars:
@@ -39,7 +41,7 @@ class ConfigComponentDefinition(ABC):
     @property
     def data(self) -> dict[str, Any]:
         """Return the underlying data as a dict."""
-        return self._data.dict()
+        return self._data.model_dump()
 
     def get(self, name: str, default: Any = None) -> None:
         """Get a value or return default if it is not found.
@@ -56,7 +58,7 @@ class ConfigComponentDefinition(ABC):
         context: RunwayContext,
         *,
         pre_process: bool = False,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        variables: RunwayVariablesDefinition | None = None,
     ) -> None:
         """Resolve variables.
 
@@ -100,7 +102,7 @@ class ConfigComponentDefinition(ABC):
 
     @classmethod
     @abstractmethod
-    def parse_obj(cls, obj: Any) -> ConfigComponentDefinition:
+    def parse_obj(cls: type[Self], obj: object) -> Self:
         """Parse a python object into this class.
 
         Args:
@@ -131,8 +133,8 @@ class ConfigComponentDefinition(ABC):
         if name in self._vars and not self._vars[name].resolved:
             raise UnresolvedVariable(self._vars[name])
         if name in super().__getattribute__("_data"):
-            return super().__getattribute__("_data").__getattribute__(name)
-        raise AttributeError(f"{self.__class__.__name__} object has not attribute {name}")
+            return super().__getattribute__("_data").__getitem__(name)
+        raise AttributeError(f"{self.__class__.__name__} object has no attribute {name}")
 
     def __getitem__(self, name: str) -> Any:
         """Implement evaluation of self[name].
@@ -146,8 +148,8 @@ class ConfigComponentDefinition(ABC):
         """
         try:
             return self.__getattr__(name)
-        except AttributeError:
-            raise KeyError(name) from None
+        except AttributeError as exc:
+            raise KeyError(name) from exc
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Implement evaluation of self.name = value.

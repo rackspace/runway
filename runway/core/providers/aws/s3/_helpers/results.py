@@ -413,7 +413,9 @@ class ResultRecorder(BaseResultHandler):
             # If the total size is no longer None that means we just learned
             # of the size so let's update the appropriate places with this
             # knowledge
-            if result.total_transfer_size is not None:
+            if (
+                result.total_transfer_size is not None
+            ):  # pyright: ignore[reportUnnecessaryComparison]
                 self._ongoing_total_sizes[ongoing_key] = total_transfer_size
                 # Figure out how many bytes have been unaccounted for as
                 # the recorder has been keeping track of how many bytes

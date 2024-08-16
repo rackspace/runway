@@ -1,6 +1,6 @@
 """Test runway.env_mgr.tfenv."""
 
-# pyright: basic, reportFunctionMemberAccess=none
+# pyright: reportFunctionMemberAccess=none
 from __future__ import annotations
 
 import json

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, ClassVar, List, Optional  # noqa: UP035
+from typing import TYPE_CHECKING, Any, ClassVar, Optional
 
 from botocore.exceptions import ClientError
 from troposphere import Ref
@@ -36,7 +36,7 @@ LOGGER = logging.getLogger(__name__)
 class HookArgs(HookArgsBaseModel):
     """Hook arguments."""
 
-    alt_names: List[str] = []  # noqa: UP006
+    alt_names: list[str] = []
     domain: str
     hosted_zone_id: str
     stack_name: Optional[str] = None

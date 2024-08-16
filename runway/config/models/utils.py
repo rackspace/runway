@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pathlib import Path
 
-CFNGIN_LOOKUP_STRING_REGEX = r"^\${.*}$"
+CFNGIN_LOOKUP_STRING_REGEX = r"^\$\{.+\}$"
 RUNWAY_LOOKUP_STRING_ERROR = ValueError("field can only be a string if it's a lookup")
-RUNWAY_LOOKUP_STRING_REGEX = r"^\${.*}$"
+RUNWAY_LOOKUP_STRING_REGEX = r"^\$\{.+\}$"
 
 
 def convert_null_values(v: Any) -> Any:

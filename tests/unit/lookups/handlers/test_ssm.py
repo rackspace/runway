@@ -1,6 +1,5 @@
 """Test runway.lookups.handlers.ssm."""
 
-# pyright: basic
 from __future__ import annotations
 
 import json

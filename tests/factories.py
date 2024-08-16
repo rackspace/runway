@@ -1,6 +1,5 @@
 """Test classes."""
 
-# pyright: basic, reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import os  # imports os

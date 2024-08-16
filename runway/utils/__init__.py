@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime
 import hashlib
 import importlib
 import json
@@ -14,7 +13,6 @@ import stat
 import sys
 from collections.abc import Iterable, Iterator, MutableMapping
 from contextlib import AbstractContextManager, contextmanager
-from decimal import Decimal
 from functools import cached_property  # noqa: F401  # TODO (kyle): remove in next major release
 from pathlib import Path
 from subprocess import check_call
@@ -25,7 +23,9 @@ from pydantic import BaseModel as _BaseModel
 
 # make this importable without defining __all__ yet.
 # more things need to be moved of this file before starting an explicit __all__.
+from . import pydantic_validators  # noqa: F401
 from ._file_hash import FileHash  # noqa: F401
+from ._json_encoder import JsonEncoder  # noqa: F401
 from ._version import Version  # noqa: F401
 
 if TYPE_CHECKING:
@@ -63,7 +63,10 @@ class BaseModel(_BaseModel):
             name: The name to check for existence in the model.
 
         """
-        return name in self.__dict__
+        if name in self.__dict__:
+            return True
+        # extra files are no longer added to __dict__, they are placed in `model_extra`
+        return bool(self.model_extra and name in self.model_extra)
 
     def __getitem__(self, name: str) -> Any:
         """Implement evaluation of self[name].
@@ -89,39 +92,6 @@ class BaseModel(_BaseModel):
 
         """
         super().__setattr__(name, value)  # type: ignore
-
-
-class JsonEncoder(json.JSONEncoder):
-    """Encode Python objects to JSON data.
-
-    This class can be used with ``json.dumps()`` to handle most data types
-    that can occur in responses from AWS.
-
-    Usage:
-        >>> json.dumps(data, cls=JsonEncoder)
-
-    """
-
-    def default(self, o: Any) -> Any:
-        """Encode types not supported by the default JSONEncoder.
-
-        Args:
-            o: Object to encode.
-
-        Returns:
-            JSON serializable data type.
-
-        Raises:
-            TypeError: Object type could not be encoded.
-
-        """
-        if isinstance(o, Decimal):
-            return float(o)
-        if isinstance(o, (datetime.datetime, datetime.date)):
-            return o.isoformat()
-        if isinstance(o, _BaseModel):
-            return o.dict()
-        return super().default(o)
 
 
 class MutableMap(MutableMapping[str, Any]):

@@ -35,7 +35,7 @@ def update(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[str, Any]
         **kwargs: Arbitrary keyword arguments.
 
     """
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     session = context.get_session()
     cognito_client = session.client("cognito-idp")
 
@@ -79,7 +79,7 @@ def delete(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[str, Any]
         **kwargs: Arbitrary keyword arguments.
 
     """
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     session = context.get_session()
     cognito_client = session.client("cognito-idp")
 

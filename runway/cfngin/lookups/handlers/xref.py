@@ -4,13 +4,12 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ...providers.aws.default import Provider
 
@@ -23,7 +22,7 @@ class XrefLookup(LookupHandler):
     """Xref lookup."""
 
     DEPRECATION_MSG = "xref Lookup has been deprecated; use the cfn lookup instead"
-    TYPE_NAME: Final[Literal["xref"]] = "xref"
+    TYPE_NAME: ClassVar[str] = "xref"
     """Name that the Lookup is registered as."""
 
     @classmethod

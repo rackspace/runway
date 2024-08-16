@@ -649,7 +649,7 @@ class UploadStreamRequestSubmitter(UploadRequestSubmitter):
     @staticmethod
     def _get_filein(fileinfo: FileInfo) -> NonSeekableStream:  # type: ignore  # noqa: ARG004
         """Get file in."""
-        if sys.stdin is None:
+        if sys.stdin is None:  # pyright: ignore[reportUnnecessaryComparison]
             raise StdinMissingError
         return NonSeekableStream(sys.stdin.buffer)
 

@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Union
 
 from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ...context import CfnginContext, RunwayContext
 
@@ -18,7 +17,7 @@ LOGGER = logging.getLogger(__name__)
 class SsmLookup(LookupHandler):
     """SSM Parameter Store Lookup."""
 
-    TYPE_NAME: Final[Literal["ssm"]] = "ssm"
+    TYPE_NAME: ClassVar[str] = "ssm"
     """Name that the Lookup is registered as."""
 
     @classmethod
