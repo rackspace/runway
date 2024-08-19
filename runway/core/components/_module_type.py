@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from typing_extensions import Literal
 
@@ -98,7 +98,7 @@ class RunwayModuleType:
         self.type_str = type_str
         self.module_class = self._determine_module_class()
 
-    def _determine_module_class(self) -> type[RunwayModule]:
+    def _determine_module_class(self) -> type[RunwayModule[Any]]:
         """Determine type of module and return deployment module class.
 
         Returns:
@@ -131,7 +131,7 @@ class RunwayModuleType:
             )
             sys.exit(1)
 
-        return cast(type["RunwayModule"], load_object_from_string(self.class_path))
+        return cast(type["RunwayModule[Any]"], load_object_from_string(self.class_path))
 
     def _set_class_path_based_on_extension(self) -> None:
         """Based on the directory suffix set the class_path."""

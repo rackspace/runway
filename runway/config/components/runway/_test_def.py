@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
-class RunwayTestDefinition(ConfigComponentDefinition):
+class RunwayTestDefinition(ConfigComponentDefinition[RunwayTestDefinitionModel]):
     """Runway test definition."""
 
     args: dict[str, Any]
@@ -20,7 +20,6 @@ class RunwayTestDefinition(ConfigComponentDefinition):
     required: bool
     type: ClassVar[ValidRunwayTestTypeValues]
 
-    _data: RunwayTestDefinitionModel
     _supports_vars: tuple[str, ...] = ("args", "required")
 
     def __init__(self, data: RunwayTestDefinitionModel) -> None:
@@ -49,4 +48,4 @@ class RunwayTestDefinition(ConfigComponentDefinition):
             obj: The object to parse.
 
         """
-        return cls(RunwayTestDefinitionModel.model_validate(obj))  # type: ignore
+        return cls(RunwayTestDefinitionModel.model_validate(obj))

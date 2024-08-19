@@ -138,7 +138,7 @@ def load_terraform_module(parser: ModuleType, path: Path) -> dict[str, Any]:
     LOGGER.debug("using %s parser to load module: %s", parser.__name__.upper(), path)
     for tf_file in path.glob("*.tf"):
         try:
-            tf_config = parser.loads(tf_file.read_text())  # type: ignore
+            tf_config = parser.loads(tf_file.read_text())
             result = merge_dicts(result, cast("dict[str, Any]", tf_config))
         except Exception as exc:  # noqa: BLE001
             raise HclParserError(exc, tf_file, parser) from None

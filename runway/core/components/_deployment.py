@@ -6,7 +6,7 @@ import concurrent.futures
 import logging
 import multiprocessing
 import sys
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, TypedDict
 
 from ..._logging import PrefixAdaptor
 from ...compat import cached_property
@@ -27,6 +27,15 @@ if TYPE_CHECKING:
 
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
+
+
+class _AssumeRoleConfigTypeDef(TypedDict, total=False):
+    """Return type for :attr:`Deployment.assume_role_config`."""
+
+    duration_seconds: int
+    revert_on_exit: bool
+    role_arn: str
+    session_name: str
 
 
 class Deployment:
@@ -57,22 +66,22 @@ class Deployment:
         self.__merge_env_vars()
 
     @property
-    def assume_role_config(self) -> dict[str, Union[bool, int, str]]:
+    def assume_role_config(self) -> _AssumeRoleConfigTypeDef:
         """Parse the definition to get assume role arguments."""
         assume_role = self.definition.assume_role
         if not assume_role:
             self.logger.debug("assume_role not configured for deployment: %s", self.name)
             return {}
-        if isinstance(assume_role, str):  # type: ignore
+        if isinstance(assume_role, str):
             self.logger.debug("role found: %s", assume_role)
             assume_role = RunwayAssumeRoleDefinitionModel(arn=assume_role)
-        elif isinstance(assume_role, dict):  # type: ignore
+        elif isinstance(assume_role, dict):
             assume_role = RunwayAssumeRoleDefinitionModel.model_validate(assume_role)
         if not assume_role.arn:
             self.logger.debug("assume_role not configured for deployment: %s", self.name)
             return {}
         return {
-            "duration_seconds": assume_role.duration,
+            "duration_seconds": int(assume_role.duration),
             "revert_on_exit": assume_role.post_deploy_env_revert,
             "role_arn": assume_role.arn,
             "session_name": assume_role.session_name,
@@ -238,7 +247,7 @@ class Deployment:
             max_workers=self.ctx.env.max_concurrent_regions,
             mp_context=multiprocessing.get_context("fork"),
         ) as executor:
-            futures = [executor.submit(self.run, *[action, region]) for region in self.regions]
+            futures = [executor.submit(self.run, action, region) for region in self.regions]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 

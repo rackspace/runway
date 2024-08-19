@@ -87,10 +87,10 @@ class S3SyncHandler:
 
     def run(self) -> None:
         """Run sync."""
-        register_sync_strategies(self._botocore_session)  # type: ignore
+        register_sync_strategies(self._botocore_session)
         ActionArchitecture(
             session=self._session,
-            botocore_session=self._botocore_session,  # type: ignore
+            botocore_session=self._botocore_session,
             action="sync",
             parameters=self.parameters.data,
             runtime_config=self.transfer_config,

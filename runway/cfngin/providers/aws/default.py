@@ -800,9 +800,11 @@ class Provider(BaseProvider):
         if chronological:
             return cast(
                 Iterable["StackEventTypeDef"],
-                reversed(cast("list[StackEventTypeDef]", functools.reduce(operator.iadd, event_list, []))),  # type: ignore
+                reversed(
+                    cast("list[StackEventTypeDef]", functools.reduce(operator.iadd, event_list, []))
+                ),
             )
-        return cast(Iterable["StackEventTypeDef"], functools.reduce(operator.iadd, event_list, []))  # type: ignore
+        return cast(Iterable["StackEventTypeDef"], functools.reduce(operator.iadd, event_list, []))
 
     def get_rollback_status_reason(self, stack_name: str) -> str | None:
         """Process events and returns latest roll back reason.
@@ -1283,7 +1285,7 @@ class Provider(BaseProvider):
         if self.service_role:
             args["RoleARN"] = self.service_role
 
-        self.cloudformation.delete_stack(**args)
+        self.cloudformation.delete_stack(**args)  # pyright: ignore[reportArgumentType]
 
     def noninteractive_changeset_update(
         self,
@@ -1428,7 +1430,7 @@ class Provider(BaseProvider):
         parameters = self.params_as_dict(stack.get("Parameters", []))
 
         # handle yaml templates
-        if isinstance(template, str):  # type: ignore
+        if isinstance(template, str):
             template = parse_cloudformation_template(template)
 
         return json.dumps(template, cls=JsonEncoder), parameters

@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-class StaticSite(RunwayModule):
+class StaticSite(RunwayModule[StaticSiteOptions]):
     """Static website Runway Module."""
 
     DEPRECATION_MSG = (
@@ -37,7 +37,6 @@ class StaticSite(RunwayModule):
         "may be removed in the next major release."
     )
 
-    options: StaticSiteOptions
     parameters: RunwayStaticSiteModuleParametersDataModel
 
     def __init__(

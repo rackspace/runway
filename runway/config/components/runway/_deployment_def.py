@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class RunwayDeploymentDefinition(ConfigComponentDefinition):
+class RunwayDeploymentDefinition(ConfigComponentDefinition[RunwayDeploymentDefinitionModel]):
     """Runway deployment definition."""
 
     account_alias: str | None
@@ -38,7 +38,6 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
     parameters: dict[str, Any]
     regions: list[str]
 
-    _data: RunwayDeploymentDefinitionModel
     _pre_process_vars: tuple[str, ...] = (
         "account_alias",
         "account_id",
@@ -167,7 +166,9 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
     def parse_obj(cls: type[Self], obj: dict[str, Any] | ConfigProperty) -> Self: ...
 
     @classmethod
-    def parse_obj(cls: type[Self], obj: object) -> Self | list[Self]:
+    def parse_obj(  # pyright: ignore[reportIncompatibleMethodOverride]
+        cls: type[Self], obj: Any
+    ) -> Self | list[Self]:
         """Parse a python object into this class.
 
         Args:

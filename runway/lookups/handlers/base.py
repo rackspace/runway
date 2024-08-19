@@ -285,7 +285,7 @@ class LookupHandler:
         if not to_type:
             return value
 
-        return mapping[to_type](value, **kwargs)  # type: ignore
+        return mapping[to_type](value, **kwargs)
 
     @classmethod
     def _transform_to_bool(cls, value: Any, **_: Any) -> bool:

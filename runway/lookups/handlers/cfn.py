@@ -54,7 +54,7 @@ class CfnLookup(LookupHandler):
 
         """
         if provider:
-            if args.get("region") and provider.region != args["region"]:
+            if "region" in args and provider.region != args["region"]:
                 LOGGER.debug("not using provider; requested region does not match")
                 return False
             LOGGER.debug("using provider")

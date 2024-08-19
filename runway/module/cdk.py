@@ -40,15 +40,47 @@ CdkCommandTypeDef = Literal[
 ]
 
 
-class CloudDevelopmentKit(RunwayModuleNpm):
+class CloudDevelopmentKitOptions(ModuleOptions):
+    """Module options for AWS Cloud Development Kit.
+
+    Attributes:
+        build_steps: A list of commands to be executed before each action (e.g.
+            diff, deploy, destroy).
+        data: Options parsed into a data model.
+        skip_npm_ci: Skip running ``npm ci`` in the module directory prior to
+            processing the module.
+
+    """
+
+    def __init__(self, data: RunwayCdkModuleOptionsDataModel) -> None:
+        """Instantiate class.
+
+        Args:
+            data: Options parsed into a data model.
+
+        """
+        self.build_steps = data.build_steps
+        self.data = data
+        self.skip_npm_ci = data.skip_npm_ci
+
+    @classmethod
+    def parse_obj(cls, obj: object) -> CloudDevelopmentKitOptions:
+        """Parse options definition and return an options object.
+
+        Args:
+            obj: Object to parse.
+
+        """
+        return cls(data=RunwayCdkModuleOptionsDataModel.model_validate(obj))
+
+
+class CloudDevelopmentKit(RunwayModuleNpm[CloudDevelopmentKitOptions]):
     """CDK Runway Module."""
 
     DEPRECATION_MSG = (
         "CDK Runway module support has been deprecated and "
         "may be removed in the next major release."
     )
-
-    options: CloudDevelopmentKitOptions
 
     def __init__(
         self,
@@ -284,37 +316,3 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                 )
                 raise
         self.logger.info("build steps (complete)")
-
-
-class CloudDevelopmentKitOptions(ModuleOptions):
-    """Module options for AWS Cloud Development Kit.
-
-    Attributes:
-        build_steps: A list of commands to be executed before each action (e.g.
-            diff, deploy, destroy).
-        data: Options parsed into a data model.
-        skip_npm_ci: Skip running ``npm ci`` in the module directory prior to
-            processing the module.
-
-    """
-
-    def __init__(self, data: RunwayCdkModuleOptionsDataModel) -> None:
-        """Instantiate class.
-
-        Args:
-            data: Options parsed into a data model.
-
-        """
-        self.build_steps = data.build_steps
-        self.data = data
-        self.skip_npm_ci = data.skip_npm_ci
-
-    @classmethod
-    def parse_obj(cls, obj: object) -> CloudDevelopmentKitOptions:
-        """Parse options definition and return an options object.
-
-        Args:
-            obj: Object to parse.
-
-        """
-        return cls(data=RunwayCdkModuleOptionsDataModel.model_validate(obj))

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal, Optional, TypedDict  # type: ignore
+from typing import Any, Literal, Optional, TypedDict
 
 
 class _LambdaResponseOptional(TypedDict, total=False):

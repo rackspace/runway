@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from ...._logging import PrefixAdaptor
 from ....exceptions import UnresolvedVariable
@@ -20,16 +20,18 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
+_ConfigPropertyTypeVar = TypeVar("_ConfigPropertyTypeVar", bound="ConfigProperty")
 
-class ConfigComponentDefinition(ABC):
+
+class ConfigComponentDefinition(ABC, Generic[_ConfigPropertyTypeVar]):
     """Base class for Runway config components."""
 
-    _data: ConfigProperty
+    _data: _ConfigPropertyTypeVar
     _pre_process_vars: tuple[str, ...] = ()
     _supports_vars: tuple[str, ...] = ()
     _vars: dict[str, Variable] = {}
 
-    def __init__(self, data: ConfigProperty) -> None:
+    def __init__(self, data: _ConfigPropertyTypeVar) -> None:
         """Instantiate class."""
         self._data = data.model_copy(deep=True)
 
@@ -167,7 +169,7 @@ class ConfigComponentDefinition(ABC):
         """
         prop = getattr(self.__class__, name, None)
         if isinstance(prop, property) and prop.fset:
-            prop.fset(self, value)  # type: ignore
+            prop.fset(self, value)
         elif isinstance(prop, property):
             raise AttributeError(f"setting {name} property is not supported")
         elif name.startswith("_") or name in dir(self):

@@ -62,8 +62,8 @@ def get_hash_of_files(
             for root, dirs, files in os.walk(cast(str, i["path"]), topdown=True):
                 sub_root = Path(root).resolve()
                 if root != "./" and gitignore.match(sub_root):
-                    dirs[:] = []  # type: ignore
-                    files[:] = []  # type: ignore
+                    dirs[:] = []
+                    files[:] = []
                 else:
                     for filename in files:
                         filepath = sub_root / filename

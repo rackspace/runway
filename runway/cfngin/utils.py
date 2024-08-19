@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from mypy_boto3_route53.client import Route53Client
-    from mypy_boto3_route53.type_defs import ResourceRecordSetTypeDef
+    from mypy_boto3_route53.type_defs import ResourceRecordSetExtraOutputTypeDef
     from mypy_boto3_s3.client import S3Client
 
     from ..config.models.cfngin import (
@@ -147,7 +147,7 @@ class SOARecordText:
 class SOARecord:
     """Represents an SOA record."""
 
-    def __init__(self, record: ResourceRecordSetTypeDef) -> None:
+    def __init__(self, record: ResourceRecordSetExtraOutputTypeDef) -> None:
         """Instantiate class."""
         self.name = record["Name"]
         self.text = SOARecordText(record.get("ResourceRecords", [{"Value": ""}])[0]["Value"])
@@ -379,7 +379,7 @@ def get_client_region(client: Any) -> str:
         AWS region string.
 
     """
-    return client._client_config.region_name  # type: ignore  # noqa: SLF001
+    return client._client_config.region_name  # noqa: SLF001
 
 
 def get_s3_endpoint(client: Any) -> str:
@@ -392,7 +392,7 @@ def get_s3_endpoint(client: Any) -> str:
         The AWS endpoint for the client.
 
     """
-    return client._endpoint.host  # type: ignore  # noqa: SLF001
+    return client._endpoint.host  # noqa: SLF001
 
 
 def s3_bucket_location_constraint(region: str | None) -> str | None:
@@ -698,7 +698,7 @@ class SourceProcessor:
                     session.client("s3")
                     .head_object(Bucket=config.bucket, Key=config.key, **extra_s3_args)[
                         "LastModified"
-                    ]  # type: ignore
+                    ]
                     .astimezone(dateutil.tz.tzutc())  # type: ignore
                 )
             except botocore.exceptions.ClientError as client_error:

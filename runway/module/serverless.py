@@ -47,10 +47,89 @@ def gen_sls_config_files(stage: str, region: str) -> list[str]:
     return names
 
 
-class Serverless(RunwayModuleNpm):
-    """Serverless Runway Module."""
+class ServerlessOptions(ModuleOptions):
+    """Module options for Serverless Framework.
 
-    options: ServerlessOptions
+    Attributes:
+        data: Options parsed into a data model.
+        extend_serverless_yml: If provided, the value of this option will be
+            recursively merged into the module's Serverless config file.
+        promotezip: If provided, promote Serverless Framework generated zip files
+            between environments from a build AWS account.
+        skip_npm_ci: Skip running ``npm ci`` in the module directory prior to
+            processing the module.
+
+    """
+
+    def __init__(self, data: RunwayServerlessModuleOptionsDataModel) -> None:
+        """Instantiate class.
+
+        Args:
+            data: Options parsed into a data model.
+
+        """
+        self._arg_parser = self._create_arg_parser()
+        cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(data.args.copy())
+        self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
+
+        self.data = data
+        self.extend_serverless_yml = data.extend_serverless_yml
+        self.promotezip = data.promotezip
+        self.skip_npm_ci = data.skip_npm_ci
+
+    @property
+    def args(self) -> list[str]:
+        """List of CLI arguments/options to pass to the Serverless Framework CLI."""
+        known_args: list[str] = []
+        for key, val in self._cli_args.items():
+            if isinstance(val, str):
+                known_args.extend([f"--{key}", val])
+        return known_args + self._unknown_cli_args
+
+    def update_args(self, key: str, value: str) -> None:
+        """Update a known CLI argument.
+
+        Args:
+            key: Dict key to be updated.
+            value: New value
+
+        Raises:
+            KeyError: The key provided for update is not a known arg.
+
+        """
+        if key in self._cli_args:
+            self._cli_args[key] = value
+        else:
+            raise KeyError(key)
+
+    @staticmethod
+    def _create_arg_parser() -> argparse.ArgumentParser:
+        """Create argparse parser to parse args.
+
+        Used to pull arguments out of self.args when logic could change
+        depending on values provided.
+
+        Returns:
+            argparse.ArgumentParser
+
+        """
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-c", "--config", default=None)
+        return parser
+
+    @classmethod
+    def parse_obj(cls, obj: object) -> ServerlessOptions:
+        """Parse options definition and return an options object.
+
+        Args:
+            obj: Object to parse.
+
+        """
+        return cls(data=RunwayServerlessModuleOptionsDataModel.model_validate(obj))
+
+
+class Serverless(RunwayModuleNpm[ServerlessOptions]):
+    """Serverless Runway Module."""
 
     def __init__(
         self,
@@ -440,84 +519,3 @@ class ServerlessArtifact:
                     filename=str(file_path),
                     session=session,
                 )
-
-
-class ServerlessOptions(ModuleOptions):
-    """Module options for Serverless Framework.
-
-    Attributes:
-        data: Options parsed into a data model.
-        extend_serverless_yml: If provided, the value of this option will be
-            recursively merged into the module's Serverless config file.
-        promotezip: If provided, promote Serverless Framework generated zip files
-            between environments from a build AWS account.
-        skip_npm_ci: Skip running ``npm ci`` in the module directory prior to
-            processing the module.
-
-    """
-
-    def __init__(self, data: RunwayServerlessModuleOptionsDataModel) -> None:
-        """Instantiate class.
-
-        Args:
-            data: Options parsed into a data model.
-
-        """
-        self._arg_parser = self._create_arg_parser()
-        cli_args, self._unknown_cli_args = self._arg_parser.parse_known_args(data.args.copy())
-        self._cli_args = vars(cli_args)  # convert argparse.Namespace to dict
-
-        self.data = data
-        self.extend_serverless_yml = data.extend_serverless_yml
-        self.promotezip = data.promotezip
-        self.skip_npm_ci = data.skip_npm_ci
-
-    @property
-    def args(self) -> list[str]:
-        """List of CLI arguments/options to pass to the Serverless Framework CLI."""
-        known_args: list[str] = []
-        for key, val in self._cli_args.items():
-            if isinstance(val, str):
-                known_args.extend([f"--{key}", val])
-        return known_args + self._unknown_cli_args
-
-    def update_args(self, key: str, value: str) -> None:
-        """Update a known CLI argument.
-
-        Args:
-            key: Dict key to be updated.
-            value: New value
-
-        Raises:
-            KeyError: The key provided for update is not a known arg.
-
-        """
-        if key in self._cli_args:
-            self._cli_args[key] = value
-        else:
-            raise KeyError(key)
-
-    @staticmethod
-    def _create_arg_parser() -> argparse.ArgumentParser:
-        """Create argparse parser to parse args.
-
-        Used to pull arguments out of self.args when logic could change
-        depending on values provided.
-
-        Returns:
-            argparse.ArgumentParser
-
-        """
-        parser = argparse.ArgumentParser()
-        parser.add_argument("-c", "--config", default=None)
-        return parser
-
-    @classmethod
-    def parse_obj(cls, obj: object) -> ServerlessOptions:
-        """Parse options definition and return an options object.
-
-        Args:
-            obj: Object to parse.
-
-        """
-        return cls(data=RunwayServerlessModuleOptionsDataModel.model_validate(obj))

@@ -414,10 +414,10 @@ class BaseTransferRequestSubmitter:
 class UploadRequestSubmitter(BaseTransferRequestSubmitter):
     """Upload request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[Callable[[dict[Any, Any], dict[Any, Any]], Any]] = (
+    REQUEST_MAPPER_METHOD: ClassVar[Callable[[dict[Any, Any], dict[Any, Any]], Any] | None] = (
         RequestParamsMapper.map_put_object_params
     )
-    RESULT_SUBSCRIBER_CLASS: ClassVar[type[UploadResultSubscriber]] = UploadResultSubscriber
+    RESULT_SUBSCRIBER_CLASS: ClassVar[type[BaseSubscriber] | None] = UploadResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -490,10 +490,10 @@ class UploadRequestSubmitter(BaseTransferRequestSubmitter):
 class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
     """Download request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[Callable[[dict[Any, Any], dict[Any, Any]], Any]] = (
+    REQUEST_MAPPER_METHOD: ClassVar[Callable[[dict[Any, Any], dict[Any, Any]], Any] | None] = (
         RequestParamsMapper.map_get_object_params
     )
-    RESULT_SUBSCRIBER_CLASS: ClassVar[type[DownloadResultSubscriber]] = DownloadResultSubscriber
+    RESULT_SUBSCRIBER_CLASS: ClassVar[type[BaseSubscriber] | None] = DownloadResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -556,10 +556,10 @@ class DownloadRequestSubmitter(BaseTransferRequestSubmitter):
 class CopyRequestSubmitter(BaseTransferRequestSubmitter):
     """Copy request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[Callable[[dict[Any, Any], dict[Any, Any]], Any]] = (
+    REQUEST_MAPPER_METHOD: ClassVar[Callable[[dict[Any, Any], dict[Any, Any]], Any] | None] = (
         RequestParamsMapper.map_copy_object_params
     )
-    RESULT_SUBSCRIBER_CLASS: ClassVar[type[CopyResultSubscriber]] = CopyResultSubscriber
+    RESULT_SUBSCRIBER_CLASS: ClassVar[type[BaseSubscriber] | None] = CopyResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -620,9 +620,7 @@ class CopyRequestSubmitter(BaseTransferRequestSubmitter):
 class UploadStreamRequestSubmitter(UploadRequestSubmitter):
     """Upload stream request submitter."""
 
-    RESULT_SUBSCRIBER_CLASS: ClassVar[type[UploadStreamResultSubscriber]] = (
-        UploadStreamResultSubscriber
-    )
+    RESULT_SUBSCRIBER_CLASS: ClassVar[type[BaseSubscriber] | None] = UploadStreamResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -649,7 +647,7 @@ class UploadStreamRequestSubmitter(UploadRequestSubmitter):
     @staticmethod
     def _get_filein(fileinfo: FileInfo) -> NonSeekableStream:  # type: ignore  # noqa: ARG004
         """Get file in."""
-        if sys.stdin is None:  # pyright: ignore[reportUnnecessaryComparison]
+        if sys.stdin is None:
             raise StdinMissingError
         return NonSeekableStream(sys.stdin.buffer)
 
@@ -661,9 +659,7 @@ class UploadStreamRequestSubmitter(UploadRequestSubmitter):
 class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
     """Download stream result subscriber."""
 
-    RESULT_SUBSCRIBER_CLASS: ClassVar[type[DownloadStreamResultSubscriber]] = (
-        DownloadStreamResultSubscriber
-    )
+    RESULT_SUBSCRIBER_CLASS: ClassVar[type[BaseSubscriber] | None] = DownloadStreamResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.
@@ -697,10 +693,10 @@ class DownloadStreamRequestSubmitter(DownloadRequestSubmitter):
 class DeleteRequestSubmitter(BaseTransferRequestSubmitter):
     """Delete request submitter."""
 
-    REQUEST_MAPPER_METHOD: ClassVar[Callable[[dict[Any, Any], dict[Any, Any]], Any]] = (
+    REQUEST_MAPPER_METHOD: ClassVar[Callable[[dict[Any, Any], dict[Any, Any]], Any] | None] = (
         RequestParamsMapper.map_delete_object_params
     )
-    RESULT_SUBSCRIBER_CLASS: ClassVar[type[DeleteResultSubscriber]] = DeleteResultSubscriber
+    RESULT_SUBSCRIBER_CLASS: ClassVar[type[BaseSubscriber] | None] = DeleteResultSubscriber
 
     def can_submit(self, fileinfo: FileInfo) -> bool:
         """Check whether it can submit a particular FileInfo.

@@ -63,6 +63,193 @@ def update_env_vars_with_tf_var_values(
     return os_env_vars
 
 
+class TerraformBackendConfig(ModuleOptions):
+    """Terraform backend configuration module options."""
+
+    def __init__(
+        self,
+        data: RunwayTerraformBackendConfigDataModel,
+        deploy_environment: DeployEnvironment,
+        path: Path,
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            data: Options parsed into a data model.
+            deploy_environment: Current deploy environment.
+            path: Module path.
+
+        """
+        self.bucket = data.bucket
+        self.data = data
+        self.dynamodb_table = data.dynamodb_table
+        self.env = deploy_environment
+        self.path = path
+        if data and not data.region:
+            data.region = deploy_environment.aws_region  # default to region from env
+        self.region = data.region
+
+    @cached_property
+    def config_file(self) -> Path | None:
+        """Backend configuration file."""
+        return self.get_backend_file(self.path, self.env.name, self.env.aws_region)
+
+    @cached_property
+    def init_args(self) -> list[str]:
+        """Return command line arguments for init."""
+        result: list[str] = []
+        for k, v in self.data.model_dump(exclude_none=True).items():
+            result.extend(["-backend-config", f"{k}={v}"])
+        if not result:
+            if self.config_file:
+                LOGGER.verbose("using backend config file: %s", self.config_file.name)
+                return [f"-backend-config={self.config_file.name}"]
+            LOGGER.info(
+                "backend file not found -- looking for one of: %s",
+                ", ".join(self.gen_backend_filenames(self.env.name, self.env.aws_region)),
+            )
+            return []
+        LOGGER.info("using backend values from runway.yml")
+        LOGGER.debug("provided backend values: %s", json.dumps(result))
+        return result
+
+    def get_full_configuration(self) -> dict[str, str]:
+        """Get full backend configuration."""
+        if not self.config_file:
+            return self.data.model_dump(exclude_none=True)
+        result = cast(dict[str, str], hcl.loads(self.config_file.read_text()))
+        result.update(self.data.model_dump(exclude_none=True))
+        return result
+
+    @classmethod
+    def get_backend_file(cls, path: Path, environment: str, region: str) -> Path | None:
+        """Determine Terraform backend file.
+
+        Args:
+            path: Path to the module.
+            environment: Current deploy environment.
+            region: Current AWS region.
+
+        """
+        backend_filenames = cls.gen_backend_filenames(environment, region)
+        for name in backend_filenames:
+            test_path = path / name
+            if test_path.is_file():
+                return test_path
+        return None
+
+    @staticmethod
+    def gen_backend_filenames(environment: str, region: str) -> list[str]:
+        """Generate possible Terraform backend filenames.
+
+        Args:
+            environment: Current deploy environment.
+            region : Current AWS region.
+
+        """
+        formats = [
+            "backend-{environment}-{region}.{extension}",
+            "backend-{environment}.{extension}",
+            "backend-{region}.{extension}",
+            "backend.{extension}",
+        ]
+        result: list[str] = []
+        for fmt in formats:
+            for ext in ["hcl", "tfvars"]:
+                result.append(  # noqa: PERF401
+                    fmt.format(environment=environment, extension=ext, region=region)
+                )
+        return result
+
+    @classmethod
+    def parse_obj(
+        cls,
+        deploy_environment: DeployEnvironment,
+        obj: object,
+        path: Path | None = None,
+    ) -> TerraformBackendConfig:
+        """Parse options definition and return an options object.
+
+        Args:
+            deploy_environment: Current deploy environment.
+            obj: Object to parse.
+            path: Module path.
+
+        """
+        return cls(
+            data=RunwayTerraformBackendConfigDataModel.model_validate(obj),
+            deploy_environment=deploy_environment,
+            path=path or Path.cwd(),
+        )
+
+
+class TerraformOptions(ModuleOptions):
+    """Module options for Terraform.
+
+    Attributes:
+        args: CLI arguments/options to pass to Terraform.
+        data: Options parsed into a data model.
+        env: Current deploy environment.
+        path: Module path.
+        version: String containing a Terraform version.
+        write_auto_tfvars: Optionally write parameters to a tfvars file instead
+            of updating variables.
+
+    """
+
+    def __init__(
+        self,
+        data: RunwayTerraformModuleOptionsDataModel,
+        deploy_environment: DeployEnvironment,
+        path: Path | None = None,
+    ) -> None:
+        """Instantiate class.
+
+        Args:
+            deploy_environment: Current deploy environment.
+            data: Options parsed into a data model.
+            path: Module path.
+
+        """
+        self.args = data.args
+        self.data = data
+        self.env = deploy_environment
+        self.path = path or Path.cwd()
+        self.version = data.version
+        self.workspace = data.workspace or deploy_environment.name
+        self.write_auto_tfvars = data.write_auto_tfvars
+
+    @cached_property
+    def backend_config(self) -> TerraformBackendConfig:
+        """Backend configuration options."""
+        return TerraformBackendConfig.parse_obj(
+            deploy_environment=self.env,
+            obj=self.data.backend_config or {},
+            path=self.path,
+        )
+
+    @classmethod
+    def parse_obj(
+        cls,
+        deploy_environment: DeployEnvironment,
+        obj: object,
+        path: Path | None = None,
+    ) -> TerraformOptions:
+        """Parse options definition and return an options object.
+
+        Args:
+            deploy_environment: Current deploy environment.
+            obj: Object to parse.
+            path: Module path.
+
+        """
+        return cls(
+            data=RunwayTerraformModuleOptionsDataModel.model_validate(obj),
+            deploy_environment=deploy_environment,
+            path=path or Path.cwd(),
+        )
+
+
 TerraformActionTypeDef = Literal[
     "apply",
     "destroy",
@@ -76,10 +263,8 @@ TerraformActionTypeDef = Literal[
 ]
 
 
-class Terraform(RunwayModule, DelCachedPropMixin):
+class Terraform(RunwayModule[TerraformOptions], DelCachedPropMixin):
     """Terraform Runway Module."""
-
-    options: TerraformOptions
 
     def __init__(
         self,
@@ -544,190 +729,3 @@ class Terraform(RunwayModule, DelCachedPropMixin):
         finally:
             if self.auto_tfvars.exists():
                 self.auto_tfvars.unlink()
-
-
-class TerraformOptions(ModuleOptions):
-    """Module options for Terraform.
-
-    Attributes:
-        args: CLI arguments/options to pass to Terraform.
-        data: Options parsed into a data model.
-        env: Current deploy environment.
-        path: Module path.
-        version: String containing a Terraform version.
-        write_auto_tfvars: Optionally write parameters to a tfvars file instead
-            of updating variables.
-
-    """
-
-    def __init__(
-        self,
-        data: RunwayTerraformModuleOptionsDataModel,
-        deploy_environment: DeployEnvironment,
-        path: Path | None = None,
-    ) -> None:
-        """Instantiate class.
-
-        Args:
-            deploy_environment: Current deploy environment.
-            data: Options parsed into a data model.
-            path: Module path.
-
-        """
-        self.args = data.args
-        self.data = data
-        self.env = deploy_environment
-        self.path = path or Path.cwd()
-        self.version = data.version
-        self.workspace = data.workspace or deploy_environment.name
-        self.write_auto_tfvars = data.write_auto_tfvars
-
-    @cached_property
-    def backend_config(self) -> TerraformBackendConfig:
-        """Backend configuration options."""
-        return TerraformBackendConfig.parse_obj(
-            deploy_environment=self.env,
-            obj=self.data.backend_config or {},
-            path=self.path,
-        )
-
-    @classmethod
-    def parse_obj(
-        cls,
-        deploy_environment: DeployEnvironment,
-        obj: object,
-        path: Path | None = None,
-    ) -> TerraformOptions:
-        """Parse options definition and return an options object.
-
-        Args:
-            deploy_environment: Current deploy environment.
-            obj: Object to parse.
-            path: Module path.
-
-        """
-        return cls(
-            data=RunwayTerraformModuleOptionsDataModel.model_validate(obj),
-            deploy_environment=deploy_environment,
-            path=path or Path.cwd(),
-        )
-
-
-class TerraformBackendConfig(ModuleOptions):
-    """Terraform backend configuration module options."""
-
-    def __init__(
-        self,
-        data: RunwayTerraformBackendConfigDataModel,
-        deploy_environment: DeployEnvironment,
-        path: Path,
-    ) -> None:
-        """Instantiate class.
-
-        Args:
-            data: Options parsed into a data model.
-            deploy_environment: Current deploy environment.
-            path: Module path.
-
-        """
-        self.bucket = data.bucket
-        self.data = data
-        self.dynamodb_table = data.dynamodb_table
-        self.env = deploy_environment
-        self.path = path
-        if data and not data.region:
-            data.region = deploy_environment.aws_region  # default to region from env
-        self.region = data.region
-
-    @cached_property
-    def config_file(self) -> Path | None:
-        """Backend configuration file."""
-        return self.get_backend_file(self.path, self.env.name, self.env.aws_region)
-
-    @cached_property
-    def init_args(self) -> list[str]:
-        """Return command line arguments for init."""
-        result: list[str] = []
-        for k, v in self.data.model_dump(exclude_none=True).items():
-            result.extend(["-backend-config", f"{k}={v}"])
-        if not result:
-            if self.config_file:
-                LOGGER.verbose("using backend config file: %s", self.config_file.name)
-                return [f"-backend-config={self.config_file.name}"]
-            LOGGER.info(
-                "backend file not found -- looking for one of: %s",
-                ", ".join(self.gen_backend_filenames(self.env.name, self.env.aws_region)),
-            )
-            return []
-        LOGGER.info("using backend values from runway.yml")
-        LOGGER.debug("provided backend values: %s", json.dumps(result))
-        return result
-
-    def get_full_configuration(self) -> dict[str, str]:
-        """Get full backend configuration."""
-        if not self.config_file:
-            return self.data.model_dump(exclude_none=True)
-        result = cast(dict[str, str], hcl.loads(self.config_file.read_text()))
-        result.update(self.data.model_dump(exclude_none=True))
-        return result
-
-    @classmethod
-    def get_backend_file(cls, path: Path, environment: str, region: str) -> Path | None:
-        """Determine Terraform backend file.
-
-        Args:
-            path: Path to the module.
-            environment: Current deploy environment.
-            region: Current AWS region.
-
-        """
-        backend_filenames = cls.gen_backend_filenames(environment, region)
-        for name in backend_filenames:
-            test_path = path / name
-            if test_path.is_file():
-                return test_path
-        return None
-
-    @staticmethod
-    def gen_backend_filenames(environment: str, region: str) -> list[str]:
-        """Generate possible Terraform backend filenames.
-
-        Args:
-            environment: Current deploy environment.
-            region : Current AWS region.
-
-        """
-        formats = [
-            "backend-{environment}-{region}.{extension}",
-            "backend-{environment}.{extension}",
-            "backend-{region}.{extension}",
-            "backend.{extension}",
-        ]
-        result: list[str] = []
-        for fmt in formats:
-            for ext in ["hcl", "tfvars"]:
-                result.append(  # noqa: PERF401
-                    fmt.format(environment=environment, extension=ext, region=region)
-                )
-        return result
-
-    @classmethod
-    def parse_obj(
-        cls,
-        deploy_environment: DeployEnvironment,
-        obj: object,
-        path: Path | None = None,
-    ) -> TerraformBackendConfig:
-        """Parse options definition and return an options object.
-
-        Args:
-            deploy_environment: Current deploy environment.
-            obj: Object to parse.
-            path: Module path.
-
-        """
-        return cls(
-            data=RunwayTerraformBackendConfigDataModel.model_validate(obj),
-            deploy_environment=deploy_environment,
-            path=path or Path.cwd(),
-        )

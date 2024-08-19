@@ -7,7 +7,7 @@ import re
 import sys
 from pathlib import Path
 from string import Template
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 import yaml
 
@@ -37,14 +37,16 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+_ModelTypeVar = TypeVar("_ModelTypeVar", bound="BaseModel")
 
-class BaseConfig:
+
+class BaseConfig(Generic[_ModelTypeVar]):
     """Base class for configurations."""
 
     file_path: Path
-    _data: BaseModel
+    _data: _ModelTypeVar
 
-    def __init__(self, data: BaseModel, *, path: Path | None = None) -> None:
+    def __init__(self, data: _ModelTypeVar, *, path: Path | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -105,7 +107,7 @@ class BaseConfig:
         raise NotImplementedError  # cov: ignore
 
 
-class CfnginConfig(BaseConfig):
+class CfnginConfig(BaseConfig[CfnginConfigDefinitionModel]):
     """Python representation of a CFNgin config file.
 
     This is used internally by CFNgin to parse and validate a YAML formatted
@@ -192,8 +194,6 @@ class CfnginConfig(BaseConfig):
 
     template_indent: int
     """Spaces to use per-indent level when outputting a template to json."""
-
-    _data: CfnginConfigDefinitionModel
 
     def __init__(
         self,
@@ -435,7 +435,7 @@ class CfnginConfig(BaseConfig):
         return rendered
 
 
-class RunwayConfig(BaseConfig):
+class RunwayConfig(BaseConfig[RunwayConfigDefinitionModel]):
     """Python representation of a Runway config file."""
 
     ACCEPTED_NAMES = ["runway.yml", "runway.yaml"]
@@ -447,8 +447,6 @@ class RunwayConfig(BaseConfig):
     runway_version: SpecifierSet | None
     tests: list[RunwayTestDefinition]
     variables: RunwayVariablesDefinition
-
-    _data: RunwayConfigDefinitionModel
 
     def __init__(self, data: RunwayConfigDefinitionModel, *, path: Path | None = None) -> None:
         """Instantiate class.

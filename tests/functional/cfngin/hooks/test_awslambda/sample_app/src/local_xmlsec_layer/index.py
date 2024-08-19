@@ -26,8 +26,8 @@ def handler(event: dict[str, Any], context: object) -> LambdaResponse:  # noqa: 
                     str(path.relative_to(PACKAGE_DIR))
                     for path in sorted(PACKAGE_DIR.rglob("*"), reverse=True)
                 ],
-                "lxml": [i[0] for i in inspect.getmembers(lxml)],  # type: ignore
-                "xmlsec": [i[0] for i in inspect.getmembers(xmlsec)],  # type: ignore
+                "lxml": [i[0] for i in inspect.getmembers(lxml)],
+                "xmlsec": [i[0] for i in inspect.getmembers(xmlsec)],
                 "opt_dir_contents": [
                     str(path) for path in sorted(OPT_DIR.rglob("*"), reverse=True)
                 ],

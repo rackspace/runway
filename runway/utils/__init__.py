@@ -91,7 +91,7 @@ class BaseModel(_BaseModel):
             value: Value to assign to the attribute.
 
         """
-        super().__setattr__(name, value)  # type: ignore
+        super().__setattr__(name, value)
 
 
 class MutableMap(MutableMapping[str, Any]):
@@ -425,7 +425,7 @@ class YamlDumper(yaml.Dumper):
 
     def increase_indent(self, flow: bool = False, indentless: bool = False) -> None:  # noqa: ARG002
         """Override parent method."""
-        return super().increase_indent(flow, False)  # type: ignore
+        return super().increase_indent(flow, False)
 
 
 @contextmanager

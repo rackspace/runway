@@ -310,9 +310,6 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
     BUILD_LAYER: ClassVar[bool] = False
     """Flag to denote if the hook creates a Lambda Function or Layer deployment package."""
 
-    args: AwsLambdaHookArgs
-    """Parsed hook arguments."""
-
     ctx: CfnginContext
     """CFNgin context object."""
 

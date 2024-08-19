@@ -397,8 +397,8 @@ class CfnginContext(BaseContext):
                 'locked persistent graph "%s" with lock ID "%s"',
                 "/".join(
                     [
-                        self.persistent_graph_location["Bucket"],
-                        self.persistent_graph_location["Key"],
+                        self.persistent_graph_location.get("Bucket", "unknown"),
+                        self.persistent_graph_location.get("Key", "unknown"),
                     ]
                 ),
                 lock_code,

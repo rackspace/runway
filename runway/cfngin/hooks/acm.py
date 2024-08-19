@@ -25,9 +25,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from ...context import CfnginContext
-    from ..blueprints.base import Blueprint
     from ..providers.aws.default import Provider
-    from ..stack import Stack
     from ..status import Status
 
 LOGGER = logging.getLogger(__name__)
@@ -84,9 +82,7 @@ class Certificate(Hook):
 
     acm_client: ACMClient
     args: HookArgs
-    blueprint: Blueprint
     r53_client: Route53Client
-    stack: Stack
     template_description: str
 
     def __init__(self, context: CfnginContext, provider: Provider, **kwargs: Any) -> None:
@@ -121,7 +117,7 @@ class Certificate(Hook):
             }
         )
 
-    def _create_blueprint(self) -> Blueprint:
+    def _create_blueprint(self) -> BlankBlueprint:
         """Create CFNgin Blueprint."""
         var_description = (
             "NO NOT CHANGE MANUALLY! Used to track the "
@@ -152,6 +148,8 @@ class Certificate(Hook):
 
     def domain_changed(self) -> bool:
         """Check to ensure domain has not changed for existing stack."""
+        if not self.stack:  # cov: ignore
+            raise NotImplementedError("stack not present on hook")
         try:
             stack_info = self.provider.get_stack(self.stack.fqn)
             if self.provider.is_stack_recreatable(stack_info):
@@ -187,6 +185,8 @@ class Certificate(Hook):
             Certificate ARN.
 
         """
+        if not self.stack:  # cov: ignore
+            raise NotImplementedError("stack not present on hook")
         response = self.provider.cloudformation.describe_stack_resources(
             StackName=self.stack.fqn, LogicalResourceId="Certificate"
         )["StackResources"]
@@ -220,16 +220,16 @@ class Certificate(Hook):
             cert_arn = self.get_certificate()
         cert = self.acm_client.describe_certificate(CertificateArn=cert_arn).get("Certificate", {})
 
-        try:
-            domain_validation = [
-                opt for opt in cert["DomainValidationOptions"] if opt["ValidationStatus"] == status
-            ]
-        except KeyError:
+        if "DomainValidationOptions" not in cert:
             LOGGER.debug(
                 "waiting for DomainValidationOptions to become available for the certificate..."
             )
             time.sleep(interval)
             return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
+
+        domain_validation = [
+            opt for opt in cert["DomainValidationOptions"] if opt.get("ValidationStatus") == status
+        ]
 
         if not domain_validation:
             raise ValueError(
@@ -240,16 +240,14 @@ class Certificate(Hook):
                 f"Found {len(domain_validation)} validation options of status "
                 f'"{status}" for "{self.args.domain}"; only one option is supported'
             )
-        try:
-            # the validation option can exists before the record set is ready
+        if "ResourceRecord" in domain_validation[0]:
             return domain_validation[0]["ResourceRecord"]
-        except KeyError:
-            LOGGER.debug(
-                "waiting for DomainValidationOptions.ResourceRecord "
-                "to become available for the certificate..."
-            )
-            time.sleep(interval)
-            return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
+        LOGGER.debug(
+            "waiting for DomainValidationOptions.ResourceRecord to become available "
+            "for the certificate..."
+        )
+        time.sleep(interval)
+        return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
 
     def put_record_set(self, record_set: ResourceRecordTypeDef) -> None:
         """Create/update a record set on a Route 53 Hosted Zone.
@@ -389,7 +387,7 @@ class Certificate(Hook):
             LOGGER.error(err)
             self.destroy(
                 records=[record] if record else None,
-                skip_r53=isinstance(  # type: ignore
+                skip_r53=isinstance(
                     err,
                     (
                         self.r53_client.exceptions.InvalidChangeBatch,
@@ -416,6 +414,8 @@ class Certificate(Hook):
             skip_r53: Skip the removal of validation records.
 
         """
+        if not self.stack:  # cov: ignore
+            raise NotImplementedError("stack not present on hook")
         if not skip_r53:
             try:
                 self.remove_validation_records(records)

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from ...models.runway import RunwayEnvironmentsType, RunwayEnvVarsType, RunwayModuleTypeTypeDef
 
 
-class RunwayModuleDefinition(ConfigComponentDefinition):
+class RunwayModuleDefinition(ConfigComponentDefinition[RunwayModuleDefinitionModel]):
     """Runway module definition."""
 
     class_path: str | None
@@ -29,7 +29,6 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     tags: list[str]
     type: RunwayModuleTypeTypeDef | None
 
-    _data: RunwayModuleDefinitionModel
     _supports_vars: tuple[str, ...] = (
         "class_path",
         "env_vars",
@@ -51,7 +50,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     @child_modules.setter
     def child_modules(
         self,
-        modules: list[RunwayModuleDefinition | RunwayModuleDefinitionModel],  # type: ignore
+        modules: list[RunwayModuleDefinition | RunwayModuleDefinitionModel],
     ) -> None:
         """Set the value of the property.
 

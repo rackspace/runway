@@ -914,14 +914,13 @@ def uni_print(statement: str, out_file: TextIO | None = None) -> None:
     Ensures that the proper encoding is used if the statement is not a string type.
 
     """
-    if out_file is None:
-        out_file = sys.stdout
+    out: TextIO | Any = sys.stdout if out_file is None else out_file
     try:
-        out_file.write(statement)
+        out.write(statement)
     except UnicodeEncodeError:
-        new_encoding = getattr(out_file, "encoding", "ascii")
+        new_encoding = getattr(out, "encoding", "ascii")
         if not new_encoding:
             new_encoding = "ascii"
         new_statement = statement.encode(new_encoding, "replace").decode(new_encoding)
-        out_file.write(new_statement)
-    out_file.flush()
+        out.write(new_statement)
+    out.flush()

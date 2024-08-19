@@ -21,6 +21,7 @@ from typing import (
     ClassVar,
     NamedTuple,
     TextIO,
+    TypedDict,
     Union,
     cast,
 )
@@ -40,7 +41,7 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from s3transfer.futures import TransferFuture
-    from typing_extensions import Literal, Self
+    from typing_extensions import Literal, Self, TypeAlias
 
     from ......_logging import RunwayLogger
     from ......type_defs import AnyPath
@@ -142,7 +143,7 @@ AllResultTypes = (
     SuccessResult,
     QueuedResult,
 )
-AnyResult = Union[
+AnyResultType: TypeAlias = Union[
     CommandResult,
     CtrlCResult,
     DryRunResult,
@@ -155,6 +156,20 @@ AnyResult = Union[
 ]
 
 
+class _ResultHandlerMappingTypedDict(TypedDict, total=False):
+
+    CommandResult: Callable[..., None]
+    CtrlCResult: Callable[..., None]
+    DryRunResult: Callable[..., None]
+    ErrorResult: Callable[..., None]
+    FailureResult: Callable[..., None]
+    FinalTotalSubmissionsResult: Callable[..., None]
+    PrintTask: Callable[..., None]
+    ProgressResult: Callable[..., None]
+    QueuedResult: Callable[..., None]
+    SuccessResult: Callable[..., None]
+
+
 class ShutdownThreadRequest:
     """Shutdown thread request."""
 
@@ -162,7 +177,7 @@ class ShutdownThreadRequest:
 class BaseResultSubscriber(OnDoneFilteredSubscriber):
     """Base result subscriber."""
 
-    TRANSFER_TYPE: ClassVar[str | None] = None
+    TRANSFER_TYPE: ClassVar = None
 
     def __init__(self, result_queue: queue.Queue[Any], transfer_type: str | None = None) -> None:
         """Send result notifications during transfer process.
@@ -333,27 +348,27 @@ class ResultRecorder(BaseResultHandler):
         self._ongoing_progress = defaultdict(int)
         self._ongoing_total_sizes: dict[str, int] = {}
 
-        self._result_handler_map = {
-            QueuedResult: self._record_queued_result,
-            ProgressResult: self._record_progress_result,
-            SuccessResult: self._record_success_result,
-            FailureResult: self._record_failure_result,
-            PrintTask: self._record_warning_result,
-            ErrorResult: self._record_error_result,
-            CtrlCResult: self._record_error_result,
-            FinalTotalSubmissionsResult: self._record_final_expected_files,
+        self._result_handler_map: _ResultHandlerMappingTypedDict = {
+            "CtrlCResult": self._record_error_result,
+            "ErrorResult": self._record_error_result,
+            "FailureResult": self._record_failure_result,
+            "FinalTotalSubmissionsResult": self._record_final_expected_files,
+            "PrintTask": self._record_warning_result,
+            "ProgressResult": self._record_progress_result,
+            "QueuedResult": self._record_queued_result,
+            "SuccessResult": self._record_success_result,
         }
 
     def expected_totals_are_final(self) -> bool:
         """Assess if expected totals are final."""
         return self.final_expected_files_transferred == self.expected_files_transferred
 
-    def __call__(self, result: Any) -> None:
+    def __call__(self, result: AnyResultType | PrintTask) -> None:
         """Record the result of an individual Result object."""
-        self._result_handler_map.get(type(result), self._record_noop)(result=result)
+        self._result_handler_map.get(type(result).__name__, self._record_noop)(result=result)
 
     @staticmethod
-    def _get_ongoing_dict_key(result: AnyResult | object) -> str:
+    def _get_ongoing_dict_key(result: AnyResultType | object) -> str:
         if not isinstance(result, AllResultTypes):
             raise TypeError(
                 "Any result using _get_ongoing_dict_key must be one of "
@@ -366,7 +381,7 @@ class ResultRecorder(BaseResultHandler):
                 key_parts.append(ensure_string(result_property))  # noqa: PERF401
         return ":".join(key_parts)
 
-    def _pop_result_from_ongoing_dicts(self, result: AnyResult) -> tuple[int, int | None]:
+    def _pop_result_from_ongoing_dicts(self, result: AnyResultType) -> tuple[int, int | None]:
         ongoing_key = self._get_ongoing_dict_key(result)
         total_progress = self._ongoing_progress.pop(ongoing_key, 0)
         total_file_size = self._ongoing_total_sizes.pop(ongoing_key, None)
@@ -429,11 +444,11 @@ class ResultRecorder(BaseResultHandler):
             else:
                 self.expected_bytes_transferred += result.bytes_transferred
 
-    def _record_success_result(self, result: AnyResult, **_: Any) -> None:
+    def _record_success_result(self, result: AnyResultType, **_: Any) -> None:
         self._pop_result_from_ongoing_dicts(result)
         self.files_transferred += 1
 
-    def _record_failure_result(self, result: AnyResult, **_: Any) -> None:
+    def _record_failure_result(self, result: AnyResultType, **_: Any) -> None:
         """On failure, account for the failure in count for bytes transferred."""
         total_progress, total_file_size = self._pop_result_from_ongoing_dicts(result)
         if total_file_size is not None:
@@ -501,20 +516,20 @@ class ResultPrinter(BaseResultHandler):
         if self._error_file is None:
             self._error_file = sys.stderr
         self._progress_length = 0
-        self._result_handler_map = {
-            ProgressResult: self._print_progress,
-            SuccessResult: self._print_success,
-            FailureResult: self._print_failure,
-            PrintTask: self._print_warning,
-            ErrorResult: self._print_error,
-            CtrlCResult: self._print_ctrl_c,
-            DryRunResult: self._print_dry_run,
-            FinalTotalSubmissionsResult: self._clear_progress_if_no_more_expected_transfers,
+        self._result_handler_map: _ResultHandlerMappingTypedDict = {
+            "CtrlCResult": self._print_ctrl_c,
+            "DryRunResult": self._print_dry_run,
+            "ErrorResult": self._print_error,
+            "FailureResult": self._print_failure,
+            "FinalTotalSubmissionsResult": self._clear_progress_if_no_more_expected_transfers,
+            "PrintTask": self._print_warning,
+            "ProgressResult": self._print_progress,
+            "SuccessResult": self._print_success,
         }
 
-    def __call__(self, result: Any) -> None:
+    def __call__(self, result: AnyResultType | PrintTask) -> None:
         """Print the progress of the ongoing transfer based on a result."""
-        self._result_handler_map.get(type(result), self._print_noop)(result=result)
+        self._result_handler_map.get(type(result).__name__, self._print_noop)(result=result)
 
     def _print_noop(self, **_: Any) -> None:
         """If result does not have a handler, then do nothing with it."""
@@ -554,7 +569,7 @@ class ResultPrinter(BaseResultHandler):
     def _print_ctrl_c(self, result: CtrlCResult, **_: Any) -> None:  # noqa: ARG002
         LOGGER.warning(self.CTRL_C_MSG)
 
-    def _get_transfer_location(self, result: AnyResult) -> str:
+    def _get_transfer_location(self, result: AnyResultType) -> str:
         if result.dest is None:
             return self.SRC_TRANSFER_LOCATION_FORMAT.format(src=result.src)
         return self.SRC_DEST_TRANSFER_LOCATION_FORMAT.format(src=result.src, dest=result.dest)
@@ -708,7 +723,7 @@ class ResultProcessor(threading.Thread):
             except queue.Empty:  # cov: ignore
                 pass
 
-    def _process_result(self, result: AnyResult) -> None:
+    def _process_result(self, result: AnyResultType) -> None:
         for result_handler in self._result_handlers:
             try:
                 result_handler(result)

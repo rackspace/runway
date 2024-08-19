@@ -259,7 +259,7 @@ class Module:
             max_workers=self.ctx.env.max_concurrent_modules,
             mp_context=multiprocessing.get_context("fork"),
         ) as executor:
-            futures = [executor.submit(child.run, *[action]) for child in self.child_modules]
+            futures = [executor.submit(child.run, action) for child in self.child_modules]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 

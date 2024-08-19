@@ -100,9 +100,7 @@ class DeployEnvironment(DelCachedPropMixin):
             return None
         try:
             LOGGER.debug("getting git branch name...")
-            return git.Repo(  # type: ignore
-                str(self.root_dir), search_parent_directories=True
-            ).active_branch.name
+            return git.Repo(str(self.root_dir), search_parent_directories=True).active_branch.name
         except InvalidGitRepositoryError:
             return None
         except TypeError:

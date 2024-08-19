@@ -46,10 +46,9 @@ class Hook(CfnginHookProtocol):
 
     """
 
-    ARGS_PARSER: ClassVar[type[HookArgsBaseModel]] = HookArgsBaseModel
+    ARGS_PARSER: ClassVar = HookArgsBaseModel
     """Class used to parse arguments passed to the hook."""
 
-    args: HookArgsBaseModel
     blueprint: Blueprint | None = None
     context: CfnginContext
     provider: Provider

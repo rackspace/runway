@@ -52,7 +52,7 @@ def get_session(
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         aws_session_token=session_token,
-        botocore_session=Session(),  # type: ignore
+        botocore_session=Session(),
         region_name=region,
         profile_name=profile,
     )

@@ -133,7 +133,7 @@ class YamlDirTestGenerator:
                 glob(f"{self.classdir}/{directory}/{self.yaml_filename}")  # noqa: PTH207
             )
 
-        class ConfigTest(self.base_class):  # type: ignore
+        class ConfigTest(self.base_class):
             """Config test."""
 
             context: CfnginContext

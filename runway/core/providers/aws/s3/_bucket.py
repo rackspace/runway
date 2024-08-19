@@ -73,7 +73,10 @@ class Bucket(DelCachedPropMixin):
 
         """
         try:
-            return BaseResponse(**self.client.head_bucket(Bucket=self.name) or {})
+            return BaseResponse(
+                **self.client.head_bucket(Bucket=self.name)
+                or {}  # pyright: ignore[reportArgumentType]
+            )
         except ClientError as err:
             LOGGER.debug(
                 'received an error from AWS S3 when trying to head bucket "%s"',

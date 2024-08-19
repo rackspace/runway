@@ -263,18 +263,18 @@ class VariableValue:
 
         """
         if isinstance(obj, BaseModel):
-            return VariableValuePydanticModel(obj, variable_type=variable_type)  # type: ignore
+            return VariableValuePydanticModel(obj, variable_type=variable_type)
         if isinstance(obj, dict):
             return VariableValueDict(obj, variable_type=variable_type)  # type: ignore
         if isinstance(obj, list):
             return VariableValueList(obj, variable_type=variable_type)  # type: ignore
         if not isinstance(obj, str):
-            return VariableValueLiteral(obj, variable_type=variable_type)  # type: ignore
+            return VariableValueLiteral(obj, variable_type=variable_type)
 
         tokens: VariableValueConcatenation[VariableValueLiteral[str] | VariableValueLookup] = (
             VariableValueConcatenation(
                 # pyright 1.1.138 is having issues properly inferring the type from comprehension
-                [  # type: ignore
+                [
                     VariableValueLiteral(cast(str, t), variable_type=variable_type)
                     for t in re.split(r"(\$\{|\}|\s+)", obj)  # ${ or space or }
                 ]
@@ -516,7 +516,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         self, __index: int | slice
     ) -> MutableSequence[VariableValue] | VariableValue:
         """Get item by index."""
-        return self._data[__index]  # pyright: ignore[reportCallIssue]
+        return self._data[__index]
 
     @overload
     def __setitem__(self, __index: int, __value: VariableValue) -> None: ...
@@ -639,7 +639,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
                 concat[-1] = VariableValueLiteral(
                     str(concat[-1].value) + str(item.value)  # type: ignore
                 )
-            elif isinstance(item, VariableValueConcatenation):  # type: ignore
+            elif isinstance(item, VariableValueConcatenation):
                 concat.extend(iter(item.simplified))
             else:
                 concat.append(item.simplified)

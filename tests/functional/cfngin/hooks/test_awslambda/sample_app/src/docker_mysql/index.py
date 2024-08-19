@@ -24,7 +24,7 @@ def handler(event: dict[str, Any], context: object) -> LambdaResponse:  # noqa: 
                     str(path.relative_to(PACKAGE_DIR))
                     for path in sorted(PACKAGE_DIR.rglob("*"), reverse=True)
                 ],
-                "mysqlclient": [i[0] for i in inspect.getmembers(MySQLdb)],  # type: ignore
+                "mysqlclient": [i[0] for i in inspect.getmembers(MySQLdb)],
             },
             "message": None,
             "status": "success",

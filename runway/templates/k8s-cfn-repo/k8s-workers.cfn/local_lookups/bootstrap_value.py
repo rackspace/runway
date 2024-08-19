@@ -41,7 +41,7 @@ class BootstrapValue(LookupHandler):
     """
 
     @classmethod
-    def handle(  # type: ignore
+    def handle(
         cls,
         value: str,
         context: CfnginContext,
