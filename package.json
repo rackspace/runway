@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "cspell": "^8.13.3",
+    "cspell": "^8.14.1",
     "pyright": "^1.1.223"
   },
   "name": "runway",
