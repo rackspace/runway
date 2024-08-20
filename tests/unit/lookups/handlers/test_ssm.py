@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 def get_parameter_response(
     name: str,
     value: str,
+    *,
     value_type: str = "String",
     label: str | None = None,
     version: int = 1,
@@ -47,7 +48,7 @@ def get_parameter_request(name: str, decrypt: bool = True) -> dict[str, bool | s
 class TestSsmLookup:
     """Test runway.lookups.handlers.ssm.SsmLookup."""
 
-    def test_basic(
+    def test_handle_basic(
         self, cfngin_context: MockCfnginContext, runway_context: MockRunwayContext
     ) -> None:
         """Test resolution of a basic lookup."""
@@ -75,7 +76,7 @@ class TestSsmLookup:
         cfn_stub.assert_no_pending_responses()
         rw_stub.assert_no_pending_responses()
 
-    def test_default(self, runway_context: MockRunwayContext) -> None:
+    def test_handle_default(self, runway_context: MockRunwayContext) -> None:
         """Test resolution of a default value."""
         name = "/test/param"
         value = "test value"
@@ -102,7 +103,7 @@ class TestSsmLookup:
             assert var.value == value
             stub.assert_no_pending_responses()
 
-    def test_different_region(self, runway_context: MockRunwayContext) -> None:
+    def test_handle_different_region(self, runway_context: MockRunwayContext) -> None:
         """Test Lookup in region other than that set in Context."""
         name = "/test/param"
         value = "test value"
@@ -120,7 +121,7 @@ class TestSsmLookup:
             assert var.value == value
             stub.assert_no_pending_responses()
 
-    def test_loaded_value(self, runway_context: MockRunwayContext) -> None:
+    def test_handle_loaded_value(self, runway_context: MockRunwayContext) -> None:
         """Test resolution of a JSON value."""
         name = "/test/param"
         raw_value = {
@@ -170,7 +171,7 @@ class TestSsmLookup:
                     assert var.value == test["expected"]
                     stub.assert_no_pending_responses()
 
-    def test_not_found(self, runway_context: MockRunwayContext) -> None:
+    def test_handle_not_found(self, runway_context: MockRunwayContext) -> None:
         """Test raises ParameterNotFound."""
         name = "/test/param"
         stubber = runway_context.add_stubber("ssm")
@@ -187,3 +188,35 @@ class TestSsmLookup:
 
         assert "ParameterNotFound" in str(err.value.__cause__)
         stub.assert_no_pending_responses()
+
+    def test_handle_no_value(self, runway_context: MockRunwayContext) -> None:
+        """Test handle no ``Value`` in response."""
+        name = "/test/param"
+        value = "foo"
+        stubber = runway_context.add_stubber("ssm")
+        var = Variable("test_var", f"${{ssm {name}}}", variable_type="runway")
+        response = get_parameter_response(name, value)
+        response["Parameter"].pop("Value", None)
+        stubber.add_response("get_parameter", response, get_parameter_request(name))
+
+        with stubber:
+            var.resolve(context=runway_context)
+            assert var.value is None
+        stubber.assert_no_pending_responses()
+
+    def test_handle_string_list(self, runway_context: MockRunwayContext) -> None:
+        """Test handle ``StringList`` returned as list."""
+        name = "/test/param"
+        value = ["foo", "bar"]
+        stubber = runway_context.add_stubber("ssm")
+        var = Variable("test_var", f"${{ssm {name}}}", variable_type="runway")
+        stubber.add_response(
+            "get_parameter",
+            get_parameter_response(name, ",".join(value), value_type="StringList"),
+            get_parameter_request(name),
+        )
+
+        with stubber:
+            var.resolve(context=runway_context)
+            assert var.value == value
+        stubber.assert_no_pending_responses()
