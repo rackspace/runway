@@ -438,7 +438,3 @@ class RunwayConfigDefinitionModel(ConfigProperty):
                 Path(path).read_text(encoding=locale.getpreferredencoding(do_setlocale=False))
             )
         )
-
-
-# https://docs.pydantic.dev/latest/concepts/postponed_annotations/#self-referencing-or-recursive-models
-RunwayDeploymentDefinitionModel.model_rebuild()

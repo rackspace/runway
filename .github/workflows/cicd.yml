@@ -87,6 +87,8 @@ jobs:
       (needs.changes.outputs.infra-test == 'true' || needs.changes.outputs.infra-test-alt == 'true')
     runs-on: ubuntu-latest
     steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v4
       - name: 🏗 Setup Python
         uses: finleyfamily/action-setup-python@v1.0.0
         with:

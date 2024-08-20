@@ -14,7 +14,7 @@ from s3transfer.exceptions import FatalError
 
 from runway._logging import LogLevels
 from runway.core.providers.aws.s3._helpers.results import (
-    AnyResult,
+    AnyResultType,
     BaseResultHandler,
     BaseResultSubscriber,
     CommandResult,
@@ -131,7 +131,7 @@ class BaseResultSubscriberTest:
     def _get_transfer_future_call_args(self) -> FakeTransferFutureCallArgs:
         return FakeTransferFutureCallArgs(fileobj=self.filename, key=self.key, bucket=self.bucket)
 
-    def get_queued_result(self) -> AnyResult:
+    def get_queued_result(self) -> AnyResultType:
         """Get queued result."""
         return self.result_queue.get(block=False)
 
@@ -1233,7 +1233,7 @@ class TestResultRecorder:
     def test_get_ongoing_dict_key(self) -> None:
         """Test _get_ongoing_dict_key."""
         with pytest.raises(TypeError):
-            self.result_recorder._get_ongoing_dict_key(Mock())  # type: ignore
+            self.result_recorder._get_ongoing_dict_key(Mock())
 
     def test_record_error_result(self) -> None:
         """Test _record_error_result."""
