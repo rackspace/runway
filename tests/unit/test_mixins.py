@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import subprocess
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock
 
 import pytest
@@ -34,7 +34,7 @@ class TestCliInterfaceMixin:
 
     @pytest.mark.parametrize("env", [None, {"foo": "bar"}])
     def test__run_command(
-        self, env: Optional[dict[str, str]], mocker: MockerFixture, tmp_path: Path
+        self, env: dict[str, str] | None, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test _run_command."""
         ctx_env = {"foo": "bar", "bar": "foo"}
@@ -76,7 +76,7 @@ class TestCliInterfaceMixin:
             ("--", "foo-bar", "--foo-bar"),
         ],
     )
-    def test_convert_to_cli_arg(self, expected: str, prefix: Optional[str], provided: str) -> None:
+    def test_convert_to_cli_arg(self, expected: str, prefix: str | None, provided: str) -> None:
         """Test convert_to_cli_arg."""
         if prefix:
             assert self.Kls.convert_to_cli_arg(provided, prefix=prefix) == expected

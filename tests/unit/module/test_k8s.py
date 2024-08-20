@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
@@ -84,7 +84,7 @@ class TestK8s:
     )
     def test_gen_cmd(
         self,
-        args_list: Optional[list[str]],
+        args_list: list[str] | None,
         command: KubectlCommandTypeDef,
         expected: list[str],
         mocker: MockerFixture,

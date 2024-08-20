@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Union
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ...lookups.handlers.base import LookupHandler
 
@@ -25,7 +25,7 @@ class SsmLookup(LookupHandler):
     def handle(
         cls,
         value: str,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *__args: Any,
         **__kwargs: Any,
     ) -> Any:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -105,9 +105,9 @@ class TestImageBuildArgs:
     )
     def test__set_docker_dict(
         self,
-        expected: Optional[str],
-        repo: Optional[str],
-        tag: Optional[str],
+        expected: str | None,
+        repo: str | None,
+        tag: str | None,
         tmp_path: Path,
     ) -> None:
         """Test _set_docker."""
@@ -128,9 +128,9 @@ class TestImageBuildArgs:
     )
     def test__set_docker_model(
         self,
-        expected: Optional[str],
-        repo: Optional[str],
-        tag: Optional[str],
+        expected: str | None,
+        repo: str | None,
+        tag: str | None,
         tmp_path: Path,
     ) -> None:
         """Test _set_docker."""

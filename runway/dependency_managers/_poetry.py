@@ -6,7 +6,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import tomli
 
@@ -87,9 +87,7 @@ class Poetry(DependencyManager):
 
         # check for PEP-517 definition
         pyproject = tomli.loads(pyproject_path.read_text())
-        build_system_requires: Optional[list[str]] = pyproject.get("build-system", {}).get(
-            "requires"
-        )
+        build_system_requires: list[str] | None = pyproject.get("build-system", {}).get("requires")
 
         if build_system_requires:
             for req in build_system_requires:
@@ -102,7 +100,7 @@ class Poetry(DependencyManager):
         self,
         *,
         dev: bool = False,
-        extras: Optional[list[str]] = None,
+        extras: list[str] | None = None,
         output: StrPath,
         output_format: str = "requirements.txt",
         with_credentials: bool = True,

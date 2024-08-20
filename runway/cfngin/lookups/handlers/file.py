@@ -7,8 +7,7 @@ import base64
 import collections.abc
 import json
 import re
-from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, overload
 
 import yaml
 from pydantic import field_validator
@@ -19,18 +18,18 @@ from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
+    from collections.abc import Mapping, Sequence
+
+    from typing_extensions import Literal, TypeAlias
 
     from ....lookups.handlers.base import ParsedArgsTypeDef
 
 _PARAMETER_PATTERN = re.compile(r"{{([::|\w]+)}}")
 
-ParameterizedObjectTypeDef = Union[str, Mapping[str, Any], Sequence[Any], Any]
-ParameterizedObjectReturnTypeDef = Union[
-    dict[str, "ParameterizedObjectReturnTypeDef"],
-    GenericHelperFn,
-    list["ParameterizedObjectReturnTypeDef"],
-]
+ParameterizedObjectTypeDef: TypeAlias = "str | Mapping[str, Any] | Sequence[Any] | Any"
+ParameterizedObjectReturnTypeDef: TypeAlias = (
+    "dict[str, ParameterizedObjectReturnTypeDef] | GenericHelperFn | list[ParameterizedObjectReturnTypeDef]"
+)
 
 
 class ArgsDataModel(BaseModel):

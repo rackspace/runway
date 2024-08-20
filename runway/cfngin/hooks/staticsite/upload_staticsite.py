@@ -8,7 +8,7 @@ import logging
 import os
 import time
 from operator import itemgetter
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
 
@@ -239,7 +239,7 @@ def auto_detect_content_type(filename: str | None) -> str | None:
     return None
 
 
-def get_content_type(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]:
+def get_content_type(extra_file: RunwayStaticSiteExtraFileDataModel) -> str | None:
     """Return the content type of the file.
 
     Args:
@@ -253,7 +253,7 @@ def get_content_type(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional
     return extra_file.content_type or auto_detect_content_type(extra_file.name)
 
 
-def get_content(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]:
+def get_content(extra_file: RunwayStaticSiteExtraFileDataModel) -> str | None:
     """Get serialized content based on content_type.
 
     Args:
@@ -276,7 +276,7 @@ def get_content(extra_file: RunwayStaticSiteExtraFileDataModel) -> Optional[str]
         if not isinstance(extra_file.content, str):
             raise TypeError(f"unsupported content: {type(extra_file.content)}")
 
-    return cast(Optional[str], extra_file.content)
+    return cast("str | None", extra_file.content)
 
 
 def calculate_hash_of_extra_files(

@@ -14,20 +14,20 @@ Args
 ****
 
 .. data:: command
-  :type: Union[List[str], str]
+  :type: list[str] | str
   :noindex:
 
   Command(s) to run.
 
 .. data:: capture
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
   If enabled, capture the command's stdout and stderr, and return them in the hook result.
 
 .. data:: interactive
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
@@ -35,14 +35,14 @@ Args
   Otherwise, stdin will be set to the null device.
 
 .. data:: ignore_status
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
   Don't fail the hook if the command returns a non-zero status.
 
 .. data:: quiet
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
@@ -50,7 +50,7 @@ Args
   Should not be enabled if ``capture`` is also enabled.
 
 .. data:: stdin
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -58,7 +58,7 @@ Args
   Implicitly disables ``interactive``.
 
 .. data:: env
-  :type: Optional[Dict[str, str]]
+  :type: dict[str, str] | None
   :value: None
   :noindex:
 

@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Union
+from typing import TYPE_CHECKING, Any, Callable, ClassVar
 
 import botocore.exceptions
 
@@ -172,21 +172,17 @@ class BaseAction:
             LOGGER.error(str(err))
             sys.exit(1)
 
-    def pre_run(
-        self, *, dump: Union[bool, str] = False, outline: bool = False, **__kwargs: Any
-    ) -> None:
+    def pre_run(self, *, dump: bool | str = False, outline: bool = False, **__kwargs: Any) -> None:
         """Perform steps before running the action."""
 
-    def post_run(
-        self, *, dump: Union[bool, str] = False, outline: bool = False, **__kwargs: Any
-    ) -> None:
+    def post_run(self, *, dump: bool | str = False, outline: bool = False, **__kwargs: Any) -> None:
         """Perform steps after running the action."""
 
     def run(
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,
+        dump: bool | str = False,
         force: bool = False,
         outline: bool = False,
         tail: bool = False,

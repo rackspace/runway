@@ -13,7 +13,7 @@ Top-Level Configuration
 ***********************
 
 .. attribute:: deployments
-  :type: List[deployment]
+  :type: list[deployment]
 
   A list of deployments that will be processed in the order they are defined.
   See Deployment_ for detailed information about defining this value.
@@ -71,7 +71,7 @@ Top-Level Configuration
   .. versionadded:: 1.11.0
 
 .. attribute:: tests
-  :type: Optional[List[test]]
+  :type: list[test] | None
   :value: []
 
   List of Runway test definitions that are executed with the :ref:`test command <commands:test>`.
@@ -90,7 +90,7 @@ Top-Level Configuration
 .. _runway-variables:
 
 .. attribute:: variables
-  :type: Optional[Dict[str, Any]]
+  :type: dict[str, Any] | None
   :value: {}
 
   Runway variables are used to fill values that could change based on any number of circumstances.
@@ -130,7 +130,7 @@ Top-Level Configuration
   .. versionadded 1.4.0
 
   .. data:: variables.file_path
-    :type: Optional[str]
+    :type: str | None
 
     Explicit path to a variables file that will be loaded and merged with the variables defined here.
 
@@ -141,7 +141,7 @@ Top-Level Configuration
         file_path: some-file.yml
 
   .. data:: variables.sys_path
-    :type: Optional[str]
+    :type: str | None
     :value: ./
 
     Directory to use as the root of a relative :data:`variables.file_path`.
@@ -199,7 +199,7 @@ Deployment
 
 
   .. attribute:: account_alias
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     An `AWS account alias <https://docs.aws.amazon.com/IAM/latest/UserGuide/console_account-alias.html>`__ use to verify the currently assumed role or credentials.
@@ -228,7 +228,7 @@ Deployment
       No longer accepts a :class:`typing.Dict`.
 
   .. attribute:: account_id
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     An AWS account ID use to verify the currently assumed role or credentials.
@@ -257,7 +257,7 @@ Deployment
       No longer accepts a :class:`typing.Dict`.
 
   .. attribute:: assume_role
-    :type: Optional[assume_role_definition, str]
+    :type: assume_role_definition | str | None
     :value: {}
 
     Assume an AWS IAM role when processing the deployment.
@@ -312,7 +312,7 @@ Deployment
         An identifier for the assumed role session.
 
   .. attribute:: env_vars
-    :type: Optional[Dict[str, Union[List[str], str]]]
+    :type: dict[str, list[str] | str] | None
     :value: {}
 
     Additional variables to add to the environment when processing the deployment.
@@ -347,7 +347,7 @@ Deployment
       The entire value of the field is used for all environments.
 
   .. attribute:: environments
-    :type: Optional[Dict[str, Union[bool, List[str], str]]]
+    :type: dict[str, bool | list[str] | str] | None
     :value: {}
 
     Explicitly enable/disable the deployment for a specific deploy environment, AWS Account ID, and AWS Region combination.
@@ -386,7 +386,7 @@ Deployment
       If defined and the current deploy environment is missing from the definition, processing will be skipped.
 
   .. attribute:: modules
-    :type: List[Union[module, str]]
+    :type: list[module | str]
 
     A list of modules to process as part of a deployment.
 
@@ -399,7 +399,7 @@ Deployment
             - path: sampleapp-02.cfn
 
   .. attribute:: module_options
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Options that are passed directly to the modules within this deployment.
@@ -434,7 +434,7 @@ Deployment
           example: value
 
   .. attribute:: name
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     The name of the deployment to be displayed in logs and the interactive selection menu.
@@ -446,7 +446,7 @@ Deployment
         - name: networking
 
   .. attribute:: parallel_regions
-    :type: Optional[Union[List[str], str]]
+    :type: list[str] | str | None
     :value: []
 
     A list of AWS Regions to process asynchronously.
@@ -488,7 +488,7 @@ Deployment
     .. versionadded:: 1.3.0
 
   .. attribute:: parameters
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Used to pass variable values to modules in place of an environment configuration file.
@@ -517,7 +517,7 @@ Deployment
     .. versionadded:: 1.4.0
 
   .. attribute:: regions
-    :type: Optional[Union[Dict[str, Union[List[str], str], List[str], str]]
+    :type: dict[str, list[str] | str] | list[str] | str | None
     :value: []
 
     A list of AWS Regions to process this deployment in.
@@ -618,7 +618,7 @@ Module
   - :attr:`~module.path`
 
   .. attribute:: class_path
-    :type: Optional[str]
+    :type: str | None
     :value: null
 
     .. note::
@@ -636,7 +636,7 @@ Module
           - class_path: runway.module.cloudformation.CloudFormation
 
   .. attribute:: env_vars
-    :type: Optional[Dict[str, Union[List[str], str]]]
+    :type: dict[str, list[str] | str] | None
     :value: {}
 
     Additional variables to add to the environment when processing the deployment.
@@ -674,7 +674,7 @@ Module
       The entire value of the field is used for all environments.
 
   .. attribute:: environments
-    :type: Optional[Dict[str, Union[bool, List[str], str]]]
+    :type: dict[str, bool | list[str] | str] | None
     :value: {}
 
     Explicitly enable/disable the deployment for a specific deploy environment, AWS Account ID, and AWS Region combination.
@@ -716,7 +716,7 @@ Module
       If defined and the current deploy environment is missing from the definition, processing will be skipped.
 
   .. attribute:: name
-    :type: Optional[str]
+    :type: str | None
 
     The name of the module to be displayed in logs and the interactive selection menu.
 
@@ -730,7 +730,7 @@ Module
           - name: networking
 
   .. attribute:: options
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Options that are passed directly to the module type handler class.
@@ -772,7 +772,7 @@ Module
           example: value
 
   .. attribute:: parallel
-    :type: Optional[List[module]]
+    :type: list[module] | None
     :value: []
 
     List of `module` definitions that can be executed asynchronously.
@@ -792,7 +792,7 @@ Module
             - path: sampleapp-02.cfn
 
   .. attribute:: parameters
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Used to pass variable values to modules in place of an environment configuration file.
@@ -824,7 +824,7 @@ Module
     .. versionadded:: 1.4.0
 
   .. attribute:: path
-    :type: Optional[Union[str, Path]]
+    :type: str | Path | None
 
     Directory (relative to the Runway config file) containing IaC.
     The directory can either be on the local file system or a network accessible location.
@@ -842,7 +842,7 @@ Module
     .. versionadded:: 1.4.0
 
   .. attribute:: tags
-    :type: Optional[List[str]]
+    :type: list[str] | None
     :value: []
 
     A list of strings to categorize the module which can be used with the CLI to quickly select a group of modules.
@@ -859,7 +859,7 @@ Module
             - type:network
 
   .. attribute:: type
-    :type: Optional[str]
+    :type: str | None
 
     Explicitly define the type of IaC contained within the directory.
     This can be useful when Runway fails to automatically determine the correct module type.
@@ -998,7 +998,7 @@ Test
   - :attr:`test.required`
 
   .. attribute:: args
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Arguments to be passed to the test.
@@ -1014,7 +1014,7 @@ Test
               - echo "Hello world"
 
   .. attribute:: name
-    :type: Optional[str]
+    :type: str | None
 
     Name of the test.
     Used to more easily identify where different tests begin/end in the logs and to identify which tests failed.

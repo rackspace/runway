@@ -2,7 +2,9 @@
 
 # cspell:disable
 # ruff: noqa: D103
-from typing import Any, Callable, Union
+from __future__ import annotations
+
+from typing import Any, Callable
 
 from docker import constants
 
@@ -523,7 +525,7 @@ prefix = "http+docker://localhost"
 if constants.IS_WINDOWS_PLATFORM:
     prefix = "http+docker://localnpipe"
 
-fake_responses: dict[Union[str, tuple[str, str]], Callable[..., tuple[int, Any]]] = {
+fake_responses: dict[str | tuple[str, str], Callable[..., tuple[int, Any]]] = {
     f"{prefix}/version": get_fake_version,
     f"{prefix}/{CURRENT_VERSION}/version": get_fake_version,
     f"{prefix}/{CURRENT_VERSION}/info": get_fake_info,

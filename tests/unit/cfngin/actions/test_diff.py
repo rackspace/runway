@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import unittest
 from operator import attrgetter
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -48,7 +48,7 @@ class TestAction:
         self,
         mock_bucket_init: MagicMock,
         caplog: pytest.LogCaptureFixture,
-        bucket_name: Optional[str],
+        bucket_name: str | None,
         forbidden: bool,
         not_found: bool,
         cfngin_context: MockCfnginContext,

@@ -474,7 +474,7 @@ class ServerlessArtifact:
                 )
                 for name, detail in self.config.get("functions", {}).items()
             }
-        directories: list[dict[str, list[str] | str]] = []
+        directories: list[dict[str, list[str] | str | None]] | None = []
         for detail in self.config.get("functions", {}).values():
             func_path = {"path": os.path.dirname(detail.get("handler"))}  # noqa: PTH120
             if func_path not in directories:

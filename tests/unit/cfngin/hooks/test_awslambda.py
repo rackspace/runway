@@ -14,7 +14,7 @@ import sys
 import unittest
 from io import BytesIO as StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import ANY, MagicMock, patch
 from zipfile import ZipFile
 
@@ -71,7 +71,7 @@ class TestLambdaHooks(unittest.TestCase):
 
     @classmethod
     def temp_directory_with_files(
-        cls, files: Union[list[str], tuple[str, ...]] = ALL_FILES
+        cls, files: list[str] | tuple[str, ...] = ALL_FILES
     ) -> TempDirectory:
         """Create a temp directory with files."""
         temp_dict = TempDirectory()
@@ -412,7 +412,7 @@ class TestLambdaHooks(unittest.TestCase):
 
     def test_select_bucket_region(self) -> None:
         """Test select bucket region."""
-        tests: tuple[tuple[tuple[Optional[str], Optional[str], Optional[str], str], str], ...] = (
+        tests: tuple[tuple[tuple[str | None, str | None, str | None, str], str], ...] = (
             (("myBucket", "us-east-1", "us-west-1", "eu-west-1"), "us-east-1"),
             (("myBucket", None, "us-west-1", "eu-west-1"), "eu-west-1"),
             ((None, "us-east-1", "us-west-1", "eu-west-1"), "us-west-1"),
@@ -420,7 +420,7 @@ class TestLambdaHooks(unittest.TestCase):
         )
 
         for args, result in tests:
-            assert select_bucket_region(*args) == result  # type: ignore
+            assert select_bucket_region(*args) == result
 
     @mock_aws
     def test_follow_symlink_nonbool(self) -> None:

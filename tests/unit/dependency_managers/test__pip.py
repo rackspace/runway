@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock
 
 import pytest
@@ -48,7 +48,7 @@ class TestPip:
     def test_generate_command(
         self,
         caplog: pytest.LogCaptureFixture,
-        command: Union[list[str], str],
+        command: list[str] | str,
         mocker: MockerFixture,
     ) -> None:
         """Test generate_command."""

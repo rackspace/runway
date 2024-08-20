@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
@@ -131,7 +131,7 @@ class TestPythonDockerDependencyInstaller:
         ],
     )
     def test_runtime(
-        self, expected: Optional[str], mocker: MockerFixture, version: Optional[Version]
+        self, expected: str | None, mocker: MockerFixture, version: Version | None
     ) -> None:
         """Test runtime."""
         mocker.patch.object(PythonDockerDependencyInstaller, "python_version", version)

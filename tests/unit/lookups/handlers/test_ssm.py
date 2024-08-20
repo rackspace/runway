@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 import pytest
 import yaml
@@ -20,7 +20,7 @@ def get_parameter_response(
     name: str,
     value: str,
     value_type: str = "String",
-    label: Optional[str] = None,
+    label: str | None = None,
     version: int = 1,
 ) -> dict[str, Any]:
     """Generate a mock ssm.get_parameter response."""
@@ -39,7 +39,7 @@ def get_parameter_response(
     }
 
 
-def get_parameter_request(name: str, decrypt: bool = True) -> dict[str, Union[bool, str]]:
+def get_parameter_request(name: str, decrypt: bool = True) -> dict[str, bool | str]:
     """Generate the expected request parameters for ssm.get_parameter."""
     return {"Name": name, "WithDecryption": decrypt}
 

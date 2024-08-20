@@ -7,7 +7,7 @@ import json
 import logging
 import multiprocessing
 import sys
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
 
@@ -88,7 +88,7 @@ class Module:
         ]
 
     @cached_property
-    def environment_matches_defined(self) -> Optional[bool]:
+    def environment_matches_defined(self) -> bool | None:
         """Environment matches one of the defined environments.
 
         Will return None if there is nothing defined for the current environment.
@@ -293,7 +293,7 @@ class Module:
         modules: list[RunwayModuleDefinition],
         variables: RunwayVariablesDefinition,
         deployment: RunwayDeploymentDefinition = None,
-        future: Optional[RunwayFutureDefinitionModel] = None,
+        future: RunwayFutureDefinitionModel | None = None,
     ) -> None:
         """Run a list of modules.
 
@@ -327,9 +327,9 @@ class Module:
 
 def validate_environment(
     context: RunwayContext,
-    env_def: Optional[Union[bool, dict[str, Any], int, str, list[str]]],
-    logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-) -> Optional[bool]:
+    env_def: bool | dict[str, Any] | int | str | list[str] | None,
+    logger: PrefixAdaptor | RunwayLogger = LOGGER,
+) -> bool | None:
     """Check if an environment should be deployed to.
 
     Args:

@@ -11,7 +11,6 @@ from typing import (
     Callable,
     Generic,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -291,7 +290,5 @@ class Action(deploy.Action):
             LOGGER.verbose("proceeding without a cfngin_bucket...")
             self.bucket_name = None
 
-    def post_run(
-        self, *, dump: Union[bool, str] = False, outline: bool = False, **__kwargs: Any
-    ) -> None:
+    def post_run(self, *, dump: bool | str = False, outline: bool = False, **__kwargs: Any) -> None:
         """Do nothing."""

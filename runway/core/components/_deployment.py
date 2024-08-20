@@ -6,7 +6,7 @@ import concurrent.futures
 import logging
 import multiprocessing
 import sys
-from typing import TYPE_CHECKING, Any, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from ..._logging import PrefixAdaptor
 from ...compat import cached_property
@@ -45,8 +45,8 @@ class Deployment:
         self,
         context: RunwayContext,
         definition: RunwayDeploymentDefinition,
-        future: Optional[RunwayFutureDefinitionModel] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        future: RunwayFutureDefinitionModel | None = None,
+        variables: RunwayVariablesDefinition | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -187,7 +187,7 @@ class Deployment:
                 variables=self._variables,
             )
 
-    def validate_account_credentials(self, context: Optional[RunwayContext] = None) -> None:
+    def validate_account_credentials(self, context: RunwayContext | None = None) -> None:
         """Exit if requested deployment account doesn't match credentials.
 
         Args:

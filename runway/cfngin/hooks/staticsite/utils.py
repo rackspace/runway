@@ -6,7 +6,7 @@ import hashlib
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import TYPE_CHECKING, cast
 
 import igittigitt
 
@@ -38,7 +38,7 @@ def calculate_hash_of_files(files: Iterable[StrPath], root: Path) -> str:
 
 def get_hash_of_files(
     root_path: Path,
-    directories: Optional[list[dict[str, Union[list[str], str]]]] = None,
+    directories: list[dict[str, list[str] | str | None]] | None = None,
 ) -> str:
     """Generate md5 hash of files.
 

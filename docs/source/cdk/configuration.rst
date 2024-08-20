@@ -82,7 +82,7 @@ Options
 .. _cdk.build_steps:
 
 .. data:: build_steps
-  :type: Optional[List[str]]
+  :type: list[str] | None
   :value: None
   :noindex:
 

@@ -14,7 +14,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Union,
     cast,
 )
 from urllib.parse import urlparse, urlunparse
@@ -750,7 +749,7 @@ class Provider(BaseProvider):
             Reason for the Stack's DELETE_FAILED status if one can be found.
 
         """
-        event: Union[dict[str, str], StackEventTypeDef] = (
+        event: dict[str, str] | StackEventTypeDef = (
             self.get_event_by_resource_status(stack_name, "DELETE_FAILED", chronological=True) or {}
         )
         return event.get("ResourceStatusReason")
@@ -816,7 +815,7 @@ class Provider(BaseProvider):
             Reason for the Stack's rollback status if one can be found.
 
         """
-        event: Union[dict[str, str], StackEventTypeDef] = (
+        event: dict[str, str] | StackEventTypeDef = (
             self.get_event_by_resource_status(
                 stack_name, "UPDATE_ROLLBACK_IN_PROGRESS", chronological=False
             )
@@ -1416,7 +1415,7 @@ class Provider(BaseProvider):
         """Get stack outputs dict."""
         return get_output_dict(stack)
 
-    def get_stack_info(self, stack: StackTypeDef) -> tuple[str, dict[str, Union[list[str], str]]]:
+    def get_stack_info(self, stack: StackTypeDef) -> tuple[str, dict[str, list[str] | str]]:
         """Get the template and parameters of the stack currently in AWS."""
         stack_name = stack.get("StackId", "None")
 
@@ -1465,7 +1464,7 @@ class Provider(BaseProvider):
             old_template: dict[str, Any] = parse_cloudformation_template(old_template_raw)
             change_type = "UPDATE"
         except exceptions.StackDoesNotExist:
-            old_params: dict[str, Union[list[str], str]] = {}
+            old_params: dict[str, list[str] | str] = {}
             old_template = {}
             change_type = "CREATE"
 
@@ -1581,7 +1580,7 @@ class Provider(BaseProvider):
     @staticmethod
     def params_as_dict(
         parameters_list: list[ParameterTypeDef],
-    ) -> dict[str, Union[list[str], str]]:
+    ) -> dict[str, list[str] | str]:
         """Parameters as dict."""
         return {
             param["ParameterKey"]: param["ParameterValue"]  # type: ignore

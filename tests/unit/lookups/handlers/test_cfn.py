@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock
 
 import boto3
@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 def generate_describe_stacks_stack(
     stack_name: str,
     outputs: dict[str, str],
-    creation_time: Optional[datetime] = None,
+    creation_time: datetime | None = None,
     stack_status: str = "CREATE_COMPLETE",
 ) -> dict[str, Any]:
     """Generate describe stacks stack.
@@ -37,7 +37,7 @@ def generate_describe_stacks_stack(
     Args:
         stack_name: Name of the stack.
         outputs: Dictionary to be converted to stack outputs.
-        creation_time (Optional[datetime.datetime]): Stack creation time.
+        creation_time: Stack creation time.
         stack_status: Current stack status.
 
     Returns:
@@ -126,7 +126,7 @@ class TestCfnLookup:
     def test_handle_exception(
         self,
         caplog: pytest.LogCaptureFixture,
-        default: Optional[str],
+        default: str | None,
         exception: Exception,
         mocker: MockerFixture,
     ) -> None:
@@ -182,7 +182,7 @@ class TestCfnLookup:
     def test_handle_provider_exception(
         self,
         caplog: pytest.LogCaptureFixture,
-        default: Optional[str],
+        default: str | None,
         exception: Exception,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -302,7 +302,7 @@ class TestCfnLookup:
         self,
         args: dict[str, Any],
         caplog: pytest.LogCaptureFixture,
-        provider: Optional[Provider],
+        provider: Provider | None,
     ) -> None:
         """Test should_use_provider with falsy cases."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")
@@ -322,7 +322,7 @@ class TestCfnLookup:
         self,
         args: dict[str, Any],
         caplog: pytest.LogCaptureFixture,
-        provider: Optional[Provider],
+        provider: Provider | None,
     ) -> None:
         """Test should_use_provider with truthy cases."""
         caplog.set_level(logging.DEBUG, logger="runway.lookups.handlers.cfn")

@@ -8,7 +8,7 @@ https://aws.amazon.com/blogs/networking-and-content-delivery/authorizationedge-h
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import awacs.logs
 import awacs.s3
@@ -64,8 +64,8 @@ class AuthAtEdge(StaticSite):
         self,
         name: str,
         context: CfnginContext,
-        mappings: Optional[dict[str, dict[str, Any]]] = None,
-        description: Optional[str] = None,
+        mappings: dict[str, dict[str, Any]] | None = None,
+        description: str | None = None,
     ) -> None:
         """Initialize the Blueprint.
 

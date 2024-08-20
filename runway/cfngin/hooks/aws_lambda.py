@@ -12,15 +12,12 @@ import stat
 import subprocess
 import sys
 import tempfile
-from collections.abc import Iterable, Iterator
 from io import BytesIO as StringIO
 from pathlib import Path
 from shutil import copyfile
 from typing import (
     TYPE_CHECKING,
     Any,
-    Optional,
-    Union,
     cast,
 )
 from zipfile import ZIP_DEFLATED, ZipFile
@@ -30,7 +27,6 @@ import botocore.exceptions
 import docker
 import docker.types
 import formic
-from docker.models.images import Image
 from troposphere.awslambda import Code
 from typing_extensions import Literal, TypedDict
 
@@ -38,9 +34,13 @@ from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
 from ..utils import ensure_s3_bucket
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+
+    from docker.models.images import Image
     from mypy_boto3_s3.client import S3Client
     from mypy_boto3_s3.literals import ObjectCannedACLType
     from mypy_boto3_s3.type_defs import HeadObjectOutputTypeDef
+    from typing_extensions import TypeAlias
 
     from ...context import CfnginContext
     from ..providers.aws.default import Provider
@@ -54,19 +54,16 @@ LOGGER = logging.getLogger(__name__)
 # list from python tags of https://hub.docker.com/r/lambci/lambda/tags
 SUPPORTED_RUNTIMES = ["python3.7", "python3.8"]
 
-DockerizePipArgTypeDef = Optional[
-    Union[
-        bool,
-        Literal["false", "False", "no", "No", "non-linux", "true", "True", "yes", "Yes"],
-    ]
-]
+DockerizePipArgTypeDef: TypeAlias = (
+    'bool | Literal["false", "False", "no", "No", "non-linux", "true", "True", "yes", "Yes"] | None'
+)
 
 
 def copydir(
     source: str,
     destination: str,
     includes: list[str],
-    excludes: Optional[list[str]] = None,
+    excludes: list[str] | None = None,
     follow_symlinks: bool = False,
 ) -> None:
     """Extend the functionality of shutil.
@@ -103,7 +100,7 @@ def copydir(
             copyfile(src, dest)
 
 
-def find_requirements(root: str) -> Optional[dict[str, bool]]:
+def find_requirements(root: str) -> dict[str, bool] | None:
     """Identify Python requirement files.
 
     Args:
@@ -212,8 +209,8 @@ def _calculate_hash(files: Iterable[str], root: str) -> str:
 
 def _find_files(
     root: str,
-    includes: Union[list[str], str],
-    excludes: Optional[list[str]] = None,
+    includes: list[str] | str,
+    excludes: list[str] | None = None,
     follow_symlinks: bool = False,
 ) -> Iterator[str]:
     """List files inside a directory based on include and exclude rules.
@@ -336,7 +333,7 @@ def handle_requirements(
 def _handle_use_pipenv(
     package_root: str,
     dest_path: str,
-    python_path: Optional[str] = None,
+    python_path: str | None = None,
     timeout: int = 300,
 ) -> str:
     """Create requirements file from Pipfile.
@@ -377,10 +374,10 @@ def _handle_use_pipenv(
 
 def dockerized_pip(  # noqa: C901, PLR0912
     work_dir: str,
-    client: Optional[docker.DockerClient] = None,
-    runtime: Optional[str] = None,
-    docker_file: Optional[str] = None,
-    docker_image: Optional[str] = None,
+    client: docker.DockerClient | None = None,
+    runtime: str | None = None,
+    docker_file: str | None = None,
+    docker_image: str | None = None,
     python_dontwritebytecode: bool = False,
     **_: Any,
 ) -> None:
@@ -414,7 +411,7 @@ def dockerized_pip(  # noqa: C901, PLR0912
             raise ValueError(f'could not find docker_file "{docker_file}"')
         LOGGER.info('building docker image from "%s"', docker_file)
         response = cast(
-            Union[Image, tuple[Image, Iterator[dict[str, str]]]],
+            "Image | tuple[Image, Iterator[dict[str, str]]]",
             client.images.build(
                 path=os.path.dirname(docker_file),  # noqa: PTH120
                 dockerfile=os.path.basename(docker_file),  # noqa: PTH119
@@ -506,14 +503,14 @@ def _zip_package(  # noqa: PLR0915, PLR0912, C901, D417
     package_root: str,
     *,
     dockerize_pip: DockerizePipArgTypeDef = False,
-    excludes: Optional[list[str]] = None,
+    excludes: list[str] | None = None,
     follow_symlinks: bool = False,
     includes: list[str],
     pipenv_timeout: int = 300,
     python_dontwritebytecode: bool = False,
     python_exclude_bin_dir: bool = False,
     python_exclude_setuptools_dirs: bool = False,
-    python_path: Optional[str] = None,
+    python_path: str | None = None,
     requirements_files: dict[str, bool],
     use_pipenv: bool = False,
     work_dir: Path,
@@ -649,7 +646,7 @@ def _zip_package(  # noqa: PLR0915, PLR0912, C901, D417
     return contents, content_hash
 
 
-def _head_object(s3_conn: S3Client, bucket: str, key: str) -> Optional[HeadObjectOutputTypeDef]:
+def _head_object(s3_conn: S3Client, bucket: str, key: str) -> HeadObjectOutputTypeDef | None:
     """Retrieve information about an object in S3 if it exists.
 
     Args:
@@ -679,7 +676,7 @@ def _upload_code(
     bucket: str,
     prefix: str,
     name: str,
-    contents: Union[bytes, str],
+    contents: bytes | str,
     content_hash: str,
     payload_acl: ObjectCannedACLType,
 ) -> Code:
@@ -727,10 +724,10 @@ def _upload_code(
 
 
 def _check_pattern_list(
-    patterns: Optional[Union[list[str], str]],
+    patterns: list[str] | str | None,
     key: str,
-    default: Optional[list[str]] = None,
-) -> Optional[list[str]]:
+    default: list[str] | None = None,
+) -> list[str] | None:
     """Validate file search patterns from user configuration.
 
     Acceptable input is a string (which will be converted to a singleton list),
@@ -774,8 +771,8 @@ class _UploadFunctionOptionsTypeDef(TypedDict):
 
     """
 
-    exclude: Optional[list[str]]
-    include: Optional[list[str]]
+    exclude: list[str] | None
+    include: list[str] | None
     path: str
 
 
@@ -850,9 +847,9 @@ def _upload_function(
 
 
 def select_bucket_region(
-    custom_bucket: Optional[str],
-    hook_region: Optional[str],
-    cfngin_bucket_region: Optional[str],
+    custom_bucket: str | None,
+    hook_region: str | None,
+    cfngin_bucket_region: str | None,
     provider_region: str,
 ) -> str:
     """Return the appropriate region to use when uploading functions.
@@ -902,41 +899,41 @@ def upload_lambda_functions(  # noqa: D417
         context: Context instance. (passed in by CFNgin)
 
     Keyword Args:
-        bucket (Optional[str]): Custom bucket to upload functions to.
+        bucket (str | None): Custom bucket to upload functions to.
             Omitting it will cause the default CFNgin bucket to be used.
-        bucket_region (Optional[str]): The region in which the bucket should
+        bucket_region (str | None): The region in which the bucket should
             exist. If not given, the region will be either be that of the
             global ``cfngin_bucket_region`` setting, or else the region in
             use by the provider.
-        prefix (Optional[str]): S3 key prefix to prepend to the uploaded
+        prefix (str | None): S3 key prefix to prepend to the uploaded
             zip name.
-        follow_symlinks (Optional[bool]): Will determine if symlinks should
+        follow_symlinks (str | None): Will determine if symlinks should
             be followed and included with the zip artifact. (*default:*
             ``False``)
-        payload_acl (Optional[str]): The canned S3 object ACL to be applied
+        payload_acl (str | None): The canned S3 object ACL to be applied
             to the uploaded payload. (*default: private*)
         functions (dict[str, Any]): Configurations of desired payloads to
             build. Keys correspond to function names, used to derive key
             names for the payload. Each value should itself be a dictionary,
             with the following data:
 
-            **docker_file (Optional[str])**
+            **docker_file (str | None)**
                 Path to a local DockerFile that will be built and used for
                 ``dockerize_pip``. Must provide exactly one of ``docker_file``,
                 ``docker_image``, or ``runtime``.
 
-            **docker_image (Optional[str])**
+            **docker_image (str | None)**
                 Custom Docker image to use  with ``dockerize_pip``. Must
                 provide exactly one of ``docker_file``, ``docker_image``, or
                 ``runtime``.
 
-            **dockerize_pip (Optional[Union[str, bool]])**
+            **dockerize_pip (bool | str | None)**
                 Whether to use Docker when preparing package dependencies with
                 pip. Can be set to True/False or the special string 'non-linux'
                 which will only run on non Linux systems. To use this option
                 Docker must be installed.
 
-            **exclude (Optional[Union[str, list[str]]])**
+            **exclude (str | list[str] | None)**
                 Pattern or list of patterns of files to exclude from the
                 payload. If provided, any files that match will be ignored,
                 regardless of whether they match an inclusion pattern.
@@ -945,7 +942,7 @@ def upload_lambda_functions(  # noqa: D417
                 such as ``.git``, ``.svn``, ``__pycache__``, ``*.pyc``,
                 ``.gitignore``, etc.
 
-            **include (Optional[Union[str, list[str]]])**
+            **include (str | list[str] | None)**
                 Pattern or list of patterns of files to include in the
                 payload. If provided, only files that match these
                 patterns will be included in the payload.
@@ -969,25 +966,25 @@ def upload_lambda_functions(  # noqa: D417
                 directly under this directory will be added to the root of
                 the ZIP file.
 
-            **pipenv_lock_timeout (Optional[int])**
+            **pipenv_lock_timeout (int | None)**
                 Time in seconds to wait while creating lock file with pipenv.
 
-            **pipenv_timeout (Optional[int])**
+            **pipenv_timeout (int | None)**
                 Time in seconds to wait while running pipenv.
 
-            **python_path (Optional[str])**
+            **python_path (str | None)**
                 Absolute path to a python interpreter to use for
                 ``pip``/``pipenv`` actions. If not provided, the current
                 python interpreter will be used for ``pip`` and ``pipenv``
                 will be used from the current ``$PATH``.
 
-            **runtime (Optional[str])**
+            **runtime (str | None)**
                 Runtime of the AWS Lambda Function being uploaded. Used with
                 ``dockerize_pip`` to automatically select the appropriate
                 Docker image to use. Must provide exactly one of
                 ``docker_file``, ``docker_image``, or ``runtime``.
 
-            **use_pipenv (Optional[bool])**
+            **use_pipenv (bool)**
                 Explicitly use Pipfile/Pipfile.lock to prepare package
                 dependencies even if a requirements.txt file is found.
 

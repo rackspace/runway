@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -73,7 +73,7 @@ class TestKBEnvManager:
             ("v0.15.0-alpha.13", Version("v0.15.0-alpha.13")),
         ],
     )
-    def test_parse_version_string(self, provided: str, expected: Optional[Version]) -> None:
+    def test_parse_version_string(self, provided: str, expected: Version | None) -> None:
         """Test parse_version_string."""
         assert KBEnvManager.parse_version_string(provided) == expected
 

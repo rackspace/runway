@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock, call
 
 import pytest
@@ -381,7 +381,7 @@ class TestCloudDevelopmentKit:
     )
     def test_gen_cmd(
         self,
-        args_list: Optional[list[str]],
+        args_list: list[str] | None,
         command: CdkCommandTypeDef,
         env_ci: bool,
         expected: list[str],

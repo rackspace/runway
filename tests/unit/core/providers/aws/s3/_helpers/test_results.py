@@ -6,7 +6,7 @@ import time
 from concurrent.futures import CancelledError
 from io import StringIO
 from queue import Queue
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 from unittest.mock import Mock
 
 import pytest
@@ -92,7 +92,7 @@ class BaseResultSubscriberTest:
     """Base class for result submitter test classes."""
 
     bucket: ClassVar[str] = "test-bucket"
-    dest: Optional[str]
+    dest: str | None
     failure_future: TransferFuture
     filename: ClassVar[str] = "test.txt"
     future: TransferFuture
@@ -110,8 +110,8 @@ class BaseResultSubscriberTest:
 
     def set_ref_transfer_futures(self) -> None:
         """Set reference transfer futures."""
-        self.future = self.get_success_transfer_future("foo")  # type: ignore
-        self.failure_future = self.get_failed_transfer_future(self.ref_exception)  # type: ignore
+        self.future = self.get_success_transfer_future("foo")
+        self.failure_future = self.get_failed_transfer_future(self.ref_exception)
 
     def get_success_transfer_future(self, result: str) -> TransferFuture:
         """Create a success transfer future."""
@@ -122,7 +122,7 @@ class BaseResultSubscriberTest:
         return self._get_transfer_future(exception=exception)  # type: ignore
 
     def _get_transfer_future(
-        self, result: Optional[Any] = None, exception: Optional[Exception] = None
+        self, result: Any | None = None, exception: Exception | None = None
     ) -> FakeTransferFuture:
         call_args = self._get_transfer_future_call_args()
         meta = FakeTransferFutureMeta(size=self.size, call_args=call_args)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Union
+from typing import TYPE_CHECKING, Any, ClassVar
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -48,7 +48,7 @@ class MockLookupHandler(LookupHandler):
     """Mock lookup handler."""
 
     return_value: ClassVar[Any] = "resolved"
-    side_effect: ClassVar[Union[Any, list[Any]]] = None
+    side_effect: ClassVar[Any | list[Any]] = None
 
     @classmethod
     def handle(
@@ -691,31 +691,31 @@ class TestVariableValueLiteral:
     """Test runway.variables.VariableValueLiteral."""
 
     @pytest.mark.parametrize("value", [False, True, 13, "test"])
-    def test_init(self, value: Union[int, str]) -> None:
+    def test_init(self, value: int | str) -> None:
         """Test __init__."""
         obj = VariableValueLiteral(value)  # type: ignore
         assert obj._data == value
 
     @pytest.mark.parametrize("value", [False, True, 13, "test"])
-    def test_iter(self, value: Union[int, str]) -> None:
+    def test_iter(self, value: int | str) -> None:
         """Test __iter__."""
         obj = VariableValueLiteral(value)  # type: ignore
         assert list(iter(obj)) == [obj]  # type: ignore
 
     @pytest.mark.parametrize("value", [False, True, 13, "test"])
-    def test_repr(self, value: Union[int, str]) -> None:
+    def test_repr(self, value: int | str) -> None:
         """Test __repr__."""
         obj = VariableValueLiteral(value)  # type: ignore
         assert repr(obj) == f"Literal[{value}]"  # type: ignore
 
     @pytest.mark.parametrize("value", [False, True, 13, "test"])
-    def test_resolved(self, value: Union[int, str]) -> None:
+    def test_resolved(self, value: int | str) -> None:
         """Test resolved."""
         obj = VariableValueLiteral(value)  # type: ignore
         assert obj.resolved
 
     @pytest.mark.parametrize("value", [False, True, 13, "test"])
-    def test_value(self, value: Union[int, str]) -> None:
+    def test_value(self, value: int | str) -> None:
         """Test value."""
         obj = VariableValueLiteral(value)  # type: ignore
         assert obj.value == value

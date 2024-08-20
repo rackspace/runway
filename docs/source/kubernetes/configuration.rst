@@ -13,7 +13,7 @@ Options
 *******
 
 .. data:: kubectl_version
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -27,7 +27,7 @@ Options
       kubectl_version: 1.14.5
 
 .. data:: overlay_path
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 

@@ -6,7 +6,7 @@ import json
 import locale
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
@@ -38,7 +38,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
     metavar="<file-name>",
 )
 @options.verbose
-def runway(indent: int, output: Optional[str], **_: Any) -> None:
+def runway(indent: int, output: str | None, **_: Any) -> None:
     """Output JSON schema Runway configuration files.
 
     The schema that is output can be used to validate configuration files.

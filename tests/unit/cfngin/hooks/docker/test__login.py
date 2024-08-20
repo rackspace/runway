@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -77,9 +77,9 @@ class TestLoginArgs:
     )
     def test__set_registry(
         self,
-        ecr: Optional[ElasticContainerRegistry],
-        expected: Optional[str],
-        registry: Optional[str],
+        ecr: ElasticContainerRegistry | None,
+        expected: str | None,
+        registry: str | None,
     ) -> None:
         """Test _set_registry."""
         assert LoginArgs(ecr=ecr, password="", registry=registry, username="").registry == expected

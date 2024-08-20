@@ -36,7 +36,6 @@ from .results import (
     ResultProcessor,
     ResultRecorder,
     SuccessResult,
-    Union,
     UploadResultSubscriber,
     UploadStreamResultSubscriber,
 )
@@ -147,12 +146,7 @@ class S3TransferHandlerFactory:
         self,
         result_recorder: ResultRecorder,
         result_processor_handlers: list[
-            Union[
-                NoProgressResultPrinter,
-                OnlyShowErrorsResultPrinter,
-                ResultPrinter,
-                ResultRecorder,
-            ]
+            NoProgressResultPrinter | OnlyShowErrorsResultPrinter | ResultPrinter | ResultRecorder
         ],
     ) -> None:
         if self._config_params.quiet:

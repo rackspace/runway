@@ -1,6 +1,8 @@
 """Test runway.config.models.base."""
 
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -28,7 +30,7 @@ class GoodObject(ConfigProperty):
     name: str
     bool_field: bool = True
     dict_field: dict[str, Any] = {}
-    optional_str_field: Optional[str] = None
+    optional_str_field: str | None = None
 
 
 GoodObject.model_config["extra"] = "forbid"

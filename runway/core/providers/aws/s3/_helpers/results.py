@@ -22,7 +22,6 @@ from typing import (
     NamedTuple,
     TextIO,
     TypedDict,
-    Union,
     cast,
 )
 
@@ -143,17 +142,9 @@ AllResultTypes = (
     SuccessResult,
     QueuedResult,
 )
-AnyResultType: TypeAlias = Union[
-    CommandResult,
-    CtrlCResult,
-    DryRunResult,
-    ErrorResult,
-    FailureResult,
-    FinalTotalSubmissionsResult,
-    ProgressResult,
-    QueuedResult,
-    SuccessResult,
-]
+AnyResultType: TypeAlias = (
+    "CommandResult | CtrlCResult | DryRunResult | ErrorResult | FailureResult | FinalTotalSubmissionsResult | ProgressResult | QueuedResult | SuccessResult"  # noqa: E501
+)
 
 
 class _ResultHandlerMappingTypedDict(TypedDict, total=False):

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -233,7 +233,7 @@ class TestModule:
         fx_deployments: YamlLoaderDeployment,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
-        validate: Optional[bool],
+        validate: bool | None,
     ) -> None:
         """Test should_skip."""
         mocker.patch.object(Module, "environment_matches_defined", validate)
@@ -381,7 +381,7 @@ class TestModule:
         )
         assert not mod.deploy()
         assert "parallel_parent:processing modules sequentially..." in caplog.messages
-        mock_run.assert_has_calls([call("deploy"), call("deploy")])  # type: ignore
+        mock_run.assert_has_calls([call("deploy"), call("deploy")])
 
     @pytest.mark.parametrize("async_used", [(True), (False)])
     def test_destroy(
@@ -634,7 +634,7 @@ def test_validate_environment(
     caplog: pytest.LogCaptureFixture,
     env_def: Any,
     expected_logs: list[str],
-    expected: Optional[bool],
+    expected: bool | None,
     mocker: MockerFixture,
     runway_context: MockRunwayContext,
 ) -> None:
@@ -642,7 +642,7 @@ def test_validate_environment(
     caplog.set_level(logging.DEBUG, logger="runway")
     mocker.patch(
         f"{MODULE}.aws",
-        **{"AccountDetails.return_value": MagicMock(id="123456789012")},
+        **{"AccountDetails.return_value": MagicMock(id="123456789012")},  # type: ignore
     )
     assert validate_environment(runway_context, env_def) is expected
     # all() does not give an output that can be used for troubleshooting failures

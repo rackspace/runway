@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
@@ -31,7 +31,7 @@ class TestRunwayStaticSiteExtraFileDataModel:
             ("test", None),
         ],
     )
-    def test_autofill_content_type(self, expected: Optional[str], name: str) -> None:
+    def test_autofill_content_type(self, expected: str | None, name: str) -> None:
         """Test _autofill_content_type."""
         assert (
             RunwayStaticSiteExtraFileDataModel(content="test", name=name).content_type == expected

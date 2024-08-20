@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
         (".test", None),
     ],
 )
-def test_auto_detect_content_type(provided: str, expected: Optional[str]) -> None:
+def test_auto_detect_content_type(provided: str, expected: str | None) -> None:
     """Test auto_detect_content_type."""
     assert auto_detect_content_type(provided) == expected
 
@@ -62,7 +62,7 @@ def test_auto_detect_content_type(provided: str, expected: Optional[str]) -> Non
     ],
 )
 def test_get_content_type(
-    provided: RunwayStaticSiteExtraFileDataModel, expected: Optional[str]
+    provided: RunwayStaticSiteExtraFileDataModel, expected: str | None
 ) -> None:
     """Test get_content_type."""
     assert get_content_type(provided) == expected

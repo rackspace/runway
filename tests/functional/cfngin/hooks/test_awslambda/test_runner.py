@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from pydantic import model_validator
@@ -55,18 +55,18 @@ pytestmark = pytest.mark.skipif(
 class AwslambdaStackOutputs(BaseModel):
     """Outputs of a Stack used for testing the awslambda hook."""
 
-    CodeImageUri: Optional[str] = None
+    CodeImageUri: str | None = None
     CodeS3Bucket: str
     CodeS3Key: str
-    CodeS3ObjectVersion: Optional[str] = None
-    CodeZipFile: Optional[str] = None
+    CodeS3ObjectVersion: str | None = None
+    CodeZipFile: str | None = None
     LambdaFunction: str
     LambdaFunctionArn: str
     LambdaRole: str
-    LayerContentS3Bucket: Optional[str] = None
-    LayerContentS3Key: Optional[str] = None
-    LayerContentS3ObjectVersion: Optional[str] = None
-    LayerVersion: Optional[str] = None
+    LayerContentS3Bucket: str | None = None
+    LayerContentS3Key: str | None = None
+    LayerContentS3ObjectVersion: str | None = None
+    LayerVersion: str | None = None
     Runtime: str
 
     @model_validator(mode="before")
@@ -121,7 +121,7 @@ class AwslambdaTester:
             )
         return stacks[0]
 
-    def invoke(self, *, payload: Optional[str] = None) -> LambdaResponse:
+    def invoke(self, *, payload: str | None = None) -> LambdaResponse:
         """Invoke the Lambda Function."""
         response = self.client.invoke(
             FunctionName=self.outputs.LambdaFunction,

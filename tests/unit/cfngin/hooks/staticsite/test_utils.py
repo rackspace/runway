@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import TYPE_CHECKING, cast
 from unittest.mock import Mock, call
 
 import igittigitt
@@ -39,7 +39,7 @@ def test_calculate_hash_of_files(mocker: MockerFixture, tmp_path: Path) -> None:
     "directories", [None, [{"path": "./"}], [{"path": "./", "exclusions": ["foobar"]}]]
 )
 def test_get_hash_of_files(
-    directories: Optional[list[dict[str, Union[list[str], str]]]],
+    directories: list[dict[str, list[str] | str | None]] | None,
     mocker: MockerFixture,
     tmp_path: Path,
 ) -> None:
@@ -75,7 +75,7 @@ def test_get_hash_of_files(
     else:
         assert get_hash_of_files(tmp_path) == mock_calculate_hash_of_files.return_value
     mock_get_ignorer.assert_has_calls(
-        [  # type: ignore
+        [
             call(tmp_path / cast(str, i["path"]), i.get("exclusions"))
             for i in (directories or [{"path": "./"}])
         ]
@@ -85,7 +85,7 @@ def test_get_hash_of_files(
 
 @pytest.mark.parametrize("additional_exclusions", [None, [], ["foo"], ["foo", "bar"]])
 def test_get_ignorer(
-    additional_exclusions: Optional[list[str]], mocker: MockerFixture, tmp_path: Path
+    additional_exclusions: list[str] | None, mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test get_ignorer."""
     ignore_parser = mocker.patch(f"{MODULE}.igittigitt.IgnoreParser")

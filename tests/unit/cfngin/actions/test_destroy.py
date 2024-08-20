@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import unittest
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import MagicMock, PropertyMock, patch
 
 from runway.cfngin.actions import destroy
@@ -37,7 +37,7 @@ class TestDestroyAction(unittest.TestCase):
         self.action = destroy.Action(self.context, cancel=MockThreadingEvent())  # type: ignore
 
     def _get_context(
-        self, extra_config_args: Optional[dict[str, Any]] = None, **kwargs: Any
+        self, extra_config_args: dict[str, Any] | None = None, **kwargs: Any
     ) -> CfnginContext:
         """Get context."""
         config = {

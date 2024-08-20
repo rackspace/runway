@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from botocore.exceptions import ClientError
 from troposphere import Ref
@@ -37,7 +37,7 @@ class HookArgs(HookArgsBaseModel):
     alt_names: list[str] = []
     domain: str
     hosted_zone_id: str
-    stack_name: Optional[str] = None
+    stack_name: str | None = None
     ttl: int = 300
 
 
@@ -45,7 +45,7 @@ class Certificate(Hook):
     r"""Hook for managing a **AWS::CertificateManager::Certificate**.
 
     Keyword Args:
-        alt_names (Optional[list[str]]): Additional FQDNs to be included in the
+        alt_names (list[str]): Additional FQDNs to be included in the
             Subject Alternative Name extension of the ACM certificate. For
             example, you can add www.example.net to a certificate for which the
             domain field is www.example.com if users can reach your site by
@@ -59,10 +59,10 @@ class Certificate(Hook):
         hosted_zone_id (str): The ID of the Route 53 Hosted Zone that contains
             the resource record sets that you want to change. This must exist
             in the same account that the certificate will be created in.
-        stack_name (Optional[str]): Provide a name for the stack used to
+        stack_name (str | None): Provide a name for the stack used to
             create the certificate. If not provided, the domain is used
             (replacing ``.`` with ``-``).
-        ttl (Optional[int]): The resource record cache time to live (TTL),
+        ttl (int): The resource record cache time to live (TTL),
             in seconds. (*default:* ``300``)
 
     .. rubric:: Example
@@ -199,7 +199,7 @@ class Certificate(Hook):
 
     def get_validation_record(
         self,
-        cert_arn: Optional[str] = None,
+        cert_arn: str | None = None,
         *,
         interval: int = 5,
         status: str = "PENDING_VALIDATION",
@@ -259,9 +259,7 @@ class Certificate(Hook):
         LOGGER.info("adding validation record to hosted zone: %s", self.args.hosted_zone_id)
         self.__change_record_set("CREATE", [record_set])
 
-    def remove_validation_records(
-        self, records: Optional[list[ResourceRecordTypeDef]] = None
-    ) -> None:
+    def remove_validation_records(self, records: list[ResourceRecordTypeDef] | None = None) -> None:
         """Remove all record set entries used to validate an ACM Certificate.
 
         Args:
@@ -337,7 +335,7 @@ class Certificate(Hook):
             ChangeBatch={"Comment": self.template_description, "Changes": changes},
         )
 
-    def deploy(self, status: Optional[Status] = None) -> dict[str, str]:
+    def deploy(self, status: Status | None = None) -> dict[str, str]:
         """Deploy an ACM Certificate."""
         record = None
         try:
@@ -402,7 +400,7 @@ class Certificate(Hook):
 
     def destroy(
         self,
-        records: Optional[list[ResourceRecordTypeDef]] = None,
+        records: list[ResourceRecordTypeDef] | None = None,
         skip_r53: bool = False,
     ) -> bool:
         """Destroy an ACM certificate.

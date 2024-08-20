@@ -12,7 +12,7 @@ import time
 from io import BytesIO
 from pathlib import Path
 from queue import Queue
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 from unittest.mock import Mock, PropertyMock, sentinel
 
 import boto3
@@ -917,7 +917,7 @@ def test_guess_content_type_handle_unicode_decode_error(
         (1024**7, None),
     ],
 )
-def test_human_readable_size(expected: Optional[str], value: float) -> None:
+def test_human_readable_size(expected: str | None, value: float) -> None:
     """Test human_readable_size."""
     assert human_readable_size(value) == expected
 
@@ -965,7 +965,7 @@ def test_relative_path_handle_value_error(mocker: MockerFixture, tmp_path: Path)
     [("/tmp/foo/bar", "/tmp/foo", f".{os.sep}bar"), (None, "/foo", None)],
 )
 def test_relative_path_posix(
-    expected: Optional[str], filename: Optional[str], mocker: MockerFixture, start: str
+    expected: str | None, filename: str | None, mocker: MockerFixture, start: str
 ) -> None:
     """Test relative_path."""
     mocker.patch("os.path.relpath", posixpath.relpath)
@@ -978,7 +978,7 @@ def test_relative_path_posix(
     [(None, "/foo", None), (r"C:\tmp\foo\bar", r"C:\tmp\foo", f".{os.sep}bar")],
 )
 def test_relative_path_windows(
-    expected: Optional[str], filename: Optional[str], mocker: MockerFixture, start: str
+    expected: str | None, filename: str | None, mocker: MockerFixture, start: str
 ) -> None:
     """Test relative_path."""
     mocker.patch("os.path.relpath", ntpath.relpath)

@@ -10,7 +10,7 @@ import string
 import sys
 from contextlib import suppress
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest_mock import MockerFixture
+    from typing_extensions import TypeAlias
 
 MODULE = "runway.utils"
 VALUE = {
@@ -106,7 +107,7 @@ class TestMutableMap:
         ), "default should be ignored"
 
 
-TestParamsTypeDef = Optional[Union[dict[str, str], list[str], str]]
+TestParamsTypeDef: TypeAlias = "dict[str, str] | list[str] | str | None"
 
 
 class TestSafeHaven:

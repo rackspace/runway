@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -83,7 +83,7 @@ class TestEnvManager:
         assert obj.bin == home / ".test-dir" / "versions" / "1.0.0" / "test-bin"
 
     @pytest.mark.parametrize("version", ["1.0.0", None])
-    def test_install(self, version: Optional[str]) -> None:
+    def test_install(self, version: str | None) -> None:
         """Test install."""
         with pytest.raises(NotImplementedError):
             assert EnvManager("", "").install(version)

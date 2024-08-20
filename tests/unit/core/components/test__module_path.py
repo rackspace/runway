@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -30,7 +30,7 @@ class TypeDefTestDefinitionExpected(TypedDict):  # noqa: D101
 
 
 class TypeDefTestDefinition(TypedDict):  # noqa: D101
-    definition: Optional[Union[Path, str]]
+    definition: Path | str | None
     expected: TypeDefTestDefinitionExpected
 
 

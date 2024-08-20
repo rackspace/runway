@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from queue import Queue
-from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, Optional, cast
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, cast
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -132,7 +132,7 @@ class TestBaseTransferRequestSubmitter:
             ("s3://test", "s3://test"),
         ],
     )
-    def test_format_s3_path(self, expected: Optional[str], path: Optional[AnyPath]) -> None:
+    def test_format_s3_path(self, expected: str | None, path: AnyPath | None) -> None:
         """Test _format_s3_path."""
         assert (
             BaseTransferRequestSubmitter(
@@ -434,11 +434,9 @@ class TestDownloadRequestSubmitter(BaseTransferRequestSubmitterTest):
 
     def assert_no_downloads_happened(self) -> None:
         """Assert not downloads."""
-        assert len(self.transfer_manager.download.call_args_list) == 0  # type: ignore
+        assert len(self.transfer_manager.download.call_args_list) == 0
 
-    def create_file_info(
-        self, key: str, response_data: Optional[dict[str, Any]] = None
-    ) -> FileInfo:
+    def create_file_info(self, key: str, response_data: dict[str, Any] | None = None) -> FileInfo:
         """Create FileInfo."""
         kwargs: dict[str, Any] = {
             "src": self.bucket + "/" + key,

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import ANY, MagicMock, Mock, call
 
 import pytest
@@ -425,7 +425,7 @@ class TestServerless:
     def test_sls_deploy(
         self,
         mocker: MockerFixture,
-        package: Optional[str],
+        package: str | None,
         runway_context: MockRunwayContext,
         skip_install: bool,
         tmp_path: Path,
@@ -455,7 +455,7 @@ class TestServerless:
     def test_sls_package(
         self,
         mocker: MockerFixture,
-        output_path: Optional[AnyPathConstrained],
+        output_path: AnyPathConstrained | None,
         runway_context: MockRunwayContext,
         skip_install: bool,
         tmp_path: Path,
@@ -486,7 +486,7 @@ class TestServerless:
     )
     def test_sls_print(
         self,
-        item_path: Optional[str],
+        item_path: str | None,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         skip_install: bool,
@@ -622,7 +622,7 @@ class TestServerlessArtifact:
         self,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
-        service: Union[dict[str, Any], str],
+        service: dict[str, Any] | str,
         service_name: str,
         tmp_path: Path,
     ) -> None:
@@ -652,7 +652,7 @@ class TestServerlessArtifact:
         self,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
-        service: Union[dict[str, Any], str],
+        service: dict[str, Any] | str,
         tmp_path: Path,
     ) -> None:
         """Test source_hash."""
