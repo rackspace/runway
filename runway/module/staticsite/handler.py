@@ -424,7 +424,7 @@ class StaticSite(RunwayModule[StaticSiteOptions]):
             i.model_dump() for i in self.parameters.lambda_function_associations
         ]
 
-        content = {
+        content: dict[str, Any] = {
             "cfngin_bucket": "",
             "namespace": "${namespace}",
             "post_deploy": post_deploy,

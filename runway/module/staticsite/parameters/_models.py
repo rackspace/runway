@@ -45,8 +45,12 @@ class RunwayStaticSiteLambdaFunctionAssociationDataModel(ConfigProperty):
 
 
 def _staticsite_alias_generator(field_name: str) -> str:
-    """Append ``staticsite`` to field names."""
-    return f"staticsite_{field_name}"
+    """Append ``staticsite`` to field names.
+
+    Some fields are excluded from having aliases (e.g. namespace).
+
+    """
+    return f"staticsite_{field_name}" if field_name != "namespace" else field_name
 
 
 class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
