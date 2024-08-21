@@ -1,6 +1,5 @@
 """DynamoDB lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import re
@@ -87,7 +86,7 @@ class QueryDataModel(BaseModel):
         }
 
 
-class DynamodbLookup(LookupHandler):
+class DynamodbLookup(LookupHandler["CfnginContext"]):
     """DynamoDB lookup."""
 
     TYPE_NAME: ClassVar[str] = "dynamodb"

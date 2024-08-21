@@ -1,6 +1,5 @@
 """AWS CloudFormation Output lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
@@ -28,7 +27,7 @@ class OutputQuery(NamedTuple):
     output_name: str
 
 
-class OutputLookup(LookupHandler):
+class OutputLookup(LookupHandler["CfnginContext"]):
     """AWS CloudFormation Output lookup."""
 
     DEPRECATION_MSG = (

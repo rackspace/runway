@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import cast
+from typing import Any, cast
 
 from ..utils import load_object_from_string
 from .handlers.base import LookupHandler
@@ -14,11 +14,13 @@ from .handlers.random_string import RandomStringLookup
 from .handlers.ssm import SsmLookup
 from .handlers.var import VarLookup
 
-RUNWAY_LOOKUP_HANDLERS: dict[str, type[LookupHandler]] = {}
+RUNWAY_LOOKUP_HANDLERS: dict[str, type[LookupHandler[Any]]] = {}
 LOGGER = logging.getLogger(__name__)
 
 
-def register_lookup_handler(lookup_type: str, handler_or_path: str | type[LookupHandler]) -> None:
+def register_lookup_handler(
+    lookup_type: str, handler_or_path: str | type[LookupHandler[Any]]
+) -> None:
     """Register a lookup handler.
 
     Args:

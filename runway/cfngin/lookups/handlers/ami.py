@@ -1,6 +1,5 @@
 """AMI lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import operator
@@ -59,14 +58,14 @@ class ImageNotFound(Exception):
         super().__init__(f"Unable to find ec2 image with search string: {search_string}")
 
 
-class AmiLookup(LookupHandler):
+class AmiLookup(LookupHandler["CfnginContext"]):
     """AMI lookup."""
 
     TYPE_NAME: ClassVar[str] = "ami"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def parse(cls, value: str) -> tuple[str, dict[str, str]]:
+    def parse_query(cls, value: str) -> tuple[str, dict[str, str]]:
         """Parse the value passed to the lookup.
 
         This overrides the default parsing to account for special requirements.
@@ -93,7 +92,7 @@ class AmiLookup(LookupHandler):
         return args.pop("name_regex"), args
 
     @classmethod
-    def handle(cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any) -> str:
+    def handle(cls, value: str, context: CfnginContext, **_kwargs: Any) -> str:
         """Fetch the most recent AMI Id using a filter.
 
         Args:
@@ -113,7 +112,7 @@ class AmiLookup(LookupHandler):
             AMI lookup.
 
         """
-        query, raw_args = cls.parse(value)
+        query, raw_args = cls.parse_query(value)
         args = ArgsDataModel.model_validate(raw_args)
         ec2 = context.get_session(region=args.region).client("ec2")
 

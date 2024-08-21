@@ -732,7 +732,7 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
 class VariableValueLookup(VariableValue):
     """A lookup variable value."""
 
-    handler: type[LookupHandler]
+    handler: type[LookupHandler[Any]]
     lookup_name: VariableValueLiteral[str]
     lookup_query: VariableValue
 
@@ -742,7 +742,7 @@ class VariableValueLookup(VariableValue):
         self,
         lookup_name: VariableValueLiteral[str],
         lookup_query: str | VariableValue,
-        handler: type[LookupHandler] | None = None,
+        handler: type[LookupHandler[Any]] | None = None,
         variable_type: VariableTypeLiteralTypeDef = "cfngin",
     ) -> None:
         """Initialize class.

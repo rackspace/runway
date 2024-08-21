@@ -1,6 +1,5 @@
 """Hook data lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class HookDataLookup(LookupHandler):
+class HookDataLookup(LookupHandler["CfnginContext"]):
     """Hook data lookup."""
 
     TYPE_NAME: ClassVar[str] = "hook_data"

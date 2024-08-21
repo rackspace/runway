@@ -1,6 +1,5 @@
 """Environment variable lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 import logging
 import os
 from typing import Any, ClassVar
@@ -11,7 +10,7 @@ from ...utils import read_value_from_path
 LOGGER = logging.getLogger(__name__)
 
 
-class EnvvarLookup(LookupHandler):
+class EnvvarLookup(LookupHandler[Any]):
     """Environment variable lookup."""
 
     DEPRECATION_MSG = "envvar Lookup has been deprecated; use the env lookup instead"
@@ -19,7 +18,7 @@ class EnvvarLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(cls, value: str, **_: Any) -> str:
+    def handle(cls, value: str, *_args: Any, **_: Any) -> str:
         """Retrieve an environment variable.
 
         Args:

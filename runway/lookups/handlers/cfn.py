@@ -6,7 +6,6 @@ the output; not the *Export.Name*.
 
 """
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import json
@@ -36,7 +35,7 @@ class OutputQuery(NamedTuple):
     output_name: str
 
 
-class CfnLookup(LookupHandler):
+class CfnLookup(LookupHandler["CfnginContext | RunwayContext"]):
     """CloudFormation Stack Output lookup."""
 
     TYPE_NAME: ClassVar[str] = "cfn"

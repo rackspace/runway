@@ -15,20 +15,14 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class SsmLookup(LookupHandler):
+class SsmLookup(LookupHandler["CfnginContext | RunwayContext"]):
     """SSM Parameter Store Lookup."""
 
     TYPE_NAME: ClassVar[str] = "ssm"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(
-        cls,
-        value: str,
-        context: CfnginContext | RunwayContext,
-        *__args: Any,
-        **__kwargs: Any,
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext | RunwayContext, **_kwargs: Any) -> Any:
         """Retrieve a value from SSM Parameter Store.
 
         Args:
