@@ -74,7 +74,7 @@ lint-black: ## run black
 
 lint-pyright: ## run pyright
 	@echo "Running pyright..."
-	@npm exec --no -- pyright --venv-path ./
+	@npm exec --no -- pyright --venvpath ./
 	@echo ""
 
 lint-ruff: ## run ruff

@@ -106,7 +106,7 @@ Top-Level Fields
   .. _cfngin-bucket:
 
   .. attribute:: cfngin_bucket
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     By default, CloudFormation templates are pushed into an S3 bucket and CloudFormation is pointed to the template in that bucket when launching or updating stacks.
@@ -158,7 +158,7 @@ Top-Level Fields
       The format of the default value is now ``cfngin-${namespace}-${region}``.
 
   .. attribute:: cfngin_bucket_region
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     AWS Region where :attr:`~cfngin.config.cfngin_bucket` is located.
@@ -172,7 +172,7 @@ Top-Level Fields
         cfngin_bucket_region: us-east-1
 
   .. attribute:: cfngin_cache_dir
-    :type: Optional[str]
+    :type: str | None
     :value: ./.runway/
 
     Path to a local directory that CFNgin will use for local caching.
@@ -187,7 +187,7 @@ Top-Level Fields
         cfngin_cache_dir: ./.runway
 
   .. attribute:: log_formats
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str]
     :value: {}
 
     Customize log message formatting by log level.
@@ -202,7 +202,7 @@ Top-Level Fields
         debug: "[%(asctime)s] %(levelname)s %(threadName)s %(name)s:%(lineno)d(%(funcName)s): %(message)s"
 
   .. attribute:: lookups
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str]
     :value: {}
 
     Lookups allow you to create custom methods which take a value and are resolved at runtime time.
@@ -224,7 +224,7 @@ Top-Level Fields
       conf_value: ${custom query}
 
   .. attribute:: mappings
-    :type: Optional[Dict[str, Dict[str, Dict[str, Any]]]]
+    :type: dict[str, dict[str, dict[str, Any]]]
     :value: {}
 
     Mappings are dictionaries that are provided as `Mappings <http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html>`__ to each CloudFormation stack that CFNgin produces.
@@ -264,7 +264,7 @@ Top-Level Fields
       namespace: ${namespace}-${environment}
 
   .. attribute:: namespace_delimiter
-    :type: Optional[str]
+    :type: str | None
     :value: "-"
 
     By default, ``-`` will be used as a delimiter between the :attr:`~cfngin.config.namespace` and the declared stack name to deploy the actual CloudFormation stack name that gets created.
@@ -279,7 +279,7 @@ Top-Level Fields
       namespace_delimiter: ""
 
   .. attribute:: package_sources
-    :type: Optional[cfngin.package_sources]
+    :type: cfngin.package_sources
     :value: {}
 
     See :ref:`Remote Sources <cfngin_remote_sources>` for detailed information.
@@ -296,7 +296,7 @@ Top-Level Fields
           ...
 
   .. attribute:: persistent_graph_key
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     Used to track the *state* of stacks defined in configuration file.
@@ -310,7 +310,7 @@ Top-Level Fields
       persistent_graph_key: unique-key.json
 
   .. attribute:: post_deploy
-    :type: Optional[List[cfngin.hook]]
+    :type: list[cfngin.hook]
     :value: []
 
     Python functions/methods that are executed after processing the stacks in the config while using the :ref:`commands:deploy` command.
@@ -330,7 +330,7 @@ Top-Level Fields
       The CFNgin bucket is now created using a CloudFormation stack.
 
   .. attribute:: post_destroy
-    :type: Optional[List[cfngin.hook]]
+    :type: list[cfngin.hook]
     :value: []
 
     Python functions/methods that are executed after processing the stacks in the config while using the :ref:`commands:destroy` command.
@@ -344,7 +344,7 @@ Top-Level Fields
         - path: do.something
 
   .. attribute:: pre_deploy
-    :type: Optional[List[cfngin.hook]]
+    :type: list[cfngin.hook]
     :value: []
 
     Python functions/methods that are executed before processing the stacks in the config while using the :ref:`commands:deploy` command.
@@ -361,7 +361,7 @@ Top-Level Fields
       *pre_build* renamed to *pre_deploy*.
 
   .. attribute:: pre_destroy
-    :type: Optional[List[cfngin.hook]]
+    :type: list[cfngin.hook]
     :value: []
 
     Python functions/methods that are executed before processing the stacks in the config while using the :ref:`commands:destroy` command.
@@ -375,7 +375,7 @@ Top-Level Fields
         - path: do.something
 
   .. attribute:: service_role
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     By default CFNgin doesn't specify a service role when executing changes to CloudFormation stacks.
@@ -391,7 +391,7 @@ Top-Level Fields
       service_role: arn:aws:iam::123456789012:role/name
 
   .. attribute:: stacks
-    :type: Optional[List[cfngin.stack]]
+    :type: list[cfngin.stack]
     :Value: []
 
     This is the core part of the config where the CloudFormations stacks that will be deployed in the environment are defined.
@@ -399,7 +399,7 @@ Top-Level Fields
     See Stack_ for more information.
 
   .. attribute:: sys_path
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     A path to be added to ``$PATH`` while processing the configuration file.
@@ -413,7 +413,7 @@ Top-Level Fields
       sys_path: ./  # most common value to use
 
   .. attribute:: tags
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str]
     :value: {"cfngin_namespace": namespace}
 
     A dictionary of tags to add to all stacks.
@@ -438,7 +438,7 @@ Top-Level Fields
       tags: {}
 
   .. attribute:: template_indent
-    :type: Optional[int]
+    :type: int | None
     :value: 4
 
     Number of spaces per indentation level to use when rendering/outputting CloudFormation templates.
@@ -486,7 +486,7 @@ Stack
           CidrBlock: 10.128.0.0/16
 
   .. attribute:: class_path
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     A python importable path to the |Blueprint| class to be used.
@@ -501,7 +501,7 @@ Stack
           class_path: example.BlueprintClass
 
   .. attribute:: description
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     A short description to apply to the stack.
@@ -516,7 +516,7 @@ Stack
           description: An Example Stack
 
   .. attribute:: enabled
-    :type: Optional[bool]
+    :type: bool
     :value: True
 
     Whether to deploy/update the stack.
@@ -534,7 +534,7 @@ Stack
           enabled: ${enable_another_stack}
 
   .. attribute:: in_progress_behavior
-    :type: Optional[Literal["wait"]]
+    :type: Literal["wait"] | None
     :value: None
 
     Specifies the behavior for when a stack is in ``CREATE_IN_PROGRESS`` or ``UPDATE_IN_PROGRESS``.
@@ -550,7 +550,7 @@ Stack
           in_progress_behavior: wait
 
   .. attribute:: locked
-    :type: Optional[bool]
+    :type: bool
     :value: False
 
     Whether the stack should be updated after initial deployment.
@@ -582,7 +582,7 @@ Stack
         - name: example-stack
 
   .. attribute:: protected
-    :type: Optional[bool]
+    :type: bool
     :value: False
 
     Whether to force all updates to be performed interactively.
@@ -599,7 +599,7 @@ Stack
           protected: ${protected_another_stack}
 
   .. attribute:: required_by
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     A list of other stacks that require this stack.
@@ -618,7 +618,7 @@ Stack
           ...
 
   .. attribute:: requires
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     A list of other stacks that this stack requires.
@@ -637,7 +637,7 @@ Stack
           ...
 
   .. attribute:: stack_name
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     The name used when creating the CloudFormation stack.
@@ -653,7 +653,7 @@ Stack
           stack_name: another-name
 
   .. attribute:: stack_policy_path
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     Path to a JSON formatted stack policy that will be applied when the CloudFormation stack is created and/or updated.
@@ -668,7 +668,7 @@ Stack
           stack_policy_path: ./stack_policies/example-stack.json
 
   .. attribute:: tags
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str]
     :value: {}
 
     A dictionary of tags to add to the Stack.
@@ -688,7 +688,7 @@ Stack
             example: value
 
   .. attribute:: template_path
-    :type: Optional[str]
+    :type: str | None
 
     Path to a raw CloudFormation template (JSON or YAML).
     Can be relative to the working directory (e.g. templates stored alongside the configuration file), or relative to a directory in the *$PATH* (i.e. for loading templates retrieved via :attr:`~cfngin.config.package_sources`).
@@ -705,7 +705,7 @@ Stack
           template_path: remote/path/templates/another-stack.json
 
   .. attribute:: termination_protection
-    :type: Optional[bool]
+    :type: bool
     :value: False
 
     Whether the stack will be protected from termination by CloudFormation.
@@ -725,7 +725,7 @@ Stack
           termination_protection: ${termination_protection_another_stack}
 
   .. attribute:: timeout
-    :type: Optional[int]
+    :type: int | None
     :value: None
 
     Specifies the amount of time, in minutes, that CloudFormation should allot before timing out stack creation operations.
@@ -743,7 +743,7 @@ Stack
           timeout: 120
 
   .. attribute:: variables
-    :type: Optional[Dict[str, Any]]
+    :type: dict[str, Any]
     :value: {}
 
     A dictionary of Variables_ to pass to the |Blueprint| when rendering the CloudFormation template.

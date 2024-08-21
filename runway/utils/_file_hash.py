@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     import hashlib
@@ -84,7 +84,7 @@ class FileHash:
         file_path: StrPath,
         *,
         end_character: str = "\0",
-        relative_to: Optional[StrPath] = None,
+        relative_to: StrPath | None = None,
     ) -> None:
         """Add file name to the hash. This includes the path.
 
@@ -109,7 +109,7 @@ class FileHash:
         self,
         file_paths: Iterable[StrPath],
         *,
-        relative_to: Optional[StrPath] = None,
+        relative_to: StrPath | None = None,
     ) -> None:
         """Add files to the hash.
 

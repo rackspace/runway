@@ -13,7 +13,7 @@ This allows the lookup to function during a ``runway plan``.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from pydantic import ValidationError
 from troposphere.awslambda import Code, Content
@@ -23,7 +23,6 @@ from ....utils import load_object_from_string
 from ...exceptions import CfnginOnlyLookupError
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ....config import CfnginConfig
     from ....config.models.cfngin import CfnginHookDefinitionModel
@@ -37,7 +36,7 @@ LOGGER = logging.getLogger(__name__)
 class AwsLambdaLookup(LookupHandler):
     """Lookup for AwsLambdaHook responses."""
 
-    TYPE_NAME: Final[Literal["awslambda"]] = "awslambda"
+    TYPE_NAME: ClassVar[str] = "awslambda"
 
     @classmethod
     def get_deployment_package_data(
@@ -74,7 +73,7 @@ class AwsLambdaLookup(LookupHandler):
             )
             context.set_hook_data(data_key, hook.plan())
         try:
-            return _AwsLambdaHookDeployResponse.parse_obj(context.hook_data[data_key])
+            return _AwsLambdaHookDeployResponse.model_validate(context.hook_data[data_key])
         except ValidationError:
             raise TypeError(
                 "expected AwsLambdaHookDeployResponseTypedDict, "
@@ -115,7 +114,7 @@ class AwsLambdaLookup(LookupHandler):
     def handle(
         cls,
         value: str,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *_args: Any,
         **_kwargs: Any,
     ) -> AwsLambdaHookDeployResponse:
@@ -171,13 +170,13 @@ class AwsLambdaLookup(LookupHandler):
     class Code(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.Code"]] = "awslambda.Code"
+        TYPE_NAME: ClassVar[str] = "awslambda.Code"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
         ) -> Code:
@@ -195,7 +194,7 @@ class AwsLambdaLookup(LookupHandler):
 
             """
             return Code(
-                **AwsLambdaLookup.handle(value, context, *args, **kwargs).dict(
+                **AwsLambdaLookup.handle(value, context, *args, **kwargs).model_dump(
                     by_alias=True,
                     exclude_none=True,
                     include={"bucket_name", "object_key", "object_version_id"},
@@ -205,13 +204,13 @@ class AwsLambdaLookup(LookupHandler):
     class CodeSha256(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.CodeSha256"]] = "awslambda.CodeSha256"
+        TYPE_NAME: ClassVar[str] = "awslambda.CodeSha256"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
         ) -> str:
@@ -233,18 +232,16 @@ class AwsLambdaLookup(LookupHandler):
     class CompatibleArchitectures(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.CompatibleArchitectures"]] = (
-            "awslambda.CompatibleArchitectures"
-        )
+        TYPE_NAME: ClassVar[str] = "awslambda.CompatibleArchitectures"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
-        ) -> Optional[list[str]]:
+        ) -> list[str] | None:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
@@ -267,13 +264,13 @@ class AwsLambdaLookup(LookupHandler):
     class CompatibleRuntimes(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.CompatibleRuntimes"]] = "awslambda.CompatibleRuntimes"
+        TYPE_NAME: ClassVar[str] = "awslambda.CompatibleRuntimes"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
         ) -> Any:
@@ -299,13 +296,13 @@ class AwsLambdaLookup(LookupHandler):
     class Content(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.Content"]] = "awslambda.Content"
+        TYPE_NAME: ClassVar[str] = "awslambda.Content"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
         ) -> Content:
@@ -323,7 +320,7 @@ class AwsLambdaLookup(LookupHandler):
 
             """
             return Content(
-                **AwsLambdaLookup.handle(value, context, *args, **kwargs).dict(
+                **AwsLambdaLookup.handle(value, context, *args, **kwargs).model_dump(
                     by_alias=True,
                     exclude_none=True,
                     include={"bucket_name", "object_key", "object_version_id"},
@@ -333,16 +330,16 @@ class AwsLambdaLookup(LookupHandler):
     class LicenseInfo(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.LicenseInfo"]] = "awslambda.LicenseInfo"
+        TYPE_NAME: ClassVar[str] = "awslambda.LicenseInfo"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
-        ) -> Optional[str]:
+        ) -> str | None:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
@@ -365,13 +362,13 @@ class AwsLambdaLookup(LookupHandler):
     class Runtime(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.Runtime"]] = "awslambda.Runtime"
+        TYPE_NAME: ClassVar[str] = "awslambda.Runtime"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
         ) -> str:
@@ -393,13 +390,13 @@ class AwsLambdaLookup(LookupHandler):
     class S3Bucket(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.S3Bucket"]] = "awslambda.S3Bucket"
+        TYPE_NAME: ClassVar[str] = "awslambda.S3Bucket"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
         ) -> str:
@@ -422,13 +419,13 @@ class AwsLambdaLookup(LookupHandler):
     class S3Key(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.S3Key"]] = "awslambda.S3Key"
+        TYPE_NAME: ClassVar[str] = "awslambda.S3Key"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
         ) -> str:
@@ -451,16 +448,16 @@ class AwsLambdaLookup(LookupHandler):
     class S3ObjectVersion(LookupHandler):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.S3ObjectVersion"]] = "awslambda.S3ObjectVersion"
+        TYPE_NAME: ClassVar[str] = "awslambda.S3ObjectVersion"
 
         @classmethod
         def handle(
             cls,
             value: str,
-            context: Union[CfnginContext, RunwayContext],
+            context: CfnginContext | RunwayContext,
             *args: Any,
             **kwargs: Any,
-        ) -> Optional[str]:
+        ) -> str | None:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:

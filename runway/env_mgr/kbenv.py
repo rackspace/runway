@@ -11,7 +11,7 @@ import re
 import shutil
 import sys
 import tempfile
-from typing import TYPE_CHECKING, Final, Optional, cast
+from typing import TYPE_CHECKING, Final, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -106,8 +106,8 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
 def download_kb_release(
     version: str,
     versions_dir: Path,
-    kb_platform: Optional[str] = None,
-    arch: Optional[str] = None,
+    kb_platform: str | None = None,
+    arch: str | None = None,
 ) -> None:
     """Download kubectl and return path to it."""
     version_dir = versions_dir / version
@@ -159,7 +159,7 @@ class KBEnvManager(EnvManager):
 
     VERSION_REGEX: Final[str] = r"^(v)?(?P<version>[0-9]+\.[0-9]+\.[0-9]+\S*)"
 
-    def __init__(self, path: Optional[Path] = None, *, overlay_path: Optional[Path] = None) -> None:
+    def __init__(self, path: Path | None = None, *, overlay_path: Path | None = None) -> None:
         """Initialize class.
 
         Args:
@@ -171,7 +171,7 @@ class KBEnvManager(EnvManager):
         self.overlay_path = overlay_path
 
     @cached_property
-    def version(self) -> Optional[Version]:
+    def version(self) -> Version | None:
         """Terraform version."""
         if not self.current_version:
             self.current_version = self.get_version_from_file()
@@ -180,7 +180,7 @@ class KBEnvManager(EnvManager):
         return self.parse_version_string(self.current_version)
 
     @cached_property
-    def version_file(self) -> Optional[Path]:
+    def version_file(self) -> Path | None:
         """Find and return a ".kubectl-version" file if one is present.
 
         Returns:
@@ -197,7 +197,7 @@ class KBEnvManager(EnvManager):
                 return tmp_path
         return None
 
-    def get_version_from_file(self, file_path: Optional[Path] = None) -> Optional[str]:
+    def get_version_from_file(self, file_path: Path | None = None) -> str | None:
         """Get kubectl version from a file.
 
         Args:
@@ -212,7 +212,7 @@ class KBEnvManager(EnvManager):
         LOGGER.debug("file path not provided and version file could not be found")
         return None
 
-    def install(self, version_requested: Optional[str] = None) -> str:
+    def install(self, version_requested: str | None = None) -> str:
         """Ensure kubectl is available."""
         if not version_requested:
             if self.version:

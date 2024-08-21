@@ -1,6 +1,5 @@
 """Test runway.utils._file_hash."""
 
-# pyright: basic
 from __future__ import annotations
 
 import hashlib

@@ -1,6 +1,5 @@
 """Test runway.cfngin.hooks.docker.data_models."""
 
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -92,7 +91,7 @@ class TestElasticContainerRegistry:
         )
 
         with sts_stubber:
-            obj = ElasticContainerRegistry(context=cfngin_context)
+            obj = ElasticContainerRegistry.model_validate({"context": cfngin_context})
         sts_stubber.assert_no_pending_responses()
         assert obj.account_id == account_id
         assert obj.alias is None
@@ -101,12 +100,8 @@ class TestElasticContainerRegistry:
 
     def test_init_no_context(self) -> None:
         """Test init with no context."""
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(ValidationError, match="context is required to resolve values"):
             ElasticContainerRegistry()
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("__root__",)
-        assert errors[0]["msg"] == "context is required to resolve values"
 
     def test_init_private(self) -> None:
         """Test init private."""
@@ -136,9 +131,9 @@ class TestElasticContainerRegistryRepository:
         region = "us-east-1"
 
         obj = ElasticContainerRegistryRepository(
-            repo_name="something",
-            registry=ElasticContainerRegistry(
-                account_id=account_id, aws_region=region, context=cfngin_context
+            name="something",
+            registry=ElasticContainerRegistry.model_validate(
+                {"account_id": account_id, "aws_region": region, "context": cfngin_context}
             ),
         )
         assert obj.fqn == f"{obj.registry.fqn}{obj.name}"

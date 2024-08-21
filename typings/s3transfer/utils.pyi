@@ -2,19 +2,7 @@
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    ClassVar,
-    Dict,
-    List,
-    Optional,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Optional, TypeVar
 
 from typing_extensions import TypedDict
 
@@ -22,17 +10,19 @@ if TYPE_CHECKING:
     from logging import Logger
     from pathlib import Path
 
+    from typing_extensions import TypeAlias
+
     from .futures import TransferFuture
 
 _K = TypeVar("_K")
 _V = TypeVar("_V")
-_AnyPath = Union[Path, str]
+_AnyPath: TypeAlias = "Path | str"
 
 MAX_PARTS: int = ...
 MAX_SINGLE_UPLOAD_SIZE: int = 5 * 1024**3
 MIN_UPLOAD_CHUNKSIZE: int = ...
 logger: Logger = ...
-S3_RETRYABLE_DOWNLOAD_ERRORS: Tuple[Type[Exception], ...] = ...
+S3_RETRYABLE_DOWNLOAD_ERRORS: tuple[type[Exception], ...] = ...
 
 def random_file_extension(num_digits: int = ...) -> str: ...
 def signal_not_transferring(request: Any, operation_name: str, **kwargs: Any) -> None: ...
@@ -43,18 +33,18 @@ def calculate_range_parameter(
 ) -> str: ...
 def get_callbacks(
     transfer_future: TransferFuture, callback_type: str
-) -> List[Callable[..., Any]]: ...
+) -> list[Callable[..., Any]]: ...
 def invoke_progress_callbacks(
-    callbacks: List[Callable[..., Any]], bytes_transferred: int
+    callbacks: list[Callable[..., Any]], bytes_transferred: int
 ) -> None: ...
-def get_filtered_dict(original_dict: Dict[_K, _V], whitelisted_keys: List[str]) -> Dict[_K, _V]: ...
+def get_filtered_dict(original_dict: dict[_K, _V], whitelisted_keys: list[str]) -> dict[_K, _V]: ...
 
 _CopySource = TypedDict("_CopySource", Bucket=str, Key=str)
 
 class CallArgs:
     bucket: str
     copy_source: _CopySource
-    extra_args: Dict[str, Any]
+    extra_args: dict[str, Any]
     fileobj: _AnyPath
     key: str
     def __init__(self, **kwargs: Any) -> None: ...
@@ -80,15 +70,15 @@ class OSUtils:
         filename: _AnyPath,
         start_byte: int,
         size: int,
-        callbacks: List[Callable[..., Any]],
+        callbacks: list[Callable[..., Any]],
     ) -> ReadFileChunk: ...
     def open_file_chunk_reader_from_fileobj(
         self,
         fileobj: _AnyPath,
         chunk_size: int,
         full_file_size: int,
-        callbacks: List[Callable[..., Any]],
-        close_callbacks: Optional[List[Callable[..., Any]]] = ...,
+        callbacks: list[Callable[..., Any]],
+        close_callbacks: Optional[list[Callable[..., Any]]] = ...,
     ) -> ReadFileChunk: ...
     def open(self, filename: _AnyPath, mode: str) -> Any: ...
     def remove_file(self, filename: _AnyPath) -> None: ...

@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ....lookups.handlers.base import LookupHandler
 from ....lookups.handlers.cfn import CfnLookup
@@ -12,9 +12,8 @@ from ....utils import DOC_SITE
 from .output import OutputQuery, deconstruct
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
-
     from ....context import CfnginContext
+    from ....lookups.handlers.base import ParsedArgsTypeDef
     from ...providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)
@@ -28,11 +27,11 @@ class RxrefLookup(LookupHandler):
         "to learn how to use the new lookup query syntax visit "
         f"{DOC_SITE}/page/cfngin/lookups/rxref.html"
     )
-    TYPE_NAME: Final[Literal["rxref"]] = "rxref"
+    TYPE_NAME: ClassVar[str] = "rxref"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def legacy_parse(cls, value: str) -> tuple[OutputQuery, dict[str, str]]:
+    def legacy_parse(cls, value: str) -> tuple[OutputQuery, ParsedArgsTypeDef]:
         """Retain support for legacy lookup syntax.
 
         Format of value:

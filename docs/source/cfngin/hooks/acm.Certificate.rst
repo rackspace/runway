@@ -38,7 +38,7 @@ Args
 ****
 
 .. data:: alt_names
-  :type: Optional[List[str]]
+  :type: list[str]
   :value: []
   :noindex:
 
@@ -62,7 +62,7 @@ Args
   This must exist in the same account that the certificate will be created in.
 
 .. data:: stack_name
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -71,7 +71,7 @@ Args
   If the is provided in a deploy stage, its needs to be provided in the matching destroy stage.
 
 .. data:: ttl
-  :type: Optional[int]
+  :type: int | None
   :value: None
   :noindex:
 

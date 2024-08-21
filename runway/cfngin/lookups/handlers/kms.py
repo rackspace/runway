@@ -5,16 +5,15 @@ from __future__ import annotations
 
 import codecs
 import logging
-from typing import TYPE_CHECKING, Any, BinaryIO, Final, Union, cast
+from typing import TYPE_CHECKING, Any, BinaryIO, ClassVar, cast
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import DOC_SITE
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
-
     from ....context import CfnginContext
+    from ....lookups.handlers.base import ParsedArgsTypeDef
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,11 +26,11 @@ class KmsLookup(LookupHandler):
         "to learn how to use the new lookup query syntax visit "
         f"{DOC_SITE}/page/cfngin/lookups/kms.html"
     )
-    TYPE_NAME: Final[Literal["kms"]] = "kms"
+    TYPE_NAME: ClassVar[str] = "kms"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def legacy_parse(cls, value: str) -> tuple[str, dict[str, str]]:
+    def legacy_parse(cls, value: str) -> tuple[str, ParsedArgsTypeDef]:
         """Retain support for legacy lookup syntax.
 
         Format of value::
@@ -60,7 +59,7 @@ class KmsLookup(LookupHandler):
         kms = context.get_session(region=args.get("region")).client("kms")
 
         decrypted = cast(
-            Union[BinaryIO, bytes],
+            "BinaryIO | bytes",
             kms.decrypt(CiphertextBlob=codecs.decode(query.encode(), "base64")).get(
                 "Plaintext", b""
             ),

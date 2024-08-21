@@ -25,7 +25,7 @@ Options
 Options specific to Serverless Framework modules.
 
 .. data:: args
-  :type: Optional[List[str]]
+  :type: list[str]
   :value: []
   :noindex:
 
@@ -43,7 +43,7 @@ Options specific to Serverless Framework modules.
   .. versionadded:: 1.4.0
 
 .. data:: extend_serverless_yml
-  :type: Optional[Dict[str, Any]]
+  :type: dict[str, Any]
   :value: {}
   :noindex:
 
@@ -62,7 +62,7 @@ Options specific to Serverless Framework modules.
   .. versionadded:: 1.8.0
 
 .. data:: promotezip
-  :type: Optional[Dict[str, str]]
+  :type: dict[str, str]
   :value: {}
   :noindex:
 

@@ -37,14 +37,14 @@ Args
 ****
 
 .. data:: bucket
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
   Custom bucket to upload functions to. If not provided, |cfngin_bucket| will be used.
 
 .. data:: bucket_region
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -52,14 +52,14 @@ Args
   If not provided, :attr:`~cfngin.config.cfngin_bucket_region` will be used.
 
 .. data:: prefix
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
   S3 key prefix to prepend to the uploaded zip name.
 
 .. data:: follow_symlinks
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
@@ -73,7 +73,7 @@ Args
   The canned S3 object ACL to be applied to the uploaded payload.
 
 .. data:: functions
-  :type: Dict[str, Any]
+  :type: dict[str, Any]
   :noindex:
 
   Configurations of desired payloads to build.
@@ -81,7 +81,7 @@ Args
   Each value should itself be a dictionary, with the following data:
 
   .. data:: docker_file
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -89,7 +89,7 @@ Args
     Must provide exactly one of ``docker_file``, ``docker_image``, or ``runtime``.
 
   .. data:: docker_image
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -97,7 +97,7 @@ Args
     Must provide exactly one of ``docker_file``, ``docker_image``, or ``runtime``.
 
   .. data:: dockerize_pip
-    :type: Optional[Union[bool, Literal["non-linux"]]]
+    :type: bool | Literal["non-linux"] | None
     :value: None
     :noindex:
 
@@ -106,7 +106,7 @@ Args
     To use this option Docker must be installed.
 
   .. data:: exclude
-    :type: Optional[Union[List[str], str]]
+    :type: list[str] | str
     :value: None
     :noindex:
 
@@ -116,7 +116,7 @@ Args
     Commonly ignored files are already excluded by default, such as ``.git``, ``.svn``, ``__pycache__``, ``*.pyc``, ``.gitignore``, etc.
 
   .. data:: include
-    :type: Optional[List[str], str]
+    :type: list[str] | str | None
     :value: None
     :noindex:
 
@@ -139,7 +139,7 @@ Args
     So, for example, all the files contained directly under this directory will be added to the root of the ZIP file.
 
   .. data:: python_path
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -147,7 +147,7 @@ Args
     If not provided, the current python interpreter will be used for ``pip`` and ``pipenv`` will be used from the current ``$PATH``.
 
   .. data:: runtime
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -156,7 +156,7 @@ Args
     Must provide exactly one of ``docker_file``, ``docker_image``, or ``runtime``.
 
   .. data:: use_pipenv
-    :type: Optional[bool]
+    :type: bool | None
     :value: False
     :noindex:
 

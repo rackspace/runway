@@ -109,9 +109,10 @@ If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.Cfn
 .. code-block:: python
 
   """Example lookup."""
+
   from __future__ import annotations
 
-  from typing import TYPE_CHECKING, Any, Final, Literal, Optional, Union
+  from typing import TYPE_CHECKING, Any, ClassVar
 
   from runway.cfngin.utils import read_value_from_path
   from runway.lookups.handlers.base import LookupHandler
@@ -124,16 +125,16 @@ If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.Cfn
   class MylookupLookup(LookupHandler):
       """My lookup."""
 
-      TYPE_NAME: Final[Literal["mylookup"]] = "mylookup"
+      TYPE_NAME: ClassVar[str] = "my_lookup"
       """Name that the Lookup is registered as."""
 
       @classmethod
       def handle(
           cls,
           value: str,
-          context: Union[CfnginContext, RunwayContext],
+          context: CfnginContext | RunwayContext,
           *_args: Any,
-          provider: Optional[Provider] = None,
+          provider: Provider | None = None,
           **_kwargs: Any
       ) -> str:
           """Do something.

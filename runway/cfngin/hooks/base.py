@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, cast  # noqa: UP035
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from troposphere import Tags
 
@@ -28,7 +28,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 class HookArgsBaseModel(BaseModel):
     """Base model for hook args."""
 
-    tags: Dict[str, str] = {}  # noqa: UP006
+    tags: dict[str, str] = {}
 
 
 class Hook(CfnginHookProtocol):
@@ -46,10 +46,9 @@ class Hook(CfnginHookProtocol):
 
     """
 
-    ARGS_PARSER: ClassVar[type[HookArgsBaseModel]] = HookArgsBaseModel
+    ARGS_PARSER: ClassVar = HookArgsBaseModel
     """Class used to parse arguments passed to the hook."""
 
-    args: HookArgsBaseModel
     blueprint: Blueprint | None = None
     context: CfnginContext
     provider: Provider
@@ -67,7 +66,7 @@ class Hook(CfnginHookProtocol):
         """
         kwargs.setdefault("tags", {})
 
-        self.args = self.ARGS_PARSER.parse_obj(kwargs)
+        self.args = self.ARGS_PARSER.model_validate(kwargs)
         self.args.tags.update(context.tags)
         self.context = context
         self.provider = provider
@@ -82,7 +81,7 @@ class Hook(CfnginHookProtocol):
 
     def generate_stack(self, **kwargs: Any) -> Stack:
         """Create a CFNgin Stack object."""
-        definition = CfnginStackDefinitionModel.construct(
+        definition = CfnginStackDefinitionModel.model_construct(
             name=self.stack_name, tags=self.args.tags, **kwargs
         )
         stack = Stack(definition, self.context)

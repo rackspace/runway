@@ -4,12 +4,11 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ...utils import MutableMap
 
@@ -21,7 +20,7 @@ TYPE_NAME = "var"
 class VarLookup(LookupHandler):
     """Variable definition Lookup."""
 
-    TYPE_NAME: Final[Literal["var"]] = "var"
+    TYPE_NAME: ClassVar[str] = "var"
     """Name that the Lookup is registered as."""
 
     @classmethod

@@ -3,12 +3,11 @@
 # pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ...context import CfnginContext, RunwayContext
 
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
 class EnvLookup(LookupHandler):
     """Environment variable Lookup."""
 
-    TYPE_NAME: Final[Literal["env"]] = "env"
+    TYPE_NAME: ClassVar[str] = "env"
     """Name that the Lookup is registered as."""
 
     @classmethod

@@ -45,8 +45,8 @@ class TestArgsDataModel:
 
     def test_name_required(self) -> None:
         """Test name."""
-        with pytest.raises(ValidationError, match="Name\n  field required"):
-            ArgsDataModel.parse_obj({"type": "String"})
+        with pytest.raises(ValidationError, match="Name\n  Field required"):
+            ArgsDataModel.model_validate({"type": "String"})
 
     def test_policies_raise_type_error(self) -> None:
         """Test policies."""
@@ -95,23 +95,29 @@ class TestArgsDataModel:
 
     def test_tags_raise_type_error(self) -> None:
         """Test tags."""
-        with pytest.raises(ValidationError, match="Tags"):
-            assert not ArgsDataModel.parse_obj({"name": "test", "tags": "", "type": "String"})
+        with pytest.raises(ValidationError, match="tags\n  Value error, unexpected type"):
+            assert not ArgsDataModel.model_validate({"name": "test", "tags": "", "type": "String"})
 
     def test_tier_invalid(self) -> None:
         """Test tier."""
-        with pytest.raises(ValidationError, match="Tier\n  unexpected value"):
-            ArgsDataModel.parse_obj({"name": "test", "tier": "invalid", "type": "String"})
+        with pytest.raises(
+            ValidationError,
+            match="tier\n  Input should be 'Advanced', 'Intelligent-Tiering' or 'Standard'",
+        ):
+            ArgsDataModel.model_validate({"name": "test", "tier": "invalid", "type": "String"})
 
     def test_type_invalid(self) -> None:
         """Test name."""
-        with pytest.raises(ValidationError, match="Type\n  unexpected value"):
-            ArgsDataModel.parse_obj({"name": "test", "type": "invalid"})
+        with pytest.raises(
+            ValidationError,
+            match="type\n  Input should be 'String', 'StringList' or 'SecureString'",
+        ):
+            ArgsDataModel.model_validate({"name": "test", "type": "invalid"})
 
     def test_type_required(self) -> None:
         """Test name."""
-        with pytest.raises(ValidationError, match="Type\n  field required"):
-            ArgsDataModel.parse_obj({"name": "test"})
+        with pytest.raises(ValidationError, match="Type\n  Field required"):
+            ArgsDataModel.model_validate({"name": "test"})
 
 
 class TestParameter:
@@ -120,12 +126,12 @@ class TestParameter:
     def test___init__(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test __init__."""
         args = mocker.patch(f"{MODULE}.ArgsDataModel")
-        args.parse_obj.return_value = args
+        args.model_validate.return_value = args
         data = {"key": "val"}
         obj = Parameter(cfngin_context, name="test", type="String", **data)
         assert obj.args == args
         assert obj.ctx == cfngin_context
-        args.parse_obj.assert_called_once_with({"name": "test", "type": "String", **data})
+        args.model_validate.assert_called_once_with({"name": "test", "type": "String", **data})
 
     def test_client(
         self,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 import awacs.sts
 from awacs.aws import Allow, AWSPrincipal, PolicyDocument, Statement
@@ -45,7 +45,7 @@ class AdminRole(Blueprint):
         return self.context.namespace
 
     @cached_property
-    def role_name(self) -> Optional[str]:
+    def role_name(self) -> str | None:
         """Name of the role being created."""
         val = self.variables["RoleName"]
         if val == "":

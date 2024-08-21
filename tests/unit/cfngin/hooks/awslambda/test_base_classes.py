@@ -124,13 +124,13 @@ class TestAwsLambdaHook:
 
     def test_plan(self, mocker: MockerFixture) -> None:
         """Test plan."""
-        response_obj = Mock(dict=Mock(return_value="success"))
+        response_obj = Mock(model_dump=Mock(return_value="success"))
         build_response = mocker.patch.object(
             AwsLambdaHook, "build_response", return_value=response_obj
         )
-        assert AwsLambdaHook(Mock()).plan() == response_obj.dict.return_value
+        assert AwsLambdaHook(Mock()).plan() == response_obj.model_dump.return_value
         build_response.assert_called_once_with("plan")
-        response_obj.dict.assert_called_once_with(by_alias=True)
+        response_obj.model_dump.assert_called_once_with(by_alias=True)
 
     def test_post_deploy(self, caplog: pytest.LogCaptureFixture) -> None:
         """Test post_deploy."""

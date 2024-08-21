@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from queue import Queue
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from typing_extensions import Literal, TypedDict
 
@@ -124,13 +124,14 @@ class ActionArchitecture:
         }
 
         # Determine what strategies to override if any.
-        responses: list[tuple[Any, BaseSync]] | None = self.botocore_session.emit(
-            "choosing-s3-sync-strategy", params=self.parameters
+        responses = cast(
+            "list[tuple[Any, BaseSync]] | None",
+            self.botocore_session.emit("choosing-s3-sync-strategy", params=self.parameters),
         )
         if responses is not None:
             for response in responses:
                 override_sync_strategy = response[1]
-                if override_sync_strategy is not None:
+                if override_sync_strategy:
                     sync_type = override_sync_strategy.sync_type
                     sync_type += "_sync_strategy"
                     sync_strategies[sync_type] = override_sync_strategy

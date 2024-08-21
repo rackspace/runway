@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Union
+from typing import TYPE_CHECKING, ClassVar
 
 from troposphere import Equals, If, Not, NoValue, Or, Tag, Tags, s3
 
@@ -70,7 +70,7 @@ class CfnginBucket(Blueprint):
         return bucket
 
     @cached_property
-    def bucket_encryption(self) -> Union[AWSHelperFn, s3.BucketEncryption]:
+    def bucket_encryption(self) -> AWSHelperFn | s3.BucketEncryption:
         """CFNgin bucket encryption.
 
         This cached property can be overridden in a subclass to customize the

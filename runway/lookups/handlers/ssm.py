@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final, Union
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
+    from mypy_boto3_ssm.type_defs import ParameterTypeDef
 
     from ...context import CfnginContext, RunwayContext
 
@@ -18,14 +18,14 @@ LOGGER = logging.getLogger(__name__)
 class SsmLookup(LookupHandler):
     """SSM Parameter Store Lookup."""
 
-    TYPE_NAME: Final[Literal["ssm"]] = "ssm"
+    TYPE_NAME: ClassVar[str] = "ssm"
     """Name that the Lookup is registered as."""
 
     @classmethod
     def handle(
         cls,
         value: str,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *__args: Any,
         **__kwargs: Any,
     ) -> Any:
@@ -46,12 +46,9 @@ class SsmLookup(LookupHandler):
         client = session.client("ssm")
 
         try:
-            response = client.get_parameter(Name=query, WithDecryption=True)["Parameter"]
             return cls.format_results(
-                (
-                    response["Value"].split(",")
-                    if response["Type"] == "StringList"
-                    else response["Value"]
+                cls._handle_get_parameter(
+                    client.get_parameter(Name=query, WithDecryption=True)["Parameter"]
                 ),
                 **args,
             )
@@ -60,3 +57,13 @@ class SsmLookup(LookupHandler):
                 args.pop("load", None)  # don't load a default value
                 return cls.format_results(args.pop("default"), **args)
             raise
+
+    @staticmethod
+    def _handle_get_parameter(parameter: ParameterTypeDef) -> list[str] | str | None:
+        """Handle the return value of ``get_parameter``."""
+        if "Value" not in parameter:
+            return None
+        value = parameter["Value"]
+        if parameter.get("Type") == "StringList":
+            return value.split(",")
+        return value

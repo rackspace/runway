@@ -6,7 +6,7 @@ import collections.abc
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Annotated, Any
 
 import pydantic
 
@@ -34,18 +34,10 @@ class BlankBlueprint(Blueprint):
 class TagDataModel(BaseModel):
     """AWS Resource Tag data model."""
 
-    key: str
-    value: str
+    model_config = pydantic.ConfigDict(extra="forbid", populate_by_name=True)
 
-    class Config:
-        """Model configuration."""
-
-        allow_population_by_field_name = True
-        extra = pydantic.Extra.forbid
-        fields = {
-            "key": {"alias": "Key"},
-            "value": {"alias": "Value"},
-        }
+    key: Annotated[str, pydantic.Field(alias="Key")]
+    value: Annotated[str, pydantic.Field(alias="Value")]
 
 
 def full_path(path: str) -> str:
@@ -119,7 +111,7 @@ def handle_hooks(  # noqa: C901, PLR0912, PLR0915
             if isinstance(method, type):
                 result: Any = getattr(method(context=context, provider=provider, **kwargs), stage)()
             else:
-                result = cast(Any, method(context=context, provider=provider, **kwargs))
+                result = method(context=context, provider=provider, **kwargs)
         except Exception:
             LOGGER.exception("hook %s threw an exception", hook.path)
             if hook.required:

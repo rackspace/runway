@@ -411,7 +411,11 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
             ContentMD5=self.md5_checksum,
             Key=self.object_key,
             Tagging=self.build_tag_set(),
-            **{"ContentType": content_type} if content_type else {},
+            **(
+                {"ContentType": content_type}  # pyright: ignore[reportArgumentType]
+                if content_type
+                else {}
+            ),
         )
         # clear cached properties so they can recalculate
         self._del_cached_property("object_version_id")

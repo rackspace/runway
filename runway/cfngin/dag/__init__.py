@@ -9,7 +9,7 @@ import logging
 from collections import OrderedDict
 from copy import copy, deepcopy
 from threading import Thread
-from typing import TYPE_CHECKING, Any, Callable, Union, cast
+from typing import TYPE_CHECKING, Any, Callable, cast
 
 if TYPE_CHECKING:
     import threading
@@ -288,7 +288,7 @@ class DAG:
         graph = self.graph
         return [key for key in graph if not graph[key]]
 
-    def from_dict(self, graph_dict: dict[str, Union[Iterable[str], Any]]) -> None:
+    def from_dict(self, graph_dict: dict[str, Iterable[str] | Any]) -> None:
         """Reset the graph and build it from the passed dictionary.
 
         The dictionary takes the form of {node_name: [directed edges]}
@@ -390,7 +390,7 @@ class UnlimitedSemaphore:
 class ThreadedWalker:
     """Walk a DAG as quickly as the graph topology allows, using threads."""
 
-    def __init__(self, semaphore: Union[threading.Semaphore, UnlimitedSemaphore]) -> None:
+    def __init__(self, semaphore: threading.Semaphore | UnlimitedSemaphore) -> None:
         """Instantiate class.
 
         Args:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import TYPE_CHECKING, Any, ClassVar, List, Optional  # noqa: UP035
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from botocore.exceptions import ClientError
 from troposphere import Ref
@@ -25,9 +25,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from ...context import CfnginContext
-    from ..blueprints.base import Blueprint
     from ..providers.aws.default import Provider
-    from ..stack import Stack
     from ..status import Status
 
 LOGGER = logging.getLogger(__name__)
@@ -36,10 +34,10 @@ LOGGER = logging.getLogger(__name__)
 class HookArgs(HookArgsBaseModel):
     """Hook arguments."""
 
-    alt_names: List[str] = []  # noqa: UP006
+    alt_names: list[str] = []
     domain: str
     hosted_zone_id: str
-    stack_name: Optional[str] = None
+    stack_name: str | None = None
     ttl: int = 300
 
 
@@ -47,7 +45,7 @@ class Certificate(Hook):
     r"""Hook for managing a **AWS::CertificateManager::Certificate**.
 
     Keyword Args:
-        alt_names (Optional[list[str]]): Additional FQDNs to be included in the
+        alt_names (list[str]): Additional FQDNs to be included in the
             Subject Alternative Name extension of the ACM certificate. For
             example, you can add www.example.net to a certificate for which the
             domain field is www.example.com if users can reach your site by
@@ -61,10 +59,10 @@ class Certificate(Hook):
         hosted_zone_id (str): The ID of the Route 53 Hosted Zone that contains
             the resource record sets that you want to change. This must exist
             in the same account that the certificate will be created in.
-        stack_name (Optional[str]): Provide a name for the stack used to
+        stack_name (str | None): Provide a name for the stack used to
             create the certificate. If not provided, the domain is used
             (replacing ``.`` with ``-``).
-        ttl (Optional[int]): The resource record cache time to live (TTL),
+        ttl (int): The resource record cache time to live (TTL),
             in seconds. (*default:* ``300``)
 
     .. rubric:: Example
@@ -84,9 +82,7 @@ class Certificate(Hook):
 
     acm_client: ACMClient
     args: HookArgs
-    blueprint: Blueprint
     r53_client: Route53Client
-    stack: Stack
     template_description: str
 
     def __init__(self, context: CfnginContext, provider: Provider, **kwargs: Any) -> None:
@@ -121,7 +117,7 @@ class Certificate(Hook):
             }
         )
 
-    def _create_blueprint(self) -> Blueprint:
+    def _create_blueprint(self) -> BlankBlueprint:
         """Create CFNgin Blueprint."""
         var_description = (
             "NO NOT CHANGE MANUALLY! Used to track the "
@@ -152,6 +148,8 @@ class Certificate(Hook):
 
     def domain_changed(self) -> bool:
         """Check to ensure domain has not changed for existing stack."""
+        if not self.stack:  # cov: ignore
+            raise NotImplementedError("stack not present on hook")
         try:
             stack_info = self.provider.get_stack(self.stack.fqn)
             if self.provider.is_stack_recreatable(stack_info):
@@ -187,6 +185,8 @@ class Certificate(Hook):
             Certificate ARN.
 
         """
+        if not self.stack:  # cov: ignore
+            raise NotImplementedError("stack not present on hook")
         response = self.provider.cloudformation.describe_stack_resources(
             StackName=self.stack.fqn, LogicalResourceId="Certificate"
         )["StackResources"]
@@ -199,7 +199,7 @@ class Certificate(Hook):
 
     def get_validation_record(
         self,
-        cert_arn: Optional[str] = None,
+        cert_arn: str | None = None,
         *,
         interval: int = 5,
         status: str = "PENDING_VALIDATION",
@@ -220,16 +220,16 @@ class Certificate(Hook):
             cert_arn = self.get_certificate()
         cert = self.acm_client.describe_certificate(CertificateArn=cert_arn).get("Certificate", {})
 
-        try:
-            domain_validation = [
-                opt for opt in cert["DomainValidationOptions"] if opt["ValidationStatus"] == status
-            ]
-        except KeyError:
+        if "DomainValidationOptions" not in cert:
             LOGGER.debug(
                 "waiting for DomainValidationOptions to become available for the certificate..."
             )
             time.sleep(interval)
             return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
+
+        domain_validation = [
+            opt for opt in cert["DomainValidationOptions"] if opt.get("ValidationStatus") == status
+        ]
 
         if not domain_validation:
             raise ValueError(
@@ -240,16 +240,14 @@ class Certificate(Hook):
                 f"Found {len(domain_validation)} validation options of status "
                 f'"{status}" for "{self.args.domain}"; only one option is supported'
             )
-        try:
-            # the validation option can exists before the record set is ready
+        if "ResourceRecord" in domain_validation[0]:
             return domain_validation[0]["ResourceRecord"]
-        except KeyError:
-            LOGGER.debug(
-                "waiting for DomainValidationOptions.ResourceRecord "
-                "to become available for the certificate..."
-            )
-            time.sleep(interval)
-            return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
+        LOGGER.debug(
+            "waiting for DomainValidationOptions.ResourceRecord to become available "
+            "for the certificate..."
+        )
+        time.sleep(interval)
+        return self.get_validation_record(cert_arn=cert_arn, interval=interval, status=status)
 
     def put_record_set(self, record_set: ResourceRecordTypeDef) -> None:
         """Create/update a record set on a Route 53 Hosted Zone.
@@ -261,9 +259,7 @@ class Certificate(Hook):
         LOGGER.info("adding validation record to hosted zone: %s", self.args.hosted_zone_id)
         self.__change_record_set("CREATE", [record_set])
 
-    def remove_validation_records(
-        self, records: Optional[list[ResourceRecordTypeDef]] = None
-    ) -> None:
+    def remove_validation_records(self, records: list[ResourceRecordTypeDef] | None = None) -> None:
         """Remove all record set entries used to validate an ACM Certificate.
 
         Args:
@@ -339,7 +335,7 @@ class Certificate(Hook):
             ChangeBatch={"Comment": self.template_description, "Changes": changes},
         )
 
-    def deploy(self, status: Optional[Status] = None) -> dict[str, str]:
+    def deploy(self, status: Status | None = None) -> dict[str, str]:
         """Deploy an ACM Certificate."""
         record = None
         try:
@@ -389,7 +385,7 @@ class Certificate(Hook):
             LOGGER.error(err)
             self.destroy(
                 records=[record] if record else None,
-                skip_r53=isinstance(  # type: ignore
+                skip_r53=isinstance(
                     err,
                     (
                         self.r53_client.exceptions.InvalidChangeBatch,
@@ -404,7 +400,7 @@ class Certificate(Hook):
 
     def destroy(
         self,
-        records: Optional[list[ResourceRecordTypeDef]] = None,
+        records: list[ResourceRecordTypeDef] | None = None,
         skip_r53: bool = False,
     ) -> bool:
         """Destroy an ACM certificate.
@@ -416,6 +412,8 @@ class Certificate(Hook):
             skip_r53: Skip the removal of validation records.
 
         """
+        if not self.stack:  # cov: ignore
+            raise NotImplementedError("stack not present on hook")
         if not skip_r53:
             try:
                 self.remove_validation_records(records)

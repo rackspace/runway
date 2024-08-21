@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import base64
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ...lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
     from mypy_boto3_ecr.client import ECRClient
-    from typing_extensions import Literal
 
     from ...context import CfnginContext, RunwayContext
 
@@ -20,7 +19,7 @@ LOGGER = logging.getLogger(__name__)
 class EcrLookup(LookupHandler):
     """ECR Lookup."""
 
-    TYPE_NAME: Final[Literal["ecr"]] = "ecr"
+    TYPE_NAME: ClassVar[str] = "ecr"
     """Name that the Lookup is registered as."""
 
     @staticmethod

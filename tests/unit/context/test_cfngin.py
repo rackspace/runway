@@ -1,12 +1,11 @@
 """Test runway.context._cfngin."""
 
-# pyright: basic
 from __future__ import annotations
 
 import io
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import MagicMock
 
 import pytest
@@ -46,7 +45,7 @@ def gen_tagset(tags: dict[str, str]) -> TagSetTypeDef:
     return [{"Key": key, "Value": value} for key, value in tags.items()]
 
 
-def gen_s3_object_content(content: Union[dict[str, Any], str]) -> StreamingBody:
+def gen_s3_object_content(content: dict[str, Any] | str) -> StreamingBody:
     """Convert a string or dict to S3 object body.
 
     Args:
@@ -68,7 +67,7 @@ def gen_s3_object_content(content: Union[dict[str, Any], str]) -> StreamingBody:
         ("-", None, "test"),
     ],
 )
-def test_get_fqn(delim: str, expected: str, name: Optional[str]) -> None:
+def test_get_fqn(delim: str, expected: str, name: str | None) -> None:
     """Test runway.context._cfngin.get_fqn."""
     assert get_fqn("test", delim, name) == expected
 
@@ -568,7 +567,7 @@ class TestCFNginContext:
     def test_set_hook_data_type_error(self, data: Any) -> None:
         """Test set_hook_data TypeError."""
         with pytest.raises(TypeError):
-            CfnginContext().set_hook_data("test", data)  # type: ignore
+            CfnginContext().set_hook_data("test", data)
 
     def test_set_hook_data(self) -> None:
         """Test set_hook_data."""

@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.command."""
 
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

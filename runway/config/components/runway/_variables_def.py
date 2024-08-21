@@ -12,6 +12,8 @@ from ....utils import MutableMap
 from ...models.runway import RunwayVariablesDefinitionModel
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ...._logging import RunwayLogger
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
@@ -29,8 +31,8 @@ class RunwayVariablesDefinition(MutableMap):
         """Instantiate class."""
         self._file_path = data.file_path
         self._sys_path = data.sys_path
-        data = RunwayVariablesDefinitionModel(**{**data.dict(), **self.__load_file()})
-        super().__init__(**data.dict(exclude={"file_path", "sys_path"}))
+        data = RunwayVariablesDefinitionModel(**{**data.model_dump(), **self.__load_file()})
+        super().__init__(**data.model_dump(exclude={"file_path", "sys_path"}))
 
     def __load_file(self) -> dict[str, Any]:
         """Load a variables file."""
@@ -55,11 +57,11 @@ class RunwayVariablesDefinition(MutableMap):
         return {}
 
     @classmethod
-    def parse_obj(cls, obj: Any) -> RunwayVariablesDefinition:
+    def parse_obj(cls: type[Self], obj: Any) -> Self:
         """Parse a python object into this class.
 
         Args:
             obj: The object to parse.
 
         """
-        return cls(RunwayVariablesDefinitionModel.parse_obj(obj))
+        return cls(RunwayVariablesDefinitionModel.model_validate(obj))

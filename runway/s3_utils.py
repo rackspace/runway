@@ -17,7 +17,10 @@ if TYPE_CHECKING:
 
     from mypy_boto3_s3.client import S3Client
     from mypy_boto3_s3.service_resource import S3ServiceResource
-    from mypy_boto3_s3.type_defs import ObjectTypeDef
+    from mypy_boto3_s3.type_defs import (
+        ListObjectsV2RequestListObjectsV2PaginateTypeDef,
+        ObjectTypeDef,
+    )
 
     from ._logging import RunwayLogger
 
@@ -188,7 +191,7 @@ def get_matching_s3_objects(
     s3_client = _get_client(session)
     paginator = s3_client.get_paginator("list_objects_v2")
 
-    kwargs = {"Bucket": bucket}
+    kwargs: ListObjectsV2RequestListObjectsV2PaginateTypeDef = {"Bucket": bucket}
 
     # We can pass the prefix directly to the S3 API.  If the user has passed
     # a tuple or list of prefixes, we go through them one by one.
@@ -197,12 +200,7 @@ def get_matching_s3_objects(
         kwargs["Prefix"] = key_prefix
 
         for page in paginator.paginate(**kwargs):
-            try:
-                contents = page["Contents"]
-            except KeyError:
-                return
-
-            for obj in contents:
+            for obj in page.get("Contents", []):
                 if "Key" in obj and obj["Key"].endswith(suffix):
                     yield obj
 

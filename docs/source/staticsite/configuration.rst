@@ -15,7 +15,7 @@ Options
 *******
 
 .. data:: build_output
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -28,7 +28,7 @@ Options
       build_output: dist
 
 .. data:: build_steps
-  :type: Optional[List[str]]
+  :type: list[str]
   :value: []
   :noindex:
 
@@ -43,7 +43,7 @@ Options
         - npm run build
 
 .. data:: extra_files
-  :type: Optional[List[Dict[str, Union[str, Dict[str, Any]]]]]
+  :type: list[dict[str, str | dict[str, Any]]]
   :value: []
   :noindex:
 
@@ -84,7 +84,7 @@ Options
   .. versionadded:: 1.9.0
 
 .. data:: pre_build_steps
-  :type: Optional[List[Dict[str, str]]]
+  :type: list[dict[str, str]]
   :value: []
   :noindex:
 
@@ -101,7 +101,7 @@ Options
           cwd: ../myothermodule
 
 .. data:: source_hashing
-  :type: Optional[Dict[str, str]]
+  :type: dict[str, str]
   :value: {}
   :noindex:
 
@@ -128,7 +128,7 @@ Parameters
 **********
 
 .. data:: cloudformation_service_role
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -158,7 +158,7 @@ Parameters
 .. _staticsite_acmcert_arn:
 
 .. data:: staticsite_acmcert_arn
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -172,7 +172,7 @@ Parameters
       staticsite_acmcert_arn: arn:aws:acm:<region>:<account-id>:certificate/<cert>
 
 .. data:: staticsite_aliases
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -190,7 +190,7 @@ Parameters
 .. _staticsite_auth_at_edge:
 
 .. data:: staticsite_auth_at_edge
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
@@ -208,7 +208,7 @@ Parameters
 .. _staticsite_cf_disable:
 
 .. data:: staticsite_cf_disable
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
@@ -226,7 +226,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_compress
-  :type: Optional[bool]
+  :type: bool
   :value: True
   :noindex:
 
@@ -239,7 +239,7 @@ Parameters
       staticsite_compress: false
 
 .. data:: staticsite_cookie_settings
-  :type: Optional[Dict[str, str]]
+  :type: dict[str, str] | None
   :value: {"idToken": "Path=/; Secure; SameSite=Lax", "accessToken": "Path=/; Secure; SameSite=Lax", "refreshToken": "Path=/; Secure; SameSite=Lax", "nonce": "Path=/; Secure; HttpOnly; Max-Age=1800; SameSite=Lax"}
   :noindex:
 
@@ -262,7 +262,7 @@ Parameters
 .. _staticsite_create_user_pool:
 
 .. data:: staticsite_create_user_pool
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
@@ -281,7 +281,7 @@ Parameters
 .. _staticsite_custom_error_responses:
 
 .. data:: staticsite_custom_error_responses
-  :type: Optional[List[Dict[str, Union[int, str]]]]
+  :type: list[dict[str, int | str]]
   :value: []
   :noindex:
 
@@ -297,7 +297,7 @@ Parameters
           ResponsePagePath: /index.html
 
 .. data:: staticsite_enable_cf_logging
-  :type: Optional[bool]
+  :type: bool
   :value: True
   :noindex:
 
@@ -310,7 +310,7 @@ Parameters
       staticsite_enable_cf_logging: true
 
 .. data:: staticsite_http_headers
-  :type: Optional[Dict[str, str]]
+  :type: dict[str, str] | None
   :value: {"Content-Security-Policy": "default-src https: 'unsafe-eval' 'unsafe-inline'; font-src 'self' 'unsafe-inline' 'unsafe-eval' data: https:; object-src 'none'; connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com", "Strict-Transport-Security": "max-age=31536000;  includeSubdomains; preload", "Referrer-Policy": "same-origin", "X-XSS-Protection": "1; mode=block", "X-Frame-Options": "DENY", "X-Content-Type-Options": "nosniff"}
   :noindex:
 
@@ -337,7 +337,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_lambda_function_associations
-  :type: Optional[List[Dict[str, str]]]
+  :type: list[dict[str, str]]
   :value: []
   :noindex:
 
@@ -353,7 +353,7 @@ Parameters
           arn: arn:aws:lambda:<region>:<account-id>:function:<function>:<version>
 
 .. data:: staticsite_non_spa
-  :type: Optional[bool]
+  :type: bool
   :value: False
   :noindex:
 
@@ -374,7 +374,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_oauth_scopes
-  :type: Optional[List[str]]
+  :type: list[str] | None
   :value: ["phone", "email", "profile", "openid", "aws.cognito.signin.user.admin"]
   :noindex:
 
@@ -398,7 +398,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_redirect_path_auth_refresh
-  :type: Optional[str]
+  :type: str | None
   :value: "/refreshauth"
   :noindex:
 
@@ -415,7 +415,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_redirect_path_sign_in
-  :type: Optional[str]
+  :type: str | None
   :value: "/parseauth"
   :noindex:
 
@@ -433,7 +433,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_redirect_path_sign_out
-  :type: Optional[str]
+  :type: str | None
   :value: "/"
   :noindex:
 
@@ -453,7 +453,7 @@ Parameters
 .. _staticsite_rewrite_directory_index:
 
 .. data:: staticsite_rewrite_directory_index
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -466,7 +466,7 @@ Parameters
       staticsite_rewrite_directory_index: index.html
 
 .. data:: staticsite_role_boundary_arn
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -482,7 +482,7 @@ Parameters
   .. versionadded:: 1.8.0
 
 .. data:: staticsite_sign_out_url
-  :type: Optional[str]
+  :type: str | None
   :value: "/signout"
   :noindex:
 
@@ -499,7 +499,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_supported_identity_providers
-  :type: Optional[str]
+  :type: str | None
   :value: "COGNITO"
   :noindex:
 
@@ -516,7 +516,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_user_pool_arn
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -533,7 +533,7 @@ Parameters
   .. versionadded:: 1.5.0
 
 .. data:: staticsite_additional_redirect_domains
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -552,7 +552,7 @@ Parameters
   .. versionadded:: 1.14.0
 
 .. data:: staticsite_web_acl
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -565,7 +565,7 @@ Parameters
       staticsite_web_acl: arn:aws:waf::<account-id>:certificate/<cert>
 
 .. data:: staticsite_required_group
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 

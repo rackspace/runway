@@ -1,6 +1,6 @@
 """Tests for runway.cfngin.lookups.handlers.file."""
 
-# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
+# pyright: reportUnknownArgumentType=none, reportUnknownVariableType=none
 from __future__ import annotations
 
 import base64
@@ -39,15 +39,11 @@ class TestArgsDataModel:
 
     def test__validate_supported_codec_raise_value_error(self) -> None:
         """Test _validate_supported_codec raise ValueError."""
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(
+            ValidationError,
+            match=rf".*Value error, Codec 'foo' must be one of: {', '.join(CODECS)}",
+        ):
             ArgsDataModel(codec="foo")
-        assert excinfo.value.errors() == [
-            {
-                "loc": ("codec",),
-                "msg": f"Codec 'foo' must be one of: {', '.join(CODECS)}",
-                "type": "value_error",
-            }
-        ]
 
 
 class TestFileLookup:
@@ -144,15 +140,11 @@ class TestFileLookup:
 
     def test_handle_raise_validation_error(self) -> None:
         """Test handle raise ValidationError."""
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(
+            ValidationError,
+            match=rf".*Value error, Codec 'foo' must be one of: {', '.join(CODECS)}",
+        ):
             FileLookup.handle("foo:bar")
-        assert excinfo.value.errors() == [
-            {
-                "loc": ("codec",),
-                "msg": f"Codec 'foo' must be one of: {', '.join(CODECS)}",
-                "type": "value_error",
-            }
-        ]
 
     def test_handle_raise_value_error(self) -> None:
         """Test handle raise ValueError."""

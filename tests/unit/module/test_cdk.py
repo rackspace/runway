@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock, call
 
 import pytest
@@ -381,7 +381,7 @@ class TestCloudDevelopmentKit:
     )
     def test_gen_cmd(
         self,
-        args_list: Optional[list[str]],
+        args_list: list[str] | None,
         command: CdkCommandTypeDef,
         env_ci: bool,
         expected: list[str],
@@ -625,4 +625,4 @@ class TestCloudDevelopmentKitOptions:
         assert isinstance(obj.data, RunwayCdkModuleOptionsDataModel)
         assert obj.data.build_steps == config["build_steps"]
         assert obj.data.skip_npm_ci == config["skip_npm_ci"]
-        assert "key" not in obj.data.dict()
+        assert "key" not in obj.data.model_dump()

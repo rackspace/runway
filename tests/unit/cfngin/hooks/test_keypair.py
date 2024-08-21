@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.keypair."""
 
-# pyright: basic
 from __future__ import annotations
 
 import os

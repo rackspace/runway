@@ -11,7 +11,7 @@ import unittest
 from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
 import boto3
@@ -63,7 +63,7 @@ def random_string(length: int = 12) -> str:
 
 def generate_describe_stacks_stack(
     stack_name: str,
-    creation_time: Optional[datetime] = None,
+    creation_time: datetime | None = None,
     stack_status: Literal[
         "CREATE_IN_PROGRESS",
         "CREATE_FAILED",
@@ -88,7 +88,7 @@ def generate_describe_stacks_stack(
         "IMPORT_ROLLBACK_FAILED",
         "IMPORT_ROLLBACK_COMPLETE",
     ] = "CREATE_COMPLETE",
-    tags: Optional[TagSetTypeDef] = None,
+    tags: TagSetTypeDef | None = None,
     termination_protection: bool = False,
 ) -> StackTypeDef:
     """Generate describe stacks stack."""
@@ -113,7 +113,7 @@ def generate_get_template(
     }
 
 
-def generate_stack_object(stack_name: str, outputs: Optional[dict[str, Any]] = None) -> MagicMock:
+def generate_stack_object(stack_name: str, outputs: dict[str, Any] | None = None) -> MagicMock:
     """Generate stack object."""
     mock_stack = MagicMock(["name", "fqn", "blueprint"])
     if not outputs:
@@ -145,7 +145,7 @@ def generate_resource_change(replacement: bool = True) -> ChangeTypeDef:
 def generate_change_set_response(
     status: str,
     execution_status: str = "AVAILABLE",
-    changes: Optional[list[dict[str, Any]]] = None,
+    changes: list[dict[str, Any]] | None = None,
     status_reason: str = "FAKE",
 ) -> dict[str, Any]:
     """Generate change set response."""

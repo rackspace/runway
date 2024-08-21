@@ -1,7 +1,9 @@
 """Fake Docker API client."""
 
+from __future__ import annotations
+
 import copy
-from typing import Any, Optional
+from typing import Any
 from unittest import mock
 
 import docker
@@ -20,7 +22,7 @@ class CopyReturnMagicMock(mock.MagicMock):
         return ret  # type: ignore
 
 
-def make_fake_api_client(overrides: Optional[dict[str, Any]] = None) -> CopyReturnMagicMock:
+def make_fake_api_client(overrides: dict[str, Any] | None = None) -> CopyReturnMagicMock:
     """Return non-complete fake APIClient.
 
     This returns most of the default cases correctly, but most arguments that
@@ -56,7 +58,7 @@ def make_fake_api_client(overrides: Optional[dict[str, Any]] = None) -> CopyRetu
     return mock_client
 
 
-def make_fake_client(overrides: Optional[dict[str, Any]] = None) -> docker.DockerClient:
+def make_fake_client(overrides: dict[str, Any] | None = None) -> docker.DockerClient:
     """Return a Client with a fake APIClient."""
     client = docker.DockerClient(version=DEFAULT_DOCKER_API_VERSION)
     client.api = make_fake_api_client(overrides)

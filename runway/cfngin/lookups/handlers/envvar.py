@@ -3,9 +3,7 @@
 # pyright: reportIncompatibleMethodOverride=none
 import logging
 import os
-from typing import Any, Final
-
-from typing_extensions import Literal
+from typing import Any, ClassVar
 
 from ....lookups.handlers.base import LookupHandler
 from ...utils import read_value_from_path
@@ -17,7 +15,7 @@ class EnvvarLookup(LookupHandler):
     """Environment variable lookup."""
 
     DEPRECATION_MSG = "envvar Lookup has been deprecated; use the env lookup instead"
-    TYPE_NAME: Final[Literal["envvar"]] = "envvar"
+    TYPE_NAME: ClassVar[str] = "envvar"
     """Name that the Lookup is registered as."""
 
     @classmethod

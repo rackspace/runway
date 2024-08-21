@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any
 
 from . import AWSHelperFn, AWSProperty
 
@@ -48,7 +48,7 @@ class ARN(BaseARN):
 class ConditionElement(AWSHelperFn):
     def __init__(
         self,
-        data: Union[Dict[str, Any], str],
+        data: dict[str, Any] | str,
         value: Any = ...,
     ) -> None:
         """Create a ConditionElement
@@ -68,7 +68,7 @@ class ConditionElement(AWSHelperFn):
         """
         ...
 
-    def get_dict(self) -> Dict[str, Union[List[str], str]]: ...
+    def get_dict(self) -> dict[str, list[str] | str]: ...
 
 class Condition(AWSHelperFn):
     def __init__(self, conditions) -> None: ...
@@ -79,26 +79,26 @@ class Principal(AWSHelperFn):
     def __init__(
         self,
         principal: str,
-        resources: Union[
-            List[str],
-            List[troposphere.AWSHelperFn],
-            List[Union[str, troposphere.AWSHelperFn]],
-            str,
-            troposphere.AWSHelperFn,
-        ] = ...,
+        resources: (
+            list[str]
+            | list[troposphere.AWSHelperFn]
+            | list[str | troposphere.AWSHelperFn]
+            | str
+            | troposphere.AWSHelperFn
+        ) = ...,
     ) -> None: ...
     def JSONrepr(self): ...
 
 class AWSPrincipal(Principal):
     def __init__(
         self,
-        principals: Union[
-            List[str],
-            List[troposphere.AWSHelperFn],
-            List[Union[str, troposphere.AWSHelperFn]],
-            str,
-            troposphere.AWSHelperFn,
-        ],
+        principals: (
+            list[str]
+            | list[troposphere.AWSHelperFn]
+            | list[str | troposphere.AWSHelperFn]
+            | str
+            | troposphere.AWSHelperFn
+        ),
     ) -> None: ...
 
 def effect(x): ...

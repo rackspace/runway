@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import subprocess
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from ..exceptions import NpmNotFound
 from ..utils import which
@@ -19,14 +19,31 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-class RunwayModule:
+class ModuleOptions:
+    """Base class for Runway module options."""
+
+    def get(self, name: str, default: Any = None) -> Any:
+        """Get a value or return the default."""
+        return getattr(self, name, default)
+
+    def __eq__(self, other: object) -> bool:
+        """Assess equality."""
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        return False
+
+
+_ModuleOptionsTypeVar = TypeVar("_ModuleOptionsTypeVar", bound="ModuleOptions | dict[str, Any]")
+
+
+class RunwayModule(Generic[_ModuleOptionsTypeVar]):
     """Base class for Runway modules."""
 
     ctx: RunwayContext
     explicitly_enabled: bool | None
     logger: PrefixAdaptor | RunwayLogger
     name: str
-    options: dict[str, Any] | ModuleOptions
+    options: _ModuleOptionsTypeVar
     region: str
 
     def __init__(
@@ -37,7 +54,7 @@ class RunwayModule:
         logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: str | None = None,
-        options: dict[str, Any] | ModuleOptions | None = None,
+        options: _ModuleOptionsTypeVar | None = None,
         parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
@@ -93,7 +110,7 @@ class RunwayModule:
         return getattr(self, key)
 
 
-class RunwayModuleNpm(RunwayModule):
+class RunwayModuleNpm(RunwayModule[_ModuleOptionsTypeVar]):
     """Base class for Runway modules that use npm."""
 
     def __init__(
@@ -104,7 +121,7 @@ class RunwayModuleNpm(RunwayModule):
         logger: RunwayLogger = LOGGER,
         module_root: Path,
         name: str | None = None,
-        options: dict[str, Any] | ModuleOptions | None = None,
+        options: _ModuleOptionsTypeVar | None = None,
         parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
@@ -209,17 +226,3 @@ class RunwayModuleNpm(RunwayModule):
                 "during use of nodejs-based module and AWS_PROFILE is "
                 "not set -- you likely want to set AWS_PROFILE instead"
             )
-
-
-class ModuleOptions:
-    """Base class for Runway module options."""
-
-    def get(self, name: str, default: Any = None) -> Any:
-        """Get a value or return the default."""
-        return getattr(self, name, default)
-
-    def __eq__(self, other: object) -> bool:
-        """Assess equality."""
-        if isinstance(other, self.__class__):
-            return self.__dict__ == other.__dict__
-        return False
