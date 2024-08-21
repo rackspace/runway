@@ -1,6 +1,5 @@
 """AWS KMS lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import codecs
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class KmsLookup(LookupHandler):
+class KmsLookup(LookupHandler["CfnginContext"]):
     """AWS KMS lookup."""
 
     DEPRECATION_MSG = (

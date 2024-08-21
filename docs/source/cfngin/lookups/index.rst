@@ -119,10 +119,10 @@ If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.Cfn
 
   if TYPE_CHECKING:
       from runway.cfngin.providers.aws.default import Provider
-      from runway.context import CfnginContext, RunwayContext
+      from runway.context import CfnginContext
 
 
-  class MylookupLookup(LookupHandler):
+  class MylookupLookup(LookupHandler["CfnginContext"]):
       """My lookup."""
 
       TYPE_NAME: ClassVar[str] = "my_lookup"
@@ -132,9 +132,9 @@ If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.Cfn
       def handle(
           cls,
           value: str,
-          context: CfnginContext | RunwayContext,
-          *_args: Any,
-          provider: Provider | None = None,
+          context: CfnginContext,
+          *,
+          provider: Provider,
           **_kwargs: Any
       ) -> str:
           """Do something.

@@ -1,6 +1,5 @@
 """Generate a random string."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
@@ -14,7 +13,6 @@ from .base import LookupHandler
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +26,7 @@ class ArgsDataModel(BaseModel):
     uppercase: bool = True
 
 
-class RandomStringLookup(LookupHandler):
+class RandomStringLookup(LookupHandler[Any]):
     """Random string lookup."""
 
     TYPE_NAME: ClassVar[str] = "random.string"
@@ -95,18 +93,11 @@ class RandomStringLookup(LookupHandler):
         return sum(c(value) for c in checks) == len(checks)
 
     @classmethod
-    def handle(
-        cls,
-        value: str,
-        context: CfnginContext | RunwayContext,  # noqa: ARG003
-        *__args: Any,
-        **__kwargs: Any,
-    ) -> Any:
+    def handle(cls, value: str, *_args: Any, **_kwargs: Any) -> Any:
         """Generate a random string.
 
         Args:
             value: The value passed to the Lookup.
-            context: The current context object.
 
         Raises:
             ValueError: Unable to find a value for the provided query and

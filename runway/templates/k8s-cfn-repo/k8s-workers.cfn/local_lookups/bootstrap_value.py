@@ -29,7 +29,7 @@ class HookArgs(BaseModel):
     post_bootstrap: str
 
 
-class BootstrapValue(LookupHandler):
+class BootstrapValue(LookupHandler["CfnginContext"]):
     """Return the bootstrap value on creation otherwise the post_bootstrap.
 
     .. rubric:: Example
@@ -42,12 +42,7 @@ class BootstrapValue(LookupHandler):
 
     @classmethod
     def handle(
-        cls,
-        value: str,
-        context: CfnginContext,
-        *_args: Any,
-        provider: Provider,
-        **_kwargs: Any,
+        cls, value: str, context: CfnginContext, *, provider: Provider, **_kwargs: Any
     ) -> str:
         """Handle lookup."""
         query, raw_args = cls.parse(value)

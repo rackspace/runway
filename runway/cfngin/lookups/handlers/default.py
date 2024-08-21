@@ -1,6 +1,5 @@
 """Lookup to provide a default value."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar
@@ -12,7 +11,7 @@ if TYPE_CHECKING:
     from ....context import CfnginContext
 
 
-class DefaultLookup(LookupHandler):
+class DefaultLookup(LookupHandler["CfnginContext"]):
     """Lookup to provide a default value."""
 
     TYPE_NAME: ClassVar[str] = "default"

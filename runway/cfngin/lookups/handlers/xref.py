@@ -1,6 +1,5 @@
 """Handler for fetching outputs from fully qualified stacks."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
@@ -18,7 +17,7 @@ LOGGER = logging.getLogger(__name__)
 XREF_PERSISTENT_STATE = {"has_warned": False}
 
 
-class XrefLookup(LookupHandler):
+class XrefLookup(LookupHandler[Any]):
     """Xref lookup."""
 
     DEPRECATION_MSG = "xref Lookup has been deprecated; use the cfn lookup instead"
@@ -26,7 +25,7 @@ class XrefLookup(LookupHandler):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(cls, value: str, provider: Provider, **_: Any) -> str:
+    def handle(cls, value: str, *_args: Any, provider: Provider, **_kwargs: Any) -> str:
         """Fetch an output from the designated, fully qualified stack.
 
         The `output` handler supports fetching outputs from stacks created

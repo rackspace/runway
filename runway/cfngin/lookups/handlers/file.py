@@ -1,6 +1,5 @@
 """File lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import base64
@@ -47,7 +46,7 @@ class ArgsDataModel(BaseModel):
         raise ValueError(f"Codec '{v}' must be one of: {', '.join(CODECS)}")
 
 
-class FileLookup(LookupHandler):
+class FileLookup(LookupHandler[Any]):
     """File lookup."""
 
     TYPE_NAME: ClassVar[str] = "file"
@@ -81,7 +80,7 @@ class FileLookup(LookupHandler):
         return read_value_from_path(data_or_path), args
 
     @classmethod
-    def handle(cls, value: str, **_: Any) -> Any:
+    def handle(cls, value: str, *_args: Any, **_kwargs: Any) -> Any:
         """Translate a filename into the file contents."""
         data, raw_args = cls.parse(value)
         args = ArgsDataModel.model_validate(raw_args)

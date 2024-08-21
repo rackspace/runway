@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import cast
+from typing import Any, cast
 
 from ...lookups.handlers.base import LookupHandler
 from ...lookups.handlers.cfn import CfnLookup
@@ -25,11 +25,13 @@ from .handlers.rxref import RxrefLookup
 from .handlers.split import SplitLookup
 from .handlers.xref import XrefLookup
 
-CFNGIN_LOOKUP_HANDLERS: dict[str, type[LookupHandler]] = {}
+CFNGIN_LOOKUP_HANDLERS: dict[str, type[LookupHandler[Any]]] = {}
 LOGGER = logging.getLogger(__name__)
 
 
-def register_lookup_handler(lookup_type: str, handler_or_path: str | type[LookupHandler]) -> None:
+def register_lookup_handler(
+    lookup_type: str, handler_or_path: str | type[LookupHandler[Any]]
+) -> None:
     """Register a lookup handler.
 
     Args:

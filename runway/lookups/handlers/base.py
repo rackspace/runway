@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, ClassVar, TypedDict, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypedDict, TypeVar, cast, overload
 
 import yaml
 from troposphere import BaseAWSObject
@@ -20,6 +21,12 @@ if TYPE_CHECKING:
     from ...variables import VariableValue
 
 LOGGER = logging.getLogger(__name__)
+
+ContextTypeVar = TypeVar(
+    "ContextTypeVar", "CfnginContext", "RunwayContext", "CfnginContext | RunwayContext"
+)
+"""Type variable for context type."""
+
 
 TransformToTypeLiteral = Literal["bool", "str"]
 
@@ -44,7 +51,7 @@ class ParsedArgsTypeDef(TypedDict, total=False):
     transform: TransformToTypeLiteral
 
 
-class LookupHandler:
+class LookupHandler(ABC, Generic[ContextTypeVar]):
     """Base class for lookup handlers."""
 
     TYPE_NAME: ClassVar[str]
@@ -115,19 +122,25 @@ class LookupHandler:
             return value.data
         return value
 
+    @overload
     @classmethod
+    @abstractmethod
     def handle(
-        cls,
-        __value: str,
-        context: CfnginContext | RunwayContext,
-        *__args: Any,
-        provider: Provider | None = None,
-        **__kwargs: Any,
-    ) -> Any:
+        cls, value: str, context: ContextTypeVar, *, provider: Provider, **_kwargs: Any
+    ) -> Any: ...
+
+    @overload
+    @classmethod
+    @abstractmethod
+    def handle(cls, value: str, context: ContextTypeVar, **_kwargs: Any) -> Any: ...
+
+    @classmethod
+    @abstractmethod
+    def handle(cls, value: str, context: ContextTypeVar, **_kwargs: Any) -> Any:
         """Perform the lookup.
 
         Args:
-            __value: Parameter(s) given to the lookup.
+            value: Parameter(s) given to the lookup.
             context: The current context object.
             provider: CFNgin AWS provider.
 

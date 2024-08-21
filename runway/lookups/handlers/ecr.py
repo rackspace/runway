@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class EcrLookup(LookupHandler):
+class EcrLookup(LookupHandler["CfnginContext | RunwayContext"]):
     """ECR Lookup."""
 
     TYPE_NAME: ClassVar[str] = "ecr"
@@ -33,13 +33,7 @@ class EcrLookup(LookupHandler):
         return password
 
     @classmethod
-    def handle(
-        cls,
-        value: str,
-        context: CfnginContext | RunwayContext,
-        *__args: Any,
-        **__kwargs: Any,
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext | RunwayContext, **_kwargs: Any) -> Any:
         """Retrieve a value from AWS Elastic Container Registry (ECR).
 
         Args:

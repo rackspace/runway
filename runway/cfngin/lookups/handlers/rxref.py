@@ -1,6 +1,5 @@
 """Handler for fetching outputs from a stack in the current namespace."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
@@ -19,7 +18,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class RxrefLookup(LookupHandler):
+class RxrefLookup(LookupHandler["CfnginContext"]):
     """Rxref lookup."""
 
     DEPRECATION_MSG = (
@@ -42,7 +41,7 @@ class RxrefLookup(LookupHandler):
         return deconstruct(value), {}
 
     @classmethod
-    def handle(cls, value: str, context: CfnginContext, provider: Provider, **_: Any) -> Any:
+    def handle(cls, value: str, context: CfnginContext, *, provider: Provider, **_: Any) -> Any:
         """Fetch an output from the designated stack in the current namespace.
 
         The ``output`` lookup supports fetching outputs from stacks created
