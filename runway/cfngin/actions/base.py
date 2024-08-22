@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 import threading
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, Union
+from typing import TYPE_CHECKING, Any, Callable, ClassVar
 
 import botocore.exceptions
 
@@ -172,21 +172,17 @@ class BaseAction:
             LOGGER.error(str(err))
             sys.exit(1)
 
-    def pre_run(
-        self, *, dump: Union[bool, str] = False, outline: bool = False, **__kwargs: Any
-    ) -> None:
+    def pre_run(self, *, dump: bool | str = False, outline: bool = False, **__kwargs: Any) -> None:
         """Perform steps before running the action."""
 
-    def post_run(
-        self, *, dump: Union[bool, str] = False, outline: bool = False, **__kwargs: Any
-    ) -> None:
+    def post_run(self, *, dump: bool | str = False, outline: bool = False, **__kwargs: Any) -> None:
         """Perform steps after running the action."""
 
     def run(
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,
+        dump: bool | str = False,
         force: bool = False,
         outline: bool = False,
         tail: bool = False,
@@ -211,9 +207,7 @@ class BaseAction:
         key_name = stack_template_key_name(blueprint)
         template_url = self.stack_template_url(blueprint)
         try:
-            template_exists = (
-                self.s3_conn.head_object(Bucket=self.bucket_name, Key=key_name) is not None
-            )
+            template_exists = bool(self.s3_conn.head_object(Bucket=self.bucket_name, Key=key_name))
         except botocore.exceptions.ClientError as err:
             if err.response["Error"]["Code"] == "404":
                 template_exists = False

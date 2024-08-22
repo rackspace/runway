@@ -64,7 +64,7 @@ def warn(context: CfnginContext, *_args: Any, **kwargs: Any) -> bool:
         **kwargs: Arbitrary keyword arguments.
 
     """
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     cfn_client = context.get_session().client("cloudformation")
     try:
         describe_response = cfn_client.describe_stacks(
@@ -75,7 +75,7 @@ def warn(context: CfnginContext, *_args: Any, **kwargs: Any) -> bool:
             for x in describe_response.get("Stacks", [])
             if (x.get("StackStatus") and x.get("StackStatus") not in STACK_STATUSES_TO_IGNORE)
         )
-        functions = get_replicated_function_names(stack["Outputs"])
+        functions = get_replicated_function_names(stack.get("Outputs", []))
         if functions:
             cmd = (
                 "aws lambda delete-function --function-name $x "

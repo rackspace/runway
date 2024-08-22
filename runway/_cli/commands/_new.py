@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 RUNWAY_YML = """---
-# See full syntax at https://docs.onica.com/projects/runway
+# See full syntax at https://runway.readthedocs.io
 deployments:
   - modules:
       - path: sampleapp.cfn
@@ -44,5 +44,5 @@ def new(ctx: click.Context, **_: Any) -> None:
     LOGGER.success("runway.yml generated")
     LOGGER.notice(
         "See addition getting started information at "
-        "https://docs.onica.com/projects/runway/page/getting_started.html"
+        "https://runway.readthedocs.io/page/getting_started.html"
     )

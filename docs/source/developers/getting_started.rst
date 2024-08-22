@@ -43,4 +43,4 @@ You can also run ``make run-pre-commit`` at any time to manually trigger these h
 pyright Type Checking
 =====================
 
-This project uses pyright to perform type checking. To run type checking locally, install pyright (``make npm-ci``) then run ``make lint`` or ``make lint-pyright``.
+This project uses pyright to perform type checking. To run type checking locally, install pyright (``make setup-npm``) then run ``make lint`` or ``make lint-pyright``.

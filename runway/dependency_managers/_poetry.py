@@ -6,7 +6,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Final, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import tomli
 
@@ -17,7 +17,6 @@ from .base_classes import DependencyManager
 
 if TYPE_CHECKING:
     from _typeshed import StrPath
-    from typing_extensions import Literal
 
 LOGGER = logging.getLogger(__name__)
 
@@ -54,13 +53,13 @@ class PoetryNotFoundError(RunwayError):
 class Poetry(DependencyManager):
     """Poetry dependency manager."""
 
-    CONFIG_FILES: Final[tuple[Literal["poetry.lock"], Literal["pyproject.toml"]]] = (
+    CONFIG_FILES: ClassVar[tuple[str, ...]] = (
         "poetry.lock",
         "pyproject.toml",
     )
     """Configuration files used by poetry."""
 
-    EXECUTABLE: Final[Literal["poetry"]] = "poetry"
+    EXECUTABLE: ClassVar[str] = "poetry"
     """CLI executable."""
 
     @cached_property
@@ -88,9 +87,7 @@ class Poetry(DependencyManager):
 
         # check for PEP-517 definition
         pyproject = tomli.loads(pyproject_path.read_text())
-        build_system_requires: Optional[list[str]] = pyproject.get("build-system", {}).get(
-            "requires"
-        )
+        build_system_requires: list[str] | None = pyproject.get("build-system", {}).get("requires")
 
         if build_system_requires:
             for req in build_system_requires:
@@ -103,7 +100,7 @@ class Poetry(DependencyManager):
         self,
         *,
         dev: bool = False,
-        extras: Optional[list[str]] = None,
+        extras: list[str] | None = None,
         output: StrPath,
         output_format: str = "requirements.txt",
         with_credentials: bool = True,

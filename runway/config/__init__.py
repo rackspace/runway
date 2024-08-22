@@ -7,7 +7,7 @@ import re
 import sys
 from pathlib import Path
 from string import Template
-from typing import TYPE_CHECKING, Any, Union, cast
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 import yaml
 
@@ -31,21 +31,22 @@ from .models.runway import RunwayConfigDefinitionModel, RunwayFutureDefinitionMo
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, MutableMapping
-    from collections.abc import Set as AbstractSet
 
     from packaging.specifiers import SpecifierSet
     from pydantic import BaseModel
 
 LOGGER = logging.getLogger(__name__)
 
+_ModelTypeVar = TypeVar("_ModelTypeVar", bound="BaseModel")
 
-class BaseConfig:
+
+class BaseConfig(Generic[_ModelTypeVar]):
     """Base class for configurations."""
 
     file_path: Path
-    _data: BaseModel
+    _data: _ModelTypeVar
 
-    def __init__(self, data: BaseModel, *, path: Path | None = None) -> None:
+    def __init__(self, data: _ModelTypeVar, *, path: Path | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -53,18 +54,18 @@ class BaseConfig:
             path: Path to the config file.
 
         """
-        self._data = data.copy()
+        self._data = data.model_copy()
         self.file_path = path.resolve() if path else Path.cwd()
 
     def dump(
         self,
         *,
         by_alias: bool = False,
-        exclude: Union[AbstractSet[Union[int, str]], Mapping[Union[int, str], Any]] | None = None,
+        exclude: set[int | str] | Mapping[int | str, Any] | None = None,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
         exclude_unset: bool = True,
-        include: Union[AbstractSet[Union[int, str]], Mapping[Union[int, str], Any]] | None = None,
+        include: set[int | str] | Mapping[int | str, Any] | None = None,
     ) -> str:
         """Dump model to a YAML string.
 
@@ -84,7 +85,7 @@ class BaseConfig:
 
         """
         return yaml.dump(
-            self._data.dict(
+            self._data.model_dump(
                 by_alias=by_alias,
                 exclude=exclude,  # type: ignore
                 exclude_defaults=exclude_defaults,
@@ -106,7 +107,7 @@ class BaseConfig:
         raise NotImplementedError  # cov: ignore
 
 
-class CfnginConfig(BaseConfig):
+class CfnginConfig(BaseConfig[CfnginConfigDefinitionModel]):
     """Python representation of a CFNgin config file.
 
     This is used internally by CFNgin to parse and validate a YAML formatted
@@ -193,8 +194,6 @@ class CfnginConfig(BaseConfig):
 
     template_indent: int
     """Spaces to use per-indent level when outputting a template to json."""
-
-    _data: CfnginConfigDefinitionModel
 
     def __init__(
         self,
@@ -342,7 +341,7 @@ class CfnginConfig(BaseConfig):
             work_dir: Working directory.
 
         """
-        return cls(CfnginConfigDefinitionModel.parse_obj(obj), path=path, work_dir=work_dir)
+        return cls(CfnginConfigDefinitionModel.model_validate(obj), path=path, work_dir=work_dir)
 
     @classmethod
     def parse_raw(
@@ -393,7 +392,7 @@ class CfnginConfig(BaseConfig):
         """
         config: dict[str, Any] = yaml.safe_load(raw_data) or {}
         processor = SourceProcessor(
-            sources=CfnginPackageSourcesDefinitionModel.parse_obj(
+            sources=CfnginPackageSourcesDefinitionModel.model_validate(
                 config.get("package_sources", {})
             ),
             cache_dir=Path(
@@ -436,7 +435,7 @@ class CfnginConfig(BaseConfig):
         return rendered
 
 
-class RunwayConfig(BaseConfig):
+class RunwayConfig(BaseConfig[RunwayConfigDefinitionModel]):
     """Python representation of a Runway config file."""
 
     ACCEPTED_NAMES = ["runway.yml", "runway.yaml"]
@@ -446,10 +445,8 @@ class RunwayConfig(BaseConfig):
     future: RunwayFutureDefinitionModel
     ignore_git_branch: bool
     runway_version: SpecifierSet | None
-    tests: list[RunwayTestDefinition[Any]]
+    tests: list[RunwayTestDefinition]
     variables: RunwayVariablesDefinition
-
-    _data: RunwayConfigDefinitionModel
 
     def __init__(self, data: RunwayConfigDefinitionModel, *, path: Path | None = None) -> None:
         """Instantiate class.
@@ -526,4 +523,4 @@ class RunwayConfig(BaseConfig):
             path: Path to the file the object was parsed from.
 
         """
-        return cls(RunwayConfigDefinitionModel.parse_obj(obj), path=path)
+        return cls(RunwayConfigDefinitionModel.model_validate(obj), path=path)

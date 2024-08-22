@@ -56,7 +56,8 @@ def list_ecr_images(client: ECRClient, repository_name: str) -> list[ImageIdenti
             image_ids.extend(response["imageIds"])
         return [
             {"imageDigest": digest}
-            for digest in {image["imageDigest"] for image in image_ids if image.get("imageDigest")}
+            for digest in {image.get("imageDigest") for image in image_ids}
+            if digest
         ]
     except client.exceptions.RepositoryNotFoundException:
         LOGGER.info("repository %s does not exist", repository_name)
@@ -71,7 +72,7 @@ def purge_repository(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict
         **kwargs: Arbitrary keyword arguments.
 
     """
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     client = context.get_session().client("ecr")
     image_ids = list_ecr_images(client, repository_name=args.repository_name)
     if not image_ids:

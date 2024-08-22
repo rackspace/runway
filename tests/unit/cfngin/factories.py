@@ -1,9 +1,8 @@
 """Factories for tests."""
 
-# pyright: basic
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, NamedTuple, Optional
+from typing import TYPE_CHECKING, Any, NamedTuple
 from unittest.mock import MagicMock
 
 from runway.cfngin.providers.aws.default import ProviderBuilder
@@ -25,7 +24,7 @@ class Lookup(NamedTuple):
 class MockThreadingEvent:
     """Mock thread events."""
 
-    def wait(self, timeout: Optional[int] = None) -> bool:  # noqa: ARG002
+    def wait(self, timeout: int | None = None) -> bool:  # noqa: ARG002
         """Mock wait method."""
         return False
 
@@ -33,13 +32,13 @@ class MockThreadingEvent:
 class MockProviderBuilder(ProviderBuilder):
     """Mock provider builder."""
 
-    def __init__(self, *, provider: Provider, region: Optional[str] = None, **_: Any) -> None:
+    def __init__(self, *, provider: Provider, region: str | None = None, **_: Any) -> None:
         """Instantiate class."""
         self.provider = provider
         self.region = region
 
     def build(
-        self, *, profile: Optional[str] = None, region: Optional[str] = None  # noqa: ARG002
+        self, *, profile: str | None = None, region: str | None = None  # noqa: ARG002
     ) -> Provider:
         """Mock build method."""
         return self.provider
@@ -52,7 +51,7 @@ def mock_provider(**kwargs: Any) -> MagicMock:
 
 def mock_context(
     namespace: str = "default",
-    extra_config_args: Optional[dict[str, Any]] = None,
+    extra_config_args: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> CfnginContext:
     """Mock context."""
@@ -78,7 +77,7 @@ def generate_definition(
     return CfnginStackDefinitionModel(**definition)
 
 
-def mock_lookup(lookup_input: Any, lookup_type: str, raw: Optional[str] = None) -> Lookup:
+def mock_lookup(lookup_input: Any, lookup_type: str, raw: str | None = None) -> Lookup:
     """Mock lookup."""
     if raw is None:
         raw = f"{lookup_type} {lookup_input}"

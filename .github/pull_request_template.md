@@ -38,7 +38,7 @@
 
 <!-- You can erase any parts of this template not applicable to your Pull Request. -->
 
-- [ ] Have you followed the guidelines in our [Contribution Requirements](https://docs.onica.com/projects/runway/page/developers/contributing.html)?
+- [ ] Have you followed the guidelines in our [Contribution Requirements](https://runway.readthedocs.io/page/developers/contributing.html)?
 - [ ] Have you checked to ensure there aren't other open [Pull Requests](../../../pulls) for the same update/change?
 - [ ] Does your submission pass tests?
 - [ ] Have you linted your code locally prior to submission?

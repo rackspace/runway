@@ -1,7 +1,7 @@
 """Runway Static Site Module options."""
 
-from .components import StaticSiteOptions
-from .models import (
+from ._components import StaticSiteOptions
+from ._models import (
     RunwayStaticSiteExtraFileDataModel,
     RunwayStaticSiteModuleOptionsDataModel,
     RunwayStaticSitePreBuildStepDataModel,

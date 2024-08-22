@@ -8,7 +8,7 @@ For more information on protocols, refer to
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, TypeVar, overload
+from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, overload
 
 from typing_extensions import Protocol, runtime_checkable
 
@@ -75,8 +75,8 @@ class CfnginHookProtocol(Protocol):
 
     """
 
-    args: CfnginHookArgsProtocol
-    """Arguments passed to the hook and parsed into an object."""
+    ARGS_PARSER: ClassVar
+    """Class used to parse arguments passed to the hook."""
 
     @abstractmethod
     def __init__(self, context: CfnginContext, **_kwargs: Any) -> None:

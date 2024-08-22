@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from ....compat import cached_property
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class AccountDetails:
     """AWS account details."""
 
-    def __init__(self, context: Union[CfnginContext, RunwayContext]) -> None:
+    def __init__(self, context: CfnginContext | RunwayContext) -> None:
         """Instantiate class.
 
         Args:

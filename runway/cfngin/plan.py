@@ -8,29 +8,14 @@ import threading
 import time
 import uuid
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    NoReturn,
-    TypeVar,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Callable, NoReturn, TypeVar, overload
 
 from .._logging import LogLevels, PrefixAdaptor
 from ..utils import merge_dicts
 from .dag import DAG, DAGValidationError, walk
 from .exceptions import CancelExecution, GraphError, PersistentGraphLocked, PlanFailed
 from .stack import Stack
-from .status import (
-    COMPLETE,
-    FAILED,
-    PENDING,
-    SKIPPED,
-    SUBMITTED,
-    FailedStatus,
-    SkippedStatus,
-)
+from .status import COMPLETE, FAILED, PENDING, SKIPPED, SUBMITTED, FailedStatus, SkippedStatus
 from .ui import ui
 from .utils import stack_template_key_name
 
@@ -275,7 +260,9 @@ class Step:
         """
         from runway.config.models.cfngin import CfnginStackDefinitionModel
 
-        stack_def = CfnginStackDefinitionModel.construct(name=stack_name, requires=requires or [])
+        stack_def = CfnginStackDefinitionModel.model_construct(
+            name=stack_name, requires=requires or []
+        )
         stack = Stack(stack_def, context)
         return cls(stack, fn=fn, watch_func=watch_func)
 

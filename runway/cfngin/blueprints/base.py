@@ -99,7 +99,7 @@ def build_parameter(name: str, properties: BlueprintVariableTypeDef) -> Paramete
     param = Parameter(name, Type=properties.get("type"))
     for name_, attr in PARAMETER_PROPERTIES.items():
         if name_ in properties:
-            setattr(param, attr, properties[name_])  # type: ignore
+            setattr(param, attr, properties[name_])
     return param
 
 
@@ -185,10 +185,9 @@ def resolve_variable(
             original exception.
 
     """
-    try:
-        var_type = var_def["type"]
-    except KeyError:
-        raise VariableTypeRequired(blueprint_name, var_name) from None
+    if "type" not in var_def:
+        raise VariableTypeRequired(blueprint_name, var_name)
+    var_type = var_def["type"]
 
     if provided_variable:
         if not provided_variable.resolved:
@@ -198,10 +197,9 @@ def resolve_variable(
     else:
         # Variable value not provided, try using the default, if it exists
         # in the definition
-        try:
-            value = var_def["default"]
-        except KeyError:
-            raise MissingVariable(blueprint_name, var_name) from None
+        if "default" not in var_def:
+            raise MissingVariable(blueprint_name, var_name)
+        value = var_def["default"]
 
     # If no validator, return the value as is, otherwise apply validator
     validator = var_def.get("validator", lambda v: v)
@@ -343,7 +341,7 @@ class Blueprint(DelCachedPropMixin):
                 "deprecated PARAMETERS or "
                 "LOCAL_PARAMETERS, rather than VARIABLES. "
                 "Please update your blueprints. See "
-                "https://docs.onica.com/projects/runway/page/cfngin/blueprints.html#variables "
+                "https://runway.readthedocs.io/page/cfngin/blueprints.html#variables "
                 "for additional information."
             )
 

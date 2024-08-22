@@ -6,7 +6,7 @@ https://aws.amazon.com/premiumsupport/knowledge-center/iam-permission-boundaries
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Union
+from typing import TYPE_CHECKING, ClassVar
 
 import awacs.iam
 import awacs.sts
@@ -66,9 +66,9 @@ class AdminPreventPrivilegeEscalation(Blueprint):
         ]
 
     @cached_property
-    def deny_assume_role_not_resources(self) -> list[Union[str, Sub]]:
+    def deny_assume_role_not_resources(self) -> list[str | Sub]:
         """List of IAM Role ARNs that can be assumed."""
-        tmp: list[Union[str, Sub]] = [
+        tmp: list[str | Sub] = [
             Sub(f"arn:${{AWS::Partition}}:iam::${{AWS::AccountId}}:role/{self.namespace}-*")
         ]
         tmp.extend(self.variables["DenyAssumeRoleNotResources"])

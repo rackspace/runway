@@ -133,7 +133,7 @@ class YamlDirTestGenerator:
                 glob(f"{self.classdir}/{directory}/{self.yaml_filename}")  # noqa: PTH207
             )
 
-        class ConfigTest(self.base_class):  # type: ignore
+        class ConfigTest(self.base_class):
             """Config test."""
 
             context: CfnginContext
@@ -149,7 +149,7 @@ class YamlDirTestGenerator:
                 self.stack = stack
                 self.description = f"{stack.name} ({filepath})"
 
-            def __call__(self) -> None:
+            def __call__(self) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
                 """Run when the class instance is called directly."""
                 # Use the context property of the baseclass, if present.
                 # If not, default to a basic context.

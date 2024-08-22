@@ -5,32 +5,21 @@
 Other Ways to Use Runway
 ########################
 
-While we recommend using one of the install methods outlined in the
-:ref:`Installation<install>` section, we realize that these may not be an
-option for some so we have provided a `CloudFormation`_ template for spinning
-up a deploy environment in AWS and a `Docker`_ image/Dockerfile that can be
-used to run Runway.
+While we recommend using one of the install methods outlined in the :ref:`installation:Installation` section, we realize that these may not be an option for some so we have provided a `CloudFormation`_ template for spinning up a deploy environment in AWS and a `Docker`_ image/Dockerfile that can be used to run Runway.
 
-.. contents::
-  :depth: 4
 
 
 **************
 CloudFormation
 **************
 
-This `CloudFormation template`_ is probably the easiest and quickest way to go
-from "zero to Runway" as it allows for using an IAM Role eliminate the need to
-configure API keys.
+This `CloudFormation template`_ is probably the easiest and quickest way to go from "zero to Runway" as it allows for using an IAM Role eliminate the need to configure API keys.
 The template will deploy your preference of Linux or Windows Runway host.
-Windows Runway host includes Visual Studio Code, which some users may
-find easier for manipulating Runway config files.
+Windows Runway host includes Visual Studio Code, which some users may find easier for manipulating Runway config files.
 
 
 ******
 Docker
 ******
 
-Docker users can build their own Docker image to run a local Runway
-container or modify this `Dockerfile`_ to build a Runway image to suit specific
-needs.
+Docker users can build their own Docker image to run a local Runway container or modify this `Dockerfile`_ to build a Runway image to suit specific needs.

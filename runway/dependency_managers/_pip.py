@@ -6,7 +6,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Final, Optional, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from ..compat import cached_property, shlex_join
 from ..exceptions import RunwayError
@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from _typeshed import StrPath
-    from typing_extensions import Literal
 
     from .._logging import RunwayLogger
 
@@ -39,10 +38,10 @@ class PipInstallFailedError(RunwayError):
 class Pip(DependencyManager):
     """pip CLI interface."""
 
-    CONFIG_FILES: Final[tuple[Literal["requirements.txt"]]] = ("requirements.txt",)
+    CONFIG_FILES: ClassVar[tuple[str, ...]] = ("requirements.txt",)
     """Configuration files used by pip."""
 
-    EXECUTABLE: Final[Literal["pip"]] = "pip"
+    EXECUTABLE: ClassVar[str] = "pip"
     """CLI executable."""
 
     @cached_property
@@ -82,7 +81,7 @@ class Pip(DependencyManager):
     def generate_install_command(
         cls,
         *,
-        cache_dir: Optional[StrPath] = None,
+        cache_dir: StrPath | None = None,
         no_cache_dir: bool = False,
         no_deps: bool = False,
         requirements: StrPath,
@@ -115,8 +114,8 @@ class Pip(DependencyManager):
     def install(
         self,
         *,
-        cache_dir: Optional[StrPath] = None,
-        extend_args: Optional[list[str]] = None,
+        cache_dir: StrPath | None = None,
+        extend_args: list[str] | None = None,
         no_cache_dir: bool = False,
         no_deps: bool = False,
         requirements: StrPath,

@@ -64,7 +64,9 @@ class BaseContext(DelCachedPropMixin):
     def boto3_credentials(self) -> Boto3CredentialsTypeDef:
         """Return a dict of boto3 credentials."""
         return Boto3CredentialsTypeDef(
-            **{key.lower(): value for key, value in self.current_aws_creds.items()}
+            **{
+                key.lower(): value for key, value in self.current_aws_creds.items()
+            }  # pyright: ignore[reportArgumentType]
         )
 
     @property

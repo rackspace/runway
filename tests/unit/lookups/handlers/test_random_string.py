@@ -95,7 +95,7 @@ class TestRandomStringLookup:
     )
     def test_calculate_char_set(self, args: object, expected: str) -> None:
         """Test calculate_char_set."""
-        assert RandomStringLookup.calculate_char_set(ArgsDataModel.parse_obj(args)) == expected
+        assert RandomStringLookup.calculate_char_set(ArgsDataModel.model_validate(args)) == expected
 
     @pytest.mark.parametrize(
         "args, value, expected",
@@ -124,7 +124,8 @@ class TestRandomStringLookup:
     def test_ensure_has_one_of(self, args: object, expected: bool, value: str) -> None:
         """Test ensure_has_one_of."""
         assert (
-            RandomStringLookup.ensure_has_one_of(ArgsDataModel.parse_obj(args), value) is expected
+            RandomStringLookup.ensure_has_one_of(ArgsDataModel.model_validate(args), value)
+            is expected
         )
 
     @pytest.mark.parametrize("length", [1, 3, 5, 7, 8, 9])

@@ -24,7 +24,7 @@ class PurgeBucketHookArgs(BaseModel):
 
 def purge_bucket(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
     """Delete objects in bucket."""
-    args = PurgeBucketHookArgs.parse_obj(kwargs)
+    args = PurgeBucketHookArgs.model_validate(kwargs)
     session = context.get_session()
     s3_resource = session.resource("s3")
     try:

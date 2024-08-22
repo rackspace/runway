@@ -4,8 +4,7 @@
 Migrating from Stacker
 ######################
 
-.. contents::
-  :depth: 4
+
 
 **********
 Blueprints

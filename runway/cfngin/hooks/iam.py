@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from awacs import ecs
 from awacs.aws import Allow, Policy, Statement
@@ -56,13 +56,13 @@ class EnsureServerCertExistsHookArgs(BaseModel):
     cert_name: str
     """Name of the certificate that should exist."""
 
-    path_to_certificate: Optional[str] = None
+    path_to_certificate: str | None = None
     """Path to certificate file."""
 
-    path_to_chain: Optional[str] = None
+    path_to_chain: str | None = None
     """Path to chain file."""
 
-    path_to_private_key: Optional[str] = None
+    path_to_private_key: str | None = None
     """Path to private key file."""
 
     prompt: bool = True
@@ -79,7 +79,7 @@ def create_ecs_service_role(context: CfnginContext, *_args: Any, **kwargs: Any) 
         **kwargs: Arbitrary keyword arguments.
 
     """
-    args = CreateEcsServiceRoleHookArgs.parse_obj(kwargs)
+    args = CreateEcsServiceRoleHookArgs.model_validate(kwargs)
     client = context.get_session().client("iam")
 
     try:
@@ -179,7 +179,7 @@ def ensure_server_cert_exists(context: CfnginContext, *_args: Any, **kwargs: Any
         Dict containing ``status``, ``cert_name``, and ``cert_arn``.
 
     """
-    args = EnsureServerCertExistsHookArgs.parse_obj(kwargs)
+    args = EnsureServerCertExistsHookArgs.model_validate(kwargs)
     client = context.get_session().client("iam")
     status = "unknown"
     try:
@@ -193,7 +193,7 @@ def ensure_server_cert_exists(context: CfnginContext, *_args: Any, **kwargs: Any
             if upload != "yes":
                 return {}
 
-        parameters = _get_cert_contents(args.dict())
+        parameters = _get_cert_contents(args.model_dump())
         if not parameters:
             return {}
         response = client.upload_server_certificate(**parameters)

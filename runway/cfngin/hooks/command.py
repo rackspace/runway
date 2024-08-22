@@ -1,9 +1,11 @@
 """Command hook."""
 
+from __future__ import annotations
+
 import logging
 import os
 import subprocess
-from typing import Any, Dict, List, Optional, Union  # noqa: UP035
+from typing import Any
 
 from typing_extensions import TypedDict
 
@@ -19,10 +21,10 @@ class RunCommandHookArgs(BaseModel):
     capture: bool = False
     """If enabled, capture the command's stdout and stderr, and return them in the hook result."""
 
-    command: Union[str, List[str]]  # noqa: UP006
+    command: str | list[str]
     """Command(s) to run."""
 
-    env: Optional[Dict[str, str]] = None  # noqa: UP006
+    env: dict[str, str] | None = None
     """Dictionary of environment variable overrides for the command context.
     Will be merged with the current environment.
 
@@ -43,7 +45,7 @@ class RunCommandHookArgs(BaseModel):
 
     """
 
-    stdin: Optional[str] = None
+    stdin: str | None = None
     """String to send to the stdin of the command. Implicitly disables ``interactive``."""
 
 
@@ -90,10 +92,10 @@ def run_command(*_args: Any, **kwargs: Any) -> RunCommandResponseTypeDef:  # noq
                     shell: true
 
     """
-    args = RunCommandHookArgs.parse_obj(kwargs)
+    args = RunCommandHookArgs.model_validate(kwargs)
 
     # remove parsed args from kwargs
-    for field in RunCommandHookArgs.__fields__:
+    for field in RunCommandHookArgs.model_fields:
         kwargs.pop(field, None)
 
     # remove unneeded args from kwargs

@@ -8,14 +8,9 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import (  # noqa: UP035
-    Any,
-    Dict,
-    List,
-    Optional,
-)
+from typing import TYPE_CHECKING, Annotated, Any
 
-from pydantic import DirectoryPath, Field, validator
+from pydantic import ConfigDict, DirectoryPath, Field, field_validator
 
 from .....context import CfnginContext
 from .....utils import BaseModel
@@ -26,19 +21,22 @@ from ..data_models import (
 )
 from ..hook_data import DockerHookData
 
+if TYPE_CHECKING:
+    from pydantic import ValidationInfo
+
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
 class DockerImageBuildApiOptions(BaseModel):
     """Options for controlling Docker."""
 
-    buildargs: Dict[str, Any] = {}  # noqa: UP006
+    buildargs: dict[str, Any] = {}
     """Dict of build-time variables that will be passed to Docker."""
 
     custom_context: bool = False
     """Whether to use custom context when providing a file object."""
 
-    extra_hosts: Dict[str, str] = {}  # noqa: UP006
+    extra_hosts: dict[str, str] = {}
     """Extra hosts to add to `/etc/hosts` in the build containers.
     Defined as a mapping of hostname to IP address.
 
@@ -47,16 +45,16 @@ class DockerImageBuildApiOptions(BaseModel):
     forcerm: bool = False
     """Always remove intermediate containers, even after unsuccessful builds."""
 
-    isolation: Optional[str] = None
+    isolation: str | None = None
     """Isolation technology used during build."""
 
-    network_mode: Optional[str] = None
+    network_mode: str | None = None
     """Network mode for the run commands during build."""
 
     nocache: bool = False
     """Whether to use cache."""
 
-    platform: Optional[str] = None
+    platform: str | None = None
     """Set platform if server is multi-platform capable.
     Uses format ``os[/arch[/variant]]``.
 
@@ -71,13 +69,13 @@ class DockerImageBuildApiOptions(BaseModel):
     squash: bool = False
     """Whether to squash the resulting image layers into a single layer."""
 
-    tag: Optional[str] = None
+    tag: str | None = None
     """Optional name and tag to apply to the base image when it is built."""
 
-    target: Optional[str] = None
+    target: str | None = None
     """Name of the build-stage to build in a multi-stage Dockerfile."""
 
-    timeout: Optional[int] = None
+    timeout: int | None = None
     """HTTP timeout."""
 
     use_config_proxy: bool = False
@@ -92,9 +90,11 @@ class DockerImageBuildApiOptions(BaseModel):
 class ImageBuildArgs(BaseModel):
     """Args passed to image.build."""
 
-    _ctx: Optional[CfnginContext] = Field(default=None, alias="context", export=False)
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    ecr_repo: Optional[ElasticContainerRegistryRepository] = None  # depends on _ctx
+    ctx: Annotated[CfnginContext | None, Field(alias="context", exclude=True)] = None
+
+    ecr_repo: ElasticContainerRegistryRepository | None = None  # depends on ctx
     """AWS Elastic Container Registry repository information.
     Providing this will automatically construct the repo URI.
     If provided, do not provide ``repo``.
@@ -110,23 +110,26 @@ class ImageBuildArgs(BaseModel):
     dockerfile: str = "Dockerfile"  # depends on path for validation
     """Path within the build context to the Dockerfile."""
 
-    repo: Optional[str] = None  # depends on ecr_repo
+    repo: Annotated[str | None, Field(validate_default=True)] = None  # depends on ecr_repo & image
     """URI of a non Docker Hub repository where the image will be stored."""
 
-    docker: DockerImageBuildApiOptions = DockerImageBuildApiOptions()  # depends on repo
+    docker: Annotated[  # depends on repo
+        DockerImageBuildApiOptions, Field(validate_default=True)
+    ] = DockerImageBuildApiOptions()
     """Options for ``docker image build``."""
 
-    tags: List[str] = ["latest"]  # noqa: UP006
+    tags: Annotated[list[str], Field(validate_default=True)] = ["latest"]
     """List of tags to apply to the image."""
 
-    @validator("docker", pre=True, always=True, allow_reuse=True)  # type: ignore
+    @field_validator("docker", mode="before")
+    @classmethod
     def _set_docker(
-        cls,  # noqa: N805
+        cls,
         v: dict[str, Any] | DockerImageBuildApiOptions | Any,
-        values: dict[str, Any],
+        info: ValidationInfo,
     ) -> Any:
         """Set the value of ``docker``."""
-        repo = values["repo"]
+        repo = info.data["repo"]
         if repo:
             if isinstance(v, dict):
                 v.setdefault("tag", repo)
@@ -134,41 +137,44 @@ class ImageBuildArgs(BaseModel):
                 v.tag = repo
         return v
 
-    @validator("ecr_repo", pre=True, allow_reuse=True)  # type: ignore
-    def _set_ecr_repo(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
+    @field_validator("ecr_repo", mode="before")
+    @classmethod
+    def _set_ecr_repo(cls, v: Any, info: ValidationInfo) -> Any:
         """Set the value of ``ecr_repo``."""
         if v and isinstance(v, dict):
-            return ElasticContainerRegistryRepository.parse_obj(
+            return ElasticContainerRegistryRepository.model_validate(
                 {
                     "repo_name": v.get("repo_name"),
-                    "registry": ElasticContainerRegistry.parse_obj(
+                    "registry": ElasticContainerRegistry.model_validate(
                         {
                             "account_id": v.get("account_id"),
                             "alias": v.get("registry_alias"),
                             "aws_region": v.get("aws_region"),
-                            "context": values.get("context"),
+                            "context": info.data.get("context"),
                         }
                     ),
                 }
             )
         return v
 
-    @validator("repo", pre=True, always=True, allow_reuse=True)  # type: ignore
-    def _set_repo(cls, v: str | None, values: dict[str, Any]) -> str | None:  # noqa: N805
+    @field_validator("repo", mode="before")
+    @classmethod
+    def _set_repo(cls, v: str | None, info: ValidationInfo) -> str | None:
         """Set the value of ``repo``."""
         if v:
             return v
 
-        ecr_repo: ElasticContainerRegistryRepository | None = values.get("ecr_repo")
+        ecr_repo: ElasticContainerRegistryRepository | None = info.data.get("ecr_repo")
         if ecr_repo:
             return ecr_repo.fqn
 
         return None
 
-    @validator("dockerfile", pre=True, always=True, allow_reuse=True)  # type: ignore
-    def _validate_dockerfile(cls, v: Any, values: dict[str, Any]) -> Any:  # noqa: N805
+    @field_validator("dockerfile", mode="before")
+    @classmethod
+    def _validate_dockerfile(cls, v: Any, info: ValidationInfo) -> Any:
         """Validate ``dockerfile``."""
-        path: Path = values["path"]
+        path: Path = info.data["path"]
         dockerfile = path / v
         if not dockerfile.is_file():
             raise ValueError(f"Dockerfile does not exist at path provided: {dockerfile}")
@@ -183,9 +189,11 @@ def build(*, context: CfnginContext, **kwargs: Any) -> DockerHookData:
     kwargs are parsed by :class:`~runway.cfngin.hooks.docker.image.ImageBuildArgs`.
 
     """
-    args = ImageBuildArgs.parse_obj({"context": context, **kwargs})
+    args = ImageBuildArgs.model_validate({"context": context, **kwargs})
     docker_hook_data = DockerHookData.from_cfngin_context(context)
-    image, logs = docker_hook_data.client.images.build(path=str(args.path), **args.docker.dict())
+    image, logs = docker_hook_data.client.images.build(
+        path=str(args.path), **args.docker.model_dump()
+    )
     for msg in logs:  # iterate through JSON log messages
         if "stream" in msg:  # log if they contain a message
             LOGGER.info(msg["stream"].strip())  # remove any new line characters

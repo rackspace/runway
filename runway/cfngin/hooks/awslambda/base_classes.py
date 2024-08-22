@@ -310,9 +310,6 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
     BUILD_LAYER: ClassVar[bool] = False
     """Flag to denote if the hook creates a Lambda Function or Layer deployment package."""
 
-    args: AwsLambdaHookArgs
-    """Parsed hook arguments."""
-
     ctx: CfnginContext
     """CFNgin context object."""
 
@@ -452,7 +449,7 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
         """Run during the **plan** stage."""
         return cast(
             "AwsLambdaHookDeployResponseTypedDict",
-            self.build_response("plan").dict(by_alias=True),
+            self.build_response("plan").model_dump(by_alias=True),
         )
 
     def post_deploy(self) -> Any:

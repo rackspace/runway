@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -55,7 +55,7 @@ def aws_credentials() -> Iterator[None]:
         "AWS_SECRET_ACCESS_KEY": "testing",
         "AWS_DEFAULT_REGION": "us-east-1",
     }
-    saved_env: dict[str, Optional[str]] = {}
+    saved_env: dict[str, str | None] = {}
     for key, value in overrides.items():
         LOGGER.info("Overriding env var: %s=%s", key, value)
         saved_env[key] = os.environ.get(key, None)

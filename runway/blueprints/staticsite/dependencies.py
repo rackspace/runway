@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """Module with static website supporting infrastructure."""
+
 import logging
+from typing import Any
 
 import awacs.s3
 from awacs.aws import Allow, AWSPrincipal, Policy, Statement
@@ -124,7 +126,7 @@ class Dependencies(Blueprint):
         )
 
         if self.variables["AuthAtEdge"]:
-            userpool_client_params = {
+            userpool_client_params: dict[str, Any] = {
                 "AllowedOAuthFlows": ["code"],
                 "AllowedOAuthScopes": self.variables["OAuthScopes"],
             }

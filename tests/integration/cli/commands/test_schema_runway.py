@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
@@ -17,14 +18,20 @@ def test_schema_runway() -> None:
     """Test ``runway schema runway``."""
     result = CliRunner().invoke(cli, ["schema", "runway"])
     assert result.exit_code == 0
-    assert result.output == RunwayConfigDefinitionModel.schema_json(indent=4) + "\n"
+    assert (
+        result.output
+        == json.dumps(RunwayConfigDefinitionModel.model_json_schema(), indent=4) + "\n"
+    )
 
 
 def test_schema_runway_indent() -> None:
     """Test ``runway schema runway --indent 2``."""
     result = CliRunner().invoke(cli, ["schema", "runway", "--indent", "2"])
     assert result.exit_code == 0
-    assert result.output == RunwayConfigDefinitionModel.schema_json(indent=2) + "\n"
+    assert (
+        result.output
+        == json.dumps(RunwayConfigDefinitionModel.model_json_schema(), indent=2) + "\n"
+    )
 
 
 def test_schema_runway_output(cd_tmp_path: Path) -> None:
@@ -34,4 +41,7 @@ def test_schema_runway_output(cd_tmp_path: Path) -> None:
     assert result.exit_code == 0
     assert str(file_path) in result.output
     assert file_path.is_file()
-    assert file_path.read_text() == RunwayConfigDefinitionModel.schema_json(indent=4) + "\n"
+    assert (
+        file_path.read_text()
+        == json.dumps(RunwayConfigDefinitionModel.model_json_schema(), indent=4) + "\n"
+    )

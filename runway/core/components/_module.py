@@ -7,7 +7,7 @@ import json
 import logging
 import multiprocessing
 import sys
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
 
@@ -88,7 +88,7 @@ class Module:
         ]
 
     @cached_property
-    def environment_matches_defined(self) -> Optional[bool]:
+    def environment_matches_defined(self) -> bool | None:
         """Environment matches one of the defined environments.
 
         Will return None if there is nothing defined for the current environment.
@@ -259,7 +259,7 @@ class Module:
             max_workers=self.ctx.env.max_concurrent_modules,
             mp_context=multiprocessing.get_context("fork"),
         ) as executor:
-            futures = [executor.submit(child.run, *[action]) for child in self.child_modules]
+            futures = [executor.submit(child.run, action) for child in self.child_modules]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
@@ -293,7 +293,7 @@ class Module:
         modules: list[RunwayModuleDefinition],
         variables: RunwayVariablesDefinition,
         deployment: RunwayDeploymentDefinition = None,
-        future: Optional[RunwayFutureDefinitionModel] = None,
+        future: RunwayFutureDefinitionModel | None = None,
     ) -> None:
         """Run a list of modules.
 
@@ -327,9 +327,9 @@ class Module:
 
 def validate_environment(
     context: RunwayContext,
-    env_def: Optional[Union[bool, dict[str, Any], int, str, list[str]]],
-    logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-) -> Optional[bool]:
+    env_def: bool | dict[str, Any] | int | str | list[str] | None,
+    logger: PrefixAdaptor | RunwayLogger = LOGGER,
+) -> bool | None:
     """Check if an environment should be deployed to.
 
     Args:
@@ -349,14 +349,12 @@ def validate_environment(
         else:
             logger.verbose("environment not defined; module will determine deployment")
             env_def = None
-        return cast(Optional[bool], env_def)
+        return env_def
     if isinstance(env_def, dict):
         if context.env.name not in env_def:
             logger.info("skipped; environment not in definition")
             return False
-        return validate_environment(
-            context, cast(Any, env_def.get(context.env.name, False)), logger=logger
-        )
+        return validate_environment(context, env_def.get(context.env.name, False), logger=logger)
 
     account = aws.AccountDetails(context)
     accepted_values = [

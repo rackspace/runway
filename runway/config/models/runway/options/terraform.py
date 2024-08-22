@@ -1,11 +1,10 @@
 """Runway Terraform Module options."""
 
-# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
-from typing import List, Optional, Union
+from typing import Annotated
 
-from pydantic import Extra, Field, validator
+from pydantic import ConfigDict, Field, field_validator
 
 from ...base import ConfigProperty
 
@@ -13,59 +12,62 @@ from ...base import ConfigProperty
 class RunwayTerraformArgsDataModel(ConfigProperty):
     """Model for Runway Terraform Module args option."""
 
-    apply: List[str] = []
-    init: List[str] = []
-    plan: List[str] = []
+    model_config = ConfigDict(
+        extra="forbid",
+        title="Runway Terraform Module args option",
+        validate_default=True,
+        validate_assignment=True,
+    )
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.forbid
-        title = "Runway Terraform Module args option"
+    apply: list[str] = []
+    init: list[str] = []
+    plan: list[str] = []
 
 
 class RunwayTerraformBackendConfigDataModel(ConfigProperty):
     """Model for Runway Terraform Module terraform_backend_config option."""
 
-    bucket: Optional[str] = None
-    dynamodb_table: Optional[str] = None
-    region: Optional[str] = None
-    workspace_key_prefix: Optional[str] = None
+    model_config = ConfigDict(
+        extra="forbid",
+        title="Runway Terraform Module terraform_backend_config option",
+        validate_default=True,
+        validate_assignment=True,
+    )
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.forbid
-        title = "Runway Terraform Module terraform_backend_config option"
+    bucket: str | None = None
+    dynamodb_table: str | None = None
+    region: str | None = None
+    workspace_key_prefix: str | None = None
 
     def __bool__(self) -> bool:
         """Evaluate the boolean value of the object instance."""
-        data = self.dict(exclude_none=True)
+        data = self.model_dump(exclude_none=True)
         return "bucket" in data or "dynamodb_table" in data
 
 
 class RunwayTerraformModuleOptionsDataModel(ConfigProperty):
     """Model for Runway Terraform Module options."""
 
+    model_config = ConfigDict(
+        extra="ignore",
+        title="Runway Terraform Module options",
+        populate_by_name=True,
+        validate_default=True,
+        validate_assignment=True,
+    )
+
     args: RunwayTerraformArgsDataModel = RunwayTerraformArgsDataModel()
     backend_config: RunwayTerraformBackendConfigDataModel = Field(
         default=RunwayTerraformBackendConfigDataModel(),
         alias="terraform_backend_config",
     )
-    version: Optional[str] = Field(default=None, alias="terraform_version")
-    workspace: Optional[str] = Field(default=None, alias="terraform_workspace")
-    write_auto_tfvars: bool = Field(default=False, alias="terraform_write_auto_tfvars")
+    version: Annotated[str | None, Field(alias="terraform_version")] = None
+    workspace: Annotated[str | None, Field(alias="terraform_workspace")] = None
+    write_auto_tfvars: Annotated[bool, Field(alias="terraform_write_auto_tfvars")] = False
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.ignore
-        title = "Runway Terraform Module options"
-
-    @validator("args", pre=True)  # type: ignore
-    def _convert_args(
-        cls, v: Union[list[str], dict[str, list[str]]]  # noqa: N805
-    ) -> dict[str, list[str]]:
+    @field_validator("args", mode="before")
+    @classmethod
+    def _convert_args(cls, v: list[str] | dict[str, list[str]]) -> dict[str, list[str]]:
         """Convert args from list to dict."""
         if isinstance(v, list):
             return {"apply": v}

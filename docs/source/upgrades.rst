@@ -4,10 +4,9 @@
 Upgrades
 ########
 
-.. contents::
-  :depth: 4
-
 During a Runway upgrade (especially coming from a :code:`0.x` version) you may required to make changes to your configuration or modules. This page will describe common issues when upgrading and how to resolve them.
+
+
 
 *******************************
 Updating the Runway Config File

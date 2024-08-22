@@ -7,7 +7,7 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -141,7 +141,7 @@ class RawTemplateBlueprint(Blueprint):
         return self.to_dict().get("Parameters", {})
 
     @cached_property
-    def parameter_values(self) -> dict[str, Union[list[Any], str]]:
+    def parameter_values(self) -> dict[str, list[Any] | str]:
         """Return a dict of variables with type :class:`~runway.cfngin.blueprints.variables.types.CFNType`.
 
         .. versionadded:: 2.0.0

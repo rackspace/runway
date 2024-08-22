@@ -11,10 +11,8 @@ from unittest.mock import Mock
 import pytest
 
 from runway.module.staticsite.handler import StaticSite
-from runway.module.staticsite.options.components import StaticSiteOptions
-from runway.module.staticsite.parameters.models import (
-    RunwayStaticSiteModuleParametersDataModel,
-)
+from runway.module.staticsite.options import StaticSiteOptions
+from runway.module.staticsite.parameters import RunwayStaticSiteModuleParametersDataModel
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -48,7 +46,7 @@ class TestStaticSite:
         assert isinstance(obj.options, StaticSiteOptions)
         assert obj.options == StaticSiteOptions.parse_obj({"build_output": "./dist"})
         assert isinstance(obj.parameters, RunwayStaticSiteModuleParametersDataModel)
-        assert obj.parameters == RunwayStaticSiteModuleParametersDataModel.parse_obj(
+        assert obj.parameters == RunwayStaticSiteModuleParametersDataModel.model_validate(
             {"namespace": "test"}
         )
         assert obj.path == tmp_path

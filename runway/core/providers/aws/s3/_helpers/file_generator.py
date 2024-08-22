@@ -16,8 +16,6 @@ from queue import Queue
 from typing import (
     TYPE_CHECKING,
     Any,
-    Optional,
-    Union,
     cast,
 )
 
@@ -197,7 +195,7 @@ class FileGenerator:
             }
             if files["src"]["type"] == "s3":
                 file_stat_kwargs["response_data"] = cast(
-                    Optional[Union["HeadObjectOutputTypeDef", "ObjectTypeDef"]],
+                    "HeadObjectOutputTypeDef | ObjectTypeDef | None",
                     extra_information,
                 )
             yield FileStats(**file_stat_kwargs)

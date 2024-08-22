@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import logging
 import os
-from typing import TYPE_CHECKING, Any, ClassVar, Union
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import awacs.awslambda
 import awacs.iam
@@ -271,19 +271,19 @@ class StaticSite(Blueprint):
             "ViewerCertificate": self.add_acm_cert(),
         }
 
-    def add_aliases(self) -> Union[list[str], Ref]:
+    def add_aliases(self) -> list[str] | Ref:
         """Add aliases."""
         if self.aliases_specified:
             return self.variables["Aliases"]
         return NoValue
 
-    def add_web_acl(self) -> Union[str, Ref]:
+    def add_web_acl(self) -> list[str] | Ref:
         """Add Web ACL."""
         if self.waf_name_specified:
             return self.variables["WAFWebACL"]
         return NoValue
 
-    def add_logging_bucket(self) -> Union[cloudfront.Logging, Ref]:
+    def add_logging_bucket(self) -> cloudfront.Logging | Ref:
         """Add Logging Bucket."""
         if self.cf_logging_enabled:
             return cloudfront.Logging(
@@ -291,7 +291,7 @@ class StaticSite(Blueprint):
             )
         return NoValue
 
-    def add_acm_cert(self) -> Union[cloudfront.ViewerCertificate, Ref]:
+    def add_acm_cert(self) -> cloudfront.ViewerCertificate | Ref:
         """Add ACM cert."""
         if self.acm_certificate_specified:
             return cloudfront.ViewerCertificate(

@@ -26,14 +26,10 @@ Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudForm
 
 ----
 
-.. _module-configurations:
-
 ********************
 Module Configuration
 ********************
 
-
-.. _mod-cdk:
 
 AWS Cloud Development Kit (CDK)
 ===============================
@@ -55,8 +51,6 @@ This means that the CDK must be included as a dev dependency in the **package.js
   cdk/directory_structure
   cdk/advanced_features
 
-
-.. _mod-cfn:
 
 CloudFormation & Troposphere
 ============================
@@ -81,8 +75,6 @@ It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_
 .. _Troposphere: https://github.com/cloudtools/troposphere
 
 
-.. _mod-k8s:
-
 Kubernetes
 ==========
 
@@ -104,8 +96,6 @@ Kubernetes manifests can be deployed via Runway offering an ideal way to handle 
   kubernetes/advanced_features
 
 
-.. _mod-sls:
-
 Serverless Framework
 ====================
 
@@ -126,8 +116,6 @@ This means that Serverless must be included as a dev dependency in the **package
   serverless/directory_structure
   serverless/advanced_features
 
-
-.. _mod-staticsite:
 
 Static Site
 ===========
@@ -156,8 +144,6 @@ A start-to-finish example walkthrough is available in the :ref:`Conduit quicksta
   staticsite/examples
   staticsite/advanced_features
 
-
-.. _mod-tf:
 
 Terraform
 =========

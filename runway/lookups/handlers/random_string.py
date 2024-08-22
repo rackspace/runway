@@ -1,12 +1,11 @@
 """Generate a random string."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
 import secrets
 import string
-from typing import TYPE_CHECKING, Any, Callable, Final
+from typing import TYPE_CHECKING, Any, Callable, ClassVar
 
 from ...utils import BaseModel
 from .base import LookupHandler
@@ -14,9 +13,6 @@ from .base import LookupHandler
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from typing_extensions import Literal
-
-    from ...context import CfnginContext, RunwayContext
 
 LOGGER = logging.getLogger(__name__)
 
@@ -30,10 +26,10 @@ class ArgsDataModel(BaseModel):
     uppercase: bool = True
 
 
-class RandomStringLookup(LookupHandler):
+class RandomStringLookup(LookupHandler[Any]):
     """Random string lookup."""
 
-    TYPE_NAME: Final[Literal["random.string"]] = "random.string"
+    TYPE_NAME: ClassVar[str] = "random.string"
     """Name that the Lookup is registered as."""
 
     @staticmethod
@@ -97,18 +93,11 @@ class RandomStringLookup(LookupHandler):
         return sum(c(value) for c in checks) == len(checks)
 
     @classmethod
-    def handle(
-        cls,
-        value: str,
-        context: CfnginContext | RunwayContext,  # noqa: ARG003
-        *__args: Any,
-        **__kwargs: Any,
-    ) -> Any:
+    def handle(cls, value: str, *_args: Any, **_kwargs: Any) -> Any:
         """Generate a random string.
 
         Args:
             value: The value passed to the Lookup.
-            context: The current context object.
 
         Raises:
             ValueError: Unable to find a value for the provided query and
@@ -117,7 +106,7 @@ class RandomStringLookup(LookupHandler):
         """
         raw_length, raw_args = cls.parse(value)
         length = int(raw_length)
-        args = ArgsDataModel.parse_obj(raw_args)
+        args = ArgsDataModel.model_validate(raw_args)
         char_set = cls.calculate_char_set(args)
         while True:
             result = cls.generate_random_string(char_set, length)

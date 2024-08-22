@@ -1,5 +1,3 @@
-.. _runway-config:
-
 ##################
 Runway Config File
 ##################
@@ -15,7 +13,7 @@ Top-Level Configuration
 ***********************
 
 .. attribute:: deployments
-  :type: List[deployment]
+  :type: list[deployment]
 
   A list of deployments that will be processed in the order they are defined.
   See Deployment_ for detailed information about defining this value.
@@ -35,9 +33,9 @@ Top-Level Configuration
   :type: bool
   :value: false
 
-  Optionally exclude the git branch name when determining the current :ref:`deploy environment <term-deploy-env>`.
+  Optionally exclude the git branch name when determining the current :term:`Deploy Environment`.
 
-  This can be useful when using the directory name or environment variable to set the :ref:`deploy environment <term-deploy-env>` to ensure the correct value is used.
+  This can be useful when using the directory name or environment variable to set the :term:`Deploy Environment` to ensure the correct value is used.
 
   .. rubric:: Example
   .. code-block:: yaml
@@ -73,10 +71,10 @@ Top-Level Configuration
   .. versionadded:: 1.11.0
 
 .. attribute:: tests
-  :type: Optional[List[test]]
+  :type: list[test] | None
   :value: []
 
-  List of Runway test definitions that are executed with the :ref:`test command <command-test>` command.
+  List of Runway test definitions that are executed with the :ref:`test command <commands:test>`.
   See Test_ for detailed information about defining this value.
 
   .. rubric:: Example
@@ -92,7 +90,7 @@ Top-Level Configuration
 .. _runway-variables:
 
 .. attribute:: variables
-  :type: Optional[Dict[str, Any]]
+  :type: dict[str, Any] | None
   :value: {}
 
   Runway variables are used to fill values that could change based on any number of circumstances.
@@ -132,7 +130,7 @@ Top-Level Configuration
   .. versionadded 1.4.0
 
   .. data:: variables.file_path
-    :type: Optional[str]
+    :type: str | None
 
     Explicit path to a variables file that will be loaded and merged with the variables defined here.
 
@@ -143,7 +141,7 @@ Top-Level Configuration
         file_path: some-file.yml
 
   .. data:: variables.sys_path
-    :type: Optional[str]
+    :type: str | None
     :value: ./
 
     Directory to use as the root of a relative :data:`variables.file_path`.
@@ -159,7 +157,6 @@ Top-Level Configuration
 ----
 
 
-.. _runway-deployment:
 
 **********
 Deployment
@@ -169,10 +166,10 @@ Deployment
 
   A deployment defines modules and options that affect the modules.
 
-  Deployments are processed during a :ref:`deploy <command-deploy>`/:ref:`destroy <command-destroy>`/:ref:`plan <command-plan>` action.
+  Deployments are processed during a :ref:`commands:deploy`/:ref:`commands:destroy`/:ref:`commands:plan` action.
   If the processing of one deployment fails, the action will end.
 
-  During a :ref:`deploy <command-deploy>`/:ref:`destroy <command-destroy>` action, the user has the option to select which deployment will run unless the ``CI`` environment variable (``--ci`` cli option) is set, the ``--tag <tag>...`` cli option was provided, or only one deployment is defined.
+  During a :ref:`commands:deploy`/:ref:`commands:destroy` action, the user has the option to select which deployment will run unless the ``CI`` environment variable (``--ci`` cli option) is set, the ``--tag <tag>...`` cli option was provided, or only one deployment is defined.
 
   .. rubric:: Lookup Support
 
@@ -202,7 +199,7 @@ Deployment
 
 
   .. attribute:: account_alias
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     An `AWS account alias <https://docs.aws.amazon.com/IAM/latest/UserGuide/console_account-alias.html>`__ use to verify the currently assumed role or credentials.
@@ -231,7 +228,7 @@ Deployment
       No longer accepts a :class:`typing.Dict`.
 
   .. attribute:: account_id
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     An AWS account ID use to verify the currently assumed role or credentials.
@@ -260,7 +257,7 @@ Deployment
       No longer accepts a :class:`typing.Dict`.
 
   .. attribute:: assume_role
-    :type: Optional[assume_role_definition, str]
+    :type: assume_role_definition | str | None
     :value: {}
 
     Assume an AWS IAM role when processing the deployment.
@@ -315,7 +312,7 @@ Deployment
         An identifier for the assumed role session.
 
   .. attribute:: env_vars
-    :type: Optional[Dict[str, Union[List[str], str]]]
+    :type: dict[str, list[str] | str] | None
     :value: {}
 
     Additional variables to add to the environment when processing the deployment.
@@ -350,7 +347,7 @@ Deployment
       The entire value of the field is used for all environments.
 
   .. attribute:: environments
-    :type: Optional[Dict[str, Union[bool, List[str], str]]]
+    :type: dict[str, bool | list[str] | str] | None
     :value: {}
 
     Explicitly enable/disable the deployment for a specific deploy environment, AWS Account ID, and AWS Region combination.
@@ -389,7 +386,7 @@ Deployment
       If defined and the current deploy environment is missing from the definition, processing will be skipped.
 
   .. attribute:: modules
-    :type: List[Union[module, str]]
+    :type: list[module | str]
 
     A list of modules to process as part of a deployment.
 
@@ -402,7 +399,7 @@ Deployment
             - path: sampleapp-02.cfn
 
   .. attribute:: module_options
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Options that are passed directly to the modules within this deployment.
@@ -437,7 +434,7 @@ Deployment
           example: value
 
   .. attribute:: name
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     The name of the deployment to be displayed in logs and the interactive selection menu.
@@ -449,7 +446,7 @@ Deployment
         - name: networking
 
   .. attribute:: parallel_regions
-    :type: Optional[Union[List[str], str]]
+    :type: list[str] | str | None
     :value: []
 
     A list of AWS Regions to process asynchronously.
@@ -491,7 +488,7 @@ Deployment
     .. versionadded:: 1.3.0
 
   .. attribute:: parameters
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Used to pass variable values to modules in place of an environment configuration file.
@@ -520,7 +517,7 @@ Deployment
     .. versionadded:: 1.4.0
 
   .. attribute:: regions
-    :type: Optional[Union[Dict[str, Union[List[str], str], List[str], str]]
+    :type: dict[str, list[str] | str] | list[str] | str | None
     :value: []
 
     A list of AWS Regions to process this deployment in.
@@ -570,7 +567,6 @@ Deployment
 ----
 
 
-.. _runway-module:
 
 ******
 Module
@@ -578,31 +574,31 @@ Module
 
 .. class:: module
 
-  A module defines the directory to be processed and applicable options.
+  A :term:`Module` defines the directory to be processed and applicable options.
 
-  It can consist of :ref:`CloudFormation <mod-cfn>`, :ref:`Terraform <mod-tf>`, :ref:`Serverless Framework <mod-sls>`, :ref:`AWS CDK <mod-cdk>`, :ref:`Kubernetes <mod-k8s>`, or a :ref:`Static Site<mod-staticsite>`.
+  It can consist of :ref:`index:CloudFormation & Troposphere`, :ref:`index:Terraform`, :ref:`index:Serverless Framework`, :ref:`index:AWS Cloud Development Kit (CDK)`, :ref:`index:Kubernetes`, or a :ref:`index:Static Site`.
   It is recommended to place the appropriate extension on each directory for identification (but it is not required).
-  See :ref:`Repo Structure<repo-structure>` for examples of a module directory structure.
+  See :ref:`repo_structure:Repo Structure` for examples of a module directory structure.
 
-  +------------------+-----------------------------------------------+
-  | Suffix/Extension | IaC Tool/Framework                            |
-  +==================+===============================================+
-  | ``.cdk``         | :ref:`AWS CDK <mod-cdk>`                      |
-  +------------------+-----------------------------------------------+
-  | ``.cfn``         | :ref:`CloudFormation <mod-cfn>`               |
-  +------------------+-----------------------------------------------+
-  | ``.k8s``         | :ref:`Kubernetes <mod-k8s>`                   |
-  +------------------+-----------------------------------------------+
-  | ``.sls``         | :ref:`Serverless Framework <mod-sls>`         |
-  +------------------+-----------------------------------------------+
-  | ``.tf``          | :ref:`Terraform <mod-tf>`                     |
-  +------------------+-----------------------------------------------+
-  | ``.web``         | :ref:`Static Site<mod-staticsite>`            |
-  +------------------+-----------------------------------------------+
+  +------------------+---------------------------------------------------------+
+  | Suffix/Extension | IaC Tool/Framework                                      |
+  +==================+=========================================================+
+  | ``.cdk``         | :ref:`index:AWS Cloud Development Kit (CDK)`            |
+  +------------------+---------------------------------------------------------+
+  | ``.cfn``         | :ref:`index:CloudFormation & Troposphere`               |
+  +------------------+---------------------------------------------------------+
+  | ``.k8s``         | :ref:`index:Kubernetes`                                 |
+  +------------------+---------------------------------------------------------+
+  | ``.sls``         | :ref:`index:Serverless Framework`                       |
+  +------------------+---------------------------------------------------------+
+  | ``.tf``          | :ref:`index:Terraform`                                  |
+  +------------------+---------------------------------------------------------+
+  | ``.web``         | :ref:`index:Static Site`                                |
+  +------------------+---------------------------------------------------------+
 
   A module is only deployed if there is a corresponding environment file present, it is explicitly enabled via :attr:`deployment.environments`/:attr:`module.environments`, or :attr:`deployment.parameters`/:attr:`module.parameters` is defined.
   The naming format of an environment file varies per module type.
-  See :ref:`Module Configurations<module-configurations>` for acceptable environment file name formats.
+  See :ref:`index:Module Configuration` for acceptable environment file name formats.
 
   Modules can be defined as a string or a mapping.
   The minimum requirement for a module is a string that is equal to the name of the module directory.
@@ -622,7 +618,7 @@ Module
   - :attr:`~module.path`
 
   .. attribute:: class_path
-    :type: Optional[str]
+    :type: str | None
     :value: null
 
     .. note::
@@ -630,7 +626,7 @@ Module
       It is only used for custom module type handlers.
 
     Import path to a custom Runway module handler class.
-    See :ref:`Module Configurations<module-configurations>` for detailed usage.
+    See :ref:`index:Module Configuration` for detailed usage.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -640,7 +636,7 @@ Module
           - class_path: runway.module.cloudformation.CloudFormation
 
   .. attribute:: env_vars
-    :type: Optional[Dict[str, Union[List[str], str]]]
+    :type: dict[str, list[str] | str] | None
     :value: {}
 
     Additional variables to add to the environment when processing the deployment.
@@ -678,7 +674,7 @@ Module
       The entire value of the field is used for all environments.
 
   .. attribute:: environments
-    :type: Optional[Dict[str, Union[bool, List[str], str]]]
+    :type: dict[str, bool | list[str] | str] | None
     :value: {}
 
     Explicitly enable/disable the deployment for a specific deploy environment, AWS Account ID, and AWS Region combination.
@@ -720,7 +716,7 @@ Module
       If defined and the current deploy environment is missing from the definition, processing will be skipped.
 
   .. attribute:: name
-    :type: Optional[str]
+    :type: str | None
 
     The name of the module to be displayed in logs and the interactive selection menu.
 
@@ -734,13 +730,13 @@ Module
           - name: networking
 
   .. attribute:: options
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Options that are passed directly to the module type handler class.
 
     The options that can be used with each module vary.
-    For detailed information about options for each type of module, see :ref:`Module Configurations<module-configurations>`.
+    For detailed information about options for each type of module, see :ref:`index:Module Configuration`.
 
     Anything defined here is merged with the value of :attr:`deployment.module_options`.
     Values defined here take precedence.
@@ -776,7 +772,7 @@ Module
           example: value
 
   .. attribute:: parallel
-    :type: Optional[List[module]]
+    :type: list[module] | None
     :value: []
 
     List of `module` definitions that can be executed asynchronously.
@@ -796,7 +792,7 @@ Module
             - path: sampleapp-02.cfn
 
   .. attribute:: parameters
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Used to pass variable values to modules in place of an environment configuration file.
@@ -828,7 +824,7 @@ Module
     .. versionadded:: 1.4.0
 
   .. attribute:: path
-    :type: Optional[Union[str, Path]]
+    :type: str | Path | None
 
     Directory (relative to the Runway config file) containing IaC.
     The directory can either be on the local file system or a network accessible location.
@@ -846,7 +842,7 @@ Module
     .. versionadded:: 1.4.0
 
   .. attribute:: tags
-    :type: Optional[List[str]]
+    :type: list[str] | None
     :value: []
 
     A list of strings to categorize the module which can be used with the CLI to quickly select a group of modules.
@@ -863,7 +859,7 @@ Module
             - type:network
 
   .. attribute:: type
-    :type: Optional[str]
+    :type: str | None
 
     Explicitly define the type of IaC contained within the directory.
     This can be useful when Runway fails to automatically determine the correct module type.
@@ -887,7 +883,6 @@ Module
     .. versionadded:: 1.4.0
 
 
-.. _runway-module-path:
 
 path
 ====
@@ -929,7 +924,6 @@ The syntax is based on that of `Terraform module sources <https://www.terraform.
 Remote Location Sources
 -----------------------
 
-.. _runway-module-path-git:
 
 Git Repository
 ^^^^^^^^^^^^^^
@@ -982,7 +976,6 @@ Below is an example of using a module in a git repository as well as a breakdown
 ----
 
 
-.. _runway-test:
 
 ****
 Test
@@ -992,12 +985,12 @@ Test
 
   Tests can be defined as part of the Runway config file.
   This is to remove the need for complex Makefiles or scripts to initiate test runners.
-  Simply define all tests for a project in the Runway config file and use the :ref:`test command<command-test>` to execute them.
+  Simply define all tests for a project in the Runway config file and use the :ref:`test command <commands:test>` to execute them.
 
   .. rubric:: Lookup Support
 
   .. note::
-    Runway does not set ``AWS_REGION`` or ``AWS_DEFAULT_REGION`` environment variables when using the :ref:`test command<command-test>`.
+    Runway does not set ``AWS_REGION`` or ``AWS_DEFAULT_REGION`` environment variables when using the :ref:`test command <commands:test>`.
 
   The following fields support lookups:
 
@@ -1005,7 +998,7 @@ Test
   - :attr:`test.required`
 
   .. attribute:: args
-    :type: Optional[Union[Dict[str, Any], str]]
+    :type: dict[str, Any] | str | None
     :value: {}
 
     Arguments to be passed to the test.
@@ -1021,7 +1014,7 @@ Test
               - echo "Hello world"
 
   .. attribute:: name
-    :type: Optional[str]
+    :type: str | None
 
     Name of the test.
     Used to more easily identify where different tests begin/end in the logs and to identify which tests failed.
@@ -1039,7 +1032,7 @@ Test
     Whether the test must pass for subsequent tests to be run.
     If ``false``, testing will continue if the test fails.
 
-    If the test fails, the :ref:`test command <command-test>` will always return a non-zero exit code regardless of this value.
+    If the test fails, the :ref:`test command <commands:test>` will always return a non-zero exit code regardless of this value.
 
     .. rubric:: Example
     .. code-block:: yaml

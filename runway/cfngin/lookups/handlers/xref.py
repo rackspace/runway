@@ -1,16 +1,14 @@
 """Handler for fetching outputs from fully qualified stacks."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ...providers.aws.default import Provider
 
@@ -19,15 +17,15 @@ LOGGER = logging.getLogger(__name__)
 XREF_PERSISTENT_STATE = {"has_warned": False}
 
 
-class XrefLookup(LookupHandler):
+class XrefLookup(LookupHandler[Any]):
     """Xref lookup."""
 
     DEPRECATION_MSG = "xref Lookup has been deprecated; use the cfn lookup instead"
-    TYPE_NAME: Final[Literal["xref"]] = "xref"
+    TYPE_NAME: ClassVar[str] = "xref"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(cls, value: str, provider: Provider, **_: Any) -> str:
+    def handle(cls, value: str, *_args: Any, provider: Provider, **_kwargs: Any) -> str:
         """Fetch an output from the designated, fully qualified stack.
 
         The `output` handler supports fetching outputs from stacks created

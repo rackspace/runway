@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 from docker.types.services import Mount
 
@@ -28,8 +28,8 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         self,
         project: PythonProject,
         *,
-        client: Optional[DockerClient] = None,
-        context: Optional[Union[CfnginContext, RunwayContext]] = None,
+        client: DockerClient | None = None,
+        context: CfnginContext | RunwayContext | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -86,7 +86,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         return []
 
     @cached_property
-    def python_version(self) -> Optional[Version]:
+    def python_version(self) -> Version | None:
         """Version of Python installed in the docker container."""
         match = re.search(
             r"Python (?P<version>\S*)",
@@ -97,7 +97,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         return Version(match.group("version"))
 
     @cached_property
-    def runtime(self) -> Optional[str]:
+    def runtime(self) -> str | None:
         """AWS Lambda runtime determined from the docker container's Python version."""
         if not self.python_version:
             return None

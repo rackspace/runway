@@ -1,13 +1,12 @@
 """Test runway.config.components.runway.base."""
 
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, call
 
 import pytest
-from pydantic import Extra
+from pydantic import ConfigDict
 
 from runway.config.components.runway import RunwayVariablesDefinition
 from runway.config.components.runway.base import ConfigComponentDefinition
@@ -22,16 +21,11 @@ if TYPE_CHECKING:
 class SampleConfigProperty(ConfigProperty):
     """Data class for SampleConfigComponentDefinition."""
 
+    model_config = ConfigDict(extra="allow", validate_assignment=True, validate_default=True)
+
     name: str = "test"
     var_attr: Any = None
     var_attr_pre: Any = None
-
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.allow
-        validate_all = False
-        validate_assignment = False
 
 
 class SampleConfigComponentDefinition(ConfigComponentDefinition):
@@ -72,7 +66,7 @@ class SampleConfigComponentDefinition(ConfigComponentDefinition):
             obj: The object to parse.
 
         """
-        return cls(SampleConfigProperty.parse_obj(obj))
+        return cls(SampleConfigProperty.model_validate(obj))
 
 
 class TestConfigComponentDefinition:
@@ -93,7 +87,7 @@ class TestConfigComponentDefinition:
         data = SampleConfigProperty()
         obj = SampleConfigComponentDefinition(data)
         assert obj._data == data
-        assert obj.data == data.dict()
+        assert obj.data == data.model_dump()
         assert not obj._vars
         assert isinstance(obj._vars, dict)
 

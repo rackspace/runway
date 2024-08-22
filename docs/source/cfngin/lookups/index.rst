@@ -109,31 +109,32 @@ If using boto3 in a lookup, use :meth:`context.get_session() <runway.context.Cfn
 .. code-block:: python
 
   """Example lookup."""
+
   from __future__ import annotations
 
-  from typing import TYPE_CHECKING, Any, Final, Literal, Optional, Union
+  from typing import TYPE_CHECKING, Any, ClassVar
 
   from runway.cfngin.utils import read_value_from_path
   from runway.lookups.handlers.base import LookupHandler
 
   if TYPE_CHECKING:
       from runway.cfngin.providers.aws.default import Provider
-      from runway.context import CfnginContext, RunwayContext
+      from runway.context import CfnginContext
 
 
-  class MylookupLookup(LookupHandler):
+  class MylookupLookup(LookupHandler["CfnginContext"]):
       """My lookup."""
 
-      TYPE_NAME: Final[Literal["mylookup"]] = "mylookup"
+      TYPE_NAME: ClassVar[str] = "my_lookup"
       """Name that the Lookup is registered as."""
 
       @classmethod
       def handle(
           cls,
           value: str,
-          context: Union[CfnginContext, RunwayContext],
-          *_args: Any,
-          provider: Optional[Provider] = None,
+          context: CfnginContext,
+          *,
+          provider: Provider,
           **_kwargs: Any
       ) -> str:
           """Do something.

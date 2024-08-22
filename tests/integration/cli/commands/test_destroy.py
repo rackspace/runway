@@ -42,7 +42,7 @@ def test_destroy(cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFi
     assert isinstance(mock_runway.call_args.args[1], RunwayContext)
 
     mock_runway.reverse_deployments.assert_called_once()
-    assert len(mock_runway.reverse_deployments.call_args.args[0]) == 1  # type: ignore
+    assert len(mock_runway.reverse_deployments.call_args.args[0]) == 1
     inst = mock_runway.return_value
     inst.destroy.assert_called_once_with(mock_runway.reverse_deployments.return_value)
 

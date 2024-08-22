@@ -17,7 +17,7 @@ Args
 ****
 
 .. data:: role_name
-  :type: Optional[str]
+  :type: str | None
   :value: "ecsServiceRole"
   :noindex:
 

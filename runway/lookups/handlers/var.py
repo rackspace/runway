@@ -1,15 +1,13 @@
 """Retrieve a variable from the variables file or definition."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ...utils import MutableMap
 
@@ -18,14 +16,14 @@ LOGGER = logging.getLogger(__name__)
 TYPE_NAME = "var"
 
 
-class VarLookup(LookupHandler):
+class VarLookup(LookupHandler[Any]):
     """Variable definition Lookup."""
 
-    TYPE_NAME: Final[Literal["var"]] = "var"
+    TYPE_NAME: ClassVar[str] = "var"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(cls, value: str, *__args: Any, variables: MutableMap, **__kwargs: Any) -> Any:
+    def handle(cls, value: str, *_args: Any, variables: MutableMap, **_kwargs: Any) -> Any:
         """Retrieve a variable from the variable definition.
 
         The value is retrieved from the variables passed to Runway using

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import zipfile
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import MagicMock, Mock, PropertyMock, call
 from urllib.parse import urlencode
 
@@ -501,7 +501,7 @@ class TestDeploymentPackage:
     def test_object_key(
         self,
         project: ProjectTypeAlias,
-        object_prefix: Optional[str],
+        object_prefix: str | None,
         usage_type: Literal["function", "layer"],
     ) -> None:
         """Test object_key."""
@@ -519,7 +519,7 @@ class TestDeploymentPackage:
     @pytest.mark.parametrize("response, expected", [({}, None), ({"VersionId": "foo"}, "foo")])
     def test_object_version_id(
         self,
-        expected: Optional[str],
+        expected: str | None,
         mocker: MockerFixture,
         project: ProjectTypeAlias,
         response: dict[str, Any],
@@ -663,7 +663,7 @@ class TestDeploymentPackageS3Object:
 
     @pytest.mark.parametrize("value", ["foobar", None, "foo,bar"])
     def test_compatible_architectures(
-        self, mocker: MockerFixture, project: ProjectTypeAlias, value: Optional[str]
+        self, mocker: MockerFixture, project: ProjectTypeAlias, value: str | None
     ) -> None:
         """Test compatible_architectures."""
         mocker.patch.object(
@@ -681,7 +681,7 @@ class TestDeploymentPackageS3Object:
 
     @pytest.mark.parametrize("value", ["foobar", None, "foo,bar"])
     def test_compatible_runtimes(
-        self, mocker: MockerFixture, project: ProjectTypeAlias, value: Optional[str]
+        self, mocker: MockerFixture, project: ProjectTypeAlias, value: str | None
     ) -> None:
         """Test compatible_runtimes."""
         mocker.patch.object(
@@ -822,7 +822,7 @@ class TestDeploymentPackageS3Object:
 
     @pytest.mark.parametrize("value", ["foobar", None])
     def test_license(
-        self, mocker: MockerFixture, project: ProjectTypeAlias, value: Optional[str]
+        self, mocker: MockerFixture, project: ProjectTypeAlias, value: str | None
     ) -> None:
         """Test license."""
         mocker.patch.object(
@@ -900,7 +900,7 @@ class TestDeploymentPackageS3Object:
     )
     def test_object_version_id(
         self,
-        expected: Optional[str],
+        expected: str | None,
         head: dict[str, str],
         mocker: MockerFixture,
         project: ProjectTypeAlias,

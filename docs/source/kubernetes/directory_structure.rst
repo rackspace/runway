@@ -4,7 +4,7 @@
 Directory Structure
 ###################
 
-Example directory structures for a :ref:`Kubernetes <mod-k8s>` module.
+Example directory structures for a :ref:`index:Kubernetes` :term:`Module`.
 
 .. code-block::
 

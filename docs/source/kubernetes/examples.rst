@@ -4,10 +4,8 @@
 Examples
 ########
 
-Example uses of the :ref:`Kubernetes <mod-k8s>` module
+Example uses of the :ref:`index:Kubernetes` :term:`Module`
 
-.. contents::
-  :depth: 4
 
 
 ******************

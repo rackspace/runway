@@ -147,7 +147,7 @@ class CFNType:
 
     """
 
-    parameter_type: ClassVar[str]
+    parameter_type: ClassVar
 
 
 # General CFN types
