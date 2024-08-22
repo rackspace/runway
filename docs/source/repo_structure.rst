@@ -1,13 +1,9 @@
-.. _repo-structure:
-
 ##############
 Repo Structure
 ##############
 
 Projects deployed via Runway can be structured in a few ways.
 
-.. contents::
-  :depth: 4
 
 
 ****************************

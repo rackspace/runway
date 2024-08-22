@@ -1,17 +1,18 @@
 """Test destroy stack removed from persistent graph."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import pytest
 
 from runway._cli import cli
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from click.testing import CliRunner, Result
 
 CURRENT_DIR = Path(__file__).parent
@@ -50,8 +51,7 @@ def test_deploy_log_messages(deploy_result: Result, namespace: str) -> None:
     )
     assert (
         '00-bootstrap:locked persistent graph "runway-testing-lab-cfngin-bucket-us-east-1'
-        f'/persistent_graphs/{namespace}/test.json" with lock ID "'
-        in deploy_result.stdout
+        f'/persistent_graphs/{namespace}/test.json" with lock ID "' in deploy_result.stdout
     )
     assert (
         '00-bootstrap:unlocked persistent graph "runway-testing-lab-cfngin-bucket-us-east-1'
@@ -59,8 +59,7 @@ def test_deploy_log_messages(deploy_result: Result, namespace: str) -> None:
     )
     assert (
         '01-removed:locked persistent graph "runway-testing-lab-cfngin-bucket-us-east-1'
-        f'/persistent_graphs/{namespace}/test.json" with lock ID "'
-        in deploy_result.stdout
+        f'/persistent_graphs/{namespace}/test.json" with lock ID "' in deploy_result.stdout
     )
     assert (
         f"{namespace}-other:removed from the CFNgin config file; it is being destroyed"
@@ -85,7 +84,4 @@ def test_destroy_exit_code(destroy_result: Result) -> None:
 @pytest.mark.order(after="test_destroy_exit_code")
 def test_destroy_log_messages(destroy_result: Result) -> None:
     """Test destroy log messages."""
-    assert (
-        "persistent graph deleted; does not need to be unlocked"
-        in destroy_result.stdout
-    )
+    assert "persistent graph deleted; does not need to be unlocked" in destroy_result.stdout

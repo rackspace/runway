@@ -14,17 +14,7 @@ import subprocess
 import sys
 import tempfile
 import zipfile
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Final, cast, overload
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
@@ -32,7 +22,6 @@ import hcl
 import hcl2
 import requests
 from packaging.version import InvalidVersion
-from typing_extensions import Final
 
 from ..compat import cached_property
 from ..exceptions import HclParserError
@@ -40,6 +29,7 @@ from ..utils import FileHash, Version, get_hash_for_filename, merge_dicts
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
     from pathlib import Path
     from types import ModuleType
 
@@ -53,8 +43,8 @@ def download_tf_release(
     version: str,
     versions_dir: Path,
     command_suffix: str,
-    tf_platform: Optional[str] = None,
-    arch: Optional[str] = None,
+    tf_platform: str | None = None,
+    arch: str | None = None,
 ) -> None:
     """Download Terraform archive and return path to it."""
     version_dir = versions_dir / version
@@ -64,19 +54,15 @@ def download_tf_release(
 
     if tf_platform:
         tfver_os = tf_platform + "_" + arch
+    elif platform.system().startswith("Darwin"):
+        tfver_os = f"darwin_{arch}"
+    elif platform.system().startswith("Windows") or (
+        platform.system().startswith("MINGW64")
+        or (platform.system().startswith("MSYS_NT") or platform.system().startswith("CYGWIN_NT"))
+    ):
+        tfver_os = f"windows_{arch}"
     else:
-        if platform.system().startswith("Darwin"):
-            tfver_os = f"darwin_{arch}"
-        elif platform.system().startswith("Windows") or (
-            platform.system().startswith("MINGW64")
-            or (
-                platform.system().startswith("MSYS_NT")
-                or platform.system().startswith("CYGWIN_NT")
-            )
-        ):
-            tfver_os = f"windows_{arch}"
-        else:
-            tfver_os = f"linux_{arch}"
+        tfver_os = f"linux_{arch}"
 
     download_dir = tempfile.mkdtemp()
     filename = f"terraform_{version}_{tfver_os}.zip"
@@ -86,20 +72,20 @@ def download_tf_release(
     try:
         LOGGER.verbose("downloading Terraform from %s...", tf_url)
         for i in [filename, shasums_name]:
-            urlretrieve(tf_url + "/" + i, os.path.join(download_dir, i))
+            urlretrieve(tf_url + "/" + i, os.path.join(download_dir, i))  # noqa: PTH118, S310
     except URLError as exc:
         handle_bin_download_error(exc, "Terraform")
 
-    tf_hash = get_hash_for_filename(filename, os.path.join(download_dir, shasums_name))
+    tf_hash = get_hash_for_filename(
+        filename, os.path.join(download_dir, shasums_name)  # noqa: PTH118
+    )
     checksum = FileHash(hashlib.sha256())
-    checksum.add_file(os.path.join(download_dir, filename))
+    checksum.add_file(os.path.join(download_dir, filename))  # noqa: PTH118
     if tf_hash != checksum.hexdigest:
-        LOGGER.error(
-            "downloaded Terraform %s does not match sha256 %s", filename, tf_hash
-        )
+        LOGGER.error("downloaded Terraform %s does not match sha256 %s", filename, tf_hash)
         sys.exit(1)
 
-    with zipfile.ZipFile(os.path.join(download_dir, filename)) as tf_zipfile:
+    with zipfile.ZipFile(os.path.join(download_dir, filename)) as tf_zipfile:  # noqa: PTH118
         version_dir.mkdir(parents=True, exist_ok=True)
         tf_zipfile.extractall(str(version_dir))
 
@@ -108,10 +94,10 @@ def download_tf_release(
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
 
 
-def get_available_tf_versions(include_prerelease: bool = False) -> List[str]:
+def get_available_tf_versions(include_prerelease: bool = False) -> list[str]:
     """Return available Terraform versions."""
     tf_releases = json.loads(
-        requests.get("https://releases.hashicorp.com/index.json").text
+        requests.get("https://releases.hashicorp.com/index.json", timeout=30).text
     )["terraform"]
 
     # Remove versions that don't align with
@@ -139,22 +125,22 @@ def get_latest_tf_version(include_prerelease: bool = False) -> str:
     return get_available_tf_versions(include_prerelease)[0]
 
 
-def load_terraform_module(parser: ModuleType, path: Path) -> Dict[str, Any]:
+def load_terraform_module(parser: ModuleType, path: Path) -> dict[str, Any]:
     """Load all Terraform files in a module into one dict.
 
     Args:
-        parser (Union[hcl, hcl2]): Parser to use when loading files.
+        parser: Parser to use when loading files.
         path: Terraform module path. All Terraform files in the
             path will be loaded.
 
     """
-    result: Dict[str, Any] = {}
+    result: dict[str, Any] = {}
     LOGGER.debug("using %s parser to load module: %s", parser.__name__.upper(), path)
     for tf_file in path.glob("*.tf"):
         try:
-            tf_config = parser.loads(tf_file.read_text())  # type: ignore
-            result = merge_dicts(result, cast(Dict[str, Any], tf_config))
-        except Exception as exc:
+            tf_config = parser.loads(tf_file.read_text())
+            result = merge_dicts(result, cast("dict[str, Any]", tf_config))
+        except Exception as exc:  # noqa: BLE001
             raise HclParserError(exc, tf_file, parser) from None
     return result
 
@@ -171,38 +157,36 @@ class TFEnvManager(EnvManager):
         r"^Terraform v(?P<version>[0-9]*\.[0-9]*\.[0-9]*)(?P<suffix>-.*)?"
     )
 
-    def __init__(self, path: Optional[Path] = None) -> None:
+    def __init__(self, path: Path | None = None) -> None:
         """Initialize class."""
         super().__init__("terraform", "tfenv", path)
 
     @cached_property
-    def backend(self) -> Dict[str, Any]:
+    def backend(self) -> dict[str, Any]:
         """Backend config of the Terraform module."""
         # Terraform can only have one backend configured; this formats the
         # data to make it easier to work with
-        return [
+        return next(
             {"type": k, "config": v}
             for k, v in self.terraform_block.get(
-                "backend", {None: cast(Dict[str, str], {})}
+                "backend", {None: cast("dict[str, str]", {})}
             ).items()
-        ][0]
+        )
 
     @cached_property
-    def terraform_block(self) -> Dict[str, Any]:
+    def terraform_block(self) -> dict[str, Any]:  # noqa: C901
         """Collect Terraform configuration blocks from a Terraform module."""
 
         @overload
-        def _flatten_lists(data: Dict[str, Any]) -> Dict[str, Any]: ...
+        def _flatten_lists(data: dict[str, Any]) -> dict[str, Any]: ...
 
         @overload
-        def _flatten_lists(data: List[Any]) -> List[Any]: ...
+        def _flatten_lists(data: list[Any]) -> list[Any]: ...
 
         @overload
         def _flatten_lists(data: str) -> str: ...
 
-        def _flatten_lists(
-            data: Union[Dict[str, Any], List[Any], Any]
-        ) -> Union[Dict[str, Any], Any]:
+        def _flatten_lists(data: dict[str, Any] | list[Any] | Any) -> dict[str, Any] | Any:
             """Flatten HCL2 list attributes until its fixed.
 
             python-hcl2 incorrectly turns all attributes into lists so we need
@@ -216,28 +200,28 @@ class TFEnvManager(EnvManager):
             """
             if not isinstance(data, dict):
                 return data
-            copy_data = cast(Dict[str, Any], data.copy())
+            copy_data = data.copy()
             for attr, val in copy_data.items():
                 if isinstance(val, list):
-                    if len(cast(List[Any], val)) == 1:
+                    if len(cast("list[Any]", val)) == 1:
                         # pull single values out of lists
                         data[attr] = _flatten_lists(cast(Any, val[0]))
                     else:
-                        data[attr] = [_flatten_lists(v) for v in cast(List[Any], val)]
+                        data[attr] = [_flatten_lists(v) for v in cast("list[Any]", val)]
                 elif isinstance(val, dict):
-                    data[attr] = _flatten_lists(cast(Dict[str, Any], val))
+                    data[attr] = _flatten_lists(cast("dict[str, Any]", val))
             return data
 
         try:
-            result: Union[Dict[str, Any], List[Dict[str, Any]]] = load_terraform_module(
+            result: dict[str, Any] | list[dict[str, Any]] = load_terraform_module(
                 hcl2, self.path
-            ).get("terraform", cast(Dict[str, Any], {}))
+            ).get("terraform", cast("dict[str, Any]", {}))
         except HclParserError as exc:
             LOGGER.warning(exc)
             LOGGER.warning("failed to parse as HCL2; trying HCL...")
             try:
                 result = load_terraform_module(hcl, self.path).get(
-                    "terraform", cast(Dict[str, Any], {})
+                    "terraform", cast("dict[str, Any]", {})
                 )
             except HclParserError as exc2:
                 LOGGER.warning(exc2)
@@ -251,7 +235,7 @@ class TFEnvManager(EnvManager):
         return _flatten_lists(result)
 
     @cached_property
-    def version(self) -> Optional[Version]:
+    def version(self) -> Version | None:
         """Terraform version."""
         version_requested = self.current_version or self.get_version_from_file()
 
@@ -263,9 +247,7 @@ class TFEnvManager(EnvManager):
             version_requested = self.get_min_required()
 
         if re.match(r"^latest:.*$", version_requested):
-            regex = re.search(r"latest:(.*)", version_requested).group(  # type: ignore
-                1
-            )
+            regex = re.search(r"latest:(.*)", version_requested).group(1)  # type: ignore
             include_prerelease_versions = False
         elif re.match(r"^latest$", version_requested):
             regex = r"^[0-9]+\.[0-9]+\.[0-9]+$"
@@ -292,7 +274,7 @@ class TFEnvManager(EnvManager):
         return self.parse_version_string(self.current_version)
 
     @cached_property
-    def version_file(self) -> Optional[Path]:
+    def version_file(self) -> Path | None:
         """Find and return a ".terraform-version" file if one is present.
 
         Returns:
@@ -334,7 +316,7 @@ class TFEnvManager(EnvManager):
         )
         sys.exit(1)
 
-    def get_version_from_file(self, file_path: Optional[Path] = None) -> Optional[str]:
+    def get_version_from_file(self, file_path: Path | None = None) -> str | None:
         """Get Terraform version from a file.
 
         Args:
@@ -349,7 +331,7 @@ class TFEnvManager(EnvManager):
         LOGGER.debug("file path not provided and version file could not be found")
         return None
 
-    def install(self, version_requested: Optional[str] = None) -> str:
+    def install(self, version_requested: str | None = None) -> str:
         """Ensure Terraform is available."""
         if version_requested:
             self.set_version(version_requested)
@@ -362,9 +344,7 @@ class TFEnvManager(EnvManager):
         # Now that a version has been selected, skip downloading if it's
         # already been downloaded
         if (self.versions_dir / str(self.version)).is_dir():
-            LOGGER.verbose(
-                "Terraform version %s already installed; using it...", self.version
-            )
+            LOGGER.verbose("Terraform version %s already installed; using it...", self.version)
             return str(self.bin)
 
         LOGGER.info("downloading and using Terraform version %s ...", self.version)
@@ -400,11 +380,11 @@ class TFEnvManager(EnvManager):
     @classmethod
     def get_version_from_executable(
         cls,
-        bin_path: Union[Path, str],
+        bin_path: Path | str,
         *,
-        cwd: Optional[Union[Path, str]] = None,
-        env: Optional[Dict[str, str]] = None,
-    ) -> Optional[Version]:
+        cwd: Path | str | None = None,
+        env: dict[str, str] | None = None,
+    ) -> Version | None:
         """Get Terraform version from an executable.
 
         Args:
@@ -413,9 +393,7 @@ class TFEnvManager(EnvManager):
             env: Environment variable overrides.
 
         """
-        output = subprocess.check_output(
-            [str(bin_path), "-version"], cwd=cwd, env=env
-        ).decode()
+        output = subprocess.check_output([str(bin_path), "-version"], cwd=cwd, env=env).decode()
         match = re.search(cls.VERSION_OUTPUT_REGEX, output)
         if not match:
             return None
@@ -432,7 +410,5 @@ class TFEnvManager(EnvManager):
         """
         match = re.search(cls.VERSION_REGEX, version)
         if not match:
-            raise ValueError(
-                f"provided version doesn't conform to regex: {cls.VERSION_REGEX}"
-            )
+            raise ValueError(f"provided version doesn't conform to regex: {cls.VERSION_REGEX}")
         return Version(match.group("version"))

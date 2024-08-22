@@ -78,9 +78,7 @@ DescribeDBSecurityGroups = Action("DescribeDBSecurityGroups")
 DescribeDBSnapshotAttributes = Action("DescribeDBSnapshotAttributes")
 DescribeDBSnapshots = Action("DescribeDBSnapshots")
 DescribeDBSubnetGroups = Action("DescribeDBSubnetGroups")
-DescribeEngineDefaultClusterParameters = Action(
-    "DescribeEngineDefaultClusterParameters"
-)
+DescribeEngineDefaultClusterParameters = Action("DescribeEngineDefaultClusterParameters")
 DescribeEngineDefaultParameters = Action("DescribeEngineDefaultParameters")
 DescribeEventCategories = Action("DescribeEventCategories")
 DescribeEventSubscriptions = Action("DescribeEventSubscriptions")
@@ -122,9 +120,7 @@ RegisterDBProxyTargets = Action("RegisterDBProxyTargets")
 RemoveFromGlobalCluster = Action("RemoveFromGlobalCluster")
 RemoveRoleFromDBCluster = Action("RemoveRoleFromDBCluster")
 RemoveRoleFromDBInstance = Action("RemoveRoleFromDBInstance")
-RemoveSourceIdentifierFromSubscription = Action(
-    "RemoveSourceIdentifierFromSubscription"
-)
+RemoveSourceIdentifierFromSubscription = Action("RemoveSourceIdentifierFromSubscription")
 RemoveTagsFromResource = Action("RemoveTagsFromResource")
 ResetDBClusterParameterGroup = Action("ResetDBClusterParameterGroup")
 ResetDBParameterGroup = Action("ResetDBParameterGroup")

@@ -1,6 +1,11 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "TestTemplate",
+    "Outputs": {
+        "DummyId": {
+            "Value": "dummy-1234"
+        }
+    },
     "Parameters": {
         "Param1": {
             "Type": "String"
@@ -11,13 +16,8 @@
         }
     },
     "Resources": {
-      "Dummy": {
-        "Type": "AWS::CloudFormation::WaitConditionHandle"
-      }
-    },
-    "Outputs": {
-      "DummyId": {
-        "Value": "dummy-1234"
-      }
+        "Dummy": {
+            "Type": "AWS::CloudFormation::WaitConditionHandle"
+        }
     }
 }

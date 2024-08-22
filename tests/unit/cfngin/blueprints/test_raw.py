@@ -1,15 +1,13 @@
 """Tests for runway.cfngin.blueprints.raw."""
 
-# pylint: disable=unused-argument
-# pyright: basic
 from __future__ import annotations
 
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
+from unittest.mock import MagicMock, Mock
 
 import pytest
-from mock import MagicMock, Mock
 
 from runway.cfngin.blueprints.raw import (
     RawTemplateBlueprint,
@@ -26,7 +24,6 @@ from runway.variables import Variable
 from ..factories import mock_context
 
 if TYPE_CHECKING:
-    from pytest import MonkeyPatch
     from pytest_mock import MockerFixture
 
     from runway.context import CfnginContext
@@ -137,13 +134,12 @@ class TestRawTemplateBlueprint:
             "Param2": {"Default": "default", "Type": "CommaDelimitedList"},
         }
 
-    def test_parameter_values(
-        self, cfngin_context: CfnginContext, tmp_path: Path
-    ) -> None:
+    def test_parameter_values(self, cfngin_context: CfnginContext, tmp_path: Path) -> None:
         """Test parameter_values."""
         obj = RawTemplateBlueprint("test", cfngin_context, raw_template_path=tmp_path)
-        assert not obj.parameter_values and isinstance(obj.parameter_values, dict)
-        obj._resolved_variables = {"var": "val"}  # pylint: disable=protected-access
+        assert not obj.parameter_values
+        assert isinstance(obj.parameter_values, dict)
+        obj._resolved_variables = {"var": "val"}
         del obj.parameter_values
         assert obj.parameter_values == {"var": "val"}
 
@@ -152,18 +148,14 @@ class TestRawTemplateBlueprint:
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_JSON_TEMPLATE_PATH
         )
-        assert blueprint.required_parameter_definitions == {
-            "Param1": {"Type": "String"}
-        }
+        assert blueprint.required_parameter_definitions == {"Param1": {"Type": "String"}}
 
     def test_required_parameter_definitions_yaml(self) -> None:
         """Verify required_parameter_definitions."""
         blueprint = RawTemplateBlueprint(
             name="test", context=MagicMock(), raw_template_path=RAW_YAML_TEMPLATE_PATH
         )
-        assert blueprint.required_parameter_definitions == {
-            "Param1": {"Type": "String"}
-        }
+        assert blueprint.required_parameter_definitions == {"Param1": {"Type": "String"}}
 
     def test_requires_change_set(
         self, cfngin_context: CfnginContext, mocker: MockerFixture, tmp_path: Path
@@ -189,13 +181,9 @@ class TestRawTemplateBlueprint:
         mock_parse_cloudformation_template = mocker.patch(
             f"{MODULE}.parse_cloudformation_template", return_value="success"
         )
-        mock_rendered = mocker.patch.object(
-            RawTemplateBlueprint, "rendered", "rendered template"
-        )
+        mock_rendered = mocker.patch.object(RawTemplateBlueprint, "rendered", "rendered template")
         assert (
-            RawTemplateBlueprint(
-                "test", cfngin_context, raw_template_path=tmp_path
-            ).to_dict()
+            RawTemplateBlueprint("test", cfngin_context, raw_template_path=tmp_path).to_dict()
             == mock_parse_cloudformation_template.return_value
         )
         mock_parse_cloudformation_template.assert_called_once_with(mock_rendered)
@@ -204,21 +192,15 @@ class TestRawTemplateBlueprint:
         self, cfngin_context: CfnginContext, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test to_json."""
-        mock_to_dict = mocker.patch.object(
-            RawTemplateBlueprint, "to_dict", return_value="dict"
-        )
+        mock_to_dict = mocker.patch.object(RawTemplateBlueprint, "to_dict", return_value="dict")
         mock_dumps = Mock(return_value="success")
         mocker.patch(f"{MODULE}.json", dumps=mock_dumps)
         assert (
-            RawTemplateBlueprint(
-                "test", cfngin_context, raw_template_path=tmp_path
-            ).to_json()
+            RawTemplateBlueprint("test", cfngin_context, raw_template_path=tmp_path).to_json()
             == mock_dumps.return_value
         )
         mock_to_dict.assert_called_once_with()
-        mock_dumps.assert_called_once_with(
-            mock_to_dict.return_value, sort_keys=True, indent=4
-        )
+        mock_dumps.assert_called_once_with(mock_to_dict.return_value, sort_keys=True, indent=4)
 
     def test_to_json_cfn_template(self, cfngin_context: CfnginContext) -> None:
         """Test to_json."""
@@ -230,9 +212,7 @@ class TestRawTemplateBlueprint:
                     "Param1": {"Type": "String"},
                     "Param2": {"Default": "default", "Type": "CommaDelimitedList"},
                 },
-                "Resources": {
-                    "Dummy": {"Type": "AWS::CloudFormation::WaitConditionHandle"}
-                },
+                "Resources": {"Dummy": {"Type": "AWS::CloudFormation::WaitConditionHandle"}},
                 "Outputs": {"DummyId": {"Value": "dummy-1234"}},
             },
             sort_keys=True,
@@ -257,9 +237,7 @@ class TestRawTemplateBlueprint:
                     "Param1": {"Type": "String"},
                     "Param2": {"Default": "default", "Type": "CommaDelimitedList"},
                 },
-                "Resources": {
-                    "Dummy": {"Type": "AWS::CloudFormation::WaitConditionHandle"}
-                },
+                "Resources": {"Dummy": {"Type": "AWS::CloudFormation::WaitConditionHandle"}},
                 "Outputs": {"DummyId": {"Value": "dummy-bar-param1val-foo-1234"}},
             },
             sort_keys=True,
@@ -293,9 +271,7 @@ class TestRawTemplateBlueprint:
         self, cfngin_context: CfnginContext, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test render_template."""
-        mock_rendered = mocker.patch.object(
-            RawTemplateBlueprint, "rendered", "rendered"
-        )
+        mock_rendered = mocker.patch.object(RawTemplateBlueprint, "rendered", "rendered")
         mock_version = mocker.patch.object(RawTemplateBlueprint, "version", "version")
         assert RawTemplateBlueprint(
             "test", cfngin_context, raw_template_path=tmp_path
@@ -307,7 +283,7 @@ class TestRawTemplateBlueprint:
         with pytest.raises(UnresolvedBlueprintVariables):
             _ = obj.variables
         # obj.resolve_variables([Variable("Var0", "test")])
-        obj._resolved_variables = {"var": "val"}  # pylint: disable=protected-access
+        obj._resolved_variables = {"var": "val"}
         assert obj.variables == {"var": "val"}
         obj.variables = {"key": "val"}
         assert obj.variables == {"key": "val"}
@@ -318,9 +294,7 @@ class TestRawTemplateBlueprint:
         """Test version."""
         mocker.patch.object(RawTemplateBlueprint, "rendered", "success")
         assert (
-            RawTemplateBlueprint(
-                "test", cfngin_context, raw_template_path=tmp_path
-            ).version
+            RawTemplateBlueprint("test", cfngin_context, raw_template_path=tmp_path).version
             == "260ca9dd"
         )
 
@@ -335,14 +309,12 @@ def test_get_template_path_local_file(tmp_path: Path) -> None:
         assert template_path.samefile(cast(Path, result))
 
 
-def test_get_template_path_invalid_file(cd_tmp_path: Path) -> None:
+def test_get_template_path_invalid_file(cd_tmp_path: Path) -> None:  # noqa: ARG001
     """Verify get_template_path with an invalid filename."""
     assert get_template_path(Path("cfn_template.json")) is None
 
 
-def test_get_template_path_file_in_syspath(
-    tmp_path: Path, monkeypatch: MonkeyPatch
-) -> None:
+def test_get_template_path_file_in_syspath(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify get_template_path with a file in sys.path.
 
     This ensures templates are able to be retrieved from remote packages.
@@ -358,10 +330,7 @@ def test_get_template_path_file_in_syspath(
 
 def test_resolve_variable() -> None:
     """Test resolve_variable."""
-    assert (
-        resolve_variable(Variable("var", "val", variable_type="cfngin"), "test")
-        == "val"
-    )
+    assert resolve_variable(Variable("var", "val", variable_type="cfngin"), "test") == "val"
 
 
 def test_resolve_variable_raise_unresolved() -> None:

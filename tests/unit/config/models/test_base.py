@@ -1,10 +1,11 @@
 """Test runway.config.models.base."""
 
-# pyright: basic
-from typing import Any, Dict, Optional
+from __future__ import annotations
+
+from typing import Any
 
 import pytest
-from pydantic import Extra, ValidationError
+from pydantic import ValidationError
 
 from runway.config.models.base import ConfigProperty
 
@@ -18,11 +19,6 @@ class BadObject(ConfigProperty):
 
     name: str = ("invalid",)  # type: ignore
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.forbid
-
 
 class GoodObject(ConfigProperty):
     """Subclass used to test a parent class.
@@ -33,13 +29,11 @@ class GoodObject(ConfigProperty):
 
     name: str
     bool_field: bool = True
-    dict_field: Dict[str, Any] = {}
-    optional_str_field: Optional[str] = None
+    dict_field: dict[str, Any] = {}
+    optional_str_field: str | None = None
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
 
-        extra = Extra.forbid
+GoodObject.model_config["extra"] = "forbid"
 
 
 class TestConfigProperty:
@@ -76,14 +70,13 @@ class TestConfigProperty:
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("name",)
-        assert errors[0]["msg"] == "str type expected"
+        assert errors[0]["msg"] == "Input should be a valid string"
 
     def test_validate_assignment(self) -> None:
         """Test Config.validate_assignment."""
         with pytest.raises(ValidationError) as excinfo:
-            obj = GoodObject(name="test")
-            obj.name = ("invalid",)  # type: ignore
+            GoodObject(name="test").name = ("invalid",)  # type: ignore
         errors = excinfo.value.errors()
         assert len(errors) == 1
         assert errors[0]["loc"] == ("name",)
-        assert errors[0]["msg"] == "str type expected"
+        assert errors[0]["msg"] == "Input should be a valid string"

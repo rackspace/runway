@@ -1,7 +1,8 @@
 """Provider base class."""
 
-# pylint: disable=unused-argument
-from typing import Any, Optional
+from __future__ import annotations
+
+from typing import Any
 
 
 def not_implemented(method: str) -> None:
@@ -12,7 +13,7 @@ def not_implemented(method: str) -> None:
 class BaseProviderBuilder:
     """ProviderBuilder base class."""
 
-    def build(self, region: Optional[str] = None) -> Any:
+    def build(self, region: str | None = None) -> Any:  # noqa: ARG002
         """Abstract method."""
         not_implemented("build")
 
@@ -20,11 +21,11 @@ class BaseProviderBuilder:
 class BaseProvider:
     """Provider base class."""
 
-    def get_stack(self, stack_name: str, *args: Any, **kwargs: Any) -> Any:
+    def get_stack(self, stack_name: str, *_args: Any, **_kwargs: Any) -> Any:  # noqa: ARG002
         """Abstract method."""
         not_implemented("get_stack")
 
-    def get_outputs(self, stack_name: str, *args: Any, **kwargs: Any) -> Any:
+    def get_outputs(self, stack_name: str, *_args: Any, **_kwargs: Any) -> Any:  # noqa: ARG002
         """Abstract method."""
         not_implemented("get_outputs")
 
@@ -42,7 +43,7 @@ class Template:
 
     """
 
-    def __init__(self, url: Optional[str] = None, body: Optional[str] = None) -> None:
+    def __init__(self, url: str | None = None, body: str | None = None) -> None:
         """Instantiate class."""
         self.url = url
         self.body = body

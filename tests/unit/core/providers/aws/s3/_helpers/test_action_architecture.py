@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import os
 from typing import TYPE_CHECKING
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock, call
 
 from runway.core.providers.aws.s3._helpers.action_architecture import ActionArchitecture
 from runway.core.providers.aws.s3._helpers.parameters import ParametersDataModel
@@ -145,16 +145,10 @@ class TestActionArchitecture:
             "choose_sync_strategies",
             return_value={"sync_strategy": "test"},
         )
-        mocker.patch(
-            f"{MODULE}.FormatPath", format=Mock(side_effect=[files, rev_files])
-        )
+        mocker.patch(f"{MODULE}.FormatPath", format=Mock(side_effect=[files, rev_files]))
         mock_file_generator = Mock(call=Mock(return_value="FileGenerator().call()"))
-        mock_file_generator_rev = Mock(
-            call=Mock(return_value="rev:FileGenerator().call()")
-        )
-        mock_file_info_builder = Mock(
-            call=Mock(return_value="FileInfoBuilder().call()")
-        )
+        mock_file_generator_rev = Mock(call=Mock(return_value="rev:FileGenerator().call()"))
+        mock_file_info_builder = Mock(call=Mock(return_value="FileInfoBuilder().call()"))
         mock_comparator = Mock(call=Mock(return_value="Comparator().call()"))
         mocker.patch(f"{MODULE}.Comparator", return_value=mock_comparator)
         mocker.patch(
@@ -195,9 +189,7 @@ class TestActionArchitecture:
         mock_comparator.call.assert_called_once_with(
             mock_filter_inst.call.return_value, mock_filter_inst.call.return_value
         )
-        mock_file_info_builder.call.assert_called_once_with(
-            mock_comparator.call.return_value
-        )
+        mock_file_info_builder.call.assert_called_once_with(mock_comparator.call.return_value)
         mock_s3_transfer_handler.call.assert_called_once_with(
             mock_file_info_builder.call.return_value
         )

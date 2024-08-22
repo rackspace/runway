@@ -42,9 +42,7 @@ def k8s_flux_repo(ctx: click.Context, **_: Any) -> None:
     copy_sample(ctx, tfstate_src_dir, dest / tfstate_src_dir.parts[-1])
     tfstate_templates_dir = dest / "tfstate.cfn/templates"
     tfstate_templates_dir.mkdir()
-    write_tfstate_template(
-        tfstate_templates_dir / "tf_state.yml", bucket_deletion_policy="Delete"
-    )
+    write_tfstate_template(tfstate_templates_dir / "tf_state.yml", bucket_deletion_policy="Delete")
 
     LOGGER.success("Sample k8s infrastructure repo created at %s", dest)
     LOGGER.notice("See the README for setup and deployment instructions.")

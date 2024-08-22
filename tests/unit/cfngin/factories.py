@@ -1,12 +1,9 @@
 """Factories for tests."""
 
-# pylint: disable=unused-argument
-# pyright: basic
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Optional
-
-from mock import MagicMock
+from typing import TYPE_CHECKING, Any, NamedTuple
+from unittest.mock import MagicMock
 
 from runway.cfngin.providers.aws.default import ProviderBuilder
 from runway.config import CfnginConfig, CfnginStackDefinitionModel
@@ -27,7 +24,7 @@ class Lookup(NamedTuple):
 class MockThreadingEvent:
     """Mock thread events."""
 
-    def wait(self, timeout: Optional[int] = None) -> bool:
+    def wait(self, timeout: int | None = None) -> bool:  # noqa: ARG002
         """Mock wait method."""
         return False
 
@@ -35,15 +32,13 @@ class MockThreadingEvent:
 class MockProviderBuilder(ProviderBuilder):
     """Mock provider builder."""
 
-    def __init__(  # pylint: disable=super-init-not-called
-        self, *, provider: Provider, region: Optional[str] = None, **_: Any
-    ) -> None:
+    def __init__(self, *, provider: Provider, region: str | None = None, **_: Any) -> None:
         """Instantiate class."""
         self.provider = provider
         self.region = region
 
     def build(
-        self, *, profile: Optional[str] = None, region: Optional[str] = None
+        self, *, profile: str | None = None, region: str | None = None  # noqa: ARG002
     ) -> Provider:
         """Mock build method."""
         return self.provider
@@ -56,7 +51,7 @@ def mock_provider(**kwargs: Any) -> MagicMock:
 
 def mock_context(
     namespace: str = "default",
-    extra_config_args: Optional[Dict[str, Any]] = None,
+    extra_config_args: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> CfnginContext:
     """Mock context."""
@@ -73,7 +68,7 @@ def generate_definition(
     base_name: str, stack_id: Any = None, **overrides: Any
 ) -> CfnginStackDefinitionModel:
     """Generate definitions."""
-    definition: Dict[str, Any] = {
+    definition: dict[str, Any] = {
         "name": f"{base_name}-{stack_id}" if stack_id else base_name,
         "class_path": f"tests.unit.cfngin.fixtures.mock_blueprints.{base_name.upper()}",
         "requires": [],
@@ -82,9 +77,7 @@ def generate_definition(
     return CfnginStackDefinitionModel(**definition)
 
 
-def mock_lookup(
-    lookup_input: Any, lookup_type: str, raw: Optional[str] = None
-) -> Lookup:
+def mock_lookup(lookup_input: Any, lookup_type: str, raw: str | None = None) -> Lookup:
     """Mock lookup."""
     if raw is None:
         raw = f"{lookup_type} {lookup_input}"
@@ -109,11 +102,11 @@ class SessionStub:
 
     """
 
-    def __init__(self, client_stub: Any):
+    def __init__(self, client_stub: Any) -> None:
         """Instantiate class."""
         self.client_stub = client_stub
 
-    def client(self, region: str) -> Any:
+    def client(self, region: str) -> Any:  # noqa: ARG002
         """Return the stubbed client object.
 
         Args:

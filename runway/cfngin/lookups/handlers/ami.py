@@ -1,21 +1,19 @@
 """AMI lookup."""
 
-# pylint: disable=no-self-argument
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import operator
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from pydantic import validator
-from typing_extensions import Final, Literal
+from pydantic import field_validator
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
+
     from ....context import CfnginContext
 
 
@@ -27,21 +25,22 @@ class ArgsDataModel(BaseModel):
 
     """
 
-    executable_users: Optional[List[str]] = None
+    executable_users: list[str] | None = None
     """List of executable users."""
 
-    owners: List[str]
+    owners: list[str]
     """At least one owner is required.
 
     Should be ``amazon``, ``self``, or an AWS account ID.
 
     """
 
-    region: Optional[str] = None
+    region: str | None = None
     """AWS region."""
 
-    @validator("executable_users", "owners", allow_reuse=True, pre=True)
-    def _convert_str_to_list(cls, v: Union[List[str], str]) -> List[str]:
+    @field_validator("executable_users", "owners", mode="before")
+    @classmethod
+    def _convert_str_to_list(cls, v: list[str] | str) -> list[str]:
         """Convert str to list."""
         if isinstance(v, str):
             return v.split(",")
@@ -56,19 +55,17 @@ class ImageNotFound(Exception):
     def __init__(self, search_string: str) -> None:
         """Instantiate class."""
         self.search_string = search_string
-        super().__init__(
-            f"Unable to find ec2 image with search string: {search_string}"
-        )
+        super().__init__(f"Unable to find ec2 image with search string: {search_string}")
 
 
-class AmiLookup(LookupHandler):
+class AmiLookup(LookupHandler["CfnginContext"]):
     """AMI lookup."""
 
-    TYPE_NAME: Final[Literal["ami"]] = "ami"
+    TYPE_NAME: ClassVar[str] = "ami"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+    def parse_query(cls, value: str) -> tuple[str, dict[str, str]]:
         """Parse the value passed to the lookup.
 
         This overrides the default parsing to account for special requirements.
@@ -81,7 +78,7 @@ class AmiLookup(LookupHandler):
 
         """
         raw_value = read_value_from_path(value)
-        args: Dict[str, str] = {}
+        args: dict[str, str] = {}
 
         if "@" in raw_value:
             args["region"], raw_value = raw_value.split("@", 1)
@@ -95,9 +92,7 @@ class AmiLookup(LookupHandler):
         return args.pop("name_regex"), args
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
-    ) -> str:
+    def handle(cls, value: str, context: CfnginContext, **_kwargs: Any) -> str:
         """Fetch the most recent AMI Id using a filter.
 
         Args:
@@ -116,18 +111,16 @@ class AmiLookup(LookupHandler):
             You can also optionally specify the region in which to perform the
             AMI lookup.
 
-        """  # noqa
-        query, raw_args = cls.parse(value)
-        args = ArgsDataModel.parse_obj(raw_args)
+        """
+        query, raw_args = cls.parse_query(value)
+        args = ArgsDataModel.model_validate(raw_args)
         ec2 = context.get_session(region=args.region).client("ec2")
 
-        describe_args: Dict[str, Any] = {
+        describe_args: dict[str, Any] = {
             "Filters": [
                 {"Name": key, "Values": val.split(",") if val else val}
                 for key, val in {
-                    k: v
-                    for k, v in raw_args.items()
-                    if k not in ArgsDataModel.__fields__
+                    k: v for k, v in raw_args.items() if k not in ArgsDataModel.model_fields
                 }.items()
             ],
             "Owners": args.owners,

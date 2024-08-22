@@ -28,12 +28,8 @@ DescribeFleetMetadata = Action("DescribeFleetMetadata")
 DescribeIdentityProviderConfiguration = Action("DescribeIdentityProviderConfiguration")
 DescribeWebsiteCertificateAuthority = Action("DescribeWebsiteCertificateAuthority")
 DisassociateDomain = Action("DisassociateDomain")
-DisassociateWebsiteAuthorizationProvider = Action(
-    "DisassociateWebsiteAuthorizationProvider"
-)
-DisassociateWebsiteCertificateAuthority = Action(
-    "DisassociateWebsiteCertificateAuthority"
-)
+DisassociateWebsiteAuthorizationProvider = Action("DisassociateWebsiteAuthorizationProvider")
+DisassociateWebsiteCertificateAuthority = Action("DisassociateWebsiteCertificateAuthority")
 ListDevices = Action("ListDevices")
 ListDomains = Action("ListDomains")
 ListFleets = Action("ListFleets")

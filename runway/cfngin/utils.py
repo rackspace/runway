@@ -14,20 +14,9 @@ import tarfile
 import tempfile
 import uuid
 import zipfile
+from collections import OrderedDict
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    OrderedDict,
-    Type,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 import botocore.client
 import botocore.exceptions
@@ -39,8 +28,10 @@ from .awscli_yamlhelper import yaml_parse
 from .session_cache import get_session
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from mypy_boto3_route53.client import Route53Client
-    from mypy_boto3_route53.type_defs import ResourceRecordSetTypeDef
+    from mypy_boto3_route53.type_defs import ResourceRecordSetExtraOutputTypeDef
     from mypy_boto3_s3.client import S3Client
 
     from ..config.models.cfngin import (
@@ -86,7 +77,7 @@ def parse_zone_id(full_zone_id: str) -> str:
     return full_zone_id.split("/")[2]
 
 
-def get_hosted_zone_by_name(client: Route53Client, zone_name: str) -> Optional[str]:
+def get_hosted_zone_by_name(client: Route53Client, zone_name: str) -> str | None:
     """Get the zone id of an existing zone by name.
 
     Args:
@@ -147,28 +138,19 @@ class SOARecordText:
 
     def __str__(self) -> str:
         """Convert an instance of this class to a string."""
-        return " ".join(
-            [
-                self.nameserver,
-                self.contact,
-                self.serial,
-                self.refresh,
-                self.retry,
-                self.expire,
-                self.min_ttl,
-            ]
+        return (
+            f"{self.nameserver} {self.contact} {self.serial} {self.refresh} "
+            f"{self.retry} {self.expire} {self.min_ttl}"
         )
 
 
 class SOARecord:
     """Represents an SOA record."""
 
-    def __init__(self, record: ResourceRecordSetTypeDef) -> None:
+    def __init__(self, record: ResourceRecordSetExtraOutputTypeDef) -> None:
         """Instantiate class."""
         self.name = record["Name"]
-        self.text = SOARecordText(
-            record.get("ResourceRecords", [{"Value": ""}])[0]["Value"]
-        )
+        self.text = SOARecordText(record.get("ResourceRecords", [{"Value": ""}])[0]["Value"])
         self.ttl = record.get("TTL", 0)
 
 
@@ -238,9 +220,9 @@ def create_route53_zone(client: Route53Client, zone_name: str) -> str:
     return zone_id
 
 
-def yaml_to_ordered_dict(
+def yaml_to_ordered_dict(  # noqa: C901
     stream: str,
-    loader: Union[Type[yaml.Loader], Type[yaml.SafeLoader]] = yaml.SafeLoader,
+    loader: type[yaml.Loader | yaml.SafeLoader] = yaml.SafeLoader,
 ) -> OrderedDict[str, Any]:
     """yaml.load alternative with preserved dictionary order.
 
@@ -267,12 +249,12 @@ def yaml_to_ordered_dict(
 
         @staticmethod
         def _error_mapping_on_dupe(
-            node: Union[yaml.MappingNode, yaml.ScalarNode, yaml.SequenceNode],
+            node: yaml.MappingNode | yaml.ScalarNode | yaml.SequenceNode,
             node_name: str,
         ) -> None:
             """Check mapping node for dupe children keys."""
             if isinstance(node, yaml.MappingNode):
-                mapping: Dict[str, Any] = {}
+                mapping: dict[str, Any] = {}
                 for val in node.value:
                     a = val[0]
                     b = mapping.get(a.value, None)
@@ -285,7 +267,7 @@ def yaml_to_ordered_dict(
 
         def _validate_mapping(
             self,
-            node: Union[yaml.MappingNode, yaml.ScalarNode, yaml.SequenceNode],
+            node: yaml.MappingNode | yaml.ScalarNode | yaml.SequenceNode,
             deep: bool = False,
         ) -> OrderedDict[Any, Any]:
             if not isinstance(node, yaml.MappingNode):
@@ -322,7 +304,7 @@ def yaml_to_ordered_dict(
 
         def construct_mapping(
             self,
-            node: Union[yaml.MappingNode, yaml.ScalarNode, yaml.SequenceNode],
+            node: yaml.MappingNode | yaml.ScalarNode | yaml.SequenceNode,
             deep: bool = False,
         ) -> OrderedDict[Any, Any]:
             """Override parent method to use OrderedDict."""
@@ -331,7 +313,7 @@ def yaml_to_ordered_dict(
             return self._validate_mapping(node, deep=deep)
 
         def construct_yaml_map(
-            self, node: Union[yaml.MappingNode, yaml.ScalarNode, yaml.SequenceNode]
+            self, node: yaml.MappingNode | yaml.ScalarNode | yaml.SequenceNode
         ) -> Iterator[OrderedDict[Any, Any]]:
             data: OrderedDict[Any, Any] = OrderedDict()
             yield data
@@ -341,7 +323,7 @@ def yaml_to_ordered_dict(
     OrderedUniqueLoader.add_constructor(
         "tag:yaml.org,2002:map", OrderedUniqueLoader.construct_yaml_map
     )
-    return yaml.load(stream, OrderedUniqueLoader)
+    return yaml.load(stream, OrderedUniqueLoader)  # noqa: S506
 
 
 def uppercase_first_letter(string_: str) -> str:
@@ -361,7 +343,7 @@ def cf_safe_name(name: str) -> str:
     return "".join(uppercase_first_letter(part) for part in parts)
 
 
-def read_value_from_path(value: str, *, root_path: Optional[Path] = None) -> str:
+def read_value_from_path(value: str, *, root_path: Path | None = None) -> str:
     """Enable translators to read values from files.
 
     The value can be referred to with the `file://` prefix.
@@ -373,23 +355,16 @@ def read_value_from_path(value: str, *, root_path: Optional[Path] = None) -> str
 
     """
     if value.startswith("file://"):
-        path = value.split("file://", 1)[1]
-        if os.path.isabs(path):
+        path = Path(value.split("file://", 1)[1])
+        if path.is_absolute():
             read_path = Path(path)
         else:
             root_path = root_path or Path.cwd()
-            if root_path.is_dir():
-                read_path = root_path / path
-            else:
-                read_path = root_path.parent / path
+            read_path = root_path / path if root_path.is_dir() else root_path.parent / path
         if read_path.is_file():
-            return read_path.read_text(
-                encoding=locale.getpreferredencoding(do_setlocale=False)
-            )
+            return read_path.read_text(encoding=locale.getpreferredencoding(do_setlocale=False))
         if read_path.is_dir():
-            raise ValueError(
-                f"path must lead to a file not directory: {read_path.absolute()}"
-            )
+            raise ValueError(f"path must lead to a file not directory: {read_path.absolute()}")
         raise ValueError(f"path does not exist: {read_path.absolute()}")
     return value
 
@@ -404,7 +379,7 @@ def get_client_region(client: Any) -> str:
         AWS region string.
 
     """
-    return client._client_config.region_name  # type: ignore
+    return client._client_config.region_name  # noqa: SLF001
 
 
 def get_s3_endpoint(client: Any) -> str:
@@ -417,10 +392,10 @@ def get_s3_endpoint(client: Any) -> str:
         The AWS endpoint for the client.
 
     """
-    return client._endpoint.host  # type: ignore
+    return client._endpoint.host  # noqa: SLF001
 
 
-def s3_bucket_location_constraint(region: Optional[str]) -> Optional[str]:
+def s3_bucket_location_constraint(region: str | None) -> str | None:
     """Return the appropriate LocationConstraint info for a new S3 bucket.
 
     When creating a bucket in a region OTHER than us-east-1, you need to
@@ -442,7 +417,7 @@ def s3_bucket_location_constraint(region: Optional[str]) -> Optional[str]:
 def ensure_s3_bucket(
     s3_client: S3Client,
     bucket_name: str,
-    bucket_region: Optional[str] = None,
+    bucket_region: str | None = None,
     *,
     create: bool = True,
     persist_graph: bool = False,
@@ -484,7 +459,7 @@ def ensure_s3_bucket(
             # can't use s3_client.exceptions.NoSuchBucket here.
             # it does not work if the bucket was recently deleted.
             LOGGER.debug("creating bucket %s", bucket_name)
-            create_args: Dict[str, Any] = {"Bucket": bucket_name}
+            create_args: dict[str, Any] = {"Bucket": bucket_name}
             location_constraint = s3_bucket_location_constraint(bucket_region)
             if location_constraint:
                 create_args["CreateBucketConfiguration"] = {
@@ -498,8 +473,7 @@ def ensure_s3_bucket(
             return
         if err.response["Error"]["Message"] == "Forbidden":
             LOGGER.exception(
-                "Access denied for bucket %s. Did you remember "
-                "to use a globally unique name?",
+                "Access denied for bucket %s. Did you remember to use a globally unique name?",
                 bucket_name,
             )
         elif err.response["Error"]["Message"] != "Not Found":
@@ -507,7 +481,7 @@ def ensure_s3_bucket(
         raise
 
 
-def parse_cloudformation_template(template: str) -> Dict[str, Any]:
+def parse_cloudformation_template(template: str) -> dict[str, Any]:
     """Parse CFN template string.
 
     Leverages the vendored aws-cli yamlhelper to handle JSON or YAML templates.
@@ -525,15 +499,15 @@ def is_within_directory(directory: Path | str, target: str) -> bool:
     Determines if the provided path is within a specific directory or its subdirectories.
 
     Args:
-        directory (Union[Path, str]): Path of the directory we're checking.
-        target (str): Path of the file we're checking for containment.
+        directory: Path of the directory we're checking.
+        target: Path of the file we're checking for containment.
 
     Returns:
         bool: True if the target is in the directory or subdirectories, False otherwise.
 
     """
-    abs_directory = os.path.abspath(directory)
-    abs_target = os.path.abspath(target)
+    abs_directory = os.path.abspath(directory)  # noqa: PTH100
+    abs_target = os.path.abspath(target)  # noqa: PTH100
     prefix = os.path.commonprefix([abs_directory, abs_target])
     return prefix == abs_directory
 
@@ -544,27 +518,27 @@ def safe_tar_extract(
     members: list[tarfile.TarInfo] | None = None,
     *,
     numeric_owner: bool = False,
-):
+) -> None:
     """Safely extract the contents of a tar file to a specified directory.
 
     This code is modified from a PR provided to Runway project
     to address CVE-2007-4559.
 
     Args:
-        tar (TarFile): The tar file object that will be extracted.
-        path (Union[Path, str], optional): The directory to extract the tar into.
-        members (List[TarInfo] | None, optional): List of TarInfo objects to extract.
-        numeric_owner (bool, optional): Enable usage of owner and group IDs when extracting.
+        tar: The tar file object that will be extracted.
+        path: The directory to extract the tar into.
+        members: List of TarInfo objects to extract.
+        numeric_owner: Enable usage of owner and group IDs when extracting.
 
     Raises:
         Exception: If any tar file tries to go outside the specified area.
 
     """
     for member in tar.getmembers():
-        member_path = os.path.join(path, member.name)
+        member_path = os.path.join(path, member.name)  # noqa: PTH118
         if not is_within_directory(path, member_path):
             raise Exception("Attempted Path Traversal in Tar File")
-    tar.extractall(path, members, numeric_owner=numeric_owner)
+    tar.extractall(path, members, numeric_owner=numeric_owner)  # noqa: S202
 
 
 class Extractor:
@@ -572,7 +546,7 @@ class Extractor:
 
     extension: ClassVar[str] = ""
 
-    def __init__(self, archive: Optional[Path] = None) -> None:
+    def __init__(self, archive: Path | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -622,7 +596,7 @@ class ZipExtractor(Extractor):
         """Extract the archive."""
         if self.archive:
             with zipfile.ZipFile(self.archive, "r") as zip_ref:
-                zip_ref.extractall(destination)
+                zip_ref.extractall(destination)  # noqa: S202
 
 
 class SourceProcessor:
@@ -645,7 +619,7 @@ class SourceProcessor:
         self.cache_dir = cache_dir
         self.package_cache_dir = cache_dir / "packages"
         self.sources = sources
-        self.configs_to_merge: List[Path] = []
+        self.configs_to_merge: list[Path] = []
         self.create_cache_directories()
 
     def create_cache_directories(self) -> None:
@@ -664,9 +638,7 @@ class SourceProcessor:
         for config in self.sources.git:
             self.fetch_git_package(config=config)
 
-    def fetch_local_package(
-        self, config: LocalCfnginPackageSourceDefinitionModel
-    ) -> None:
+    def fetch_local_package(self, config: LocalCfnginPackageSourceDefinitionModel) -> None:
         """Make a local path available to current CFNgin config.
 
         Args:
@@ -713,7 +685,7 @@ class SourceProcessor:
             )
 
         session = get_session(region=None)
-        extra_s3_args: Dict[str, Any] = {}
+        extra_s3_args: dict[str, Any] = {}
         if config.requester_pays:
             extra_s3_args["RequestPayer"] = "requester"
 
@@ -726,7 +698,7 @@ class SourceProcessor:
                     session.client("s3")
                     .head_object(Bucket=config.bucket, Key=config.key, **extra_s3_args)[
                         "LastModified"
-                    ]  # type: ignore
+                    ]
                     .astimezone(dateutil.tz.tzutc())  # type: ignore
                 )
             except botocore.exceptions.ClientError as client_error:
@@ -749,13 +721,12 @@ class SourceProcessor:
                 cached_dir_path,
             )
             tmp_dir = tempfile.mkdtemp(prefix="cfngin")
-            tmp_package_path = os.path.join(tmp_dir, dir_name)
+            tmp_package_path = os.path.join(tmp_dir, dir_name)  # noqa: PTH118
             with tempfile.TemporaryDirectory(prefix="runway-cfngin") as tmp_dir:
                 tmp_package_path = Path(tmp_dir) / dir_name
                 extractor.set_archive(tmp_package_path)
                 LOGGER.debug(
-                    "starting remote package download from S3 to %s "
-                    'with extra S3 options "%s"',
+                    'starting remote package download from S3 to %s with extra S3 options "%s"',
                     extractor.archive,
                     str(extra_s3_args),
                 )
@@ -770,8 +741,7 @@ class SourceProcessor:
                 )
                 extractor.extract(tmp_package_path)
                 LOGGER.debug(
-                    "moving extracted package directory %s to the "
-                    "CFNgin cache at %s",
+                    "moving extracted package directory %s to the CFNgin cache at %s",
                     dir_name,
                     self.package_cache_dir,
                 )
@@ -797,7 +767,7 @@ class SourceProcessor:
         """
         # only loading git here when needed to avoid load errors on systems
         # without git installed
-        from git.repo import Repo  # pylint: disable=import-outside-toplevel
+        from git.repo import Repo
 
         ref = self.determine_git_ref(config)
         dir_name = self.sanitize_git_path(uri=config.uri, ref=ref)
@@ -813,7 +783,7 @@ class SourceProcessor:
             )
             tmp_dir = tempfile.mkdtemp(prefix="cfngin")
             try:
-                tmp_repo_path = os.path.join(tmp_dir, dir_name)
+                tmp_repo_path = os.path.join(tmp_dir, dir_name)  # noqa: PTH118
                 with Repo.clone_from(config.uri, tmp_repo_path) as repo:
                     repo.head.set_reference(ref)
                     repo.head.reset(index=True, working_tree=True)
@@ -822,8 +792,7 @@ class SourceProcessor:
                 shutil.rmtree(tmp_dir)
         else:
             LOGGER.debug(
-                "remote repo %s appears to have been previously "
-                "cloned to %s; download skipped",
+                "remote repo %s appears to have been previously cloned to %s; download skipped",
                 config.uri,
                 cached_dir_path,
             )
@@ -833,13 +802,13 @@ class SourceProcessor:
 
     def update_paths_and_config(
         self,
-        config: Union[
-            GitCfnginPackageSourceDefinitionModel,
-            LocalCfnginPackageSourceDefinitionModel,
-            S3CfnginPackageSourceDefinitionModel,
-        ],
+        config: (
+            GitCfnginPackageSourceDefinitionModel
+            | LocalCfnginPackageSourceDefinitionModel
+            | S3CfnginPackageSourceDefinitionModel
+        ),
         pkg_dir_name: str,
-        pkg_cache_dir: Optional[Path] = None,
+        pkg_cache_dir: Path | None = None,
     ) -> None:
         """Handle remote source defined sys.paths & configs.
 
@@ -933,7 +902,7 @@ class SourceProcessor:
             uri = uri.replace(i, "_")
         return uri
 
-    def sanitize_git_path(self, uri: str, ref: Optional[str] = None) -> str:
+    def sanitize_git_path(self, uri: str, ref: str | None = None) -> str:
         """Take a git URI and ref and converts it to a directory safe path.
 
         Args:
@@ -944,10 +913,7 @@ class SourceProcessor:
             Directory name for the supplied uri
 
         """
-        if uri.endswith(".git"):
-            dir_name = uri[:-4]  # drop .git
-        else:
-            dir_name = uri
+        dir_name = uri[:-4] if uri.endswith(".git") else uri  # drop .git
         dir_name = self.sanitize_uri_path(dir_name)
         if ref is not None:
             dir_name += f"-{ref}"

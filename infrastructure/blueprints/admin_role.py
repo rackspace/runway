@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 import awacs.sts
 from awacs.aws import Allow, AWSPrincipal, PolicyDocument, Statement
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class AdminRole(Blueprint):
     """Blueprint for an admin role."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "CrossAccountAccessAccountIds": {"type": list, "default": []},
         "PermissionsBoundary": {"type": str},
         "RoleName": {"type": str, "default": ""},
@@ -34,9 +34,7 @@ class AdminRole(Blueprint):
                 Statement(
                     Action=[awacs.sts.AssumeRole],
                     Effect=Allow,
-                    Principal=AWSPrincipal(
-                        self.variables["CrossAccountAccessAccountIds"]
-                    ),
+                    Principal=AWSPrincipal(self.variables["CrossAccountAccessAccountIds"]),
                 )
             )
         return policy_doc
@@ -47,7 +45,7 @@ class AdminRole(Blueprint):
         return self.context.namespace
 
     @cached_property
-    def role_name(self) -> Optional[str]:
+    def role_name(self) -> str | None:
         """Name of the role being created."""
         val = self.variables["RoleName"]
         if val == "":

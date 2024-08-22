@@ -24,14 +24,14 @@ Args
 ****
 
 .. data:: allowed_pattern
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
   A regular expression used to validate the parameter value.
 
 .. data:: data_type
-  :type: Optional[Literal["aws:ec2:image", "text"]]
+  :type: Literal["aws:ec2:image", "text"] | None
   :value: None
   :noindex:
 
@@ -39,7 +39,7 @@ Args
   Supported data types include plain text and Amazon Machine Image IDs.
 
 .. data:: description
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -54,7 +54,7 @@ Args
   Can be used alongside **overwrite** to always update a parameter.
 
 .. data:: key_id
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -76,7 +76,7 @@ Args
   If this is set to ``False`` and the parameter already exists, the parameter will not be updated and a warning will be logged.
 
 .. data:: policies
-  :type: Optional[Union[List[Dict[str, Any]], str]]
+  :type: list[dict[str, Any]] | str | None
   :value: None
   :noindex:
 
@@ -84,7 +84,7 @@ Args
   This field takes a JSON array.
 
 .. data:: tags
-  :type: Optional[Union[Dict[str, str], List[TagTypeDef]]]
+  :type: dict[str, str] | list[TagTypeDef] | None
   :value: None
   :noindex:
 
@@ -98,7 +98,7 @@ Args
   The parameter tier to assign to a parameter.
 
 .. data:: value
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 

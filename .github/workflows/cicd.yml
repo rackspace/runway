@@ -15,7 +15,7 @@ env:
   AWS_DEFAULT_REGION: us-east-1
   AWS_MAX_ATTEMPTS: 20  # retry attempts for AWS API calls
   AWS_RETRY_MODE: adaptive  # defaults to "legacy"; this handles more errors
-  NODE_VERSION: '18'
+  NODE_VERSION: '20'
   PYTEST_ADDOPTS: --color=yes
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
   PIPENV_IGNORE_VIRTUALENVS: '1'
@@ -28,7 +28,8 @@ jobs:
       infra-test: ${{ steps.filter.outputs.infrastructure-test }}
       infra-test-alt: ${{ steps.filter.outputs.infrastructure-test-alt }}
     steps:
-      - uses: actions/checkout@v4  # not needed for pull_request
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v4  # not needed for pull_request
         if: |
           github.event_name == 'push'
       - uses: dorny/paths-filter@v3  # cspell:ignore dorny
@@ -57,7 +58,7 @@ jobs:
       repo-head: ${{ steps.gh-context.outputs.repo-head }}  # repo where change occurred
       repo-origin: ${{ steps.gh-context.outputs.repo-origin }}  # origin of codebase
     steps:
-      - name: Output GitHub Context
+      - name: ℹ️ Output GitHub Context
         id: gh-context
         run: |
           export _REPO_ORIGIN="onicagroup/runway";
@@ -86,35 +87,28 @@ jobs:
       (needs.changes.outputs.infra-test == 'true' || needs.changes.outputs.infra-test-alt == 'true')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
+      - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          python-version: 3.9
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Configure AWS Credentials
+          poetry-plugins: poetry-dynamic-versioning[plugin]
+      - name: 🏗 Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.DEPLOY_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.DEPLOY_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - run: make deploy test
+      - name: 🚀 Deploy to the test environment
+        run: make deploy test
         working-directory: infrastructure
-      - run: make deploy test-alt
+      - name: 🚀 Deploy to the test-alt environment
+        run: make deploy test-alt
         working-directory: infrastructure
   lint-python:
     name: Lint Python
     strategy:
+      fail-fast: false
       matrix:
         python-version: [3.9, '3.10', '3.11']
         os: [ubuntu-latest, windows-latest]
@@ -124,29 +118,21 @@ jobs:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     steps:
-      - name: Checkout Repo
+      - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
-      - name: Install Node
+      - name: 🏗 Setup Node
         uses: actions/setup-node@v4
         with:
+          cache: npm
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: ${{ matrix.python-version }}
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Install Node Dependencies
-        run: make npm-ci
-      - name: Run Linters
+      - name: ⤵️ Install Node Dependencies
+        run: make setup-npm
+      - name: 🚀 Run Linters
         run: make lint
   pre-commit:
     name: pre-commit
@@ -155,22 +141,12 @@ jobs:
       matrix:
         python-version: ['3.10']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        id: setup-python
-        with:
-          python-version: ${{ matrix.python-version }}
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - uses: pre-commit/action@v3.0.1
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v4
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
+      - name: 🚀 Run pre-commit
+        uses: pre-commit/action@v3.0.1
   test-functional:
     name: Functional Tests
     needs:
@@ -183,40 +159,34 @@ jobs:
       (needs.deploy-test-infrastructure.result == 'success' || needs.deploy-test-infrastructure.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
+      - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: 🏗 Setup Node
+        uses: actions/setup-node@v4
         with:
+          cache: npm
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: '3.10'
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Install Ubuntu Dependencies
+      - name: ⤵️ Install Ubuntu Dependencies
         run: |
           sudo apt update -y
           sudo apt install -y default-libmysqlclient-dev libxml2-dev libxmlsec1-dev libxmlsec1-openssl pkg-config
-      - name: Configure AWS Credentials
+      - name: 🏗 Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.TEST_RUNNER_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.TEST_RUNNER_AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Run Tests
+      - name: 🚀 Run Tests
         run: make test-functional
   test-python:
     name: Test Python
     strategy:
+      fail-fast: false
       matrix:
         python-version: [3.9, '3.10', '3.11']
         os: [ubuntu-latest, windows-latest]
@@ -226,41 +196,33 @@ jobs:
       AWS_ACCESS_KEY_ID: test
       AWS_SECRET_ACCESS_KEY: test
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install Node
+      - name: 🏗 Setup Node
         uses: actions/setup-node@v4
         with:
+          cache: npm
           node-version: ${{ env.NODE_VERSION }}
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
+          poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: ${{ matrix.python-version }}
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Install Node Dependencies
-        run: make npm-install
-      - name: Configure Pagefile  # avoid MemoryError during tests
+      - name: ⤵️ Install Node Dependencies
+        run: make setup-npm
+      - name: 🏗 Configure Pagefile  # avoid MemoryError during tests
         if: runner.os == 'Windows'
         uses: al-cheb/configure-pagefile-action@v1.4  # cspell:ignore cheb
         with:
           minimum-size: 16GB
           maximum-size: 16GB
           disk-root: 'C:'
-      - name: Run Integration & Unit Tests
+      - name: 🚀 Run Integration & Unit Tests
         # assertions assume linux so some fail when run on windows
         run: make test cov-xml
-      - name: Upload to Codecov
+      - name: ⤴️ Upload to Codecov
         uses: codecov/codecov-action@v4.5.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -271,34 +233,25 @@ jobs:
       - pre-commit
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo (complete)
+      - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
-        id: setup-python
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
         with:
-          python-version: 3.9
+          poetry-install: false
+          poetry-plugins: poetry-dynamic-versioning[plugin]
       # Remove apt repos that are known to break from time to time
       # See https://github.com/actions/virtual-environments/issues/323
       - name: Remove broken apt repos (ubuntu)
         run: |
           for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
-      - name: Install Dependencies (ubuntu)
+      - name: ⤵️ Install Dependencies (ubuntu)
         run: sudo apt-get update && sudo apt-get install sed -y
-      - uses: Gr1N/setup-poetry@v9
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-      - name: Ensure Cache Is Healthy
-        if: runner.os != 'Windows' && steps.cache.outputs.cache-hit == 'true'
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-      - run: poetry install -vv
-      - name: Run Build
+      - name: 👷 Build
         run: make build
-      - name: Upload Distribution Artifact
+      - name: ⤴️ Upload distribution artifact
         uses: actions/upload-artifact@v4
         with:
           name: pypi-dist

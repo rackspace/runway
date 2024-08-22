@@ -1,7 +1,9 @@
 """CFNgin statuses."""
 
+from __future__ import annotations
+
 import operator
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 
 class Status:
@@ -16,9 +18,9 @@ class Status:
 
     code: int
     name: str
-    reason: Optional[str]
+    reason: str | None
 
-    def __init__(self, name: str, code: int, reason: Optional[str] = None) -> None:
+    def __init__(self, name: str, code: int, reason: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -46,11 +48,11 @@ class Status:
             return operator_(self.code, other.code)
         return NotImplemented
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Compare if self is equal to another object."""
         return self._comparison(operator.eq, other)
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         """Compare if self is not equal to another object."""
         return self._comparison(operator.ne, other)
 
@@ -74,7 +76,7 @@ class Status:
 class CompleteStatus(Status):
     """Status name of 'complete' with code of '2'."""
 
-    def __init__(self, reason: Optional[str] = None) -> None:
+    def __init__(self, reason: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -87,7 +89,7 @@ class CompleteStatus(Status):
 class FailedStatus(Status):
     """Status name of 'failed' with code of '4'."""
 
-    def __init__(self, reason: Optional[str] = None) -> None:
+    def __init__(self, reason: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -100,7 +102,7 @@ class FailedStatus(Status):
 class PendingStatus(Status):
     """Status name of 'pending' with code of '0'."""
 
-    def __init__(self, reason: Optional[str] = None) -> None:
+    def __init__(self, reason: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -113,7 +115,7 @@ class PendingStatus(Status):
 class SkippedStatus(Status):
     """Status name of 'skipped' with code of '3'."""
 
-    def __init__(self, reason: Optional[str] = None) -> None:
+    def __init__(self, reason: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -126,7 +128,7 @@ class SkippedStatus(Status):
 class SubmittedStatus(Status):
     """Status name of 'submitted' with code of '1'."""
 
-    def __init__(self, reason: Optional[str] = None) -> None:
+    def __init__(self, reason: str | None = None) -> None:
         """Instantiate class.
 
         Args:

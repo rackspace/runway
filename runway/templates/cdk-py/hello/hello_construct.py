@@ -1,5 +1,6 @@
 """Sample app."""
 
+# ruff: noqa
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_s3 as s3
 from aws_cdk import core
@@ -17,7 +18,7 @@ class HelloConstruct(core.Construct):
         """Instantiate class."""
         super().__init__(scope, id)
         self._buckets = []
-        for i in range(0, num_buckets):
+        for i in range(num_buckets):
             self._buckets.append(s3.Bucket(self, f"Bucket-{i}"))
 
     def grant_read(self, principal: iam.IPrincipal):

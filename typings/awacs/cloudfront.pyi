@@ -36,9 +36,7 @@ DeleteStreamingDistribution = Action("DeleteStreamingDistribution")
 GetCachePolicy = Action("GetCachePolicy")
 GetCachePolicyConfig = Action("GetCachePolicyConfig")
 GetCloudFrontOriginAccessIdentity = Action("GetCloudFrontOriginAccessIdentity")
-GetCloudFrontOriginAccessIdentityConfig = Action(
-    "GetCloudFrontOriginAccessIdentityConfig"
-)
+GetCloudFrontOriginAccessIdentityConfig = Action("GetCloudFrontOriginAccessIdentityConfig")
 GetDistribution = Action("GetDistribution")
 GetDistributionConfig = Action("GetDistributionConfig")
 GetFieldLevelEncryption = Action("GetFieldLevelEncryption")
@@ -57,9 +55,7 @@ ListCloudFrontOriginAccessIdentities = Action("ListCloudFrontOriginAccessIdentit
 ListDistributions = Action("ListDistributions")
 ListDistributionsByCachePolicyId = Action("ListDistributionsByCachePolicyId")
 ListDistributionsByLambdaFunction = Action("ListDistributionsByLambdaFunction")
-ListDistributionsByOriginRequestPolicyId = Action(
-    "ListDistributionsByOriginRequestPolicyId"
-)
+ListDistributionsByOriginRequestPolicyId = Action("ListDistributionsByOriginRequestPolicyId")
 ListDistributionsByWebACLId = Action("ListDistributionsByWebACLId")
 ListFieldLevelEncryptionConfigs = Action("ListFieldLevelEncryptionConfigs")
 ListFieldLevelEncryptionProfiles = Action("ListFieldLevelEncryptionProfiles")

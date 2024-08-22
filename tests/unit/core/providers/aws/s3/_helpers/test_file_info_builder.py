@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from mock import Mock
+from unittest.mock import Mock
 
 from runway.core.providers.aws.s3._helpers.file_generator import FileStats
 from runway.core.providers.aws.s3._helpers.file_info import FileInfo

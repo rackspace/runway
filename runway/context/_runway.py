@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from ..compat import cached_property
 from ..core.components import DeployEnvironment
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-def str2bool(v: str):
+def str2bool(v: str) -> bool:
     """Return boolean value of string."""
     return v.lower() in ("yes", "true", "t", "1", "on", "y")
 
@@ -27,16 +27,16 @@ def str2bool(v: str):
 class RunwayContext(BaseContext):
     """Runway context object."""
 
-    command: Optional[RunwayActionTypeDef]
+    command: RunwayActionTypeDef | None
     """Runway command/action being run."""
 
     def __init__(
         self,
         *,
-        command: Optional[RunwayActionTypeDef] = None,
-        deploy_environment: Optional[DeployEnvironment] = None,
-        logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-        work_dir: Optional[Path] = None,
+        command: RunwayActionTypeDef | None = None,
+        deploy_environment: DeployEnvironment | None = None,
+        logger: PrefixAdaptor | RunwayLogger = LOGGER,
+        work_dir: Path | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -65,7 +65,7 @@ class RunwayContext(BaseContext):
         """
         colorize = self.env.vars.get("RUNWAY_COLORIZE")  # explicitly enable/disable
         try:
-            if isinstance(colorize, bool):  # type: ignore
+            if isinstance(colorize, bool):
                 # catch False
                 return not colorize
             if colorize and isinstance(colorize, str):  # type: ignore

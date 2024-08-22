@@ -1,17 +1,15 @@
 """Tests for runway.cfngin.actions.diff."""
 
-# pylint: disable=protected-access
-# pyright: basic
 from __future__ import annotations
 
 import logging
 import unittest
 from operator import attrgetter
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from botocore.exceptions import ClientError
-from mock import MagicMock, Mock, patch
 
 from runway.cfngin.actions.diff import (
     Action,
@@ -26,10 +24,9 @@ from runway.cfngin.status import SkippedStatus
 from ..factories import MockProviderBuilder, MockThreadingEvent
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
-    from ...factories import MockCFNginContext
+    from ...factories import MockCfnginContext
 
 MODULE = "runway.cfngin.actions.diff"
 
@@ -50,11 +47,11 @@ class TestAction:
     def test_pre_run(
         self,
         mock_bucket_init: MagicMock,
-        caplog: LogCaptureFixture,
-        bucket_name: Optional[str],
+        caplog: pytest.LogCaptureFixture,
+        bucket_name: str | None,
         forbidden: bool,
         not_found: bool,
-        cfngin_context: MockCFNginContext,
+        cfngin_context: MockCfnginContext,
     ) -> None:
         """Test pre_run."""
         caplog.set_level(logging.DEBUG, logger=MODULE)
@@ -71,9 +68,7 @@ class TestAction:
             with pytest.raises(SystemExit) as excinfo:
                 action.pre_run()
             assert excinfo.value.code == 1
-            assert (
-                f"access denied for CFNgin bucket: {bucket_name}"
-            ) in caplog.messages
+            assert (f"access denied for CFNgin bucket: {bucket_name}") in caplog.messages
             return
 
         action.pre_run()
@@ -88,8 +83,8 @@ class TestAction:
     @pytest.mark.parametrize("stack_not_exist", [False, True])
     def test__diff_stack_validationerror_template_too_large(
         self,
-        caplog: LogCaptureFixture,
-        cfngin_context: MockCFNginContext,
+        caplog: pytest.LogCaptureFixture,
+        cfngin_context: MockCfnginContext,
         mocker: MockerFixture,
         provider_get_stack: MagicMock,
         stack_not_exist: bool,
@@ -100,9 +95,7 @@ class TestAction:
         cfngin_context.add_stubber("cloudformation")
         cfngin_context.config.cfngin_bucket = ""
         expected = SkippedStatus("cfngin_bucket: existing bucket required")
-        mock_build_parameters = mocker.patch.object(
-            Action, "build_parameters", return_value=[]
-        )
+        mock_build_parameters = mocker.patch.object(Action, "build_parameters", return_value=[])
         mock_get_stack_changes = mocker.patch.object(
             Provider,
             "get_stack_changes",
@@ -147,35 +140,28 @@ class TestDictValueFormat(unittest.TestCase):
     def test_status(self) -> None:
         """Test status."""
         added = DictValue("k0", None, "value_0")
-        self.assertEqual(added.status(), DictValue.ADDED)
+        assert added.status() == DictValue.ADDED
         removed = DictValue("k1", "value_1", None)
-        self.assertEqual(removed.status(), DictValue.REMOVED)
+        assert removed.status() == DictValue.REMOVED
         modified = DictValue("k2", "value_1", "value_2")
-        self.assertEqual(modified.status(), DictValue.MODIFIED)
+        assert modified.status() == DictValue.MODIFIED
         unmodified = DictValue("k3", "value_1", "value_1")
-        self.assertEqual(unmodified.status(), DictValue.UNMODIFIED)
+        assert unmodified.status() == DictValue.UNMODIFIED
 
     def test_format(self) -> None:
         """Test format."""
         added = DictValue("k0", None, "value_0")
-        self.assertEqual(added.changes(), [f"+{added.key} = {added.new_value}"])
+        assert added.changes() == [f"+{added.key} = {added.new_value}"]
         removed = DictValue("k1", "value_1", None)
-        self.assertEqual(removed.changes(), [f"-{removed.key} = {removed.old_value}"])
+        assert removed.changes() == [f"-{removed.key} = {removed.old_value}"]
         modified = DictValue("k2", "value_1", "value_2")
-        self.assertEqual(
-            modified.changes(),
-            [
-                f"-{modified.key} = {modified.old_value}",
-                f"+{modified.key} = {modified.new_value}",
-            ],
-        )
+        assert modified.changes() == [
+            f"-{modified.key} = {modified.old_value}",
+            f"+{modified.key} = {modified.new_value}",
+        ]
         unmodified = DictValue("k3", "value_1", "value_1")
-        self.assertEqual(
-            unmodified.changes(), [f" {unmodified.key} = {unmodified.old_value}"]
-        )
-        self.assertEqual(
-            unmodified.changes(), [f" {unmodified.key} = {unmodified.new_value}"]
-        )
+        assert unmodified.changes() == [f" {unmodified.key} = {unmodified.old_value}"]
+        assert unmodified.changes() == [f" {unmodified.key} = {unmodified.new_value}"]
 
 
 class TestDiffDictionary(unittest.TestCase):
@@ -195,7 +181,7 @@ class TestDiffDictionary(unittest.TestCase):
         }
 
         count, changes = diff_dictionaries(old_dict, new_dict)
-        self.assertEqual(count, 3)
+        assert count == 3
         expected_output = [
             DictValue("a", "Apple", "Apple"),
             DictValue("b", "Banana", "Bob"),
@@ -207,10 +193,10 @@ class TestDiffDictionary(unittest.TestCase):
         # compare all the outputs to the expected change
         for expected_change in expected_output:
             change = changes.pop(0)
-            self.assertEqual(change, expected_change)
+            assert change == expected_change
 
         # No extra output
-        self.assertEqual(len(changes), 0)
+        assert len(changes) == 0
 
 
 class TestDiffParameters(unittest.TestCase):
@@ -222,4 +208,4 @@ class TestDiffParameters(unittest.TestCase):
         new_params = {"a": "Apple"}
 
         param_diffs = diff_parameters(old_params, new_params)
-        self.assertEqual(param_diffs, [])
+        assert param_diffs == []

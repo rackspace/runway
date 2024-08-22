@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, Iterable, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     import hashlib
+    from collections.abc import Iterable
 
     from _typeshed import StrPath
 
@@ -26,9 +27,7 @@ class FileHash:
         1024 * 10_000_000  # 10mb - number of bytes in each read operation
     )
 
-    def __init__(
-        self, hash_alg: "hashlib._Hash", *, chunk_size: int = DEFAULT_CHUNK_SIZE
-    ) -> None:
+    def __init__(self, hash_alg: hashlib._Hash, *, chunk_size: int = DEFAULT_CHUNK_SIZE) -> None:
         """Instantiate class.
 
         Args:
@@ -75,10 +74,8 @@ class FileHash:
             file_path: Path of the file to add.
 
         """
-        with open(file_path, "rb") as stream:
-            # python 3.7 compatible version of `while chunk := buf.read(read_size):`
-            chunk = stream.read(self.chunk_size)  # seed chunk with initial value
-            while chunk:
+        with Path.open(Path(file_path), "rb") as stream:
+            while chunk := stream.read(self.chunk_size):
                 self._hash.update(chunk)
                 chunk = stream.read(self.chunk_size)  # read in new chunk
 
@@ -87,7 +84,7 @@ class FileHash:
         file_path: StrPath,
         *,
         end_character: str = "\0",
-        relative_to: Optional[StrPath] = None,
+        relative_to: StrPath | None = None,
     ) -> None:
         """Add file name to the hash. This includes the path.
 
@@ -103,11 +100,7 @@ class FileHash:
         """
         self._hash.update(
             (
-                str(
-                    Path(file_path).relative_to(relative_to)
-                    if relative_to
-                    else Path(file_path)
-                )
+                str(Path(file_path).relative_to(relative_to) if relative_to else Path(file_path))
                 + end_character
             ).encode()
         )
@@ -116,7 +109,7 @@ class FileHash:
         self,
         file_paths: Iterable[StrPath],
         *,
-        relative_to: Optional[StrPath] = None,
+        relative_to: StrPath | None = None,
     ) -> None:
         """Add files to the hash.
 
@@ -132,4 +125,4 @@ class FileHash:
             self.add_file_name(fp, relative_to=relative_to)
             self.add_file(fp)
             # end of file contents; only necessary with multiple files
-            self._hash.update("\0".encode())
+            self._hash.update(b"\0")

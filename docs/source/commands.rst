@@ -12,8 +12,6 @@ Commands
   :ellipsis: 13
 
 
-.. _command-deploy:
-
 ******
 deploy
 ******
@@ -32,7 +30,6 @@ deploy
 ----
 
 
-.. _command-destroy:
 
 *******
 destroy
@@ -52,7 +49,6 @@ destroy
 ----
 
 
-.. _command-dismantle:
 
 *********
 dismantle
@@ -72,7 +68,6 @@ dismantle
 ----
 
 
-.. _command-docs:
 
 ****
 docs
@@ -90,7 +85,6 @@ docs
 ----
 
 
-.. _command-envvars:
 
 *******
 envvars
@@ -110,7 +104,6 @@ envvars
 ----
 
 
-.. _command-gen-sample:
 
 **********
 gen-sample
@@ -129,7 +122,6 @@ gen-sample
 ----
 
 
-.. _command-init:
 
 ****
 init
@@ -149,8 +141,6 @@ init
 ----
 
 
-.. _command-kbenv:
-.. _command-kbenv-install:
 
 *************
 kbenv install
@@ -169,7 +159,6 @@ kbenv install
 ----
 
 
-.. _command-kbenv-list:
 
 **********
 kbenv list
@@ -187,7 +176,6 @@ kbenv list
 ----
 
 
-.. _command-kbenv-run:
 
 *********
 kbenv run
@@ -206,7 +194,6 @@ kbenv run
 ----
 
 
-.. _command-kbenv-uninstall:
 
 ***************
 kbenv uninstall
@@ -225,7 +212,6 @@ kbenv uninstall
 ----
 
 
-.. _command-new:
 
 ****
 new
@@ -244,7 +230,6 @@ new
 ----
 
 
-.. _command-plan:
 
 ****
 plan
@@ -252,7 +237,7 @@ plan
 
 .. file://./../../runway/_cli/commands/_plan.py
 
-.. note:: Currently only supported for :ref:`mod-cdk`, :ref:`mod-cfn`, and :ref:`mod-tf`.
+.. note:: Currently only supported for :ref:`index:AWS Cloud Development Kit (CDK)`, :ref:`index:CloudFormation & Troposphere`, and :ref:`index:Terraform`.
 
 .. command-output:: runway new --help
 
@@ -266,7 +251,6 @@ plan
 ----
 
 
-.. _command-preflight:
 
 *********
 preflight
@@ -284,7 +268,6 @@ preflight
 ----
 
 
-.. _command-run-python:
 
 **********
 run-python
@@ -302,7 +285,6 @@ run-python
 ----
 
 
-.. _command-schema-cfngin:
 
 *************
 schema cfngin
@@ -320,7 +302,6 @@ schema cfngin
 ----
 
 
-.. _command-schema-runway:
 
 *************
 schema runway
@@ -338,7 +319,6 @@ schema runway
 ----
 
 
-.. _command-takeoff:
 
 *******
 takeoff
@@ -358,7 +338,6 @@ takeoff
 ----
 
 
-.. _command-taxi:
 
 ****
 taxi
@@ -378,7 +357,6 @@ taxi
 ----
 
 
-.. _command-test:
 
 ****
 test
@@ -396,8 +374,6 @@ test
 ----
 
 
-.. _command-tfenv:
-.. _command-tfenv-install:
 
 *************
 tfenv install
@@ -415,7 +391,6 @@ tfenv install
 ----
 
 
-.. _command-tfenv-list:
 
 **********
 tfenv list
@@ -433,7 +408,6 @@ tfenv list
 ----
 
 
-.. _command-tfenv-run:
 
 *********
 tfenv run
@@ -452,7 +426,6 @@ tfenv run
 ----
 
 
-.. _command-tfenv-uninstall:
 
 ***************
 tfenv uninstall
@@ -471,7 +444,6 @@ tfenv uninstall
 ----
 
 
-.. _command-whichenv:
 
 ********
 whichenv

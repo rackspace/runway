@@ -7,7 +7,7 @@ import json
 import logging
 import multiprocessing
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
 
@@ -66,9 +66,7 @@ class Module:
         """
         self.__deployment = deployment
         self.__future = future or RunwayFutureDefinitionModel()
-        self.__variables = variables or RunwayVariablesDefinition(
-            RunwayVariablesDefinitionModel()
-        )
+        self.__variables = variables or RunwayVariablesDefinition(RunwayVariablesDefinitionModel())
         self.ctx = context.copy()  # each module has it's own instance of context
         definition.resolve(self.ctx, variables=variables)
         self.definition = definition
@@ -76,7 +74,7 @@ class Module:
         self.logger = PrefixAdaptor(self.fqn, LOGGER)
 
     @cached_property
-    def child_modules(self) -> List[Module]:
+    def child_modules(self) -> list[Module]:
         """Return child modules."""
         return [
             self.__class__(
@@ -90,7 +88,7 @@ class Module:
         ]
 
     @cached_property
-    def environment_matches_defined(self) -> Optional[bool]:
+    def environment_matches_defined(self) -> bool | None:
         """Environment matches one of the defined environments.
 
         Will return None if there is nothing defined for the current environment.
@@ -109,14 +107,14 @@ class Module:
         return tmp
 
     @cached_property
-    def fqn(self):
+    def fqn(self) -> str:
         """Fully qualified name."""
         if not self.__deployment:
             return self.name
         return f"{self.__deployment.name}.{self.name}"
 
     @cached_property
-    def opts_from_file(self) -> Dict[str, Any]:
+    def opts_from_file(self) -> dict[str, Any]:
         """Load module options from local file."""
         opts_file = self.path.module_root / "runway.module.yml"
         if opts_file.is_file():
@@ -134,9 +132,9 @@ class Module:
         )
 
     @cached_property
-    def payload(self) -> Dict[str, Any]:  # lazy load the payload
+    def payload(self) -> dict[str, Any]:  # lazy load the payload
         """Return payload to be passed to module class handler class."""
-        payload: Dict[str, Any] = {}
+        payload: dict[str, Any] = {}
         if self.__deployment:
             payload.update(
                 {
@@ -216,9 +214,7 @@ class Module:
         if not self.child_modules:
             return self.run("plan")
         if self.use_async:
-            self.logger.info(
-                "processing of modules will be done in parallel during deploy/destroy"
-            )
+            self.logger.info("processing of modules will be done in parallel during deploy/destroy")
         return self.__sync("plan")
 
     def run(self, action: RunwayActionTypeDef) -> None:
@@ -231,9 +227,7 @@ class Module:
 
         """
         LOGGER.info("")
-        self.logger.notice(
-            "processing module in %s (in progress)", self.ctx.env.aws_region
-        )
+        self.logger.notice("processing module in %s (in progress)", self.ctx.env.aws_region)
         self.logger.verbose("module payload: %s", json.dumps(self.payload))
         if self.should_skip:
             return
@@ -248,9 +242,7 @@ class Module:
             else:
                 self.logger.error('"%s" is missing method "%s"', inst, action)
                 sys.exit(1)
-        self.logger.success(
-            "processing module in %s (complete)", self.ctx.env.aws_region
-        )
+        self.logger.success("processing module in %s (complete)", self.ctx.env.aws_region)
 
     def __async(self, action: RunwayActionTypeDef) -> None:
         """Execute asynchronously.
@@ -259,9 +251,7 @@ class Module:
             action: Name of action to run.
 
         """
-        self.logger.info(
-            "processing modules in parallel... (output will be interwoven)"
-        )
+        self.logger.info("processing modules in parallel... (output will be interwoven)")
         # Can't use threading or ThreadPoolExecutor here because
         # we need to be able to do things like `cd` which is not
         # thread safe.
@@ -269,9 +259,7 @@ class Module:
             max_workers=self.ctx.env.max_concurrent_modules,
             mp_context=multiprocessing.get_context("fork"),
         ) as executor:
-            futures = [
-                executor.submit(child.run, *[action]) for child in self.child_modules
-            ]
+            futures = [executor.submit(child.run, action) for child in self.child_modules]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
@@ -294,9 +282,7 @@ class Module:
                 self.logger.verbose(
                     "environment variable overrides are being applied to this module"
                 )
-                self.logger.debug(
-                    "environment variable overrides: %s", resolved_env_vars
-                )
+                self.logger.debug("environment variable overrides: %s", resolved_env_vars)
                 self.ctx.env.vars = merge_dicts(self.ctx.env.vars, resolved_env_vars)
 
     @classmethod
@@ -304,10 +290,10 @@ class Module:
         cls,
         action: RunwayActionTypeDef,
         context: RunwayContext,
-        modules: List[RunwayModuleDefinition],
+        modules: list[RunwayModuleDefinition],
         variables: RunwayVariablesDefinition,
         deployment: RunwayDeploymentDefinition = None,
-        future: Optional[RunwayFutureDefinitionModel] = None,
+        future: RunwayFutureDefinitionModel | None = None,
     ) -> None:
         """Run a list of modules.
 
@@ -341,9 +327,9 @@ class Module:
 
 def validate_environment(
     context: RunwayContext,
-    env_def: Optional[Union[bool, Dict[str, Any], int, str, List[str]]],
-    logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-) -> Optional[bool]:
+    env_def: bool | dict[str, Any] | int | str | list[str] | None,
+    logger: PrefixAdaptor | RunwayLogger = LOGGER,
+) -> bool | None:
     """Check if an environment should be deployed to.
 
     Args:
@@ -363,14 +349,12 @@ def validate_environment(
         else:
             logger.verbose("environment not defined; module will determine deployment")
             env_def = None
-        return cast(Optional[bool], env_def)
+        return env_def
     if isinstance(env_def, dict):
         if context.env.name not in env_def:
             logger.info("skipped; environment not in definition")
             return False
-        return validate_environment(
-            context, cast(Any, env_def.get(context.env.name, False)), logger=logger
-        )
+        return validate_environment(context, env_def.get(context.env.name, False), logger=logger)
 
     account = aws.AccountDetails(context)
     accepted_values = [

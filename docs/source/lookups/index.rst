@@ -5,7 +5,7 @@ Lookups
 #######
 
 Runway Lookups allow the use of variables within the Runway config file.
-These variables can then be passed along to :ref:`deployments <runway-deployment>`, :ref:`modules <runway-module>` and :ref:`tests <runway-test>`.
+These variables can then be passed along to :ref:`Deployment <runway_config:Deployment>`, :ref:`Modules <runway_config:Module>` and :ref:`tests <runway_config:Test>`.
 
 The syntax for a lookup is ``${<lookup-name> <query>::<arg>=<arg-val>}``.
 
@@ -46,9 +46,6 @@ Lookups can't resolve other lookups.
 For example, if i use ``${var region}`` in my Runway config file to resolve the ``region`` from my variables file, the value in the variables file can't be ``${env AWS_REGION}``.
 Well, it can but it will resolve to the literal value provided, not an AWS region like you may expect.
 
-
-.. contents::
-  :depth: 4
 
 
 .. _lookup arguments:

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 from click.testing import CliRunner
-from mock import Mock
 
 from runway._cli import cli
 from runway._cli.commands import deploy
@@ -14,16 +14,16 @@ from runway._cli.commands import deploy
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture, MonkeyPatch
+    import pytest
 
     from ...conftest import CpConfigTypeDef
 
 
 def test_takeoff(
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    monkeypatch: MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Test takeoff."""
     cp_config("min_required", cd_tmp_path)

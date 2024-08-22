@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Type, Union
+from typing import TYPE_CHECKING, ClassVar
 from urllib.parse import parse_qs
 
 from typing_extensions import TypedDict
@@ -25,7 +25,7 @@ LOGGER = logging.getLogger(__name__)
 class ModulePathMetadataTypeDef(TypedDict):
     """Type definition for ModulePath.metadata."""
 
-    arguments: Dict[str, str]
+    arguments: dict[str, str]
     cache_dir: Path
     location: str
     source: str
@@ -36,16 +36,16 @@ class ModulePath:
     """Handler for the ``path`` field of a Runway module."""
 
     ARGS_REGEX: ClassVar[str] = r"(\?)(?P<args>.*)$"
-    REMOTE_SOURCE_HANDLERS: ClassVar[Dict[str, Type[Source]]] = {"git": Git}
+    REMOTE_SOURCE_HANDLERS: ClassVar[dict[str, type[Source]]] = {"git": Git}
     SOURCE_REGEX: ClassVar[str] = r"(?P<source>[a-z]+)(\:\:)"
     URI_REGEX: ClassVar[str] = r"(?P<uri>[a-z]+://[a-zA-Z0-9\./-]+?(?=//|\?|$))"
 
     def __init__(
         self,
-        definition: Optional[Union[Path, str]] = None,
+        definition: Path | str | None = None,
         *,
         cache_dir: Path,
-        deploy_environment: Optional[DeployEnvironment] = None,
+        deploy_environment: DeployEnvironment | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -60,24 +60,19 @@ class ModulePath:
         self.env = deploy_environment or DeployEnvironment()
 
     @cached_property
-    def arguments(self) -> Dict[str, str]:
+    def arguments(self) -> dict[str, str]:
         """Remote source arguments."""
         if isinstance(self.definition, str):
             match = re.match(rf"^.*{self.ARGS_REGEX}", self.definition)
             if match:
-                return {
-                    k: ",".join(v) for k, v in parse_qs(match.group("args")).items()
-                }
+                return {k: ",".join(v) for k, v in parse_qs(match.group("args")).items()}
         return {}
 
     @cached_property
     def location(self) -> str:
         """Location of the module."""
         if isinstance(self.definition, str):
-            if (
-                re.match(r"^(/|//|\.|\./)", self.definition)
-                or "::" not in self.definition
-            ):
+            if re.match(r"^(/|//|\.|\./)", self.definition) or "::" not in self.definition:
                 return re.sub(self.ARGS_REGEX, "", self.definition)
             no_src = re.sub(rf"^{self.SOURCE_REGEX}", "", self.definition)
             no_uri = re.sub(rf"^{self.URI_REGEX}", "", no_src)
@@ -141,12 +136,10 @@ class ModulePath:
     @classmethod
     def parse_obj(
         cls,
-        obj: Optional[
-            Union[Path, RunwayModuleDefinition, RunwayModuleDefinitionModel, str]
-        ],
+        obj: Path | RunwayModuleDefinition | RunwayModuleDefinitionModel | str | None,
         *,
         cache_dir: Path,
-        deploy_environment: Optional[DeployEnvironment] = None,
+        deploy_environment: DeployEnvironment | None = None,
     ) -> ModulePath:
         """Parse object.
 

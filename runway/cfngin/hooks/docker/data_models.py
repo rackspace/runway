@@ -5,13 +5,12 @@ can be used.
 
 """
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar, cast
 
 from docker.models.images import Image
-from pydantic import Field, root_validator
+from pydantic import ConfigDict, Field, PrivateAttr, model_validator
 
 from ....core.providers.aws import AccountDetails
 from ....utils import BaseModel, MutableMap
@@ -19,10 +18,7 @@ from ....utils import BaseModel, MutableMap
 if TYPE_CHECKING:
     from ....context import CfnginContext
 
-
-ECR_REPO_FQN_TEMPLATE = (
-    "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/{repo_name}"
-)
+ECR_REPO_FQN_TEMPLATE = "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/{repo_name}"
 
 
 class ElasticContainerRegistry(BaseModel):
@@ -31,19 +27,18 @@ class ElasticContainerRegistry(BaseModel):
     PUBLIC_URI_TEMPLATE: ClassVar[str] = "public.ecr.aws/{registry_alias}/"
     URI_TEMPLATE: ClassVar[str] = "{aws_account_id}.dkr.ecr.{aws_region}.amazonaws.com/"
 
-    _ctx: Optional[CfnginContext] = Field(default=None, alias="context", exclude=True)
-    """CFNgin context."""
+    model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
 
-    account_id: Optional[str] = None
+    account_id: str | None = None
     """AWS account ID that owns the registry being logged into."""
 
-    alias: Optional[str] = None
+    alias: str | None = None
     """If it is a public repository, the alias of the repository."""
 
     public: bool = True
     """Whether the repository is public."""
 
-    region: Optional[str] = Field(default=None, alias="aws_region")
+    region: str | None = Field(default=None, alias="aws_region")
     """AWS region where the registry is located."""
 
     @property
@@ -51,42 +46,35 @@ class ElasticContainerRegistry(BaseModel):
         """Fully qualified ECR name."""
         if self.public:
             return self.PUBLIC_URI_TEMPLATE.format(registry_alias=self.alias)
-        return self.URI_TEMPLATE.format(
-            aws_account_id=self.account_id, aws_region=self.region
-        )
+        return self.URI_TEMPLATE.format(aws_account_id=self.account_id, aws_region=self.region)
 
-    @root_validator(allow_reuse=True, pre=True)
-    def _set_defaults(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    @model_validator(mode="before")
+    @classmethod
+    def _set_defaults(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Set default values based on other values."""
         values.setdefault("public", bool(values.get("alias")))
 
         if not values["public"]:
             account_id = values.get("account_id")
-            ctx: Optional[CfnginContext] = values.get("context")
-            region = values.get("aws_region")
-            if not ctx and not (account_id or region):
+            ctx: CfnginContext | None = values.get("context")
+            aws_region = values.get("aws_region")
+            if not ctx and not (account_id or aws_region):
                 raise ValueError("context is required to resolve values")
             if ctx:
                 if not account_id:
                     values["account_id"] = AccountDetails(ctx).id
-                if not region:
+                if not aws_region:
                     values["aws_region"] = ctx.env.aws_region or "us-east-1"
-
         return values
 
 
 class DockerImage(BaseModel):
     """Wrapper for :class:`docker.models.images.Image`."""
 
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    _repo: str | None = PrivateAttr(default=None)
     image: Image
-    _repo: Optional[str] = None
-
-    class Config:
-        """Model configuration."""
-
-        arbitrary_types_allowed = True
-        fields = {"_repo": {"exclude": True}}
-        underscore_attrs_are_private = True
 
     @property
     def id(self) -> str:
@@ -106,7 +94,7 @@ class DockerImage(BaseModel):
         return self.image.short_id
 
     @property
-    def tags(self) -> List[str]:
+    def tags(self) -> list[str]:
         """List of image tags."""
         self.image.reload()
         return [uri.split(":")[-1] for uri in self.image.tags]
@@ -116,11 +104,17 @@ class DockerImage(BaseModel):
         """Return a mapping of tag to image URI."""
         return MutableMap(**{uri.split(":")[-1]: uri for uri in self.image.tags})
 
+    def __bool__(self) -> bool:
+        """Evaluate the boolean value of the object instance."""
+        return True
+
 
 class ElasticContainerRegistryRepository(BaseModel):
     """AWS Elastic Container Registry (ECR) Repository."""
 
-    name: str = Field(..., alias="repo_name")
+    model_config = ConfigDict(populate_by_name=True)
+
+    name: Annotated[str, Field(alias="repo_name")]
     """The name of the repository."""
 
     registry: ElasticContainerRegistry

@@ -35,9 +35,7 @@ def k8s_tf_repo(ctx: click.Context, **_: Any) -> None:
 
     tfstate_dir = dest / "tfstate.cfn/templates"
     tfstate_dir.mkdir()
-    write_tfstate_template(
-        tfstate_dir / "tf_state.yml", bucket_deletion_policy="Delete"
-    )
+    write_tfstate_template(tfstate_dir / "tf_state.yml", bucket_deletion_policy="Delete")
 
     LOGGER.success("Sample k8s infrastructure repo created at %s", dest)
     LOGGER.notice("See the README for setup and deployment instructions.")

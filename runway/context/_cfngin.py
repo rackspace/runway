@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import collections.abc
+import contextlib
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, MutableMapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from pydantic import BaseModel
 
@@ -27,6 +28,8 @@ from ..core.components import DeployEnvironment
 from ._base import BaseContext
 
 if TYPE_CHECKING:
+    from collections.abc import MutableMapping
+
     from mypy_boto3_s3.client import S3Client
 
     from .type_defs import PersistentGraphLocation
@@ -34,7 +37,7 @@ if TYPE_CHECKING:
 LOGGER = cast(RunwayLogger, logging.getLogger(__name__))
 
 
-def get_fqn(base_fqn: str, delimiter: str, name: Optional[str] = None) -> str:
+def get_fqn(base_fqn: str, delimiter: str, name: str | None = None) -> str:
     """Return the fully qualified name of an object within this context.
 
     If the name passed already appears to be a fully qualified name, it
@@ -70,32 +73,32 @@ class CfnginContext(BaseContext):
 
     """
 
-    _persistent_graph_lock_code: Optional[str]
+    _persistent_graph_lock_code: str | None
     _persistent_graph_lock_tag: str = "cfngin_lock_code"
-    _persistent_graph: Optional[Graph]
+    _persistent_graph: Graph | None
     _s3_bucket_verified: bool
 
     bucket_region: str
     config: CfnginConfig
     config_path: Path
     env: DeployEnvironment
-    force_stacks: List[str]
-    hook_data: Dict[str, Any]
-    logger: Union[PrefixAdaptor, RunwayLogger]
+    force_stacks: list[str]
+    hook_data: dict[str, Any]
+    logger: PrefixAdaptor | RunwayLogger
     parameters: MutableMapping[str, Any]
-    stack_names: List[str]
+    stack_names: list[str]
 
     def __init__(
         self,
         *,
-        config: Optional[CfnginConfig] = None,
-        config_path: Optional[Path] = None,
-        deploy_environment: Optional[DeployEnvironment] = None,
-        force_stacks: Optional[List[str]] = None,
-        logger: Union[PrefixAdaptor, RunwayLogger] = LOGGER,
-        parameters: Optional[MutableMapping[str, Any]] = None,
-        stack_names: Optional[List[str]] = None,
-        work_dir: Optional[Path] = None,
+        config: CfnginConfig | None = None,
+        config_path: Path | None = None,
+        deploy_environment: DeployEnvironment | None = None,
+        force_stacks: list[str] | None = None,
+        logger: PrefixAdaptor | RunwayLogger = LOGGER,
+        parameters: MutableMapping[str, Any] | None = None,
+        stack_names: list[str] | None = None,
+        work_dir: Path | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -137,17 +140,14 @@ class CfnginContext(BaseContext):
         return self.config.namespace.replace(".", "-").lower()
 
     @cached_property
-    def bucket_name(self) -> Optional[str]:
+    def bucket_name(self) -> str | None:
         """Return ``cfngin_bucket`` from config, calculated name, or None."""
         if not self.upload_to_s3:
             return None
-        return (
-            self.config.cfngin_bucket
-            or f"cfngin-{self.get_fqn()}-{self.env.aws_region}"
-        )
+        return self.config.cfngin_bucket or f"cfngin-{self.get_fqn()}-{self.env.aws_region}"
 
     @cached_property
-    def mappings(self) -> Dict[str, Dict[str, Dict[str, Any]]]:
+    def mappings(self) -> dict[str, dict[str, dict[str, Any]]]:
         """Return ``mappings`` from config."""
         return self.config.mappings or {}
 
@@ -185,7 +185,7 @@ class CfnginContext(BaseContext):
         return bool(self.persistent_graph_lock_code)
 
     @property
-    def persistent_graph_lock_code(self) -> Optional[str]:
+    def persistent_graph_lock_code(self) -> str | None:
         """Code used to lock the persistent graph S3 object."""
         if not self._persistent_graph_lock_code and self.persistent_graph_location:
             self._persistent_graph_lock_code = self.persistent_graph_tags.get(
@@ -194,23 +194,21 @@ class CfnginContext(BaseContext):
         return self._persistent_graph_lock_code
 
     @property
-    def persistent_graph_tags(self) -> Dict[str, str]:
+    def persistent_graph_tags(self) -> dict[str, str]:
         """Cache of tags on the persistent graph object."""
         try:
             return {
                 t["Key"]: t["Value"]
-                for t in self.s3_client.get_object_tagging(
-                    **self.persistent_graph_location
-                ).get("TagSet", [])
+                for t in self.s3_client.get_object_tagging(**self.persistent_graph_location).get(
+                    "TagSet", []
+                )
             }
         except self.s3_client.exceptions.NoSuchKey:
-            self.logger.debug(
-                "persistent graph object does not exist in S3; could not get tags"
-            )
+            self.logger.debug("persistent graph object does not exist in S3; could not get tags")
             return {}
 
     @property
-    def persistent_graph(self) -> Optional[Graph]:
+    def persistent_graph(self) -> Graph | None:
         """Graph if a persistent graph is being used.
 
         Will create an "empty" object in S3 if one is not found.
@@ -238,8 +236,7 @@ class CfnginContext(BaseContext):
                     )
                 except self.s3_client.exceptions.NoSuchKey:
                     self.logger.info(
-                        "persistent graph object does not exist in s3; "
-                        "creating one now..."
+                        "persistent graph object does not exist in s3; creating one now..."
                     )
                     self.s3_client.put_object(
                         Body=content.encode(),
@@ -253,7 +250,7 @@ class CfnginContext(BaseContext):
         return self._persistent_graph
 
     @persistent_graph.setter
-    def persistent_graph(self, graph: Optional[Graph]) -> None:
+    def persistent_graph(self, graph: Graph | None) -> None:
         """Load a persistent graph dict as a :class:`runway.cfngin.plan.Graph`."""
         self._persistent_graph = graph
 
@@ -281,12 +278,12 @@ class CfnginContext(BaseContext):
         return self.get_session(region=self.bucket_region).client("s3")
 
     @cached_property
-    def stacks_dict(self) -> Dict[str, Stack]:
+    def stacks_dict(self) -> dict[str, Stack]:
         """Construct a dict of ``{stack.fqn: Stack}`` for easy access to stacks."""
         return {stack.fqn: stack for stack in self.stacks}
 
     @cached_property
-    def stacks(self) -> List[Stack]:
+    def stacks(self) -> list[Stack]:
         """Stacks for the current action."""
         return [
             Stack(
@@ -302,16 +299,12 @@ class CfnginContext(BaseContext):
         ]
 
     @cached_property
-    def tags(self) -> Dict[str, str]:
+    def tags(self) -> dict[str, str]:
         """Return ``tags`` from config."""
         return (
             self.config.tags
             if self.config.tags is not None
-            else (
-                {"cfngin_namespace": self.config.namespace}
-                if self.config.namespace
-                else {}
-            )
+            else ({"cfngin_namespace": self.config.namespace} if self.config.namespace else {})
         )
 
     @cached_property
@@ -326,8 +319,7 @@ class CfnginContext(BaseContext):
         # explicitly set to an empty string.
         if self.config.cfngin_bucket == "":
             self.logger.debug(
-                "not uploading to s3; cfngin_bucket "
-                "is explicitly set to an empty string"
+                "not uploading to s3; cfngin_bucket is explicitly set to an empty string"
             )
             return False
 
@@ -336,9 +328,7 @@ class CfnginContext(BaseContext):
         # sense because we can't realistically auto generate a cfngin
         # bucket name in this case.
         if not self.config.namespace and not self.config.cfngin_bucket:
-            self.logger.debug(
-                "not uploading to s3; namespace & cfngin_bucket not provided"
-            )
+            self.logger.debug("not uploading to s3; namespace & cfngin_bucket not provided")
             return False
 
         return True
@@ -356,7 +346,7 @@ class CfnginContext(BaseContext):
             work_dir=self.work_dir,
         )
 
-    def get_fqn(self, name: Optional[str] = None) -> str:
+    def get_fqn(self, name: str | None = None) -> str:
         """Return the fully qualified name of an object within this context.
 
         If the name passed already appears to be a fully qualified name, it
@@ -365,7 +355,7 @@ class CfnginContext(BaseContext):
         """
         return get_fqn(self.base_fqn, self.config.namespace_delimiter, name)
 
-    def get_stack(self, name: str) -> Optional[Stack]:
+    def get_stack(self, name: str) -> Stack | None:
         """Get a stack by name.
 
         Args:
@@ -400,19 +390,15 @@ class CfnginContext(BaseContext):
 
         try:
             self.s3_client.put_object_tagging(
-                Tagging={
-                    "TagSet": [
-                        {"Key": self._persistent_graph_lock_tag, "Value": lock_code}
-                    ]
-                },
+                Tagging={"TagSet": [{"Key": self._persistent_graph_lock_tag, "Value": lock_code}]},
                 **self.persistent_graph_location,
             )
             self.logger.info(
                 'locked persistent graph "%s" with lock ID "%s"',
                 "/".join(
                     [
-                        self.persistent_graph_location["Bucket"],
-                        self.persistent_graph_location["Key"],
+                        self.persistent_graph_location.get("Bucket", "unknown"),
+                        self.persistent_graph_location.get("Key", "unknown"),
                     ]
                 ),
                 lock_code,
@@ -445,9 +431,7 @@ class CfnginContext(BaseContext):
             )
 
         if self.persistent_graph_lock_code != lock_code:
-            raise PersistentGraphLockCodeMismatch(
-                lock_code, self.persistent_graph_lock_code
-            )
+            raise PersistentGraphLockCodeMismatch(lock_code, self.persistent_graph_lock_code)
 
         self.s3_client.put_object(
             Body=self.persistent_graph.dumps(4).encode(),
@@ -457,9 +441,7 @@ class CfnginContext(BaseContext):
             Tagging=f"{self._persistent_graph_lock_tag}={lock_code}",
             **self.persistent_graph_location,
         )
-        self.logger.debug(
-            "persistent graph updated:\n%s", self.persistent_graph.dumps(indent=4)
-        )
+        self.logger.debug("persistent graph updated:\n%s", self.persistent_graph.dumps(indent=4))
 
     def set_hook_data(self, key: str, data: Any) -> None:
         """Set hook data for the given key.
@@ -477,8 +459,7 @@ class CfnginContext(BaseContext):
 
         if key in self.hook_data:
             raise KeyError(
-                f"Hook data for key {key} already exists, each hook "
-                "must have a unique data_key."
+                f"Hook data for key {key} already exists, each hook must have a unique data_key."
             )
 
         self.hook_data[key] = data
@@ -503,14 +484,10 @@ class CfnginContext(BaseContext):
                     **self.persistent_graph_location,
                 )
             except self.s3_client.exceptions.NoSuchKey:
-                self.logger.info(
-                    "persistent graph deleted; does not need to be unlocked"
-                )
+                self.logger.info("persistent graph deleted; does not need to be unlocked")
                 return True
 
-        self.logger.verbose(
-            'unlocking persistent graph "%s"...', self.persistent_graph_location
-        )
+        self.logger.verbose('unlocking persistent graph "%s"...', self.persistent_graph_location)
 
         if not self.persistent_graph_locked:
             raise PersistentGraphCannotUnlock(
@@ -520,10 +497,8 @@ class CfnginContext(BaseContext):
             )
 
         if self.persistent_graph_lock_code == lock_code:
-            try:
+            with contextlib.suppress(self.s3_client.exceptions.NoSuchKey):
                 self.s3_client.delete_object_tagging(**self.persistent_graph_location)
-            except self.s3_client.exceptions.NoSuchKey:
-                pass
             self._persistent_graph_lock_code = None
             self.logger.info(
                 'unlocked persistent graph "%s/%s"',

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from ...compat import cached_property
 from ...config.models.cfngin import CfnginStackDefinitionModel
@@ -31,9 +31,9 @@ class Action(BaseAction):
     def __init__(
         self,
         context: CfnginContext,
-        provider_builder: Optional[ProviderBuilder] = None,
-        cancel: Optional[threading.Event] = None,
-    ):
+        provider_builder: ProviderBuilder | None = None,
+        cancel: threading.Event | None = None,
+    ) -> None:
         """Instantiate class.
 
         This class creates a copy of the context object prior to initialization
@@ -46,9 +46,7 @@ class Action(BaseAction):
             cancel: Cancel handler.
 
         """
-        super().__init__(
-            context=context.copy(), provider_builder=provider_builder, cancel=cancel
-        )
+        super().__init__(context=context.copy(), provider_builder=provider_builder, cancel=cancel)
 
     @property
     def _stack_action(self) -> Any:
@@ -56,7 +54,7 @@ class Action(BaseAction):
         return None
 
     @cached_property
-    def cfngin_bucket(self) -> Optional[Bucket]:
+    def cfngin_bucket(self) -> Bucket | None:
         """CFNgin bucket.
 
         Raises:
@@ -86,11 +84,11 @@ class Action(BaseAction):
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        force: bool = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
+        dump: bool | str = False,  # noqa: ARG002
+        force: bool = False,  # noqa: ARG002
+        outline: bool = False,  # noqa: ARG002
         tail: bool = False,
-        upload_disabled: bool = True,  # pylint: disable=unused-argument
+        upload_disabled: bool = True,  # noqa: ARG002
         **_kwargs: Any,
     ) -> None:
         """Run the action.
@@ -125,9 +123,7 @@ class Action(BaseAction):
             LOGGER.notice("using default blueprint to create cfngin_bucket...")
             self.context.config.stacks = [self.default_cfngin_bucket_stack]
             # clear cached values that were populated by checking the previous condition
-            self.context._del_cached_property(  # pylint: disable=protected-access
-                "stacks", "stacks_dict"
-            )
+            self.context._del_cached_property("stacks", "stacks_dict")  # noqa: SLF001
         if self.provider_builder:
             self.provider_builder.region = self.context.bucket_region
         deploy.Action(
@@ -144,7 +140,7 @@ class Action(BaseAction):
     def pre_run(
         self,
         *,
-        dump: Union[bool, str] = False,
+        dump: bool | str = False,
         outline: bool = False,
         **__kwargs: Any,
     ) -> None:
@@ -153,7 +149,7 @@ class Action(BaseAction):
     def post_run(
         self,
         *,
-        dump: Union[bool, str] = False,
+        dump: bool | str = False,
         outline: bool = False,
         **__kwargs: Any,
     ) -> None:

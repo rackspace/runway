@@ -16,7 +16,7 @@ These environment variables are manipulated at runtime by Runway to fill in addi
 
 .. note::
   ``DEPLOY_ENVIRONMENT`` and ``AWS_REGION`` can only be resolved during the processing of a module.
-  To ensure no error occurs when trying to resolve one of these in a :ref:`Deployment <runway-deployment>` definition, provide a default value.
+  To ensure no error occurs when trying to resolve one of these in a :ref:`Deployment <runway_config:Deployment>` definition, provide a default value.
 
 
 If the Lookup is unable to find an environment variable matching the provided query, the default value is returned or a :exc:`ValueError` is raised if a default value was not provided.

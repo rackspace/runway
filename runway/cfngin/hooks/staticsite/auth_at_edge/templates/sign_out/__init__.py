@@ -1,10 +1,9 @@
 """Sign user out of Cognito and remove all Cookie Headers."""
 
-# pylint: disable=consider-using-f-string
 import logging
 from urllib.parse import urlencode
 
-from shared import (  # noqa pylint: disable=import-error
+from shared import (
     create_error_html,
     extract_and_parse_cookies,
     generate_cookie_headers,
@@ -31,9 +30,7 @@ def handler(event, _context):
             ),
             "status": "200",
             "headers": {
-                "content-type": [
-                    {"key": "Content-Type", "value": "text/html; charset=UTF-8"}
-                ],
+                "content-type": [{"key": "Content-Type", "value": "text/html; charset=UTF-8"}],
                 **CONFIG.get("cloud_front_headers", {}),
             },
         }

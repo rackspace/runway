@@ -1,7 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.hook_data."""
 
-# pylint: disable=protected-access
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -13,13 +11,13 @@ from runway.exceptions import FailedVariableLookup
 from runway.variables import Variable
 
 if TYPE_CHECKING:
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 
 class TestHookDataLookup:
     """Tests for runway.cfngin.lookups.handlers.hook_data.HookDataLookup."""
 
-    def test_handle(self, cfngin_context: MockCFNginContext) -> None:
+    def test_handle(self, cfngin_context: MockCfnginContext) -> None:
         """Test handle with simple usage."""
         cfngin_context.set_hook_data("fake_hook", {"nested": {"result": "good"}})
         var_top = Variable("test", "${hook_data fake_hook}", variable_type="cfngin")
@@ -32,7 +30,7 @@ class TestHookDataLookup:
         assert var_top.value == {"nested": {"result": "good"}}
         assert var_nested.value == "good"
 
-    def test_default(self, cfngin_context: MockCFNginContext) -> None:
+    def test_default(self, cfngin_context: MockCfnginContext) -> None:
         """Test handle with a default value."""
         cfngin_context.set_hook_data("fake_hook", {"nested": {"result": "good"}})
         var_top = Variable(
@@ -40,8 +38,7 @@ class TestHookDataLookup:
         )
         var_nested = Variable(
             "test",
-            "${hook_data fake_hook.bad."
-            + "result::default=something,load=json,get=key}",
+            "${hook_data fake_hook.bad." + "result::default=something,load=json,get=key}",
             variable_type="cfngin",
         )
         var_top.resolve(cfngin_context)
@@ -50,11 +47,9 @@ class TestHookDataLookup:
         assert var_top.value == "something"
         assert var_nested.value == "something"
 
-    def test_not_found(self, cfngin_context: MockCFNginContext) -> None:
+    def test_not_found(self, cfngin_context: MockCfnginContext) -> None:
         """Test value not found and no default."""
-        variable = Variable(
-            "test", "${hook_data fake_hook.bad.result}", variable_type="cfngin"
-        )
+        variable = Variable("test", "${hook_data fake_hook.bad.result}", variable_type="cfngin")
         with pytest.raises(FailedVariableLookup) as err:
             variable.resolve(cfngin_context)
 
@@ -63,13 +58,11 @@ class TestHookDataLookup:
         )
         assert "Could not find a value for" in str(err.value.__cause__)
 
-    def test_troposphere(self, cfngin_context: MockCFNginContext) -> None:
+    def test_troposphere(self, cfngin_context: MockCfnginContext) -> None:
         """Test with troposphere object like returned from lambda hook."""
         bucket = "test-bucket"
         s3_key = "lambda_functions/my_function"
-        cfngin_context.set_hook_data(
-            "lambda", {"my_function": Code(S3Bucket=bucket, S3Key=s3_key)}
-        )
+        cfngin_context.set_hook_data("lambda", {"my_function": Code(S3Bucket=bucket, S3Key=s3_key)})
         var_bucket = Variable(
             "test",
             "${hook_data lambda.my_function::" + "load=troposphere,get=S3Bucket}",

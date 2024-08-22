@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from pydantic import Extra
+from pydantic import ConfigDict
 
 from ...base import ConfigProperty
 
@@ -12,31 +12,33 @@ from ...base import ConfigProperty
 class RunwayServerlessPromotezipOptionDataModel(ConfigProperty):
     """Model for Runway Serverless module promotezip option."""
 
-    bucketname: Optional[str] = None
+    model_config = ConfigDict(
+        extra="forbid",
+        title="Runway Serverless Framework Module promotezip option",
+        validate_default=True,
+        validate_assignment=True,
+    )
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.forbid
-        title = "Runway Serverless Framework Module promotezip option"
+    bucketname: str | None = None
 
     def __bool__(self) -> bool:
         """Evaluate the boolean value of the object instance."""
-        return bool(self.dict(exclude_none=True))
+        return bool(self.model_dump(exclude_none=True))
 
 
 class RunwayServerlessModuleOptionsDataModel(ConfigProperty):
     """Model for Runway Serverless Framework Module options."""
 
-    args: List[str] = []
-    extend_serverless_yml: Dict[str, Any] = {}
+    model_config = ConfigDict(
+        extra="ignore",
+        title="Runway Serverless Framework Module options",
+        validate_default=True,
+        validate_assignment=True,
+    )
+
+    args: list[str] = []
+    extend_serverless_yml: dict[str, Any] = {}
     promotezip: RunwayServerlessPromotezipOptionDataModel = (
         RunwayServerlessPromotezipOptionDataModel()
     )
     skip_npm_ci: bool = False
-
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.ignore
-        title = "Runway Serverless Framework Module options"

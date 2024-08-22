@@ -1,20 +1,22 @@
 """DynamoDB lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from botocore.exceptions import ClientError
-from typing_extensions import Final, Literal, TypedDict
+from typing_extensions import Literal, TypedDict
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
+    from mypy_boto3_dynamodb.type_defs import AttributeValueTypeDef
+
     from ....context import CfnginContext
+    from ....lookups.handlers.base import ParsedArgsTypeDef
 
 
 _QUERY_PATTERN = r"""(?x)  # <table_name>@<partition_key>:<partition_key_value>.<attribute>
@@ -38,7 +40,7 @@ _QUERY_PATTERN = r"""(?x)  # <table_name>@<partition_key>:<partition_key_value>.
 class ArgsDataModel(BaseModel):
     """Arguments data model."""
 
-    region: Optional[str] = None
+    region: str | None = None
     """AWS region."""
 
 
@@ -61,7 +63,7 @@ class QueryDataModel(BaseModel):
     """Name of the DynamoDB Table to query."""
 
     @property
-    def item_key(self) -> Dict[str, Dict[Literal["B", "N", "S"], Any]]:
+    def item_key(self) -> dict[str, AttributeValueTypeDef]:
         """Value to pass to boto3 ``.get_item()`` call as the ``Key`` argument.
 
         Raises:
@@ -77,22 +79,21 @@ class QueryDataModel(BaseModel):
                 f"doesn't match regex: {pattern.pattern}"
             )
         return {
-            self.partition_key: {
-                cast(
-                    Literal["B", "N", "S"], match.groupdict("S")["data_type"]
-                ): match.group("value")
-            }
+            self.partition_key: cast(
+                "AttributeValueTypeDef",
+                {match.groupdict("S")["data_type"]: match.group("value")},
+            )
         }
 
 
-class DynamodbLookup(LookupHandler):
+class DynamodbLookup(LookupHandler["CfnginContext"]):
     """DynamoDB lookup."""
 
-    TYPE_NAME: Final[Literal["dynamodb"]] = "dynamodb"
+    TYPE_NAME: ClassVar[str] = "dynamodb"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+    def parse(cls, value: str) -> tuple[str, ParsedArgsTypeDef]:
         """Parse the value passed to the lookup.
 
         This overrides the default parsing to account for special requirements.
@@ -109,7 +110,7 @@ class DynamodbLookup(LookupHandler):
 
         """
         raw_value = read_value_from_path(value)
-        args: Dict[str, str] = {}
+        args: ParsedArgsTypeDef = {}
 
         if "@" not in raw_value:
             raise ValueError(
@@ -120,7 +121,7 @@ class DynamodbLookup(LookupHandler):
         if ":" in table_info:
             args["region"], table_info = table_info.split(":", 1)
 
-        return "@".join([table_info, table_keys]), args
+        return f"{table_info}@{table_keys}", args
 
     @classmethod
     def parse_query(cls, value: str) -> QueryDataModel:
@@ -136,12 +137,10 @@ class DynamodbLookup(LookupHandler):
         match = pattern.search(value)
         if not match:
             raise ValueError(f"Query '{value}' doesn't match regex:\n{pattern.pattern}")
-        return QueryDataModel.parse_obj(match.groupdict())
+        return QueryDataModel.model_validate(match.groupdict())
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext, *__args: Any, **__kwargs: Any) -> Any:
         """Get a value from a DynamoDB table.
 
         Args:
@@ -158,7 +157,7 @@ class DynamodbLookup(LookupHandler):
         """
         raw_query, raw_args = cls.parse(value)
         query = cls.parse_query(raw_query)
-        args = ArgsDataModel.parse_obj(raw_args)
+        args = ArgsDataModel.model_validate(raw_args)
 
         table_keys = query.attribute.split(".")
 
@@ -169,22 +168,16 @@ class DynamodbLookup(LookupHandler):
             response = dynamodb.get_item(
                 TableName=query.table_name,
                 Key=query.item_key,
-                ProjectionExpression=",".join(
-                    [query.partition_key, *key_dict["clean_table_keys"]]
-                ),
+                ProjectionExpression=",".join([query.partition_key, *key_dict["clean_table_keys"]]),
             )
         except dynamodb.exceptions.ResourceNotFoundException as exc:
-            raise ValueError(
-                f"Can't find the DynamoDB table: {query.table_name}"
-            ) from exc
+            raise ValueError(f"Can't find the DynamoDB table: {query.table_name}") from exc
         except ClientError as exc:
             if exc.response["Error"]["Code"] == "ValidationException":
                 raise ValueError(
                     f"No DynamoDB record matched the partition key: {query.partition_key}"
                 ) from exc
-            raise ValueError(
-                f"The DynamoDB lookup '{value}' encountered an error: {exc}"
-            ) from exc
+            raise ValueError(f"The DynamoDB lookup '{value}' encountered an error: {exc}") from exc
         # find and return the key from the dynamo data returned
         if "Item" in response:
             return _get_val_from_ddb_data(response["Item"], key_dict["new_keys"])
@@ -196,11 +189,11 @@ class DynamodbLookup(LookupHandler):
 class ParsedLookupKey(TypedDict):
     """Return value of _lookup_key_parse."""
 
-    clean_table_keys: List[str]
-    new_keys: List[Dict[Literal["L", "M", "N", "S"], str]]
+    clean_table_keys: list[str]
+    new_keys: list[dict[Literal["L", "M", "N", "S"], str]]
 
 
-def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
+def _lookup_key_parse(table_keys: list[str]) -> ParsedLookupKey:
     """Return the order in which the stacks should be executed.
 
     Args:
@@ -217,8 +210,8 @@ def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
     # we need to parse the key lookup passed in
     regex_matcher = r"\[([^\]]+)]"
     valid_dynamodb_datatypes = ["L", "M", "N", "S"]
-    clean_table_keys: List[str] = []
-    new_keys: List[Dict[Literal["L", "M", "N", "S"], str]] = []
+    clean_table_keys: list[str] = []
+    new_keys: list[dict[Literal["L", "M", "N", "S"], str]] = []
 
     for key in table_keys:
         match = re.search(regex_matcher, key)
@@ -229,7 +222,7 @@ def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
                     f"CFNgin does not support looking up the data type: {match.group(1)}"
                 )
             match_val = cast(Literal["L", "M", "N", "S"], match.group(1))
-            key = key.replace(match.group(0), "")
+            key = key.replace(match.group(0), "")  # noqa: PLW2901
             new_keys.append({match_val: key})
         else:
             new_keys.append({"S": key})
@@ -237,7 +230,9 @@ def _lookup_key_parse(table_keys: List[str]) -> ParsedLookupKey:
     return {"new_keys": new_keys, "clean_table_keys": clean_table_keys}
 
 
-def _get_val_from_ddb_data(data: Dict[str, Any], keylist: List[Dict[str, str]]) -> Any:
+def _get_val_from_ddb_data(
+    data: dict[str, Any], keylist: list[dict[Literal["L", "M", "N", "S"], str]]
+) -> Any:
     """Return the value of the lookup.
 
     Args:
@@ -249,7 +244,7 @@ def _get_val_from_ddb_data(data: Dict[str, Any], keylist: List[Dict[str, str]]) 
         datatype.
 
     """
-    next_type: Optional[str] = None
+    next_type: str | None = None
     # iterate through the keylist to find the matching key/datatype
     for key in keylist:
         for k in key:
@@ -263,14 +258,14 @@ def _get_val_from_ddb_data(data: Dict[str, Any], keylist: List[Dict[str, str]]) 
         # if type is list, convert it to a list and return
         return _convert_ddb_list_to_list(data[cast(str, next_type)])
     if next_type == "N":
-        # TODO: handle various types of 'number' datatypes, (e.g. int, double)
+        # TODO (troyready): handle various types of 'number' datatypes, (e.g. int, double)
         # if a number, convert to an int and return
         return int(data[cast(str, next_type)])
     # else, just assume its a string and return
     return str(data[cast(str, next_type)])
 
 
-def _convert_ddb_list_to_list(conversion_list: List[Dict[str, Any]]) -> List[Any]:
+def _convert_ddb_list_to_list(conversion_list: list[dict[str, Any]]) -> list[Any]:
     """Return a python list without the DynamoDB datatypes.
 
     Args:
@@ -280,8 +275,4 @@ def _convert_ddb_list_to_list(conversion_list: List[Dict[str, Any]]) -> List[Any
         Returns A sanitized list without the datatypes.
 
     """
-    ret_list: List[Any] = []
-    for val in conversion_list:
-        for v in val:
-            ret_list.append(val[v])
-    return ret_list
+    return [val[v] for val in conversion_list for v in val]

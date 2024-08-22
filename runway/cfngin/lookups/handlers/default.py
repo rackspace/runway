@@ -1,28 +1,24 @@
 """Lookup to provide a default value."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ....lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
+
     from ....context import CfnginContext
 
 
-class DefaultLookup(LookupHandler):
+class DefaultLookup(LookupHandler["CfnginContext"]):
     """Lookup to provide a default value."""
 
-    TYPE_NAME: Final[Literal["default"]] = "default"
+    TYPE_NAME: ClassVar[str] = "default"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: Optional[CfnginContext] = None, **_: Any
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext | None = None, **_: Any) -> Any:
         """Use a value from the environment or fall back to a default value.
 
         Allows defaults to be set at the config file level.

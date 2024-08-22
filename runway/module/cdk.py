@@ -6,8 +6,7 @@ import logging
 import platform
 import subprocess
 import sys
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from typing_extensions import Literal
 
@@ -19,6 +18,8 @@ from .base import ModuleOptions, RunwayModuleNpm
 from .utils import generate_node_command, run_module_command
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from .._logging import RunwayLogger
     from ..context import RunwayContext
 
@@ -39,7 +40,41 @@ CdkCommandTypeDef = Literal[
 ]
 
 
-class CloudDevelopmentKit(RunwayModuleNpm):
+class CloudDevelopmentKitOptions(ModuleOptions):
+    """Module options for AWS Cloud Development Kit.
+
+    Attributes:
+        build_steps: A list of commands to be executed before each action (e.g.
+            diff, deploy, destroy).
+        data: Options parsed into a data model.
+        skip_npm_ci: Skip running ``npm ci`` in the module directory prior to
+            processing the module.
+
+    """
+
+    def __init__(self, data: RunwayCdkModuleOptionsDataModel) -> None:
+        """Instantiate class.
+
+        Args:
+            data: Options parsed into a data model.
+
+        """
+        self.build_steps = data.build_steps
+        self.data = data
+        self.skip_npm_ci = data.skip_npm_ci
+
+    @classmethod
+    def parse_obj(cls, obj: object) -> CloudDevelopmentKitOptions:
+        """Parse options definition and return an options object.
+
+        Args:
+            obj: Object to parse.
+
+        """
+        return cls(data=RunwayCdkModuleOptionsDataModel.model_validate(obj))
+
+
+class CloudDevelopmentKit(RunwayModuleNpm[CloudDevelopmentKitOptions]):
     """CDK Runway Module."""
 
     DEPRECATION_MSG = (
@@ -47,18 +82,16 @@ class CloudDevelopmentKit(RunwayModuleNpm):
         "may be removed in the next major release."
     )
 
-    options: CloudDevelopmentKitOptions
-
     def __init__(
         self,
         context: RunwayContext,
         *,
-        explicitly_enabled: Optional[bool] = False,
+        explicitly_enabled: bool | None = False,
         logger: RunwayLogger = LOGGER,
         module_root: Path,
-        name: Optional[str] = None,
-        options: Optional[Union[Dict[str, Any], ModuleOptions]] = None,
-        parameters: Optional[Dict[str, Any]] = None,
+        name: str | None = None,
+        options: dict[str, Any] | ModuleOptions | None = None,
+        parameters: dict[str, Any] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
@@ -92,9 +125,9 @@ class CloudDevelopmentKit(RunwayModuleNpm):
         LOGGER.warning("%s:%s", self.name, self.DEPRECATION_MSG)
 
     @cached_property
-    def cli_args(self) -> List[str]:
+    def cli_args(self) -> list[str]:
         """Generate CLI args from self used in all CDK commands."""
-        result: List[str] = []
+        result: list[str] = []
         if self.ctx.no_color:
             result.append("--no-color")
         if self.ctx.env.debug:
@@ -104,9 +137,9 @@ class CloudDevelopmentKit(RunwayModuleNpm):
         return result
 
     @cached_property
-    def cli_args_context(self) -> List[str]:
+    def cli_args_context(self) -> list[str]:
         """Generate CLI args from self passed to CDK commands as ``--context``."""
-        result: List[str] = []
+        result: list[str] = []
         args = {"environment": self.ctx.env.name}
         args.update(self.parameters)
         for key, val in args.items():
@@ -157,7 +190,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
         )
         self.logger.info("destroy (complete)")
 
-    def cdk_diff(self, stack_name: Optional[str] = None) -> None:
+    def cdk_diff(self, stack_name: str | None = None) -> None:
         """Execute ``cdk diff`` command."""
         self.logger.info("plan (in progress)")
         try:
@@ -179,11 +212,11 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                 "is not enabled",
                 stack_name,
             )
-            # TODO raise error instead of sys.exit() when refactoring cli error handling
+            # TODO (kyle): raise error instead of sys.exit() when refactoring cli error handling
             sys.exit(exc.returncode)
         self.logger.info("plan (complete)")
 
-    def cdk_list(self) -> List[str]:
+    def cdk_list(self) -> list[str]:
         """Execute ``cdk list`` command."""
         result = subprocess.check_output(
             self.gen_cmd("list", include_context=True),
@@ -213,10 +246,10 @@ class CloudDevelopmentKit(RunwayModuleNpm):
     def gen_cmd(
         self,
         command: CdkCommandTypeDef,
-        args_list: Optional[List[str]] = None,
+        args_list: list[str] | None = None,
         *,
         include_context: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate and log a CDK command.
 
         This does not execute the command, only prepares it for use.
@@ -231,7 +264,7 @@ class CloudDevelopmentKit(RunwayModuleNpm):
             The full command to be passed into a subprocess.
 
         """
-        args = [command] + self.cli_args
+        args = [command, *self.cli_args]
         args.extend(args_list or [])
         if include_context:
             args.extend(self.cli_args_context)
@@ -283,37 +316,3 @@ class CloudDevelopmentKit(RunwayModuleNpm):
                 )
                 raise
         self.logger.info("build steps (complete)")
-
-
-class CloudDevelopmentKitOptions(ModuleOptions):
-    """Module options for AWS Cloud Development Kit.
-
-    Attributes:
-        build_steps: A list of commands to be executed before each action (e.g.
-            diff, deploy, destroy).
-        data: Options parsed into a data model.
-        skip_npm_ci: Skip running ``npm ci`` in the module directory prior to
-            processing the module.
-
-    """
-
-    def __init__(self, data: RunwayCdkModuleOptionsDataModel) -> None:
-        """Instantiate class.
-
-        Args:
-            data: Options parsed into a data model.
-
-        """
-        self.build_steps = data.build_steps
-        self.data = data
-        self.skip_npm_ci = data.skip_npm_ci
-
-    @classmethod
-    def parse_obj(cls, obj: object) -> CloudDevelopmentKitOptions:
-        """Parse options definition and return an options object.
-
-        Args:
-            obj: Object to parse.
-
-        """
-        return cls(data=RunwayCdkModuleOptionsDataModel.parse_obj(obj))

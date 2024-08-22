@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 RUNWAY_YML = """---
-# See full syntax at https://docs.onica.com/projects/runway
+# See full syntax at https://runway.readthedocs.io
 deployments:
   - modules:
       - path: sampleapp.cfn
@@ -37,16 +37,12 @@ def new(ctx: click.Context, **_: Any) -> None:
 
     LOGGER.verbose("checking for preexisting runway.yml file...")
     if runway_yml.is_file():
-        LOGGER.error(
-            "There is already a %s file in the current directory", runway_yml.name
-        )
+        LOGGER.error("There is already a %s file in the current directory", runway_yml.name)
         ctx.exit(1)
 
-    runway_yml.write_text(
-        RUNWAY_YML, encoding=locale.getpreferredencoding(do_setlocale=False)
-    )
+    runway_yml.write_text(RUNWAY_YML, encoding=locale.getpreferredencoding(do_setlocale=False))
     LOGGER.success("runway.yml generated")
     LOGGER.notice(
         "See addition getting started information at "
-        "https://docs.onica.com/projects/runway/page/getting_started.html"
+        "https://runway.readthedocs.io/page/getting_started.html"
     )

@@ -7,7 +7,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any
 
 from .delete import DeleteSync
 from .exact_timestamps import ExactTimestampsSync
@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 
 def register_sync_strategy(
     session: Session,
-    strategy_cls: Type[BaseSync],
+    strategy_cls: type[BaseSync],
     sync_type: ValidSyncType = "file_at_src_and_dest",
-):
+) -> None:
     """Register a single sync strategy.
 
     Args:

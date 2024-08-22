@@ -8,35 +8,34 @@ the CFNgin configuration file (it can be reused in other CFNgin configuration fi
 The :attr:`~cfngin.hook.data_key` is then passed to the lookup as it's input/query.
 This allows the lookup to function during a ``runway plan``.
 
-"""  # noqa
+"""
 
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from pydantic import ValidationError
 from troposphere.awslambda import Code, Content
-from typing_extensions import Final, Literal
 
 from ....lookups.handlers.base import LookupHandler
 from ....utils import load_object_from_string
-from ...exceptions import CfnginOnlyLookupError
 
 if TYPE_CHECKING:
+
     from ....config import CfnginConfig
     from ....config.models.cfngin import CfnginHookDefinitionModel
-    from ....context import CfnginContext, RunwayContext
+    from ....context import CfnginContext
     from ...hooks.awslambda.base_classes import AwsLambdaHook
     from ...hooks.awslambda.models.responses import AwsLambdaHookDeployResponse
 
 LOGGER = logging.getLogger(__name__)
 
 
-class AwsLambdaLookup(LookupHandler):
+class AwsLambdaLookup(LookupHandler["CfnginContext"]):
     """Lookup for AwsLambdaHook responses."""
 
-    TYPE_NAME: Final[Literal["awslambda"]] = "awslambda"
+    TYPE_NAME: ClassVar[str] = "awslambda"
 
     @classmethod
     def get_deployment_package_data(
@@ -62,7 +61,6 @@ class AwsLambdaLookup(LookupHandler):
         """
         # needs to be imported here to avoid cyclic imports for conditional code
         # caused by import of runway.cfngin.actions.deploy in runway.cfngin.hooks.base
-        # pylint: disable=import-outside-toplevel
         from ...hooks.awslambda.models.responses import (
             AwsLambdaHookDeployResponse as _AwsLambdaHookDeployResponse,
         )
@@ -74,7 +72,7 @@ class AwsLambdaLookup(LookupHandler):
             )
             context.set_hook_data(data_key, hook.plan())
         try:
-            return _AwsLambdaHookDeployResponse.parse_obj(context.hook_data[data_key])
+            return _AwsLambdaHookDeployResponse.model_validate(context.hook_data[data_key])
         except ValidationError:
             raise TypeError(
                 "expected AwsLambdaHookDeployResponseTypedDict, "
@@ -108,18 +106,12 @@ class AwsLambdaLookup(LookupHandler):
         if not hooks_with_data_key:
             raise ValueError(f"no hook definition found with data_key {data_key}")
         if len(hooks_with_data_key) > 1:
-            raise ValueError(
-                f"more than one hook definition found with data_key {data_key}"
-            )
+            raise ValueError(f"more than one hook definition found with data_key {data_key}")
         return hooks_with_data_key.pop()
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls,
-        value: str,
-        context: Union[CfnginContext, RunwayContext],
-        *_args: Any,
-        **_kwargs: Any,
+    def handle(
+        cls, value: str, context: CfnginContext, **_kwargs: Any
     ) -> AwsLambdaHookDeployResponse:
         """Retrieve metadata for an AWS Lambda deployment package.
 
@@ -132,12 +124,8 @@ class AwsLambdaLookup(LookupHandler):
             data model.
 
         """
-        # `if isinstance(context, _RunwayContext)` without needing to import candidate
-        # importing candidate causes cyclic import
-        if "RunwayContext" in type(context).__name__:
-            raise CfnginOnlyLookupError(cls.TYPE_NAME)
         query, _ = cls.parse(value)
-        return cls.get_deployment_package_data(cast("CfnginContext", context), query)
+        return cls.get_deployment_package_data(context, query)
 
     @staticmethod
     def init_hook_class(
@@ -156,7 +144,6 @@ class AwsLambdaLookup(LookupHandler):
         """
         # needs to be imported here to avoid cyclic imports for conditional code
         # caused by import of runway.cfngin.actions.deploy in runway.cfngin.hooks.base
-        # pylint: disable=import-outside-toplevel
         from ...hooks.awslambda.base_classes import AwsLambdaHook as _AwsLambdaHook
 
         kls = load_object_from_string(hook_def.path)
@@ -171,24 +158,20 @@ class AwsLambdaLookup(LookupHandler):
             )
         return cast("AwsLambdaHook[Any]", kls(context, **hook_def.args))
 
-    class Code(LookupHandler):
+    class Code(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.Code"]] = "awslambda.Code"
+        TYPE_NAME: ClassVar[str] = "awslambda.Code"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> Code:
+        def handle(cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any) -> Code:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -196,31 +179,27 @@ class AwsLambdaLookup(LookupHandler):
 
             """
             return Code(
-                **AwsLambdaLookup.handle(value, context, *args, **kwargs).dict(
+                **AwsLambdaLookup.handle(value, context, *args, **kwargs).model_dump(
                     by_alias=True,
                     exclude_none=True,
                     include={"bucket_name", "object_key", "object_version_id"},
                 )
             )
 
-    class CodeSha256(LookupHandler):
+    class CodeSha256(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.CodeSha256"]] = "awslambda.CodeSha256"
+        TYPE_NAME: ClassVar[str] = "awslambda.CodeSha256"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> str:
+        def handle(cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any) -> str:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -229,26 +208,22 @@ class AwsLambdaLookup(LookupHandler):
             """
             return AwsLambdaLookup.handle(value, context, *args, **kwargs).code_sha256
 
-    class CompatibleArchitectures(LookupHandler):
+    class CompatibleArchitectures(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.CompatibleArchitectures"]] = (
-            "awslambda.CompatibleArchitectures"
-        )
+        TYPE_NAME: ClassVar[str] = "awslambda.CompatibleArchitectures"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> Optional[List[str]]:
+        def handle(
+            cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any
+        ) -> list[str] | None:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -257,32 +232,24 @@ class AwsLambdaLookup(LookupHandler):
             """
             _query, lookup_args = cls.parse(value)
             return cls.format_results(
-                AwsLambdaLookup.handle(
-                    value, context, *args, **kwargs
-                ).compatible_architectures,
+                AwsLambdaLookup.handle(value, context, *args, **kwargs).compatible_architectures,
                 **lookup_args,
             )
 
-    class CompatibleRuntimes(LookupHandler):
+    class CompatibleRuntimes(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.CompatibleRuntimes"]] = (
-            "awslambda.CompatibleRuntimes"
-        )
+        TYPE_NAME: ClassVar[str] = "awslambda.CompatibleRuntimes"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> Any:
+        def handle(cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any) -> Any:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -291,30 +258,24 @@ class AwsLambdaLookup(LookupHandler):
             """
             _query, lookup_args = cls.parse(value)
             return cls.format_results(
-                AwsLambdaLookup.handle(
-                    value, context, *args, **kwargs
-                ).compatible_runtimes,
+                AwsLambdaLookup.handle(value, context, *args, **kwargs).compatible_runtimes,
                 **lookup_args,
             )
 
-    class Content(LookupHandler):
+    class Content(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.Content"]] = "awslambda.Content"
+        TYPE_NAME: ClassVar[str] = "awslambda.Content"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> Content:
+        def handle(cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any) -> Content:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -322,31 +283,29 @@ class AwsLambdaLookup(LookupHandler):
 
             """
             return Content(
-                **AwsLambdaLookup.handle(value, context, *args, **kwargs).dict(
+                **AwsLambdaLookup.handle(value, context, *args, **kwargs).model_dump(
                     by_alias=True,
                     exclude_none=True,
                     include={"bucket_name", "object_key", "object_version_id"},
                 )
             )
 
-    class LicenseInfo(LookupHandler):
+    class LicenseInfo(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.LicenseInfo"]] = "awslambda.LicenseInfo"
+        TYPE_NAME: ClassVar[str] = "awslambda.LicenseInfo"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> Optional[str]:
+        def handle(
+            cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any
+        ) -> str | None:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -359,24 +318,20 @@ class AwsLambdaLookup(LookupHandler):
                 **lookup_args,
             )
 
-    class Runtime(LookupHandler):
+    class Runtime(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.Runtime"]] = "awslambda.Runtime"
+        TYPE_NAME: ClassVar[str] = "awslambda.Runtime"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> str:
+        def handle(cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any) -> str:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -385,24 +340,20 @@ class AwsLambdaLookup(LookupHandler):
             """
             return AwsLambdaLookup.handle(value, context, *args, **kwargs).runtime
 
-    class S3Bucket(LookupHandler):
+    class S3Bucket(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.S3Bucket"]] = "awslambda.S3Bucket"
+        TYPE_NAME: ClassVar[str] = "awslambda.S3Bucket"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> str:
+        def handle(cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any) -> str:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -412,24 +363,20 @@ class AwsLambdaLookup(LookupHandler):
             """
             return AwsLambdaLookup.handle(value, context, *args, **kwargs).bucket_name
 
-    class S3Key(LookupHandler):
+    class S3Key(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.S3Key"]] = "awslambda.S3Key"
+        TYPE_NAME: ClassVar[str] = "awslambda.S3Key"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> str:
+        def handle(cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any) -> str:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -439,26 +386,22 @@ class AwsLambdaLookup(LookupHandler):
             """
             return AwsLambdaLookup.handle(value, context, *args, **kwargs).object_key
 
-    class S3ObjectVersion(LookupHandler):
+    class S3ObjectVersion(LookupHandler["CfnginContext"]):
         """Lookup for AwsLambdaHook responses."""
 
-        TYPE_NAME: Final[Literal["awslambda.S3ObjectVersion"]] = (
-            "awslambda.S3ObjectVersion"
-        )
+        TYPE_NAME: ClassVar[str] = "awslambda.S3ObjectVersion"
 
         @classmethod
-        def handle(  # pylint: disable=arguments-differ
-            cls,
-            value: str,
-            context: Union[CfnginContext, RunwayContext],
-            *args: Any,
-            **kwargs: Any,
-        ) -> Optional[str]:
+        def handle(
+            cls, value: str, context: CfnginContext, *args: Any, **kwargs: Any
+        ) -> str | None:
             """Retrieve metadata for an AWS Lambda deployment package.
 
             Args:
                 value: Value to resolve.
                 context: The current context object.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
 
             Returns:
                 Value that can be passed into CloudFormation property
@@ -466,6 +409,4 @@ class AwsLambdaLookup(LookupHandler):
                 ``AWS::Lambda::LayerVersion.Content.S3ObjectVersion``.
 
             """
-            return AwsLambdaLookup.handle(
-                value, context, *args, **kwargs
-            ).object_version_id
+            return AwsLambdaLookup.handle(value, context, *args, **kwargs).object_version_id

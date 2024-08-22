@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING
 
 from docker.types.services import Mount
 
@@ -28,8 +28,8 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         self,
         project: PythonProject,
         *,
-        client: Optional[DockerClient] = None,
-        context: Optional[Union[CfnginContext, RunwayContext]] = None,
+        client: DockerClient | None = None,
+        context: CfnginContext | RunwayContext | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -42,7 +42,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         super().__init__(project, client=client, context=context)
 
     @cached_property
-    def bind_mounts(self) -> List[Mount]:
+    def bind_mounts(self) -> list[Mount]:
         """Bind mounts that will be used by the container."""
         mounts = [*super().bind_mounts]
         if self.project.requirements_txt:
@@ -56,7 +56,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         return mounts
 
     @cached_property
-    def environment_variables(self) -> Dict[str, str]:
+    def environment_variables(self) -> dict[str, str]:
         """Environment variables to pass to the docker container.
 
         This is a subset of the environment variables stored in the context
@@ -64,13 +64,11 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
 
         """
         docker_env_vars = super().environment_variables
-        pip_env_vars = {
-            k: v for k, v in self.ctx.env.vars.items() if k.startswith("PIP")
-        }
+        pip_env_vars = {k: v for k, v in self.ctx.env.vars.items() if k.startswith("PIP")}
         return {**docker_env_vars, **pip_env_vars}
 
     @cached_property
-    def install_commands(self) -> List[str]:
+    def install_commands(self) -> list[str]:
         """Commands to run to install dependencies."""
         if self.project.requirements_txt:
             return [
@@ -88,7 +86,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         return []
 
     @cached_property
-    def python_version(self) -> Optional[Version]:
+    def python_version(self) -> Version | None:
         """Version of Python installed in the docker container."""
         match = re.search(
             r"Python (?P<version>\S*)",
@@ -99,7 +97,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
         return Version(match.group("version"))
 
     @cached_property
-    def runtime(self) -> Optional[str]:
+    def runtime(self) -> str | None:
         """AWS Lambda runtime determined from the docker container's Python version."""
         if not self.python_version:
             return None

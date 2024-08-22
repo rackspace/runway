@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import awacs.awslambda
 import awacs.dynamodb
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class LambdaFunction(Blueprint):
     """Blueprint for creating a Lambda Function."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "AppName": {"type": str, "description": "Name of app."},
         "Code": {
             "type": awslambda.Code,
@@ -122,7 +122,7 @@ class LambdaFunction(Blueprint):
     @cached_property
     def lambda_function(self) -> awslambda.Function:
         """AWS Lambda Function."""
-        optional_kwargs: Dict[str, Any] = {
+        optional_kwargs: dict[str, Any] = {
             "Environment": (
                 awslambda.Environment(Variables=self.variables["EnvironmentVariables"])
                 if self.variables["EnvironmentVariables"]
@@ -146,13 +146,11 @@ class LambdaFunction(Blueprint):
         self.add_output(f"{func.title}Arn", func.get_att("Arn"))
         self.add_output("Runtime", self.runtime)
         for attr in awslambda.Code.props:
-            self.add_output(
-                f"Code{attr}", getattr(self.variables["Code"], attr, "null")
-            )
+            self.add_output(f"Code{attr}", getattr(self.variables["Code"], attr, "null"))
         return func
 
     @cached_property
-    def lambda_layer(self) -> Optional[awslambda.LayerVersion]:
+    def lambda_layer(self) -> awslambda.LayerVersion | None:
         """AWS Lambda Layer."""
         create_layer = bool(self.variables["LayerContent"].S3Bucket)
         kwargs = {
@@ -179,5 +177,5 @@ class LambdaFunction(Blueprint):
         """Create template."""
         self.template.set_version("2010-09-09")
         self.template.set_description("Test Lambda")
-        self.iam_role  # pylint: disable=pointless-statement
-        self.lambda_function  # pylint: disable=pointless-statement
+        self.iam_role  # noqa: B018
+        self.lambda_function  # noqa: B018

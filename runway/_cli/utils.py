@@ -6,20 +6,24 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 import click
 import yaml
 
 from ..compat import cached_property
 from ..config import RunwayConfig
-from ..config.components.runway import (
-    RunwayDeploymentDefinition,
-    RunwayModuleDefinition,
-)
 from ..context import RunwayContext
 from ..core.components import DeployEnvironment
 from ..exceptions import ConfigNotFound
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from ..config.components.runway import (
+        RunwayDeploymentDefinition,
+        RunwayModuleDefinition,
+    )
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +36,7 @@ class CliContext:
         *,
         ci: bool = False,
         debug: int = 0,
-        deploy_environment: Optional[str] = None,
+        deploy_environment: str | None = None,
         verbose: bool = False,
         **_: Any,
     ) -> None:
@@ -95,7 +99,7 @@ class CliContext:
         sys.exit(1)
 
     def get_runway_context(
-        self, deploy_environment: Optional[DeployEnvironment] = None
+        self, deploy_environment: DeployEnvironment | None = None
     ) -> RunwayContext:
         """Get a Runway context object.
 
@@ -104,7 +108,7 @@ class CliContext:
         Args:
             deploy_environment: Object representing the current deploy environment.
 
-        Returns
+        Returns:
             RunwayContext
 
         """
@@ -168,9 +172,9 @@ class CliContext:
 
 def select_deployments(
     ctx: click.Context,
-    deployments: List[RunwayDeploymentDefinition],
-    tags: Optional[Tuple[str, ...]] = None,
-) -> List[RunwayDeploymentDefinition]:
+    deployments: list[RunwayDeploymentDefinition],
+    tags: tuple[str, ...] | None = None,
+) -> list[RunwayDeploymentDefinition]:
     """Select which deployments to run.
 
     Uses tags, interactive prompts, or selects all.
@@ -178,6 +182,7 @@ def select_deployments(
     Args:
         ctx: Current click context.
         deployments: List of deployment(s) to choose from.
+        tags: Deployment tags to filter.
 
     Returns:
         Selected deployment(s).
@@ -192,9 +197,7 @@ def select_deployments(
         LOGGER.debug("only one deployment detected; no selection necessary")
     else:
         # build the menu before displaying it so debug logs don't break up what is printed
-        deployment_menu = yaml.safe_dump(
-            {i + 1: d.menu_entry for i, d in enumerate(deployments)}
-        )
+        deployment_menu = yaml.safe_dump({i + 1: d.menu_entry for i, d in enumerate(deployments)})
         click.secho("\nConfigured deployments\n", bold=True, underline=True)
         click.echo(deployment_menu)
         if ctx.command.name == "destroy":
@@ -206,9 +209,7 @@ def select_deployments(
             'Enter number of deployment to run (or "all")',
             default="all",
             show_choices=False,
-            type=click.Choice(
-                [str(n) for n in range(1, len(deployments) + 1)] + ["all"]
-            ),
+            type=click.Choice([str(n) for n in range(1, len(deployments) + 1)] + ["all"]),
         )
     if choice != "all":
         deployments = [deployments[int(choice) - 1]]
@@ -217,8 +218,8 @@ def select_deployments(
 
 
 def select_modules(
-    ctx: click.Context, modules: List[RunwayModuleDefinition]
-) -> List[RunwayModuleDefinition]:
+    ctx: click.Context, modules: list[RunwayModuleDefinition]
+) -> list[RunwayModuleDefinition]:
     """Interactively select which modules to run.
 
     Args:
@@ -233,8 +234,7 @@ def select_modules(
         LOGGER.debug("only one module detected; no selection necessary")
         if ctx.command.name == "destroy":
             LOGGER.info(
-                "Only one module detected; all modules "
-                "automatically selected for deletion."
+                "Only one module detected; all modules automatically selected for deletion."
             )
             if not click.confirm("Proceed?"):
                 ctx.exit(0)
@@ -243,8 +243,7 @@ def select_modules(
     click.echo(yaml.safe_dump({i + 1: m.menu_entry for i, m in enumerate(modules)}))
     if ctx.command.name == "destroy":
         click.echo(
-            '(operating in destroy mode -- "all" will destroy all '
-            "modules in reverse order)\n"
+            '(operating in destroy mode -- "all" will destroy all modules in reverse order)\n'
         )
     choice = click.prompt(
         'Enter number of module to run (or "all")',
@@ -263,9 +262,9 @@ def select_modules(
 
 def select_modules_using_tags(
     ctx: click.Context,
-    deployments: List[RunwayDeploymentDefinition],
-    tags: Tuple[str, ...],
-) -> List[RunwayDeploymentDefinition]:
+    deployments: list[RunwayDeploymentDefinition],
+    tags: tuple[str, ...],
+) -> list[RunwayDeploymentDefinition]:
     """Select modules to run using tags.
 
     Args:
@@ -277,9 +276,9 @@ def select_modules_using_tags(
         List of selected deployments with selected modules.
 
     """
-    deployments_to_run: List[RunwayDeploymentDefinition] = []
+    deployments_to_run: list[RunwayDeploymentDefinition] = []
     for deployment in deployments:
-        modules_to_run: List[RunwayModuleDefinition] = []
+        modules_to_run: list[RunwayModuleDefinition] = []
         for module in deployment.modules:
             if module.child_modules:
                 module.child_modules = [

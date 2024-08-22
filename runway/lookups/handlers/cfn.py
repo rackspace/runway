@@ -6,15 +6,13 @@ the output; not the *Export.Name*.
 
 """
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, NamedTuple, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, cast
 
 from botocore.exceptions import ClientError
-from typing_extensions import Final, Literal
 
 from ...cfngin.exceptions import StackDoesNotExist
 from ...exceptions import OutputDoesNotExist
@@ -25,6 +23,7 @@ if TYPE_CHECKING:
 
     from ...cfngin.providers.aws.default import Provider
     from ...context import CfnginContext, RunwayContext
+    from .base import ParsedArgsTypeDef
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,14 +35,14 @@ class OutputQuery(NamedTuple):
     output_name: str
 
 
-class CfnLookup(LookupHandler):
+class CfnLookup(LookupHandler["CfnginContext | RunwayContext"]):
     """CloudFormation Stack Output lookup."""
 
-    TYPE_NAME: Final[Literal["cfn"]] = "cfn"
+    TYPE_NAME: ClassVar[str] = "cfn"
     """Name that the Lookup is registered as."""
 
     @staticmethod
-    def should_use_provider(args: Dict[str, str], provider: Optional[Provider]) -> bool:
+    def should_use_provider(args: ParsedArgsTypeDef, provider: Provider | None) -> bool:
         """Determine if the provider should be used for the lookup.
 
         This will open happen when the lookup is used with CFNgin.
@@ -54,7 +53,7 @@ class CfnLookup(LookupHandler):
 
         """
         if provider:
-            if args.get("region") and provider.region != args["region"]:
+            if "region" in args and provider.region != args["region"]:
                 LOGGER.debug("not using provider; requested region does not match")
                 return False
             LOGGER.debug("using provider")
@@ -81,12 +80,12 @@ class CfnLookup(LookupHandler):
         return outputs[query.output_name]
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
+    def handle(
         cls,
         value: str,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *,
-        provider: Optional[Provider] = None,
+        provider: Provider | None = None,
         **_: Any,
     ) -> Any:
         """Retrieve a value from CloudFormation Stack outputs.
@@ -117,13 +116,9 @@ class CfnLookup(LookupHandler):
             # args for testing to function correctly
             if cls.should_use_provider(args.copy(), provider):
                 # this will only happen when used from cfngin
-                result = cast("Provider", provider).get_output(
-                    query.stack_name, query.output_name
-                )
+                result = cast("Provider", provider).get_output(query.stack_name, query.output_name)
             else:
-                cfn_client = context.get_session(region=args.get("region")).client(
-                    "cloudformation"
-                )
+                cfn_client = context.get_session(region=args.get("region")).client("cloudformation")
                 result = cls.get_stack_output(cfn_client, query)
         except (ClientError, KeyError, StackDoesNotExist) as exc:
             # StackDoesNotExist is only raised by provider

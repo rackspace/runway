@@ -7,11 +7,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional
+from typing import TYPE_CHECKING, Any
 
 from .file_info import FileInfo
 
 if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable
+
     from mypy_boto3_s3.client import S3Client
 
     from .file_generator import FileStats
@@ -26,8 +28,8 @@ class FileInfoBuilder:
         *,
         client: S3Client,
         is_stream: bool = False,
-        parameters: Optional[ParametersDataModel] = None,
-        source_client: Optional[Any] = None,
+        parameters: ParametersDataModel | None = None,
+        source_client: Any | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -61,7 +63,7 @@ class FileInfoBuilder:
         """
         delete_enabled = self._parameters.delete if self._parameters else False
         return FileInfo(
-            **file_base.dict(),
+            **file_base.dict(),  # pyright: ignore[reportArgumentType]
             **(
                 {"client": self._source_client, "source_client": self._client}
                 if file_base.operation_name == "delete" and delete_enabled

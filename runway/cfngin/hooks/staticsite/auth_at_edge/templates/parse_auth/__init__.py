@@ -6,7 +6,6 @@ then inform the user of a bad request, otherwise retrieve the Cognito tokens to
 add to the cookie headers.
 """
 
-# pylint: disable=consider-using-f-string
 import base64
 import hmac
 import json
@@ -14,12 +13,12 @@ import logging
 from datetime import datetime
 from urllib.parse import parse_qs
 
-from shared_jose import (  # noqa pylint: disable=import-error
+from shared_jose import (
     MissingRequiredGroupError,
     validate_and_check_id_token,
 )
 
-from shared import (  # noqa pylint: disable=import-error
+from shared import (
     create_error_html,
     extract_and_parse_cookies,
     generate_cookie_headers,
@@ -44,7 +43,7 @@ def validate_querystring_and_cookies(request, cookies):
 
     Args:
         request (Any): Cloudfront request.
-        cookies (Dict[str, Any]): Cookies.
+        cookies (dict[str, Any]): Cookies.
 
     """
     qsp = parse_qs(request.get("querystring"))
@@ -107,8 +106,7 @@ def validate_querystring_and_cookies(request, cookies):
     calculated_hmac = sign(current_nonce, CONFIG["nonce_signing_secret"])
     if not hmac.compare_digest(calculated_hmac, nonce_hmac):
         raise RequiresConfirmationError(
-            "Nonce signature mismatch; expected %s but got %s"
-            % (calculated_hmac, nonce_hmac)
+            "Nonce signature mismatch; expected %s but got %s" % (calculated_hmac, nonce_hmac)
         )
 
     return [code, pkce, requested_uri]
@@ -140,8 +138,7 @@ def handler(event, _context):
         body = {
             "grant_type": "authorization_code",
             "client_id": CONFIG["client_id"],
-            "redirect_uri": "https://%s%s"
-            % (domain_name, CONFIG.get("redirect_path_sign_in")),
+            "redirect_uri": "https://%s%s" % (domain_name, CONFIG.get("redirect_path_sign_in")),
             "code": code[0],
             "code_verifier": pkce,
         }
@@ -183,7 +180,7 @@ def handler(event, _context):
             },
         }
         return response
-    except Exception as err:  # pylint: disable=broad-except
+    except Exception as err:
         if id_token:
             # ID token found; checking if it is valid
             try:
@@ -203,7 +200,7 @@ def handler(event, _context):
                         **CONFIG.get("cloud_front_headers", {}),
                     },
                 }
-            except Exception as err2:  # pylint: disable=broad-except
+            except Exception as err2:
                 LOGGER.debug("Id token not valid")
                 LOGGER.debug(err2)
 
@@ -235,8 +232,6 @@ def handler(event, _context):
             "status": "200",
             "headers": {
                 **CONFIG.get("cloud_front_headers", {}),
-                "content-type": [
-                    {"key": "Content-Type", "value": "text/html; charset=UTF-8"}
-                ],
+                "content-type": [{"key": "Content-Type", "value": "text/html; charset=UTF-8"}],
             },
         }

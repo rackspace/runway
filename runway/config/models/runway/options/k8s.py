@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
-from pydantic import Extra
+from pydantic import ConfigDict
 
 from ...base import ConfigProperty
 
@@ -13,11 +12,12 @@ from ...base import ConfigProperty
 class RunwayK8sModuleOptionsDataModel(ConfigProperty):
     """Model for Runway Kubernetes Module options."""
 
-    kubectl_version: Optional[str] = None
-    overlay_path: Optional[Path] = None
+    model_config = ConfigDict(
+        extra="ignore",
+        title="Runway Kubernetes Module options",
+        validate_default=True,
+        validate_assignment=True,
+    )
 
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.ignore
-        title = "Runway Kubernetes Module options."
+    kubectl_version: str | None = None
+    overlay_path: Path | None = None

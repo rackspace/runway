@@ -23,13 +23,8 @@ from typing import (
     Any,
     BinaryIO,
     Callable,
-    Dict,
-    Generator,
     NamedTuple,
-    Optional,
     TextIO,
-    Tuple,
-    Union,
     overload,
 )
 
@@ -38,10 +33,11 @@ from dateutil.tz import tzlocal, tzutc
 from s3transfer.subscribers import BaseSubscriber
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
     from queue import Queue
 
     from mypy_boto3_s3.client import S3Client
-    from mypy_boto3_s3.type_defs import ObjectTypeDef
+    from mypy_boto3_s3.type_defs import DeleteObjectRequestRequestTypeDef, ObjectTypeDef
     from s3transfer.futures import TransferFuture
     from s3transfer.utils import CallArgs
 
@@ -67,8 +63,7 @@ SIZE_SUFFIX = {
 }
 
 _S3_ACCESSPOINT_TO_BUCKET_KEY_REGEX = re.compile(
-    r"^(?P<bucket>arn:(aws).*:s3:[a-z\-0-9]+:[0-9]{12}:accesspoint[:/][^/]+)/?"
-    r"(?P<key>.*)$"
+    r"^(?P<bucket>arn:(aws).*:s3:[a-z\-0-9]+:[0-9]{12}:accesspoint[:/][^/]+)/?(?P<key>.*)$"
 )
 _S3_OUTPOST_TO_BUCKET_KEY_REGEX = re.compile(
     r"^(?P<bucket>arn:(aws).*:s3-outposts:[a-z\-0-9]+:[0-9]{12}:outpost[/:]"
@@ -93,7 +88,7 @@ class BaseProvideContentTypeSubscriber(BaseSubscriber):
         raise NotImplementedError("_get_filename()")
 
 
-def _date_parser(date_string: Union[datetime, str]) -> datetime:
+def _date_parser(date_string: datetime | str) -> datetime:
     """Parse date string into a datetime object."""
     if isinstance(date_string, datetime):
         return date_string
@@ -106,7 +101,7 @@ class BucketLister:
     def __init__(
         self,
         client: S3Client,
-        date_parser: Callable[[Union[datetime, str]], datetime] = _date_parser,
+        date_parser: Callable[[datetime | str], datetime] = _date_parser,
     ) -> None:
         """Instantiate class.
 
@@ -121,10 +116,10 @@ class BucketLister:
     def list_objects(
         self,
         bucket: str,
-        prefix: Optional[str] = None,
-        page_size: Optional[int] = None,
+        prefix: str | None = None,
+        page_size: int | None = None,
         extra_args: Any = None,
-    ) -> Generator[Tuple[str, ObjectTypeDef], None, None]:
+    ) -> Generator[tuple[str, ObjectTypeDef], None, None]:
         """List objects in S3 bucket.
 
         Args:
@@ -163,7 +158,7 @@ class OnDoneFilteredSubscriber(BaseSubscriber):
         """On done."""
         try:
             future.result()
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001
             self._on_failure(future, exc)
         else:
             self._on_success(future)
@@ -181,7 +176,7 @@ class DeleteSourceSubscriber(OnDoneFilteredSubscriber):
     def _on_success(self, future: TransferFuture) -> None:
         try:
             self._delete_source(future)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001
             future.set_exception(exc)
 
     def _delete_source(self, future: TransferFuture) -> None:
@@ -192,13 +187,13 @@ class DeleteSourceFileSubscriber(DeleteSourceSubscriber):
     """A subscriber which deletes a file."""
 
     def _delete_source(self, future: TransferFuture) -> None:
-        os.remove(future.meta.call_args.fileobj)
+        Path(future.meta.call_args.fileobj).unlink()
 
 
 class DeleteSourceObjectSubscriber(DeleteSourceSubscriber):
     """A subscriber which deletes an object."""
 
-    def __init__(self, client: S3Client):
+    def __init__(self, client: S3Client) -> None:
         """Instantiate class."""
         self._client = client
 
@@ -215,7 +210,7 @@ class DeleteSourceObjectSubscriber(DeleteSourceSubscriber):
     def _delete_source(self, future: TransferFuture) -> None:
         """Delete source."""
         call_args = future.meta.call_args
-        delete_object_kwargs = {
+        delete_object_kwargs: DeleteObjectRequestRequestTypeDef = {
             "Bucket": self._get_bucket(call_args),
             "Key": self._get_key(call_args),
         }
@@ -243,16 +238,15 @@ class CreateDirectoryError(Exception):
 class DirectoryCreatorSubscriber(BaseSubscriber):
     """Creates a directory to download if it does not exist."""
 
-    def on_queued(self, future: TransferFuture, **_: Any):
+    def on_queued(self, future: TransferFuture, **_: Any) -> None:
         """On queued."""
-        dirname = os.path.dirname(str(future.meta.call_args.fileobj))
+        dirname = Path(future.meta.call_args.fileobj).parent
         try:
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
+            dirname.mkdir(exist_ok=True, parents=True)
         except OSError as exc:
             if exc.errno != errno.EEXIST:
                 raise CreateDirectoryError(
-                    f"Could not create directory {dirname}: {exc}"
+                    f"Could not create directory {dirname.name}: {exc}"
                 ) from exc
 
 
@@ -275,11 +269,11 @@ class NonSeekableStream:
 
     """
 
-    def __init__(self, fileobj: BinaryIO):
+    def __init__(self, fileobj: BinaryIO) -> None:
         """Instantiate class."""
         self._fileobj = fileobj
 
-    def read(self, amt: Optional[int] = None) -> bytes:
+    def read(self, amt: int | None = None) -> bytes:
         """Read."""
         if amt is None:
             return self._fileobj.read()
@@ -300,7 +294,7 @@ class PrintTask(NamedTuple):
 
     message: str
     error: bool = False
-    total_parts: Optional[int] = None
+    total_parts: int | None = None
     warning: bool = False
 
 
@@ -314,9 +308,7 @@ class ProvideCopyContentTypeSubscriber(BaseProvideContentTypeSubscriber):
 class ProvideLastModifiedTimeSubscriber(OnDoneFilteredSubscriber):
     """Sets utime for a downloaded file."""
 
-    def __init__(
-        self, last_modified_time: datetime, result_queue: "Queue[Any]"
-    ) -> None:
+    def __init__(self, last_modified_time: datetime, result_queue: Queue[Any]) -> None:
         """Instantiate class."""
         self._last_modified_time = last_modified_time
         self._result_queue = result_queue
@@ -327,7 +319,7 @@ class ProvideLastModifiedTimeSubscriber(OnDoneFilteredSubscriber):
             last_update_tuple = self._last_modified_time.timetuple()
             mod_timestamp = time.mktime(last_update_tuple)
             set_file_utime(filename, int(mod_timestamp))
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001
             warning_message = (
                 f"Successfully Downloaded {filename} but was unable to update the "
                 f"last modified time. {exc}"
@@ -338,7 +330,7 @@ class ProvideLastModifiedTimeSubscriber(OnDoneFilteredSubscriber):
 class ProvideSizeSubscriber(BaseSubscriber):
     """A subscriber which provides the transfer size before it's queued."""
 
-    def __init__(self, size: Optional[int]):
+    def __init__(self, size: int | None) -> None:
         """Instantiate class."""
         self.size = size or 0
 
@@ -377,7 +369,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_copy_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to CopyObject request params.
 
@@ -399,7 +391,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_create_multipart_upload_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to CreateMultipartUpload request params.
 
@@ -419,7 +411,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_delete_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to DeleteObject request params.
 
@@ -435,7 +427,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_get_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to GetObject request params.
 
@@ -452,7 +444,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_head_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to HeadObject request params.
 
@@ -469,7 +461,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_list_objects_v2_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to DeleteObjectV2 request params.
 
@@ -485,7 +477,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_put_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to PutObject request params.
 
@@ -505,7 +497,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_upload_part_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to UploadPart request params.
 
@@ -522,7 +514,7 @@ class RequestParamsMapper:
 
     @classmethod
     def map_upload_part_copy_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Map config params to UploadPartCopy request params.
 
@@ -538,11 +530,9 @@ class RequestParamsMapper:
         cls._set_request_payer_param(request_params, config_params)
 
     @classmethod
-    def _auto_populate_metadata_directive(cls, request_params: Dict[Any, Any]) -> None:
+    def _auto_populate_metadata_directive(cls, request_params: dict[Any, Any]) -> None:
         """Auto populate metadata directive."""
-        if request_params.get("Metadata") and not request_params.get(
-            "MetadataDirective"
-        ):
+        if request_params.get("Metadata") and not request_params.get("MetadataDirective"):
             request_params["MetadataDirective"] = "REPLACE"
 
     @classmethod
@@ -560,8 +550,8 @@ class RequestParamsMapper:
 
     @classmethod
     def _set_general_object_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ):
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
+    ) -> None:
         """Set general object params.
 
         Parameters set in this method should be applicable to the following
@@ -588,7 +578,7 @@ class RequestParamsMapper:
 
     @classmethod
     def _set_grant_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Set grant params."""
         if config_params.get("grants"):
@@ -596,14 +586,12 @@ class RequestParamsMapper:
                 try:
                     permission, grantee = grant.split("=", 1)
                 except ValueError:
-                    raise ValueError(
-                        "grants should be of the form permission=principal"
-                    ) from None
+                    raise ValueError("grants should be of the form permission=principal") from None
                 request_params[cls._permission_to_param(permission)] = grantee
 
     @classmethod
     def _set_metadata_directive_param(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Set metadata directive param."""
         if config_params.get("metadata_directive"):
@@ -611,7 +599,7 @@ class RequestParamsMapper:
 
     @classmethod
     def _set_metadata_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Get metadata params."""
         if config_params.get("metadata"):
@@ -619,15 +607,15 @@ class RequestParamsMapper:
 
     @classmethod
     def _set_request_payer_param(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
-    ):
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
+    ) -> None:
         """Set request payer param."""
         if config_params.get("request_payer"):
             request_params["RequestPayer"] = config_params["request_payer"]
 
     @classmethod
     def _set_sse_c_and_copy_source_request_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Set SSE-C and copy source request params."""
         cls._set_sse_c_request_params(request_params, config_params)
@@ -635,19 +623,15 @@ class RequestParamsMapper:
 
     @classmethod
     def _set_sse_c_copy_source_request_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         if config_params.get("sse_c_copy_source"):
-            request_params["CopySourceSSECustomerAlgorithm"] = config_params[
-                "sse_c_copy_source"
-            ]
-            request_params["CopySourceSSECustomerKey"] = config_params[
-                "sse_c_copy_source_key"
-            ]
+            request_params["CopySourceSSECustomerAlgorithm"] = config_params["sse_c_copy_source"]
+            request_params["CopySourceSSECustomerKey"] = config_params["sse_c_copy_source_key"]
 
     @classmethod
     def _set_sse_c_request_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Set SSE-C request params."""
         if config_params.get("sse_c"):
@@ -656,7 +640,7 @@ class RequestParamsMapper:
 
     @classmethod
     def _set_sse_request_params(
-        cls, request_params: Dict[Any, Any], config_params: Dict[Any, Any]
+        cls, request_params: dict[Any, Any], config_params: dict[Any, Any]
     ) -> None:
         """Set SSE request params."""
         if config_params.get("sse"):
@@ -668,7 +652,7 @@ class RequestParamsMapper:
 class StdoutBytesWriter:
     """Acts as a file-like object that performs the bytes_print function on write."""
 
-    def __init__(self, stdout: Optional[TextIO] = None) -> None:
+    def __init__(self, stdout: TextIO | None = None) -> None:
         """Instantiate class."""
         self._stdout = stdout
 
@@ -692,9 +676,7 @@ def block_s3_object_lambda(s3_path: str) -> None:
         raise ValueError("S3 action does not support S3 Object Lambda resources")
 
 
-def create_warning(
-    path: Optional[AnyPath], error_message: str, skip_file: bool = True
-) -> PrintTask:
+def create_warning(path: AnyPath | None, error_message: str, skip_file: bool = True) -> PrintTask:
     """Create a ``PrintTask`` for whenever a warning is to be thrown."""
     print_string = "warning: "
     if skip_file:
@@ -703,7 +685,7 @@ def create_warning(
     return PrintTask(message=print_string, error=False, warning=True)
 
 
-def find_bucket_key(s3_path: str) -> Tuple[str, str]:
+def find_bucket_key(s3_path: str) -> tuple[str, str]:
     """Given an S3 path return the bucket and the key represented by the S3 path.
 
     Args:
@@ -726,8 +708,8 @@ def find_bucket_key(s3_path: str) -> Tuple[str, str]:
 
 
 def find_dest_path_comp_key(
-    files: FormatPathResult, src_path: Optional[AnyPath] = None
-) -> Tuple[str, str]:
+    files: FormatPathResult, src_path: AnyPath | None = None
+) -> tuple[str, str]:
     """Determine destination path and compare key.
 
     Args:
@@ -742,17 +724,13 @@ def find_dest_path_comp_key(
     if src_path is None:
         src_path = src["path"]
     if isinstance(src_path, Path):  # convert path to absolute path str
-        if src_path.is_dir():
-            src_path = f"{src_path.resolve()}{os.sep}"
-        else:
-            src_path = str(src_path.resolve())
+        src_path = f"{src_path.resolve()}{os.sep}" if src_path.is_dir() else str(src_path.resolve())
 
     sep_table = {"s3": "/", "local": os.sep}
 
-    if files["dir_op"]:
-        rel_path = src_path[len(src["path"]) :]
-    else:
-        rel_path = src_path.split(sep_table[src_type])[-1]
+    rel_path = (
+        src_path[len(src["path"]) :] if files["dir_op"] else src_path.split(sep_table[src_type])[-1]
+    )
     compare_key = rel_path.replace(sep_table[src_type], "/")
     if files["use_src_name"]:
         dest_path = dest["path"]
@@ -762,11 +740,11 @@ def find_dest_path_comp_key(
     return dest_path, compare_key
 
 
-def get_file_stat(path: Path) -> Tuple[int, Optional[datetime]]:
+def get_file_stat(path: Path) -> tuple[int, datetime | None]:
     """Get size of file in bytes and last modified time stamp."""
     try:
         stats = path.stat()
-    except IOError as exc:
+    except OSError as exc:
         raise ValueError(f"Could not retrieve file stat of {path}: {exc}") from exc
 
     try:
@@ -777,7 +755,7 @@ def get_file_stat(path: Path) -> Tuple[int, Optional[datetime]]:
     return stats.st_size, update_time
 
 
-def guess_content_type(filename: AnyPath) -> Optional[str]:
+def guess_content_type(filename: AnyPath) -> str | None:
     """Given a filename, guess it's content type.
 
     If the type cannot be guessed, a value of None is returned.
@@ -794,7 +772,7 @@ def guess_content_type(filename: AnyPath) -> Optional[str]:
     return None
 
 
-def human_readable_size(value: float) -> Optional[str]:
+def human_readable_size(value: float) -> str | None:
     """Convert a size in bytes into a human readable format.
 
     For example::
@@ -843,11 +821,7 @@ def human_readable_to_bytes(value: str) -> int:
 
     """
     value = value.lower()
-    if value[-2:] == "ib":
-        # Assume IEC suffix.
-        suffix = value[-3:].lower()
-    else:
-        suffix = value[-2:].lower()
+    suffix = value[-3:].lower() if value[-2:] == "ib" else value[-2:].lower()
     has_size_identifier = len(value) >= 2 and suffix in SIZE_SUFFIX
     if not has_size_identifier:
         try:
@@ -868,14 +842,10 @@ def relative_path(filename: None, start: AnyPath = ...) -> None: ...
 
 
 @overload
-def relative_path(
-    filename: Optional[AnyPath], start: AnyPath = ...
-) -> Optional[str]: ...
+def relative_path(filename: AnyPath | None, start: AnyPath = ...) -> str | None: ...
 
 
-def relative_path(
-    filename: Optional[AnyPath], start: AnyPath = os.path.curdir
-) -> Optional[str]:
+def relative_path(filename: AnyPath | None, start: AnyPath = os.path.curdir) -> str | None:
     """Cross platform relative path of a filename.
 
     If no relative path can be calculated (i.e different
@@ -888,16 +858,16 @@ def relative_path(
     try:
         dirname, basename = os.path.split(str(filename))
         relative_dir = os.path.relpath(dirname, start)
-        return os.path.join(relative_dir, basename)
+        return os.path.join(relative_dir, basename)  # noqa: PTH118
     except ValueError:
-        return os.path.abspath(str(filename))
+        return os.path.abspath(str(filename))  # noqa: PTH100
 
 
 class SetFileUtimeError(Exception):
     """Set file update time error."""
 
 
-def set_file_utime(filename: AnyPath, desired_time: float):
+def set_file_utime(filename: AnyPath, desired_time: float) -> None:
     """Set the utime of a file, and if it fails, raise a more explicit error.
 
     Args:
@@ -921,7 +891,7 @@ def set_file_utime(filename: AnyPath, desired_time: float):
         ) from exc
 
 
-def split_s3_bucket_key(s3_path: str) -> Tuple[str, str]:
+def split_s3_bucket_key(s3_path: str) -> tuple[str, str]:
     """Split s3 path into bucket and key prefix.
 
     This will also handle the s3:// prefix.
@@ -938,20 +908,19 @@ def split_s3_bucket_key(s3_path: str) -> Tuple[str, str]:
     return find_bucket_key(s3_path)
 
 
-def uni_print(statement: str, out_file: Optional[TextIO] = None) -> None:
+def uni_print(statement: str, out_file: TextIO | None = None) -> None:
     """Write unicode to a file, usually stdout or stderr.
 
     Ensures that the proper encoding is used if the statement is not a string type.
 
     """
-    if out_file is None:
-        out_file = sys.stdout
+    out: TextIO | Any = sys.stdout if out_file is None else out_file
     try:
-        out_file.write(statement)
+        out.write(statement)
     except UnicodeEncodeError:
-        new_encoding = getattr(out_file, "encoding", "ascii")
+        new_encoding = getattr(out, "encoding", "ascii")
         if not new_encoding:
             new_encoding = "ascii"
         new_statement = statement.encode(new_encoding, "replace").decode(new_encoding)
-        out_file.write(new_statement)
-    out_file.flush()
+        out.write(new_statement)
+    out.flush()

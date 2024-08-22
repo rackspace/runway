@@ -15,9 +15,7 @@ if TYPE_CHECKING:
 
 MODULE = "runway.compat"
 
-py37 = pytest.mark.skipif(
-    sys.version_info >= (3, 8), reason="requires python3.8 or higher"
-)
+py37 = pytest.mark.skipif(sys.version_info >= (3, 8), reason="requires python3.8 or higher")
 
 
 @py37

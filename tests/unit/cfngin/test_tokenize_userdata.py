@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.tokenize_userdata."""
 
-# pyright: basic
 import unittest
 
 import yaml
@@ -16,8 +15,8 @@ class TestCfTokenize(unittest.TestCase):
         user_data = ["field0", 'Ref("SshKey")', "field1", 'Fn::GetAtt("Blah", "Woot")']
         user_data_dump = yaml.dump(user_data)
         parts = cf_tokenize(user_data_dump)
-        self.assertIsInstance(parts[1], dict)
-        self.assertIsInstance(parts[3], dict)
-        self.assertEqual(parts[1]["Ref"], "SshKey")  # type: ignore
-        self.assertEqual(parts[3]["Fn::GetAtt"], ["Blah", "Woot"])  # type: ignore
-        self.assertEqual(len(parts), 5)
+        assert isinstance(parts[1], dict)
+        assert isinstance(parts[3], dict)
+        assert parts[1]["Ref"] == "SshKey"  # type: ignore
+        assert parts[3]["Fn::GetAtt"] == ["Blah", "Woot"]  # type: ignore
+        assert len(parts) == 5

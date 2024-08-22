@@ -15,9 +15,9 @@ jobs:
     if: github.repository == 'onicagroup/runway' && github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
-      - name: Run Label Maker
+      - name: 🚀 Run Label Maker
         uses: crazy-max/ghaction-github-labeler@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

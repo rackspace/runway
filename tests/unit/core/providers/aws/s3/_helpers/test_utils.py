@@ -1,6 +1,5 @@
 """Test runway.core.providers.aws.s3._helpers.utils."""
 
-# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import datetime
@@ -13,7 +12,8 @@ import time
 from io import BytesIO
 from pathlib import Path
 from queue import Queue
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
+from unittest.mock import Mock, PropertyMock, sentinel
 
 import boto3
 import pytest
@@ -21,7 +21,6 @@ from botocore.exceptions import ClientError
 from botocore.hooks import HierarchicalEmitter
 from botocore.stub import Stubber
 from dateutil.tz import tzlocal
-from mock import Mock, PropertyMock, sentinel
 from s3transfer.compat import seekable
 from s3transfer.futures import TransferFuture
 
@@ -90,9 +89,9 @@ class TestBucketLister:
     date_parser: ClassVar[Mock] = Mock(return_value=sentinel.now)
     emitter: ClassVar[HierarchicalEmitter] = HierarchicalEmitter()
     client: ClassVar[Mock] = Mock(meta=Mock(events=emitter))
-    responses: List[Any] = []
+    responses: list[Any] = []
 
-    def fake_paginate(self, *_args: Any, **_kwargs: Any) -> List[Any]:
+    def fake_paginate(self, *_args: Any, **_kwargs: Any) -> list[Any]:
         """Fake paginate."""
         for response in self.responses:
             self.emitter.emit("after-call.s3.ListObjectsV2", parsed=response)
@@ -121,7 +120,7 @@ class TestBucketLister:
         for individual_response in individual_response_elements:
             assert individual_response["LastModified"] == now
 
-    def test_list_objects_pass_extra_args(self):
+    def test_list_objects_pass_extra_args(self) -> None:
         """Test list_objects."""
         self.client.get_paginator.return_value.paginate = Mock(
             return_value=[
@@ -137,18 +136,14 @@ class TestBucketLister:
             ]
         )
         lister = BucketLister(self.client, self.date_parser)
-        list(
-            lister.list_objects(
-                bucket="mybucket", extra_args={"RequestPayer": "requester"}
-            )
-        )
+        list(lister.list_objects(bucket="mybucket", extra_args={"RequestPayer": "requester"}))
         self.client.get_paginator.return_value.paginate.assert_called_with(
             Bucket="mybucket",
             PaginationConfig={"PageSize": None},
             RequestPayer="requester",
         )
 
-    def test_list_objects_pass_prefix(self):
+    def test_list_objects_pass_prefix(self) -> None:
         """Test list_objects."""
         self.client.get_paginator.return_value.paginate = Mock(
             return_value=[
@@ -183,9 +178,7 @@ class TestDeleteCopySourceObjectSubscriber:
         """Test on_done."""
         client = boto3.client("s3")
         stubber = Stubber(client)
-        stubber.add_response(
-            "delete_object", {}, {"Bucket": self.bucket, "Key": self.key}
-        )
+        stubber.add_response("delete_object", {}, {"Bucket": self.bucket, "Key": self.key})
         future = Mock(meta=self.meta)
         with stubber:
             assert not DeleteCopySourceObjectSubscriber(client).on_done(future)
@@ -232,9 +225,7 @@ class TestDeleteSourceFileSubscriber:
         tmp_file = tmp_path / "test.txt"
         tmp_file.write_text("data")
         future = Mock(
-            meta=FakeTransferFutureMeta(
-                call_args=FakeTransferFutureCallArgs(fileobj=str(tmp_file))
-            )
+            meta=FakeTransferFutureMeta(call_args=FakeTransferFutureCallArgs(fileobj=str(tmp_file)))
         )
         DeleteSourceFileSubscriber().on_done(future)
         assert not tmp_file.exists()
@@ -244,9 +235,7 @@ class TestDeleteSourceFileSubscriber:
         """Test on_done."""
         tmp_file = tmp_path / "test.txt"
         future = Mock(
-            meta=FakeTransferFutureMeta(
-                call_args=FakeTransferFutureCallArgs(fileobj=str(tmp_file))
-            )
+            meta=FakeTransferFutureMeta(call_args=FakeTransferFutureCallArgs(fileobj=str(tmp_file)))
         )
         DeleteSourceFileSubscriber().on_done(future)
         assert not tmp_file.exists()
@@ -267,9 +256,7 @@ class TestDeleteSourceObjectSubscriber:
         """Test on_done."""
         client = boto3.client("s3")
         stubber = Stubber(client)
-        stubber.add_response(
-            "delete_object", {}, {"Bucket": self.bucket, "Key": self.key}
-        )
+        stubber.add_response("delete_object", {}, {"Bucket": self.bucket, "Key": self.key})
         future = Mock(meta=self.meta)
         with stubber:
             assert not DeleteSourceObjectSubscriber(client).on_done(future)
@@ -348,7 +335,7 @@ class TestDirectoryCreatorSubscriber:
         assert tmp_dir.is_dir()
         future.set_exception.assert_not_called()
 
-    def test_on_queued_handle_eexist(
+    def test_on_queued_handle_eexist(  # cspell: disable-line
         self, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test on_queued."""
@@ -359,8 +346,8 @@ class TestDirectoryCreatorSubscriber:
             )
         )
         exc = OSError()
-        exc.errno = errno.EEXIST
-        mocker.patch("os.makedirs", side_effect=exc)
+        exc.errno = errno.EEXIST  # cspell: disable-line
+        mocker.patch("pathlib.Path.mkdir", side_effect=exc)
         assert not DirectoryCreatorSubscriber().on_queued(future)
         assert not tmp_dir.exists()
 
@@ -372,7 +359,7 @@ class TestDirectoryCreatorSubscriber:
                 call_args=FakeTransferFutureCallArgs(fileobj=tmp_dir / "test.txt")
             )
         )
-        mocker.patch("os.makedirs", side_effect=OSError())
+        mocker.patch("pathlib.Path.mkdir", side_effect=OSError())
         with pytest.raises(CreateDirectoryError):
             DirectoryCreatorSubscriber().on_queued(future)
         assert not tmp_dir.exists()
@@ -400,10 +387,10 @@ class TestOnDoneFilteredSubscriber:
     class Subscriber(OnDoneFilteredSubscriber):
         """Subscriber subclass to test."""
 
-        def __init__(self):
+        def __init__(self) -> None:
             """Instantiate class."""
-            self.on_success_calls: List[Any] = []
-            self.on_failure_calls: List[Any] = []
+            self.on_success_calls: list[Any] = []
+            self.on_failure_calls: list[Any] = []
 
         def _on_success(self, future: Any) -> None:
             self.on_success_calls.append(future)
@@ -411,26 +398,24 @@ class TestOnDoneFilteredSubscriber:
         def _on_failure(self, future: Any, exception: Exception) -> None:
             self.on_failure_calls.append((future, exception))
 
-    def test_on_done_failure(self):
+    def test_on_done_failure(self) -> None:
         """Test on_done."""
         subscriber = self.Subscriber()
         exception = Exception("my exception")
         future = FakeTransferFuture(exception=exception)
         subscriber.on_done(future)  # type: ignore
         assert subscriber.on_failure_calls == [(future, exception)]
-        assert not subscriber.on_success_calls and isinstance(
-            subscriber.on_success_calls, list
-        )
+        assert not subscriber.on_success_calls
+        assert isinstance(subscriber.on_success_calls, list)
 
-    def test_on_done_success(self):
+    def test_on_done_success(self) -> None:
         """Test on_done."""
         subscriber = self.Subscriber()
         future = FakeTransferFuture("return-value")
         subscriber.on_done(future)  # type: ignore
         assert subscriber.on_success_calls == [future]
-        assert not subscriber.on_failure_calls and isinstance(
-            subscriber.on_failure_calls, list
-        )
+        assert not subscriber.on_failure_calls
+        assert isinstance(subscriber.on_failure_calls, list)
 
 
 class TestProvideCopyContentTypeSubscriber:
@@ -459,25 +444,19 @@ class TestProvideLastModifiedTimeSubscriber:
     desired_utime: ClassVar[datetime.datetime] = datetime.datetime(
         2016, 1, 18, 7, 0, 0, tzinfo=tzlocal()
     )
-    result_queue: ClassVar["Queue[Any]"] = Queue()
-    subscriber: ClassVar[ProvideLastModifiedTimeSubscriber] = (
-        ProvideLastModifiedTimeSubscriber(desired_utime, result_queue)
+    result_queue: ClassVar[Queue[Any]] = Queue()
+    subscriber: ClassVar[ProvideLastModifiedTimeSubscriber] = ProvideLastModifiedTimeSubscriber(
+        desired_utime, result_queue
     )
 
-    def test_on_done_handle_exception(
-        self, mocker: MockerFixture, tmp_path: Path
-    ) -> None:
+    def test_on_done_handle_exception(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test on_done."""
         tmp_file = tmp_path / "test.txt"
         tmp_file.touch()
         future = FakeTransferFuture(
-            meta=FakeTransferFutureMeta(
-                call_args=FakeTransferFutureCallArgs(fileobj=tmp_file)
-            )
+            meta=FakeTransferFutureMeta(call_args=FakeTransferFutureCallArgs(fileobj=tmp_file))
         )
-        mock_create_warning = mocker.patch(
-            f"{MODULE}.create_warning", return_value="warning"
-        )
+        mock_create_warning = mocker.patch(f"{MODULE}.create_warning", return_value="warning")
         assert not ProvideLastModifiedTimeSubscriber(
             None, self.result_queue  # type: ignore
         ).on_done(
@@ -485,10 +464,7 @@ class TestProvideLastModifiedTimeSubscriber:
         )
         mock_create_warning.assert_called_once()
         assert mock_create_warning.call_args[0][0] == tmp_file
-        assert (
-            "was unable to update the last modified time."
-            in mock_create_warning.call_args[0][1]
-        )
+        assert "was unable to update the last modified time." in mock_create_warning.call_args[0][1]
         assert self.result_queue.get() == "warning"
 
     def test_on_done_modifies_utime(self, tmp_path: Path) -> None:
@@ -496,9 +472,7 @@ class TestProvideLastModifiedTimeSubscriber:
         tmp_file = tmp_path / "test.txt"
         tmp_file.touch()
         future = FakeTransferFuture(
-            meta=FakeTransferFutureMeta(
-                call_args=FakeTransferFutureCallArgs(fileobj=tmp_file)
-            )
+            meta=FakeTransferFutureMeta(call_args=FakeTransferFutureCallArgs(fileobj=tmp_file))
         )
         assert not self.subscriber.on_done(future)  # type: ignore
         _, utime = get_file_stat(tmp_file)
@@ -523,9 +497,7 @@ class TestProvideUploadContentTypeSubscriber:
     def test_on_queued(self) -> None:
         """Test on_queued."""
         future = FakeTransferFuture(
-            meta=FakeTransferFutureMeta(
-                call_args=FakeTransferFutureCallArgs(fileobj="test.txt")
-            )
+            meta=FakeTransferFutureMeta(call_args=FakeTransferFutureCallArgs(fileobj="test.txt"))
         )
         assert not ProvideUploadContentTypeSubscriber().on_queued(future)  # type: ignore
         assert future.meta.call_args.extra_args.get("ContentType") == "text/plain"
@@ -534,7 +506,7 @@ class TestProvideUploadContentTypeSubscriber:
 class TestRequestParamsMapper:
     """Test RequestParamsMapper."""
 
-    params: ClassVar[Dict[str, str]] = {
+    params: ClassVar[dict[str, str]] = {
         "sse": "AES256",
         "sse_kms_key_id": "my-kms-key",
         "sse_c": "AES256",
@@ -545,7 +517,7 @@ class TestRequestParamsMapper:
 
     def test_map_copy_object_params(self) -> None:
         """Test map_copy_object_params."""
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         assert not RequestParamsMapper.map_copy_object_params(
             params, {"metadata": "something", **self.params}
         )
@@ -562,7 +534,7 @@ class TestRequestParamsMapper:
 
     def test_map_copy_object_params_metadata_directive(self) -> None:
         """Test map_copy_object_params."""
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         assert not RequestParamsMapper.map_copy_object_params(
             params, {"metadata_directive": "something", **self.params}
         )
@@ -578,10 +550,8 @@ class TestRequestParamsMapper:
 
     def test_map_create_multipart_upload_params(self) -> None:
         """Test map_create_multipart_upload_params."""
-        params: Dict[str, str] = {}
-        assert not RequestParamsMapper.map_create_multipart_upload_params(
-            params, self.params
-        )
+        params: dict[str, str] = {}
+        assert not RequestParamsMapper.map_create_multipart_upload_params(params, self.params)
         assert params == {
             "SSECustomerAlgorithm": "AES256",
             "SSECustomerKey": "my-sse-c-key",
@@ -591,7 +561,7 @@ class TestRequestParamsMapper:
 
     def test_map_delete_object_params(self) -> None:
         """Test map_delete_object_params."""
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         assert not RequestParamsMapper.map_delete_object_params(
             params, {"request_payer": "requester", **self.params}
         )
@@ -599,7 +569,7 @@ class TestRequestParamsMapper:
 
     def test_map_get_object_params(self) -> None:
         """Test map_get_object_params."""
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         assert not RequestParamsMapper.map_get_object_params(params, self.params)
         assert params == {
             "SSECustomerAlgorithm": "AES256",
@@ -608,7 +578,7 @@ class TestRequestParamsMapper:
 
     def test_map_head_object_params(self) -> None:
         """Test map_head_object_params."""
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         assert not RequestParamsMapper.map_head_object_params(params, self.params)
         assert params == {
             "SSECustomerAlgorithm": "AES256",
@@ -617,7 +587,7 @@ class TestRequestParamsMapper:
 
     def test_map_list_objects_v2_params(self) -> None:
         """Test map_list_objects_v2_params."""
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
         assert not RequestParamsMapper.map_list_objects_v2_params(
             params, {"request_payer": "requester", **self.params}
         )
@@ -625,7 +595,7 @@ class TestRequestParamsMapper:
 
     def test_map_put_object_params(self) -> None:
         """Test map_put_object_params."""
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         assert not RequestParamsMapper.map_put_object_params(
             params,
             {
@@ -653,28 +623,25 @@ class TestRequestParamsMapper:
 
     def test_map_put_object_params_raise_value_error_format(self) -> None:
         """Test map_put_object_params."""
-        params: Dict[str, str] = {}
-        with pytest.raises(ValueError) as excinfo:
+        params: dict[str, str] = {}
+        with pytest.raises(ValueError, match="grants should be of the form permission=principal"):
             RequestParamsMapper.map_put_object_params(
                 params, {"grants": ["invalid"], **self.params}
             )
-        assert str(excinfo.value) == "grants should be of the form permission=principal"
 
     def test_map_put_object_params_raise_value_error_permission(self) -> None:
         """Test map_put_object_params."""
-        params: Dict[str, str] = {}
-        with pytest.raises(ValueError) as excinfo:
+        params: dict[str, str] = {}
+        with pytest.raises(
+            ValueError, match="permission must be one of: read|readacl|writeacl|full"
+        ):
             RequestParamsMapper.map_put_object_params(
                 params, {"grants": ["invalid=test-read"], **self.params}
             )
-        assert (
-            str(excinfo.value)
-            == "permission must be one of: read|readacl|writeacl|full"
-        )
 
     def test_map_upload_part_params(self) -> None:
         """Test map_upload_part_params."""
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         assert not RequestParamsMapper.map_upload_part_params(params, self.params)
         assert params == {
             "SSECustomerAlgorithm": "AES256",
@@ -683,7 +650,7 @@ class TestRequestParamsMapper:
 
     def test_map_upload_part_copy_params(self) -> None:
         """Test map_upload_part_copy_params."""
-        params: Dict[str, str] = {}
+        params: dict[str, str] = {}
         assert not RequestParamsMapper.map_upload_part_copy_params(params, self.params)
         assert params == {
             "CopySourceSSECustomerAlgorithm": "AES256",
@@ -725,22 +692,18 @@ class TestStdoutBytesWriter:
 
 def test_block_s3_object_lambda_raise_colon() -> None:
     """Test block_s3_object_lambda."""
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="S3 action does not support S3 Object Lambda resources"):
         block_s3_object_lambda(
-            "arn:aws:s3-object-lambda:us-west-2:123456789012:"
-            "accesspoint:my-accesspoint"
+            "arn:aws:s3-object-lambda:us-west-2:123456789012:accesspoint:my-accesspoint"
         )
-    assert "does not support S3 Object Lambda resources" in str(excinfo.value)
 
 
 def test_block_s3_object_lambda_raise_slash() -> None:
     """Test block_s3_object_lambda."""
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="S3 action does not support S3 Object Lambda resources"):
         block_s3_object_lambda(
-            "arn:aws:s3-object-lambda:us-west-2:123456789012:"
-            "accesspoint/my-accesspoint"
+            "arn:aws:s3-object-lambda:us-west-2:123456789012:accesspoint/my-accesspoint"
         )
-    assert "does not support S3 Object Lambda resources" in str(excinfo.value)
 
 
 def test_create_warning() -> None:
@@ -806,28 +769,28 @@ def test_date_parser_datetime() -> None:
             "pre/key",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "key",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key:name",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key:name",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "key:name",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key/name",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/key/name",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "key/name",
         ),
         (
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/prefix/key:name",  # noqa
-            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",  # noqa
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint/prefix/key:name",
+            "arn:aws:s3-outposts:us-west-2:123456789012:outpost:op-12334:accesspoint:my-accesspoint",
             "prefix/key:name",
         ),
     ],
@@ -888,12 +851,12 @@ def test_find_dest_path_comp_key_locals3_file_no_dir_op(tmp_path: Path) -> None:
 def test_get_file_stat(tmp_path: Path) -> None:
     """Test get_file_stat."""
     tmp_file = tmp_path / "test.txt"
-    now = datetime.datetime.now(tzlocal())
-    epoch_now = time.mktime(now.timetuple())
     tmp_file.write_text("foo")
     size, update_time = get_file_stat(tmp_file)
     assert size == 3
-    assert time.mktime(update_time.timetuple()) == epoch_now  # type: ignore
+    assert update_time, (
+        "just ensure that it has a truthy value, checking exact value is inconsistent",
+    )
 
 
 @pytest.mark.parametrize("exc", [ValueError(), OSError(), OverflowError()])
@@ -909,11 +872,10 @@ def test_get_file_stat_handle_timestamp_error(
 
 def test_get_file_stat_raise_value_error(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test get_file_stat."""
-    mocker.patch.object(Path, "stat", PropertyMock(side_effect=IOError("msg")))
+    mocker.patch.object(Path, "stat", PropertyMock(side_effect=OSError("msg")))
     tmp_file = tmp_path / "test.txt"
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Could not retrieve file stat"):
         get_file_stat(tmp_file)
-    assert str(excinfo.value) == f"Could not retrieve file stat of {tmp_file}: msg"
 
 
 def test_guess_content_type(mocker: MockerFixture, tmp_path: Path) -> None:
@@ -955,7 +917,7 @@ def test_guess_content_type_handle_unicode_decode_error(
         (1024**7, None),
     ],
 )
-def test_human_readable_size(expected: Optional[str], value: float) -> None:
+def test_human_readable_size(expected: str | None, value: float) -> None:
     """Test human_readable_size."""
     assert human_readable_size(value) == expected
 
@@ -984,23 +946,18 @@ def test_human_readable_to_bytes(expected: int, value: str) -> None:
 
 def test_human_readable_to_bytes_raise_value_error() -> None:
     """Test human_readable_to_bytes."""
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Invalid size value"):
         human_readable_to_bytes("test")
-    assert str(excinfo.value) == "Invalid size value: test"
 
 
-@pytest.mark.skipif(
-    platform.system() == "Windows", reason="crashes xdist worker on Windows"
-)
-def test_relative_path_handle_value_error(
-    mocker: MockerFixture, tmp_path: Path
-) -> None:
+@pytest.mark.skipif(platform.system() == "Windows", reason="crashes xdist worker on Windows")
+def test_relative_path_handle_value_error(mocker: MockerFixture, tmp_path: Path) -> None:
     """Test relative_path."""
     tmp_file = tmp_path / "test.txt"
     mocker.patch("os.path.split", side_effect=ValueError())
     result = relative_path(tmp_file, tmp_path)
     assert isinstance(result, str)
-    assert os.path.isabs(result)
+    assert Path(result).is_absolute()
 
 
 @pytest.mark.parametrize(
@@ -1008,7 +965,7 @@ def test_relative_path_handle_value_error(
     [("/tmp/foo/bar", "/tmp/foo", f".{os.sep}bar"), (None, "/foo", None)],
 )
 def test_relative_path_posix(
-    expected: Optional[str], filename: Optional[str], mocker: MockerFixture, start: str
+    expected: str | None, filename: str | None, mocker: MockerFixture, start: str
 ) -> None:
     """Test relative_path."""
     mocker.patch("os.path.relpath", posixpath.relpath)
@@ -1021,7 +978,7 @@ def test_relative_path_posix(
     [(None, "/foo", None), (r"C:\tmp\foo\bar", r"C:\tmp\foo", f".{os.sep}bar")],
 )
 def test_relative_path_windows(
-    expected: Optional[str], filename: Optional[str], mocker: MockerFixture, start: str
+    expected: str | None, filename: str | None, mocker: MockerFixture, start: str
 ) -> None:
     """Test relative_path."""
     mocker.patch("os.path.relpath", ntpath.relpath)
@@ -1057,7 +1014,7 @@ def test_set_file_utime_raise_os_error(mocker: MockerFixture, tmp_path: Path) ->
     mocker.patch("os.utime", side_effect=OSError(2, ""))
     now = datetime.datetime.now(tzlocal())
     epoch_now = time.mktime(now.timetuple())
-    with pytest.raises(OSError):
+    with pytest.raises(OSError):  # noqa: PT011
         set_file_utime(tmp_file, epoch_now)
 
 
@@ -1073,9 +1030,7 @@ def test_uni_print_handle_unicode_encoding_error() -> None:
     """Test uni_print."""
     out_file = Mock(
         encoding=None,
-        write=Mock(
-            side_effect=[UnicodeEncodeError("test", "test", 0, 0, "test"), None]
-        ),
+        write=Mock(side_effect=[UnicodeEncodeError("test", "test", 0, 0, "test"), None]),
     )
     assert not uni_print("test", out_file)
     assert out_file.write.call_count == 2

@@ -6,9 +6,7 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Tuple, Union, cast
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from ..compat import cached_property, shlex_join
 from ..exceptions import RunwayError
@@ -16,6 +14,8 @@ from ..utils import Version
 from .base_classes import DependencyManager
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from _typeshed import StrPath
 
     from .._logging import RunwayLogger
@@ -30,8 +30,7 @@ class PipInstallFailedError(RunwayError):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Instantiate class. All args/kwargs are passed to parent method."""
         self.message = (
-            "pip failed to install dependencies; "
-            "review pip's output above to troubleshoot"
+            "pip failed to install dependencies; review pip's output above to troubleshoot"
         )
         super().__init__(*args, **kwargs)
 
@@ -39,10 +38,10 @@ class PipInstallFailedError(RunwayError):
 class Pip(DependencyManager):
     """pip CLI interface."""
 
-    CONFIG_FILES: Final[Tuple[Literal["requirements.txt"]]] = ("requirements.txt",)
+    CONFIG_FILES: ClassVar[tuple[str, ...]] = ("requirements.txt",)
     """Configuration files used by pip."""
 
-    EXECUTABLE: Final[Literal["pip"]] = "pip"
+    EXECUTABLE: ClassVar[str] = "pip"
     """CLI executable."""
 
     @cached_property
@@ -51,9 +50,7 @@ class Pip(DependencyManager):
         cmd_output = self._run_command([self.EXECUTABLE, "--version"])
         match = re.search(r"^pip \S* from .+ \(python (?P<version>\S*)\)$", cmd_output)
         if not match:
-            LOGGER.warning(
-                "unable to parse Python version from output:\n%s", cmd_output
-            )
+            LOGGER.warning("unable to parse Python version from output:\n%s", cmd_output)
             return Version("0.0.0")
         return Version(match.group("version"))
 
@@ -73,24 +70,23 @@ class Pip(DependencyManager):
 
         Args:
             directory: Directory to check.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         kwargs.setdefault("file_name", cls.CONFIG_FILES[0])
         requirements_txt = Path(directory) / kwargs["file_name"]
-        if requirements_txt.is_file():
-            return True
-        return False
+        return bool(requirements_txt.is_file())
 
     @classmethod
     def generate_install_command(
         cls,
         *,
-        cache_dir: Optional[StrPath] = None,
+        cache_dir: StrPath | None = None,
         no_cache_dir: bool = False,
         no_deps: bool = False,
         requirements: StrPath,
         target: StrPath,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate the command that when run will install dependencies.
 
         This method is exposed to easily format the command to be run by with
@@ -118,8 +114,8 @@ class Pip(DependencyManager):
     def install(
         self,
         *,
-        cache_dir: Optional[StrPath] = None,
-        extend_args: Optional[List[str]] = None,
+        cache_dir: StrPath | None = None,
+        extend_args: list[str] | None = None,
         no_cache_dir: bool = False,
         no_deps: bool = False,
         requirements: StrPath,
@@ -165,14 +161,15 @@ class Pip(DependencyManager):
     @classmethod
     def generate_command(
         cls,
-        command: Union[List[str], str],
-        **kwargs: Optional[Union[bool, Iterable[str], str]],
-    ) -> List[str]:
+        command: list[str] | str,
+        **kwargs: bool | Iterable[str] | str | None,
+    ) -> list[str]:
         """Generate command to be executed and log it.
 
         Args:
             command: Command to run.
             args: Additional args to pass to the command.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             The full command to be passed into a subprocess.

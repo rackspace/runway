@@ -50,7 +50,7 @@ Environment variables can be used to alter the functionality of Runway.
   :type: str
   :noindex:
 
-  Explicitly enable/disable colorized output for :ref:`CDK <mod-cdk>`, :ref:`Serverless <mod-sls>`, and :ref:`Terraform <mod-tf>` modules.
+  Explicitly enable/disable colorized output for :ref:`index:AWS Cloud Development Kit (CDK)`, :ref:`index:Serverless Framework`, and :ref:`index:Terraform` :term:`Modules <module>`.
   Having this set to a truthy value will prevent ``-no-color``/``--no-color`` from being added to any commands even if stdout is not a TTY.
   Having this set to a falsy value will include ``-no-color``/``--no-color`` in commands even if stdout is a TTY.
   If the IaC tool has other mechanisms for disabling color output, using a truthy value will not circumvent them.

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING
 
 from .....compat import cached_property
 from ._helpers.action_architecture import ActionArchitecture
@@ -23,15 +23,15 @@ class S3SyncHandler:
 
     def __init__(
         self,
-        context: Union[CfnginContext, RunwayContext],
+        context: CfnginContext | RunwayContext,
         *,
         delete: bool = False,
         dest: str,
-        exclude: Optional[List[str]] = None,
+        exclude: list[str] | None = None,
         follow_symlinks: bool = False,
-        include: Optional[List[str]] = None,
-        page_size: Optional[int] = None,
-        session: Optional[boto3.Session] = None,
+        include: list[str] | None = None,
+        page_size: int | None = None,
+        session: boto3.Session | None = None,
         src: str,
     ) -> None:
         """Instantiate class.
@@ -80,15 +80,17 @@ class S3SyncHandler:
     def transfer_config(self) -> TransferConfigDict:
         """Get runtime transfer config."""
         return RuntimeConfig.build_config(
-            **self._botocore_session.get_scoped_config().get("s3", {})
+            **self._botocore_session.get_scoped_config().get(  # pyright: ignore[reportUnknownArgumentType]
+                "s3", {}
+            )
         )
 
     def run(self) -> None:
         """Run sync."""
-        register_sync_strategies(self._botocore_session)  # type: ignore
+        register_sync_strategies(self._botocore_session)
         ActionArchitecture(
             session=self._session,
-            botocore_session=self._botocore_session,  # type: ignore
+            botocore_session=self._botocore_session,
             action="sync",
             parameters=self.parameters.data,
             runtime_config=self.transfer_config,

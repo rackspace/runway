@@ -49,24 +49,18 @@ DescribeDocument = Action("DescribeDocument")
 DescribeDocumentParameters = Action("DescribeDocumentParameters")
 DescribeDocumentPermission = Action("DescribeDocumentPermission")
 DescribeEffectiveInstanceAssociations = Action("DescribeEffectiveInstanceAssociations")
-DescribeEffectivePatchesForPatchBaseline = Action(
-    "DescribeEffectivePatchesForPatchBaseline"
-)
+DescribeEffectivePatchesForPatchBaseline = Action("DescribeEffectivePatchesForPatchBaseline")
 DescribeInstanceAssociationsStatus = Action("DescribeInstanceAssociationsStatus")
 DescribeInstanceInformation = Action("DescribeInstanceInformation")
 DescribeInstancePatchStates = Action("DescribeInstancePatchStates")
-DescribeInstancePatchStatesForPatchGroup = Action(
-    "DescribeInstancePatchStatesForPatchGroup"
-)
+DescribeInstancePatchStatesForPatchGroup = Action("DescribeInstancePatchStatesForPatchGroup")
 DescribeInstancePatches = Action("DescribeInstancePatches")
 DescribeInstanceProperties = Action("DescribeInstanceProperties")
 DescribeInventoryDeletions = Action("DescribeInventoryDeletions")
 DescribeMaintenanceWindowExecutionTaskInvocations = Action(
     "DescribeMaintenanceWindowExecutionTaskInvocations"
 )
-DescribeMaintenanceWindowExecutionTasks = Action(
-    "DescribeMaintenanceWindowExecutionTasks"
-)
+DescribeMaintenanceWindowExecutionTasks = Action("DescribeMaintenanceWindowExecutionTasks")
 DescribeMaintenanceWindowExecutions = Action("DescribeMaintenanceWindowExecutions")
 DescribeMaintenanceWindowSchedule = Action("DescribeMaintenanceWindowSchedule")
 DescribeMaintenanceWindowTargets = Action("DescribeMaintenanceWindowTargets")
@@ -92,9 +86,7 @@ GetInventorySchema = Action("GetInventorySchema")
 GetMaintenanceWindow = Action("GetMaintenanceWindow")
 GetMaintenanceWindowExecution = Action("GetMaintenanceWindowExecution")
 GetMaintenanceWindowExecutionTask = Action("GetMaintenanceWindowExecutionTask")
-GetMaintenanceWindowExecutionTaskInvocation = Action(
-    "GetMaintenanceWindowExecutionTaskInvocation"
-)
+GetMaintenanceWindowExecutionTaskInvocation = Action("GetMaintenanceWindowExecutionTaskInvocation")
 GetMaintenanceWindowTask = Action("GetMaintenanceWindowTask")
 GetManifest = Action("GetManifest")
 GetOpsItem = Action("GetOpsItem")

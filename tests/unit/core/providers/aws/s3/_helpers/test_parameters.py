@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from pydantic import ValidationError
@@ -45,9 +45,7 @@ class TestParameters:
         "cmd, expected",
         [("sync", True), ("mb", True), ("rb", True), ("cp", False), ("mv", False)],
     )
-    def test_init_set_dir_op(
-        self, cmd: str, expected: bool, mocker: MockerFixture
-    ) -> None:
+    def test_init_set_dir_op(self, cmd: str, expected: bool, mocker: MockerFixture) -> None:
         """Test __init__."""
         mocker.patch.object(Parameters, "_validate_path_args")
         assert Parameters(cmd, self.data_locallocal).data.dir_op == expected
@@ -56,9 +54,7 @@ class TestParameters:
         "cmd, expected",
         [("sync", False), ("mb", False), ("rb", False), ("cp", False), ("mv", True)],
     )
-    def test_init_set_is_move(
-        self, cmd: str, expected: bool, mocker: MockerFixture
-    ) -> None:
+    def test_init_set_is_move(self, cmd: str, expected: bool, mocker: MockerFixture) -> None:
         """Test __init__."""
         mocker.patch.object(Parameters, "_validate_path_args")
         assert Parameters(cmd, self.data_locallocal).data.is_move == expected
@@ -71,9 +67,8 @@ class TestParameters:
     def test_same_path_mv_s3s3(self) -> None:
         """Test _same_path."""
         self.data_s3s3.dest = self.data_s3s3.src
-        with pytest.raises(ValueError) as excinfo:
+        with pytest.raises(ValueError, match="Cannot mv a file onto itself"):
             Parameters("mv", self.data_s3s3)
-        assert "Cannot mv a file onto itself" in str(excinfo.value)
 
     def test_same_path_mv_s3s3_not_same(self) -> None:
         """Test _same_path."""
@@ -126,9 +121,7 @@ class TestParametersDataModel:
             ("s3://test-dest", "s3://test-src", "s3s3"),
         ],
     )
-    def test_determine_paths_type(
-        self, dest: str, expected: PathsType, src: str
-    ) -> None:
+    def test_determine_paths_type(self, dest: str, expected: PathsType, src: str) -> None:
         """Test _determine_paths_type."""
         assert ParametersDataModel(dest=dest, src=src).paths_type == expected
 
@@ -168,9 +161,7 @@ class TestParametersDataModel:
         "kwargs, error_locs",
         [({"dest": "test-dest"}, ["src"]), ({"src": "test-src"}, ["dest"])],
     )
-    def test_required_fields(
-        self, error_locs: List[str], kwargs: Dict[str, Any]
-    ) -> None:
+    def test_required_fields(self, error_locs: list[str], kwargs: dict[str, Any]) -> None:
         """Test required fields."""
         with pytest.raises(ValidationError) as excinfo:
             ParametersDataModel(**kwargs)

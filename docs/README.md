@@ -14,7 +14,7 @@ To record or render a new gif, terminalizer must be installed (globally is fine)
 
 ### Caveats
 
-- node <= 10 is required due to dependency requirements (`nvm install 10` or `nvm use 10`)
+- node \<= 10 is required due to dependency requirements (`nvm install 10` or `nvm use 10`)
 - `terminalizer@0.6.1` must be used (`npm i -g terminalizer@0.6.1`)
   - 0.7 changed the resolution of the GIF which increases the size 3x
 
@@ -41,4 +41,4 @@ To render a new copy of the gif, just run `terminalizer render runway-example.ym
 This will take some time to complete.
 
 We need to reduce the size of the rendered GIF so it can be served from GitHub to be viewable on PyPi.
-To do this, the GIF must be compressed ([GIF Compressor](https://gifcompressor.com/) was used) to achieve the <5MB size required (GitHub restriction).
+To do this, the GIF must be compressed ([GIF Compressor](https://gifcompressor.com/) was used) to achieve the \<5MB size required (GitHub restriction).

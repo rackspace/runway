@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 from click.testing import CliRunner
-from mock import Mock
 
 from runway._cli import cli
 from runway.config import RunwayConfig
@@ -21,7 +21,7 @@ from runway.core import Runway
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
+    import pytest
     from pytest_mock import MockerFixture
 
     from ...conftest import CpConfigTypeDef
@@ -29,9 +29,7 @@ if TYPE_CHECKING:
 MODULE = "runway._cli.commands._plan"
 
 
-def test_plan(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
-) -> None:
+def test_plan(cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture) -> None:
     """Test plan."""
     mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("min_required", cd_tmp_path)
@@ -73,16 +71,14 @@ def test_plan_options_deploy_environment(
     assert mock_runway.call_args.args[1].env.name == "e-option"
 
     assert (
-        runner.invoke(
-            cli, ["plan", "--deploy-environment", "deploy-environment-option"]
-        ).exit_code
+        runner.invoke(cli, ["plan", "--deploy-environment", "deploy-environment-option"]).exit_code
         == 0
     )
     assert mock_runway.call_args.args[1].env.name == "deploy-environment-option"
 
 
 def test_plan_options_tag(
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
     mocker: MockerFixture,
@@ -92,12 +88,7 @@ def test_plan_options_tag(
     mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     cp_config("tagged_modules", cd_tmp_path)
     runner = CliRunner()
-    assert (
-        runner.invoke(
-            cli, ["plan", "--tag", "app:test-app", "--tag", "tier:iac"]
-        ).exit_code
-        == 0
-    )
+    assert runner.invoke(cli, ["plan", "--tag", "app:test-app", "--tag", "tier:iac"]).exit_code == 0
     deployment = mock_runway.return_value.plan.call_args.args[0][0]
     assert len(deployment.modules) == 1
     assert deployment.modules[0].name == "sampleapp-01.cfn"

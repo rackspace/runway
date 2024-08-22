@@ -6,25 +6,16 @@ import logging
 import platform
 import shutil
 import subprocess
+from collections.abc import Iterable
 from contextlib import suppress
-from typing import (
-    TYPE_CHECKING,
-    ClassVar,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Union,
-    cast,
-    overload,
-)
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar, cast, overload
 
 from .compat import shlex_join
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from typing_extensions import Literal
 
     from ._logging import RunwayLogger
     from .context import CfnginContext, RunwayContext
@@ -38,7 +29,7 @@ class CliInterfaceMixin:
     EXECUTABLE: ClassVar[str]
     """CLI executable."""
 
-    ctx: Union[CfnginContext, RunwayContext]
+    ctx: CfnginContext | RunwayContext
     """CFNgin or Runway context object."""
 
     cwd: Path
@@ -52,21 +43,20 @@ class CliInterfaceMixin:
     @classmethod
     def found_in_path(cls) -> bool:
         """Determine if executable is found in $PATH."""
-        if shutil.which(cls.EXECUTABLE):
-            return True
-        return False
+        return bool(shutil.which(cls.EXECUTABLE))
 
     @classmethod
     def generate_command(
         cls,
-        command: Union[List[str], str],
-        **kwargs: Optional[Union[bool, Iterable[str], str]],
-    ) -> List[str]:
+        command: list[str] | str,
+        **kwargs: bool | Iterable[str] | str | None,
+    ) -> list[str]:
         """Generate command to be executed and log it.
 
         Args:
             command: Command to run.
             args: Additional args to pass to the command.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             The full command to be passed into a subprocess.
@@ -79,10 +69,10 @@ class CliInterfaceMixin:
 
     @classmethod
     def _generate_command_handle_kwargs(
-        cls, **kwargs: Optional[Union[bool, Iterable[str], str]]
-    ) -> List[str]:
+        cls, **kwargs: bool | Iterable[str] | str | None
+    ) -> list[str]:
         """Handle kwargs passed to generate_command."""
-        result: List[str] = []
+        result: list[str] = []
         for k, v in kwargs.items():
             if isinstance(v, str):
                 result.extend([cls.convert_to_cli_arg(k), v])
@@ -107,28 +97,28 @@ class CliInterfaceMixin:
     @overload
     def _run_command(
         self,
-        command: Union[Iterable[str], str],
+        command: Iterable[str] | str,
         *,
-        env: Optional[Dict[str, str]] = ...,
+        env: dict[str, str] | None = ...,
         suppress_output: Literal[True] = ...,
     ) -> str: ...
 
     @overload
     def _run_command(
         self,
-        command: Union[Iterable[str], str],
+        command: Iterable[str] | str,
         *,
-        env: Optional[Dict[str, str]] = ...,
+        env: dict[str, str] | None = ...,
         suppress_output: Literal[False] = ...,
     ) -> None: ...
 
     def _run_command(
         self,
-        command: Union[Iterable[str], str],
+        command: Iterable[str] | str,
         *,
-        env: Optional[Dict[str, str]] = None,
+        env: dict[str, str] | None = None,
         suppress_output: bool = True,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Run command.
 
         Args:

@@ -1,13 +1,12 @@
 """AWS SSM Parameter Store hooks."""
 
-# pylint: disable=no-self-argument
 from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar, cast
 
-from pydantic import Extra, validator
+from pydantic import ConfigDict, Field, field_validator
 from typing_extensions import Literal, TypedDict
 
 from ....compat import cached_property
@@ -27,10 +26,11 @@ else:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
+
 # PutParameterResultTypeDef but without metadata
-_PutParameterResultTypeDef = TypedDict(
-    "_PutParameterResultTypeDef", {"Tier": ParameterTierType, "Version": int}
-)
+class _PutParameterResultTypeDef(TypedDict):
+    Tier: ParameterTierType
+    Version: int
 
 
 class ArgsDataModel(BaseModel):
@@ -61,77 +61,103 @@ class ArgsDataModel(BaseModel):
 
     """
 
-    allowed_pattern: Optional[str] = None
-    data_type: Optional[Literal["aws:ec2:image", "text"]] = None
-    description: Optional[str] = None
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+    allowed_pattern: Annotated[str | None, Field(alias="AllowedPattern")] = None
+    """A regular expression used to validate the parameter value."""
+
+    data_type: Annotated[
+        Literal["aws:ec2:image", "text"] | None,
+        Field(alias="DataType"),
+    ] = None
+    """The data type for a String parameter.
+
+    Supported data types include plain text and Amazon Machine Image IDs.
+
+    """
+
+    description: Annotated[str | None, Field(alias="Description")] = None
+    """Information about the parameter."""
+
     force: bool = False
-    key_id: Optional[str] = None
-    name: str
-    overwrite: bool = True
-    policies: Optional[str] = None
-    tags: Optional[List[TagDataModel]] = None
-    tier: ParameterTierType = "Standard"
-    type: Literal["String", "StringList", "SecureString"]
-    value: Optional[str] = None
+    """Skip checking the current value of the parameter, just put it.
 
-    class Config:
-        """Model configuration."""
+    Can be used alongside ``overwrite`` to always update a parameter.
 
-        allow_population_by_field_name = True
-        extra = Extra.ignore
-        fields = {
-            "allowed_pattern": {"alias": "AllowedPattern"},
-            "data_type": {"alias": "DataType"},
-            "description": {"alias": "Description"},
-            "key_id": {"alias": "KeyId"},
-            "name": {"alias": "Name"},
-            "overwrite": {"alias": "Overwrite"},
-            "policies": {"alias": "Policies"},
-            "tags": {"alias": "Tags"},
-            "tier": {"alias": "Tier"},
-            "type": {"alias": "Type"},
-            "value": {"alias": "Value"},
-        }
+    """
 
-    @validator("policies", allow_reuse=True, pre=True)
-    def _convert_policies(cls, v: Union[List[Dict[str, Any]], str, Any]) -> str:
+    key_id: Annotated[str | None, Field(alias="KeyId")] = None
+    """The KMS Key ID that you want to use to encrypt a parameter.
+
+    Either the default AWS Key Management Service (AWS KMS) key automatically
+    assigned to your AWS account or a custom key.
+    Required for parameters that use the ``SecureString`` data type.
+
+    """
+
+    name: Annotated[str, Field(alias="Name")]
+    """The fully qualified name of the parameter that you want to add to the system."""
+
+    overwrite: Annotated[bool, Field(alias="Overwrite")] = True
+    """Allow overwriting an existing parameter."""
+
+    policies: Annotated[str | None, Field(alias="Policies")] = None
+    """One or more policies to apply to a parameter. This field takes a JSON array."""
+
+    tags: Annotated[list[TagDataModel] | None, Field(alias="Tags")] = None
+    """Optional metadata that you assign to a resource."""
+
+    tier: Annotated[ParameterTierType, Field(alias="Tier")] = "Standard"
+    """The parameter tier to assign to a parameter."""
+
+    type: Annotated[Literal["String", "StringList", "SecureString"], Field(alias="Type")]
+    """The type of parameter."""
+
+    value: Annotated[str | None, Field(alias="Value")] = None
+    """The parameter value that you want to add to the system.
+
+    Standard parameters have a value limit of 4 KB.
+    Advanced parameters have a value limit of 8 KB.
+
+    """
+
+    @field_validator("policies", mode="before")
+    @classmethod
+    def _convert_policies(cls, v: list[dict[str, Any]] | str | Any) -> str:
         """Convert policies to acceptable value."""
         if isinstance(v, str):
             return v
         if isinstance(v, list):
             return json.dumps(v, cls=JsonEncoder)
-        raise TypeError(
-            f"unexpected type {type(v)}; permitted: Optional[Union[List[Dict[str, Any]], str]]"
-        )
+        raise ValueError(f"unexpected type {type(v)}; permitted: list[dict[str, Any]] | str | None")
 
-    @validator("tags", allow_reuse=True, pre=True)
-    def _convert_tags(
-        cls, v: Union[Dict[str, str], List[Dict[str, str]], Any]
-    ) -> List[Dict[str, str]]:
+    @field_validator("tags", mode="before")
+    @classmethod
+    def _convert_tags(cls, v: dict[str, str] | list[dict[str, str]] | Any) -> list[dict[str, str]]:
         """Convert tags to acceptable value."""
         if isinstance(v, list):
             return v
         if isinstance(v, dict):
             return [{"Key": k, "Value": v} for k, v in v.items()]
-        raise TypeError(
-            f"unexpected type {type(v)}; permitted: "
-            "Optional[Union[Dict[str, str], List[Dict[str, str]]]"
+        raise ValueError(
+            f"unexpected type {type(v)}; permitted: dict[str, str] | list[dict[str, str]] | none"
         )
 
 
 class _Parameter(CfnginHookProtocol):
     """AWS SSM Parameter Store Parameter."""
 
+    ARGS_PARSER: ClassVar = ArgsDataModel
+    """Class used to parse arguments passed to the hook."""
+
     args: ArgsDataModel
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(
         self,
         context: CfnginContext,
         *,
         name: str,
-        type: Literal[  # pylint: disable=redefined-builtin
-            "String", "StringList", "SecureString"
-        ],
+        type: Literal["String", "StringList", "SecureString"],  # noqa: A002
         **kwargs: Any,
     ) -> None:
         """Instantiate class.
@@ -141,9 +167,10 @@ class _Parameter(CfnginHookProtocol):
             name: The fully qualified name of the parameter that you want to add to
                 the system.
             type: The type of parameter.
+            **kwargs: Arbitrary keyword arguments.
 
         """
-        self.args = ArgsDataModel.parse_obj({"name": name, "type": type, **kwargs})
+        self.args = ArgsDataModel.model_validate({"name": name, "type": type, **kwargs})
         self.ctx = context
 
     @cached_property
@@ -165,14 +192,14 @@ class _Parameter(CfnginHookProtocol):
         if self.args.force:  # bypass getting current value
             return {}
         try:
-            return self.client.get_parameter(
-                Name=self.args.name, WithDecryption=True
-            ).get("Parameter", {})
+            return self.client.get_parameter(Name=self.args.name, WithDecryption=True).get(
+                "Parameter", {}
+            )
         except self.client.exceptions.ParameterNotFound:
             LOGGER.verbose("parameter %s does not exist", self.args.name)
             return {}
 
-    def get_current_tags(self) -> List[TagTypeDef]:
+    def get_current_tags(self) -> list[TagTypeDef]:
         """Get Tags currently applied to Parameter."""
         try:
             return self.client.list_tags_for_resource(
@@ -216,7 +243,7 @@ class _Parameter(CfnginHookProtocol):
         if current_param.get("Value") != self.args.value:
             try:
                 result = self.client.put_parameter(
-                    **self.args.dict(
+                    **self.args.model_dump(
                         by_alias=True, exclude_none=True, exclude={"force", "tags"}
                     )
                 )
@@ -242,9 +269,7 @@ class _Parameter(CfnginHookProtocol):
         """Update tags."""
         current_tags = self.get_current_tags()
         if self.args.tags and current_tags:
-            diff_tag_keys = list(
-                {i["Key"] for i in current_tags} ^ {i.key for i in self.args.tags}
-            )
+            diff_tag_keys = list({i["Key"] for i in current_tags} ^ {i.key for i in self.args.tags})
         elif self.args.tags:
             diff_tag_keys = []
         else:
@@ -258,14 +283,11 @@ class _Parameter(CfnginHookProtocol):
                     ResourceType="Parameter",
                     TagKeys=diff_tag_keys,
                 )
-                LOGGER.debug(
-                    "removed tags for parameter %s: %s", self.args.name, diff_tag_keys
-                )
+                LOGGER.debug("removed tags for parameter %s: %s", self.args.name, diff_tag_keys)
 
             if self.args.tags:
                 tags_to_add = [
-                    cast("TagTypeDef", tag.dict(by_alias=True))
-                    for tag in self.args.tags
+                    cast("TagTypeDef", tag.model_dump(by_alias=True)) for tag in self.args.tags
                 ]
                 self.client.add_tags_to_resource(
                     ResourceId=self.args.name,
@@ -278,9 +300,7 @@ class _Parameter(CfnginHookProtocol):
                     [tag["Key"] for tag in tags_to_add],
                 )
         except self.client.exceptions.InvalidResourceId:
-            LOGGER.info(
-                "skipped updating tags; parameter %s does not exist", self.args.name
-            )
+            LOGGER.info("skipped updating tags; parameter %s does not exist", self.args.name)
         else:
             LOGGER.info("updated tags for parameter %s", self.args.name)
 
@@ -301,6 +321,7 @@ class SecureString(_Parameter):
             context: CFNgin context object.
             name: The fully qualified name of the parameter that you want to add to
                 the system.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         for k in ["Type", "type"]:  # ensure neither of these are set

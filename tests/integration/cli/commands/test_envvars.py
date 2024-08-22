@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 from click.testing import CliRunner
-from mock import Mock
 
 from runway._cli import cli
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture, MonkeyPatch
+    import pytest
 
     from ...conftest import CpConfigTypeDef
 
@@ -30,7 +30,7 @@ PSH_OUTPUT = (
 
 
 def test_envvars(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test envvars."""
     monkeypatch.setattr("platform.system", Mock(return_value="Darwin"))
@@ -42,7 +42,7 @@ def test_envvars(
 
 
 def test_envvar_windows(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: MonkeyPatch
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Test envvars for Windows."""
     monkeypatch.setattr("platform.system", Mock(return_value="Windows"))
@@ -58,7 +58,7 @@ def test_envvar_windows(
     assert result1.output == POSIX_OUTPUT
 
 
-def test_envvars_no_config(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None:
+def test_envvars_no_config(caplog: pytest.LogCaptureFixture, cd_tmp_path: Path) -> None:
     """Test envvars with no config in the directory or parent."""
     caplog.set_level(logging.ERROR, logger="runway")
     runner = CliRunner()
@@ -72,7 +72,7 @@ def test_envvars_no_config(caplog: LogCaptureFixture, cd_tmp_path: Path) -> None
 
 
 def test_envvars_no_env_vars(
-    caplog: LogCaptureFixture, cd_tmp_path: Path, cp_config: CpConfigTypeDef
+    caplog: pytest.LogCaptureFixture, cd_tmp_path: Path, cp_config: CpConfigTypeDef
 ) -> None:
     """Test envvars with no env_vars in the config."""
     caplog.set_level(logging.ERROR, logger="runway")

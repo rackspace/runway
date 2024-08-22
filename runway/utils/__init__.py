@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import datetime
 import hashlib
 import importlib
 import json
@@ -12,51 +11,34 @@ import platform
 import re
 import stat
 import sys
-from contextlib import contextmanager
-from decimal import Decimal
+from collections.abc import Iterable, Iterator, MutableMapping
+from contextlib import AbstractContextManager, contextmanager
+from functools import cached_property  # noqa: F401  # TODO (kyle): remove in next major release
 from pathlib import Path
 from subprocess import check_call
-from types import TracebackType
-from typing import (
-    ContextManager,  # deprecated in 3.9 for contextlib.AbstractContextManager
-)
-from typing import (
-    MutableMapping,  # deprecated in 3.9 for collections.abc.MutableMapping
-)
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    Set,
-    Type,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Callable, cast, overload
 
 import yaml
 from pydantic import BaseModel as _BaseModel
-from typing_extensions import Literal
-
-# make this importable for util as it was before
-from ..compat import cached_property  # noqa: F401
 
 # make this importable without defining __all__ yet.
 # more things need to be moved of this file before starting an explicit __all__.
+from . import pydantic_validators  # noqa: F401
 from ._file_hash import FileHash  # noqa: F401
+from ._json_encoder import JsonEncoder  # noqa: F401
 from ._version import Version  # noqa: F401
 
 if TYPE_CHECKING:
+    from types import TracebackType
+
     from mypy_boto3_cloudformation.type_defs import OutputTypeDef
+    from typing_extensions import Literal
+
+    from ..compat import Self
 
 AWS_ENV_VARS = ("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN")
-DOC_SITE = "https://docs.onica.com/projects/runway"
-EMBEDDED_LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "embedded")
+DOC_SITE = "https://runway.readthedocs.io"
+EMBEDDED_LIB_PATH = str(Path(__file__).resolve().parent / "embedded")
 
 LOGGER = logging.getLogger(__name__)
 
@@ -81,7 +63,10 @@ class BaseModel(_BaseModel):
             name: The name to check for existence in the model.
 
         """
-        return name in self.__dict__
+        if name in self.__dict__:
+            return True
+        # extra files are no longer added to __dict__, they are placed in `model_extra`
+        return bool(self.model_extra and name in self.model_extra)
 
     def __getitem__(self, name: str) -> Any:
         """Implement evaluation of self[name].
@@ -106,40 +91,7 @@ class BaseModel(_BaseModel):
             value: Value to assign to the attribute.
 
         """
-        super().__setattr__(name, value)  # type: ignore
-
-
-class JsonEncoder(json.JSONEncoder):
-    """Encode Python objects to JSON data.
-
-    This class can be used with ``json.dumps()`` to handle most data types
-    that can occur in responses from AWS.
-
-    Usage:
-        >>> json.dumps(data, cls=JsonEncoder)
-
-    """
-
-    def default(self, o: Any) -> Any:
-        """Encode types not supported by the default JSONEncoder.
-
-        Args:
-            o: Object to encode.
-
-        Returns:
-            JSON serializable data type.
-
-        Raises:
-            TypeError: Object type could not be encoded.
-
-        """
-        if isinstance(o, Decimal):
-            return float(o)
-        if isinstance(o, (datetime.datetime, datetime.date)):
-            return o.isoformat()
-        if isinstance(o, _BaseModel):
-            return o.dict()
-        return super().default(o)
+        super().__setattr__(name, value)
 
 
 class MutableMap(MutableMapping[str, Any]):
@@ -167,13 +119,13 @@ class MutableMap(MutableMapping[str, Any]):
             self._found_queries = MutableMap()
 
     @property
-    def data(self) -> Dict[str, Any]:
+    def data(self) -> dict[str, Any]:
         """Sanitized output of __dict__.
 
         Removes anything that starts with ``_``.
 
         """
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
         for key, val in self.__dict__.items():
             if key.startswith("_"):
                 continue
@@ -182,7 +134,7 @@ class MutableMap(MutableMapping[str, Any]):
 
     def clear_found_cache(self) -> None:
         """Clear _found_cache."""
-        for _, val in self.__dict__.items():
+        for val in self.__dict__.values():
             if isinstance(val, MutableMap):
                 val.clear_found_cache()
         if hasattr(self, "_found_queries"):
@@ -350,20 +302,19 @@ class MutableMap(MutableMapping[str, Any]):
         return json.dumps(self.data, default=json_serial)
 
 
-class SafeHaven(ContextManager["SafeHaven"]):
+class SafeHaven(AbstractContextManager["SafeHaven"]):
     """Context manager that caches and resets important values on exit.
 
     Caches and resets os.environ, sys.argv, sys.modules, and sys.path.
 
     """
 
-    # pylint: disable=redefined-outer-name
     def __init__(
         self,
-        argv: Optional[Iterable[str]] = None,
-        environ: Optional[Dict[str, str]] = None,
-        sys_modules_exclude: Optional[Iterable[str]] = None,
-        sys_path: Optional[Iterable[str]] = None,
+        argv: Iterable[str] | None = None,
+        environ: dict[str, str] | None = None,
+        sys_modules_exclude: Iterable[str] | None = None,
+        sys_path: Iterable[str] | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -385,7 +336,7 @@ class SafeHaven(ContextManager["SafeHaven"]):
         self.__sys_path = list(sys.path)
         # more informative origin for log statements
         self.logger = logging.getLogger("runway." + self.__class__.__name__)
-        self.sys_modules_exclude: Set[str] = (
+        self.sys_modules_exclude: set[str] = (
             set(sys_modules_exclude) if sys_modules_exclude else set()
         )
         self.sys_modules_exclude.add("runway")
@@ -434,7 +385,7 @@ class SafeHaven(ContextManager["SafeHaven"]):
         self.logger.debug("resetting sys.path: %s", json.dumps(self.__sys_path))
         sys.path = self.__sys_path
 
-    def __enter__(self) -> SafeHaven:
+    def __enter__(self) -> Self:
         """Enter the context manager.
 
         Returns:
@@ -446,16 +397,16 @@ class SafeHaven(ContextManager["SafeHaven"]):
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
     ) -> None:
         """Exit the context manager."""
         self.logger.debug("leaving the safe haven...")
         self.reset_all()
 
 
-# TODO remove after https://github.com/yaml/pyyaml/issues/234 is resolved
+# TODO (kyle): remove after https://github.com/yaml/pyyaml/issues/234 is resolved
 class YamlDumper(yaml.Dumper):
     """Custom YAML Dumper.
 
@@ -472,9 +423,9 @@ class YamlDumper(yaml.Dumper):
 
     """
 
-    def increase_indent(self, flow: bool = False, indentless: bool = False) -> None:
+    def increase_indent(self, flow: bool = False, indentless: bool = False) -> None:  # noqa: ARG002
         """Override parent method."""
-        return super().increase_indent(flow, False)  # type: ignore
+        return super().increase_indent(flow, False)
 
 
 @contextmanager
@@ -490,7 +441,7 @@ def argv(*args: str) -> Iterator[None]:
 
 
 @contextmanager
-def change_dir(newdir: Union[Path, str]) -> Iterator[None]:
+def change_dir(newdir: Path | str) -> Iterator[None]:
     """Change directory.
 
     Adapted from http://stackoverflow.com/a/24176022
@@ -519,9 +470,7 @@ def ensure_file_is_executable(path: str) -> None:
         SystemExit: file is not executable.
 
     """
-    if platform.system() != "Windows" and (
-        not stat.S_IXUSR & os.stat(path)[stat.ST_MODE]
-    ):
+    if platform.system() != "Windows" and (not stat.S_IXUSR & Path(path).stat()[stat.ST_MODE]):
         print(f"Error: File {path} is not executable")  # noqa: T201
         sys.exit(1)
 
@@ -536,13 +485,14 @@ def ensure_string(value: Any) -> str:
 
 
 @contextmanager
-def environ(env: Optional[Dict[str, str]] = None, **kwargs: str) -> Iterator[None]:
+def environ(env: dict[str, str] | None = None, **kwargs: str) -> Iterator[None]:
     """Context manager for temporarily changing os.environ.
 
     The original value of os.environ is restored upon exit.
 
     Args:
         env: Dictionary to use when updating os.environ.
+        **kwargs: Arbitrary keyword arguments.
 
     """
     env = env or {}
@@ -566,9 +516,7 @@ def json_serial(obj: Any) -> Any:
     raise TypeError(f"Type {type(obj)} not serializable")
 
 
-def load_object_from_string(
-    fqcn: str, try_reload: bool = False
-) -> Union[type, Callable[..., Any]]:
+def load_object_from_string(fqcn: str, try_reload: bool = False) -> type | Callable[..., Any]:
     """Convert "." delimited strings to a python object.
 
     Args:
@@ -595,8 +543,7 @@ def load_object_from_string(
         if (
             try_reload
             and sys.modules.get(module_path)
-            and module_path.split(".")[0]
-            not in sys.builtin_module_names  # skip builtins
+            and module_path.split(".")[0] not in sys.builtin_module_names  # skip builtins
         ):
             importlib.reload(sys.modules[module_path])
         else:
@@ -606,21 +553,19 @@ def load_object_from_string(
 
 @overload
 def merge_dicts(
-    dict1: Dict[Any, Any], dict2: Dict[Any, Any], deep_merge: bool = ...
-) -> Dict[str, Any]: ...
+    dict1: dict[Any, Any], dict2: dict[Any, Any], deep_merge: bool = ...
+) -> dict[str, Any]: ...
 
 
 @overload
-def merge_dicts(
-    dict1: List[Any], dict2: List[Any], deep_merge: bool = ...
-) -> List[Any]: ...
+def merge_dicts(dict1: list[Any], dict2: list[Any], deep_merge: bool = ...) -> list[Any]: ...
 
 
 def merge_dicts(
-    dict1: Union[Dict[Any, Any], List[Any]],
-    dict2: Union[Dict[Any, Any], List[Any]],
+    dict1: dict[Any, Any] | list[Any],
+    dict2: dict[Any, Any] | list[Any],
     deep_merge: bool = True,
-) -> Union[Dict[Any, Any], List[Any]]:
+) -> dict[Any, Any] | list[Any]:
     """Merge dict2 into dict1."""
     if deep_merge:
         if isinstance(dict1, list) and isinstance(dict2, list):
@@ -630,19 +575,13 @@ def merge_dicts(
             return dict2
 
         for key in dict2:
-            dict1[key] = (
-                merge_dicts(dict1[key], dict2[key], True)
-                if key in dict1
-                else dict2[key]
-            )
+            dict1[key] = merge_dicts(dict1[key], dict2[key], True) if key in dict1 else dict2[key]
         return dict1
     if isinstance(dict1, dict) and isinstance(dict2, dict):
         dict3 = dict1.copy()
         dict3.update(dict2)
         return dict3
-    raise ValueError(
-        f"values of type {type(dict1)} and {type(dict2)} must be type dict"
-    )
+    raise ValueError(f"values of type {type(dict1)} and {type(dict2)} must be type dict")
 
 
 def snake_case_to_kebab_case(value: str) -> str:
@@ -655,7 +594,7 @@ def snake_case_to_kebab_case(value: str) -> str:
     return value.replace("_", "-")
 
 
-def extract_boto_args_from_env(env_vars: Dict[str, str]) -> Dict[str, str]:
+def extract_boto_args_from_env(env_vars: dict[str, str]) -> dict[str, str]:
     """Return boto3 client args dict with environment creds."""
     return {
         i: env_vars[i.upper()]
@@ -664,27 +603,25 @@ def extract_boto_args_from_env(env_vars: Dict[str, str]) -> Dict[str, str]:
     }
 
 
-def flatten_path_lists(
-    env_dict: Dict[str, Any], env_root: Optional[str] = None
-) -> Dict[str, Any]:
+def flatten_path_lists(env_dict: dict[str, Any], env_root: str | None = None) -> dict[str, Any]:
     """Join paths in environment dict down to strings."""
     for key, val in env_dict.items():
         # Lists are presumed to be path components and will be turned back
         # to strings
         if isinstance(val, list):
             env_dict[key] = (
-                os.path.join(env_root, os.path.join(*cast(List[str], val)))
-                if (env_root and not os.path.isabs(os.path.join(*cast(List[str], val))))
-                else os.path.join(*cast(List[str], val))
+                Path(env_root).joinpath(*cast("list[str]", val))
+                if (env_root and not Path(*cast("list[str]", val)).is_absolute())
+                else Path(*cast("list[str]", val))
             )
     return env_dict
 
 
 def merge_nested_environment_dicts(
-    env_dicts: Dict[str, Any],
-    env_name: Optional[str] = None,
-    env_root: Optional[str] = None,
-) -> Dict[str, Any]:
+    env_dicts: dict[str, Any],
+    env_name: str | None = None,
+    env_root: str | None = None,
+) -> dict[str, Any]:
     """Return single-level dictionary from dictionary of dictionaries."""
     # If the provided dictionary is just a single "level" (no nested
     # environments), it applies to all environments
@@ -700,13 +637,13 @@ def merge_nested_environment_dicts(
         return {}
 
     combined_dicts = merge_dicts(
-        cast(Dict[Any, Any], env_dicts.get("*", {})),
-        cast(Dict[Any, Any], env_dicts.get(env_name, {})),
+        cast("dict[Any, Any]", env_dicts.get("*", {})),
+        cast("dict[Any, Any]", env_dicts.get(env_name, {})),
     )
     return flatten_path_lists(combined_dicts, env_root)
 
 
-def find_cfn_output(key: str, outputs: List[OutputTypeDef]) -> Optional[str]:
+def find_cfn_output(key: str, outputs: list[OutputTypeDef]) -> str | None:
     """Return CFN output value.
 
     Args:
@@ -722,13 +659,13 @@ def find_cfn_output(key: str, outputs: List[OutputTypeDef]) -> Optional[str]:
 
 def get_embedded_lib_path() -> str:
     """Return path of embedded libraries."""
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "embedded")
+    return str(Path(__file__).resolve().parent / "embedded")
 
 
 def get_hash_for_filename(filename: str, hashfile_path: str) -> str:
     """Return hash for filename in the hashfile."""
     filehash = ""
-    with open(hashfile_path, "r", encoding="utf-8") as stream:
+    with open(hashfile_path, encoding="utf-8") as stream:  # noqa: PTH123
         for _cnt, line in enumerate(stream):
             if line.rstrip().endswith(filename):
                 match = re.match(r"^[A-Za-z0-9]*", line)
@@ -750,7 +687,7 @@ def ignore_exit_code_0() -> Iterator[None]:
             raise
 
 
-def fix_windows_command_list(commands: List[str]) -> List[str]:
+def fix_windows_command_list(commands: list[str]) -> list[str]:
     """Return command list with working Windows commands.
 
     npm on windows is npm.cmd, which will blow up
@@ -762,16 +699,17 @@ def fix_windows_command_list(commands: List[str]) -> List[str]:
     """
     fully_qualified_cmd_path = which(commands[0])
     if fully_qualified_cmd_path:
-        commands[0] = os.path.basename(fully_qualified_cmd_path)
+        commands[0] = Path(fully_qualified_cmd_path).name
     return commands
 
 
 def run_commands(
-    commands: List[Union[str, List[str], Dict[str, Union[str, List[str]]]]],
-    directory: Union[Path, str],
-    env: Optional[Dict[str, str]] = None,
+    commands: list[dict[str, list[str] | str] | list[str] | str],
+    directory: Path | str,
+    env: dict[str, str] | None = None,
 ) -> None:
     """Run list of commands."""
+    directory = Path(directory)
     if env is None:
         env = os.environ.copy()
     for step in commands:
@@ -780,16 +718,12 @@ def run_commands(
             raw_command = step
         elif step.get("command"):  # dictionary
             execution_dir = (
-                os.path.join(directory, cast(str, step.get("cwd", "")))
-                if step.get("cwd")
-                else directory
+                directory / str(step["cwd"]) if step.get("cwd") and step["cwd"] else directory
             )
             raw_command = step["command"]
         else:
             raise AttributeError(f"Invalid command step: {step}")
-        command_list = (
-            raw_command.split(" ") if isinstance(raw_command, str) else raw_command
-        )
+        command_list = raw_command.split(" ") if isinstance(raw_command, str) else raw_command
         if platform.system().lower() == "windows":
             command_list = fix_windows_command_list(command_list)
 
@@ -835,7 +769,7 @@ def get_file_hash(
         __name__,
     )
     file_hash = getattr(hashlib, algorithm)()
-    with open(filename, "rb") as stream:
+    with open(filename, "rb") as stream:  # noqa: PTH123
         while True:
             data = stream.read(65536)  # 64kb chunks
             if not data:
@@ -870,7 +804,7 @@ def sha256sum(filename: str) -> str:
         __name__,
     )
     sha256 = hashlib.sha256()
-    with open(filename, "rb", buffering=0) as stream:
+    with open(filename, "rb", buffering=0) as stream:  # noqa: PTH123
         mem_view = memoryview(bytearray(128 * 1024))
         for i in iter(lambda: stream.readinto(mem_view), 0):
             sha256.update(mem_view[:i])
@@ -878,7 +812,7 @@ def sha256sum(filename: str) -> str:
 
 
 @contextmanager
-def use_embedded_pkgs(embedded_lib_path: Optional[str] = None) -> Iterator[None]:
+def use_embedded_pkgs(embedded_lib_path: str | None = None) -> Iterator[None]:
     """Temporarily prepend embedded packages to sys.path."""
     if embedded_lib_path is None:
         embedded_lib_path = get_embedded_lib_path()
@@ -891,14 +825,14 @@ def use_embedded_pkgs(embedded_lib_path: Optional[str] = None) -> Iterator[None]
         sys.path = old_sys_path
 
 
-def which(program: str) -> Optional[str]:
+def which(program: str) -> str | None:
     """Mimic 'which' command behavior."""
 
     def is_exe(fpath: str) -> bool:
         """Determine if program exists and is executable."""
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+        return Path(fpath).is_file() and os.access(fpath, os.X_OK)
 
-    def get_extensions() -> List[str]:
+    def get_extensions() -> list[str]:
         """Get PATHEXT if the exist, otherwise use default."""
         exts = ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC"
 
@@ -907,7 +841,7 @@ def which(program: str) -> Optional[str]:
 
         return exts.split(";")
 
-    fname, file_ext = os.path.splitext(program)
+    fname, file_ext = os.path.splitext(program)  # noqa: PTH122
     fpath, fname = os.path.split(program)
 
     if not file_ext and platform.system().lower() == "windows":
@@ -917,16 +851,16 @@ def which(program: str) -> Optional[str]:
 
     for i in fnames:
         if fpath:
-            exe_file = os.path.join(fpath, i)
+            exe_file = os.path.join(fpath, i)  # noqa: PTH118
             if is_exe(exe_file):
                 return exe_file
         else:
             for path in (
                 os.environ.get("PATH", "").split(os.pathsep)
                 if "PATH" in os.environ
-                else [os.getcwd()]
+                else [os.getcwd()]  # noqa: PTH109
             ):
-                exe_file = os.path.join(path, i)
+                exe_file = os.path.join(path, i)  # noqa: PTH118
                 if is_exe(exe_file):
                     return exe_file
 

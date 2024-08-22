@@ -5,18 +5,20 @@ from __future__ import annotations
 import json
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Iterable, List, TextIO, Tuple, Union
+from typing import TYPE_CHECKING, Any, TextIO
 
 from ..plan import merge_graphs
 from .base import BaseAction
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from ..plan import Graph, Step
 
 LOGGER = logging.getLogger(__name__)
 
 
-def each_step(graph: Graph) -> Iterable[Tuple[Step, List[Step]]]:
+def each_step(graph: Graph) -> Iterable[tuple[Step, list[Step]]]:
     """Yield each step and it's direct dependencies.
 
     Args:
@@ -56,10 +58,7 @@ def json_format(out: TextIO, graph: Graph) -> None:
         graph: Graph to be output.
 
     """
-    steps = {
-        step.name: {"deps": [dep.name for dep in deps]}
-        for step, deps in each_step(graph)
-    }
+    steps = {step.name: {"deps": [dep.name for dep in deps]} for step, deps in each_step(graph)}
 
     json.dump({"steps": steps}, out, indent=4)
     out.write("\n")
@@ -85,18 +84,16 @@ class Action(BaseAction):
     def run(
         self,
         *,
-        concurrency: int = 0,  # pylint: disable=unused-argument
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
-        force: bool = False,  # pylint: disable=unused-argument
-        outline: bool = False,  # pylint: disable=unused-argument
-        tail: bool = False,  # pylint: disable=unused-argument
-        upload_disabled: bool = False,  # pylint: disable=unused-argument
+        concurrency: int = 0,  # noqa: ARG002
+        dump: bool | str = False,  # noqa: ARG002
+        force: bool = False,  # noqa: ARG002
+        outline: bool = False,  # noqa: ARG002
+        tail: bool = False,  # noqa: ARG002
+        upload_disabled: bool = False,  # noqa: ARG002
         **kwargs: Any,
     ) -> None:
         """Generate the underlying graph and prints it."""
-        graph = self._generate_plan(
-            require_unlocked=False, include_persistent_graph=True
-        ).graph
+        graph = self._generate_plan(require_unlocked=False, include_persistent_graph=True).graph
         if self.context.persistent_graph:
             graph = merge_graphs(self.context.persistent_graph, graph)
         if kwargs.get("reduce"):

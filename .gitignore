@@ -1,5 +1,4 @@
 !infrastructure/**/**/**/package.json
-!runway/templates/**/.npmignore
 *.egg-info
 *.pyc
 *.pyo
@@ -9,7 +8,6 @@
 .eggs
 .idea
 .mypy_cache
-.npmignore
 .runway
 .secrets
 .serverless

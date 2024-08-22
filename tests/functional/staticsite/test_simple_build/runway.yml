@@ -1,12 +1,12 @@
 deployments:
   - modules:
-    - name: test-simple-build
-      path: ./
-      type: static
-      parameters:
-        namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
-        staticsite_cf_disable: true
-      options:
-        build_output: site
+      - name: test-simple-build
+        path: ./
+        type: static
+        parameters:
+          namespace: ${env RUNWAY_TEST_NAMESPACE::default=${env USER::default=user}-local}
+          staticsite_cf_disable: true
+        options:
+          build_output: site
     regions:
       - us-east-1

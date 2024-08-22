@@ -3,7 +3,7 @@ autolabeler:  # cspell:ignore autolabeler
   - label: bug
     branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
   - label: changelog:skip
-    branch: [/^(dependabot)\/.*/]
+    branch: [/^(dependabot)\/.*/, /^pre-commit-ci-update-config/, /^renovate\/.*lockfile/]
   - label: cloudformation
     files:
       - '**/templates/*.json'
@@ -11,7 +11,7 @@ autolabeler:  # cspell:ignore autolabeler
       - '**/templates/*.yaml'
       - '**/templates/*.yml'
   - label: dependencies
-    branch: [/^(depend|dependabot)\/.*/]
+    branch: [/^(dep|depend|dependabot|deps|renovate)\/.*/]
   - label: documentation
     branch: [/^(docs)\/.*/]
   - label: feature
@@ -38,10 +38,6 @@ autolabeler:  # cspell:ignore autolabeler
       - poetry.lock
       - poetry.toml
       - pyproject.toml
-  - label: pyinstaller
-    files:
-      - runway.file.spec
-      - runway.folder.spec
   - label: python
     files:
       - '**/*.py'

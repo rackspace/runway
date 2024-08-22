@@ -15,9 +15,7 @@ class ARN(BaseARN):
     def __init__(self, resource=..., region=..., account=...) -> None: ...
 
 AcceptAgreementApprovalRequest = Action("AcceptAgreementApprovalRequest")
-AssociateProductsWithPrivateMarketplace = Action(
-    "AssociateProductsWithPrivateMarketplace"
-)
+AssociateProductsWithPrivateMarketplace = Action("AssociateProductsWithPrivateMarketplace")
 BatchMeterUsage = Action("BatchMeterUsage")
 CancelAgreementRequest = Action("CancelAgreementRequest")
 CancelChangeSet = Action("CancelChangeSet")
@@ -34,13 +32,9 @@ DescribePrivateMarketplaceProfile = Action("DescribePrivateMarketplaceProfile")
 DescribePrivateMarketplaceRequests = Action("DescribePrivateMarketplaceRequests")
 DescribePrivateMarketplaceSettings = Action("DescribePrivateMarketplaceSettings")
 DescribePrivateMarketplaceStatus = Action("DescribePrivateMarketplaceStatus")
-DescribeProcurementSystemConfiguration = Action(
-    "DescribeProcurementSystemConfiguration"
-)
+DescribeProcurementSystemConfiguration = Action("DescribeProcurementSystemConfiguration")
 DescribeTask = Action("DescribeTask")
-DisassociateProductsFromPrivateMarketplace = Action(
-    "DisassociateProductsFromPrivateMarketplace"
-)
+DisassociateProductsFromPrivateMarketplace = Action("DisassociateProductsFromPrivateMarketplace")
 GetAgreementApprovalRequest = Action("GetAgreementApprovalRequest")
 GetAgreementRequest = Action("GetAgreementRequest")
 GetAgreementTerms = Action("GetAgreementTerms")

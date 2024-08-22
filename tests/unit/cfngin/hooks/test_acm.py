@@ -1,20 +1,18 @@
 """Tests for runway.cfngin.hooks.acm."""
 
-# pylint: disable=protected-access,unused-argument
-# pyright: basic, reportUnknownArgumentType=none, reportUnknownVariableType=none
+# pyright: reportUnknownArgumentType=none, reportUnknownVariableType=none
 # pyright: reportUnknownLambdaType=none
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, NoReturn, Union, cast
+from typing import TYPE_CHECKING, Any, Literal, NoReturn, cast
+from unittest.mock import MagicMock
 
 import boto3
 import pytest
 from botocore.exceptions import ClientError
 from botocore.stub import ANY, Stubber
-from mock import MagicMock
 from troposphere.certificatemanager import Certificate as CertificateResource
-from typing_extensions import Literal
 
 from runway.cfngin.exceptions import (
     StackDoesNotExist,
@@ -34,19 +32,22 @@ if TYPE_CHECKING:
         ChangeTypeDef,
         ResourceRecordSetTypeDef,
     )
-    from pytest import MonkeyPatch
 
-    from ...factories import MockCFNginContext
+    from ...factories import MockCfnginContext
 
 STATUS = MutableMap(
-    **{
-        "failed": FAILED,
-        "new": SubmittedStatus("creating new stack"),
-        "no": NO_CHANGE,
-        "recreate": SubmittedStatus("destroying stack for re-creation"),
-        "update": SubmittedStatus("updating existing stack"),
-    }
+    failed=FAILED,
+    new=SubmittedStatus("creating new stack"),
+    no=NO_CHANGE,
+    recreate=SubmittedStatus("destroying stack for re-creation"),
+    update=SubmittedStatus("updating existing stack"),
 )
+
+
+@pytest.fixture(autouse=True)
+def sub_s3(cfngin_context: MockCfnginContext) -> None:
+    """Sub s3 for MockCfnginContext as this hook uses a ``cached_property`` that creates it."""
+    cfngin_context.add_stubber("s3")
 
 
 def check_bool_is_true(val: Any) -> bool:
@@ -63,7 +64,7 @@ def check_bool_is_false(val: Any) -> bool:
     raise ValueError(f'Value should be "False"; got {val}')
 
 
-def gen_certificate(**kwargs: Any) -> Dict[str, Any]:
+def gen_certificate(**kwargs: Any) -> dict[str, Any]:
     """Generate a response to describe_certificate."""
     data = {
         "CertificateArn": kwargs.pop("CertificateArn"),
@@ -81,7 +82,7 @@ def gen_change(
     return {"Action": action, "ResourceRecordSet": record_set}
 
 
-def gen_change_batch(changes: Any = ANY, comment: Any = ANY) -> Dict[str, Any]:
+def gen_change_batch(changes: Any = ANY, comment: Any = ANY) -> dict[str, Any]:
     """Generate expected change batch."""
     return {"Comment": comment, "Changes": changes}
 
@@ -119,9 +120,9 @@ def gen_domain_validation_option(**kwargs: Any) -> DomainValidationTypeDef:
 
 def gen_record_set(
     use_resource_record: bool = False, **kwargs: Any
-) -> Union[ResourceRecordSetTypeDef, ResourceRecordTypeDef]:
+) -> ResourceRecordSetTypeDef | ResourceRecordTypeDef:
     """Generate a record set."""
-    data: Dict[str, Any] = {
+    data: dict[str, Any] = {
         "Name": "placeholder_name",
         "Type": "CNAME",
         "Value": "placeholder_value",
@@ -152,11 +153,11 @@ def gen_stack_resource(**kwargs: Any) -> StackResourceTypeDef:
 class TestCertificate:
     """Tests for runway.cfngin.hooks.acm.Certificate."""
 
-    def test_attributes(self, cfngin_context: MockCFNginContext) -> None:
+    def test_attributes(self, cfngin_context: MockCfnginContext) -> None:
         """Test attributes set during __init__."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         result = Certificate(
@@ -177,6 +178,7 @@ class TestCertificate:
         assert result.properties["ValidationMethod"] == "DNS"
 
         # blueprint attributes
+        assert result.blueprint
         assert result.blueprint.VARIABLES["DomainName"]
         assert result.blueprint.VARIABLES["ValidateRecordTTL"]
 
@@ -187,9 +189,7 @@ class TestCertificate:
         assert not template.conditions
         assert not template.mappings
         assert template.outputs["DomainName"].Value.to_dict() == {"Ref": "DomainName"}
-        assert template.outputs["ValidateRecordTTL"].Value.to_dict() == {
-            "Ref": "ValidateRecordTTL"
-        }
+        assert template.outputs["ValidateRecordTTL"].Value.to_dict() == {"Ref": "ValidateRecordTTL"}
         assert not template.parameters
         assert isinstance(template.resources["Certificate"], CertificateResource)
         assert not template.rules
@@ -197,14 +197,15 @@ class TestCertificate:
         assert not template.transform
 
         # stack attributes
+        assert result.stack
         assert result.stack.fqn == "test-stack-name"
-        assert result.stack._blueprint == result.blueprint
+        assert result.stack.blueprint == result.blueprint  # type: ignore
 
-    def test_domain_changed(self, cfngin_context: MockCFNginContext) -> None:
+    def test_domain_changed(self, cfngin_context: MockCfnginContext) -> None:
         """Test for domain_changed."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         provider = MagicMock()
@@ -245,12 +246,12 @@ class TestCertificate:
         assert not cert.domain_changed()
 
     def test_get_certificate(
-        self, cfngin_context: MockCFNginContext, patch_time: None
+        self, cfngin_context: MockCfnginContext, mock_sleep: None  # noqa: ARG002
     ) -> None:
         """Test get_certificate."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         provider = MagicMock(cloudformation=boto3.client("cloudformation"))
@@ -290,22 +291,20 @@ class TestCertificate:
     @pytest.mark.parametrize("status", ["PENDING_VALIDATION", "SUCCESS", "FAILED"])
     def test_get_validation_record(
         self,
-        cfngin_context: MockCFNginContext,
-        monkeypatch: MonkeyPatch,
-        patch_time: None,
+        cfngin_context: MockCfnginContext,
+        monkeypatch: pytest.MonkeyPatch,
+        mock_sleep: None,  # noqa: ARG002
         status: str,
     ) -> None:
         """Test get_validation_record."""
         # setup context
-        acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        acm_stubber = cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
         expected_request = {"CertificateArn": cert_arn}
-        validate_option_missing_record = gen_domain_validation_option(
-            ValidationStatus=status
-        )
+        validate_option_missing_record = gen_domain_validation_option(ValidationStatus=status)
         del validate_option_missing_record["ResourceRecord"]
 
         cert = Certificate(
@@ -333,17 +332,15 @@ class TestCertificate:
             "describe_certificate",
             gen_certificate(
                 CertificateArn=cert_arn,
-                DomainValidationOptions=[
-                    gen_domain_validation_option(ValidationStatus=status)
-                ],
+                DomainValidationOptions=[gen_domain_validation_option(ValidationStatus=status)],
             ),
             expected_request,
         )
 
         with acm_stubber:
-            assert cert.get_validation_record(
-                status=status
-            ) == gen_domain_validation_option().get("ResourceRecord")
+            assert cert.get_validation_record(status=status) == gen_domain_validation_option().get(
+                "ResourceRecord"
+            )
         acm_stubber.assert_no_pending_responses()
 
     @pytest.mark.parametrize(
@@ -355,12 +352,12 @@ class TestCertificate:
         ],
     )
     def test_get_validation_record_status_mismatch(
-        self, cfngin_context: MockCFNginContext, check: str, found: str
+        self, cfngin_context: MockCfnginContext, check: str, found: str
     ) -> None:
         """Test get get_validation_record with a mismatched record status."""
         # setup context
-        acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        acm_stubber = cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
@@ -377,26 +374,20 @@ class TestCertificate:
             "describe_certificate",
             gen_certificate(
                 CertificateArn=cert_arn,
-                DomainValidationOptions=[
-                    gen_domain_validation_option(ValidationStatus=found)
-                ],
+                DomainValidationOptions=[gen_domain_validation_option(ValidationStatus=found)],
             ),
             expected_request,
         )
 
-        with acm_stubber, pytest.raises(ValueError) as excinfo:
+        with acm_stubber, pytest.raises(ValueError, match="No validations with status"):
             cert.get_validation_record(cert_arn=cert_arn, status=check)
-
-        assert "No validations with status" in str(excinfo.value)
         acm_stubber.assert_no_pending_responses()
 
-    def test_get_validation_record_gt_one(
-        self, cfngin_context: MockCFNginContext
-    ) -> None:
+    def test_get_validation_record_gt_one(self, cfngin_context: MockCfnginContext) -> None:
         """Test get get_validation_record more than one result."""
         # setup context
-        acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        acm_stubber = cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
@@ -421,17 +412,18 @@ class TestCertificate:
             expected_request,
         )
 
-        with acm_stubber, pytest.raises(ValueError) as excinfo:
+        with (
+            acm_stubber,
+            pytest.raises(ValueError, match="only one option is supported"),
+        ):
             cert.get_validation_record(cert_arn=cert_arn)
-
-        assert "only one option is supported" in str(excinfo.value)
         acm_stubber.assert_no_pending_responses()
 
-    def test_put_record_set(self, cfngin_context: MockCFNginContext) -> None:
+    def test_put_record_set(self, cfngin_context: MockCfnginContext) -> None:
         """Test put_record."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        r53_stubber = cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        r53_stubber = cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert = Certificate(
@@ -451,9 +443,7 @@ class TestCertificate:
                         gen_change(
                             record_set=cast(
                                 "ResourceRecordSetTypeDef",
-                                gen_record_set(
-                                    use_resource_record=True, TTL=cert.args.ttl
-                                ),
+                                gen_record_set(use_resource_record=True, TTL=cert.args.ttl),
                             )
                         )
                     ]
@@ -462,18 +452,16 @@ class TestCertificate:
         )
 
         with r53_stubber:
-            assert not cert.put_record_set(
-                cast("ResourceRecordTypeDef", gen_record_set())
-            )
+            assert not cert.put_record_set(cast("ResourceRecordTypeDef", gen_record_set()))
         r53_stubber.assert_no_pending_responses()
 
     def test_remove_validation_records(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test remove_validation_records."""
         # setup context
-        acm_stubber = cfngin_context.add_stubber("acm", "us-east-1")
-        r53_stubber = cfngin_context.add_stubber("route53", "us-east-1")
+        acm_stubber = cfngin_context.add_stubber("acm", region="us-east-1")
+        r53_stubber = cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
@@ -499,9 +487,7 @@ class TestCertificate:
             "describe_certificate",
             gen_certificate(
                 CertificateArn=cert_arn,
-                DomainValidationOptions=[
-                    gen_domain_validation_option(ValidationMethod="EMAIL")
-                ],
+                DomainValidationOptions=[gen_domain_validation_option(ValidationMethod="EMAIL")],
             ),
             expected_cert_request,
         )
@@ -520,9 +506,7 @@ class TestCertificate:
                                 gen_record_set(
                                     use_resource_record=True,
                                     TTL=cert.args.ttl,
-                                    **gen_domain_validation_option().get(
-                                        "ResourceRecord", {}
-                                    ),
+                                    **gen_domain_validation_option().get("ResourceRecord", {}),
                                 ),
                             ),
                         )
@@ -531,19 +515,22 @@ class TestCertificate:
             },
         )
 
-        with acm_stubber, r53_stubber, pytest.raises(ValueError) as excinfo:
+        with (  # noqa: PT012
+            acm_stubber,
+            r53_stubber,
+            pytest.raises(ValueError, match="Must provide one of more record sets"),
+        ):
             assert not cert.remove_validation_records()
             cert.remove_validation_records()
 
         acm_stubber.assert_no_pending_responses()
         r53_stubber.assert_no_pending_responses()
-        assert str(excinfo.value) == "Must provide one of more record sets"
 
-    def test_update_record_set(self, cfngin_context: MockCFNginContext) -> None:
+    def test_update_record_set(self, cfngin_context: MockCfnginContext) -> None:
         """Test update_record_set."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        r53_stubber = cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        r53_stubber = cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert = Certificate(
@@ -564,9 +551,7 @@ class TestCertificate:
                             action="UPSERT",
                             record_set=cast(
                                 "ResourceRecordSetTypeDef",
-                                gen_record_set(
-                                    use_resource_record=True, TTL=cert.args.ttl
-                                ),
+                                gen_record_set(use_resource_record=True, TTL=cert.args.ttl),
                             ),
                         )
                     ]
@@ -575,18 +560,16 @@ class TestCertificate:
         )
 
         with r53_stubber:
-            assert not cert.update_record_set(
-                cast("ResourceRecordTypeDef", gen_record_set())
-            )
+            assert not cert.update_record_set(cast("ResourceRecordTypeDef", gen_record_set()))
         r53_stubber.assert_no_pending_responses()
 
     def test_deploy(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test deploy."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
@@ -611,17 +594,17 @@ class TestCertificate:
             "put_record_set",
             lambda x: None if x == "get_validation_record" else ValueError,
         )
-        monkeypatch.setattr(cert, "_wait_for_stack", lambda x, last_status: None)
+        monkeypatch.setattr(cert, "_wait_for_stack", lambda _, last_status: None)  # noqa: ARG005
 
         assert cert.deploy() == expected
 
     def test_deploy_update(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test deploy update stack."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
@@ -640,9 +623,7 @@ class TestCertificate:
             cert,
             "get_validation_record",
             lambda x, status: (
-                "get_validation_record"
-                if x == cert_arn and status == "SUCCESS"
-                else ValueError
+                "get_validation_record" if x == cert_arn and status == "SUCCESS" else ValueError
             ),
         )
         monkeypatch.setattr(
@@ -650,17 +631,17 @@ class TestCertificate:
             "update_record_set",
             lambda x: None if x == "get_validation_record" else ValueError,
         )
-        monkeypatch.setattr(cert, "_wait_for_stack", lambda x, last_status: None)
+        monkeypatch.setattr(cert, "_wait_for_stack", lambda _, last_status: None)  # noqa: ARG005
 
         assert cert.deploy() == expected
 
     def test_deploy_no_change(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test deploy no change."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
@@ -679,12 +660,12 @@ class TestCertificate:
         assert cert.deploy() == expected
 
     def test_deploy_recreate(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
-    ):
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
         """Test deploy with stack recreation."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
@@ -698,9 +679,7 @@ class TestCertificate:
         )
         monkeypatch.setattr(cert, "domain_changed", lambda: False)
         monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.recreate)  # type: ignore
-        monkeypatch.setattr(
-            cert, "get_certificate", MagicMock(side_effect=["old", cert_arn])
-        )
+        monkeypatch.setattr(cert, "get_certificate", MagicMock(side_effect=["old", cert_arn]))
         monkeypatch.setattr(
             cert, "_wait_for_stack", MagicMock(side_effect=[STATUS.new, None])  # type: ignore
         )
@@ -718,12 +697,12 @@ class TestCertificate:
         assert cert.deploy() == expected
 
     def test_deploy_domain_changed(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test deploy domain changed."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert = Certificate(
@@ -737,12 +716,12 @@ class TestCertificate:
         assert not cert.deploy()
 
     def test_deploy_error_destroy(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test deploy with errors that result in destroy being called."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert_arn = "arn:aws:acm:us-east-1:012345678901:certificate/test"
@@ -774,27 +753,29 @@ class TestCertificate:
             ),
         )
         monkeypatch.setattr(
-            cert, "destroy", lambda records, skip_r53: check_bool_is_true(skip_r53)
+            cert,
+            "destroy",
+            lambda records, skip_r53: check_bool_is_true(skip_r53),  # noqa: ARG005
         )
-        monkeypatch.setattr(
-            cert, "_wait_for_stack", MagicMock(side_effect=StackFailed("test"))
-        )
+        monkeypatch.setattr(cert, "_wait_for_stack", MagicMock(side_effect=StackFailed("test")))
 
         assert not cert.deploy()  # cert.r53_client.exceptions.InvalidChangeBatch
         assert not cert.deploy()  # cert.r53_client.exceptions.NoSuchHostedZone
 
         monkeypatch.setattr(
-            cert, "destroy", lambda records, skip_r53: check_bool_is_false(skip_r53)
+            cert,
+            "destroy",
+            lambda records, skip_r53: check_bool_is_false(skip_r53),  # noqa: ARG005
         )
         assert not cert.deploy()  # StackFailed
 
     def test_deploy_error_no_destroy(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test deploy with errors that don't result in destroy being called."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert = Certificate(
@@ -813,12 +794,12 @@ class TestCertificate:
         assert not cert.deploy()
 
     def test_destroy(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test destroy."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert = Certificate(
@@ -828,24 +809,20 @@ class TestCertificate:
             hosted_zone_id="test",
         )
         # should only be called once
-        monkeypatch.setattr(
-            cert, "remove_validation_records", MagicMock(return_value=None)
-        )
-        monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)
+        monkeypatch.setattr(cert, "remove_validation_records", MagicMock(return_value=None))
+        monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)  # noqa: ARG005
 
         assert cert.destroy()
         assert cert.destroy(skip_r53=True)
-        assert (  # pylint: disable=no-member
-            cert.remove_validation_records.call_count == 1  # type: ignore
-        )
+        assert cert.remove_validation_records.call_count == 1  # type: ignore
 
     def test_destroy_aws_errors(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test destroy with errors from AWS."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert = Certificate(
@@ -866,19 +843,19 @@ class TestCertificate:
                 ]
             ),
         )
-        monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)
+        monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)  # noqa: ARG005
 
         assert cert.destroy()
         assert cert.destroy()
         assert cert.destroy()
 
     def test_destroy_raise_client_error(
-        self, cfngin_context: MockCFNginContext, monkeypatch: MonkeyPatch
+        self, cfngin_context: MockCfnginContext, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Test destroy with ClientError raised."""
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         def build_client_error(msg: str) -> ClientError:
@@ -891,10 +868,11 @@ class TestCertificate:
             domain="example.com",
             hosted_zone_id="test",
         )
-        monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)
+        monkeypatch.setattr(cert, "destroy_stack", lambda wait: None)  # noqa: ARG005
 
         def raise_stack_not_exist(_records: Any) -> NoReturn:
             """Raise ClientError mimicking stack not existing."""
+            assert cert.stack
             raise build_client_error(f"Stack with id {cert.stack.fqn} does not exist")
 
         def raise_other(_records: Any) -> NoReturn:
@@ -920,8 +898,8 @@ class TestCertificate:
     )
     def test_stage_methods(
         self,
-        cfngin_context: MockCFNginContext,
-        monkeypatch: MonkeyPatch,
+        cfngin_context: MockCfnginContext,
+        monkeypatch: pytest.MonkeyPatch,
         stage: str,
         expected: str,
     ) -> None:
@@ -933,8 +911,8 @@ class TestCertificate:
 
         """
         # setup context
-        cfngin_context.add_stubber("acm", "us-east-1")
-        cfngin_context.add_stubber("route53", "us-east-1")
+        cfngin_context.add_stubber("acm", region="us-east-1")
+        cfngin_context.add_stubber("route53", region="us-east-1")
         cfngin_context.config.namespace = "test"
 
         cert = Certificate(

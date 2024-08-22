@@ -1,7 +1,7 @@
 """``runway kbenv`` command group."""
 
 # docs: file://./../../../../docs/source/commands.rst
-from typing import Any, List
+from typing import Any
 
 import click
 
@@ -13,7 +13,7 @@ from ._uninstall import uninstall
 
 __all__ = ["install", "list_installed", "run", "uninstall"]
 
-COMMANDS: List[click.Command] = [install, list_installed, run, uninstall]
+COMMANDS: list[click.Command] = [install, list_installed, run, uninstall]
 
 
 @click.group("kbenv", short_help="kubectl (install|run)")

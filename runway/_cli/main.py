@@ -3,7 +3,7 @@
 import argparse
 import logging
 import os
-from typing import Any, Dict
+from typing import Any
 
 import click
 
@@ -15,7 +15,7 @@ from .utils import CliContext
 
 LOGGER = logging.getLogger("runway.cli")
 
-CLICK_CONTEXT_SETTINGS: Dict[str, Any] = {
+CLICK_CONTEXT_SETTINGS: dict[str, Any] = {
     "help_option_names": ["-h", "--help"],
     "max_content_width": 999,
 }
@@ -34,7 +34,7 @@ class _CliGroup(click.Group):
         return super().invoke(ctx)
 
     @staticmethod
-    def __parse_global_options(ctx: click.Context) -> Dict[str, Any]:
+    def __parse_global_options(ctx: click.Context) -> dict[str, Any]:
         """Parse global options.
 
         These options are passed to subcommands but, should be parsed by the
@@ -44,20 +44,14 @@ class _CliGroup(click.Group):
         """
         parser = argparse.ArgumentParser(add_help=False)
         parser.add_argument("--ci", action="store_true", default=bool(os.getenv("CI")))
-        parser.add_argument(
-            "--debug", default=int(os.getenv("DEBUG", "0")), action="count"
-        )
-        parser.add_argument(
-            "-e", "--deploy-environment", default=os.getenv("DEPLOY_ENVIRONMENT")
-        )
+        parser.add_argument("--debug", default=int(os.getenv("DEBUG", "0")), action="count")
+        parser.add_argument("-e", "--deploy-environment", default=os.getenv("DEPLOY_ENVIRONMENT"))
         parser.add_argument(
             "--no-color",
             action="store_true",
             default=bool(os.getenv("RUNWAY_NO_COLOR")),
         )
-        parser.add_argument(
-            "--verbose", action="store_true", default=bool(os.getenv("VERBOSE"))
-        )
+        parser.add_argument("--verbose", action="store_true", default=bool(os.getenv("VERBOSE")))
         args, _ = parser.parse_known_args(list(ctx.args))
         return vars(args)
 
@@ -71,13 +65,11 @@ class _CliGroup(click.Group):
 def cli(ctx: click.Context, **_: Any) -> None:
     """Runway CLI.
 
-    Full documentation available at https://docs.onica.com/projects/runway/
+    Full documentation available at https://runway.readthedocs.io/
 
     """
     opts = ctx.meta["global.options"]
-    setup_logging(
-        debug=opts["debug"], no_color=opts["no_color"], verbose=opts["verbose"]
-    )
+    setup_logging(debug=opts["debug"], no_color=opts["no_color"], verbose=opts["verbose"])
     ctx.obj = CliContext(**opts)
 
 

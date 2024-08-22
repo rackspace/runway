@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Union
+from typing import TYPE_CHECKING, Any, ClassVar
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 from troposphere import Parameter, Ref, s3, sns
 
 from runway.cfngin.blueprints.base import (
@@ -46,14 +46,14 @@ MODULE = "runway.cfngin.blueprints.base"
 class SampleBlueprint(Blueprint):
     """Sample Blueprint to use for testing."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "Var0": {"type": CFNString, "default": "test"},
         "Var1": {"type": str, "default": ""},
     }
 
     def create_template(self) -> None:
         """Create template."""
-        return None
+        return
 
 
 def resolve_troposphere_var(tpe: Any, value: Any, **kwargs: Any) -> Any:
@@ -83,9 +83,7 @@ class TestBlueprint:
 
         blueprint = _Blueprint(name="test", context=cfngin_context)
         blueprint.render_template()
-        assert (
-            blueprint.template.outputs[output_name].properties["Value"] == output_value
-        )
+        assert blueprint.template.outputs[output_name].properties["Value"] == output_value
 
     def test_cfn_parameters(self, cfngin_context: CfnginContext) -> None:
         """Test cfn_parameters."""
@@ -107,20 +105,14 @@ class TestBlueprint:
     def test_description(self, cfngin_context: CfnginContext) -> None:
         """Test description."""
         description = "my blueprint description"
-        obj = SampleBlueprint(
-            name="test", context=cfngin_context, description=description
-        )
+        obj = SampleBlueprint(name="test", context=cfngin_context, description=description)
         assert obj.description == description
         obj.render_template()
         assert obj.template.description == description
 
-    def test_get_cfn_parameters(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_get_cfn_parameters(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test get_cfn_parameters."""
-        mock_cfn_parameters = mocker.patch.object(
-            Blueprint, "cfn_parameters", "success"
-        )
+        mock_cfn_parameters = mocker.patch.object(Blueprint, "cfn_parameters", "success")
         assert (
             Blueprint(name="test", context=cfngin_context).get_cfn_parameters()
             == mock_cfn_parameters
@@ -130,9 +122,7 @@ class TestBlueprint:
         self, cfngin_context: CfnginContext, mocker: MockerFixture
     ) -> None:
         """Test get_output_definitions."""
-        mock_output_definitions = mocker.patch.object(
-            Blueprint, "output_definitions", "success"
-        )
+        mock_output_definitions = mocker.patch.object(Blueprint, "output_definitions", "success")
         assert (
             Blueprint(name="test", context=cfngin_context).get_output_definitions()
             == mock_output_definitions
@@ -154,9 +144,7 @@ class TestBlueprint:
         self, cfngin_context: CfnginContext, mocker: MockerFixture
     ) -> None:
         """Test get_parameter_values."""
-        mock_parameter_values = mocker.patch.object(
-            Blueprint, "parameter_values", "success"
-        )
+        mock_parameter_values = mocker.patch.object(Blueprint, "parameter_values", "success")
         assert (
             Blueprint(name="test", context=cfngin_context).get_parameter_values()
             == mock_parameter_values
@@ -170,31 +158,24 @@ class TestBlueprint:
             Blueprint, "required_parameter_definitions", "success"
         )
         assert (
-            Blueprint(
-                name="test", context=cfngin_context
-            ).get_required_parameter_definitions()
+            Blueprint(name="test", context=cfngin_context).get_required_parameter_definitions()
             == mock_required_parameter_definitions
         )
 
-    def test_get_variables(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_get_variables(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test get_variables."""
         mock_variables = mocker.patch.object(Blueprint, "variables", "success")
-        assert (
-            Blueprint(name="test", context=cfngin_context).get_variables()
-            == mock_variables
-        )
+        assert Blueprint(name="test", context=cfngin_context).get_variables() == mock_variables
 
     def test_init_raise_attribute_error(self, cfngin_context: CfnginContext) -> None:
         """Test __init__."""
 
         class _Blueprint(Blueprint):
-            PARAMETERS: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {}
+            PARAMETERS: ClassVar[dict[str, BlueprintVariableTypeDef]] = {}
 
             def create_template(self) -> None:
                 """Create template."""
-                return None
+                return
 
         with pytest.raises(AttributeError):
             _Blueprint("test", cfngin_context)
@@ -208,9 +189,9 @@ class TestBlueprint:
 
     def test_parameter_definitions(self, cfngin_context: CfnginContext) -> None:
         """Test parameter_definitions."""
-        assert SampleBlueprint(
-            name="test", context=cfngin_context
-        ).parameter_definitions == {"Var0": {"type": "String", "default": "test"}}
+        assert SampleBlueprint(name="test", context=cfngin_context).parameter_definitions == {
+            "Var0": {"type": "String", "default": "test"}
+        }
 
     def test_parameter_values(self, cfngin_context: CfnginContext) -> None:
         """Test parameter_values."""
@@ -218,16 +199,12 @@ class TestBlueprint:
         obj.resolve_variables([])
         assert obj.parameter_values == {"Var0": "test"}
 
-    def test_read_user_data(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_read_user_data(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test read_user_data."""
         mock_read_value_from_path = mocker.patch(
             f"{MODULE}.read_value_from_path", return_value="something"
         )
-        mock_parse_user_data = mocker.patch(
-            f"{MODULE}.parse_user_data", return_value="success"
-        )
+        mock_parse_user_data = mocker.patch(f"{MODULE}.parse_user_data", return_value="success")
         obj = SampleBlueprint(name="test", context=cfngin_context)
         obj.resolve_variables([])
         assert obj.read_user_data("path") == mock_parse_user_data.return_value
@@ -236,9 +213,7 @@ class TestBlueprint:
             obj.variables, mock_read_value_from_path.return_value, obj.name
         )
 
-    def test_rendered(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_rendered(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test rendered."""
         mock_render_template = mocker.patch.object(
             SampleBlueprint, "render_template", return_value=("version", "render")
@@ -247,32 +222,25 @@ class TestBlueprint:
         assert obj.rendered == "render"
         mock_render_template.assert_called_once_with()
 
-    def test_required_parameter_definitions(
-        self, cfngin_context: CfnginContext
-    ) -> None:
+    def test_required_parameter_definitions(self, cfngin_context: CfnginContext) -> None:
         """Test required_parameter_definitions."""
 
         class _Blueprint(SampleBlueprint):
-            VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+            VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
                 "Var0": {"type": CFNString},
                 "Var1": {"type": str, "default": ""},
             }
 
-        assert _Blueprint(
-            name="test", context=cfngin_context
-        ).required_parameter_definitions == {"Var0": {"type": "String"}}
+        assert _Blueprint(name="test", context=cfngin_context).required_parameter_definitions == {
+            "Var0": {"type": "String"}
+        }
 
-    def test_required_parameter_definitions_none(
-        self, cfngin_context: CfnginContext
-    ) -> None:
+    def test_required_parameter_definitions_none(self, cfngin_context: CfnginContext) -> None:
         """Test required_parameter_definitions."""
-        assert SampleBlueprint(
-            name="test", context=cfngin_context
-        ).required_parameter_definitions
+        assert SampleBlueprint(name="test", context=cfngin_context).required_parameter_definitions
 
     def test_reset_template(self, cfngin_context: CfnginContext) -> None:
         """Test reset_template."""
-        # pylint: disable=protected-access
         obj = SampleBlueprint(name="test", context=cfngin_context)
         obj._rendered = "true"
         obj._version = "test"
@@ -289,9 +257,7 @@ class TestBlueprint:
         obj.template.transform = "something"  # type: ignore
         assert obj.requires_change_set
 
-    def test_setup_parameters(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_setup_parameters(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test setup_parameters."""
         template = Mock()
         mocker.patch(f"{MODULE}.build_parameter", return_value="params")
@@ -303,7 +269,7 @@ class TestBlueprint:
         """Test to_json."""
 
         class _Blueprint(Blueprint):
-            VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+            VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
                 "Param1": {"default": "default", "type": CFNString},
                 "Param2": {"type": CFNNumber},
                 "Param3": {"type": CFNCommaDelimitedList},
@@ -316,9 +282,7 @@ class TestBlueprint:
                 self.template.set_version("2010-09-09")
                 self.template.set_description("TestBlueprint")
 
-        result = _Blueprint("test", context=cfngin_context).to_json(
-            {"Param3": "something"}
-        )
+        result = _Blueprint("test", context=cfngin_context).to_json({"Param3": "something"})
         assert isinstance(result, str)
         assert json.loads(result) == {
             "AWSTemplateFormatVersion": "2010-09-09",
@@ -343,9 +307,7 @@ class TestBlueprint:
         """Test variables."""
 
         class _Blueprint(Blueprint):
-            VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
-                "Var0": {"type": str}
-            }
+            VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {"Var0": {"type": str}}
 
             def create_template(self) -> None:
                 """Create template."""
@@ -358,9 +320,7 @@ class TestBlueprint:
         obj.variables = {"key": "val"}
         assert obj.variables == {"key": "val"}
 
-    def test_version(
-        self, cfngin_context: CfnginContext, mocker: MockerFixture
-    ) -> None:
+    def test_version(self, cfngin_context: CfnginContext, mocker: MockerFixture) -> None:
         """Test version."""
         mock_render_template = mocker.patch.object(
             SampleBlueprint, "render_template", return_value=("version", "render")
@@ -399,7 +359,7 @@ class TestCFNParameter:
             (1, "1"),
         ],
     )
-    def test_value(self, expected: Union[List[str], str], provided: Any) -> None:
+    def test_value(self, expected: list[str] | str, provided: Any) -> None:
         """Test value."""
         assert CFNParameter("myParameter", provided).value == expected
 
@@ -447,14 +407,10 @@ def test_resolve_variable_allowed_values() -> None:
     """Test resolve_variable."""
     var_name = "testVar"
     var_def: BlueprintVariableTypeDef = {"type": str, "allowed_values": ["allowed"]}
-    with pytest.raises(ValueError):
-        resolve_variable(
-            var_name, var_def, Variable(var_name, "not_allowed", "cfngin"), "test"
-        )
+    with pytest.raises(ValueError):  # noqa: PT011
+        resolve_variable(var_name, var_def, Variable(var_name, "not_allowed", "cfngin"), "test")
     assert (
-        resolve_variable(
-            var_name, var_def, Variable(var_name, "allowed", "cfngin"), "test"
-        )
+        resolve_variable(var_name, var_def, Variable(var_name, "allowed", "cfngin"), "test")
         == "allowed"
     )
 
@@ -484,9 +440,7 @@ def test_resolve_variable_provided_not_resolved(mocker: MockerFixture) -> None:
     """Test resolve_variable."""
     mocker.patch("runway.variables.CFNGIN_LOOKUP_HANDLERS", {"mock": Mock()})
     with pytest.raises(UnresolvedBlueprintVariable):
-        resolve_variable(
-            "name", {"type": str}, Variable("name", "${mock abc}", "cfngin"), "test"
-        )
+        resolve_variable("name", {"type": str}, Variable("name", "${mock abc}", "cfngin"), "test")
 
 
 def test_resolve_variable_troposphere_fail() -> None:
@@ -654,14 +608,9 @@ def test_validate_variable_type_python_raise_type_error() -> None:
 
 def test_validate_variable_type_troposphere(mocker: MockerFixture) -> None:
     """Test validate_variable_type."""
-    mock_create = mocker.patch.object(
-        TroposphereType, "create", side_effect=["success", Exception]
-    )
+    mock_create = mocker.patch.object(TroposphereType, "create", side_effect=["success", Exception])
     value = {"Endpoint": "test", "Protocol": "test"}
-    assert (
-        validate_variable_type("test", TroposphereType(sns.Subscription), value)
-        == "success"
-    )
+    assert validate_variable_type("test", TroposphereType(sns.Subscription), value) == "success"
     mock_create.assert_called_once_with(value)
     with pytest.raises(ValidatorError):
         validate_variable_type("test", TroposphereType(sns.Subscription), value)

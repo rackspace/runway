@@ -26,6 +26,4 @@ def list_installed(**_: Any) -> None:
         LOGGER.info("Terraform versions installed:")
         click.echo("\n".join(v.name for v in versions))
     else:
-        LOGGER.warning(
-            "no versions of Terraform installed at path %s", tfenv.versions_dir
-        )
+        LOGGER.warning("no versions of Terraform installed at path %s", tfenv.versions_dir)

@@ -1,11 +1,9 @@
 """Test runway.env_mgr."""
 
-# pylint: disable=unused-argument
-# pyright: basic
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -14,7 +12,6 @@ from runway.env_mgr import EnvManager
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture, MonkeyPatch
     from pytest_mock import MockerFixture
 
 
@@ -22,7 +19,7 @@ class TestEnvManager:
     """Test runway.env_mgr.EnvManager."""
 
     def test___init___darwin(
-        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture
+        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture  # noqa: ARG002
     ) -> None:
         """Test __init__ on Darwin platform."""
         home = cd_tmp_path / "home"
@@ -37,10 +34,10 @@ class TestEnvManager:
 
     def test___init___windows(
         self,
-        platform_windows: None,
+        platform_windows: None,  # noqa: ARG002
         cd_tmp_path: Path,
         mocker: MockerFixture,
-        monkeypatch: MonkeyPatch,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Test __init__ on Windows platform."""
         home = cd_tmp_path / "home"
@@ -57,7 +54,10 @@ class TestEnvManager:
         assert obj.versions_dir == expected_env_dir / "versions"
 
     def test___init___windows_appdata(
-        self, platform_windows: None, cd_tmp_path: Path, monkeypatch: MonkeyPatch
+        self,
+        platform_windows: None,  # noqa: ARG002
+        cd_tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         """Test __init__ on Windows platform."""
         monkeypatch.setenv("APPDATA", str(cd_tmp_path / "custom_path"))
@@ -72,7 +72,7 @@ class TestEnvManager:
         assert obj.versions_dir == expected_env_dir / "versions"
 
     def test_bin(
-        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture
+        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture  # noqa: ARG002
     ) -> None:
         """Test bin."""
         home = cd_tmp_path / "home"
@@ -83,7 +83,7 @@ class TestEnvManager:
         assert obj.bin == home / ".test-dir" / "versions" / "1.0.0" / "test-bin"
 
     @pytest.mark.parametrize("version", ["1.0.0", None])
-    def test_install(self, version: Optional[str]) -> None:
+    def test_install(self, version: str | None) -> None:
         """Test install."""
         with pytest.raises(NotImplementedError):
             assert EnvManager("", "").install(version)
@@ -101,7 +101,7 @@ class TestEnvManager:
     @pytest.mark.parametrize("exists", [False, True])
     def test_uninstall(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         exists: bool,
         mocker: MockerFixture,
         tmp_path: Path,
@@ -119,10 +119,7 @@ class TestEnvManager:
             version_dir.mkdir()
             (version_dir / "foo").touch()
             assert obj.uninstall(version)
-            assert (
-                f"uninstalling {bin_name} {version} from {tmp_path}..."
-                in caplog.messages
-            )
+            assert f"uninstalling {bin_name} {version} from {tmp_path}..." in caplog.messages
             assert f"uninstalled {bin_name} {version}" in caplog.messages
         else:
             assert not obj.uninstall(version)

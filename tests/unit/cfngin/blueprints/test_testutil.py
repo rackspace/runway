@@ -1,8 +1,8 @@
 """Tests for runway.cfngin.blueprints.testutil."""
 
-# pyright: basic
 import unittest
 
+import pytest
 from troposphere import ecr
 
 from runway.cfngin.blueprints.base import Blueprint
@@ -24,9 +24,7 @@ class Repositories(Blueprint):
     def create_template(self) -> None:
         """Create template."""
         for repo in self.variables["Repositories"]:
-            self.template.add_resource(
-                ecr.Repository(f"{repo}Repository", RepositoryName=repo)
-            )
+            self.template.add_resource(ecr.Repository(f"{repo}Repository", RepositoryName=repo))
 
 
 class TestRepositories(BlueprintTestCase):
@@ -38,9 +36,7 @@ class TestRepositories(BlueprintTestCase):
         """Test create template passes."""
         ctx = CfnginContext()
         blueprint = Repositories("test_repo", ctx)
-        blueprint.resolve_variables(
-            [Variable("Repositories", ["repo1", "repo2"], "cfngin")]
-        )
+        blueprint.resolve_variables([Variable("Repositories", ["repo1", "repo2"], "cfngin")])
         blueprint.create_template()
         self.assertRenderedBlueprint(blueprint)
 
@@ -52,7 +48,7 @@ class TestRepositories(BlueprintTestCase):
             [Variable("Repositories", ["repo1", "repo2", "repo3"], "cfngin")]
         )
         blueprint.create_template()
-        with self.assertRaises(AssertionError):
+        with pytest.raises(AssertionError):
             self.assertRenderedBlueprint(blueprint)
 
 

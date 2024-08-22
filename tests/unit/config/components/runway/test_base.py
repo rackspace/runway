@@ -1,14 +1,12 @@
 """Test runway.config.components.runway.base."""
 
-# pylint: disable=protected-access
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock, call
 
 import pytest
-from mock import MagicMock, call
-from pydantic import Extra
+from pydantic import ConfigDict
 
 from runway.config.components.runway import RunwayVariablesDefinition
 from runway.config.components.runway.base import ConfigComponentDefinition
@@ -16,7 +14,6 @@ from runway.config.models.base import ConfigProperty
 from runway.exceptions import UnresolvedVariable
 
 if TYPE_CHECKING:
-    from pytest import MonkeyPatch
 
     from ....factories import MockRunwayContext
 
@@ -24,16 +21,11 @@ if TYPE_CHECKING:
 class SampleConfigProperty(ConfigProperty):
     """Data class for SampleConfigComponentDefinition."""
 
+    model_config = ConfigDict(extra="allow", validate_assignment=True, validate_default=True)
+
     name: str = "test"
     var_attr: Any = None
     var_attr_pre: Any = None
-
-    class Config(ConfigProperty.Config):
-        """Model configuration."""
-
-        extra = Extra.allow
-        validate_all = False
-        validate_assignment = False
 
 
 class SampleConfigComponentDefinition(ConfigComponentDefinition):
@@ -74,15 +66,13 @@ class SampleConfigComponentDefinition(ConfigComponentDefinition):
             obj: The object to parse.
 
         """
-        return cls(SampleConfigProperty.parse_obj(obj))
+        return cls(SampleConfigProperty.model_validate(obj))
 
 
 class TestConfigComponentDefinition:
     """Test runway.config.components.runway.base.ConfigComponentDefinition."""
 
-    VARIABLES = RunwayVariablesDefinition.parse_obj(
-        {"key": "val", "test": {"key": "test-val"}}
-    )
+    VARIABLES = RunwayVariablesDefinition.parse_obj({"key": "val", "test": {"key": "test-val"}})
 
     def test_contains(self) -> None:
         """Test __contains__."""
@@ -97,8 +87,9 @@ class TestConfigComponentDefinition:
         data = SampleConfigProperty()
         obj = SampleConfigComponentDefinition(data)
         assert obj._data == data
-        assert obj.data == data.dict()
-        assert not obj._vars and isinstance(obj._vars, dict)
+        assert obj.data == data.model_dump()
+        assert not obj._vars
+        assert isinstance(obj._vars, dict)
 
     def test_get(self) -> None:
         """Test get."""
@@ -113,9 +104,7 @@ class TestConfigComponentDefinition:
             var_attr="${var ${env DEPLOY_ENVIRONMENT}.key}", var_attr_pre="${var key}"
         )
         obj = SampleConfigComponentDefinition(data)
-        assert not obj.resolve(
-            runway_context, pre_process=True, variables=self.VARIABLES
-        )
+        assert not obj.resolve(runway_context, pre_process=True, variables=self.VARIABLES)
 
         assert obj.var_attr_pre == self.VARIABLES["key"]
         with pytest.raises(UnresolvedVariable):
@@ -123,12 +112,10 @@ class TestConfigComponentDefinition:
         with pytest.raises(AttributeError):
             assert not obj.missing
 
-    def test_getitem(self, monkeypatch: MonkeyPatch) -> None:
+    def test_getitem(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test __getitem__."""
         mock_getattr = MagicMock(side_effect=["val", AttributeError])
-        monkeypatch.setattr(
-            SampleConfigComponentDefinition, "__getattr__", mock_getattr
-        )
+        monkeypatch.setattr(SampleConfigComponentDefinition, "__getattr__", mock_getattr)
         obj = SampleConfigComponentDefinition.parse_obj({})
 
         assert obj["key"] == "val"
@@ -175,9 +162,7 @@ class TestConfigComponentDefinition:
             var_attr="${var ${env DEPLOY_ENVIRONMENT}.key}", var_attr_pre="${var key}"
         )
         obj = SampleConfigComponentDefinition(data)
-        assert not obj.resolve(
-            runway_context, pre_process=True, variables=self.VARIABLES
-        )
+        assert not obj.resolve(runway_context, pre_process=True, variables=self.VARIABLES)
 
         assert not obj._vars["var_attr"].resolved
         with pytest.raises(UnresolvedVariable):
@@ -191,7 +176,7 @@ class TestConfigComponentDefinition:
         """Test __setattr__."""
         obj = SampleConfigComponentDefinition.parse_obj({})
         assert not obj._data.get("key")
-        obj.key = "val"  # pylint: disable=attribute-defined-outside-init
+        obj.key = "val"
         assert obj._data["key"] == "val"
         assert obj.key == "val"
 
@@ -207,7 +192,7 @@ class TestConfigComponentDefinition:
     def test_setattr_underscore(self) -> None:
         """Test __setattr__ underscore."""
         obj = SampleConfigComponentDefinition.parse_obj({})
-        obj._key = "_val"  # pylint: disable=attribute-defined-outside-init
+        obj._key = "_val"
         assert "_key" not in obj._data
         assert obj._key == "_val"
 

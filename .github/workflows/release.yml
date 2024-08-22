@@ -1,0 +1,77 @@
+name: Publish Release
+
+on:
+  release:
+    types:
+      - published
+
+env:
+  AWS_DEFAULT_REGION: us-east-1
+
+jobs:
+  build-pypi:
+    name: Build PyPi 📦
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub (complete)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
+        with:
+          poetry-plugins: poetry-dynamic-versioning[plugin]
+      # Remove apt repos that are known to break from time to time
+      # See https://github.com/actions/virtual-environments/issues/323
+      - name: Remove broken apt repos (ubuntu)
+        run: |
+          for apt_file in `grep -lr microsoft /etc/apt/sources.list.d/`; do sudo rm $apt_file; done
+      - name: ⤵️ Install Dependencies (ubuntu)
+        run: sudo apt-get update && sudo apt-get install sed -y
+      - name: 👷 Build
+        run: make build
+      - name: ⤴️ Upload distribution artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pypi-dist
+          path: dist
+  publish-pypi:
+    name: Publish 📦 To PyPI
+    needs:
+      - build-pypi
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub (complete)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: ⤵️ Download distribution artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pypi-dist
+          path: dist
+      - name: 🏗 Setup Python
+        uses: finleyfamily/action-setup-python@v1.0.0
+        with:
+          poetry-install: false
+          poetry-plugins: poetry-dynamic-versioning[plugin]
+      - name: 🚀 Publish Distribution 📦 to PyPI
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
+        run: poetry publish
+  notify-on-publish:
+    name: Notify
+    needs:
+      - publish-pypi
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⤵️ Check out code from GitHub
+        uses: actions/checkout@v4
+      - name: 🚀 Microsoft Teams Notification
+        uses: skitionek/notify-microsoft-teams@v1.0.8  # cspell:ignore skitionek
+        if: always()
+        with:
+          webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}

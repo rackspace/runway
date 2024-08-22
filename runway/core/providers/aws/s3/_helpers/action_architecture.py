@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, cast
 
 from typing_extensions import Literal, TypedDict
 
@@ -50,12 +50,12 @@ _InstructionTypeDef = Literal[
 class _CommandDictTypeDef(TypedDict):
     """Type definition for command_dict."""
 
-    comparator: List[Comparator]
-    file_generator: List[FileGenerator]
-    file_info_builder: List[FileInfoBuilder]
-    filters: List[Any]
-    s3_handler: List[S3TransferHandler]
-    setup: List[FormatPathResult]
+    comparator: list[Comparator]
+    file_generator: list[FileGenerator]
+    file_info_builder: list[FileInfoBuilder]
+    filters: list[Any]
+    s3_handler: list[S3TransferHandler]
+    setup: list[FormatPathResult]
 
 
 class ActionArchitecture:
@@ -76,7 +76,7 @@ class ActionArchitecture:
         botocore_session: Session,
         action: Literal["sync"],
         parameters: ParametersDataModel,
-        runtime_config: Optional[TransferConfigDict] = None,
+        runtime_config: TransferConfigDict | None = None,
     ) -> None:
         """Instantiate class."""
         self.botocore_session = botocore_session
@@ -92,7 +92,7 @@ class ActionArchitecture:
         return self.session.client("s3")
 
     @cached_property
-    def instructions(self) -> List[_InstructionTypeDef]:
+    def instructions(self) -> list[_InstructionTypeDef]:
         """Create the instructions based on the command name and parameters.
 
         Note that all commands must have an s3_handler instruction in the
@@ -100,7 +100,7 @@ class ActionArchitecture:
         sends the request to S3 and does not yield anything.
 
         """
-        result: List[_InstructionTypeDef] = ["file_generator"]
+        result: list[_InstructionTypeDef] = ["file_generator"]
         if self.parameters.exclude or self.parameters.include:
             result.append("filters")
         if self.action == "sync":
@@ -109,7 +109,7 @@ class ActionArchitecture:
         result.append("s3_handler")
         return result
 
-    def choose_sync_strategies(self) -> Dict[str, BaseSync]:
+    def choose_sync_strategies(self) -> dict[str, BaseSync]:
         """Determine the sync strategy for the command.
 
         It defaults to the default sync strategies but a customizable sync
@@ -117,27 +117,28 @@ class ActionArchitecture:
         of its self when the event is emitted.
 
         """
-        sync_strategies: Dict[str, BaseSync] = {
+        sync_strategies: dict[str, BaseSync] = {
             "file_at_src_and_dest_sync_strategy": SizeAndLastModifiedSync(),
             "file_not_at_dest_sync_strategy": MissingFileSync(),
             "file_not_at_src_sync_strategy": NeverSync(),
         }
 
         # Determine what strategies to override if any.
-        responses: Optional[List[Tuple[Any, BaseSync]]] = self.botocore_session.emit(
-            "choosing-s3-sync-strategy", params=self.parameters
+        responses = cast(
+            "list[tuple[Any, BaseSync]] | None",
+            self.botocore_session.emit("choosing-s3-sync-strategy", params=self.parameters),
         )
         if responses is not None:
             for response in responses:
                 override_sync_strategy = response[1]
-                if override_sync_strategy is not None:
+                if override_sync_strategy:
                     sync_type = override_sync_strategy.sync_type
                     sync_type += "_sync_strategy"
                     sync_strategies[sync_type] = override_sync_strategy
 
         return sync_strategies
 
-    def run(self):
+    def run(self) -> Literal[1, 2, 0]:
         """Wire together all of the generators and completes the action.
 
         First a dictionary is created that is indexed first by
@@ -170,7 +171,7 @@ class ActionArchitecture:
             "s3local": "download",
             "s3": "delete",
         }
-        result_queue: "Queue[Any]" = Queue()
+        result_queue: Queue[Any] = Queue()
         operation_name = action_translation[paths_type]
 
         file_generator = FileGenerator(
@@ -189,9 +190,7 @@ class ActionArchitecture:
             result_queue=result_queue,
             request_parameters=self._get_file_generator_request_parameters_skeleton(),
         )
-        file_info_builder = FileInfoBuilder(
-            client=self.client, parameters=self.parameters
-        )
+        file_info_builder = FileInfoBuilder(client=self.client, parameters=self.parameters)
         s3_transfer_handler = S3TransferHandlerFactory(
             config_params=self.parameters, runtime_config=self._runtime_config
         )(self.client, result_queue)
@@ -243,5 +242,5 @@ class ActionArchitecture:
         return return_code
 
     @staticmethod
-    def _get_file_generator_request_parameters_skeleton() -> Dict[str, Dict[str, Any]]:
+    def _get_file_generator_request_parameters_skeleton() -> dict[str, dict[str, Any]]:
         return {"HeadObject": {}, "ListObjects": {}, "ListObjectsV2": {}}

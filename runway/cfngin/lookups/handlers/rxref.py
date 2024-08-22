@@ -1,12 +1,9 @@
 """Handler for fetching outputs from a stack in the current namespace."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Tuple
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ....lookups.handlers.base import LookupHandler
 from ....lookups.handlers.cfn import CfnLookup
@@ -15,12 +12,13 @@ from .output import OutputQuery, deconstruct
 
 if TYPE_CHECKING:
     from ....context import CfnginContext
+    from ....lookups.handlers.base import ParsedArgsTypeDef
     from ...providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)
 
 
-class RxrefLookup(LookupHandler):
+class RxrefLookup(LookupHandler["CfnginContext"]):
     """Rxref lookup."""
 
     DEPRECATION_MSG = (
@@ -28,11 +26,11 @@ class RxrefLookup(LookupHandler):
         "to learn how to use the new lookup query syntax visit "
         f"{DOC_SITE}/page/cfngin/lookups/rxref.html"
     )
-    TYPE_NAME: Final[Literal["rxref"]] = "rxref"
+    TYPE_NAME: ClassVar[str] = "rxref"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def legacy_parse(cls, value: str) -> Tuple[OutputQuery, Dict[str, str]]:
+    def legacy_parse(cls, value: str) -> tuple[OutputQuery, ParsedArgsTypeDef]:
         """Retain support for legacy lookup syntax.
 
         Format of value:
@@ -43,9 +41,7 @@ class RxrefLookup(LookupHandler):
         return deconstruct(value), {}
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, context: CfnginContext, provider: Provider, **_: Any
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext, *, provider: Provider, **_: Any) -> Any:
         """Fetch an output from the designated stack in the current namespace.
 
         The ``output`` lookup supports fetching outputs from stacks created

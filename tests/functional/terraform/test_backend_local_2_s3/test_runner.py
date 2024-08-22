@@ -1,12 +1,11 @@
 """Test migrating local backend to s3."""
 
-# pylint: disable=redefined-outer-name,unused-argument
 from __future__ import annotations
 
 import locale
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
@@ -14,6 +13,8 @@ from runway._cli import cli
 from runway.env_mgr.tfenv import TF_VERSION_FILENAME
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from _pytest.fixtures import SubRequest
     from click.testing import CliRunner, Result
 
@@ -25,9 +26,7 @@ def tf_state_bucket(cli_runner: CliRunner) -> Iterator[None]:
     """Create Terraform state bucket and table."""
     cli_runner.invoke(cli, ["deploy", "--tag", "bootstrap"], env={"CI": "1"})
     yield
-    destroy_result = cli_runner.invoke(
-        cli, ["destroy", "--tag", "cleanup"], env={"CI": "1"}
-    )
+    destroy_result = cli_runner.invoke(cli, ["destroy", "--tag", "cleanup"], env={"CI": "1"})
     assert destroy_result.exit_code == 0
 
 
@@ -44,20 +43,20 @@ def tf_version(request: SubRequest) -> Iterator[str]:
         encoding=locale.getpreferredencoding(do_setlocale=False),
     )
     yield cast(str, request.param)
-    file_path.unlink(missing_ok=True)  # pylint: disable=unexpected-keyword-arg
+    file_path.unlink(missing_ok=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def deploy_local_backend_result(
-    cli_runner: CliRunner, local_backend: Path
-) -> Iterator[Result]:
+    cli_runner: CliRunner, local_backend: Path  # noqa: ARG001
+) -> Result:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
-    yield cli_runner.invoke(cli, ["deploy", "--tag", "local"], env={"CI": "1"})
+    return cli_runner.invoke(cli, ["deploy", "--tag", "local"], env={"CI": "1"})
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def deploy_s3_backend_result(
-    cli_runner: CliRunner, s3_backend: Path
+    cli_runner: CliRunner, s3_backend: Path  # noqa: ARG001
 ) -> Iterator[Result]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy", "--tag", "test"], env={"CI": "1"})
@@ -65,10 +64,7 @@ def deploy_s3_backend_result(
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
-    (CURRENT_DIR / "local_backend").unlink(  # pylint: disable=unexpected-keyword-arg
-        missing_ok=True
-    )
-    # pylint: disable=unexpected-keyword-arg
+    (CURRENT_DIR / "local_backend").unlink(missing_ok=True)
     (CURRENT_DIR / ".terraform.lock.hcl").unlink(missing_ok=True)
 
 

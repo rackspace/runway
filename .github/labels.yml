@@ -48,7 +48,7 @@
     color: f0db4f
     description: Pull request that updates Javascript code
   - name: maintenance
-    color: fbca04
+    color: fbca04  # cspell:ignore fbca04
     description: General repo or CI/CD upkeep
   - name: npm
     color: cc3534
@@ -68,9 +68,6 @@
   - name: priority:medium
     color: fbca04
     description: Medium priority issue or pull request
-  - name: pyinstaller
-    color: ffffff
-    description: Update to Pyinstaller configuration
   - name: python
     color: '306998'
     description: Update to Python code

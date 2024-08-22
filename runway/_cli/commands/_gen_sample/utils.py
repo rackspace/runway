@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 import click
-from cfn_flip import to_yaml
+from cfn_flip import to_yaml  # pyright: ignore[reportUnknownVariableType]
 from typing_extensions import Literal
 
 from ....blueprints.tf_state import TfState
@@ -20,7 +20,7 @@ def convert_gitignore(src: Path) -> Path:
     """Rename a gitignore template.
 
     Keyword Args:
-        Path object for source file.
+        src: Path object for source file.
 
     Returns:
         The renamed file if it was created.

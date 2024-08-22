@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Dict
-
 import pytest
 from s3transfer.manager import TransferConfig
 
@@ -26,17 +24,12 @@ class TestRuntimeConfig:
 
     def test_build_config_human_readable_rates_converted_to_bytes(self) -> None:
         """Test build_config."""
-        assert (
-            RuntimeConfig.build_config(max_bandwidth="1MB/s")["max_bandwidth"]
-            == 1024**2
-        )
+        assert RuntimeConfig.build_config(max_bandwidth="1MB/s")["max_bandwidth"] == 1024**2
 
     def test_build_config_human_readable_sizes_converted_to_bytes(self) -> None:
         """Test build_config."""
         assert (
-            RuntimeConfig.build_config(multipart_threshold="10MB")[
-                "multipart_threshold"
-            ]
+            RuntimeConfig.build_config(multipart_threshold="10MB")["multipart_threshold"]
             == 10 * 1024 * 1024
         )
 
@@ -69,7 +62,7 @@ class TestRuntimeConfig:
             {"max_queue_size": "not an int"},
         ],
     )
-    def test_build_config_validates_integer_types(self, kwargs: Dict[str, str]) -> None:
+    def test_build_config_validates_integer_types(self, kwargs: dict[str, str]) -> None:
         """Test build_config."""
         with pytest.raises(InvalidConfigError):
             RuntimeConfig.build_config(**kwargs)
@@ -84,9 +77,7 @@ class TestRuntimeConfig:
             {"multipart_threshold": -15},
         ],
     )
-    def test_build_config_validates_positive_integers(
-        self, kwargs: Dict[str, str]
-    ) -> None:
+    def test_build_config_validates_positive_integers(self, kwargs: dict[str, str]) -> None:
         """Test build_config."""
         with pytest.raises(InvalidConfigError):
             RuntimeConfig.build_config(**kwargs)

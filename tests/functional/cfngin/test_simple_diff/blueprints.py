@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict
+from typing import TYPE_CHECKING, ClassVar
 
 from troposphere.cloudformation import WaitConditionHandle
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class DiffTester(Blueprint):
     """Diff tester."""
 
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "InstanceType": {
             "type": CFNString,
             "description": "NAT EC2 instance type.",
@@ -24,8 +24,7 @@ class DiffTester(Blueprint):
         },
         "WaitConditionCount": {
             "type": int,
-            "description": "Number of WaitConditionHandle resources "
-            "to add to the template",
+            "description": "Number of WaitConditionHandle resources to add to the template",
         },
     }
 

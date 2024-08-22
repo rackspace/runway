@@ -4,10 +4,8 @@
 Configuration
 #############
 
-Configuration options and parameters for :ref:`Kubernetes <mod-k8s>` modules.
+Configuration options and parameters for :ref:`index:Kubernetes` :term:`Modules <module>`.
 
-.. contents::
-  :depth: 4
 
 
 *******
@@ -15,7 +13,7 @@ Options
 *******
 
 .. data:: kubectl_version
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -29,7 +27,7 @@ Options
       kubectl_version: 1.14.5
 
 .. data:: overlay_path
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -48,4 +46,4 @@ Options
 Parameters
 **********
 
-:ref:`Kubernetes <mod-k8s>` does not support the use of :attr:`deployment.parameters`/:attr:`module.parameters` at this time.
+:ref:`index:Kubernetes` does not support the use of :attr:`deployment.parameters`/:attr:`module.parameters` at this time.

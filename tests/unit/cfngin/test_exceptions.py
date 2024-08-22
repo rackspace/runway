@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -29,9 +29,7 @@ class TestCfnginBucketRequired:
             (Path("/tmp"), "something", f"; something ({Path('/tmp')})"),
         ],
     )
-    def test___init__(
-        self, config_path: Optional[AnyPath], reason: Optional[str], expected: str
-    ) -> None:
+    def test___init__(self, config_path: AnyPath | None, reason: str | None, expected: str) -> None:
         """Test __init__."""
         expected_msg = f"cfngin_bucket is required{expected}"
         obj = CfnginBucketRequired(config_path=config_path, reason=reason)
@@ -50,9 +48,7 @@ class TestInvalidConfig:
         "errors, expected_msg",
         [("error", "error"), (["error0", "error1"], "error0\nerror1")],
     )
-    def test___init__(
-        self, errors: Union[str, List[Union[Exception, str]]], expected_msg: str
-    ) -> None:
+    def test___init__(self, errors: str | list[Exception | str], expected_msg: str) -> None:
         """Test __init__."""
         obj = InvalidConfig(errors)
         assert obj.errors == errors
@@ -76,9 +72,7 @@ class TestPersistentGraphLocked:
             (None, "reason", "Persistent graph is locked. reason"),
         ],
     )
-    def test___init__(
-        self, message: Optional[str], reason: Optional[str], expected_msg: str
-    ) -> None:
+    def test___init__(self, message: str | None, reason: str | None, expected_msg: str) -> None:
         """Test __init__."""
         obj = PersistentGraphLocked(message=message, reason=reason)
         assert obj.message == expected_msg
@@ -101,9 +95,7 @@ class TestPersistentGraphUnlocked:
             (None, "reason", "Persistent graph is unlocked. reason"),
         ],
     )
-    def test___init__(
-        self, message: Optional[str], reason: Optional[str], expected_msg: str
-    ) -> None:
+    def test___init__(self, message: str | None, reason: str | None, expected_msg: str) -> None:
         """Test __init__."""
         obj = PersistentGraphUnlocked(message=message, reason=reason)
         assert obj.message == expected_msg

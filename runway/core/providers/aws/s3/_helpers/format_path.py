@@ -9,21 +9,22 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Tuple
 
 from typing_extensions import Literal, TypedDict
 
 SupportedPathType = Literal["local", "s3"]
-FormattedPathDetails = TypedDict(
-    "FormattedPathDetails", path=str, type=SupportedPathType
-)
-FormatPathResult = TypedDict(
-    "FormattedPaths",
-    dest=FormattedPathDetails,
-    dir_op=bool,
-    src=FormattedPathDetails,
-    use_src_name=bool,
-)
+
+
+class FormattedPathDetails(TypedDict):
+    path: str
+    type: SupportedPathType
+
+
+class FormatPathResult(TypedDict):
+    dest: FormattedPathDetails
+    dir_op: bool
+    src: FormattedPathDetails
+    use_src_name: bool
 
 
 class FormatPath:
@@ -47,7 +48,7 @@ class FormatPath:
         }
 
     @staticmethod
-    def format_local_path(path: str, dir_op: bool = True) -> Tuple[str, bool]:
+    def format_local_path(path: str, dir_op: bool = True) -> tuple[str, bool]:
         """Format the path of local files.
 
         Returns whether the destination will keep its own name or take the
@@ -80,7 +81,7 @@ class FormatPath:
         return str(full_path), False
 
     @staticmethod
-    def format_s3_path(path: str, dir_op: bool = True) -> Tuple[str, bool]:
+    def format_s3_path(path: str, dir_op: bool = True) -> tuple[str, bool]:
         """Format the path of S3 files.
 
         Returns whether the destination will keep its own name or take the
@@ -110,7 +111,7 @@ class FormatPath:
         return path, False
 
     @staticmethod
-    def identify_path_type(path: str) -> Tuple[SupportedPathType, str]:
+    def identify_path_type(path: str) -> tuple[SupportedPathType, str]:
         """Parse path.
 
         Args:

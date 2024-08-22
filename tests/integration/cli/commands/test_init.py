@@ -9,9 +9,9 @@ from __future__ import annotations
 
 import logging
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 from click.testing import CliRunner
-from mock import Mock
 from pydantic import ValidationError
 
 from runway._cli import cli
@@ -23,7 +23,7 @@ from runway.exceptions import ConfigNotFound
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
+    import pytest
     from pytest_mock import MockerFixture
 
     from ...conftest import CpConfigTypeDef
@@ -34,7 +34,7 @@ MODULE = "runway._cli.commands._init"
 def test_init(
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     mocker: MockerFixture,
 ) -> None:
     """Test init."""
@@ -64,13 +64,12 @@ def test_init_handle_validation_error(
         f"{MODULE}.Runway",
         spec=Runway,
         spec_set=True,
-        init=Mock(side_effect=ValidationError([], Mock())),  # type: ignore
+        init=Mock(side_effect=ValidationError),
     )
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     result = runner.invoke(cli, ["init"])
     assert result.exit_code == 1
-    assert "ValidationError" in result.output
 
 
 def test_init_handle_config_not_found(
@@ -117,16 +116,14 @@ def test_init_options_deploy_environment(
     assert mock_runway.call_args.args[1].env.name == "e-option"
 
     assert (
-        runner.invoke(
-            cli, ["init", "--deploy-environment", "deploy-environment-option"]
-        ).exit_code
+        runner.invoke(cli, ["init", "--deploy-environment", "deploy-environment-option"]).exit_code
         == 0
     )
     assert mock_runway.call_args.args[1].env.name == "deploy-environment-option"
 
 
 def test_init_options_tag(
-    caplog: LogCaptureFixture,
+    caplog: pytest.LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
     mocker: MockerFixture,

@@ -20,9 +20,7 @@ MODULE = "runway.cfngin.hooks.staticsite.auth_at_edge.user_pool_id_retriever"
         ),
     ],
 )
-def test_hook_args_parse_obj(
-    provided: dict[str, str], expected: dict[str, str]
-) -> None:
+def test_hook_args_parse_obj(provided: dict[str, str], expected: dict[str, str]) -> None:
     """Test HookArgs.parse_obj."""
     kwargs = provided
     args = HookArgs.parse_obj(kwargs)

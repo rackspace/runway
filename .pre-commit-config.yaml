@@ -1,11 +1,19 @@
-minimum_pre_commit_version: 2.6.0
+default_language_version:
+  node: system
+
+exclude: |
+  (?x)^(
+    (.*/)?package-lock\.json|
+    (.*/)?poetry\.lock
+  )$
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.6.0
     hooks:
       - id: check-json
       - id: check-merge-conflict
+      - id: check-toml
       - id: check-yaml
         args:
           - --unsafe  # needed for parsing CFN
@@ -14,56 +22,47 @@ repos:
       - id: file-contents-sorter
         files: |
           (?x)^(
+            \.dockerignore|
             \.gitignore|
             \.vscode/dictionaries/.*\.txt|
-            MANIFEST.in
           )$
       - id: pretty-format-json
         args: [--autofix, --indent, '4']
-        files: |
+        exclude: |
           (?x)^(
-            \.vscode/.*\.json
+            (.*)?(angular|cdk|package|tsconfig(\.spec)?|tslint)\.json
           )$
       - id: pretty-format-json
         args: [--autofix, --indent, '2']
         files: |
           (?x)^(
-            (.*)?(cdk|tsconfig|tslint).json
+            (.*)?(angular|cdk|package|tsconfig(\.spec)?|tslint)\.json
           )$
       - id: trailing-whitespace
+  - repo: https://github.com/pappasam/toml-sort
+    rev: v0.23.1
+    hooks:
+      - id: toml-sort-fix
   - repo: https://github.com/ITProKyle/pre-commit-hook-yamlfmt
-    rev: v0.2.0
+    rev: v0.3.0
     hooks:
       - id: yamlfmt
         args: [--mapping, '2', --offset, '2', --sequence, '4']
-        files: |
+        exclude: |
           (?x)^(
-            \.github/(?!dependabot).*\.(yaml|yml)|
-            \.markdownlint.yml|
-            \.pre-commit-config.yaml|
-            \.readthedocs.yml|
-            buildspec.yml
+            tests/unit/module/staticsite/fixtures/expected_yaml/.*\.(yaml|yml)|
+            docs/runway-example\.yml
           )$
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.12.0
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
     hooks:
-      - id: isort
-  - repo: https://github.com/psf/black
-    rev: 24.1.1
-    hooks:
-      - id: black
-        args:
-          - --color
-  - repo: https://github.com/pycqa/flake8
-    rev: 4.0.1
-    hooks:
-      - id: flake8
+      - id: mdformat
         additional_dependencies:
-          - flake8-bugbear
-          - flake8-docstrings
-          - flake8-print==5.0.0
-          - flake8-use-fstring
+          - mdformat-frontmatter
+          - mdformat-gfm
+          - mdformat-gfm-alerts
+          - mdformat-tables
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.31.1
+    rev: v0.41.0
     hooks:
       - id: markdownlint

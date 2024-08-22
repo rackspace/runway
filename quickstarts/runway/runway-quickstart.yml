@@ -10,31 +10,22 @@ Parameters:
       - Linux
 
   KeyPair:
-    Description: "The existing EC2 KeyPair to be used to access the Runway \
-                  instance"
+    Description: "The existing EC2 KeyPair to be used to access the Runway instance"
     Type: AWS::EC2::KeyPair::KeyName
 
   SourceIP:
-    Description: "The egress (public) IPv4 address from which you plan to \
-                  access your Runway instance.  Hint- https://whatismyip.com . \
-                  Specify address only, do not include /CIDR designator, \
-                  example 157.123.231.123"
+    Description: "The egress (public) IPv4 address from which you plan to access your Runway instance.  Hint- https://whatismyip.com . Specify address only, do not include /CIDR designator, example 157.123.231.123"
     Type: String
 
   IamRole:
     Type: String
-    Description: "Choose 'auto/admin' to have this CloudFormation template \
-                  deploy an ADMIN IAM Role for Runway to use to call AWS \
-                  services.  Choose 'manual' to specify an existing IAM Role \
-                  with more restrictive permissions."
+    Description: "Choose 'auto/admin' to have this CloudFormation template deploy an ADMIN IAM Role for Runway to use to call AWS services.  Choose 'manual' to specify an existing IAM Role with more restrictive permissions."
     AllowedValues:
       - auto/admin
       - manual
 
   IamRoleName:
-    Description: "If you chose 'manual' for IamRole, specify the name of an \
-                  existing IAM Role here, otherwise leave as the default value \
-                  of 'none'"
+    Description: "If you chose 'manual' for IamRole, specify the name of an existing IAM Role here, otherwise leave as the default value of 'none'"
     Type: String
     Default: none
 
@@ -209,7 +200,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.0.0/24
-      AvailabilityZone: !Select ['0', !GetAZs {Ref: 'AWS::Region'}]
+      AvailabilityZone: !Select ['0', !GetAZs Ref: 'AWS::Region']
 
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
@@ -266,20 +257,17 @@ Resources:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
-          -
-            Effect: Allow
+          - Effect: Allow
             Principal:
               Service:
                 - ec2.amazonaws.com
             Action:
               - sts:AssumeRole
       Policies:
-        -
-          PolicyName: RunwayIamRolePolicy
+        - PolicyName: RunwayIamRolePolicy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              -
-                Effect: Allow
+              - Effect: Allow
                 Action: '*'
                 Resource: '*'

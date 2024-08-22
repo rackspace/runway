@@ -14,9 +14,7 @@ class Action(BaseAction):
 class ARN(BaseARN):
     def __init__(self, resource=..., region=..., account=...) -> None: ...
 
-AssociateApprovalRuleTemplateWithRepository = Action(
-    "AssociateApprovalRuleTemplateWithRepository"
-)
+AssociateApprovalRuleTemplateWithRepository = Action("AssociateApprovalRuleTemplateWithRepository")
 BatchAssociateApprovalRuleTemplateWithRepositories = Action(
     "BatchAssociateApprovalRuleTemplateWithRepositories"
 )
@@ -81,9 +79,7 @@ ListAssociatedApprovalRuleTemplatesForRepository = Action(
 ListBranches = Action("ListBranches")
 ListPullRequests = Action("ListPullRequests")
 ListRepositories = Action("ListRepositories")
-ListRepositoriesForApprovalRuleTemplate = Action(
-    "ListRepositoriesForApprovalRuleTemplate"
-)
+ListRepositoriesForApprovalRuleTemplate = Action("ListRepositoriesForApprovalRuleTemplate")
 ListTagsForResource = Action("ListTagsForResource")
 MergeBranchesByFastForward = Action("MergeBranchesByFastForward")
 MergeBranchesBySquash = Action("MergeBranchesBySquash")

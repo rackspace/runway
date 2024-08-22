@@ -1,9 +1,8 @@
 """Pytest fixtures and plugins."""
 
-# pylint: disable=redefined-outer-name,unused-argument
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -11,16 +10,18 @@ if TYPE_CHECKING:
     from botocore.stub import Stubber
     from mypy_boto3_ssm.client import SSMClient
 
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 
-@pytest.fixture(scope="function")
-def ssm_client(cfngin_context: MockCFNginContext, ssm_stubber: Stubber) -> SSMClient:
+@pytest.fixture()
+def ssm_client(
+    cfngin_context: MockCfnginContext, ssm_stubber: Stubber  # noqa: ARG001
+) -> SSMClient:
     """Create SSM client."""
-    return cast("SSMClient", cfngin_context.get_session().client("ssm"))
+    return cfngin_context.get_session().client("ssm")
 
 
-@pytest.fixture(scope="function")
-def ssm_stubber(cfngin_context: MockCFNginContext) -> Stubber:
+@pytest.fixture()
+def ssm_stubber(cfngin_context: MockCfnginContext) -> Stubber:
     """Create SSM stubber."""
     return cfngin_context.add_stubber("ssm")

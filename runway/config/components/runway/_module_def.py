@@ -2,36 +2,34 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any
 
 from ....variables import Variable
 from ...models.runway import RunwayModuleDefinitionModel
 from .base import ConfigComponentDefinition
 
 if TYPE_CHECKING:
-    from ...models.runway import (
-        RunwayEnvironmentsType,
-        RunwayEnvVarsType,
-        RunwayModuleTypeTypeDef,
-    )
+    from pathlib import Path
+
+    from typing_extensions import Self
+
+    from ...models.runway import RunwayEnvironmentsType, RunwayEnvVarsType, RunwayModuleTypeTypeDef
 
 
-class RunwayModuleDefinition(ConfigComponentDefinition):
+class RunwayModuleDefinition(ConfigComponentDefinition[RunwayModuleDefinitionModel]):
     """Runway module definition."""
 
-    class_path: Optional[str]
+    class_path: str | None
     environments: RunwayEnvironmentsType
     env_vars: RunwayEnvVarsType
     name: str
-    options: Dict[str, Any]
-    parameters: Dict[str, Any]
-    path: Optional[Union[str, Path]]
-    tags: List[str]
-    type: Optional[RunwayModuleTypeTypeDef]
+    options: dict[str, Any]
+    parameters: dict[str, Any]
+    path: str | Path | None
+    tags: list[str]
+    type: RunwayModuleTypeTypeDef | None
 
-    _data: RunwayModuleDefinitionModel
-    _supports_vars: Tuple[str, ...] = (
+    _supports_vars: tuple[str, ...] = (
         "class_path",
         "env_vars",
         "environments",
@@ -45,14 +43,14 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
         super().__init__(data)
 
     @property
-    def child_modules(self) -> List[RunwayModuleDefinition]:
+    def child_modules(self) -> list[RunwayModuleDefinition]:
         """List of child modules."""
         return [RunwayModuleDefinition(child) for child in self._data.parallel]
 
     @child_modules.setter
     def child_modules(
         self,
-        modules: List[Union[RunwayModuleDefinition, RunwayModuleDefinitionModel]],  # type: ignore
+        modules: list[RunwayModuleDefinition | RunwayModuleDefinitionModel],
     ) -> None:
         """Set the value of the property.
 
@@ -64,13 +62,11 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
 
         """
         if not isinstance(modules, list):  # type: ignore
-            raise TypeError(
-                f"expected List[RunwayModuleDefinition]; got {type(modules)}"
-            )
-        sanitized: List[RunwayModuleDefinitionModel] = []
+            raise TypeError(f"expected list[RunwayModuleDefinition]; got {type(modules)}")
+        sanitized: list[RunwayModuleDefinitionModel] = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
-                sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
+                sanitized.append(RunwayModuleDefinitionModel.model_validate(mod.data))
             elif isinstance(mod, RunwayModuleDefinitionModel):  # type: ignore
                 sanitized.append(mod)
             else:
@@ -89,12 +85,10 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     def menu_entry(self) -> str:
         """Return menu entry representation of this module."""
         if self.is_parent:
-            return (
-                f"{self.name} [{', '.join([c.menu_entry for c in self.child_modules])}]"
-            )
+            return f"{self.name} [{', '.join([c.menu_entry for c in self.child_modules])}]"
         return self.name
 
-    def reverse(self):
+    def reverse(self) -> None:
         """Reverse the order of child/parallel modules."""
         self._data.parallel.reverse()
 
@@ -113,11 +107,11 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
         )
 
     @classmethod
-    def parse_obj(cls, obj: Any) -> RunwayModuleDefinition:
+    def parse_obj(cls: type[Self], obj: object) -> Self:
         """Parse a python object into this class.
 
         Args:
             obj: The object to parse.
 
         """
-        return cls(RunwayModuleDefinitionModel.parse_obj(obj))
+        return cls(RunwayModuleDefinitionModel.model_validate(obj))
