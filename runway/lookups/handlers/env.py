@@ -1,32 +1,24 @@
 """Retrieve a value from an environment variable."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Union
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from .base import LookupHandler
 
 if TYPE_CHECKING:
+
     from ...context import CfnginContext, RunwayContext
 
 
-class EnvLookup(LookupHandler):
+class EnvLookup(LookupHandler["CfnginContext | RunwayContext"]):
     """Environment variable Lookup."""
 
-    TYPE_NAME: Final[Literal["env"]] = "env"
+    TYPE_NAME: ClassVar[str] = "env"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls,
-        value: str,
-        context: Union[CfnginContext, RunwayContext],
-        *__args: Any,
-        **__kwargs: Any,
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext | RunwayContext, **_kwargs: Any) -> Any:
         """Retrieve an environment variable.
 
         The value is retrieved from a copy of the current environment variables

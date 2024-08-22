@@ -1,12 +1,11 @@
 """Test migration from no backend to local backend."""
 
-# pylint: disable=redefined-outer-name,unused-argument
 from __future__ import annotations
 
 import locale
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
@@ -14,6 +13,8 @@ from runway._cli import cli
 from runway.env_mgr.tfenv import TF_VERSION_FILENAME
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from _pytest.fixtures import SubRequest
     from click.testing import CliRunner, Result
 
@@ -33,14 +34,14 @@ def tf_version(request: SubRequest) -> Generator[str, None, None]:
         encoding=locale.getpreferredencoding(do_setlocale=False),
     )
     yield cast(str, request.param)
-    file_path.unlink(missing_ok=True)  # pylint: disable=unexpected-keyword-arg
+    file_path.unlink(missing_ok=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def deploy_local_backend_result(
     cli_runner: CliRunner,
-    local_backend: Path,
-    tf_version: str,
+    local_backend: Path,  # noqa: ARG001
+    tf_version: str,  # noqa: ARG001
 ) -> Generator[Result, None, None]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     assert (CURRENT_DIR / "terraform.tfstate.d").exists()
@@ -49,18 +50,17 @@ def deploy_local_backend_result(
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / ".terraform", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "terraform.tfstate.d", ignore_errors=True)
-    # pylint: disable=unexpected-keyword-arg
     (CURRENT_DIR / ".terraform.lock.hcl").unlink(missing_ok=True)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def deploy_no_backend_result(
     cli_runner: CliRunner,
-    no_backend: Path,
-    tf_version: str,
-) -> Generator[Result, None, None]:
+    no_backend: Path,  # noqa: ARG001
+    tf_version: str,  # noqa: ARG001
+) -> Result:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
-    yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
+    return cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})
 
 
 def test_deploy_no_backend_result(deploy_no_backend_result: Result) -> None:

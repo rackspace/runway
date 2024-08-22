@@ -1,8 +1,9 @@
 """Test runway.config.models.utils."""
 
-# pyright: basic
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import pytest
 
@@ -36,7 +37,7 @@ def test_convert_null_values(provided: Any, expected: Any) -> None:
 
 
 @pytest.mark.parametrize("provided", [None, Path("./")])
-def test_resolve_path_field(provided: Optional[Path]) -> None:
+def test_resolve_path_field(provided: Path | None) -> None:
     """Test resolve_path_field."""
     if provided is None:
         assert not resolve_path_field(provided)
@@ -66,6 +67,6 @@ def test_validate_string_is_lookup(provided: Any) -> None:
 )
 def test_validate_string_is_lookup_raises(provided: str) -> None:
     """Test validate_string_is_lookup."""
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError) as excinfo:  # noqa: PT011
         validate_string_is_lookup(provided)
     assert excinfo.value == RUNWAY_LOOKUP_STRING_ERROR

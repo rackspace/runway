@@ -1,6 +1,6 @@
 # Tests
 
-Runway's tests are split into three catagories; [functional](#functional-tests), [integration](#integration-tests), and [unit](#unit-tests).
+Runway's tests are split into three categories; [functional](#functional-tests), [integration](#integration-tests), and [unit](#unit-tests).
 
 - [Tests](#tests)
   - [Test Types](#test-types)
@@ -34,13 +34,12 @@ The the operation of each function/method individually.
 - Low level tests that import individual functions and classes to invoke them directly.
 - Mocks should be used to isolate each function/method.
 
-
 ## Running Tests
 
 Tests can be run using `make` commands from the root of the repo.
 
-|         Command         |       Description        |
-|-------------------------|--------------------------|
+| Command                 | Description              |
+| ----------------------- | ------------------------ |
 | `make test`             | integration & unit tests |
 | `make test-functional`  | functional tests         |
 | `make test-integration` | integration tests        |

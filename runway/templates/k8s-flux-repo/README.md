@@ -17,82 +17,82 @@ This repo represents a sample Terraform infrastructure deployment of EKS & Flux.
 1. Update the `kubectl-access-role-arn` parameter in [runway.yml](./runway.yml) to specify the IAM role to which cluster admin access should be granted.
    E.g., if you assume an IAM role for operating in your account `aws sts get-caller-identity --query 'Arn' --output text` will show you the assumed role principal like:
 
-    ```text
-    arn:aws:sts::123456789012:assumed-role/myIamRole/guy.incognito
-    ```
+   ```text
+   arn:aws:sts::123456789012:assumed-role/myIamRole/guy.incognito
+   ```
 
-    You can use that arn to determine the IAM role arn for runway.yml:
+   You can use that arn to determine the IAM role arn for runway.yml:
 
-    ```yaml
-    deployments:
-      ...
-      - modules:
-        ...
-        parameters:
-          ...
-          kubectl-access-role-arn: arn:aws:iam::123456789012:role/myIamRole
-    ```
+   ```yaml
+   deployments:
+     ...
+     - modules:
+       ...
+       parameters:
+         ...
+         kubectl-access-role-arn: arn:aws:iam::123456789012:role/myIamRole
+   ```
 
-    (to use IAM users instead, see `mapUsers` in `eks-base.tf/main.tf`)
+   (to use IAM users instead, see `mapUsers` in `eks-base.tf/main.tf`)
 
-2. After updating the role ARN, deploy to the dev environment (`runway deploy -e dev`).
+1. After updating the role ARN, deploy to the dev environment (`runway deploy -e dev`).
    This will take some time to complete.
-  (Terraform will prompt for confirmation; pass the `--ci` flag to prevent any prompting)
+   (Terraform will prompt for confirmation; pass the `--ci` flag to prevent any prompting)
 
 #### Part 2: Pushing to the Flux repo
 
 1. Setup and push an initial commit to the AWS CodeCommit git repository called `flux-dev`.
 
-    macOS/Linux:
+   macOS/Linux:
 
-    ```sh
-    CC_REPO_URL=https://git-codecommit.us-west-2.amazonaws.com/v1/repos/flux-dev
-    cd flux-dev
-    git init
-    git config credential."$CC_REPO_URL".helper '!aws codecommit credential-helper $@'
-    git config credential."$CC_REPO_URL".UseHttpPath true
-    git remote add origin $CC_REPO_URL
-    git add *
-    git commit -m "initial commit"
-    git push --set-upstream origin master
-    ```
+   ```sh
+   CC_REPO_URL=https://git-codecommit.us-west-2.amazonaws.com/v1/repos/flux-dev
+   cd flux-dev
+   git init
+   git config credential."$CC_REPO_URL".helper '!aws codecommit credential-helper $@'
+   git config credential."$CC_REPO_URL".UseHttpPath true
+   git remote add origin $CC_REPO_URL
+   git add *
+   git commit -m "initial commit"
+   git push --set-upstream origin master
+   ```
 
-    Windows:
+   Windows:
 
-    ```powershell
-    cd $home
-    $CC_REPO_URL = "https://git-codecommit.us-west-2.amazonaws.com/v1/repos/flux-dev"
-    cd flux-dev
-    git init
-    git config credential."$CC_REPO_URL".helper '!aws codecommit credential-helper $@'
-    git config credential."$CC_REPO_URL".UseHttpPath true
-    git remote add origin $CC_REPO_URL
-    git add *
-    git commit -m "initial commit"
-    git push --set-upstream origin master
-    ```
+   ```powershell
+   cd $home
+   $CC_REPO_URL = "https://git-codecommit.us-west-2.amazonaws.com/v1/repos/flux-dev"
+   cd flux-dev
+   git init
+   git config credential."$CC_REPO_URL".helper '!aws codecommit credential-helper $@'
+   git config credential."$CC_REPO_URL".UseHttpPath true
+   git remote add origin $CC_REPO_URL
+   git add *
+   git commit -m "initial commit"
+   git push --set-upstream origin master
+   ```
 
-2. [Wait 5 minutes](https://fluxcd.io/legacy/flux/faq/#how-often-does-flux-check-for-new-images)...
+1. [Wait 5 minutes](https://fluxcd.io/legacy/flux/faq/#how-often-does-flux-check-for-new-images)...
 
-3. The CodeCommit git repo will have a `flux` tag indicated the applied state of the repo and a namespace titled `demo` will appear in the cluster.
+1. The CodeCommit git repo will have a `flux` tag indicated the applied state of the repo and a namespace titled `demo` will appear in the cluster.
 
-    macOS/Linux:
+   macOS/Linux:
 
-    ```sh
-    git ls-remote
-    cd ..
-    eval $(runway envvars -e dev)
-    runway kbenv run -- get namespace
-    ```
+   ```sh
+   git ls-remote
+   cd ..
+   eval $(runway envvars -e dev)
+   runway kbenv run -- get namespace
+   ```
 
-    Windows:
+   Windows:
 
-    ```powershell
-    git ls-remote
-    cd ..
-    runway envvars -e dev | iex
-    runway kbenv run -- get namespace
-    ```
+   ```powershell
+   git ls-remote
+   cd ..
+   runway envvars -e dev | iex
+   runway kbenv run -- get namespace
+   ```
 
 ### Post-Deployment
 

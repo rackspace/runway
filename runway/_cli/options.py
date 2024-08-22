@@ -14,8 +14,7 @@ debug = click.option(
     "--debug",
     count=True,
     envvar="DEBUG",
-    help="Supply once to display Runway debug logs. "
-    "Supply twice to display all debug logs.",
+    help="Supply once to display Runway debug logs. Supply twice to display all debug logs.",
 )
 
 deploy_environment = click.option(

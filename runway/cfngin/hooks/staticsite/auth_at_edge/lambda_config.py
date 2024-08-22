@@ -9,7 +9,7 @@ import secrets
 import shutil
 import tempfile
 from tempfile import mkstemp
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any
 
 from ... import aws_lambda
 from ...base import HookArgsBaseModel
@@ -34,16 +34,16 @@ class HookArgs(HookArgsBaseModel):
     client_id: str
     """The ID of the Cognito User Pool Client."""
 
-    cookie_settings: Dict[str, Any]
+    cookie_settings: dict[str, Any]
     """The settings for our customized cookies."""
 
-    http_headers: Dict[str, Any]
+    http_headers: dict[str, Any]
     """The additional headers added to our requests."""
 
     nonce_signing_secret_param_name: str
     """SSM param name to store nonce signing secret."""
 
-    oauth_scopes: List[str]
+    oauth_scopes: list[str]
     """The validation scopes for our OAuth requests."""
 
     redirect_path_refresh: str
@@ -58,14 +58,13 @@ class HookArgs(HookArgsBaseModel):
 
     """
 
-    required_group: Optional[str] = None
+    required_group: str | None = None
     """Optional User Pool group to which access should be restricted."""
 
 
-# pylint: disable=too-many-locals
 def write(
     context: CfnginContext, provider: Provider, *__args: Any, **kwargs: Any
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Writes/Uploads the configured lambdas for Auth@Edge.
 
     Lambda@Edge does not have the ability to allow Environment variables
@@ -78,7 +77,7 @@ def write(
 
     """
     cognito_domain = context.hook_data["aae_domain_updater"].get("domain")
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     config = {
         "client_id": args.client_id,
         "cognito_auth_domain": cognito_domain,
@@ -96,10 +95,10 @@ def write(
     }
 
     # Shared file that contains the method called for configuration data
-    path = os.path.join(os.path.dirname(__file__), "templates", "shared.py")
-    context_dict: Dict[str, Any] = {}
+    path = os.path.join(os.path.dirname(__file__), "templates", "shared.py")  # noqa: PTH120, PTH118
+    context_dict: dict[str, Any] = {}
 
-    with open(path, encoding="utf-8") as file_:
+    with open(path, encoding="utf-8") as file_:  # noqa: PTH123
         # Dynamically replace our configuration values
         # in the shared.py template file with actual
         # calculated values
@@ -114,7 +113,7 @@ def write(
         filedir, temppath = mkstemp()
 
         # Save the file to a temp path
-        with open(temppath, "w", encoding="utf-8") as tmp:
+        with open(temppath, "w", encoding="utf-8") as tmp:  # noqa: PTH123
             tmp.write(shared)
             config = temppath
         os.close(filedir)
@@ -127,23 +126,27 @@ def write(
             # Copy the template code for the specific Lambda function
             # to the temporary folder
             shutil.copytree(
-                os.path.join(os.path.dirname(__file__), "templates", handler),
+                os.path.join(  # noqa: PTH118
+                    os.path.dirname(__file__), "templates", handler  # noqa: PTH120
+                ),
                 dirpath,
                 dirs_exist_ok=True,
             )
 
             # Save our dynamic configuration shared file to the
             # temporary folder
-            with open(config, encoding="utf-8") as shared:
+            with open(config, encoding="utf-8") as shared:  # noqa: PTH123
                 raw = shared.read()
                 filename = "shared.py"
-                with open(os.path.join(dirpath, filename), "wb") as newfile:
+                with open(os.path.join(dirpath, filename), "wb") as newfile:  # noqa: PTH118, PTH123
                     newfile.write(raw.encode())
 
             # Copy the shared jose-dependent util module to the temporary folder
             shutil.copyfile(
-                os.path.join(os.path.dirname(__file__), "templates", "shared_jose.py"),
-                os.path.join(dirpath, "shared_jose.py"),
+                os.path.join(  # noqa: PTH118
+                    os.path.dirname(__file__), "templates", "shared_jose.py"  # noqa: PTH120
+                ),
+                os.path.join(dirpath, "shared_jose.py"),  # noqa: PTH118
             )
 
             # Upload our temporary folder to our S3 bucket for
@@ -174,7 +177,7 @@ def get_nonce_signing_secret(param_name: str, context: CfnginContext) -> str:
     ssm_client = session.client("ssm")
     try:
         response = ssm_client.get_parameter(Name=param_name, WithDecryption=True)
-        return response["Parameter"]["Value"]
+        return response["Parameter"].get("Value", "")
     except ssm_client.exceptions.ParameterNotFound:
         secret = random_key(16)
         ssm_client.put_parameter(
@@ -193,7 +196,5 @@ def random_key(length: int = 16) -> str:
         length: The length of the random key.
 
     """
-    secret_allowed_chars = (
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
-    )
+    secret_allowed_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
     return "".join(secrets.choice(secret_allowed_chars) for _ in range(length))

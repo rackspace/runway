@@ -50,12 +50,8 @@ DescribeTargetGroupAttributes = Action("DescribeTargetGroupAttributes")
 DescribeTargetGroups = Action("DescribeTargetGroups")
 DescribeTargetHealth = Action("DescribeTargetHealth")
 DetachLoadBalancerFromSubnets = Action("DetachLoadBalancerFromSubnets")
-DisableAvailabilityZonesForLoadBalancer = Action(
-    "DisableAvailabilityZonesForLoadBalancer"
-)
-EnableAvailabilityZonesForLoadBalancer = Action(
-    "EnableAvailabilityZonesForLoadBalancer"
-)
+DisableAvailabilityZonesForLoadBalancer = Action("DisableAvailabilityZonesForLoadBalancer")
+EnableAvailabilityZonesForLoadBalancer = Action("EnableAvailabilityZonesForLoadBalancer")
 ModifyListener = Action("ModifyListener")
 ModifyLoadBalancerAttributes = Action("ModifyLoadBalancerAttributes")
 ModifyRule = Action("ModifyRule")
@@ -67,9 +63,7 @@ RemoveListenerCertificates = Action("RemoveListenerCertificates")
 RemoveTags = Action("RemoveTags")
 SetIpAddressType = Action("SetIpAddressType")
 SetLoadBalancerListenerSSLCertificate = Action("SetLoadBalancerListenerSSLCertificate")
-SetLoadBalancerPoliciesForBackendServer = Action(
-    "SetLoadBalancerPoliciesForBackendServer"
-)
+SetLoadBalancerPoliciesForBackendServer = Action("SetLoadBalancerPoliciesForBackendServer")
 SetLoadBalancerPoliciesOfListener = Action("SetLoadBalancerPoliciesOfListener")
 SetRulePriorities = Action("SetRulePriorities")
 SetSecurityGroups = Action("SetSecurityGroups")

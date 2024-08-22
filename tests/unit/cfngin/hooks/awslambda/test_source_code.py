@@ -1,13 +1,12 @@
 """Test runway.cfngin.hooks.awslambda.source_code."""
 
-# pylint: disable=protected-access, unnecessary-dunder-call
 from __future__ import annotations
 
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import Mock, call
 
 import pytest
-from mock import Mock, call
 
 from runway.cfngin.hooks.awslambda.source_code import SourceCode
 
@@ -100,9 +99,7 @@ class TestSourceCode:
             )
             == 1
         )
-        gitignore_filter.match.assert_has_calls(
-            [call(file0), call(file1)], any_order=True
-        )
+        gitignore_filter.match.assert_has_calls([call(file0), call(file1)], any_order=True)
 
     def test___str__(self, tmp_path: Path) -> None:
         """Test __str__."""
@@ -117,20 +114,14 @@ class TestSourceCode:
         gitignore_filter = Mock()
         pattern = "foobar/"
         src_path = tmp_path / "src"
-        obj = SourceCode(
-            src_path, gitignore_filter=gitignore_filter, project_root=tmp_path
-        )
+        obj = SourceCode(src_path, gitignore_filter=gitignore_filter, project_root=tmp_path)
         assert not obj.add_filter_rule(pattern)
-        gitignore_filter.add_rule.assert_called_once_with(
-            pattern=pattern, base_path=src_path
-        )
+        gitignore_filter.add_rule.assert_called_once_with(pattern=pattern, base_path=src_path)
 
     def test_md5_hash(self, mocker: MockerFixture, tmp_path: Path) -> None:
         """Test md5_hash."""
         file_hash = Mock(hexdigest="success")
-        mock_file_hash_class = mocker.patch(
-            f"{MODULE}.FileHash", return_value=file_hash
-        )
+        mock_file_hash_class = mocker.patch(f"{MODULE}.FileHash", return_value=file_hash)
         mock_md5 = mocker.patch("hashlib.md5")
         src_path = tmp_path / "src"
         src_path.mkdir()

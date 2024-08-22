@@ -320,9 +320,7 @@ class Session(object):
         """
         ...
 
-    def unregister(
-        self, event_name, handler=..., unique_id=..., unique_id_uses_count=...
-    ):
+    def unregister(self, event_name, handler=..., unique_id=..., unique_id_uses_count=...):
         """Unregister a handler with an event.
 
         :type event_name: str
@@ -450,9 +448,7 @@ class Session(object):
         """
         ...
 
-    def get_available_regions(
-        self, service_name, partition_name=..., allow_non_regional=...
-    ):
+    def get_available_regions(self, service_name, partition_name=..., allow_non_regional=...):
         """Lists the region and endpoint names of a particular partition.
 
         :type service_name: string

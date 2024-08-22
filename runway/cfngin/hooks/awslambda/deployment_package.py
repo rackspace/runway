@@ -7,25 +7,9 @@ import hashlib
 import logging
 import mimetypes
 import stat
-import sys
 import zipfile
-from contextlib import suppress
-from typing import (
-    TYPE_CHECKING,
-    ClassVar,
-    Dict,
-    Generic,
-    Iterator,
-    List,
-    Optional,
-    TypeVar,
-    Union,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, ClassVar, Final, Generic, TypeVar, cast, overload
 from urllib.parse import urlencode
-
-from typing_extensions import Final, Literal
 
 from ....compat import cached_property
 from ....core.providers.aws.s3 import Bucket
@@ -42,10 +26,12 @@ from .exceptions import DeploymentPackageEmptyError
 from .models.args import AwsLambdaHookArgs
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
     import igittigitt
     from mypy_boto3_s3.type_defs import HeadObjectOutputTypeDef, PutObjectOutputTypeDef
+    from typing_extensions import Literal
 
     from ...._logging import RunwayLogger
 
@@ -64,7 +50,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
 
     """
 
-    META_TAGS: ClassVar[Dict[str, str]] = {
+    META_TAGS: ClassVar[dict[str, str]] = {
         "code_sha256": "runway.cfngin:awslambda.code_sha256",
         "compatible_architectures": "runway.cfngin:awslambda.compatible_architectures",
         "compatible_runtimes": "runway.cfngin:awslambda.compatible_runtimes",
@@ -78,9 +64,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
     SIZE_EOCD: Final[Literal[22]] = 22
     """Size of a zip file's End of Central Directory Record (empty zip)."""
 
-    ZIPFILE_PERMISSION_MASK: ClassVar[int] = (
-        stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO
-    ) << 16
+    ZIPFILE_PERMISSION_MASK: ClassVar[int] = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16
     """Mask to retrieve unix file permissions from the external attributes
     property of a ``zipfile.ZipInfo``.
     """
@@ -91,7 +75,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
     usage_type: Literal["function", "layer"]
     """How the deployment package can be used by AWS Lambda."""
 
-    _put_object_response: Optional[PutObjectOutputTypeDef] = None
+    _put_object_response: PutObjectOutputTypeDef | None = None
 
     def __init__(
         self,
@@ -154,26 +138,24 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
         return base64.b64encode(file_hash.digest).decode()
 
     @cached_property
-    def compatible_architectures(self) -> Optional[List[str]]:
+    def compatible_architectures(self) -> list[str] | None:
         """List of compatible instruction set architectures."""
         return self.project.compatible_architectures
 
     @cached_property
-    def compatible_runtimes(self) -> Optional[List[str]]:
+    def compatible_runtimes(self) -> list[str] | None:
         """List of compatible runtimes."""
         return self.project.compatible_runtimes
 
     @cached_property
     def exists(self) -> bool:
         """Whether the deployment package exists."""
-        if self.archive_file.exists():
-            return True
-        return False
+        return bool(self.archive_file.exists())
 
     @cached_property
     def gitignore_filter(
         self,
-    ) -> Optional[igittigitt.IgnoreParser]:
+    ) -> igittigitt.IgnoreParser | None:
         """Filter to use when zipping dependencies.
 
         This should be overridden by subclasses if a filter should be used.
@@ -182,7 +164,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
         return None
 
     @cached_property
-    def license(self) -> Optional[str]:
+    def license(self) -> str | None:
         """Software license for the project."""
         return self.project.license
 
@@ -197,7 +179,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
             FileNotFoundError: Property accessed before archive file has been built.
 
         """
-        file_hash = FileHash(hashlib.md5())
+        file_hash = FileHash(hashlib.md5())  # noqa: S324
         file_hash.add_file(self.archive_file)
         return base64.b64encode(file_hash.digest).decode()
 
@@ -206,16 +188,14 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
         """Key to use when upload object to AWS S3."""
         prefix = f"awslambda/{self.usage_type}s"
         if self.project.args.object_prefix:
-            prefix = (
-                f"{prefix}/{self.project.args.object_prefix.lstrip('/').rstrip('/')}"
-            )
+            prefix = f"{prefix}/{self.project.args.object_prefix.lstrip('/').rstrip('/')}"
         return (  # this can't contain runtime - causes a cyclic dependency
             f"{prefix}/{self.project.source_code.root_directory.name}."
             f"{self.project.source_code.md5_hash}.zip"
         )
 
     @cached_property
-    def object_version_id(self) -> Optional[str]:
+    def object_version_id(self) -> str | None:
         """S3 object version ID.
 
         Returns:
@@ -223,10 +203,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
             if versioning is enabled on the bucket.
 
         """
-        if (
-            not self._put_object_response
-            or "VersionId" not in self._put_object_response
-        ):
+        if not self._put_object_response or "VersionId" not in self._put_object_response:
             return None
         return self._put_object_response["VersionId"]
 
@@ -244,9 +221,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
         # we need to use runtime BEFORE the build process starts to allow runtime
         # errors to be raised early.
         LOGGER.info("building %s (%s)...", self.archive_file.name, self.runtime)
-        with zipfile.ZipFile(
-            self.archive_file, "w", zipfile.ZIP_DEFLATED
-        ) as archive_file:
+        with zipfile.ZipFile(self.archive_file, "w", zipfile.ZIP_DEFLATED) as archive_file:
             self._build_zip_dependencies(archive_file)
             self._build_zip_source_code(archive_file)
             self._build_fix_file_permissions(archive_file)
@@ -273,9 +248,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
 
         """
         for file_info in archive_file.filelist:
-            current_perms = (
-                file_info.external_attr & self.ZIPFILE_PERMISSION_MASK
-            ) >> 16
+            current_perms = (file_info.external_attr & self.ZIPFILE_PERMISSION_MASK) >> 16
             required_perm = 0o755 if current_perms & stat.S_IXUSR != 0 else 0o644
             if current_perms != required_perm:
                 LOGGER.debug(
@@ -304,9 +277,9 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
             archive_file.write(
                 dep,
                 (
-                    self.insert_layer_dir(
-                        dep, self.project.dependency_directory
-                    ).relative_to(self.project.dependency_directory)
+                    self.insert_layer_dir(dep, self.project.dependency_directory).relative_to(
+                        self.project.dependency_directory
+                    )
                     if self.usage_type == "layer"
                     else dep.relative_to(self.project.dependency_directory)
                 ),
@@ -336,14 +309,12 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
     def build_tag_set(self, *, url_encoded: Literal[True] = ...) -> str: ...
 
     @overload
-    def build_tag_set(self, *, url_encoded: Literal[False] = ...) -> Dict[str, str]: ...
+    def build_tag_set(self, *, url_encoded: Literal[False] = ...) -> dict[str, str]: ...
 
     @overload
-    def build_tag_set(
-        self, *, url_encoded: bool = ...
-    ) -> Union[Dict[str, str], str]: ...
+    def build_tag_set(self, *, url_encoded: bool = ...) -> dict[str, str] | str: ...
 
-    def build_tag_set(self, *, url_encoded: bool = True) -> Union[Dict[str, str], str]:
+    def build_tag_set(self, *, url_encoded: bool = True) -> dict[str, str] | str:
         """Build tag set to be applied to the S3 object.
 
         Args:
@@ -382,21 +353,13 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
 
     def delete(self) -> None:
         """Delete deployment package."""
-        if sys.version_info < (3, 8):  # cov: ignore
-            with suppress(FileNotFoundError):  # acts the same as `missing_ok=true`
-                self.archive_file.unlink()  # python3.7 does not support `missing_ok`
-        else:  # cov: ignore
-            self.archive_file.unlink(missing_ok=True)
+        self.archive_file.unlink(missing_ok=True)
         LOGGER.verbose("deleted local deployment package %s", self.archive_file)
         # clear cached properties so they can recalculate
-        self._del_cached_property(
-            "code_sha256", "exists", "md5_checksum", "object_version_id"
-        )
+        self._del_cached_property("code_sha256", "exists", "md5_checksum", "object_version_id")
 
     @staticmethod
-    def insert_layer_dir(
-        file_path: Path, relative_to: Path  # pylint: disable=unused-argument
-    ) -> Path:
+    def insert_layer_dir(file_path: Path, relative_to: Path) -> Path:  # noqa: ARG004
         """Insert directory into local file path for layer archive.
 
         If required, this should be overridden by a subclass for language
@@ -448,7 +411,11 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
             ContentMD5=self.md5_checksum,
             Key=self.object_key,
             Tagging=self.build_tag_set(),
-            **{"ContentType": content_type} if content_type else {},
+            **(
+                {"ContentType": content_type}  # pyright: ignore[reportArgumentType]
+                if content_type
+                else {}
+            ),
         )
         # clear cached properties so they can recalculate
         self._del_cached_property("object_version_id")
@@ -518,16 +485,14 @@ class DeploymentPackageS3Object(DeploymentPackage[_ProjectTypeVar]):
         return self.object_tags[self.META_TAGS["code_sha256"]]
 
     @cached_property
-    def compatible_architectures(self) -> Optional[List[str]]:
+    def compatible_architectures(self) -> list[str] | None:
         """List of compatible instruction set architectures."""
         if self.META_TAGS["compatible_architectures"] in self.object_tags:
-            return self.object_tags[self.META_TAGS["compatible_architectures"]].split(
-                "+"
-            )
+            return self.object_tags[self.META_TAGS["compatible_architectures"]].split("+")
         return None
 
     @cached_property
-    def compatible_runtimes(self) -> Optional[List[str]]:
+    def compatible_runtimes(self) -> list[str] | None:
         """List of compatible runtimes."""
         if self.META_TAGS["compatible_runtimes"] in self.object_tags:
             return self.object_tags[self.META_TAGS["compatible_runtimes"]].split("+")
@@ -536,21 +501,15 @@ class DeploymentPackageS3Object(DeploymentPackage[_ProjectTypeVar]):
     @cached_property
     def exists(self) -> bool:
         """Whether the S3 object exists."""
-        if self.head and not self.head.get("DeleteMarker", False):
-            return True
-        return False
+        return bool(self.head and not self.head.get("DeleteMarker", False))
 
     @cached_property
-    def head(self) -> Optional[HeadObjectOutputTypeDef]:
+    def head(self) -> HeadObjectOutputTypeDef | None:
         """Response from HeadObject API call."""
         try:
-            return self.bucket.client.head_object(
-                Bucket=self.bucket.name, Key=self.object_key
-            )
+            return self.bucket.client.head_object(Bucket=self.bucket.name, Key=self.object_key)
         except self.bucket.client.exceptions.ClientError as exc:
-            status_code = exc.response.get("ResponseMetadata", {}).get(
-                "HTTPStatusCode", 0
-            )
+            status_code = exc.response.get("ResponseMetadata", {}).get("HTTPStatusCode", 0)
             if status_code == 404:
                 LOGGER.verbose(
                     "%s not found",
@@ -566,7 +525,7 @@ class DeploymentPackageS3Object(DeploymentPackage[_ProjectTypeVar]):
             raise
 
     @cached_property
-    def license(self) -> Optional[str]:
+    def license(self) -> str | None:
         """Software license for the project."""
         if self.META_TAGS["license"] in self.object_tags:
             return self.object_tags[self.META_TAGS["license"]]
@@ -591,7 +550,7 @@ class DeploymentPackageS3Object(DeploymentPackage[_ProjectTypeVar]):
         return self.object_tags[self.META_TAGS["md5_checksum"]]
 
     @cached_property
-    def object_tags(self) -> Dict[str, str]:
+    def object_tags(self) -> dict[str, str]:
         """S3 object tags."""
         response = self.bucket.client.get_object_tagging(
             Bucket=self.bucket.name, Key=self.object_key
@@ -602,7 +561,7 @@ class DeploymentPackageS3Object(DeploymentPackage[_ProjectTypeVar]):
         return {t["Key"]: t["Value"] for t in response["TagSet"]}
 
     @cached_property
-    def object_version_id(self) -> Optional[str]:
+    def object_version_id(self) -> str | None:
         """S3 object version ID.
 
         Returns:
@@ -649,9 +608,7 @@ class DeploymentPackageS3Object(DeploymentPackage[_ProjectTypeVar]):
     def delete(self) -> None:
         """Delete deployment package."""
         if self.exists:
-            self.bucket.client.delete_object(
-                Bucket=self.bucket.name, Key=self.object_key
-            )
+            self.bucket.client.delete_object(Bucket=self.bucket.name, Key=self.object_key)
             LOGGER.verbose(
                 "deleted deployment package S3 object %s",
                 self.bucket.format_bucket_path_uri(key=self.object_key),
@@ -682,8 +639,7 @@ class DeploymentPackageS3Object(DeploymentPackage[_ProjectTypeVar]):
         )
         LOGGER.info("updated S3 object's tags")
 
-    # pylint: disable=unused-argument
-    def upload(self, *, build: bool = True) -> None:
+    def upload(self, *, build: bool = True) -> None:  # noqa: ARG002
         """Upload deployment package.
 
         The object should already exist. This method only exists as a "placeholder"

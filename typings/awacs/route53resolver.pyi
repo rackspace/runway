@@ -35,9 +35,7 @@ GetResolverRuleAssociation = Action("GetResolverRuleAssociation")
 GetResolverRulePolicy = Action("GetResolverRulePolicy")
 ListResolverEndpointIpAddresses = Action("ListResolverEndpointIpAddresses")
 ListResolverEndpoints = Action("ListResolverEndpoints")
-ListResolverQueryLogConfigAssociations = Action(
-    "ListResolverQueryLogConfigAssociations"
-)
+ListResolverQueryLogConfigAssociations = Action("ListResolverQueryLogConfigAssociations")
 ListResolverQueryLogConfigs = Action("ListResolverQueryLogConfigs")
 ListResolverRuleAssociations = Action("ListResolverRuleAssociations")
 ListResolverRules = Action("ListResolverRules")

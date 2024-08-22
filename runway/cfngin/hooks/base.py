@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from troposphere import Tags
 
@@ -28,7 +28,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 class HookArgsBaseModel(BaseModel):
     """Base model for hook args."""
 
-    tags: Dict[str, str] = {}
+    tags: dict[str, str] = {}
 
 
 class Hook(CfnginHookProtocol):
@@ -46,33 +46,31 @@ class Hook(CfnginHookProtocol):
 
     """
 
-    ARGS_PARSER: ClassVar[Type[HookArgsBaseModel]] = HookArgsBaseModel
+    ARGS_PARSER: ClassVar = HookArgsBaseModel
     """Class used to parse arguments passed to the hook."""
 
-    args: HookArgsBaseModel
-    blueprint: Optional[Blueprint] = None
+    blueprint: Blueprint | None = None
     context: CfnginContext
     provider: Provider
-    stack: Optional[Stack] = None
+    stack: Stack | None = None
     stack_name: str = "stack"
 
-    def __init__(  # pylint: disable=super-init-not-called
-        self, context: CfnginContext, provider: Provider, **kwargs: Any
-    ) -> None:
+    def __init__(self, context: CfnginContext, provider: Provider, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
             context: Context instance. (passed in by CFNgin)
             provider: Provider instance. (passed in by CFNgin)
+            **kwargs: Arbitrary keyword arguments.
 
         """
         kwargs.setdefault("tags", {})
 
-        self.args = self.ARGS_PARSER.parse_obj(kwargs)
+        self.args = self.ARGS_PARSER.model_validate(kwargs)
         self.args.tags.update(context.tags)
         self.context = context
         self.provider = provider
-        # TODO BREAKING remove these from the primary base class
+        # TODO (kyle): BREAKING remove these from the primary base class
         self._deploy_action = HookDeployAction(self.context, self.provider)
         self._destroy_action = HookDestroyAction(self.context, self.provider)
 
@@ -83,14 +81,14 @@ class Hook(CfnginHookProtocol):
 
     def generate_stack(self, **kwargs: Any) -> Stack:
         """Create a CFNgin Stack object."""
-        definition = CfnginStackDefinitionModel.construct(
+        definition = CfnginStackDefinitionModel.model_construct(
             name=self.stack_name, tags=self.args.tags, **kwargs
         )
         stack = Stack(definition, self.context)
-        stack._blueprint = self.blueprint  # pylint: disable=protected-access
+        stack._blueprint = self.blueprint  # noqa: SLF001
         return stack
 
-    def get_template_description(self, suffix: Optional[str] = None) -> str:
+    def get_template_description(self, suffix: str | None = None) -> str:
         """Generate a template description.
 
         Args:
@@ -104,7 +102,7 @@ class Hook(CfnginHookProtocol):
             return template.format(self.__class__.__module__, suffix)
         return template.format(self.__class__.__module__)
 
-    def deploy_stack(self, stack: Optional[Stack] = None, wait: bool = False) -> Status:
+    def deploy_stack(self, stack: Stack | None = None, wait: bool = False) -> Status:
         """Deploy a stack.
 
         Args:
@@ -115,13 +113,9 @@ class Hook(CfnginHookProtocol):
             Ending status of the stack.
 
         """
-        return self._run_stack_action(
-            action=self._deploy_action, stack=stack, wait=wait
-        )
+        return self._run_stack_action(action=self._deploy_action, stack=stack, wait=wait)
 
-    def destroy_stack(
-        self, stack: Optional[Stack] = None, wait: bool = False
-    ) -> Status:
+    def destroy_stack(self, stack: Stack | None = None, wait: bool = False) -> Status:
         """Destroy a stack.
 
         Args:
@@ -132,9 +126,7 @@ class Hook(CfnginHookProtocol):
             Ending status of the stack.
 
         """
-        return self._run_stack_action(
-            action=self._destroy_action, stack=stack, wait=wait
-        )
+        return self._run_stack_action(action=self._destroy_action, stack=stack, wait=wait)
 
     def post_deploy(self) -> Any:
         """Run during the **post_deploy** stage."""
@@ -175,8 +167,8 @@ class Hook(CfnginHookProtocol):
 
     def _run_stack_action(
         self,
-        action: Union[HookDeployAction, HookDestroyAction],
-        stack: Optional[Stack] = None,
+        action: HookDeployAction | HookDestroyAction,
+        stack: Stack | None = None,
         wait: bool = False,
     ) -> Status:
         """Run a CFNgin hook modified for use in hooks.
@@ -197,18 +189,16 @@ class Hook(CfnginHookProtocol):
         self._log_stack(stack, status)
 
         if wait and status != SKIPPED:
-            status = self._wait_for_stack(
-                action=action, stack=stack, last_status=status
-            )
+            status = self._wait_for_stack(action=action, stack=stack, last_status=status)
         return status
 
     def _wait_for_stack(
         self,
-        action: Union[HookDeployAction, HookDestroyAction],
-        last_status: Optional[Status] = None,
-        stack: Optional[Stack] = None,
-        till_reason: Optional[str] = None,
-    ):
+        action: HookDeployAction | HookDestroyAction,
+        last_status: Status | None = None,
+        stack: Stack | None = None,
+        till_reason: str | None = None,
+    ) -> Status:
         """Wait for a CloudFormation stack to complete.
 
         Args:
@@ -249,11 +239,11 @@ class Hook(CfnginHookProtocol):
         return status
 
 
-# TODO BREAKING find a better place for this - can cause cyclic imports
+# TODO (kyle): BREAKING find a better place for this - can cause cyclic imports
 class HookDeployAction(deploy.Action):
     """Deploy action that can be used from hooks."""
 
-    def __init__(self, context: CfnginContext, provider: Provider):
+    def __init__(self, context: CfnginContext, provider: Provider) -> None:
         """Instantiate class.
 
         Args:

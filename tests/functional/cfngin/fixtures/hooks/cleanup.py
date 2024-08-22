@@ -18,7 +18,7 @@ LOGGER = logging.getLogger("runway.cfngin.hooks.custom.cleanup")
 
 
 def local_delete(
-    context: CfnginContext,  # pylint: disable=unused-argument
+    context: CfnginContext,  # noqa: ARG001
     *,
     path: StrPath,
     **_: Any,

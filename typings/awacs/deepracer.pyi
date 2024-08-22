@@ -38,7 +38,5 @@ ListTrainingJobs = Action("ListTrainingJobs")
 SetAlias = Action("SetAlias")
 StartEvaluation = Action("StartEvaluation")
 StopEvaluation = Action("StopEvaluation")
-StopTrainingReinforcementLearningModel = Action(
-    "StopTrainingReinforcementLearningModel"
-)
+StopTrainingReinforcementLearningModel = Action("StopTrainingReinforcementLearningModel")
 TestRewardFunction = Action("TestRewardFunction")

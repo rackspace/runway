@@ -31,9 +31,7 @@ DeleteRemediationExceptions = Action("DeleteRemediationExceptions")
 DeleteResourceConfig = Action("DeleteResourceConfig")
 DeleteRetentionConfiguration = Action("DeleteRetentionConfiguration")
 DeliverConfigSnapshot = Action("DeliverConfigSnapshot")
-DescribeAggregateComplianceByConfigRules = Action(
-    "DescribeAggregateComplianceByConfigRules"
-)
+DescribeAggregateComplianceByConfigRules = Action("DescribeAggregateComplianceByConfigRules")
 DescribeAggregationAuthorizations = Action("DescribeAggregationAuthorizations")
 DescribeComplianceByConfigRule = Action("DescribeComplianceByConfigRule")
 DescribeComplianceByResource = Action("DescribeComplianceByResource")
@@ -50,25 +48,17 @@ DescribeConformancePackStatus = Action("DescribeConformancePackStatus")
 DescribeConformancePacks = Action("DescribeConformancePacks")
 DescribeDeliveryChannelStatus = Action("DescribeDeliveryChannelStatus")
 DescribeDeliveryChannels = Action("DescribeDeliveryChannels")
-DescribeOrganizationConfigRuleStatuses = Action(
-    "DescribeOrganizationConfigRuleStatuses"
-)
+DescribeOrganizationConfigRuleStatuses = Action("DescribeOrganizationConfigRuleStatuses")
 DescribeOrganizationConfigRules = Action("DescribeOrganizationConfigRules")
-DescribeOrganizationConformancePackStatuses = Action(
-    "DescribeOrganizationConformancePackStatuses"
-)
+DescribeOrganizationConformancePackStatuses = Action("DescribeOrganizationConformancePackStatuses")
 DescribeOrganizationConformancePacks = Action("DescribeOrganizationConformancePacks")
 DescribePendingAggregationRequests = Action("DescribePendingAggregationRequests")
 DescribeRemediationConfigurations = Action("DescribeRemediationConfigurations")
 DescribeRemediationExceptions = Action("DescribeRemediationExceptions")
 DescribeRemediationExecutionStatus = Action("DescribeRemediationExecutionStatus")
 DescribeRetentionConfigurations = Action("DescribeRetentionConfigurations")
-GetAggregateComplianceDetailsByConfigRule = Action(
-    "GetAggregateComplianceDetailsByConfigRule"
-)
-GetAggregateConfigRuleComplianceSummary = Action(
-    "GetAggregateConfigRuleComplianceSummary"
-)
+GetAggregateComplianceDetailsByConfigRule = Action("GetAggregateComplianceDetailsByConfigRule")
+GetAggregateConfigRuleComplianceSummary = Action("GetAggregateConfigRuleComplianceSummary")
 GetAggregateDiscoveredResourceCounts = Action("GetAggregateDiscoveredResourceCounts")
 GetAggregateResourceConfig = Action("GetAggregateResourceConfig")
 GetComplianceDetailsByConfigRule = Action("GetComplianceDetailsByConfigRule")
@@ -78,9 +68,7 @@ GetComplianceSummaryByResourceType = Action("GetComplianceSummaryByResourceType"
 GetConformancePackComplianceDetails = Action("GetConformancePackComplianceDetails")
 GetConformancePackComplianceSummary = Action("GetConformancePackComplianceSummary")
 GetDiscoveredResourceCounts = Action("GetDiscoveredResourceCounts")
-GetOrganizationConfigRuleDetailedStatus = Action(
-    "GetOrganizationConfigRuleDetailedStatus"
-)
+GetOrganizationConfigRuleDetailedStatus = Action("GetOrganizationConfigRuleDetailedStatus")
 GetOrganizationConformancePackDetailedStatus = Action(
     "GetOrganizationConformancePackDetailedStatus"
 )

@@ -11,12 +11,11 @@ import re
 import shutil
 import sys
 import tempfile
-from typing import TYPE_CHECKING, Generator, Optional, cast
+from typing import TYPE_CHECKING, Final, cast
 from urllib.error import URLError
 from urllib.request import urlretrieve
 
 import requests
-from typing_extensions import Final
 
 from ..compat import cached_property
 from ..exceptions import KubectlVersionNotSpecified
@@ -24,6 +23,7 @@ from ..utils import FileHash, Version
 from . import EnvManager, handle_bin_download_error
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
     from pathlib import Path
 
     from .._logging import RunwayLogger
@@ -50,11 +50,11 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
     # the ridiculousness should be short-lived as md5 & sha1 support won't last
     # long.
     try:
-        hash_alg: "hashlib._Hash" = hashlib.sha512()
+        hash_alg: hashlib._Hash = hashlib.sha512()
         checksum_filename = filename + "." + hash_alg.name
         LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
         download_request = requests.get(
-            kb_url + "/" + checksum_filename, allow_redirects=True
+            kb_url + "/" + checksum_filename, allow_redirects=True, timeout=30
         )
         download_request.raise_for_status()
     except requests.exceptions.HTTPError:
@@ -63,42 +63,35 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
             checksum_filename = filename + "." + hash_alg.name
             LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
             download_request = requests.get(
-                kb_url + "/" + checksum_filename, allow_redirects=True
+                kb_url + "/" + checksum_filename, allow_redirects=True, timeout=30
             )
             download_request.raise_for_status()
         except requests.exceptions.HTTPError:
             try:
-                hash_alg = hashlib.sha1()
+                hash_alg = hashlib.sha1()  # noqa: S324
                 checksum_filename = filename + "." + hash_alg.name
-                LOGGER.debug(
-                    "attempting download of kubectl %s checksum...", hash_alg.name
-                )
+                LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
                 download_request = requests.get(
-                    kb_url + "/" + checksum_filename, allow_redirects=True
+                    kb_url + "/" + checksum_filename, allow_redirects=True, timeout=30
                 )
                 download_request.raise_for_status()
             except requests.exceptions.HTTPError:
                 try:
-                    hash_alg = hashlib.md5()
+                    hash_alg = hashlib.md5()  # noqa: S324
                     checksum_filename = filename + "." + hash_alg.name
-                    LOGGER.debug(
-                        "attempting download of kubectl %s checksum...", hash_alg.name
-                    )
+                    LOGGER.debug("attempting download of kubectl %s checksum...", hash_alg.name)
                     download_request = requests.get(
-                        kb_url + "/" + checksum_filename, allow_redirects=True
+                        kb_url + "/" + checksum_filename, allow_redirects=True, timeout=30
                     )
                     download_request.raise_for_status()
                 except requests.exceptions.HTTPError:
                     LOGGER.error("Unable to retrieve kubectl checksum file")
                     sys.exit(1)
 
-    if sys.version_info < (3, 0):
-        kb_hash = download_request.content.rstrip("\n")
-    else:
-        kb_hash = download_request.content.decode().rstrip("\n")
+    kb_hash = download_request.content.decode().rstrip("\n")
 
     checksum = FileHash(hash_alg)
-    checksum.add_file(os.path.join(download_dir, filename))
+    checksum.add_file(os.path.join(download_dir, filename))  # noqa: PTH118
     if kb_hash != checksum.hexdigest:
         LOGGER.error(
             "downloaded kubectl %s does not match %s checksum %s",
@@ -113,8 +106,8 @@ def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
 def download_kb_release(
     version: str,
     versions_dir: Path,
-    kb_platform: Optional[str] = None,
-    arch: Optional[str] = None,
+    kb_platform: str | None = None,
+    arch: str | None = None,
 ) -> None:
     """Download kubectl and return path to it."""
     version_dir = versions_dir / version
@@ -142,14 +135,16 @@ def download_kb_release(
 
     try:
         LOGGER.verbose("downloading kubectl from %s...", kb_url)
-        urlretrieve(kb_url + "/" + filename, os.path.join(download_dir, filename))
+        urlretrieve(  # noqa: S310
+            kb_url + "/" + filename, os.path.join(download_dir, filename)  # noqa: PTH118
+        )
     except URLError as exc:
         handle_bin_download_error(exc, "kubectl")
 
     verify_kb_release(kb_url, download_dir, filename)
 
     version_dir.mkdir(parents=True, exist_ok=True)
-    shutil.move(os.path.join(download_dir, filename), version_dir / filename)
+    shutil.move(os.path.join(download_dir, filename), version_dir / filename)  # noqa: PTH118
     shutil.rmtree(download_dir)
     result = version_dir / filename
     result.chmod(result.stat().st_mode | 0o0111)  # ensure it is executable
@@ -164,9 +159,7 @@ class KBEnvManager(EnvManager):
 
     VERSION_REGEX: Final[str] = r"^(v)?(?P<version>[0-9]+\.[0-9]+\.[0-9]+\S*)"
 
-    def __init__(
-        self, path: Optional[Path] = None, *, overlay_path: Optional[Path] = None
-    ) -> None:
+    def __init__(self, path: Path | None = None, *, overlay_path: Path | None = None) -> None:
         """Initialize class.
 
         Args:
@@ -178,7 +171,7 @@ class KBEnvManager(EnvManager):
         self.overlay_path = overlay_path
 
     @cached_property
-    def version(self) -> Optional[Version]:
+    def version(self) -> Version | None:
         """Terraform version."""
         if not self.current_version:
             self.current_version = self.get_version_from_file()
@@ -187,7 +180,7 @@ class KBEnvManager(EnvManager):
         return self.parse_version_string(self.current_version)
 
     @cached_property
-    def version_file(self) -> Optional[Path]:
+    def version_file(self) -> Path | None:
         """Find and return a ".kubectl-version" file if one is present.
 
         Returns:
@@ -204,7 +197,7 @@ class KBEnvManager(EnvManager):
                 return tmp_path
         return None
 
-    def get_version_from_file(self, file_path: Optional[Path] = None) -> Optional[str]:
+    def get_version_from_file(self, file_path: Path | None = None) -> str | None:
         """Get kubectl version from a file.
 
         Args:
@@ -219,7 +212,7 @@ class KBEnvManager(EnvManager):
         LOGGER.debug("file path not provided and version file could not be found")
         return None
 
-    def install(self, version_requested: Optional[str] = None) -> str:
+    def install(self, version_requested: str | None = None) -> str:
         """Ensure kubectl is available."""
         if not version_requested:
             if self.version:
@@ -237,9 +230,7 @@ class KBEnvManager(EnvManager):
         # Return early (i.e before reaching out to the internet) if the
         # matching version is already installed
         if (self.versions_dir / version_requested).is_dir():
-            LOGGER.verbose(
-                "kubectl version %s already installed; using it...", version_requested
-            )
+            LOGGER.verbose("kubectl version %s already installed; using it...", version_requested)
             self.current_version = version_requested
             return str(self.bin)
 
@@ -285,7 +276,5 @@ class KBEnvManager(EnvManager):
         """
         match = re.search(cls.VERSION_REGEX, version)
         if not match:
-            raise ValueError(
-                f"provided version doesn't conform to regex: {cls.VERSION_REGEX}"
-            )
+            raise ValueError(f"provided version doesn't conform to regex: {cls.VERSION_REGEX}")
         return Version(f"v{match.group('version')}")

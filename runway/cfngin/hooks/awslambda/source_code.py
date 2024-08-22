@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Iterator, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING
 
 import igittigitt
 
@@ -13,6 +13,8 @@ from runway.compat import cached_property
 from runway.utils import FileHash
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Sequence
+
     from _typeshed import StrPath
 
 LOGGER = logging.getLogger(__name__)
@@ -41,9 +43,9 @@ class SourceCode:
         self,
         root_directory: StrPath,
         *,
-        gitignore_filter: Optional[igittigitt.IgnoreParser] = None,
-        include_files_in_hash: Optional[Sequence[Path]] = None,
-        project_root: Optional[StrPath] = None,
+        gitignore_filter: igittigitt.IgnoreParser | None = None,
+        include_files_in_hash: Sequence[Path] | None = None,
+        project_root: StrPath | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -88,7 +90,7 @@ class SourceCode:
         for include_file in self._include_files_in_hash:
             if include_file not in sorted_files:
                 sorted_files.append(include_file)
-        file_hash = FileHash(hashlib.md5())
+        file_hash = FileHash(hashlib.md5())  # noqa: S324
         file_hash.add_files(sorted(sorted_files), relative_to=self.project_root)
         return file_hash.hexdigest
 
@@ -101,7 +103,7 @@ class SourceCode:
         """
         self.gitignore_filter.add_rule(pattern=pattern, base_path=self.root_directory)
 
-    def sorted(self, *, reverse: bool = False) -> List[Path]:
+    def sorted(self, *, reverse: bool = False) -> list[Path]:
         """Sorted list of source code files.
 
         Args:
@@ -120,7 +122,7 @@ class SourceCode:
             return self.root_directory == other.root_directory
         return False
 
-    def __fspath__(self) -> Union[str, bytes]:
+    def __fspath__(self) -> str | bytes:
         """Return the file system path representation of the object."""
         return str(self.root_directory)
 

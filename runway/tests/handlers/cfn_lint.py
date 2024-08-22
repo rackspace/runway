@@ -7,7 +7,7 @@ import logging
 import runpy
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
@@ -26,7 +26,7 @@ class CfnLintHandler(TestHandler):
     """Lints CFN."""
 
     @classmethod
-    def handle(cls, name: str, args: Union[ConfigProperty, Dict[str, Any]]) -> None:
+    def handle(cls, name: str, args: ConfigProperty | dict[str, Any]) -> None:
         """Perform the actual test.
 
         Relies on .cfnlintrc file to be located beside the Runway config file.
@@ -42,7 +42,7 @@ class CfnLintHandler(TestHandler):
         # prevent duplicate log messages by not passing to the root logger
         logging.getLogger("cfnlint").propagate = False
         try:
-            with argv(*["cfn-lint"] + args.get("cli_args", [])):
+            with argv(*["cfn-lint", *args.get("cli_args", [])]):
                 runpy.run_module("cfnlint", run_name="__main__")
         except SystemExit as err:  # this call will always result in SystemExit
             if err.code != 0:  # ignore zero exit codes but re-raise for non-zero

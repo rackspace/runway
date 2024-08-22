@@ -21,9 +21,7 @@ DeleteCertificateAuthority = Action("DeleteCertificateAuthority")
 DeletePermission = Action("DeletePermission")
 DeletePolicy = Action("DeletePolicy")
 DescribeCertificateAuthority = Action("DescribeCertificateAuthority")
-DescribeCertificateAuthorityAuditReport = Action(
-    "DescribeCertificateAuthorityAuditReport"
-)
+DescribeCertificateAuthorityAuditReport = Action("DescribeCertificateAuthorityAuditReport")
 GetCertificate = Action("GetCertificate")
 GetCertificateAuthorityCertificate = Action("GetCertificateAuthorityCertificate")
 GetCertificateAuthorityCsr = Action("GetCertificateAuthorityCsr")

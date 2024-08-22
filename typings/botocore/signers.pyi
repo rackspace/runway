@@ -90,9 +90,7 @@ class RequestSigner(object):
         """
         ...
 
-    def get_auth_instance(
-        self, signing_name, region_name, signature_version=..., **kwargs
-    ):
+    def get_auth_instance(self, signing_name, region_name, signature_version=..., **kwargs):
         """
         Get an auth instance which can be used to sign a request
         using the given signature version.
@@ -199,9 +197,7 @@ class CloudFrontSigner(object):
         """
         ...
 
-    def build_policy(
-        self, resource, date_less_than, date_greater_than=..., ip_address=...
-    ):
+    def build_policy(self, resource, date_less_than, date_greater_than=..., ip_address=...):
         """A helper to build policy.
 
         :type resource: str
@@ -289,9 +285,7 @@ class S3PostPresigner(object):
         ...
 
 def add_generate_presigned_url(class_attributes, **kwargs): ...
-def generate_presigned_url(
-    self, ClientMethod, Params=..., ExpiresIn=..., HttpMethod=...
-):
+def generate_presigned_url(self, ClientMethod, Params=..., ExpiresIn=..., HttpMethod=...):
     """Generate a presigned url given a client, its method, and arguments
 
     :type ClientMethod: string
@@ -314,9 +308,7 @@ def generate_presigned_url(
     ...
 
 def add_generate_presigned_post(class_attributes, **kwargs): ...
-def generate_presigned_post(
-    self, Bucket, Key, Fields=..., Conditions=..., ExpiresIn=...
-):
+def generate_presigned_post(self, Bucket, Key, Fields=..., Conditions=..., ExpiresIn=...):
     """Builds the url and the form fields used for a presigned s3 post
 
     :type Bucket: string

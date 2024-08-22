@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable
 
 from ..exceptions import StackDoesNotExist
 from ..hooks.utils import handle_hooks
@@ -49,9 +49,7 @@ class Action(BaseAction):
         """Run against a step."""
         return self._destroy_stack
 
-    def _destroy_stack(
-        self, stack: Stack, *, status: Optional[Status], **_: Any
-    ) -> Status:
+    def _destroy_stack(self, stack: Stack, *, status: Status | None, **_: Any) -> Status:
         wait_time = 0 if status is PENDING else STACK_POLL_TIME
         if self.cancel.wait(wait_time):
             return INTERRUPTED
@@ -82,17 +80,15 @@ class Action(BaseAction):
             LOGGER.debug("%s:destroying stack", stack.fqn)
             provider.destroy_stack(stack_data)
             return DESTROYING_STATUS
-        LOGGER.critical(
-            "%s: %s", stack.fqn, provider.get_delete_failed_status_reason(stack.fqn)
-        )
+        LOGGER.critical("%s: %s", stack.fqn, provider.get_delete_failed_status_reason(stack.fqn))
         return FailedStatus(provider.get_stack_status_reason(stack_data))
 
     def pre_run(
         self,
         *,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        dump: bool | str = False,  # noqa: ARG002
         outline: bool = False,
-        **__kwargs: Any,
+        **_kwargs: Any,
     ) -> None:
         """Any steps that need to be taken prior to running the action."""
         pre_destroy = self.context.config.pre_destroy
@@ -108,17 +104,15 @@ class Action(BaseAction):
         self,
         *,
         concurrency: int = 0,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        dump: bool | str = False,  # noqa: ARG002
         force: bool = False,
-        outline: bool = False,  # pylint: disable=unused-argument
+        outline: bool = False,  # noqa: ARG002
         tail: bool = False,
-        upload_disabled: bool = False,  # pylint: disable=unused-argument
+        upload_disabled: bool = False,  # noqa: ARG002
         **_kwargs: Any,
     ) -> None:
         """Kicks off the destruction of the stacks in the stack_definitions."""
-        plan = self._generate_plan(
-            tail=tail, reverse=True, include_persistent_graph=True
-        )
+        plan = self._generate_plan(tail=tail, reverse=True, include_persistent_graph=True)
         if not plan.keys():
             LOGGER.warning("no stacks detected (error in config?)")
         if force:
@@ -137,9 +131,9 @@ class Action(BaseAction):
     def post_run(
         self,
         *,
-        dump: Union[bool, str] = False,  # pylint: disable=unused-argument
+        dump: bool | str = False,  # noqa: ARG002
         outline: bool = False,
-        **__kwargs: Any,
+        **_kwargs: Any,
     ) -> None:
         """Any steps that need to be taken after running the action."""
         if not outline and self.context.config.post_destroy:

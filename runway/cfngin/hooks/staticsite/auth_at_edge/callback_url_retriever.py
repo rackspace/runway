@@ -8,7 +8,7 @@ callback urls are retrieved or a temporary one is used in it's place.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Any
 
 from ...base import HookArgsBaseModel
 
@@ -24,11 +24,11 @@ class HookArgs(HookArgsBaseModel):
     stack_name: str
     """The name of the stack to check against."""
 
-    user_pool_arn: Optional[str] = None
+    user_pool_arn: str | None = None
     """The ARN of the User Pool to check for a client."""
 
 
-def get(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, Any]:
+def get(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[str, Any]:
     """Retrieve the callback URLs for User Pool Client Creation.
 
     When the User Pool is created a Callback URL is required. During a post
@@ -42,9 +42,10 @@ def get(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, Any]:
 
     Args:
         context: The context instance.
+        **kwargs: Arbitrary keyword arguments.
 
     """
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     session = context.get_session()
     cloudformation_client = session.client("cloudformation")
     cognito_client = session.client("cognito-idp")
@@ -54,31 +55,32 @@ def get(context: CfnginContext, *__args: Any, **kwargs: Any) -> Dict[str, Any]:
         # Return the current stack if one exists
         stack_desc = cloudformation_client.describe_stacks(StackName=args.stack_name)
         # Get the client_id from the outputs
-        outputs = stack_desc["Stacks"][0]["Outputs"]
+        outputs = stack_desc["Stacks"][0].get("Outputs", [])
 
         if args.user_pool_arn:
             user_pool_id = args.user_pool_arn.split("/")[-1:][0]
         else:
-            user_pool_id = [
+            user_pool_id = next(
                 o["OutputValue"]
                 for o in outputs
-                if o["OutputKey"] == "AuthAtEdgeUserPoolId"
-            ][0]
+                if ("OutputKey" in o and "OutputValue" in o)
+                and o["OutputKey"] == "AuthAtEdgeUserPoolId"
+            )
 
-        client_id = [
-            o["OutputValue"] for o in outputs if o["OutputKey"] == "AuthAtEdgeClient"
-        ][0]
-
-        # Poll the user pool client information
-        resp = cognito_client.describe_user_pool_client(
-            UserPoolId=user_pool_id, ClientId=client_id
+        client_id = next(
+            o["OutputValue"]
+            for o in outputs
+            if ("OutputKey" in o and "OutputValue" in o) and o["OutputKey"] == "AuthAtEdgeClient"
         )
 
+        # Poll the user pool client information
+        resp = cognito_client.describe_user_pool_client(UserPoolId=user_pool_id, ClientId=client_id)
+
         # Retrieve the callbacks
-        callbacks = resp["UserPoolClient"]["CallbackURLs"]
+        callbacks = resp["UserPoolClient"].get("CallbackURLs")
 
         if callbacks:
             context_dict["callback_urls"] = callbacks
         return context_dict
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa: BLE001
         return context_dict

@@ -22,7 +22,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 @options.no_color
 @options.verbose
 @click.pass_context
-def tf(ctx: click.Context, **_: Any) -> None:  # pylint: disable=invalid-name
+def tf(ctx: click.Context, **_: Any) -> None:
     """Generate a sample Terraform project."""
     src = TEMPLATES / "terraform"
     dest = Path.cwd() / "sampleapp.tf"

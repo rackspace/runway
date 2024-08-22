@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar, List
+from typing import ClassVar
 
 import awacs.iam
 import awacs.s3
@@ -123,10 +123,7 @@ class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
                 Action("cloudformation", "List*"),
             ],
             Resource=[
-                Sub(
-                    "arn:aws:cloudformation:*:${AWS::AccountId}:stack/"
-                    f"{self.namespace}-*"
-                ),
+                Sub(f"arn:aws:cloudformation:*:${{AWS::AccountId}}:stack/{self.namespace}-*"),
                 f"arn:aws:s3:::{self.namespace}",
                 f"arn:aws:s3:::{self.namespace}/*",
                 f"arn:aws:s3:::{self.namespace}-*",
@@ -135,9 +132,10 @@ class TestRunnerBoundary(AdminPreventPrivilegeEscalation):
         )
 
     @cached_property
-    def statements(self) -> List[Statement]:
+    def statements(self) -> list[Statement]:
         """List of statements to add to the policy."""
-        return super().statements + [
+        return [
+            *super().statements,
             self.statement_deny_change_cfngin_bucket,
             self.statement_deny_cloudtrail,
             self.statement_deny_iam,

@@ -1,14 +1,12 @@
 """Test runway.context._base."""
 
-# pylint: disable=redefined-outer-name
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
+from unittest.mock import MagicMock
 
 import boto3
 import pytest
-from mock import MagicMock
 
 from runway.context._base import BaseContext
 from runway.context.sys_info import SystemInfo
@@ -31,7 +29,7 @@ TEST_ENV_CREDS = {
 }
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def mock_boto3_session(mocker: MockerFixture) -> MagicMock:
     """Mock boto3.Session."""
     mock_session = MagicMock(autospec=boto3.Session)
@@ -39,7 +37,7 @@ def mock_boto3_session(mocker: MockerFixture) -> MagicMock:
     return mock_session
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def mock_sso_botocore_session(mocker: MockerFixture) -> MagicMock:
     """Mock runway.aws_sso_botocore.session.Session."""
     return mocker.patch(f"{MODULE}.Session")
@@ -62,10 +60,7 @@ class TestBaseContext:
     def test_boto3_credentials(self, mocker: MockerFixture) -> None:
         """Test boto3_credentials."""
         mocker.patch.object(self.env, "vars", TEST_ENV_CREDS)
-        assert (
-            BaseContext(deploy_environment=self.env).boto3_credentials
-            == TEST_BOTO3_CREDS
-        )
+        assert BaseContext(deploy_environment=self.env).boto3_credentials == TEST_BOTO3_CREDS
 
     def test_boto3_credentials_empty(self, mocker: MockerFixture) -> None:
         """Test boto3_credentials empty."""
@@ -75,9 +70,7 @@ class TestBaseContext:
     def test_current_aws_creds(self, mocker: MockerFixture) -> None:
         """Test current_aws_creds."""
         mocker.patch.object(self.env, "vars", TEST_ENV_CREDS)
-        assert (
-            BaseContext(deploy_environment=self.env).current_aws_creds == TEST_ENV_CREDS
-        )
+        assert BaseContext(deploy_environment=self.env).current_aws_creds == TEST_ENV_CREDS
 
     def test_current_aws_creds_empty(self, mocker: MockerFixture) -> None:
         """Test current_aws_creds empty."""

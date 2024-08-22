@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
@@ -20,7 +20,7 @@ try:  # will raise an import error if git is not in the current path
     import git
     from git.exc import InvalidGitRepositoryError
 except ImportError:  # cov: ignore
-    git = object  # pylint: disable=invalid-name
+    git = object
     InvalidGitRepositoryError = AttributeError
 
 if TYPE_CHECKING:
@@ -32,19 +32,19 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 class DeployEnvironment(DelCachedPropMixin):
     """Runway deploy environment."""
 
-    __name: Optional[str]
+    __name: str | None
     _ignore_git_branch: bool
 
-    name_derived_from: Optional[str]
+    name_derived_from: str | None
     root_dir: Path
 
     def __init__(
         self,
         *,
-        environ: Optional[Dict[str, str]] = None,
-        explicit_name: Optional[str] = None,
+        environ: dict[str, str] | None = None,
+        explicit_name: str | None = None,
         ignore_git_branch: bool = False,
-        root_dir: Optional[Path] = None,
+        root_dir: Path | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -70,7 +70,7 @@ class DeployEnvironment(DelCachedPropMixin):
         )
 
     @property
-    def aws_profile(self) -> Optional[str]:
+    def aws_profile(self) -> str | None:
         """Get AWS profile from environment variables."""
         return self.vars.get("AWS_PROFILE")
 
@@ -82,9 +82,7 @@ class DeployEnvironment(DelCachedPropMixin):
     @property
     def aws_region(self) -> str:
         """Get AWS region from environment variables."""
-        return self.vars.get(
-            "AWS_REGION", self.vars.get("AWS_DEFAULT_REGION", "us-east-1")
-        )
+        return self.vars.get("AWS_REGION", self.vars.get("AWS_DEFAULT_REGION", "us-east-1"))
 
     @aws_region.setter
     def aws_region(self, region: str) -> None:
@@ -92,7 +90,7 @@ class DeployEnvironment(DelCachedPropMixin):
         self._update_vars({"AWS_DEFAULT_REGION": region, "AWS_REGION": region})
 
     @cached_property
-    def branch_name(self) -> Optional[str]:
+    def branch_name(self) -> str | None:
         """Git branch name."""
         if isinstance(git, type):
             LOGGER.debug(
@@ -102,9 +100,7 @@ class DeployEnvironment(DelCachedPropMixin):
             return None
         try:
             LOGGER.debug("getting git branch name...")
-            return git.Repo(  # type: ignore
-                str(self.root_dir), search_parent_directories=True
-            ).active_branch.name
+            return git.Repo(str(self.root_dir), search_parent_directories=True).active_branch.name
         except InvalidGitRepositoryError:
             return None
         except TypeError:
@@ -261,9 +257,7 @@ class DeployEnvironment(DelCachedPropMixin):
         else:
             self.name_derived_from = "directory"
             if self.root_dir.name.startswith("ENV-"):
-                LOGGER.verbose(
-                    'stripped "ENV-" from the directory name "%s"', self.root_dir.name
-                )
+                LOGGER.verbose('stripped "ENV-" from the directory name "%s"', self.root_dir.name)
                 name = self.root_dir.name[4:]
             else:
                 name = self.root_dir.name
@@ -307,9 +301,7 @@ class DeployEnvironment(DelCachedPropMixin):
         """Output name to log."""
         name = self.name  # resolve if not already resolved
         if self.name_derived_from == "explicit":
-            LOGGER.info(
-                'deploy environment "%s" is explicitly defined in the environment', name
-            )
+            LOGGER.info('deploy environment "%s" is explicitly defined in the environment', name)
             LOGGER.info(
                 "if not correct, update the value or unset it to fall back "
                 "to the name of the current git branch or parent directory"
@@ -333,13 +325,11 @@ class DeployEnvironment(DelCachedPropMixin):
                 "override via the DEPLOY_ENVIRONMENT environment variable"
             )
 
-    def _parse_branch_name(self) -> Optional[str]:
+    def _parse_branch_name(self) -> str | None:
         """Parse branch name for use as deploy environment name."""
         if self.branch_name:
             if self.branch_name.startswith("ENV-"):
-                LOGGER.verbose(
-                    'stripped "ENV-" from the branch name "%s"', self.branch_name
-                )
+                LOGGER.verbose('stripped "ENV-" from the branch name "%s"', self.branch_name)
                 return self.branch_name[4:]
             if self.branch_name == "master":
                 LOGGER.verbose('translated branch name "master" to "common"')
@@ -354,11 +344,11 @@ class DeployEnvironment(DelCachedPropMixin):
             return result
         return self.branch_name
 
-    def _update_vars(self, env_vars: Dict[str, str]) -> None:
+    def _update_vars(self, env_vars: dict[str, str]) -> None:
         """Update vars and log the change.
 
         Args:
-            env_vars (Dict[str, str]): Dict to update self.vars with.
+            env_vars: Dict to update self.vars with.
 
         """
         self.vars.update(env_vars)

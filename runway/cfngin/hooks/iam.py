@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from awacs import ecs
 from awacs.aws import Allow, Policy, Statement
@@ -56,31 +56,30 @@ class EnsureServerCertExistsHookArgs(BaseModel):
     cert_name: str
     """Name of the certificate that should exist."""
 
-    path_to_certificate: Optional[str] = None
+    path_to_certificate: str | None = None
     """Path to certificate file."""
 
-    path_to_chain: Optional[str] = None
+    path_to_chain: str | None = None
     """Path to chain file."""
 
-    path_to_private_key: Optional[str] = None
+    path_to_private_key: str | None = None
     """Path to private key file."""
 
     prompt: bool = True
     """Whether to prompt to upload a certificate if one does not exist."""
 
 
-def create_ecs_service_role(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> bool:
+def create_ecs_service_role(context: CfnginContext, *_args: Any, **kwargs: Any) -> bool:
     """Create ecsServiceRole IAM role.
 
     https://docs.aws.amazon.com/AmazonECS/latest/developerguide/using-service-linked-roles.html
 
     Args:
         context: Context instance. (passed in by CFNgin)
+        **kwargs: Arbitrary keyword arguments.
 
     """
-    args = CreateEcsServiceRoleHookArgs.parse_obj(kwargs)
+    args = CreateEcsServiceRoleHookArgs.model_validate(kwargs)
     client = context.get_session().client("iam")
 
     try:
@@ -100,9 +99,7 @@ def create_ecs_service_role(
 
 
 def _get_cert_arn_from_response(
-    response: Union[
-        GetServerCertificateResponseTypeDef, UploadServerCertificateResponseTypeDef
-    ]
+    response: GetServerCertificateResponseTypeDef | UploadServerCertificateResponseTypeDef,
 ) -> str:
     result = copy.deepcopy(response)
     # GET response returns this extra key
@@ -117,7 +114,7 @@ def _get_cert_arn_from_response(
     )
 
 
-def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def _get_cert_contents(kwargs: dict[str, Any]) -> dict[str, Any]:  # noqa: C901
     """Build parameters with server cert file contents.
 
     Args:
@@ -145,7 +142,7 @@ def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:
 
         paths[key] = path
 
-    parameters: Dict[str, str] = {}
+    parameters: dict[str, str] = {}
 
     for key, path in paths.items():
         if not path:
@@ -155,7 +152,7 @@ def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:
         try:
             contents = path.read()
         except AttributeError:
-            with open(utils.full_path(path), encoding="utf-8") as read_file:
+            with open(utils.full_path(path), encoding="utf-8") as read_file:  # noqa: PTH123
                 contents = read_file.read()
 
         if key == "certificate":
@@ -171,19 +168,18 @@ def _get_cert_contents(kwargs: Dict[str, Any]) -> Dict[str, Any]:
     return parameters
 
 
-def ensure_server_cert_exists(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> Dict[str, str]:
+def ensure_server_cert_exists(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[str, str]:
     """Ensure server cert exists.
 
     Args:
         context: CFNgin context object.
+        **kwargs: Arbitrary keyword arguments.
 
     Returns:
         Dict containing ``status``, ``cert_name``, and ``cert_arn``.
 
     """
-    args = EnsureServerCertExistsHookArgs.parse_obj(kwargs)
+    args = EnsureServerCertExistsHookArgs.model_validate(kwargs)
     client = context.get_session().client("iam")
     status = "unknown"
     try:
@@ -193,13 +189,11 @@ def ensure_server_cert_exists(
         LOGGER.info("certificate exists: %s (%s)", args.cert_name, cert_arn)
     except ClientError:
         if args.prompt:
-            upload = input(
-                f"Certificate '{args.cert_name}' wasn't found. Upload it now? (yes/no) "
-            )
+            upload = input(f"Certificate '{args.cert_name}' wasn't found. Upload it now? (yes/no) ")
             if upload != "yes":
                 return {}
 
-        parameters = _get_cert_contents(args.dict())
+        parameters = _get_cert_contents(args.model_dump())
         if not parameters:
             return {}
         response = client.upload_server_certificate(**parameters)

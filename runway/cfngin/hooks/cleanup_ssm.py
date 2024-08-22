@@ -22,7 +22,7 @@ class DeleteParamHookArgs(BaseModel):
 
 def delete_param(context: CfnginContext, *__args: Any, **kwargs: Any) -> bool:
     """Delete SSM parameter."""
-    args = DeleteParamHookArgs.parse_obj(kwargs)
+    args = DeleteParamHookArgs.model_validate(kwargs)
 
     session = context.get_session()
     ssm_client = session.client("ssm")

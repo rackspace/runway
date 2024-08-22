@@ -7,9 +7,6 @@ Advanced Features
 Advanced features and detailed information for using Terraform with Runway.
 
 
-.. contents::
-  :depth: 4
-
 
 .. _tf-backend:
 
@@ -35,7 +32,7 @@ However, it's generally preferable to separate the backend configuration out fro
 This form of configuration is known as `partial configuration`_ and allows for dynamic or secret values to be passed in at runtime.
 
 Below are examples of how to implement `partial configuration`_ with Runway.
-All examples provided showcase the use of the s3 backend type as it is the easiest to use when going from zero to deployed (try :ref:`runway gen-sample cfngin <command-gen-sample>` for quickstart Terraform backend infrastructure).
+All examples provided showcase the use of the s3 backend type as it is the easiest to use when going from zero to deployed (try :ref:`runway gen-sample cfngin <commands:gen-sample>` for quickstart Terraform backend infrastructure).
 However, Runway supports the use of any `backend type <https://www.terraform.io/docs/backends/types/index.html>`__ (refer to Terraform's documentation for proper `partial configuration`_ instructions).
 
 .. seealso::

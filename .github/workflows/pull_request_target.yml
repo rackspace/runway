@@ -1,0 +1,36 @@
+name: pull_request_target
+
+on:
+  pull_request_target:
+
+jobs:
+  assign-author-to-pr:
+    name: Assign Author to PR
+    if: ${{ !endswith(github.actor, '[bot]') && (github.event.action == 'opened' || github.event.action == 'reopened') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: technote-space/assign-author@v1  # cspell:ignore technote
+  enforce-branch-name:
+    name: Enforce Branch Name
+    runs-on: ubuntu-latest
+    steps:
+      - name: 💂 Enforce Branch Name
+        uses: finleyfamily/action-enforce-branch-name@v1.0.0
+        with:
+          allowed_prefixes: >-
+            bugfix,chore,dep,depend,dependabot,deps,docs,feat,feature,fix,hotfix,
+            maint,maintain,maintenance,pre-commit,release,renovate,snyk
+  label-pr:
+    name: Label PR
+    if: ${{ github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'synchronize' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Run Release Drafter
+        uses: release-drafter/release-drafter@v6
+        with:
+          disable-releaser: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

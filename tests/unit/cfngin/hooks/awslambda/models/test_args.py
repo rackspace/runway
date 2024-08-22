@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -43,7 +43,7 @@ class TestAwsLambdaHookArgs:
         "kwargs", [{"image": "test"}, {"file": ""}, {"file": "", "image": "test"}]
     )
     def test__validate_runtime_or_docker_docker_no_runtime(
-        self, kwargs: Dict[str, Any], tmp_path: Path
+        self, kwargs: dict[str, Any], tmp_path: Path
     ) -> None:
         """Test _validate_runtime_or_docker no runtime if Docker."""
         if "file" in kwargs:
@@ -52,7 +52,7 @@ class TestAwsLambdaHookArgs:
             kwargs["file"] = dockerfile
         obj = AwsLambdaHookArgs(
             bucket_name="test-bucket",
-            docker=DockerOptions.parse_obj(kwargs),
+            docker=DockerOptions.model_validate(kwargs),
             source_code=tmp_path,
         )
         assert not obj.runtime
@@ -63,30 +63,26 @@ class TestAwsLambdaHookArgs:
         With ``runtime=None`` and ``docker.disabled=True``.
 
         """
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(
+            ValidationError,
+            match="runtime\n  Value error, runtime must be provided if docker.disabled is True",
+        ):
             AwsLambdaHookArgs(
                 bucket_name="test-bucket",
                 docker=DockerOptions(disabled=True),
                 source_code=tmp_path,
             )
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("runtime",)
-        assert errors[0]["msg"] == "runtime must be provided if docker.disabled is True"
 
-    def test__validate_runtime_or_docker_no_runtime_or_docker(
-        self, tmp_path: Path
-    ) -> None:
+    def test__validate_runtime_or_docker_no_runtime_or_docker(self, tmp_path: Path) -> None:
         """Test _validate_runtime_or_docker no runtime or docker."""
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(
+            ValidationError,
+            match="runtime\n  Value error, docker.file, docker.image, or runtime is required",
+        ):
             AwsLambdaHookArgs(
                 bucket_name="test-bucket",
                 source_code=tmp_path,
             )
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("runtime",)
-        assert errors[0]["msg"] == "docker.file, docker.image, or runtime is required"
 
     def test_field_defaults(self, tmp_path: Path) -> None:
         """Test field defaults."""
@@ -95,40 +91,36 @@ class TestAwsLambdaHookArgs:
             runtime="test",
             source_code=tmp_path,
         )
-        assert not obj.extend_gitignore and isinstance(obj.extend_gitignore, list)
+        assert not obj.extend_gitignore
+        assert isinstance(obj.extend_gitignore, list)
         assert not obj.object_prefix
 
     def test_source_code_is_file(self, tmp_path: Path) -> None:
         """Test source_code is file."""
         source_path = tmp_path / "foo"
         source_path.write_text("bar")
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(
+            ValidationError,
+            match="source_code\n  Path does not point to a directory",
+        ):
             AwsLambdaHookArgs(  # these are all required fields
                 bucket_name="test-bucket",
                 runtime="test",
                 source_code=source_path,
             )
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("source_code",)
-        assert errors[0]["msg"] == f'path "{source_path}" does not point to a directory'
 
     def test_source_code_not_exist(self, tmp_path: Path) -> None:
         """Test source_code directory does not exist."""
         source_path = tmp_path / "foo"
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(
+            ValidationError,
+            match="source_code\n  Path does not point to a directory",
+        ):
             AwsLambdaHookArgs(  # these are all required fields
                 bucket_name="test-bucket",
                 runtime="test",
                 source_code=source_path,
             )
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("source_code",)
-        assert (
-            errors[0]["msg"]
-            == f'file or directory at path "{source_path}" does not exist'
-        )
 
 
 class TestPythonHookArgs:

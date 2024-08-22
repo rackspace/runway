@@ -14,7 +14,7 @@ By defining these additional sources you are able to extend your *$PATH* to make
   There are three different types of package sources - git repository, local, and AWS S3.
 
   .. attribute:: git
-    :type: Optional[List[cfngin.package_source.git]]
+    :type: list[cfngin.package_source.git]
     :value: []
 
     A list of git repositories to include when processing the configuration file.
@@ -29,7 +29,7 @@ By defining these additional sources you are able to extend your *$PATH* to make
           ...
 
   .. attribute:: local
-    :type: Optional[List[cfngin.package_source.local]]
+    :type: list[cfngin.package_source.local]
     :value: []
 
     A list of additional local directories to include when processing the configuration file.
@@ -44,7 +44,7 @@ By defining these additional sources you are able to extend your *$PATH* to make
           ...
 
   .. attribute:: s3
-    :type: Optional[List[cfngin.package_source.s3]]
+    :type: list[cfngin.package_source.s3]
     :value: []
 
     A list of AWS S3 objects to include when processing the configuration file.
@@ -59,9 +59,6 @@ By defining these additional sources you are able to extend your *$PATH* to make
           ...
 
 
-.. contents::
-  :depth: 4
-
 
 **************
 Git Repository
@@ -75,7 +72,7 @@ Git Repository
   The cache location is defined by :attr:`cfngin.config.cfngin_cache_dir`.
 
   .. attribute:: branch
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     Name of a branch to checkout after cloning the git repository.
@@ -90,7 +87,7 @@ Git Repository
           - branch: master
 
   .. attribute:: commit
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     After cloning the git repository, reset *HEAD* to the given commit hash.
@@ -105,7 +102,7 @@ Git Repository
           - commit: 5d83f7ff1ad6527233be2c27e9f68816599b6c57
 
   .. attribute:: configs
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     Configuration files from this source location can also be used by specifying a list of file paths.
@@ -123,7 +120,7 @@ Git Repository
             - example-02.yml
 
   .. attribute:: paths
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     A list of subdirectories within the source location that should be added to *$PATH*.
@@ -138,7 +135,7 @@ Git Repository
             - another/
 
   .. attribute:: tag
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     After cloning the git repository, reset *HEAD* to the given tag.
@@ -175,7 +172,7 @@ Local
   Package source located on a local disk.
 
   .. attribute:: configs
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     Configuration files from this source location can also be used by specifying a list of file paths.
@@ -193,7 +190,7 @@ Local
             - example-02.yml
 
   .. attribute:: paths
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     A list of subdirectories within the source location that should be added to *$PATH*.
@@ -245,7 +242,7 @@ AWS S3
           - bucket: example-bucket
 
   .. attribute:: configs
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     Configuration files from this source location can also be used by specifying a list of file paths.
@@ -276,7 +273,7 @@ AWS S3
             - key: path/to/example.zip
 
   .. attribute:: paths
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     A list of subdirectories within the source location that should be added to *$PATH*.
@@ -291,7 +288,7 @@ AWS S3
             - another/
 
   .. attribute:: requester_pays
-    :type: Optional[bool]
+    :type: bool
     :value: False
 
     Confirms that the requester knows that they will be charged for the request
@@ -304,7 +301,7 @@ AWS S3
           - requester_pays: true
 
   .. attribute:: use_latest
-    :type: Optional[bool]
+    :type: bool
     :value: True
 
     Update the local copy if the last modified date in AWS S3 changes.

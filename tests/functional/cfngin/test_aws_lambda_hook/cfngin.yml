@@ -21,12 +21,12 @@ pre_deploy:
           exclude:
             - '*.pyc'
         nondockerize:
-            path: ./lambda_src/nondockerize_src
-            runtime: python3.8
-            include:
-              - '*.py'
-            exclude:
-              - '*.pyc'
+          path: ./lambda_src/nondockerize_src
+          runtime: python3.8
+          include:
+            - '*.py'
+          exclude:
+            - '*.pyc'
 
 stacks:
   - name: test-dockerize
@@ -46,17 +46,17 @@ stacks:
 
 post_deploy:
   - path: hooks.awslambda_test.invoke
-    required: True
+    required: true
     args:
       function_name: ${cfn ${namespace}-test-dockerize.LambdaFunction}
   - path: hooks.awslambda_test.invoke
-    required: True
+    required: true
     args:
       function_name: ${cfn ${namespace}-test-nondockerize.LambdaFunction}
 
 post_destroy:
   - path: hooks.cleanup.s3_delete_prefix
-    required: True
+    required: true
     args:
       bucket_name: ${cfngin_bucket}
       prefix: lambda_functions/${namespace}/

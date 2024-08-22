@@ -3,22 +3,15 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
     Generic,
-    List,
-    Optional,
-    Set,
-    Tuple,
     TypeVar,
     cast,
     overload,
 )
-
-from typing_extensions import Literal
 
 from ....compat import cached_property
 from ..protocols import CfnginHookProtocol
@@ -28,6 +21,10 @@ from .models.responses import AwsLambdaHookDeployResponse
 from .source_code import SourceCode
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
+    from typing_extensions import Literal
+
     from ...._logging import RunwayLogger
     from ....context import CfnginContext
     from ....utils import BaseModel
@@ -54,9 +51,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
     ctx: CfnginContext
     """CFNgin context object."""
 
-    def __init__(
-        self, args: _AwsLambdaHookArgsTypeVar_co, context: CfnginContext
-    ) -> None:
+    def __init__(self, args: _AwsLambdaHookArgsTypeVar_co, context: CfnginContext) -> None:
         """Instantiate class.
 
         Args:
@@ -78,7 +73,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         return result
 
     @cached_property
-    def cache_dir(self) -> Optional[Path]:
+    def cache_dir(self) -> Path | None:
         """Directory where a dependency manager's cache data will be stored.
 
         Returns:
@@ -98,12 +93,12 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         return cache_dir
 
     @cached_property
-    def compatible_architectures(self) -> Optional[List[str]]:
+    def compatible_architectures(self) -> list[str] | None:
         """List of compatible instruction set architectures."""
         return getattr(self.args, "compatible_architectures", None)
 
     @cached_property
-    def compatible_runtimes(self) -> Optional[List[str]]:
+    def compatible_runtimes(self) -> list[str] | None:
         """List of compatible runtimes.
 
         Value should be valid Lambda Function runtimes
@@ -114,7 +109,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
                 compatible runtimes.
 
         """
-        runtimes = getattr(self.args, "compatible_runtimes", cast(List[str], []))
+        runtimes = getattr(self.args, "compatible_runtimes", cast("list[str]", []))
         if runtimes and self.runtime not in runtimes:
             raise ValueError(
                 f"runtime ({self.runtime}) not in compatible runtimes ({', '.join(runtimes)})"
@@ -129,7 +124,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         return result
 
     @cached_property
-    def license(self) -> Optional[str]:
+    def license(self) -> str | None:
         """Software license for the project.
 
         Can be any of the following:
@@ -142,8 +137,8 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         """
         return getattr(self.args, "license", None)
 
-    @cached_property  # pylint error is python3.7 only
-    def metadata_files(self) -> Tuple[Path, ...]:
+    @cached_property
+    def metadata_files(self) -> tuple[Path, ...]:
         """Project metadata files (e.g. ``project.json``, ``pyproject.toml``)."""
         return ()
 
@@ -163,9 +158,9 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         raise ValueError("runtime could not be determined from the build system")
 
     @cached_property
-    def _runtime_from_docker(self) -> Optional[str]:
+    def _runtime_from_docker(self) -> str | None:
         """runtime from Docker if class can use Docker."""
-        docker: Optional[DockerDependencyInstaller] = getattr(self, "docker", None)
+        docker: DockerDependencyInstaller | None = getattr(self, "docker", None)
         if not docker:
             return None
         return docker.runtime
@@ -226,11 +221,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         top_lvl_dir = (
             self.ctx.config_path.parent
             if self.ctx.config_path.is_file()
-            else (
-                self.ctx.config_path
-                if self.ctx.config_path.is_dir()
-                else self.args.source_code
-            )
+            else (self.ctx.config_path if self.ctx.config_path.is_dir() else self.args.source_code)
         )
         if top_lvl_dir == self.args.source_code:
             return top_lvl_dir
@@ -238,8 +229,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         parents = list(self.args.source_code.parents)
         if top_lvl_dir not in parents:
             LOGGER.info(
-                "ignoring project directory; "
-                "source code located outside of project directory"
+                "ignoring project directory; source code located outside of project directory"
             )
             return self.args.source_code
 
@@ -269,8 +259,8 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         """
         raise NotImplementedError
 
-    @cached_property  # pylint error is python3.7 only
-    def supported_metadata_files(self) -> Set[str]:
+    @cached_property
+    def supported_metadata_files(self) -> set[str]:
         """Names of all supported metadata files.
 
         Returns:
@@ -320,13 +310,9 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
     BUILD_LAYER: ClassVar[bool] = False
     """Flag to denote if the hook creates a Lambda Function or Layer deployment package."""
 
-    args: AwsLambdaHookArgs
-    """Parsed hook arguments."""
-
     ctx: CfnginContext
     """CFNgin context object."""
 
-    # pylint: disable=super-init-not-called
     def __init__(self, context: CfnginContext, **_kwargs: Any) -> None:
         """Instantiate class.
 
@@ -350,19 +336,15 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
         raise NotImplementedError
 
     @overload
-    def build_response(
-        self, stage: Literal["deploy"]
-    ) -> AwsLambdaHookDeployResponse: ...
+    def build_response(self, stage: Literal["deploy"]) -> AwsLambdaHookDeployResponse: ...
 
     @overload
-    def build_response(self, stage: Literal["destroy"]) -> Optional[BaseModel]: ...
+    def build_response(self, stage: Literal["destroy"]) -> BaseModel | None: ...
 
     @overload
     def build_response(self, stage: Literal["plan"]) -> AwsLambdaHookDeployResponse: ...
 
-    def build_response(
-        self, stage: Literal["deploy", "destroy", "plan"]
-    ) -> Optional[BaseModel]:
+    def build_response(self, stage: Literal["deploy", "destroy", "plan"]) -> BaseModel | None:
         """Build response object that will be returned by this hook.
 
         Args:
@@ -390,7 +372,7 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
             runtime=self.deployment_package.runtime,
         )
 
-    def _build_response_destroy(self) -> Optional[BaseModel]:
+    def _build_response_destroy(self) -> BaseModel | None:
         """Build response for destroy stage."""
         return None
 
@@ -467,7 +449,7 @@ class AwsLambdaHook(CfnginHookProtocol, Generic[_ProjectTypeVar]):
         """Run during the **plan** stage."""
         return cast(
             "AwsLambdaHookDeployResponseTypedDict",
-            self.build_response("plan").dict(by_alias=True),
+            self.build_response("plan").model_dump(by_alias=True),
         )
 
     def post_deploy(self) -> Any:

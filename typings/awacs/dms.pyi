@@ -40,9 +40,7 @@ DescribeRefreshSchemasStatus = Action("DescribeRefreshSchemasStatus")
 DescribeReplicationInstanceTaskLogs = Action("DescribeReplicationInstanceTaskLogs")
 DescribeReplicationInstances = Action("DescribeReplicationInstances")
 DescribeReplicationSubnetGroups = Action("DescribeReplicationSubnetGroups")
-DescribeReplicationTaskAssessmentResults = Action(
-    "DescribeReplicationTaskAssessmentResults"
-)
+DescribeReplicationTaskAssessmentResults = Action("DescribeReplicationTaskAssessmentResults")
 DescribeReplicationTasks = Action("DescribeReplicationTasks")
 DescribeSchemas = Action("DescribeSchemas")
 DescribeTableStatistics = Action("DescribeTableStatistics")

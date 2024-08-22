@@ -1,9 +1,8 @@
 """Test runway.cfngin.hooks.ecr._purge_repository."""
 
-# pyright: basic
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 import boto3
 import pytest
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
     from mypy_boto3_ecr.type_defs import ImageIdentifierTypeDef
     from pytest_mock import MockerFixture
 
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 MODULE = "runway.cfngin.hooks.ecr._purge_repository"
 
@@ -25,7 +24,7 @@ def test_delete_ecr_images() -> None:
     """Test delete_ecr_images."""
     client = boto3.client("ecr")
     stubber = Stubber(client)
-    image_ids: List[ImageIdentifierTypeDef] = [{"imageDigest": "image0"}]
+    image_ids: list[ImageIdentifierTypeDef] = [{"imageDigest": "image0"}]
     repo_name = "test-repo"
 
     stubber.add_response(
@@ -35,16 +34,14 @@ def test_delete_ecr_images() -> None:
     )
 
     with stubber:
-        assert not delete_ecr_images(
-            client, image_ids=image_ids, repository_name=repo_name
-        )
+        assert not delete_ecr_images(client, image_ids=image_ids, repository_name=repo_name)
 
 
 def test_delete_ecr_images_failures() -> None:
     """Test delete_ecr_images with failures."""
     client = boto3.client("ecr")
     stubber = Stubber(client)
-    image_ids: List[ImageIdentifierTypeDef] = [{"imageDigest": "image0"}]
+    image_ids: list[ImageIdentifierTypeDef] = [{"imageDigest": "image0"}]
     repo_name = "test-repo"
 
     stubber.add_response(
@@ -62,7 +59,7 @@ def test_delete_ecr_images_failures() -> None:
         {"repositoryName": repo_name, "imageIds": image_ids},
     )
 
-    with stubber, pytest.raises(ValueError):
+    with stubber, pytest.raises(ValueError):  # noqa: PT011
         delete_ecr_images(client, image_ids=image_ids, repository_name=repo_name)
 
 
@@ -109,9 +106,7 @@ def test_list_ecr_images_repository_not_found() -> None:
         assert list_ecr_images(client, repository_name="test-repo") == []
 
 
-def test_purge_repository(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture
-) -> None:
+def test_purge_repository(cfngin_context: MockCfnginContext, mocker: MockerFixture) -> None:
     """Test purge_repository."""
     mock_list_ecr_images = mocker.patch(
         MODULE + ".list_ecr_images", return_value=[{"imageDigest": "abc123"}]
@@ -121,18 +116,14 @@ def test_purge_repository(
     client = cfngin_context.get_session().client("ecr")
     repo_name = "test-repo"
 
-    assert purge_repository(cfngin_context, repository_name=repo_name) == {
-        "status": "success"
-    }
+    assert purge_repository(cfngin_context, repository_name=repo_name) == {"status": "success"}
     mock_list_ecr_images.assert_called_once_with(client, repository_name=repo_name)
     mock_delete_ecr_images.assert_called_once_with(
         client, image_ids=mock_list_ecr_images.return_value, repository_name=repo_name
     )
 
 
-def test_purge_repository_skip(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture
-) -> None:
+def test_purge_repository_skip(cfngin_context: MockCfnginContext, mocker: MockerFixture) -> None:
     """Test purge_repository."""
     mock_list_ecr_images = mocker.patch(MODULE + ".list_ecr_images", return_value=[])
     mock_delete_ecr_images = mocker.patch(MODULE + ".delete_ecr_images")
@@ -140,8 +131,6 @@ def test_purge_repository_skip(
     client = cfngin_context.get_session().client("ecr")
     repo_name = "test-repo"
 
-    assert purge_repository(cfngin_context, repository_name=repo_name) == {
-        "status": "skipped"
-    }
+    assert purge_repository(cfngin_context, repository_name=repo_name) == {"status": "skipped"}
     mock_list_ecr_images.assert_called_once_with(client, repository_name=repo_name)
     mock_delete_ecr_images.assert_not_called()

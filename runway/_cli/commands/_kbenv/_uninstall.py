@@ -1,8 +1,10 @@
 """Uninstall kubectl version(s) that were installed by Runway and/or kbenv."""
 
 # docs: file://./../../../../docs/source/commands.rst
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
@@ -33,7 +35,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 def uninstall(
     ctx: click.Context,
     *,
-    version: Optional[str] = None,
+    version: str | None = None,
     all_versions: bool = False,
     **_: Any,
 ) -> None:
@@ -45,10 +47,7 @@ def uninstall(
     """
     kbenv = KBEnvManager()
     version = version or (str(kbenv.version) if kbenv.version else None)
-    if version:
-        version_tuple = KBEnvManager.parse_version_string(version)
-    else:
-        version_tuple = kbenv.version
+    version_tuple = KBEnvManager.parse_version_string(version) if version else kbenv.version
     if version_tuple and not all_versions:
         if not kbenv.uninstall(version_tuple):
             ctx.exit(1)

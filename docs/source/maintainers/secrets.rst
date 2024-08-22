@@ -55,7 +55,7 @@ Secrets specific to the repository, available to all environments.
 
 .. envvar:: TEST_PYPI_PASSWORD
 
-  Similar to :envvar:`PYPI_PASSWORD` but for https://test.pypi.org/.
+  Similar to :envvar:`PYPI_PASSWORD` but for :link:`Test PyPI`.
 
 .. envvar:: TEST_RUNNER_AWS_ACCESS_KEY_ID
 

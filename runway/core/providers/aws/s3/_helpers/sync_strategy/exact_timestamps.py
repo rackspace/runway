@@ -8,13 +8,13 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, Optional
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, ClassVar
 
 from .base import SizeAndLastModifiedSync
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from ..file_generator import FileStats
 
 LOGGER = logging.getLogger(__name__.replace("._", "."))
@@ -25,9 +25,7 @@ class ExactTimestampsSync(SizeAndLastModifiedSync):
 
     NAME: ClassVar[Literal["exact_timestamps"]] = "exact_timestamps"
 
-    def compare_time(
-        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
-    ) -> bool:
+    def compare_time(self, src_file: FileStats | None, dest_file: FileStats | None) -> bool:
         """Compare modified time of two FileStats objects.
 
         Returns:

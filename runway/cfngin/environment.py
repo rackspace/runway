@@ -1,18 +1,18 @@
 """CFNgin environment file parsing."""
 
-from typing import Any, Dict
+from typing import Any
 
 
-def parse_environment(raw_environment: str) -> Dict[str, Any]:
+def parse_environment(raw_environment: str) -> dict[str, Any]:
     """Parse environment file contents.
 
     Args:
         raw_environment: Environment file read into a string.
 
     """
-    environment: Dict[str, Any] = {}
-    for line in raw_environment.split("\n"):
-        line = line.strip()
+    environment: dict[str, Any] = {}
+    for raw_line in raw_environment.split("\n"):
+        line = raw_line.strip()
         if not line:
             continue
 

@@ -1,7 +1,8 @@
 """Tests for runway.cfngin.lookups.handlers.split."""
 
-# pyright: basic
 import unittest
+
+import pytest
 
 from runway.cfngin.lookups.handlers.split import SplitLookup
 
@@ -24,5 +25,5 @@ class TestSplitLookup(unittest.TestCase):
     def test_invalid_value_split(self) -> None:
         """Test invalid value split."""
         value = ",:a,b,c"
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):  # noqa: PT011
             SplitLookup.handle(value)

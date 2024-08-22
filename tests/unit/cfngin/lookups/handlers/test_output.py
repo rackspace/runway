@@ -1,12 +1,11 @@
 """Tests for runway.cfngin.lookups.handlers.output."""
 
-# pylint: disable=protected-access
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 import pytest
-from mock import MagicMock
 
 from runway._logging import LogLevels
 from runway.cfngin.exceptions import StackDoesNotExist
@@ -18,10 +17,9 @@ from runway.variables import VariableValueLiteral
 from ...factories import generate_definition
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 MODULE = "runway.cfngin.lookups.handlers.output"
 
@@ -62,27 +60,19 @@ class TestOutputLookup:
             ("stack-name.foo::default=bar", "bar"),
         ],
     )
-    def test_handle(
-        self, cfngin_context: MockCFNginContext, expected: str, provided: str
-    ) -> None:
+    def test_handle(self, cfngin_context: MockCfnginContext, expected: str, provided: str) -> None:
         """Test handle."""
-        stack = Stack(
-            definition=generate_definition("stack-name"), context=cfngin_context
-        )
+        stack = Stack(definition=generate_definition("stack-name"), context=cfngin_context)
         stack.set_outputs({"Output": "output-val"})
         cfngin_context.stacks_dict[cfngin_context.get_fqn(stack.name)] = stack
         assert OutputLookup.handle(provided, context=cfngin_context) == expected
 
-    @pytest.mark.parametrize(
-        "provided", ["stack-name.MissingOutput", "stack-name::MissingOutput"]
-    )
+    @pytest.mark.parametrize("provided", ["stack-name.MissingOutput", "stack-name::MissingOutput"])
     def test_handle_raise_output_does_not_exist(
-        self, cfngin_context: MockCFNginContext, provided: str
+        self, cfngin_context: MockCfnginContext, provided: str
     ) -> None:
         """Test handle raise OutputDoesNotExist."""
-        stack = Stack(
-            definition=generate_definition("stack-name"), context=cfngin_context
-        )
+        stack = Stack(definition=generate_definition("stack-name"), context=cfngin_context)
         stack.set_outputs({"Output": "output-val"})
         cfngin_context.stacks_dict[cfngin_context.get_fqn(stack.name)] = stack
         with pytest.raises(
@@ -94,7 +84,7 @@ class TestOutputLookup:
 
     @pytest.mark.parametrize("provided", ["stack-name.Output", "stack-name::Output"])
     def test_handle_raise_stack_does_not_exist(
-        self, cfngin_context: MockCFNginContext, provided: str
+        self, cfngin_context: MockCfnginContext, provided: str
     ) -> None:
         """Test handle raise StackDoesNotExist."""
         with pytest.raises(
@@ -103,9 +93,7 @@ class TestOutputLookup:
         ):
             OutputLookup.handle(provided, context=cfngin_context)
 
-    def test_legacy_parse(
-        self, caplog: LogCaptureFixture, mocker: MockerFixture
-    ) -> None:
+    def test_legacy_parse(self, caplog: pytest.LogCaptureFixture, mocker: MockerFixture) -> None:
         """Test legacy_parse."""
         query = "foo"
         caplog.set_level(LogLevels.WARNING, MODULE)

@@ -1,5 +1,6 @@
 """Hello stack."""
 
+# ruff: noqa
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_sns as sns
 from aws_cdk import aws_sns_subscriptions as subs
@@ -16,9 +17,7 @@ class MyStack(core.Stack):
         """Instantiate class."""
         super().__init__(scope, id, **kwargs)
 
-        queue = sqs.Queue(
-            self, "MyFirstQueue", visibility_timeout=core.Duration.seconds(300)
-        )
+        queue = sqs.Queue(self, "MyFirstQueue", visibility_timeout=core.Duration.seconds(300))
 
         topic = sns.Topic(self, "MyFirstTopic", display_name="My First Topic")
 

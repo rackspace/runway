@@ -8,9 +8,9 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, List, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from typing_extensions import Literal
+from typing_extensions import Literal, Self
 
 if TYPE_CHECKING:
     from botocore.session import Session
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 ValidSyncType = Literal["file_at_src_and_dest", "file_not_at_dest", "file_not_at_src"]
-VALID_SYNC_TYPES: List[ValidSyncType] = [
+VALID_SYNC_TYPES: list[ValidSyncType] = [
     "file_at_src_and_dest",
     "file_not_at_dest",
     "file_not_at_src",
@@ -36,7 +36,7 @@ class BaseSync:
 
     """
 
-    NAME: ClassVar[Optional[str]] = None
+    NAME: ClassVar = None
 
     sync_type: ValidSyncType
 
@@ -52,7 +52,7 @@ class BaseSync:
         self.sync_type = sync_type
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         """Retrieve the ``name`` of the sync strategy's ``ARGUMENT``."""
         return self.NAME
 
@@ -68,7 +68,7 @@ class BaseSync:
         session.register("choosing-s3-sync-strategy", self.use_sync_strategy)
 
     def determine_should_sync(
-        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+        self, src_file: FileStats | None, dest_file: FileStats | None
     ) -> bool:
         """Determine if file should sync.
 
@@ -104,7 +104,7 @@ class BaseSync:
         """
         raise NotImplementedError("determine_should_sync")
 
-    def use_sync_strategy(self, params: ParametersDataModel, **_) -> Optional[BaseSync]:
+    def use_sync_strategy(self, params: ParametersDataModel, **_: Any) -> Self | None:
         """Determine which sync strategy to use.
 
         The sync strategy object must be returned by this method
@@ -114,24 +114,19 @@ class BaseSync:
             params: All arguments that a sync strategy is able to process.
 
         """
-        if self.name:
-            if params.get(self.name):
-                # Return the sync strategy object to be used for syncing.
-                return self
+        if self.name and params.get(self.name):
+            # Return the sync strategy object to be used for syncing.
+            return self
         return None
 
     @staticmethod
-    def compare_size(
-        src_file: Optional[FileStats], dest_file: Optional[FileStats]
-    ) -> bool:
+    def compare_size(src_file: FileStats | None, dest_file: FileStats | None) -> bool:
         """Compare the size of two FileStats objects."""
         if not (src_file and dest_file):
             raise ValueError("src_file and dest_file must not be None")
         return src_file.size == dest_file.size
 
-    def compare_time(
-        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
-    ) -> bool:
+    def compare_time(self, src_file: FileStats | None, dest_file: FileStats | None) -> bool:
         """Compare modified time of two FileStats objects.
 
         Returns:
@@ -145,22 +140,14 @@ class BaseSync:
         delta = dest_file.last_update - src_file.last_update
         cmd = src_file.operation_name
         if cmd in ["copy", "upload"]:
-            if delta.total_seconds() >= 0:
-                # Destination is newer than source.
-                return True
-            return False
-        if cmd == "download":
-            if delta.total_seconds() <= 0:
-                return True
-        return False
+            return delta.total_seconds() >= 0
+        return bool(cmd == "download" and delta.total_seconds() <= 0)
 
 
 class MissingFileSync(BaseSync):
     """File is missing from destination."""
 
-    def __init__(
-        self, sync_type: Literal["file_not_at_dest"] = "file_not_at_dest"
-    ) -> None:
+    def __init__(self, sync_type: Literal["file_not_at_dest"] = "file_not_at_dest") -> None:
         """Instantiate class.
 
         Args:
@@ -171,7 +158,7 @@ class MissingFileSync(BaseSync):
         super().__init__(sync_type)
 
     def determine_should_sync(
-        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+        self, src_file: FileStats | None, dest_file: FileStats | None  # noqa: ARG002
     ) -> bool:
         """Determine if file should sync."""
         LOGGER.debug(
@@ -185,9 +172,7 @@ class MissingFileSync(BaseSync):
 class NeverSync(BaseSync):
     """Never sync file."""
 
-    def __init__(
-        self, sync_type: Literal["file_not_at_src"] = "file_not_at_src"
-    ) -> None:
+    def __init__(self, sync_type: Literal["file_not_at_src"] = "file_not_at_src") -> None:
         """Instantiate class.
 
         Args:
@@ -198,7 +183,7 @@ class NeverSync(BaseSync):
         super().__init__(sync_type)
 
     def determine_should_sync(
-        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+        self, src_file: FileStats | None, dest_file: FileStats | None  # noqa: ARG002
     ) -> bool:
         """Determine if file should sync."""
         return False
@@ -208,7 +193,7 @@ class SizeAndLastModifiedSync(BaseSync):
     """Sync based on size and last modified date."""
 
     def determine_should_sync(
-        self, src_file: Optional[FileStats], dest_file: Optional[FileStats]
+        self, src_file: FileStats | None, dest_file: FileStats | None
     ) -> bool:
         """Determine if file should sync."""
         same_size = self.compare_size(src_file, dest_file)

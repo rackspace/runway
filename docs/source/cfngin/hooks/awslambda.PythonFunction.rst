@@ -24,10 +24,6 @@ It also ensures that binary files built during the install process are compatibl
 .. versionadded:: 2.5.0
 
 
-.. contents:: Table of Contents
-  :local:
-
-
 
 ****
 Args

@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-
-from mock import Mock
+from unittest.mock import Mock
 
 from runway.cfngin.hooks.awslambda.base_classes import Project
 from runway.cfngin.hooks.awslambda.models.args import AwsLambdaHookArgs
@@ -21,8 +20,7 @@ class MockProject(Project[AwsLambdaHookArgs]):
     def build_directory(self) -> Path:
         """Directory being used to build deployment package."""
         result = (
-            self.source_code
-            / f"{self.source_code.root_directory.name}.{self.source_code.md5_hash}"
+            self.source_code / f"{self.source_code.root_directory.name}.{self.source_code.md5_hash}"
         )
         result.mkdir(exist_ok=True, parents=True)
         return result

@@ -4,7 +4,7 @@
 import logging
 import os
 import platform
-from typing import TYPE_CHECKING, Any, Dict, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 from pydantic import ValidationError
@@ -41,9 +41,7 @@ def envvars(ctx: click.Context, debug: bool, **_: Any) -> None:
     ctx.obj.env.ci = True
     LOGGER.verbose("forced Runway to non-interactive mode to suppress prompts")
     try:
-        env_vars = Runway(
-            ctx.obj.runway_config, ctx.obj.get_runway_context()
-        ).get_env_vars()
+        env_vars = Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).get_env_vars()
     except ValidationError as err:
         LOGGER.error(err, exc_info=debug)
         ctx.exit(1)
@@ -58,7 +56,7 @@ def envvars(ctx: click.Context, debug: bool, **_: Any) -> None:
     print_env_vars(env_vars)
 
 
-def print_env_vars(env_vars: Dict[str, Any]) -> None:
+def print_env_vars(env_vars: dict[str, Any]) -> None:
     """Print environment variables."""
     if platform.system() == "Windows":
         if os.getenv("MSYSTEM", "").startswith("MINGW"):
@@ -67,14 +65,14 @@ def print_env_vars(env_vars: Dict[str, Any]) -> None:
     return __print_env_vars_posix(env_vars)
 
 
-def __print_env_vars_posix(env_vars: Dict[str, Any]) -> None:
+def __print_env_vars_posix(env_vars: dict[str, Any]) -> None:
     """Print environment variables for bash."""
     LOGGER.debug("using posix formatting for environment variable export")
     for key, val in env_vars.items():
         click.echo(f'export {key}="{val}"')
 
 
-def __print_env_vars_psh(env_vars: Dict[str, Any]) -> None:
+def __print_env_vars_psh(env_vars: dict[str, Any]) -> None:
     """Print environment variables for Powershell."""
     LOGGER.debug("using powershell formatting for environment variable export")
     for key, val in env_vars.items():

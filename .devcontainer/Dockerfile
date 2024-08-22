@@ -42,8 +42,11 @@ ADD --chown=vscode:vscode files/.bash_completion /home/vscode/.bash_completion
 RUN mkdir /home/vscode/.bash_completion.d/
 
 # Setup AWS CLI
-RUN pip3 install --user awscli poetry==1.5.1
-RUN echo "complete -C '/home/vscode/.local/bin/aws_completer' aws" >> ~/.bashrc
+RUN set -e; \
+    pip3 install --no-cache-dir --user awscli pipx; \
+    pipx install poetry; \
+    pipx inject poetry "poetry-dynamic-versioning[plugin]" poetry-plugin-export; \
+    echo "complete -C '/home/vscode/.local/bin/aws_completer' aws" >> ~/.bashrc
 
 # Setup OS_NAME var for runway builds from this dev container
 RUN echo "export OS_NAME=ubuntu-latest" >> ~/.bashrc

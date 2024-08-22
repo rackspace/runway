@@ -1,10 +1,10 @@
 {
-  "Statement" : [
-    {
-      "Effect" : "Deny",
-      "Action" : "Update:*",
-      "Principal": "*",
-      "Resource" : "*"
-    }
-  ]
+    "Statement": [
+        {
+            "Action": "Update:*",
+            "Effect": "Deny",
+            "Principal": "*",
+            "Resource": "*"
+        }
+    ]
 }

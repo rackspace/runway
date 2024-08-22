@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from ...._logging import PrefixAdaptor
 from ....exceptions import UnresolvedVariable
 from ....variables import Variable
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ...._logging import RunwayLogger
     from ....context import RunwayContext
     from ...models.base import ConfigProperty
@@ -18,18 +20,20 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
+_ConfigPropertyTypeVar = TypeVar("_ConfigPropertyTypeVar", bound="ConfigProperty")
 
-class ConfigComponentDefinition(ABC):
+
+class ConfigComponentDefinition(ABC, Generic[_ConfigPropertyTypeVar]):
     """Base class for Runway config components."""
 
-    _data: ConfigProperty
-    _pre_process_vars: Tuple[str, ...] = ()
-    _supports_vars: Tuple[str, ...] = ()
-    _vars: Dict[str, Variable] = {}
+    _data: _ConfigPropertyTypeVar
+    _pre_process_vars: tuple[str, ...] = ()
+    _supports_vars: tuple[str, ...] = ()
+    _vars: dict[str, Variable] = {}
 
-    def __init__(self, data: ConfigProperty) -> None:
+    def __init__(self, data: _ConfigPropertyTypeVar) -> None:
         """Instantiate class."""
-        self._data = data.copy(deep=True)
+        self._data = data.model_copy(deep=True)
 
         self._vars = {}
         for var in self._supports_vars:
@@ -37,9 +41,9 @@ class ConfigComponentDefinition(ABC):
                 self._register_variable(var, self._data[var])
 
     @property
-    def data(self) -> Dict[str, Any]:
+    def data(self) -> dict[str, Any]:
         """Return the underlying data as a dict."""
-        return self._data.dict()
+        return self._data.model_dump()
 
     def get(self, name: str, default: Any = None) -> None:
         """Get a value or return default if it is not found.
@@ -56,7 +60,7 @@ class ConfigComponentDefinition(ABC):
         context: RunwayContext,
         *,
         pre_process: bool = False,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        variables: RunwayVariablesDefinition | None = None,
     ) -> None:
         """Resolve variables.
 
@@ -96,13 +100,11 @@ class ConfigComponentDefinition(ABC):
                 as a variable if it contains a lookup.
 
         """
-        self._vars[var_name] = Variable(
-            name=var_name, value=var_value, variable_type="runway"
-        )
+        self._vars[var_name] = Variable(name=var_name, value=var_value, variable_type="runway")
 
     @classmethod
     @abstractmethod
-    def parse_obj(cls, obj: Any) -> ConfigComponentDefinition:
+    def parse_obj(cls: type[Self], obj: object) -> Self:
         """Parse a python object into this class.
 
         Args:
@@ -117,7 +119,7 @@ class ConfigComponentDefinition(ABC):
             return name in self.__dict__
         return self._data.__contains__(name)
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> Any:
         """Implement evaluation of self.name.
 
         Args:
@@ -133,12 +135,10 @@ class ConfigComponentDefinition(ABC):
         if name in self._vars and not self._vars[name].resolved:
             raise UnresolvedVariable(self._vars[name])
         if name in super().__getattribute__("_data"):
-            return super().__getattribute__("_data").__getattribute__(name)
-        raise AttributeError(
-            f"{self.__class__.__name__} object has not attribute {name}"
-        )
+            return super().__getattribute__("_data").__getitem__(name)
+        raise AttributeError(f"{self.__class__.__name__} object has no attribute {name}")
 
-    def __getitem__(self, name: str):
+    def __getitem__(self, name: str) -> Any:
         """Implement evaluation of self[name].
 
         Args:
@@ -150,8 +150,8 @@ class ConfigComponentDefinition(ABC):
         """
         try:
             return self.__getattr__(name)
-        except AttributeError:
-            raise KeyError(name) from None
+        except AttributeError as exc:
+            raise KeyError(name) from exc
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Implement evaluation of self.name = value.
@@ -169,7 +169,7 @@ class ConfigComponentDefinition(ABC):
         """
         prop = getattr(self.__class__, name, None)
         if isinstance(prop, property) and prop.fset:
-            prop.fset(self, value)  # type: ignore
+            prop.fset(self, value)
         elif isinstance(prop, property):
             raise AttributeError(f"setting {name} property is not supported")
         elif name.startswith("_") or name in dir(self):

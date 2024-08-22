@@ -22,7 +22,7 @@ This repo represents a sample infrastructure deployment of EKS, featuring:
 ### Deployment
 
 1. Update the VPC-id & subnet ids in [runway.yml](./runway.yml) to reflect your VPC & private subnets.
-2. Deploy to the **dev** environment (`runway deploy -e dev`). This will take some time to complete.
+1. Deploy to the **dev** environment (`runway deploy -e dev`). This will take some time to complete.
 
 ### Post-Deployment
 

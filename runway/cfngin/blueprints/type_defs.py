@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, List
+from typing import Any, Callable
 
 from typing_extensions import TypedDict
 
@@ -17,7 +17,7 @@ class _OptionalBlueprintVariableTypeDef(TypedDict, total=False):
     """Type definition for runway.cfngin.blueprints.base.Blueprint.VARIABLES items."""
 
     allowed_pattern: str
-    allowed_values: List[Any]
+    allowed_values: list[Any]
     constraint_description: str
     default: Any
     description: str
@@ -74,4 +74,4 @@ class BlueprintVariableTypeDef(
             If there is an issue validating the value, an exception
             (``ValueError``, ``TypeError``, etc) should be raised by the function.
 
-    """  # noqa
+    """

@@ -1,15 +1,4 @@
 {
-  "name": "sample-app",
-  "version": "0.0.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
-  },
-  "private": true,
   "dependencies": {
     "@angular/animations": "~8.2.11",
     "@angular/common": "~8.2.11",
@@ -26,11 +15,11 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "~15.2.4",
     "@angular/cli": "~15.2.4",
-    "@angular/compiler-cli": "~8.2.11",
+    "@angular/compiler-cli": "~18.0.2",
     "@angular/language-service": "~8.2.11",
-    "@types/node": "~8.9.4",
     "@types/jasmine": "~3.3.8",
     "@types/jasminewd2": "~2.0.3",
+    "@types/node": "~8.9.4",
     "codelyzer": "^5.0.0",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",
@@ -43,5 +32,16 @@
     "ts-node": "~7.0.0",
     "tslint": "~5.15.0",
     "typescript": "~3.5.3"
-  }
+  },
+  "name": "sample-app",
+  "private": true,
+  "scripts": {
+    "build": "ng build",
+    "e2e": "ng e2e",
+    "lint": "ng lint",
+    "ng": "ng",
+    "start": "ng serve",
+    "test": "ng test"
+  },
+  "version": "0.0.0"
 }

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING
 
 from ....compat import cached_property
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class AccountDetails:
     """AWS account details."""
 
-    def __init__(self, context: Union[CfnginContext, RunwayContext]) -> None:
+    def __init__(self, context: CfnginContext | RunwayContext) -> None:
         """Instantiate class.
 
         Args:
@@ -25,12 +25,12 @@ class AccountDetails:
         self.__ctx = context
 
     @cached_property
-    def aliases(self) -> List[str]:
+    def aliases(self) -> list[str]:
         """Get the aliases of the AWS account."""
         # Super overkill here using pagination when an account can only
         # have a single alias, but at least this implementation should be
         # future-proof.
-        aliases: List[str] = []
+        aliases: list[str] = []
         paginator = self.__session.client("iam").get_paginator("list_account_aliases")
         response_iterator = paginator.paginate()
         for page in response_iterator:

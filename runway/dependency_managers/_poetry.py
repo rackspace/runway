@@ -6,10 +6,9 @@ import logging
 import re
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import tomli
-from typing_extensions import Final, Literal
 
 from ..compat import cached_property
 from ..exceptions import RunwayError
@@ -30,6 +29,8 @@ class PoetryExportFailedError(RunwayError):
 
         Args:
             output: The output from running ``poetry export``.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.message = f"poetry export failed with the following output:\n{output}"
@@ -52,13 +53,13 @@ class PoetryNotFoundError(RunwayError):
 class Poetry(DependencyManager):
     """Poetry dependency manager."""
 
-    CONFIG_FILES: Final[Tuple[Literal["poetry.lock"], Literal["pyproject.toml"]]] = (
+    CONFIG_FILES: ClassVar[tuple[str, ...]] = (
         "poetry.lock",
         "pyproject.toml",
     )
     """Configuration files used by poetry."""
 
-    EXECUTABLE: Final[Literal["poetry"]] = "poetry"
+    EXECUTABLE: ClassVar[str] = "poetry"
     """CLI executable."""
 
     @cached_property
@@ -67,9 +68,7 @@ class Poetry(DependencyManager):
         cmd_output = self._run_command([self.EXECUTABLE, "--version"])
         match = re.search(r"^Poetry version (?P<version>\S*)", cmd_output)
         if not match:
-            LOGGER.warning(
-                "unable to parse poetry version from output:\n%s", cmd_output
-            )
+            LOGGER.warning("unable to parse poetry version from output:\n%s", cmd_output)
             return Version("0.0.0")
         return Version(match.group("version"))
 
@@ -88,9 +87,7 @@ class Poetry(DependencyManager):
 
         # check for PEP-517 definition
         pyproject = tomli.loads(pyproject_path.read_text())
-        build_system_requires: Optional[List[str]] = pyproject.get(
-            "build-system", {}
-        ).get("requires")
+        build_system_requires: list[str] | None = pyproject.get("build-system", {}).get("requires")
 
         if build_system_requires:
             for req in build_system_requires:
@@ -103,7 +100,7 @@ class Poetry(DependencyManager):
         self,
         *,
         dev: bool = False,
-        extras: Optional[List[str]] = None,
+        extras: list[str] | None = None,
         output: StrPath,
         output_format: str = "requirements.txt",
         with_credentials: bool = True,

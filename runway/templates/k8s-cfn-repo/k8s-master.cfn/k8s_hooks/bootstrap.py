@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import shutil
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -16,13 +15,13 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-def copy_template_to_env(path: Path, env: str, region: str):
+def copy_template_to_env(path: Path, env: str, region: str) -> None:
     """Copy k8s module template into new environment directory."""
     overlays_dir = path / "overlays"
     template_dir = overlays_dir / "template"
     env_dir = overlays_dir / env
     if template_dir.is_dir():
-        if env_dir.is_dir() or (os.path.isdir(f"{env_dir}-{region}")):
+        if env_dir.is_dir() or (Path(f"{env_dir}-{region}").is_dir()):
             LOGGER.info(
                 'Bootstrap of k8s module at "%s" skipped; module '
                 "already has a config for this environment",
@@ -30,7 +29,7 @@ def copy_template_to_env(path: Path, env: str, region: str):
             )
         else:
             LOGGER.info(
-                'Copying overlay template at "%s" to new ' 'environment directory "%s"',
+                'Copying overlay template at "%s" to new environment directory "%s"',
                 template_dir,
                 env_dir,
             )
@@ -44,10 +43,8 @@ def copy_template_to_env(path: Path, env: str, region: str):
                 templated_file_path = env_dir / i
                 if templated_file_path.is_file():
                     filedata = templated_file_path.read_text()
-                    if "REPLACEMEENV" in filedata:
-                        templated_file_path.write_text(
-                            filedata.replace("REPLACEMEENV", env)
-                        )
+                    if "REPLACE_ME_ENV" in filedata:
+                        templated_file_path.write_text(filedata.replace("REPLACE_ME_ENV", env))
     else:
         LOGGER.info(
             'Skipping bootstrap of k8s module at "%s"; no template directory present',
@@ -55,7 +52,7 @@ def copy_template_to_env(path: Path, env: str, region: str):
         )
 
 
-def create_runway_environments(*, context: CfnginContext, namespace: str, **_: Any):
+def create_runway_environments(*, context: CfnginContext, namespace: str, **_: Any) -> bool:
     """Copy k8s module templates into new environment directories.
 
     Args:
@@ -65,9 +62,7 @@ def create_runway_environments(*, context: CfnginContext, namespace: str, **_: A
     Returns: boolean for whether or not the hook succeeded.
 
     """
-    LOGGER.info(
-        "Bootstrapping runway k8s modules, looking for unconfigured environments..."
-    )
+    LOGGER.info("Bootstrapping runway k8s modules, looking for unconfigured environments...")
 
     environment = namespace
 

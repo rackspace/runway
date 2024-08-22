@@ -26,6 +26,4 @@ def list_installed(**_: Any) -> None:
         LOGGER.info("kubectl versions installed:")
         click.echo("\n".join(v.name for v in versions))
     else:
-        LOGGER.warning(
-            "no versions of kubectl installed at path %s", kbenv.versions_dir
-        )
+        LOGGER.warning("no versions of kubectl installed at path %s", kbenv.versions_dir)

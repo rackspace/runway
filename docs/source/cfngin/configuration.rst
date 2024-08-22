@@ -4,7 +4,7 @@
 Configuration
 #############
 
-In addition to the :ref:`Runway Config File <runway-config>`, there are two files that can be used for configuration:
+In addition to the :ref:`runway_config:Runway Config File`, there are two files that can be used for configuration:
 
 - a YAML :ref:`configuration file <cfngin-config>` **[REQUIRED]**
 - a key/value :ref:`environment file <cfngin-env>`
@@ -14,9 +14,6 @@ In addition to the :ref:`Runway Config File <runway-config>`, there are two file
   Stacker is no longer used for handling CloudFormation/Troposphere.
   It has been replaced with an internal CloudFormation engin (CFNgin).
 
-
-.. contents::
-  :depth: 4
 
 
 **********
@@ -48,10 +45,10 @@ CloudFormation modules do not have any module-specific options.
 Parameters
 ==========
 
-Runway can pass :ref:`Parameters <term-param>` to a CloudFormation module in place of or in addition to values in an :ref:`environment file <cfngin-env>`.
-When :ref:`Parameters <term-param>` are passed to the module, the data type is retained (e.g. ``array``, ``boolean``, ``mapping``).
+Runway can pass :term:`Parameters` to a CloudFormation module in place of or in addition to values in an :ref:`environment file <cfngin-env>`.
+When :term:`Parameters` are passed to the module, the data type is retained (e.g. ``array``, ``boolean``, ``mapping``).
 
-A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combination with :ref:`Parameters <term-param>` to pass :ref:`deploy environment <term-deploy-env>` and/or region specific values to the module from the :ref:`Runway Config File <runway-config>`.
+A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combination with :term:`Parameters` to pass :term:`Deploy Environment` and/or region specific values to the module from the :ref:`runway_config:Runway Config File`.
 
 .. rubric:: Example
 .. code-block:: yaml
@@ -68,7 +65,7 @@ A typical usage pattern would be to use :ref:`Runway Lookups <Lookups>` in combi
 Common Parameters
 -----------------
 
-Runway automatically makes the following commonly used :ref:`Parameters <term-param>`  available to CloudFormation modules.
+Runway automatically makes the following commonly used :term:`Parameters`  available to CloudFormation modules.
 
 .. note::
   If these parameters are already being explicitly defined in :attr:`deployment.parameters`/:attr:`module.parameters` the value provided will be used instead of what would be automatically added.
@@ -77,7 +74,7 @@ Runway automatically makes the following commonly used :ref:`Parameters <term-pa
   :type: str
   :noindex:
 
-  Taken from the ``DEPLOY_ENVIRONMENT`` environment variable. This will the be current :ref:`deploy environment <term-deploy-env>`.
+  Taken from the ``DEPLOY_ENVIRONMENT`` environment variable. This will the be current :term:`Deploy Environment`.
 
 .. data:: region
   :type: str
@@ -109,7 +106,7 @@ Top-Level Fields
   .. _cfngin-bucket:
 
   .. attribute:: cfngin_bucket
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     By default, CloudFormation templates are pushed into an S3 bucket and CloudFormation is pointed to the template in that bucket when launching or updating stacks.
@@ -161,7 +158,7 @@ Top-Level Fields
       The format of the default value is now ``cfngin-${namespace}-${region}``.
 
   .. attribute:: cfngin_bucket_region
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     AWS Region where :attr:`~cfngin.config.cfngin_bucket` is located.
@@ -175,7 +172,7 @@ Top-Level Fields
         cfngin_bucket_region: us-east-1
 
   .. attribute:: cfngin_cache_dir
-    :type: Optional[str]
+    :type: str | None
     :value: ./.runway/
 
     Path to a local directory that CFNgin will use for local caching.
@@ -190,7 +187,7 @@ Top-Level Fields
         cfngin_cache_dir: ./.runway
 
   .. attribute:: log_formats
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str]
     :value: {}
 
     Customize log message formatting by log level.
@@ -205,7 +202,7 @@ Top-Level Fields
         debug: "[%(asctime)s] %(levelname)s %(threadName)s %(name)s:%(lineno)d(%(funcName)s): %(message)s"
 
   .. attribute:: lookups
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str]
     :value: {}
 
     Lookups allow you to create custom methods which take a value and are resolved at runtime time.
@@ -227,7 +224,7 @@ Top-Level Fields
       conf_value: ${custom query}
 
   .. attribute:: mappings
-    :type: Optional[Dict[str, Dict[str, Dict[str, Any]]]]
+    :type: dict[str, dict[str, dict[str, Any]]]
     :value: {}
 
     Mappings are dictionaries that are provided as `Mappings <http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/mappings-section-structure.html>`__ to each CloudFormation stack that CFNgin produces.
@@ -259,7 +256,7 @@ Top-Level Fields
     In addition, this value can be used to create an S3 bucket that will be used to upload and store all CloudFormation templates.
     See :attr:`~cfngin.config.cfngin_bucket` for more detailed information.
 
-    In general, this is paired with the concept of :ref:`deploy environments <term-deploy-env>` to create a namespace per environment.
+    In general, this is paired with the concept of :term:`Deploy Environments <Deploy Environment>` to create a namespace per environment.
 
     .. rubric:: Example
     .. code-block:: yaml
@@ -267,7 +264,7 @@ Top-Level Fields
       namespace: ${namespace}-${environment}
 
   .. attribute:: namespace_delimiter
-    :type: Optional[str]
+    :type: str | None
     :value: "-"
 
     By default, ``-`` will be used as a delimiter between the :attr:`~cfngin.config.namespace` and the declared stack name to deploy the actual CloudFormation stack name that gets created.
@@ -282,7 +279,7 @@ Top-Level Fields
       namespace_delimiter: ""
 
   .. attribute:: package_sources
-    :type: Optional[cfngin.package_sources]
+    :type: cfngin.package_sources
     :value: {}
 
     See :ref:`Remote Sources <cfngin_remote_sources>` for detailed information.
@@ -299,7 +296,7 @@ Top-Level Fields
           ...
 
   .. attribute:: persistent_graph_key
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     Used to track the *state* of stacks defined in configuration file.
@@ -313,10 +310,10 @@ Top-Level Fields
       persistent_graph_key: unique-key.json
 
   .. attribute:: post_deploy
-    :type: Optional[List[cfngin.hook]]
+    :type: list[cfngin.hook]
     :value: []
 
-    Python functions/methods that are executed after processing the stacks in the config while using the :ref:`deploy command <command-deploy>`.
+    Python functions/methods that are executed after processing the stacks in the config while using the :ref:`commands:deploy` command.
 
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
@@ -333,10 +330,10 @@ Top-Level Fields
       The CFNgin bucket is now created using a CloudFormation stack.
 
   .. attribute:: post_destroy
-    :type: Optional[List[cfngin.hook]]
+    :type: list[cfngin.hook]
     :value: []
 
-    Python functions/methods that are executed after processing the stacks in the config while using the :ref:`destroy command <command-destroy>`.
+    Python functions/methods that are executed after processing the stacks in the config while using the :ref:`commands:destroy` command.
 
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
@@ -347,10 +344,10 @@ Top-Level Fields
         - path: do.something
 
   .. attribute:: pre_deploy
-    :type: Optional[List[cfngin.hook]]
+    :type: list[cfngin.hook]
     :value: []
 
-    Python functions/methods that are executed before processing the stacks in the config while using the :ref:`deploy command <command-deploy>`.
+    Python functions/methods that are executed before processing the stacks in the config while using the :ref:`commands:deploy` command.
 
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
@@ -364,10 +361,10 @@ Top-Level Fields
       *pre_build* renamed to *pre_deploy*.
 
   .. attribute:: pre_destroy
-    :type: Optional[List[cfngin.hook]]
+    :type: list[cfngin.hook]
     :value: []
 
-    Python functions/methods that are executed before processing the stacks in the config while using the :ref:`destroy command <command-destroy>`.
+    Python functions/methods that are executed before processing the stacks in the config while using the :ref:`commands:destroy` command.
 
     See :ref:`Hooks <cfngin-hooks>` for more detailed information.
 
@@ -378,7 +375,7 @@ Top-Level Fields
         - path: do.something
 
   .. attribute:: service_role
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     By default CFNgin doesn't specify a service role when executing changes to CloudFormation stacks.
@@ -394,7 +391,7 @@ Top-Level Fields
       service_role: arn:aws:iam::123456789012:role/name
 
   .. attribute:: stacks
-    :type: Optional[List[cfngin.stack]]
+    :type: list[cfngin.stack]
     :Value: []
 
     This is the core part of the config where the CloudFormations stacks that will be deployed in the environment are defined.
@@ -402,7 +399,7 @@ Top-Level Fields
     See Stack_ for more information.
 
   .. attribute:: sys_path
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     A path to be added to ``$PATH`` while processing the configuration file.
@@ -416,7 +413,7 @@ Top-Level Fields
       sys_path: ./  # most common value to use
 
   .. attribute:: tags
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str]
     :value: {"cfngin_namespace": namespace}
 
     A dictionary of tags to add to all stacks.
@@ -441,7 +438,7 @@ Top-Level Fields
       tags: {}
 
   .. attribute:: template_indent
-    :type: Optional[int]
+    :type: int | None
     :value: 4
 
     Number of spaces per indentation level to use when rendering/outputting CloudFormation templates.
@@ -489,7 +486,7 @@ Stack
           CidrBlock: 10.128.0.0/16
 
   .. attribute:: class_path
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     A python importable path to the |Blueprint| class to be used.
@@ -504,7 +501,7 @@ Stack
           class_path: example.BlueprintClass
 
   .. attribute:: description
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     A short description to apply to the stack.
@@ -519,7 +516,7 @@ Stack
           description: An Example Stack
 
   .. attribute:: enabled
-    :type: Optional[bool]
+    :type: bool
     :value: True
 
     Whether to deploy/update the stack.
@@ -537,7 +534,7 @@ Stack
           enabled: ${enable_another_stack}
 
   .. attribute:: in_progress_behavior
-    :type: Optional[Literal["wait"]]
+    :type: Literal["wait"] | None
     :value: None
 
     Specifies the behavior for when a stack is in ``CREATE_IN_PROGRESS`` or ``UPDATE_IN_PROGRESS``.
@@ -553,7 +550,7 @@ Stack
           in_progress_behavior: wait
 
   .. attribute:: locked
-    :type: Optional[bool]
+    :type: bool
     :value: False
 
     Whether the stack should be updated after initial deployment.
@@ -585,7 +582,7 @@ Stack
         - name: example-stack
 
   .. attribute:: protected
-    :type: Optional[bool]
+    :type: bool
     :value: False
 
     Whether to force all updates to be performed interactively.
@@ -602,7 +599,7 @@ Stack
           protected: ${protected_another_stack}
 
   .. attribute:: required_by
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     A list of other stacks that require this stack.
@@ -621,7 +618,7 @@ Stack
           ...
 
   .. attribute:: requires
-    :type: Optional[List[str]]
+    :type: list[str]
     :value: []
 
     A list of other stacks that this stack requires.
@@ -640,7 +637,7 @@ Stack
           ...
 
   .. attribute:: stack_name
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     The name used when creating the CloudFormation stack.
@@ -656,7 +653,7 @@ Stack
           stack_name: another-name
 
   .. attribute:: stack_policy_path
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     Path to a JSON formatted stack policy that will be applied when the CloudFormation stack is created and/or updated.
@@ -671,7 +668,7 @@ Stack
           stack_policy_path: ./stack_policies/example-stack.json
 
   .. attribute:: tags
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str]
     :value: {}
 
     A dictionary of tags to add to the Stack.
@@ -691,7 +688,7 @@ Stack
             example: value
 
   .. attribute:: template_path
-    :type: Optional[str]
+    :type: str | None
 
     Path to a raw CloudFormation template (JSON or YAML).
     Can be relative to the working directory (e.g. templates stored alongside the configuration file), or relative to a directory in the *$PATH* (i.e. for loading templates retrieved via :attr:`~cfngin.config.package_sources`).
@@ -708,7 +705,7 @@ Stack
           template_path: remote/path/templates/another-stack.json
 
   .. attribute:: termination_protection
-    :type: Optional[bool]
+    :type: bool
     :value: False
 
     Whether the stack will be protected from termination by CloudFormation.
@@ -728,7 +725,7 @@ Stack
           termination_protection: ${termination_protection_another_stack}
 
   .. attribute:: timeout
-    :type: Optional[int]
+    :type: int | None
     :value: None
 
     Specifies the amount of time, in minutes, that CloudFormation should allot before timing out stack creation operations.
@@ -746,7 +743,7 @@ Stack
           timeout: 120
 
   .. attribute:: variables
-    :type: Optional[Dict[str, Any]]
+    :type: dict[str, Any]
     :value: {}
 
     A dictionary of Variables_ to pass to the |Blueprint| when rendering the CloudFormation template.
@@ -816,8 +813,8 @@ Using Outputs as Variables
 ---------------------------
 
 Since CFNgin encourages the breaking up of your CloudFormation stacks into entirely separate stacks, sometimes you'll need to pass values from one stack to another.
-The way this is handled in CFNgin is by having one stack provide :ref:`Outputs <term-outputs>` for all the values that another stack may need, and then using those as the inputs for another stack's :attr:`~cfngin.stack.variables`.
-CFNgin makes this easier for you by providing a syntax for :attr:`~cfngin.stack.variables` that will cause CFNgin to automatically look up the values of :ref:`Outputs <term-outputs>` from another stack in its config.
+The way this is handled in CFNgin is by having one stack provide :term:`Outputs <Output>` for all the values that another stack may need, and then using those as the inputs for another stack's :attr:`~cfngin.stack.variables`.
+CFNgin makes this easier for you by providing a syntax for :attr:`~cfngin.stack.variables` that will cause CFNgin to automatically look up the values of :term:`Outputs <Output>` from another stack in its config.
 
 To do so, use the :ref:`output lookup` in the :attr:`~cfngin.stack.variables` on the target stack.
 
@@ -876,7 +873,7 @@ The files must also be stored at the root of the module's directory.
   The region can optionally be omitted to apply a single file to all regions.
 
 Files following both naming schemes may be used. The file with the most specific name takes precedence.
-Values passed in as ``parameters`` from the :ref:`Runway Config File <runway-config>` take precedence over those provided in an environment file.
+Values passed in as ``parameters`` from the :ref:`runway_config:Runway Config File` take precedence over those provided in an environment file.
 
 
 Usage
@@ -886,16 +883,16 @@ A pretty common use case is to have separate environments that you want to look 
 For example, you might want a **production** and a **staging** environment.
 
 The production environment likely needs more instances, and often those instances will be of a larger instance type.
-The parameters defined in an environment file, :attr:`deployment.parameters`, and/or :attr:`module.parameters` allow you to use your existing CFNgin config, but provide different values based on the current :ref:`deploy environment <term-deploy-env>`.
+The parameters defined in an environment file, :attr:`deployment.parameters`, and/or :attr:`module.parameters` allow you to use your existing CFNgin config, but provide different values based on the current :term:`Deploy Environment`.
 
 .. rubric:: Example
 .. code-block:: yaml
 
   vpcID: vpc-12345678
 
-Provided the key-value pair above, you will now be able to use this in your configs for a :ref:`deploy environment <term-deploy-env>`.
+Provided the key-value pair above, you will now be able to use this in your configs for a :term:`Deploy Environment`.
 They act as keys that can be used in your config file, providing a sort of templating ability.
-This allows you to change the values of your config based on the current :ref:`deploy environment <term-deploy-env>`.
+This allows you to change the values of your config based on the current :term:`Deploy Environment`.
 
 For example, if you have a **webserver** stack, and you need to provide it a variable for the instance size it should use, you would have something like this in your config file.
 

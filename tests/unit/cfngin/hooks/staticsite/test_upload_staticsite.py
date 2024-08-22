@@ -1,10 +1,9 @@
 """Test runway.cfngin.hooks.staticsite.upload_staticsite."""
 
-# pyright: basic
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
@@ -17,10 +16,10 @@ from runway.cfngin.hooks.staticsite.upload_staticsite import (
     get_content_type,
     sync_extra_files,
 )
-from runway.module.staticsite.options.models import RunwayStaticSiteExtraFileDataModel
+from runway.module.staticsite.options import RunwayStaticSiteExtraFileDataModel
 
 if TYPE_CHECKING:
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 
 @pytest.mark.parametrize(
@@ -35,7 +34,7 @@ if TYPE_CHECKING:
         (".test", None),
     ],
 )
-def test_auto_detect_content_type(provided: str, expected: Optional[str]) -> None:
+def test_auto_detect_content_type(provided: str, expected: str | None) -> None:
     """Test auto_detect_content_type."""
     assert auto_detect_content_type(provided) == expected
 
@@ -44,26 +43,26 @@ def test_auto_detect_content_type(provided: str, expected: Optional[str]) -> Non
     "provided, expected",
     [
         (
-            RunwayStaticSiteExtraFileDataModel.construct(
+            RunwayStaticSiteExtraFileDataModel.model_construct(
                 content_type="text/plain", name="test.txt"
             ),
             "text/plain",
         ),
         (
-            RunwayStaticSiteExtraFileDataModel.construct(
+            RunwayStaticSiteExtraFileDataModel.model_construct(
                 name="test.txt", content_type="text/plain"
             ),
             "text/plain",
         ),
         (
-            RunwayStaticSiteExtraFileDataModel.construct(name="test.json"),
+            RunwayStaticSiteExtraFileDataModel.model_construct(name="test.json"),
             "application/json",
         ),
-        (RunwayStaticSiteExtraFileDataModel.construct(name="test.txt"), None),
+        (RunwayStaticSiteExtraFileDataModel.model_construct(name="test.txt"), None),
     ],
 )
 def test_get_content_type(
-    provided: RunwayStaticSiteExtraFileDataModel, expected: Optional[str]
+    provided: RunwayStaticSiteExtraFileDataModel, expected: str | None
 ) -> None:
     """Test get_content_type."""
     assert get_content_type(provided) == expected
@@ -88,9 +87,7 @@ def test_get_content_yaml() -> None:
     content = {"a": 0}
 
     actual = get_content(
-        RunwayStaticSiteExtraFileDataModel(
-            content_type="text/yaml", content=content, name=""
-        )
+        RunwayStaticSiteExtraFileDataModel(content_type="text/yaml", content=content, name="")
     )
     expected = yaml.safe_dump(content)
 
@@ -99,7 +96,7 @@ def test_get_content_yaml() -> None:
 
 def test_get_content_unknown() -> None:
     """Get content unknown."""
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         get_content(RunwayStaticSiteExtraFileDataModel(content={"a": 0}, name=""))
 
 
@@ -113,16 +110,16 @@ def test_get_content_unsupported() -> None:
     "a, b",
     [
         (
-            RunwayStaticSiteExtraFileDataModel.construct(name="a"),
-            RunwayStaticSiteExtraFileDataModel.construct(name="b"),
+            RunwayStaticSiteExtraFileDataModel.model_construct(name="a"),
+            RunwayStaticSiteExtraFileDataModel.model_construct(name="b"),
         ),
         (
-            RunwayStaticSiteExtraFileDataModel.construct(name="test", content_type="a"),
-            RunwayStaticSiteExtraFileDataModel.construct(name="test", content_type="b"),
+            RunwayStaticSiteExtraFileDataModel.model_construct(name="test", content_type="a"),
+            RunwayStaticSiteExtraFileDataModel.model_construct(name="test", content_type="b"),
         ),
         (
-            RunwayStaticSiteExtraFileDataModel.construct(name="test", content="a"),
-            RunwayStaticSiteExtraFileDataModel.construct(name="test", content="b"),
+            RunwayStaticSiteExtraFileDataModel.model_construct(name="test", content="a"),
+            RunwayStaticSiteExtraFileDataModel.model_construct(name="test", content="b"),
         ),
     ],
 )
@@ -133,7 +130,7 @@ def test_calculate_hash_of_extra_files(
     assert calculate_hash_of_extra_files([a]) != calculate_hash_of_extra_files([b])
 
 
-def test_sync_extra_files_json_content(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_json_content(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files json content is put in s3."""
     s3_stub = cfngin_context.add_stubber("s3")
 
@@ -153,13 +150,11 @@ def test_sync_extra_files_json_content(cfngin_context: MockCFNginContext) -> Non
     files = [RunwayStaticSiteExtraFileDataModel(name="test.json", content=content)]
 
     with s3_stub as stub:
-        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
-            "test.json"
-        ]
+        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == ["test.json"]
         stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_yaml_content(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_yaml_content(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files yaml content is put in s3."""
     s3_stub = cfngin_context.add_stubber("s3")
 
@@ -176,18 +171,14 @@ def test_sync_extra_files_yaml_content(cfngin_context: MockCFNginContext) -> Non
         },
     )
 
-    files = [
-        RunwayStaticSiteExtraFileDataModel.construct(name="test.yaml", content=content)
-    ]
+    files = [RunwayStaticSiteExtraFileDataModel.model_construct(name="test.yaml", content=content)]
 
     with s3_stub as stub:
-        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
-            "test.yaml"
-        ]
+        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == ["test.yaml"]
         stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_empty_content(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_empty_content(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files empty content is not uploaded."""
     s3_stub = cfngin_context.add_stubber("s3")
 
@@ -196,9 +187,7 @@ def test_sync_extra_files_empty_content(cfngin_context: MockCFNginContext) -> No
             cfngin_context,
             "bucket",
             extra_files=[
-                RunwayStaticSiteExtraFileDataModel.construct(
-                    name="test.yaml", content=""
-                )
+                RunwayStaticSiteExtraFileDataModel.model_construct(name="test.yaml", content="")
             ],
         )
         assert isinstance(result, list)
@@ -206,7 +195,7 @@ def test_sync_extra_files_empty_content(cfngin_context: MockCFNginContext) -> No
         stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_file_reference(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_file_reference(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files file is uploaded."""
     s3_stub = cfngin_context.add_stubber("s3")
 
@@ -224,9 +213,7 @@ def test_sync_extra_files_file_reference(cfngin_context: MockCFNginContext) -> N
         },
     )
 
-    files = [
-        RunwayStaticSiteExtraFileDataModel.construct(name="test", file=".gitignore")
-    ]
+    files = [RunwayStaticSiteExtraFileDataModel.model_construct(name="test", file=".gitignore")]
 
     with s3_stub as stub:
         assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == ["test"]
@@ -234,7 +221,7 @@ def test_sync_extra_files_file_reference(cfngin_context: MockCFNginContext) -> N
 
 
 def test_sync_extra_files_file_reference_with_content_type(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
 ) -> None:
     """Test sync_extra_files file is uploaded with the content type."""
     s3_stub = cfngin_context.add_stubber("s3")
@@ -251,24 +238,20 @@ def test_sync_extra_files_file_reference_with_content_type(
     )
 
     files = [
-        RunwayStaticSiteExtraFileDataModel.construct(
-            name="test.json", file=".gitignore"
-        )
+        RunwayStaticSiteExtraFileDataModel.model_construct(name="test.json", file=".gitignore")
     ]
 
     with s3_stub as stub:
-        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == [
-            "test.json"
-        ]
+        assert sync_extra_files(cfngin_context, "bucket", extra_files=files) == ["test.json"]
         stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_hash_unchanged(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_hash_unchanged(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files upload is skipped if the has was unchanged."""
     s3_stub = cfngin_context.add_stubber("s3")
     ssm_stub = cfngin_context.add_stubber("ssm")
 
-    extra = RunwayStaticSiteExtraFileDataModel.construct(name="test", content="test")
+    extra = RunwayStaticSiteExtraFileDataModel.model_construct(name="test", content="test")
     extra_hash = calculate_hash_of_extra_files([extra])
 
     ssm_stub.add_response(
@@ -290,7 +273,7 @@ def test_sync_extra_files_hash_unchanged(cfngin_context: MockCFNginContext) -> N
         ssm_stub.assert_no_pending_responses()
 
 
-def test_sync_extra_files_hash_updated(cfngin_context: MockCFNginContext) -> None:
+def test_sync_extra_files_hash_updated(cfngin_context: MockCfnginContext) -> None:
     """Test sync_extra_files extra files hash is updated."""
     s3_stub = cfngin_context.add_stubber("s3")
     ssm_stub = cfngin_context.add_stubber("ssm")
@@ -324,7 +307,7 @@ def test_sync_extra_files_hash_updated(cfngin_context: MockCFNginContext) -> Non
         {
             "Bucket": "bucket",
             "Key": "test",
-            "Body": "test".encode(),
+            "Body": b"test",
             "ContentType": "text/plain",
         },
     )

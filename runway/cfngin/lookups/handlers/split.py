@@ -1,23 +1,18 @@
 """Split lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
-from typing import Any, List
-
-from typing_extensions import Final, Literal
+from typing import Any, ClassVar
 
 from ....lookups.handlers.base import LookupHandler
 
 
-class SplitLookup(LookupHandler):
+class SplitLookup(LookupHandler[Any]):
     """Split lookup."""
 
-    TYPE_NAME: Final[Literal["split"]] = "split"
+    TYPE_NAME: ClassVar[str] = "split"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls, value: str, **_: Any
-    ) -> List[str]:
+    def handle(cls, value: str, *_args: Any, **_kwargs: Any) -> list[str]:
         """Split the supplied string on the given delimiter, providing a list.
 
         Args:

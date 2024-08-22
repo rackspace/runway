@@ -15,9 +15,7 @@ def get_instance_public_methods(instance):
     """
     ...
 
-def document_model_driven_signature(
-    section, name, operation_model, include=..., exclude=...
-):
+def document_model_driven_signature(section, name, operation_model, include=..., exclude=...):
     """Documents the signature of a model-driven method
 
     :param section: The section to write the documentation to.

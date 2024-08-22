@@ -21,14 +21,14 @@ Args
 ****
 
 .. data:: docker
-  :type: Optional[Dict[str, Any]]
+  :type: dict[str, Any]
   :value: {}
   :noindex:
 
   Options for ``docker image build``.
 
   .. data:: buildargs
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str] | None
     :value: None
     :noindex:
 
@@ -42,7 +42,7 @@ Args
     Optional if providing a path to a zip file.
 
   .. data:: extra_hosts
-    :type: Optional[Dict[str, str]]
+    :type: dict[str, str] | None
     :value: None
     :noindex:
 
@@ -57,14 +57,14 @@ Args
     Always remove intermediate containers, even after unsuccessful builds.
 
   .. data:: isolation
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
     Isolation technology used during build.
 
   .. data:: network_mode
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -78,7 +78,7 @@ Args
     Don't use cache when set to ``True``.
 
   .. data:: platform
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -107,21 +107,21 @@ Args
     Squash the resulting image layers into a single layer.
 
   .. data:: tag
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
     Optional name and tag to apply to the base image when it is built.
 
   .. data:: target
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
     Name of the build-stage to build in a multi-stage Dockerfile.
 
   .. data:: timeout
-    :type: Optional[int]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -135,14 +135,14 @@ Args
     If ``True`` and if the docker client configuration file (``~/.docker/config.json`` by default) contains a proxy configuration, the corresponding environment variables will be set in the container being built.
 
 .. data:: dockerfile
-  :type: Optional[str]
+  :type: str | None
   :value: "./Dockerfile"
   :noindex:
 
   Path within the build context to the Dockerfile.
 
 .. data:: ecr_repo
-  :type: Optional[Dict[str, Optional[str]]]
+  :type: dict[str, str | None] | None
   :value: None
   :noindex:
 
@@ -153,7 +153,7 @@ Args
   If using a public registry, ``repo_name`` and ``registry_alias``.
 
   .. data:: account_id
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -161,7 +161,7 @@ Args
     it will be acquired automatically if needed.
 
   .. data:: aws_region
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -169,7 +169,7 @@ Args
     automatically if needed.
 
   .. data:: registry_alias
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -182,13 +182,13 @@ Args
     The name of the repository.
 
 .. data:: path
-  :type: Optional[str]
+  :type: str | None
   :noindex:
 
   Path to the directory containing the Dockerfile.
 
 .. data:: repo
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -196,7 +196,7 @@ Args
   If providing one of the other repo values, leave this value empty.
 
 .. data:: tags
-  :type: Optional[List[str]]
+  :type: list[str]
   :value: ["latest"]
   :noindex:
 

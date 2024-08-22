@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from ...utils import BaseModel
 from ..utils import create_route53_zone
@@ -21,19 +21,18 @@ class CreateDomainHookArgs(BaseModel):
     """Domain name for the Route 53 hosted zone to be created."""
 
 
-def create_domain(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> Dict[str, str]:
+def create_domain(context: CfnginContext, *_args: Any, **kwargs: Any) -> dict[str, str]:
     """Create a domain within route53.
 
     Args:
         context: CFNgin context object.
+        **kwargs: Arbitrary keyword arguments.
 
     Returns:
         Dict containing ``domain`` and ``zone_id``.
 
     """
-    args = CreateDomainHookArgs.parse_obj(kwargs)
+    args = CreateDomainHookArgs.model_validate(kwargs)
     client = context.get_session().client("route53")
     zone_id = create_route53_zone(client, args.domain)
     return {"domain": args.domain, "zone_id": zone_id}

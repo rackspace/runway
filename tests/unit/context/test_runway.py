@@ -1,12 +1,11 @@
 """Test runway.context._runway."""
 
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from unittest.mock import MagicMock
 
 import pytest
-from mock import MagicMock
 
 from runway.context._runway import RunwayContext
 from runway.context.sys_info import OsInfo

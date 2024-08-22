@@ -29,9 +29,7 @@ CreateReplicationGroup = Action("CreateReplicationGroup")
 CreateSnapshot = Action("CreateSnapshot")
 CreateUser = Action("CreateUser")
 CreateUserGroup = Action("CreateUserGroup")
-DecreaseNodeGroupsInGlobalReplicationGroup = Action(
-    "DecreaseNodeGroupsInGlobalReplicationGroup"
-)
+DecreaseNodeGroupsInGlobalReplicationGroup = Action("DecreaseNodeGroupsInGlobalReplicationGroup")
 DecreaseReplicaCount = Action("DecreaseReplicaCount")
 DeleteCacheCluster = Action("DeleteCacheCluster")
 DeleteCacheParameterGroup = Action("DeleteCacheParameterGroup")
@@ -61,9 +59,7 @@ DescribeUserGroups = Action("DescribeUserGroups")
 DescribeUsers = Action("DescribeUsers")
 DisassociateGlobalReplicationGroup = Action("DisassociateGlobalReplicationGroup")
 FailoverGlobalReplicationGroup = Action("FailoverGlobalReplicationGroup")
-IncreaseNodeGroupsInGlobalReplicationGroup = Action(
-    "IncreaseNodeGroupsInGlobalReplicationGroup"
-)
+IncreaseNodeGroupsInGlobalReplicationGroup = Action("IncreaseNodeGroupsInGlobalReplicationGroup")
 IncreaseReplicaCount = Action("IncreaseReplicaCount")
 ListAllowedNodeTypeModifications = Action("ListAllowedNodeTypeModifications")
 ListTagsForResource = Action("ListTagsForResource")
@@ -72,15 +68,11 @@ ModifyCacheParameterGroup = Action("ModifyCacheParameterGroup")
 ModifyCacheSubnetGroup = Action("ModifyCacheSubnetGroup")
 ModifyGlobalReplicationGroup = Action("ModifyGlobalReplicationGroup")
 ModifyReplicationGroup = Action("ModifyReplicationGroup")
-ModifyReplicationGroupShardConfiguration = Action(
-    "ModifyReplicationGroupShardConfiguration"
-)
+ModifyReplicationGroupShardConfiguration = Action("ModifyReplicationGroupShardConfiguration")
 ModifyUser = Action("ModifyUser")
 ModifyUserGroup = Action("ModifyUserGroup")
 PurchaseReservedCacheNodesOffering = Action("PurchaseReservedCacheNodesOffering")
-RebalanceSlotsInGlobalReplicationGroup = Action(
-    "RebalanceSlotsInGlobalReplicationGroup"
-)
+RebalanceSlotsInGlobalReplicationGroup = Action("RebalanceSlotsInGlobalReplicationGroup")
 RebootCacheCluster = Action("RebootCacheCluster")
 RemoveTagsFromResource = Action("RemoveTagsFromResource")
 ResetCacheParameterGroup = Action("ResetCacheParameterGroup")

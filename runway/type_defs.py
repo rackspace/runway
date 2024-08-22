@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TypeVar, Union
+from typing import TYPE_CHECKING, TypeVar
 
 from typing_extensions import TypedDict
 
-AnyPath = Union[Path, str]
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+AnyPath: TypeAlias = "Path | str"
 AnyPathConstrained = TypeVar("AnyPathConstrained", Path, str)
 
 

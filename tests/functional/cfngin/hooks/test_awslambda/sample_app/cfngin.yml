@@ -70,7 +70,7 @@ pre_deploy:
   - path: runway.cfngin.hooks.awslambda.PythonLayer
     data_key: awslambda.layer.xmlsec
     args:
-      << : *xmlsec_args
+      <<: *xmlsec_args
       compatible_runtimes:
         - python3.10
       extend_gitignore:

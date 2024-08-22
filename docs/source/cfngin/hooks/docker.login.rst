@@ -20,14 +20,14 @@ Args
 ****
 
 .. data:: dockercfg_path
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
   Use a custom path for the Docker config file (``$HOME/.docker/config.json`` if present, otherwise ``$HOME/.dockercfg``).
 
 .. data:: ecr
-  :type: Optional[Dict[str, Optional[str]]]
+  :type: dict[str, str | None] | None
   :value: None
   :noindex:
 
@@ -38,7 +38,7 @@ Args
   If using a public registry, ``repo_name`` and ``registry_alias``.
 
   .. data:: account_id
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -46,14 +46,14 @@ Args
     it will be acquired automatically if needed.
 
   .. data:: alias
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
     If it is a public registry, provide the alias.
 
   .. data:: aws_region
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -61,7 +61,7 @@ Args
     automatically if needed.
 
 .. data:: email
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -74,7 +74,7 @@ Args
   The plaintext password for the registry account.
 
 .. data:: registry
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -83,7 +83,7 @@ Args
   If providing a value for this field, do not provide a value for ``ecr``.
 
 .. data:: username
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 

@@ -2,7 +2,7 @@
 
 # docs: file://./../../../docs/source/commands.rst
 import logging
-from typing import Any, Tuple
+from typing import Any
 
 import click
 from pydantic import ValidationError
@@ -23,7 +23,7 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.tags
 @options.verbose
 @click.pass_context
-def deploy(ctx: click.Context, debug: bool, tags: Tuple[str, ...], **_: Any) -> None:
+def deploy(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) -> None:
     """Deploy infrastructure as code.
 
     \b

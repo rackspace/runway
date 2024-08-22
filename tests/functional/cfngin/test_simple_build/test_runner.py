@@ -1,11 +1,10 @@
 """Run a simple test of CFNgin deploy and destroy."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -13,6 +12,8 @@ from runway._cli import cli
 from runway.config import CfnginConfig
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from _pytest.fixtures import SubRequest
     from click.testing import CliRunner, Result
 
@@ -27,9 +28,7 @@ def cfngin_config(
     request: SubRequest, runway_config: RunwayConfig, runway_context: RunwayContext
 ) -> CfnginConfig:
     """Find and return the CFNgin config."""
-    runway_config.deployments[0].resolve(
-        runway_context, variables=runway_config.variables
-    )
+    runway_config.deployments[0].resolve(runway_context, variables=runway_config.variables)
     return CfnginConfig.parse_file(
         path=request.path.parent / "simple-build.cfn" / "cfngin.yml",
         parameters=runway_config.deployments[0].parameters,
@@ -163,9 +162,7 @@ def test_stacks_not_exists(cfngin_context: CfnginContext) -> None:
     client = cfngin_context.get_session(region="us-east-1").client("cloudformation")
     assert cfngin_context.stacks, "no stacks found in context/config"
     for stack in cfngin_context.stacks:
-        try:
+        with pytest.raises(client.exceptions.ClientError, match="does not exist"):
             assert not client.describe_stacks(StackName=stack.fqn)[
                 "Stacks"
             ], f"stack exists: {stack.fqn}"
-        except client.exceptions.ClientError as exc:
-            assert "does not exist" in str(exc)

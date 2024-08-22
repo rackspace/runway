@@ -1,9 +1,9 @@
 """Stats for fake Docker API."""
 
 # cspell:disable
-from typing import Any, Dict
+from typing import Any
 
-OBJ: Dict[str, Any] = {
+OBJ: dict[str, Any] = {
     "read": "2015-02-11T19:20:46.667237763+02:00",
     "network": {
         "rx_bytes": 567224,

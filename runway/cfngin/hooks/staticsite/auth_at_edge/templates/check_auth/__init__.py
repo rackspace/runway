@@ -10,7 +10,6 @@ of the credentials by redirecting the user to the refresh agent.
 
 """
 
-# pylint: disable=consider-using-f-string
 import base64
 import datetime
 import hashlib
@@ -20,9 +19,9 @@ import re
 import secrets
 from urllib.parse import quote_plus, urlencode
 
-from shared_jose import validate_jwt  # noqa pylint: disable=import-error
+from shared_jose import validate_jwt
 
-from shared import (  # noqa pylint: disable=import-error
+from shared import (
     decode_token,
     extract_and_parse_cookies,
     get_config,
@@ -32,9 +31,7 @@ from shared import (  # noqa pylint: disable=import-error
 
 LOGGER = logging.getLogger(__file__)
 
-SECRET_ALLOWED_CHARS = (
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
-)
+SECRET_ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
 NONCE_LENGTH = 16
 PKCE_LENGTH = 43
 CONFIG = get_config()
@@ -44,7 +41,7 @@ def handler(event, _context):
     """Handle the request passed in.
 
     Args:
-        event (Dict[str, Any]): The Lambda Event.
+        event (dict[str, Any]): The Lambda Event.
         _context (Any): Lambda context object.
 
     """
@@ -90,9 +87,7 @@ def handler(event, _context):
                             % (
                                 domain_name,
                                 CONFIG.get("redirect_path_auth_refresh"),
-                                urlencode(
-                                    {"requestedUri": requested_uri, "nonce": nonce}
-                                ),
+                                urlencode({"requestedUri": requested_uri, "nonce": nonce}),
                             ),
                         }
                     ],
@@ -129,7 +124,7 @@ def handler(event, _context):
         )
 
         return request
-    except Exception:  # noqa pylint: disable=broad-except
+    except Exception:
         # We need new authorization. Get the user over to Cognito
         nonce = generate_nonce()
         state = {
@@ -139,8 +134,7 @@ def handler(event, _context):
         }
         login_query_string = urlencode(
             {
-                "redirect_uri": "https://%s%s"
-                % (domain_name, CONFIG["redirect_path_sign_in"]),
+                "redirect_uri": "https://%s%s" % (domain_name, CONFIG["redirect_path_sign_in"]),
                 "response_type": "code",
                 "client_id": CONFIG["client_id"],
                 "state": base64.urlsafe_b64encode(

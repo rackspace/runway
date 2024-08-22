@@ -1,7 +1,5 @@
 """Hook for creating an AWS Lambda Function using Python runtime."""
 
-# pylint errors are python3.7 only
-# pylint: disable=inherit-non-class,no-value-for-parameter
 from __future__ import annotations
 
 import logging
@@ -31,7 +29,7 @@ class PythonFunction(AwsLambdaHook[PythonProject]):
     def __init__(self, context: CfnginContext, **kwargs: Any) -> None:
         """Instantiate class."""
         super().__init__(context)
-        self.args = PythonHookArgs.parse_obj(kwargs)
+        self.args = PythonHookArgs.model_validate(kwargs)
 
     @cached_property
     def deployment_package(self) -> DeploymentPackage[PythonProject]:
@@ -58,7 +56,7 @@ class PythonFunction(AwsLambdaHook[PythonProject]):
         """Run during the **pre_deploy** stage."""
         try:
             self.deployment_package.upload()
-            return self.build_response("deploy").dict(by_alias=True)
+            return self.build_response("deploy").model_dump(by_alias=True)
         except BaseException:
             self.cleanup_on_error()
             raise

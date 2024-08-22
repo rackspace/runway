@@ -1,114 +1,102 @@
 [tool.poetry]
 name = "runway"
-version = "2.0.0-dev"  # do not change
-description = "Simplify infrastructure/app testing/deployment"
-license = "Apache-2.0"
+version = "0.0.0"
 authors = [
   "Onica Group LLC <opensource@onica.com>",
 ]
-maintainers = [
-  "Kyle Finley <kyle@finley.sh>", "Sam Fakhreddine <sam.fakhreddine@rackspace.com>"
-]
-readme = "README.md"
-homepage = "https://github.com/onicagroup/runway"
-repository = "https://github.com/onicagroup/runway"
-documentation = "https://docs.onica.com/projects/runway"
-keywords = ["cli"]
 classifiers = [
   "Intended Audience :: Developers",
-  "Topic :: Utilities",
   "Natural Language :: English",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12"
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Utilities",
+]
+description = "Simplify infrastructure/app testing/deployment"
+documentation = "https://runway.readthedocs.io"
+homepage = "https://github.com/onicagroup/runway"
+keywords = ["cli"]
+license = "Apache-2.0"
+maintainers = [
+  "Kyle Finley <kyle@finley.sh>",
+  "Sam Fakhreddine <sam.fakhreddine@rackspace.com>",
 ]
 packages = [
-  { include = "runway" },
+  {include = "runway"},
 ]
+readme = "README.md"
+repository = "https://github.com/onicagroup/runway"
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.13"
-
-# dependencies needed for building docs are included here.
-# they are marked as "optional" and are installed as the extra "docs".
-# this is a workaround for ReadTheDocs to work with poetry until fill support
-# is added or poetry dependency groups are added.
-
-"backports.cached_property" = { version = "*", python = "<3.8" }
 awacs = "*"
-boto3 = "^1.16"
+boto3 = "^1.34.50"
 cfn-lint = "*"
 cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
 click = "^8.0"
 coloredlogs = "*, !=15.0.1"
 docker = ">=3.0.0"  # used in runway.cfngin.hooks
-dunamai = { version = "^1.5", optional = true }  # docs
+eval-type-backport = {python = "< 3.10", version = "*"}  # TODO (kyle): remove when dropping support for python 3.9
 formic2 = "*"  # only used in runway.cfngin.hooks.aws_lambda
 gitpython = "*"
 igittigitt = ">=2.0.5"
-importlib-metadata = { version = "*", python = "<3.8" }
 jinja2 = ">=2.7"  # used in runway.cfngin.blueprints.raw
-jsx-lexer = { version = "^1.0", optional = true }  # docs
 packaging = "*"  # component of setuptools needed for version compare
+pipenv = "2022.1.8"
 pyOpenSSL = "*"  # For embedded hook & associated script usage
-pydantic = "^1.4"
+pydantic = "^2.8.0"
 pyhcl = "^0.4"  # does not support HCL2, possibly move to extras_require in the future
 python-hcl2 = ">=3.0.0"
 pyyaml = ">5.4"
 requests = "*"
 send2trash = "*"
-sphinx = { version = "^4.3", optional = true }  # docs
-sphinx-github-changelog = { version = "^1.1", optional = true }  # docs
-sphinx-rtd-theme = { version = "^1.0", optional = true } # docs
-sphinx-tabs = { version = "^3.2", optional = true }  # docs
-sphinxcontrib-apidoc = { version = "^0.3", optional = true }  # docs
-sphinxcontrib-programoutput = { version = "^0.17", optional = true }  # docs
 tomli = ">=1.2.2"
 troposphere = ">=2.4, <5"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
-urllib3 = "*"  # allow us to follow botocore's hard pinning without needing to update our own
 yamllint = "*"
-pipenv = "2022.1.8"
-moto = "3.0.5"
-testfixtures = "^7.0.3"
-wheel = "^0.42.0"
-pyinstaller = "^6.2.0"
 
-[tool.poetry.dev-dependencies]
-black = ">=22.1"
-coverage = { version = ">=6.3", extras = ["toml"] }
-doc8 = ">=0.10"  # for linting with vscode rst extension
-dunamai = "^1.5"
-flake8 = ">=4.0.1"
-flake8-bugbear = ">=21.9.2"  # flake8 plugin
-flake8-comprehensions = ">=3.7.0"  # flake8 plugin
-flake8-docstrings = ">=1.6"  # flake8 plugin
-flake8-print = ">=4.0.0"  # flake8 plugin
-flake8-use-fstring = ">=1.3"  # flake8 plugin
-isort = ">=5.12"
-mock = ">=4.0"
-moto = { version = ">=3.0", extras = ["ec2", "ecs", "iam", "s3", "ssm"] }
-mypy-boto3 = "^1.16"  # importable boto3 type annotations
-pep8-naming = ">=0.12.1"  # flake8 plugin
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.8.0"
+
+[tool.poetry.group.docs.dependencies]
+doc8 = "^1.1.1"
+furo = "^2024.8.6"
+jsx-lexer = "^2.0.1"
+sphinx = "^7.4.7"
+sphinx-copybutton = "^0.5.2"
+sphinx-design = "^0.6.1"
+sphinx-github-changelog = "^1.4.0"
+sphinx-notfound-page = "^1.0.4"
+sphinxcontrib-apidoc = "^0.5.0"
+sphinxcontrib-external-links = "^0.1.1"
+sphinxcontrib-jquery = "^4.1"
+sphinxcontrib-programoutput = "^0.17"
+
+[tool.poetry.group.lint.dependencies]
+black = "^24.8.0"
+ruff = "^0.5.7"
+
+[tool.poetry.group.test.dependencies]
+coverage = {extras = ["toml"], version = "^7.6.1"}
+moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.12"}
 pipenv = "^2022.1.8"  # only used in tests
-pre-commit = ">=2.14"
-pydocstyle = ">=6.1.1"  # flake8 plugin
-pylint = ">=2.12"
-pytest = ">=7.0"
-pytest-cov = ">=3.0"  # pytest plugin
-pytest-mock = ">=3.7"  # pytest plugin
-pytest-order = ">=1"  # pytest plugin
-pytest-subprocess = ">=1.4"  # pytest plugin
-pytest-sugar = ">=0.9"  # pytest plugin
-pytest-xdist = ">=2.5"  # pytest plugin
-semver = "^2.13"  # only used in .github/scripts/urlshortener
-testfixtures = "^7.0.3"  # TODO remove use of this dependency - was inherited
-tomli-w = ">=1.0"
+pytest = "^8.3.2"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
+pytest-order = "^1.2.1"
+pytest-subprocess = "^1.5.2"
+pytest-sugar = "^1.0.0"
+pytest-xdist = {extras = ["psutil"], version = "^3.6.1"}
+testfixtures = "^7.0.3"  # TODO (kyle) remove use of this dependency - was inherited
+tomli-w = "^1.0.0"
 
-[tool.poetry.dev-dependencies.boto3-stubs]
+[tool.poetry.group.types.dependencies]
+mypy-boto3 = "^1.34.158"  # importable boto3 type annotations
+
+[tool.poetry.group.types.dependencies.boto3-stubs]
 extras = [
   "acm",
   "awslambda",
@@ -127,30 +115,13 @@ extras = [
   "ssm",
   "sts",
 ]
-version = "^1.16"
-
-[tool.poetry.extras]
-docs = [
-  "dunamai",
-  "jsx-lexer",
-  "sphinx",
-  "sphinx-github-changelog",
-  "sphinx-rtd-theme",
-  "sphinx-tabs",
-  "sphinxcontrib-apidoc",
-  "sphinxcontrib-programoutput",
-]
+version = "^1.34.158"
 
 [tool.poetry.scripts]
 runway = "runway._cli.main:cli"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/onicagroup/runway/issues"
-
-[build-system]
-requires = ["poetry_core>=1.0.7"]
-build-backend = "poetry.core.masonry.api"
-
 
 [tool.black]
 force-exclude = '''
@@ -166,29 +137,26 @@ force-exclude = '''
   | _build
   | build
   | dist
-  | npm
   | runway/aws_sso_botocore
 )/
 '''
 include = '\.pyi?$'
-line-length = 88
-target-version = ["py38", "py39"]
-
+line-length = 100
+target-version = ["py310", "py311", "py312", "py39"]
 
 [tool.coverage.report]
 exclude_lines = [
+  "@overload",
   "cov: ignore",  # standard exclude comment
+  "from pathlib import Path",
   "if TYPE_CHECKING:",  # excluded blocks
   "if __name__ == .__main__.:",
   "raise AssertionError",  # defensive exceptions
   "raise NotImplementedError",
-  "from pathlib import Path",
-  "@overload",
 ]
 fail_under = 85
 precision = 2
 show_missing = true
-
 
 [tool.coverage.run]
 concurrency = [
@@ -196,183 +164,53 @@ concurrency = [
   "thread",
 ]
 omit = [
+  "*/compat.py",
   "*/runway/aws_sso_botocore/*",  # TODO remove native support is added to botocore
   "*/runway/cfngin/hooks/staticsite/auth_at_edge/templates/*",
-  "*/compat.py",
   "*/type_defs.py",
 ]
 
-[tool.isort]
-profile = "black"
-known_local_folder = [
-  "jwks_rsa",
-  "shared",
-  "update_urls",
-]
-skip = [
-  ".demo",
-  ".eggs",
-  ".git",
-  ".mypy_cache",
-  ".runway",
-  ".runway_cache",
-  ".venv",
-  "_build",
-  "build",
-  "dist",
-  "integration_tests",
-  "node_modules",
-  "venv",
-]
-
-
-[tool.pylint.basic]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#basic-checker
-attr-rgx = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
-# attr-name-hint = "([a-z_][a-z0-9_]{2,50}|VARIABLES)$"
-good-names = [
-  "_",
-  "a",
-  "b",
-  "ci",
-  "db",
-  "f",
-  "fn",
-  "fp",
-  "gb",
-  "i",
-  "id",
-  "j",
-  "k",
-  "kb",
-  "mb",
-  "ok",
-  "os",
-  "ui",
-  "v",
-]
-
-[tool.pylint.classes]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#classes-checker
-defining-attr-methods = [
-  "__init__",
-  "__new__",
-  "setUp",
-]
-exclude-protected=[
-  "_asdict",
-  "_fields",
-  "_replace",
-  "_source",
-  "_make",
-  "_session",  # for boto3.session.Session
-  "_prompter",
-  "_client_config",  # boto3.client.Client._client_config contains info like region
-  "_endpoint",  # boto3.client.Client._endpoint contains s3 endpoint info
-  "_validate_props"  # called on troposphere resources
-]
-
-[tool.pylint.design]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#design-checker-options
-max-args = 10
-max-attributes = 20
-max-bool-expr = 5
-max-branches = 20
-max-locals = 25
-max-parents = 10
-max-public-methods = 30
-max-returns = 10
-max-statements = 50
-min-public-methods = 0
-
-[tool.pylint.format]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#format-checker
-max-line-length = 120
-max-module-lines = 1000
-
-[tool.pylint.imports]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#imports-checker
-allow-wildcard-with-all = "no"
-
-[tool.pylint.logging]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#logging-checker
-logging-format-style = "old"  # TODO update to new
-
-[tool.pylint.master]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#general-options
-extension-pkg-whitelist = [
-  "pydantic",  # https://github.com/samuelcolvin/pydantic/issues/992#issuecomment-553545180
-]
-ignore-patterns = [
-  ".+py[ci]$",
-]
-jobs = 0
-
-[tool.pylint.miscellaneous]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#miscellaneous-checker
-notes = ["FIXME"]
-
-[tool.pylint.message_control]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#messages-control-options
-disable = [
-  "line-too-long",  # flake8 overlap
-  "missing-class-docstring",  # flake8 (pydocstyle) overlap
-  "missing-function-docstring",  # flake8 (pydocstyle) overlap
-  "missing-module-docstring",  # flake8 (pydocstyle) overlap
-  "similarities",  # black overcomplicated this
-  "ungrouped-imports", # false positive when using TYPE_CHECKING; isort should cover this
-  "unused-import",  # flake8 overlap (F401)
-  "broad-exception-raised",
-  "missing-timeout"
-]
-
-[tool.pylint.typecheck]
-# http://pylint.pycqa.org/en/latest/technical_reference/features.html#typecheck-checker
-ignored-classes = [
-  "runway.config.ConfigComponent",
-  "runway.utils.MutableMap",
-]
-ignored-modules = ["_typeshed", "distutils"]
-
+[tool.poetry-dynamic-versioning]  # poetry self add "poetry-dynamic-versioning[plugin]"
+bump = true
+enable = true
+fix-shallow-repository = true
+metadata = false
+strict = true
+style = "pep440"
 
 [tool.pyright]
 exclude = [
-  "**/__pycache__",
   "**/.demo",
   "**/.eggs",
   "**/.git",
   "**/.runway",
   "**/.venv",
+  "**/__pycache__",
   "**/docs",
   "**/node_modules",
   "**/quickstarts",
-  "**/typings",
   "**/runway/aws_sso_botocore",
   "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
   "**/runway/templates/cdk-py",
   "**/tests/functional/cfngin/test_aws_lambda_hook/lambda_src",
-  "**/tests/unit"
-]
-extraPaths = [
-  "./.github/scripts/urlshortener",
+  "**/tests/unit",
+  "**/typings",
 ]
 pythonPlatform = "All"
 pythonVersion = "3.9"
 reportDuplicateImport = "none"
 reportImportCycles = "none"
-reportIncompatibleMethodOverride = "warning"
 reportMissingTypeStubs = "none"
 reportPrivateUsage = "none"
 reportUnknownMemberType = "none"
 reportUnnecessaryIsInstance = "warning"
+reportUnnecessaryTypeIgnoreComment = "error"
 reportUnusedImport = "none"
 reportUnusedVariable = "none"
-reportWildcardImportFromLibrary = "none"
 strictParameterNoneValue = false
 typeCheckingMode = "strict"
 useLibraryCodeForTypes = true
 venv = ".venv"
-
 
 [tool.pytest.ini_options]
 addopts = [
@@ -391,3 +229,129 @@ python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 testpaths = ["tests"]
+
+[tool.ruff]  # https://docs.astral.sh/ruff/settings/#top-level
+extend-exclude = [
+  "runway/aws_sso_botocore",  # NOTE (kyle): ignoring vendored code
+  "runway/cfngin/hooks/staticsite/auth_at_edge/templates",  # TODO (kyle): resolve lint error
+  "typings",
+]
+force-exclude = true
+line-length = 120
+show-fixes = true
+target-version = "py39"  # important to set before applying fixes
+
+[tool.ruff.lint]  # https://docs.astral.sh/ruff/settings/#lint
+extend-safe-fixes = [
+  "UP006",
+  "UP007",
+  "UP038",
+  "UP040",
+]
+ignore = [
+  "ANN101",  # Missing type annotation for `self` in method
+  "ANN102",  # Missing type annotation for `cls` in classmethod
+  "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed  # TODO (kyle): improve type annotations
+  "COM812",  # Trailing comma missing
+  "D203",  # 1 blank line required before class docstring
+  "D213",  # Multi-line docstring summary should start at the second line
+  "D215",  # Section underline is over-indented
+  "D403",  # First word of the first line should be capitalized
+  "D406",  # Section name should end with a newline
+  "D407",  # Missing dashed underline after section
+  "D408",  # Section underline should be in the line following the section's name
+  "D409",  # Section underline should match the length of its name
+  "DTZ",  # flake8-datetimez  # NOTE (kyle): this is fine here
+  "EM",  # flake8-errmsg
+  "ERA001",  # Found commented-out code  # NOTE (kyle): incorrectly detects cspell
+  "FA100",  # Missing `from __future__ import annotations`, but uses `typing.Optional`
+  "FBT001",  # Boolean positional arg in function definition
+  "FBT002",  # Boolean default value in function definition
+  "FBT003",  # Boolean positional value in function call
+  "FIX002",  # Line contains TODO
+  "N818",  # Exception name should be named with an Error suffix  # TODO (kyle): resolve in next major release
+  "PERF203",  # `try`-`except` within a loop incurs performance overhead
+  "PGH003",  # Use specific rule codes when ignoring type issues  # TODO (kyle): resolve this eventually
+  "RUF012",  # TODO (kyle): remove when resolved - https://github.com/astral-sh/ruff/issues/5243
+  "S105",  # (hardcoded-password-string) Possible hardcoded password
+  "S106",  # (hardcoded-password-func-arg) Possible hardcoded password
+  "S107",  # (hardcoded-password-default) Possible hardcoded password
+  "S108",  # Probable insecure usage of temporary file or directory
+  "S301",  # `pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data
+  "S60",  # flake8-bandit   # NOTE (kyle): most of these are for subprocess which we don't care about right now
+  "S604",  # Function call with `shell=True` parameter identified   # NOTE (kyle): required for runway
+  "TD003",  # Missing issue link on the line following this TODO
+  "TID252",  # Relative imports from parent modules are banned
+  "TRY",  # tryceratops
+]
+select = ["ALL"]
+
+[tool.ruff.lint.extend-per-file-ignores]  # https://docs.astral.sh/ruff/settings/#lintextend-per-file-ignores
+"*.py" = [
+  "PYI024",  # Use `typing.NamedTuple` instead of `collections.namedtuple`  # NOTE (kyle): should only apply to pyi
+]
+"runway/templates/*" = [
+  "N999",  # Invalid module name  # NOTE (kyle): these are fine here
+]
+"tests/*" = [
+  "PT004",  # Fixture does not return anything, add leading underscore
+  "S101",  # Use of `assert` detected  # NOTE (kyle): this is fine here
+  "SLF001",  # Private member accessed  # NOTE (kyle): fine in tests
+]
+
+[tool.ruff.lint.flake8-annotations]  # https://docs.astral.sh/ruff/settings/#lintflake8-annotations
+allow-star-arg-any = true
+
+[tool.ruff.lint.flake8-pytest-style]  # https://docs.astral.sh/ruff/settings/#lintflake8-pytest-style
+parametrize-names-type = "csv"  # TODO (kyle): update tests to remove the need for this
+
+[tool.ruff.lint.flake8-self]
+ignore-names = [
+  "_Environ",
+  "_Hash",
+  "_session",
+]
+
+[tool.ruff.lint.flake8-type-checking]  # https://docs.astral.sh/ruff/settings/#lint_flake8-type-checking_runtime-evaluated-base-classes
+runtime-evaluated-base-classes = [
+  "pydantic.BaseModel",
+  "pydantic.BeforeValidator",
+  "runway.cfngin.hooks.base.HookArgsBaseModel",
+  "runway.config.models.base.ConfigProperty",
+  "runway.utils.BaseModel",
+]
+
+[tool.ruff.lint.isort]  # https://docs.astral.sh/ruff/settings/#lintisort
+known-local-folder = [
+  "jwks_rsa",
+  "shared",
+  "update_urls",
+]
+known-third-party = [
+  "docker",  # NOTE (kyle): the `docker/` directory confuses isort
+]
+
+[tool.ruff.lint.pydocstyle]  # https://docs.astral.sh/ruff/settings/#lintpydocstyle
+convention = "google"
+
+[tool.ruff.lint.pylint]  # https://docs.astral.sh/ruff/settings/#lintpylint
+allow-magic-value-types = ["bytes", "int", "str"]
+max-args = 15
+max-returns = 10
+max-statements = 50
+
+[tool.ruff.lint.pyupgrade]  # https://docs.astral.sh/ruff/settings/#pyupgrade-keep-runtime-typing
+keep-runtime-typing = true  # TODO (kyle): remove when dropping support for python 3.9
+
+[tool.tomlsort]
+all = true
+in_place = true
+sort_first = ["tool", "tool.poetry"]
+spaces_before_inline_comment = 2
+trailing_comma_inline_array = true
+overrides."tool.poetry".first = ["name", "version"]
+overrides."tool.poetry.dependencies".first = ["python"]
+
+[build-system]
+build-backend = "poetry_dynamic_versioning.backend"
+requires = ["poetry-core", "poetry-dynamic-versioning>=1.2.0,<2.0.0"]

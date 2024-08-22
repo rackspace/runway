@@ -1,7 +1,6 @@
 """Resources to tokenize userdata."""
 
 import re
-from typing import List
 
 from troposphere import GetAtt, Ref
 
@@ -14,7 +13,7 @@ SPLIT_RE = re.compile(SPLIT_STRING)
 REPLACE_RE = re.compile(REPLACE_STRING)
 
 
-def cf_tokenize(raw_userdata: str) -> List[str]:
+def cf_tokenize(raw_userdata: str) -> list[str]:
     """Parse UserData for Cloudformation helper functions.
 
     http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html
@@ -39,7 +38,7 @@ def cf_tokenize(raw_userdata: str) -> List[str]:
             Base64(Join('', cf_tokenize(userdata_string)))
 
     """
-    result: List[str] = []
+    result: list[str] = []
     parts = SPLIT_RE.split(raw_userdata)
     for part in parts:
         cf_func = REPLACE_RE.search(part)

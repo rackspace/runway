@@ -1,11 +1,10 @@
 """Test runway.module.k8s."""
 
-# pyright: basic
 from __future__ import annotations
 
 import logging
 from subprocess import CalledProcessError
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
@@ -17,7 +16,6 @@ from runway.module.k8s import K8s, K8sOptions
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
     from pytest_subprocess import FakeProcess
 
@@ -86,9 +84,9 @@ class TestK8s:
     )
     def test_gen_cmd(
         self,
-        args_list: Optional[List[str]],
+        args_list: list[str] | None,
         command: KubectlCommandTypeDef,
-        expected: List[str],
+        expected: list[str],
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -107,7 +105,7 @@ class TestK8s:
 
     def test_init(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -122,17 +120,13 @@ class TestK8s:
     ) -> None:
         """Test kbenv."""
         mock_env_mgr = mocker.patch(f"{MODULE}.KBEnvManager", return_value="success")
-        overlay_path = mocker.patch(
-            f"{MODULE}.K8sOptions.overlay_path", tmp_path / "overlay"
-        )
-        assert (
-            K8s(runway_context, module_root=tmp_path).kbenv == mock_env_mgr.return_value
-        )
+        overlay_path = mocker.patch(f"{MODULE}.K8sOptions.overlay_path", tmp_path / "overlay")
+        assert K8s(runway_context, module_root=tmp_path).kbenv == mock_env_mgr.return_value
         mock_env_mgr.assert_called_once_with(tmp_path, overlay_path=overlay_path)
 
     def test_kubectl_apply(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -161,9 +155,7 @@ class TestK8s:
     ) -> None:
         """Test kubectl_apply raise CalledProcessError."""
         mocker.patch.object(K8s, "gen_cmd")
-        mocker.patch(
-            f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, "")
-        )
+        mocker.patch(f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, ""))
         with pytest.raises(CalledProcessError):
             K8s(runway_context, module_root=tmp_path).kubectl_apply()
 
@@ -180,9 +172,7 @@ class TestK8s:
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
     ) -> None:
         """Test kubectl_bin."""
-        obj = K8s(
-            runway_context, module_root=tmp_path, options={"kubectl_version": "1.22.0"}
-        )
+        obj = K8s(runway_context, module_root=tmp_path, options={"kubectl_version": "1.22.0"})
         mock_install = mocker.patch.object(obj.kbenv, "install", return_value="success")
         assert obj.kubectl_bin == mock_install.return_value
         mock_install.assert_called_once_with("1.22.0")
@@ -193,9 +183,7 @@ class TestK8s:
         """Test kubectl_bin."""
         which = mocker.patch(f"{MODULE}.which", return_value=True)
         obj = K8s(runway_context, module_root=tmp_path)
-        mocker.patch.object(
-            obj.kbenv, "install", side_effect=KubectlVersionNotSpecified
-        )
+        mocker.patch.object(obj.kbenv, "install", side_effect=KubectlVersionNotSpecified)
         assert obj.kubectl_bin == "kubectl"
         which.assert_called_once_with("kubectl")
 
@@ -205,16 +193,14 @@ class TestK8s:
         """Test kubectl_bin."""
         which = mocker.patch(f"{MODULE}.which", return_value=False)
         obj = K8s(runway_context, module_root=tmp_path)
-        mocker.patch.object(
-            obj.kbenv, "install", side_effect=KubectlVersionNotSpecified
-        )
+        mocker.patch.object(obj.kbenv, "install", side_effect=KubectlVersionNotSpecified)
         with pytest.raises(SystemExit):
             assert obj.kubectl_bin
         which.assert_called_once_with("kubectl")
 
     def test_kubectl_delete(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         tmp_path: Path,
@@ -243,15 +229,13 @@ class TestK8s:
     ) -> None:
         """Test kubectl_delete raise CalledProcessError."""
         mocker.patch.object(K8s, "gen_cmd")
-        mocker.patch(
-            f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, "")
-        )
+        mocker.patch(f"{MODULE}.run_module_command", side_effect=CalledProcessError(1, ""))
         with pytest.raises(CalledProcessError):
             K8s(runway_context, module_root=tmp_path).kubectl_delete()
 
     def test_kubectl_kustomize(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         fake_process: FakeProcess,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -261,15 +245,9 @@ class TestK8s:
         caplog.set_level(logging.DEBUG, logger=MODULE)
         data = {"key": "val"}
         data_string = yaml.dump(data, indent=2)
-        gen_cmd = mocker.patch.object(
-            K8s, "gen_cmd", return_value=["kubectl", "kustomize"]
-        )
-        fake_process.register_subprocess(
-            gen_cmd.return_value, stdout=data_string, returncode=0
-        )
-        assert (
-            K8s(runway_context, module_root=tmp_path).kubectl_kustomize() == data_string
-        )
+        gen_cmd = mocker.patch.object(K8s, "gen_cmd", return_value=["kubectl", "kustomize"])
+        fake_process.register_subprocess(gen_cmd.return_value, stdout=data_string, returncode=0)
+        assert K8s(runway_context, module_root=tmp_path).kubectl_kustomize() == data_string
         assert fake_process.call_count(gen_cmd.return_value) == 1
         logs = "\n".join(caplog.messages)
         assert f"kustomized yaml generated by kubectl:\n\n{data_string}" in logs
@@ -282,9 +260,7 @@ class TestK8s:
         tmp_path: Path,
     ) -> None:
         """Test kubectl_kustomize."""
-        gen_cmd = mocker.patch.object(
-            K8s, "gen_cmd", return_value=["kubectl", "kustomize"]
-        )
+        gen_cmd = mocker.patch.object(K8s, "gen_cmd", return_value=["kubectl", "kustomize"])
         fake_process.register_subprocess(gen_cmd.return_value, returncode=1)
         with pytest.raises(CalledProcessError):
             assert K8s(runway_context, module_root=tmp_path).kubectl_kustomize()
@@ -302,7 +278,7 @@ class TestK8s:
     @pytest.mark.parametrize("skip", [False, True])
     def test_plan(
         self,
-        caplog: LogCaptureFixture,
+        caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
         skip: bool,
@@ -311,9 +287,7 @@ class TestK8s:
         """Test plan."""
         caplog.set_level(logging.INFO, logger=MODULE)
         mocker.patch.object(K8s, "skip", skip)
-        kubectl_kustomize = mocker.patch.object(
-            K8s, "kubectl_kustomize", return_value="success"
-        )
+        kubectl_kustomize = mocker.patch.object(K8s, "kubectl_kustomize", return_value="success")
         assert not K8s(runway_context, module_root=tmp_path).plan()
         if skip:
             kubectl_kustomize.assert_not_called()
@@ -321,8 +295,7 @@ class TestK8s:
             kubectl_kustomize.assert_called_once_with()
             logs = "\n".join(caplog.messages)
             assert (
-                f"kustomized yaml generated by kubectl:\n\n{kubectl_kustomize.return_value}"
-                in logs
+                f"kustomized yaml generated by kubectl:\n\n{kubectl_kustomize.return_value}" in logs
             )
 
 
@@ -348,18 +321,13 @@ class TestK8sOptions:
             (["test2/kustomization.yaml"], "test"),
         ],
     )
-    def test_get_overlay_dir(
-        self, expected: str, files: List[str], tmp_path: Path
-    ) -> None:
+    def test_get_overlay_dir(self, expected: str, files: list[str], tmp_path: Path) -> None:
         """Test get_overlay_dir."""
         for f in files:
             tmp_file = tmp_path / f
             tmp_file.parent.mkdir(parents=True, exist_ok=True)
             tmp_file.touch()
-        assert (
-            K8sOptions.get_overlay_dir(tmp_path, "test", "us-east-1")
-            == tmp_path / expected
-        )
+        assert K8sOptions.get_overlay_dir(tmp_path, "test", "us-east-1") == tmp_path / expected
 
     def test_kustomize_config(
         self, mocker: MockerFixture, runway_context: MockRunwayContext, tmp_path: Path
@@ -367,9 +335,7 @@ class TestK8sOptions:
         """Test kustomize_config."""
         overlay_path = tmp_path / "overlays" / "test"
         mocker.patch.object(K8sOptions, "overlay_path", overlay_path)
-        obj = K8sOptions.parse_obj(
-            deploy_environment=runway_context.env, obj={}, path=tmp_path
-        )
+        obj = K8sOptions.parse_obj(deploy_environment=runway_context.env, obj={}, path=tmp_path)
         assert obj.kustomize_config == overlay_path / "kustomization.yaml"
 
     def test_overlay_path_found(
@@ -380,9 +346,7 @@ class TestK8sOptions:
         mock_get_overlay_dir = mocker.patch.object(
             K8sOptions, "get_overlay_dir", return_value=overlay_path
         )
-        obj = K8sOptions.parse_obj(
-            deploy_environment=runway_context.env, obj={}, path=tmp_path
-        )
+        obj = K8sOptions.parse_obj(deploy_environment=runway_context.env, obj={}, path=tmp_path)
         assert obj.overlay_path == overlay_path
         mock_get_overlay_dir.assert_called_once_with(
             path=tmp_path / "overlays",
@@ -390,9 +354,7 @@ class TestK8sOptions:
             region=runway_context.env.aws_region,
         )
 
-    def test_overlay_path_provided(
-        self, runway_context: MockRunwayContext, tmp_path: Path
-    ) -> None:
+    def test_overlay_path_provided(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test overlay_path provided."""
         overlay_path = tmp_path / "overlays" / "test"
         obj = K8sOptions.parse_obj(
@@ -405,9 +367,7 @@ class TestK8sOptions:
     def test_parse_obj(self, runway_context: MockRunwayContext, tmp_path: Path) -> None:
         """Test parse_obj."""
         config = {"kubectl_version": "0.13.0"}
-        obj = K8sOptions.parse_obj(
-            deploy_environment=runway_context.env, obj=config, path=tmp_path
-        )
+        obj = K8sOptions.parse_obj(deploy_environment=runway_context.env, obj=config, path=tmp_path)
         assert isinstance(obj.data, RunwayK8sModuleOptionsDataModel)
         assert obj.data.kubectl_version == config["kubectl_version"]
         assert not obj.data.overlay_path

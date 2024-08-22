@@ -6,7 +6,7 @@ import concurrent.futures
 import logging
 import multiprocessing
 import sys
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from ..._logging import PrefixAdaptor
 from ...compat import cached_property
@@ -29,6 +29,15 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
+class _AssumeRoleConfigTypeDef(TypedDict, total=False):
+    """Return type for :attr:`Deployment.assume_role_config`."""
+
+    duration_seconds: int
+    revert_on_exit: bool
+    role_arn: str
+    session_name: str
+
+
 class Deployment:
     """Runway deployment."""
 
@@ -36,8 +45,8 @@ class Deployment:
         self,
         context: RunwayContext,
         definition: RunwayDeploymentDefinition,
-        future: Optional[RunwayFutureDefinitionModel] = None,
-        variables: Optional[RunwayVariablesDefinition] = None,
+        future: RunwayFutureDefinitionModel | None = None,
+        variables: RunwayVariablesDefinition | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -57,49 +66,44 @@ class Deployment:
         self.__merge_env_vars()
 
     @property
-    def assume_role_config(self) -> Dict[str, Union[bool, int, str]]:
+    def assume_role_config(self) -> _AssumeRoleConfigTypeDef:
         """Parse the definition to get assume role arguments."""
         assume_role = self.definition.assume_role
         if not assume_role:
-            self.logger.debug(
-                "assume_role not configured for deployment: %s", self.name
-            )
+            self.logger.debug("assume_role not configured for deployment: %s", self.name)
             return {}
-        if isinstance(assume_role, str):  # type: ignore
+        if isinstance(assume_role, str):
             self.logger.debug("role found: %s", assume_role)
             assume_role = RunwayAssumeRoleDefinitionModel(arn=assume_role)
-        elif isinstance(assume_role, dict):  # type: ignore
-            assume_role = RunwayAssumeRoleDefinitionModel.parse_obj(assume_role)
+        elif isinstance(assume_role, dict):
+            assume_role = RunwayAssumeRoleDefinitionModel.model_validate(assume_role)
         if not assume_role.arn:
-            self.logger.debug(
-                "assume_role not configured for deployment: %s", self.name
-            )
+            self.logger.debug("assume_role not configured for deployment: %s", self.name)
             return {}
         return {
-            "duration_seconds": assume_role.duration,
+            "duration_seconds": int(assume_role.duration),
             "revert_on_exit": assume_role.post_deploy_env_revert,
             "role_arn": assume_role.arn,
             "session_name": assume_role.session_name,
         }
 
     @property
-    def env_vars_config(self) -> Dict[str, str]:
+    def env_vars_config(self) -> dict[str, str]:
         """Parse the definition to get the correct env_vars configuration."""
         try:
             if not self.definition.env_vars:
                 return {}
         except UnresolvedVariable:
-            # pylint: disable=protected-access
-            if "env_vars" in self.definition._vars:
-                var = self.definition._vars["env_vars"]
+            if "env_vars" in self.definition._vars:  # noqa: SLF001
+                var = self.definition._vars["env_vars"]  # noqa: SLF001
                 var.resolve(self.ctx, variables=self._variables)
-                self.definition._data["env_vars"] = var.value
+                self.definition._data["env_vars"] = var.value  # noqa: SLF001
             else:
                 raise
         return flatten_path_lists(self.definition.env_vars, str(self.ctx.env.root_dir))
 
     @cached_property
-    def regions(self) -> List[str]:
+    def regions(self) -> list[str]:
         """List of regions this deployment is associated with."""
         return self.definition.parallel_regions or self.definition.regions
 
@@ -114,9 +118,7 @@ class Deployment:
         High level method for running a deployment.
 
         """
-        self.logger.verbose(
-            "attempting to deploy to region(s): %s", ", ".join(self.regions)
-        )
+        self.logger.verbose("attempting to deploy to region(s): %s", ", ".join(self.regions))
         if self.use_async:
             return self.__async("deploy")
         return self.__sync("deploy")
@@ -127,9 +129,7 @@ class Deployment:
         High level method for running a deployment.
 
         """
-        self.logger.verbose(
-            "attempting to destroy in region(s): %s", ", ".join(self.regions)
-        )
+        self.logger.verbose("attempting to destroy in region(s): %s", ", ".join(self.regions))
         if self.use_async:
             return self.__async("destroy")
         return self.__sync("destroy")
@@ -140,9 +140,7 @@ class Deployment:
         High level method for running a deployment.
 
         """
-        self.logger.verbose(
-            "attempting to initialize region(s): %s", ", ".join(self.regions)
-        )
+        self.logger.verbose("attempting to initialize region(s): %s", ", ".join(self.regions))
         if self.use_async:
             return self.__async("init")
         return self.__sync("init")
@@ -189,9 +187,7 @@ class Deployment:
                 variables=self._variables,
             )
 
-    def validate_account_credentials(
-        self, context: Optional[RunwayContext] = None
-    ) -> None:
+    def validate_account_credentials(self, context: RunwayContext | None = None) -> None:
         """Exit if requested deployment account doesn't match credentials.
 
         Args:
@@ -213,7 +209,7 @@ class Deployment:
                 )
                 sys.exit(1)
             self.logger.info(
-                "verified current AWS account matches required " + 'account id "%s"',
+                'verified current AWS account matches required account id "%s"',
                 self.definition.account_id,
             )
         if self.definition.account_alias:
@@ -236,9 +232,7 @@ class Deployment:
             self.logger.verbose(
                 "environment variable overrides are being applied to this deployment"
             )
-            self.logger.debug(
-                "environment variable overrides: %s", self.env_vars_config
-            )
+            self.logger.debug("environment variable overrides: %s", self.env_vars_config)
             self.ctx.env.vars = merge_dicts(self.ctx.env.vars, self.env_vars_config)
 
     def __async(self, action: RunwayActionTypeDef) -> None:
@@ -248,16 +242,12 @@ class Deployment:
             action: Name of action to run.
 
         """
-        self.logger.info(
-            "processing regions in parallel... (output will be interwoven)"
-        )
+        self.logger.info("processing regions in parallel... (output will be interwoven)")
         with concurrent.futures.ProcessPoolExecutor(
             max_workers=self.ctx.env.max_concurrent_regions,
             mp_context=multiprocessing.get_context("fork"),
         ) as executor:
-            futures = [
-                executor.submit(self.run, *[action, region]) for region in self.regions
-            ]
+            futures = [executor.submit(self.run, action, region) for region in self.regions]
         for job in futures:
             job.result()  # raise exceptions / exit as needed
 
@@ -278,7 +268,7 @@ class Deployment:
         cls,
         action: RunwayActionTypeDef,
         context: RunwayContext,
-        deployments: List[RunwayDeploymentDefinition],
+        deployments: list[RunwayDeploymentDefinition],
         future: RunwayFutureDefinitionModel,
         variables: RunwayVariablesDefinition,
     ) -> None:

@@ -19,15 +19,11 @@ ActivateUsers = Action("ActivateUsers")
 AddDomain = Action("AddDomain")
 AddOrUpdateGroups = Action("AddOrUpdateGroups")
 AssociatePhoneNumberWithUser = Action("AssociatePhoneNumberWithUser")
-AssociatePhoneNumbersWithVoiceConnector = Action(
-    "AssociatePhoneNumbersWithVoiceConnector"
-)
+AssociatePhoneNumbersWithVoiceConnector = Action("AssociatePhoneNumbersWithVoiceConnector")
 AssociatePhoneNumbersWithVoiceConnectorGroup = Action(
     "AssociatePhoneNumbersWithVoiceConnectorGroup"
 )
-AssociateSigninDelegateGroupsWithAccount = Action(
-    "AssociateSigninDelegateGroupsWithAccount"
-)
+AssociateSigninDelegateGroupsWithAccount = Action("AssociateSigninDelegateGroupsWithAccount")
 AuthorizeDirectory = Action("AuthorizeDirectory")
 BatchCreateAttendee = Action("BatchCreateAttendee")
 BatchCreateRoomMembership = Action("BatchCreateRoomMembership")
@@ -73,23 +69,15 @@ DeleteVoiceConnectorEmergencyCallingConfiguration = Action(
 DeleteVoiceConnectorGroup = Action("DeleteVoiceConnectorGroup")
 DeleteVoiceConnectorOrigination = Action("DeleteVoiceConnectorOrigination")
 DeleteVoiceConnectorProxy = Action("DeleteVoiceConnectorProxy")
-DeleteVoiceConnectorStreamingConfiguration = Action(
-    "DeleteVoiceConnectorStreamingConfiguration"
-)
+DeleteVoiceConnectorStreamingConfiguration = Action("DeleteVoiceConnectorStreamingConfiguration")
 DeleteVoiceConnectorTermination = Action("DeleteVoiceConnectorTermination")
-DeleteVoiceConnectorTerminationCredentials = Action(
-    "DeleteVoiceConnectorTerminationCredentials"
-)
+DeleteVoiceConnectorTerminationCredentials = Action("DeleteVoiceConnectorTerminationCredentials")
 DisassociatePhoneNumberFromUser = Action("DisassociatePhoneNumberFromUser")
-DisassociatePhoneNumbersFromVoiceConnector = Action(
-    "DisassociatePhoneNumbersFromVoiceConnector"
-)
+DisassociatePhoneNumbersFromVoiceConnector = Action("DisassociatePhoneNumbersFromVoiceConnector")
 DisassociatePhoneNumbersFromVoiceConnectorGroup = Action(
     "DisassociatePhoneNumbersFromVoiceConnectorGroup"
 )
-DisassociateSigninDelegateGroupsFromAccount = Action(
-    "DisassociateSigninDelegateGroupsFromAccount"
-)
+DisassociateSigninDelegateGroupsFromAccount = Action("DisassociateSigninDelegateGroupsFromAccount")
 DisconnectDirectory = Action("DisconnectDirectory")
 GetAccount = Action("GetAccount")
 GetAccountResource = Action("GetAccountResource")
@@ -122,9 +110,7 @@ GetVoiceConnectorGroup = Action("GetVoiceConnectorGroup")
 GetVoiceConnectorLoggingConfiguration = Action("GetVoiceConnectorLoggingConfiguration")
 GetVoiceConnectorOrigination = Action("GetVoiceConnectorOrigination")
 GetVoiceConnectorProxy = Action("GetVoiceConnectorProxy")
-GetVoiceConnectorStreamingConfiguration = Action(
-    "GetVoiceConnectorStreamingConfiguration"
-)
+GetVoiceConnectorStreamingConfiguration = Action("GetVoiceConnectorStreamingConfiguration")
 GetVoiceConnectorTermination = Action("GetVoiceConnectorTermination")
 GetVoiceConnectorTerminationHealth = Action("GetVoiceConnectorTerminationHealth")
 InviteDelegate = Action("InviteDelegate")
@@ -154,9 +140,7 @@ ListRooms = Action("ListRooms")
 ListTagsForResource = Action("ListTagsForResource")
 ListUsers = Action("ListUsers")
 ListVoiceConnectorGroups = Action("ListVoiceConnectorGroups")
-ListVoiceConnectorTerminationCredentials = Action(
-    "ListVoiceConnectorTerminationCredentials"
-)
+ListVoiceConnectorTerminationCredentials = Action("ListVoiceConnectorTerminationCredentials")
 ListVoiceConnectors = Action("ListVoiceConnectors")
 LogoutUser = Action("LogoutUser")
 PutEventsConfiguration = Action("PutEventsConfiguration")
@@ -167,13 +151,9 @@ PutVoiceConnectorEmergencyCallingConfiguration = Action(
 PutVoiceConnectorLoggingConfiguration = Action("PutVoiceConnectorLoggingConfiguration")
 PutVoiceConnectorOrigination = Action("PutVoiceConnectorOrigination")
 PutVoiceConnectorProxy = Action("PutVoiceConnectorProxy")
-PutVoiceConnectorStreamingConfiguration = Action(
-    "PutVoiceConnectorStreamingConfiguration"
-)
+PutVoiceConnectorStreamingConfiguration = Action("PutVoiceConnectorStreamingConfiguration")
 PutVoiceConnectorTermination = Action("PutVoiceConnectorTermination")
-PutVoiceConnectorTerminationCredentials = Action(
-    "PutVoiceConnectorTerminationCredentials"
-)
+PutVoiceConnectorTerminationCredentials = Action("PutVoiceConnectorTerminationCredentials")
 RedactConversationMessage = Action("RedactConversationMessage")
 RedactRoomMessage = Action("RedactRoomMessage")
 RegenerateSecurityToken = Action("RegenerateSecurityToken")

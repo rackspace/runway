@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Any
 
 from botocore.exceptions import ClientError
 from typing_extensions import Literal, TypedDict
@@ -31,19 +31,19 @@ class EnsureKeypairExistsHookArgs(BaseModel):
     keypair: str
     """Name of the key pair to ensure exists."""
 
-    public_key_path: Optional[str] = None
+    public_key_path: str | None = None
     """Path to a public key file to be imported instead of generating a new key.
     Incompatible with the SSM options, as the private key will not be available for storing.
 
     """
 
-    ssm_key_id: Optional[str] = None
+    ssm_key_id: str | None = None
     """ID of a KMS key to encrypt the SSM parameter with.
     If omitted, the default key will be used.
 
     """
 
-    ssm_parameter_name: Optional[str] = None
+    ssm_parameter_name: str | None = None
     """Path to an SSM store parameter to receive the generated private key
     instead of importing it or storing it locally.
 
@@ -59,7 +59,7 @@ class KeyPairInfo(TypedDict, total=False):
     status: Literal["created", "exists", "imported"]
 
 
-def get_existing_key_pair(ec2: EC2Client, keypair_name: str) -> Optional[KeyPairInfo]:
+def get_existing_key_pair(ec2: EC2Client, keypair_name: str) -> KeyPairInfo | None:
     """Get existing keypair."""
     resp = ec2.describe_key_pairs()
     keypair = next(
@@ -100,7 +100,7 @@ def import_key_pair(
     return keypair
 
 
-def read_public_key_file(path: Path) -> Optional[bytes]:
+def read_public_key_file(path: Path) -> bytes | None:
     """Read public key file."""
     try:
         data = path.read_bytes()
@@ -117,7 +117,7 @@ def read_public_key_file(path: Path) -> Optional[bytes]:
 
 def create_key_pair_from_public_key_file(
     ec2: EC2Client, keypair_name: str, public_key_path: Path
-) -> Optional[KeyPairInfo]:
+) -> KeyPairInfo | None:
     """Create keypair from public key file."""
     public_key_data = read_public_key_file(public_key_path)
     if not public_key_data:
@@ -136,13 +136,13 @@ def create_key_pair_in_ssm(
     ssm: SSMClient,
     keypair_name: str,
     parameter_name: str,
-    kms_key_id: Optional[str] = None,
-) -> Optional[KeyPairInfo]:
+    kms_key_id: str | None = None,
+) -> KeyPairInfo | None:
     """Create keypair in SSM."""
     keypair = create_key_pair(ec2, keypair_name)
     try:
         kms_key_label = "default"
-        kms_args: Dict[str, Any] = {}
+        kms_args: dict[str, Any] = {}
         if kms_key_id:
             kms_key_label = kms_key_id
             kms_args = {"KeyId": kms_key_id}
@@ -191,9 +191,7 @@ def create_key_pair(ec2: EC2Client, keypair_name: str) -> KeyPairTypeDef:
     return keypair
 
 
-def create_key_pair_local(
-    ec2: EC2Client, keypair_name: str, dest_dir: Path
-) -> Optional[KeyPairInfo]:
+def create_key_pair_local(ec2: EC2Client, keypair_name: str, dest_dir: Path) -> KeyPairInfo | None:
     """Create local keypair."""
     dest_dir = dest_dir.resolve()
     if not dest_dir.is_dir():
@@ -219,7 +217,7 @@ def create_key_pair_local(
 
 def interactive_prompt(
     keypair_name: str,
-) -> Tuple[Optional[Literal["create", "import"]], Optional[str]]:
+) -> tuple[Literal["create", "import"] | None, str | None]:
     """Interactive prompt."""
     if not sys.stdin.isatty():
         return None, None
@@ -246,21 +244,16 @@ def interactive_prompt(
     return None, None
 
 
-def ensure_keypair_exists(
-    context: CfnginContext, *__args: Any, **kwargs: Any
-) -> KeyPairInfo:
+def ensure_keypair_exists(context: CfnginContext, *__args: Any, **kwargs: Any) -> KeyPairInfo:
     """Ensure a specific keypair exists within AWS.
 
     If the key doesn't exist, upload it.
 
     """
-    args = EnsureKeypairExistsHookArgs.parse_obj(kwargs)
+    args = EnsureKeypairExistsHookArgs.model_validate(kwargs)
 
     if args.public_key_path and args.ssm_parameter_name:
-        LOGGER.error(
-            "public_key_path and ssm_parameter_name cannot be "
-            "specified at the same time"
-        )
+        LOGGER.error("public_key_path and ssm_parameter_name cannot be specified at the same time")
         return {}
 
     session = context.get_session()
@@ -282,9 +275,7 @@ def ensure_keypair_exists(
     else:
         action, path = interactive_prompt(args.keypair)
         if action == "import" and path:
-            keypair_info = create_key_pair_from_public_key_file(
-                ec2, args.keypair, Path(path)
-            )
+            keypair_info = create_key_pair_from_public_key_file(ec2, args.keypair, Path(path))
         elif action == "create" and path:
             keypair_info = create_key_pair_local(ec2, args.keypair, Path(path))
         else:

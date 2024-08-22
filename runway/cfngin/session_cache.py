@@ -1,7 +1,8 @@
 """CFNgin session caching."""
 
+from __future__ import annotations
+
 import logging
-from typing import Optional
 
 import boto3
 
@@ -15,11 +16,11 @@ DEFAULT_PROFILE = None
 
 
 def get_session(
-    region: Optional[str] = None,
-    profile: Optional[str] = None,
-    access_key: Optional[str] = None,
-    secret_key: Optional[str] = None,
-    session_token: Optional[str] = None,
+    region: str | None = None,
+    profile: str | None = None,
+    access_key: str | None = None,
+    secret_key: str | None = None,
+    session_token: str | None = None,
 ) -> boto3.Session:
     """Create a thread-safe boto3 session.
 
@@ -51,12 +52,12 @@ def get_session(
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         aws_session_token=session_token,
-        botocore_session=Session(),  # type: ignore
+        botocore_session=Session(),
         region_name=region,
         profile_name=profile,
     )
     cred_provider = session._session.get_component("credential_provider")  # type: ignore
     provider = cred_provider.get_provider("assume-role")  # type: ignore
     provider.cache = BOTO3_CREDENTIAL_CACHE
-    provider._prompter = ui.getpass
+    provider._prompter = ui.getpass  # noqa: SLF001
     return session

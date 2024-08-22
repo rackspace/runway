@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.iam."""
 
-# pyright: basic
 from __future__ import annotations
 
 from datetime import datetime
@@ -22,13 +21,13 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
-    from ...factories import MockCFNginContext
+    from ...factories import MockCfnginContext
 
 CREATE_DATE = datetime(2015, 1, 1)
 MODULE = "runway.cfngin.hooks.iam"
 
 
-def test_create_ecs_service_role(cfngin_context: MockCFNginContext) -> None:
+def test_create_ecs_service_role(cfngin_context: MockCfnginContext) -> None:
     """Test create_ecs_service_role."""
     stub = cfngin_context.add_stubber("iam")
 
@@ -64,7 +63,7 @@ def test_create_ecs_service_role(cfngin_context: MockCFNginContext) -> None:
 
 
 def test_create_ecs_service_role_already_exists(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
 ) -> None:
     """Test create_ecs_service_role already exists."""
     stub = cfngin_context.add_stubber("iam")
@@ -86,7 +85,7 @@ def test_create_ecs_service_role_already_exists(
 
 
 def test_create_ecs_service_role_raise_client_error(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
 ) -> None:
     """Test create_ecs_service_role raise ClientError."""
     stub = cfngin_context.add_stubber("iam")
@@ -99,7 +98,7 @@ def test_create_ecs_service_role_raise_client_error(
 
 
 def test_ensure_server_cert_exists(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture, tmp_path: Path
+    cfngin_context: MockCfnginContext, mocker: MockerFixture, tmp_path: Path
 ) -> None:
     """Test ensure_server_cert_exists."""
     cert_name = "foo"
@@ -155,7 +154,7 @@ def test_ensure_server_cert_exists(
 
 
 def test_ensure_server_cert_exists_already_exists(
-    cfngin_context: MockCFNginContext,
+    cfngin_context: MockCfnginContext,
 ) -> None:
     """Test ensure_server_cert_exists already exists."""
     cert_name = "foo"
@@ -188,7 +187,7 @@ def test_ensure_server_cert_exists_already_exists(
 
 
 def test_ensure_server_cert_exists_no_prompt_no_parameters(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture
+    cfngin_context: MockCfnginContext, mocker: MockerFixture
 ) -> None:
     """Test ensure_server_cert_exists no prompt, not parameters."""
     mocker.patch(
@@ -200,14 +199,12 @@ def test_ensure_server_cert_exists_no_prompt_no_parameters(
     stub.add_client_error("get_server_certificate")
 
     with stub:
-        assert not ensure_server_cert_exists(
-            cfngin_context, cert_name="foo", prompt=False
-        )
+        assert not ensure_server_cert_exists(cfngin_context, cert_name="foo", prompt=False)
     stub.assert_no_pending_responses()
 
 
 def test_ensure_server_cert_exists_prompt_no(
-    cfngin_context: MockCFNginContext, mocker: MockerFixture
+    cfngin_context: MockCfnginContext, mocker: MockerFixture
 ) -> None:
     """Test ensure_server_cert_exists prompt input no."""
     mocker.patch(

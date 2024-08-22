@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import base64
 import logging
-from typing import TYPE_CHECKING, Any, Union
-
-from typing_extensions import Final, Literal
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ...lookups.handlers.base import LookupHandler
 
@@ -18,10 +16,10 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class EcrLookup(LookupHandler):
+class EcrLookup(LookupHandler["CfnginContext | RunwayContext"]):
     """ECR Lookup."""
 
-    TYPE_NAME: Final[Literal["ecr"]] = "ecr"
+    TYPE_NAME: ClassVar[str] = "ecr"
     """Name that the Lookup is registered as."""
 
     @staticmethod
@@ -35,13 +33,7 @@ class EcrLookup(LookupHandler):
         return password
 
     @classmethod
-    def handle(  # pylint: disable=arguments-differ
-        cls,
-        value: str,
-        context: Union[CfnginContext, RunwayContext],
-        *__args: Any,
-        **__kwargs: Any,
-    ) -> Any:
+    def handle(cls, value: str, context: CfnginContext | RunwayContext, **_kwargs: Any) -> Any:
         """Retrieve a value from AWS Elastic Container Registry (ECR).
 
         Args:

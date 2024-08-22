@@ -5,23 +5,10 @@ from __future__ import annotations
 import logging
 import os
 import platform
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from docker import DockerClient
 from docker.errors import DockerException, ImageNotFound
-from docker.models.images import Image
 from docker.types import Mount
 
 from ...._logging import PrefixAdaptor
@@ -30,7 +17,11 @@ from ....exceptions import DockerConnectionRefusedError, DockerExecFailedError
 from .constants import AWS_SAM_BUILD_IMAGE_PREFIX, DEFAULT_IMAGE_NAME, DEFAULT_IMAGE_TAG
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
+
+    from docker.models.images import Image
+    from typing_extensions import Self
 
     from ...._logging import RunwayLogger
     from ....context import CfnginContext, RunwayContext
@@ -38,9 +29,6 @@ if TYPE_CHECKING:
     from .models.args import AwsLambdaHookArgs, DockerOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
-
-
-_T = TypeVar("_T")
 
 
 class DockerDependencyInstaller:
@@ -61,7 +49,7 @@ class DockerDependencyInstaller:
     client: DockerClient
     """Docker client."""
 
-    ctx: Union[CfnginContext, RunwayContext]
+    ctx: CfnginContext | RunwayContext
     """Context object."""
 
     options: DockerOptions
@@ -71,8 +59,8 @@ class DockerDependencyInstaller:
         self,
         project: Project[AwsLambdaHookArgs],
         *,
-        client: Optional[DockerClient] = None,
-        context: Optional[Union[CfnginContext, RunwayContext]] = None,
+        client: DockerClient | None = None,
+        context: CfnginContext | RunwayContext | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -96,7 +84,7 @@ class DockerDependencyInstaller:
         self.project = project
 
     @cached_property
-    def bind_mounts(self) -> List[Mount]:
+    def bind_mounts(self) -> list[Mount]:
         """Bind mounts that will be used by the container."""
         mounts = [
             Mount(
@@ -121,7 +109,7 @@ class DockerDependencyInstaller:
         return mounts
 
     @cached_property
-    def environment_variables(self) -> Dict[str, str]:
+    def environment_variables(self) -> dict[str, str]:
         """Environment variables to pass to the Docker container.
 
         This is a subset of the environment variables stored in the context
@@ -131,7 +119,7 @@ class DockerDependencyInstaller:
         return {k: v for k, v in self.ctx.env.vars.items() if k.startswith("DOCKER")}
 
     @cached_property
-    def image(self) -> Union[Image, str]:
+    def image(self) -> Image | str:
         """Docker image that will be used.
 
         Raises:
@@ -149,13 +137,13 @@ class DockerDependencyInstaller:
             )
         raise ValueError("docker.file, docker.image, or runtime is required")
 
-    @cached_property  # pylint error is python3.7 only
-    def install_commands(self) -> List[str]:
+    @cached_property
+    def install_commands(self) -> list[str]:
         """Commands to run to install dependencies."""
         return []
 
     @cached_property
-    def post_install_commands(self) -> List[str]:
+    def post_install_commands(self) -> list[str]:
         """Commands to run after dependencies have been installed."""
         cmds = [
             *[
@@ -171,7 +159,7 @@ class DockerDependencyInstaller:
         ]
         if platform.system() != "Windows":
             # methods only exist on POSIX systems
-            gid, uid = os.getgid(), os.getuid()  # pylint: disable=no-member
+            gid, uid = os.getgid(), os.getuid()
             cmds.append(
                 f"chown -R {uid}:{gid} {self.DEPENDENCY_DIR}",
             )
@@ -180,7 +168,7 @@ class DockerDependencyInstaller:
         return cmds
 
     @cached_property
-    def pre_install_commands(self) -> List[str]:
+    def pre_install_commands(self) -> list[str]:
         """Commands to run before dependencies have been installed."""
         cmds = [
             f"chown -R 0:0 {self.DEPENDENCY_DIR}",
@@ -189,8 +177,8 @@ class DockerDependencyInstaller:
             cmds.append(f"chown -R 0:0 {self.CACHE_DIR}")
         return cmds
 
-    @cached_property  # pylint error is python3.7 only
-    def runtime(self) -> Optional[str]:
+    @cached_property
+    def runtime(self) -> str | None:
         """AWS Lambda runtime determined from the Docker container."""
         return None
 
@@ -198,8 +186,8 @@ class DockerDependencyInstaller:
         self,
         docker_file: Path,
         *,
-        name: Optional[str] = None,
-        tag: Optional[str] = None,
+        name: str | None = None,
+        tag: str | None = None,
     ) -> Image:
         """Build Docker image from Dockerfile.
 
@@ -233,7 +221,7 @@ class DockerDependencyInstaller:
 
     def log_docker_msg_bytes(
         self, stream: Iterator[bytes], *, level: int = logging.INFO
-    ) -> List[str]:
+    ) -> list[str]:
         """Log Docker output message from blocking generator that return bytes.
 
         Args:
@@ -244,7 +232,7 @@ class DockerDependencyInstaller:
             List of log messages.
 
         """
-        result: List[str] = []
+        result: list[str] = []
         for raw_msg in stream:
             msg = raw_msg.decode().strip()
             result.append(msg)
@@ -252,8 +240,8 @@ class DockerDependencyInstaller:
         return result
 
     def log_docker_msg_dict(
-        self, stream: Iterator[Dict[str, Any]], *, level: int = logging.INFO
-    ) -> List[str]:
+        self, stream: Iterator[dict[str, Any]], *, level: int = logging.INFO
+    ) -> list[str]:
         """Log Docker output message from blocking generator that return dict.
 
         Args:
@@ -264,7 +252,7 @@ class DockerDependencyInstaller:
             list of log messages.
 
         """
-        result: List[str] = []
+        result: list[str] = []
         for raw_msg in stream:
             for key in ["stream", "status"]:
                 if key in raw_msg:
@@ -283,7 +271,7 @@ class DockerDependencyInstaller:
         - :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.install_commands`
         - :attr:`~runway.cfngin.hooks.awslambda.docker.DockerDependencyInstaller.post_install_commands`
 
-        """  # noqa
+        """
         for cmd in self.pre_install_commands:
             self.run_command(cmd)
         for cmd in self.install_commands:
@@ -315,7 +303,7 @@ class DockerDependencyInstaller:
             LOGGER.info("image not found; pulling docker image %s...", name)
         return self.client.images.pull(repository=name)
 
-    def run_command(self, command: str, *, level: int = logging.INFO) -> List[str]:
+    def run_command(self, command: str, *, level: int = logging.INFO) -> list[str]:
         """Execute equivalent of ``docker container run``.
 
         Args:
@@ -350,9 +338,7 @@ class DockerDependencyInstaller:
                 raise DockerExecFailedError(response)
 
     @classmethod
-    def from_project(
-        cls: Type[_T], project: Project[AwsLambdaHookArgs]
-    ) -> Optional[_T]:
+    def from_project(cls: type[Self], project: Project[AwsLambdaHookArgs]) -> Self | None:
         """Instantiate class from a project.
 
         High-level method that wraps instantiation in error handling.

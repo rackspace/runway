@@ -1,6 +1,6 @@
 test_value: basic value
 
-require_test: True
+require_test: true
 
 test_list:
   - list value 1

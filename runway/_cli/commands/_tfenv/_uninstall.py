@@ -1,8 +1,10 @@
 """Uninstall Terraform version(s) that were installed by Runway and/or tfenv."""
 
 # docs: file://./../../../../docs/source/commands.rst
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
@@ -33,7 +35,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 def uninstall(
     ctx: click.Context,
     *,
-    version: Optional[str] = None,
+    version: str | None = None,
     all_versions: bool = False,
     **_: Any,
 ) -> None:

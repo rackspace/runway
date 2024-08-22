@@ -1,7 +1,9 @@
 """Retrieve the ID of the Cognito User Pool."""
 
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from ...base import HookArgsBaseModel
 
@@ -11,14 +13,14 @@ LOGGER = logging.getLogger(__name__)
 class HookArgs(HookArgsBaseModel):
     """Hook arguments."""
 
-    created_user_pool_id: Optional[str] = None
+    created_user_pool_id: str | None = None
     """The ID of the created Cognito User Pool."""
 
-    user_pool_arn: Optional[str] = None
+    user_pool_arn: str | None = None
     """The ARN of the supplied User pool."""
 
 
-def get(*__args: Any, **kwargs: Any) -> Dict[str, Any]:
+def get(*__args: Any, **kwargs: Any) -> dict[str, Any]:
     """Retrieve the ID of the Cognito User Pool.
 
     The User Pool can either be supplied via an ARN or by being generated.
@@ -29,7 +31,7 @@ def get(*__args: Any, **kwargs: Any) -> Dict[str, Any]:
     :class:`~runway.cfngin.hooks.staticsite.auth_at_edge.user_pool_id_retriever.HookArgs`.
 
     """
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
 
     # Favor a specific arn over a created one
     if args.user_pool_arn:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Type
+from typing import TYPE_CHECKING
 
 from .handlers import cfn_lint, script
 from .handlers import yaml_lint as yamllint
@@ -10,10 +10,10 @@ from .handlers import yaml_lint as yamllint
 if TYPE_CHECKING:
     from .handlers.base import TestHandler
 
-TEST_HANDLERS: Dict[str, Type[TestHandler]] = {}
+TEST_HANDLERS: dict[str, type[TestHandler]] = {}
 
 
-def register_test_handler(test_type: str, handler: Type[TestHandler]) -> None:
+def register_test_handler(test_type: str, handler: type[TestHandler]) -> None:
     """Register a test handler.
 
     Args:

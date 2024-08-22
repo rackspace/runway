@@ -1,15 +1,15 @@
 deployments:
   - modules:
-    - path: sampleapp.web
-      type: static
-      parameters:
-        namespace: sampleapp-${env DEPLOY_ENVIRONMENT}
-        staticsite_cf_disable: ${var cf_disable.${env DEPLOY_ENVIRONMENT}::default=false, transform=bool}
-      options:
-        build_output: dist/sample-app
-        build_steps:
-          - npm install
-          - npx ng build
+      - path: sampleapp.web
+        type: static
+        parameters:
+          namespace: sampleapp-${env DEPLOY_ENVIRONMENT}
+          staticsite_cf_disable: ${var cf_disable.${env DEPLOY_ENVIRONMENT}::default=false, transform=bool}
+        options:
+          build_output: dist/sample-app
+          build_steps:
+            - npm install
+            - npx ng build
     regions:
       - us-east-1
 

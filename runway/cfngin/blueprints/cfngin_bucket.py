@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, Union
+from typing import TYPE_CHECKING, ClassVar
 
 from troposphere import Equals, If, Not, NoValue, Or, Tag, Tags, s3
 
@@ -21,7 +21,7 @@ class CfnginBucket(Blueprint):
     """CFNgin Bucket Blueprint."""
 
     DESCRIPTION: ClassVar[str] = f"{__name__}.CFNginBucket (v{__version__})"
-    VARIABLES: ClassVar[Dict[str, BlueprintVariableTypeDef]] = {
+    VARIABLES: ClassVar[dict[str, BlueprintVariableTypeDef]] = {
         "AccessControl": {
             "allowed_values": [
                 "AuthenticatedRead",
@@ -66,13 +66,11 @@ class CfnginBucket(Blueprint):
         self.add_output("BucketArn", bucket.get_att("Arn"))
         self.add_output("BucketDomainName", bucket.get_att("DomainName"))
         self.add_output("BucketName", bucket.ref())
-        self.add_output(
-            "BucketRegionalDomainName", bucket.get_att("RegionalDomainName")
-        )
+        self.add_output("BucketRegionalDomainName", bucket.get_att("RegionalDomainName"))
         return bucket
 
     @cached_property
-    def bucket_encryption(self) -> Union[AWSHelperFn, s3.BucketEncryption]:
+    def bucket_encryption(self) -> AWSHelperFn | s3.BucketEncryption:
         """CFNgin bucket encryption.
 
         This cached property can be overridden in a subclass to customize the

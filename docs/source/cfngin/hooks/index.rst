@@ -24,7 +24,7 @@ Only the following actions allow pre/post hooks:
   - :attr:`~cfngin.hook.args`
 
   .. attribute:: args
-    :type: Optional[Dict[str, Any]]
+    :type: dict[str, Any]
     :value: {}
 
     A dictionary of arguments to pass to the hook.
@@ -42,7 +42,7 @@ Only the following actions allow pre/post hooks:
             key: ${val}
 
   .. attribute:: data_key
-    :type: Optional[str]
+    :type: str | None
     :value: None
 
     If set, and the hook returns data (a dictionary or ``pydantic.BaseModel``), the results will be stored in :attr:`CfnginContext.hook_data <runway.context.CfnginContext.hook_data>` with the ``data_key`` as its key.
@@ -54,7 +54,7 @@ Only the following actions allow pre/post hooks:
         - data_key: example-key
 
   .. attribute:: enabled
-    :type: Optional[bool]
+    :type: bool
     :value: True
 
     Whether to execute the hook every CFNgin run.
@@ -78,14 +78,11 @@ Only the following actions allow pre/post hooks:
         - path: runway.cfngin.hooks.command.run_command
 
   .. attribute:: required
-    :type: Optional[bool]
+    :type: bool
     :value: True
 
     Whether to stop execution if the hook fails.
 
-
-.. contents::
-  :depth: 4
 
 
 ----
@@ -156,12 +153,11 @@ Example Hook Function
   :caption: local_path/hooks/my_hook.py
 
   """My hook."""
-  from typing import Dict, Optional
 
 
   def do_something(
       *, is_failure: bool = True, name: str = "Kevin", **_kwargs: str
-  ) -> Optional[Dict[str, str]]:
+  ) -> dict[str, str] | None:
       """Do something."""
       if is_failure:
           return None
@@ -194,7 +190,7 @@ These can then be used to parse the values provided in the :attr:`~cfngin.hook.a
 
   """My hook."""
   import logging
-  from typing import TYPE_CHECKING, Any, Dict, Optional
+  from typing import TYPE_CHECKING, Any
 
   from runway.utils import BaseModel
   from runway.cfngin.hooks.protocols import CfnginHookProtocol
@@ -222,11 +218,11 @@ These can then be used to parse the values provided in the :attr:`~cfngin.hook.a
       """My class does a thing.
 
       Keyword Args:
-          is_failure (bool): Force the hook to fail if true.
-          name (str): Name used in the response.
+          is_failure: Force the hook to fail if true.
+          name: Name used in the response.
 
       Returns:
-          Dict[str, str]: Response message is stored in ``result``.
+          Response message is stored in ``result``.
 
       Example:
       .. code-block:: yaml
@@ -255,7 +251,7 @@ These can then be used to parse the values provided in the :attr:`~cfngin.hook.a
           self.args.tags.update(context.tags)
           self.context = context
 
-      def post_deploy(self) -> Optional[Dict[str, str]]:
+      def post_deploy(self) -> dict[str, str] | None:
           """Run during the **post_deploy** stage."""
           if self.args["is_failure"]:
               return None

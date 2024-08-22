@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.lookups.handlers.kms."""
 
-# pyright: basic
 from __future__ import annotations
 
 import codecs
@@ -12,7 +11,7 @@ import pytest
 from runway.cfngin.lookups.handlers.kms import KmsLookup
 
 if TYPE_CHECKING:
-    from ....factories import MockCFNginContext
+    from ....factories import MockCfnginContext
 
 SECRET = "my secret"
 
@@ -20,7 +19,7 @@ SECRET = "my secret"
 class TestKMSHandler:
     """Tests for runway.cfngin.lookups.handlers.kms.KmsLookup."""
 
-    def test_handle(self, cfngin_context: MockCFNginContext) -> None:
+    def test_handle(self, cfngin_context: MockCfnginContext) -> None:
         """Test handle."""
         stubber = cfngin_context.add_stubber("kms")
         stubber.add_response(
@@ -33,12 +32,8 @@ class TestKMSHandler:
             assert KmsLookup.handle(SECRET, context=cfngin_context) == SECRET
             stubber.assert_no_pending_responses()
 
-    @pytest.mark.parametrize(
-        "template", ["${region}@${blob}", "${blob}::region=${region}"]
-    )
-    def test_handle_with_region(
-        self, cfngin_context: MockCFNginContext, template: str
-    ) -> None:
+    @pytest.mark.parametrize("template", ["${region}@${blob}", "${blob}::region=${region}"])
+    def test_handle_with_region(self, cfngin_context: MockCfnginContext, template: str) -> None:
         """Test handle with region."""
         region = "us-west-2"
         query = string.Template(template).substitute({"blob": SECRET, "region": region})

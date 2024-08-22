@@ -6,8 +6,6 @@ Configuration
 
 Standard `Serverless Framework <https://serverless.com>`__ rules apply but, we have some added prerequisites, recommendations, and caveats.
 
-.. contents::
-  :depth: 4
 
 
 *************
@@ -27,7 +25,7 @@ Options
 Options specific to Serverless Framework modules.
 
 .. data:: args
-  :type: Optional[List[str]]
+  :type: list[str]
   :value: []
   :noindex:
 
@@ -45,7 +43,7 @@ Options specific to Serverless Framework modules.
   .. versionadded:: 1.4.0
 
 .. data:: extend_serverless_yml
-  :type: Optional[Dict[str, Any]]
+  :type: dict[str, Any]
   :value: {}
   :noindex:
 
@@ -64,7 +62,7 @@ Options specific to Serverless Framework modules.
   .. versionadded:: 1.8.0
 
 .. data:: promotezip
-  :type: Optional[Dict[str, str]]
+  :type: dict[str, str]
   :value: {}
   :noindex:
 
@@ -104,10 +102,10 @@ Refer to the `Serverless Framework Documentation <https://serverless.com/framewo
 Stages
 ******
 
-Runway's concept of a :ref:`deploy environment <term-deploy-env>` has a 1-to-1 mapping to Serverless's **stage**.
+Runway's concept of a :term:`Deploy Environment` has a 1-to-1 mapping to Serverless's **stage**.
 For example, if the deploy environment is **dev**, Serverless will be run with ``--stage dev``.
 
-Each stage requires either its own variables file (even if empty for a particular stage) following a specific `File Naming`_ scheme and/or a configured ``environment`` for the module or deployment (see :ref:`Runway Config File <runway-config>` for details).
+Each stage requires either its own variables file (even if empty for a particular stage) following a specific `File Naming`_ scheme and/or a configured ``environment`` for the module or deployment (see :ref:`runway_config:Runway Config File` for details).
 
 File Naming
 ===========

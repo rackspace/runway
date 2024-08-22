@@ -12,9 +12,7 @@ spec:
       containers:
         - name: the-container
           image: monopole/hello:1
-          command: ["/hello",
-                    "--port=8080",
-                    "--enableRiskyFeature=$(ENABLE_RISKY)"]
+          command: ["/hello", "--port=8080", "--enableRiskyFeature=$(ENABLE_RISKY)"]
           ports:
             - containerPort: 8080
           env:

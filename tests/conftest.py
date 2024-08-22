@@ -1,22 +1,22 @@
 """Pytest configuration, fixtures, and plugins."""
 
-# pylint: disable=redefined-outer-name
 from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Generator, Iterator
+from typing import TYPE_CHECKING
 
 import pytest
 
 from .factories import cli_runner_factory
 
 if TYPE_CHECKING:
+    from collections.abc import Generator, Iterator
+
     from _pytest.config import Config
     from _pytest.config.argparsing import Parser
     from _pytest.fixtures import SubRequest
     from click.testing import CliRunner
-    from pytest import TempPathFactory
 
 
 def pytest_configure(config: Config) -> None:
@@ -50,20 +50,20 @@ def pytest_addoption(parser: Parser) -> None:
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def cli_runner(request: SubRequest) -> CliRunner:
     """Initialize instance of `click.testing.CliRunner`."""
     return cli_runner_factory(request)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def cli_runner_isolated(cli_runner: CliRunner) -> Generator[CliRunner, None, None]:
     """Initialize instance of `click.testing.CliRunner` with `isolate_filesystem()` called."""
     with cli_runner.isolated_filesystem():
         yield cli_runner
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def cd_tmp_path(tmp_path: Path) -> Iterator[Path]:
     """Change directory to a temporary path.
 
@@ -79,7 +79,7 @@ def cd_tmp_path(tmp_path: Path) -> Iterator[Path]:
         os.chdir(prev_dir)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def root_dir() -> Path:
     """Return a path object to the root directory."""
     return Path(__file__).parent.parent
@@ -101,6 +101,6 @@ def sanitize_environment() -> None:
 
 
 @pytest.fixture(scope="session")
-def tfenv_dir(tmp_path_factory: TempPathFactory) -> Path:
+def tfenv_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Directory for storing tfenv between tests."""
     return tmp_path_factory.mktemp(".tfenv", numbered=True)

@@ -22,18 +22,18 @@ from runway.cfngin.blueprints.variables.types import (
 
 def get_valid_instance_types() -> Any:
     """Return list of instance types from either a JSON or gzipped JSON file."""
-    base_path = os.path.join(
-        os.path.dirname(botocore.__file__), "data", "ec2", "2016-11-15"
+    base_path = os.path.join(  # noqa: PTH118
+        os.path.dirname(botocore.__file__), "data", "ec2", "2016-11-15"  # noqa: PTH120
     )
 
-    json_path = os.path.join(base_path, "service-2.json")
-    gzip_path = os.path.join(base_path, "service-2.json.gz")
+    json_path = os.path.join(base_path, "service-2.json")  # noqa: PTH118
+    gzip_path = os.path.join(base_path, "service-2.json.gz")  # noqa: PTH118
 
-    if os.path.exists(gzip_path):
+    if os.path.exists(gzip_path):  # noqa: PTH110
         with gzip.open(gzip_path, "rt", encoding="utf-8") as stream:
             data = json.load(stream)
-    elif os.path.exists(json_path):
-        with open(json_path, "r", encoding="utf-8") as stream:
+    elif os.path.exists(json_path):  # noqa: PTH110
+        with open(json_path, encoding="utf-8") as stream:  # noqa: PTH123
             data = json.load(stream)
     else:
         raise FileNotFoundError("Neither JSON nor gzipped JSON file found.")
@@ -47,8 +47,7 @@ class NodeGroup(Blueprint):
     VARIABLES = {
         "KeyName": {
             "type": CFNString,  # string to allow it to be unset
-            "description": "(Optional) EC2 Key Pair to allow SSH "
-            "access to the instances",
+            "description": "(Optional) EC2 Key Pair to allow SSH access to the instances",
             "default": "",
         },
         "NodeImageId": {
@@ -57,10 +56,10 @@ class NodeGroup(Blueprint):
         },
         "NodeInstanceType": {
             "type": CFNString,
-            "description": "EC2 instance type for the node " "instances",
+            "description": "EC2 instance type for the node instances",
             "default": "t2.medium",
             "allowed_values": get_valid_instance_types(),
-            "constraint_description": "Must be a valid EC2 " "instance type",
+            "constraint_description": "Must be a valid EC2 instance type",
         },
         "NodeInstanceProfile": {
             "type": CFNString,
@@ -68,12 +67,12 @@ class NodeGroup(Blueprint):
         },
         "NodeAutoScalingGroupMinSize": {
             "type": CFNNumber,
-            "description": "Minimum size of Node " "Group ASG.",
+            "description": "Minimum size of Node Group ASG.",
             "default": 1,
         },
         "NodeAutoScalingGroupMaxSize": {
             "type": CFNNumber,
-            "description": "Maximum size of Node " "Group ASG.",
+            "description": "Maximum size of Node Group ASG.",
             "default": 3,
         },
         "NodeVolumeSize": {
@@ -98,16 +97,16 @@ class NodeGroup(Blueprint):
         },
         "NodeGroupName": {
             "type": CFNString,
-            "description": "Unique identifier for the Node " "Group.",
+            "description": "Unique identifier for the Node Group.",
         },
         "ClusterControlPlaneSecurityGroup": {
             "type": EC2SecurityGroupId,
-            "description": "The security " "group of the " "cluster control " "plane.",
+            "description": "The security group of the cluster control plane.",
         },
         "VpcId": {"type": EC2VPCId, "description": "The VPC of the worker instances"},
         "Subnets": {
             "type": EC2SubnetIdList,
-            "description": "The subnets where workers can be " "created.",
+            "description": "The subnets where workers can be created.",
         },
         "UseDesiredInstanceCount": {
             "type": CFNString,
@@ -120,8 +119,7 @@ class NodeGroup(Blueprint):
         template = self.template
         template.set_version("2010-09-09")
         template.set_description(
-            "Kubernetes workers via EKS - V1.0.0 "
-            "- compatible with amazon-eks-node-v23+"
+            "Kubernetes workers via EKS - V1.0.0 - compatible with amazon-eks-node-v23+"
         )
 
         # Metadata
@@ -159,9 +157,7 @@ class NodeGroup(Blueprint):
                         },
                         {
                             "Label": {"default": "Worker Network Configuration"},
-                            "Parameters": [
-                                self.variables[i].name for i in ["VpcId", "Subnets"]
-                            ],
+                            "Parameters": [self.variables[i].name for i in ["VpcId", "Subnets"]],
                         },
                     ]
                 }
@@ -173,9 +169,7 @@ class NodeGroup(Blueprint):
             "DesiredInstanceCountSpecified",
             Equals(self.variables["UseDesiredInstanceCount"].ref, "true"),
         )
-        template.add_condition(
-            "KeyNameSpecified", Not(Equals(self.variables["KeyName"].ref, ""))
-        )
+        template.add_condition("KeyNameSpecified", Not(Equals(self.variables["KeyName"].ref, "")))
 
         # Resources
         nodesecuritygroup = template.add_resource(
@@ -215,9 +209,7 @@ class NodeGroup(Blueprint):
                 Description="Allow worker Kubelets and pods to receive "
                 "communication from the cluster control plane",
                 GroupId=nodesecuritygroup.ref(),
-                SourceSecurityGroupId=self.variables[
-                    "ClusterControlPlaneSecurityGroup"
-                ].ref,
+                SourceSecurityGroupId=self.variables["ClusterControlPlaneSecurityGroup"].ref,
                 IpProtocol="tcp",
                 FromPort=1025,
                 ToPort=65535,
@@ -242,9 +234,7 @@ class NodeGroup(Blueprint):
                 "443 to receive communication from cluster "
                 "control plane",
                 GroupId=nodesecuritygroup.ref(),
-                SourceSecurityGroupId=self.variables[
-                    "ClusterControlPlaneSecurityGroup"
-                ].ref,  # noqa
+                SourceSecurityGroupId=self.variables["ClusterControlPlaneSecurityGroup"].ref,
                 IpProtocol="tcp",
                 FromPort=443,
                 ToPort=443,
@@ -266,7 +256,7 @@ class NodeGroup(Blueprint):
         template.add_resource(
             ec2.SecurityGroupIngress(
                 "ClusterControlPlaneSecurityGroupIngress",
-                Description="Allow pods to communicate with the cluster API " "Server",
+                Description="Allow pods to communicate with the cluster API Server",
                 GroupId=self.variables["ClusterControlPlaneSecurityGroup"].ref,
                 SourceSecurityGroupId=nodesecuritygroup.ref(),
                 IpProtocol="tcp",
@@ -294,9 +284,7 @@ class NodeGroup(Blueprint):
                     ),
                     ImageId=self.variables["NodeImageId"].ref,
                     InstanceType=self.variables["NodeInstanceType"].ref,
-                    KeyName=If(
-                        "KeyNameSpecified", self.variables["KeyName"].ref, NoValue
-                    ),
+                    KeyName=If("KeyNameSpecified", self.variables["KeyName"].ref, NoValue),
                     MetadataOptions=ec2.MetadataOptions(
                         HttpPutResponseHopLimit=2,
                         HttpEndpoint="enabled",
@@ -305,7 +293,7 @@ class NodeGroup(Blueprint):
                     SecurityGroupIds=[nodesecuritygroup.ref()],
                     UserData=Base64(
                         Sub(
-                            "\n".join(
+                            "\n".join(  # noqa: FLY002
                                 [
                                     "#!/bin/bash",
                                     "set -o xtrace",
@@ -342,12 +330,8 @@ class NodeGroup(Blueprint):
                 MinSize=self.variables["NodeAutoScalingGroupMinSize"].ref,
                 MaxSize=self.variables["NodeAutoScalingGroupMaxSize"].ref,
                 Tags=[
-                    autoscaling.Tag(
-                        "Name", Sub("${ClusterName}-${NodeGroupName}-Node"), True
-                    ),
-                    autoscaling.Tag(
-                        Sub("kubernetes.io/cluster/${ClusterName}"), "owned", True
-                    ),
+                    autoscaling.Tag("Name", Sub("${ClusterName}-${NodeGroupName}-Node"), True),
+                    autoscaling.Tag(Sub("kubernetes.io/cluster/${ClusterName}"), "owned", True),
                 ],
                 VPCZoneIdentifier=self.variables["Subnets"].ref,
                 UpdatePolicy=UpdatePolicy(

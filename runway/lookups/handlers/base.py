@@ -4,18 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
-    cast,
-)
+from abc import ABC, abstractmethod
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypedDict, TypeVar, cast, overload
 
 import yaml
 from troposphere import BaseAWSObject
@@ -31,22 +22,43 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+ContextTypeVar = TypeVar(
+    "ContextTypeVar", "CfnginContext", "RunwayContext", "CfnginContext | RunwayContext"
+)
+"""Type variable for context type."""
+
+
 TransformToTypeLiteral = Literal["bool", "str"]
 
 
-def str2bool(v: str):
+def str2bool(v: str) -> bool:
     """Return boolean value of string."""
     return v.lower() in ("yes", "true", "t", "1", "on", "y")
 
 
-class LookupHandler:
+class ParsedArgsTypeDef(TypedDict, total=False):
+    """Partial type definition for the args returned by :meth:`LookupHandler.parse`.
+
+    This class can be subclassed to model all expected arguments if needed.
+
+    """
+
+    default: str
+    get: str
+    indent: str
+    load: Literal["json", "troposphere", "yaml"]
+    region: str
+    transform: TransformToTypeLiteral
+
+
+class LookupHandler(ABC, Generic[ContextTypeVar]):
     """Base class for lookup handlers."""
 
     TYPE_NAME: ClassVar[str]
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def dependencies(cls, __lookup_query: VariableValue) -> Set[str]:
+    def dependencies(cls, __lookup_query: VariableValue) -> set[str]:
         """Calculate any dependencies required to perform this lookup.
 
         Note that lookup_query may not be (completely) resolved at this time.
@@ -58,9 +70,9 @@ class LookupHandler:
     def format_results(
         cls,
         value: Any,
-        get: Optional[str] = None,
-        load: Optional[str] = None,
-        transform: Optional[TransformToTypeLiteral] = None,
+        get: str | None = None,
+        load: str | None = None,
+        transform: TransformToTypeLiteral | None = None,
         **kwargs: Any,
     ) -> Any:
         """Format results to be returned by a lookup.
@@ -72,6 +84,7 @@ class LookupHandler:
                 and ``transform`` method.
             transform: Convert the final value to a different data type before
                 returning it.
+            **kwargs: Arbitrary keyword arguments.
 
         Raises:
             TypeError: If ``get`` is provided but the value value is not a
@@ -95,9 +108,7 @@ class LookupHandler:
             elif isinstance(value, dict):
                 value = value.get(get)
             else:
-                raise TypeError(
-                    f'value must be dict type to use "get"; got type "{type(value)}"'
-                )
+                raise TypeError(f'value must be dict type to use "get"; got type "{type(value)}"')
         if (
             isinstance(value, str)
             and value.lower() in ["none", "null"]
@@ -111,19 +122,25 @@ class LookupHandler:
             return value.data
         return value
 
+    @overload
     @classmethod
+    @abstractmethod
     def handle(
-        cls,
-        __value: str,
-        context: Union[CfnginContext, RunwayContext],
-        *__args: Any,
-        provider: Optional[Provider] = None,
-        **__kwargs: Any,
-    ) -> Any:
+        cls, value: str, context: ContextTypeVar, *, provider: Provider, **_kwargs: Any
+    ) -> Any: ...
+
+    @overload
+    @classmethod
+    @abstractmethod
+    def handle(cls, value: str, context: ContextTypeVar, **_kwargs: Any) -> Any: ...
+
+    @classmethod
+    @abstractmethod
+    def handle(cls, value: str, context: ContextTypeVar, **_kwargs: Any) -> Any:
         """Perform the lookup.
 
         Args:
-            __value: Parameter(s) given to the lookup.
+            value: Parameter(s) given to the lookup.
             context: The current context object.
             provider: CFNgin AWS provider.
 
@@ -131,7 +148,7 @@ class LookupHandler:
         raise NotImplementedError
 
     @classmethod
-    def parse(cls, value: str) -> Tuple[str, Dict[str, str]]:
+    def parse(cls, value: str) -> tuple[str, ParsedArgsTypeDef]:
         """Parse the value passed to a lookup in a standardized way.
 
         Args:
@@ -146,12 +163,12 @@ class LookupHandler:
         colon_split = raw_value.split("::", 1)
 
         query = colon_split.pop(0)
-        args: Dict[str, str] = cls._parse_args(colon_split[0]) if colon_split else {}
+        args = cls._parse_args(colon_split[0]) if colon_split else {}
 
-        return query, args
+        return query, cast(ParsedArgsTypeDef, args)
 
     @classmethod
-    def _parse_args(cls, args: str) -> Dict[str, str]:
+    def _parse_args(cls, args: str) -> dict[str, str]:
         """Convert a string into an args dict.
 
         Each arg should be separated by  ``,``. The key and value should
@@ -167,12 +184,11 @@ class LookupHandler:
         """
         split_args = args.split(",")
         return {
-            key.strip(): value.strip()
-            for key, value in [arg.split("=", 1) for arg in split_args]
+            key.strip(): value.strip() for key, value in [arg.split("=", 1) for arg in split_args]
         }
 
     @classmethod
-    def load(cls, value: Any, parser: Optional[str] = None, **kwargs: Any) -> Any:
+    def load(cls, value: Any, parser: str | None = None, **kwargs: Any) -> Any:
         """Load a formatted string or object into a python data type.
 
         First action taken in :meth:`format_results`.
@@ -183,6 +199,7 @@ class LookupHandler:
         Args:
             value: What is being loaded.
             parser: Name of the parser to use.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             The loaded value.
@@ -257,7 +274,7 @@ class LookupHandler:
         cls,
         value: Any,
         *,
-        to_type: Optional[TransformToTypeLiteral] = "str",
+        to_type: TransformToTypeLiteral | None = "str",
         **kwargs: Any,
     ) -> Any:
         """Transform the result of a lookup into another datatype.
@@ -270,6 +287,7 @@ class LookupHandler:
         Args:
             value: What is to be transformed.
             to_type: The type the value will be transformed into.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             The transformed value.
@@ -280,7 +298,7 @@ class LookupHandler:
         if not to_type:
             return value
 
-        return mapping[to_type](value, **kwargs)  # type: ignore
+        return mapping[to_type](value, **kwargs)
 
     @classmethod
     def _transform_to_bool(cls, value: Any, **_: Any) -> bool:
@@ -325,9 +343,7 @@ class LookupHandler:
             value = value.data
         if isinstance(value, dict):
             # dumped twice for an escaped json dict
-            return json.dumps(
-                json.dumps(cast(Dict[str, Any], value), indent=int(indent))
-            )
+            return json.dumps(json.dumps(cast("dict[str, Any]", value), indent=int(indent)))
         if isinstance(value, bool):
             return json.dumps(str(value))
         return str(value)

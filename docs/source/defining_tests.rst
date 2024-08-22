@@ -4,8 +4,8 @@
 Defining Tests
 ##############
 
-:ref:`Tests<runway-test>` can be defined in the :ref:`runway config file<runway-config>` to test your modules in any way you desire before deploying.
-They are run by using the ``runway test`` :ref:`command<command-test>`.
+:ref:`Tests <runway_config:Test>` can be defined in the :ref:`runway_config:Runway Config File` to test your modules in any way you desire before deploying.
+They are run by using the ``runway test`` :ref:`command <commands:test>`.
 Tests are run in the order they are defined.
 
 .. rubric:: Example:
@@ -19,9 +19,6 @@ Tests are run in the order they are defined.
         commands:
           - echo "Success!"
 
-
-.. contents::
-  :depth: 4
 
 
 *************
@@ -61,7 +58,7 @@ cfn-lint
   *and additional checks. Includes checking valid values for resource properties*
   *and best practices*.
 
-In order to use this test, there must be a ``.cfnlintrc`` file in the same directory as the :ref:`Runway config file<runway-config>`.
+In order to use this test, there must be a ``.cfnlintrc`` file in the same directory as the :ref:`runway_config:Runway Config File`.
 
 .. rubric:: Example:
 .. code-block:: yaml
@@ -104,7 +101,7 @@ yamllint
   *problems such as lines length, trailing spaces, indentation, etc*.
 
 A ``.yamllint`` file can be placed at in the same directory as the
-:ref:`Runway config file<runway-config>` to customize the linter or,
+:ref:`runway_config:Runway Config File` to customize the linter or,
 the Runway provided template will be used.
 
 .. rubric:: Example:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
 from click.testing import CliRunner
@@ -17,14 +18,20 @@ def test_schema_cfngin() -> None:
     """Test ``runway schema cfngin``."""
     result = CliRunner().invoke(cli, ["schema", "cfngin"])
     assert result.exit_code == 0
-    assert result.output == CfnginConfigDefinitionModel.schema_json(indent=4) + "\n"
+    assert (
+        result.output
+        == json.dumps(CfnginConfigDefinitionModel.model_json_schema(), indent=4) + "\n"
+    )
 
 
 def test_schema_cfngin_indent() -> None:
     """Test ``runway schema cfngin --indent 2``."""
     result = CliRunner().invoke(cli, ["schema", "cfngin", "--indent", "2"])
     assert result.exit_code == 0
-    assert result.output == CfnginConfigDefinitionModel.schema_json(indent=2) + "\n"
+    assert (
+        result.output
+        == json.dumps(CfnginConfigDefinitionModel.model_json_schema(), indent=2) + "\n"
+    )
 
 
 def test_schema_cfngin_output(cd_tmp_path: Path) -> None:
@@ -36,5 +43,5 @@ def test_schema_cfngin_output(cd_tmp_path: Path) -> None:
     assert file_path.is_file()
     assert (
         file_path.read_text()
-        == CfnginConfigDefinitionModel.schema_json(indent=4) + "\n"
+        == json.dumps(CfnginConfigDefinitionModel.model_json_schema(), indent=4) + "\n"
     )

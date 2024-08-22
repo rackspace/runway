@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.lookups.registry."""
 
-# pyright: basic
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
@@ -51,9 +50,7 @@ def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
         "xref",
     ]
     for handler in handlers:
-        assert (
-            handler in CFNGIN_LOOKUP_HANDLERS
-        ), f'Lookup handler: "{handler}" not registered'
+        assert handler in CFNGIN_LOOKUP_HANDLERS, f'Lookup handler: "{handler}" not registered'
     assert len(CFNGIN_LOOKUP_HANDLERS) == len(
         handlers
     ), f"expected {len(handlers)} autoloaded handlers but found {len(CFNGIN_LOOKUP_HANDLERS)}"
@@ -82,9 +79,7 @@ def test_register_lookup_handler_not_subclass() -> None:
 def test_register_lookup_handler_str(mocker: MockerFixture) -> None:
     """Test register_lookup_handler from string."""
     mocker.patch.dict(CFNGIN_LOOKUP_HANDLERS, {})
-    register_lookup_handler(
-        "test", "runway.cfngin.lookups.handlers.default.DefaultLookup"
-    )
+    register_lookup_handler("test", "runway.cfngin.lookups.handlers.default.DefaultLookup")
     assert "test" in CFNGIN_LOOKUP_HANDLERS
     assert CFNGIN_LOOKUP_HANDLERS["test"] == DefaultLookup
 

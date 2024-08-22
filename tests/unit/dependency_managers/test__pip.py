@@ -5,16 +5,15 @@ from __future__ import annotations
 import logging
 import subprocess
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any
+from unittest.mock import Mock
 
 import pytest
-from mock import Mock
 
 from runway.compat import shlex_join
 from runway.dependency_managers import Pip, PipInstallFailedError
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
     from pytest_mock import MockerFixture
 
 MODULE = "runway.dependency_managers._pip"
@@ -36,9 +35,7 @@ class TestPip:
             ({"file_name": "foo.txt"}, True),
         ],
     )
-    def test_dir_is_project(
-        self, expected: bool, kwargs: Dict[str, str], tmp_path: Path
-    ) -> None:
+    def test_dir_is_project(self, expected: bool, kwargs: dict[str, str], tmp_path: Path) -> None:
         """Test dir_is_project."""
         requirements_txt = tmp_path / kwargs.get("file_name", "requirements.txt")
         if expected:
@@ -50,8 +47,8 @@ class TestPip:
     @pytest.mark.parametrize("command", ["test", ["test"]])
     def test_generate_command(
         self,
-        caplog: LogCaptureFixture,
-        command: Union[List[str], str],
+        caplog: pytest.LogCaptureFixture,
+        command: list[str] | str,
         mocker: MockerFixture,
     ) -> None:
         """Test generate_command."""
@@ -89,7 +86,7 @@ class TestPip:
         ],
     )
     def test_generate_install_command(
-        self, call_args: Dict[str, Any], expected: Dict[str, Any], mocker: MockerFixture
+        self, call_args: dict[str, Any], expected: dict[str, Any], mocker: MockerFixture
     ) -> None:
         """Test generate_install_command."""
         expected.setdefault("cache_dir", None)
@@ -117,9 +114,7 @@ class TestPip:
         mock_generate_install_command = mocker.patch.object(
             Pip, "generate_install_command", return_value=["generate_install_command"]
         )
-        mock_run_command = mocker.patch.object(
-            Pip, "_run_command", return_value="_run_command"
-        )
+        mock_run_command = mocker.patch.object(Pip, "_run_command", return_value="_run_command")
 
         assert (
             Pip(Mock(), tmp_path).install(
@@ -138,7 +133,7 @@ class TestPip:
             target=target,
         )
         mock_run_command.assert_called_once_with(
-            mock_generate_install_command.return_value + ["--foo", "bar"],
+            [*mock_generate_install_command.return_value, "--foo", "bar"],
             suppress_output=False,
         )
 
@@ -158,9 +153,7 @@ class TestPip:
         )
 
         with pytest.raises(PipInstallFailedError) as excinfo:
-            assert Pip(Mock(), tmp_path).install(
-                requirements=requirements_txt, target=target
-            )
+            assert Pip(Mock(), tmp_path).install(requirements=requirements_txt, target=target)
         assert (
             excinfo.value.message == "pip failed to install dependencies; "
             "review pip's output above to troubleshoot"
@@ -180,9 +173,7 @@ class TestPip:
         self, cmd_output: str, expected: str, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test python_version."""
-        mock_run_command = mocker.patch.object(
-            Pip, "_run_command", return_value=cmd_output
-        )
+        mock_run_command = mocker.patch.object(Pip, "_run_command", return_value=cmd_output)
         version_cls = mocker.patch(f"{MODULE}.Version", return_value="success")
         assert Pip(Mock(), tmp_path).python_version == version_cls.return_value
         mock_run_command.assert_called_once_with([Pip.EXECUTABLE, "--version"])
@@ -202,9 +193,7 @@ class TestPip:
         self, cmd_output: str, expected: str, mocker: MockerFixture, tmp_path: Path
     ) -> None:
         """Test version."""
-        mock_run_command = mocker.patch.object(
-            Pip, "_run_command", return_value=cmd_output
-        )
+        mock_run_command = mocker.patch.object(Pip, "_run_command", return_value=cmd_output)
         version_cls = mocker.patch(f"{MODULE}.Version", return_value="success")
         assert Pip(Mock(), tmp_path).version == version_cls.return_value
         mock_run_command.assert_called_once_with([Pip.EXECUTABLE, "--version"])

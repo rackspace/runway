@@ -1,9 +1,10 @@
 """Fake Docker API."""
 
 # cspell:disable
-# flake8: noqa=D103
-# pylint: disable=consider-using-f-string,invalid-name
-from typing import Any, Callable, Dict, Tuple, Union
+# ruff: noqa: D103
+from __future__ import annotations
+
+from typing import Any, Callable
 
 from docker import constants
 
@@ -29,7 +30,7 @@ FAKE_NODE_ID = "24ifsmvkjbyhk"
 # for clarity and readability
 
 
-def get_fake_version() -> Tuple[int, Any]:
+def get_fake_version() -> tuple[int, Any]:
     status_code = 200
     response = {
         "ApiVersion": "1.35",
@@ -64,7 +65,7 @@ def get_fake_version() -> Tuple[int, Any]:
     return status_code, response
 
 
-def get_fake_info() -> Tuple[int, Any]:
+def get_fake_info() -> tuple[int, Any]:
     status_code = 200
     response = {
         "Containers": 1,
@@ -77,23 +78,23 @@ def get_fake_info() -> Tuple[int, Any]:
     return status_code, response
 
 
-def post_fake_auth() -> Tuple[int, Any]:
+def post_fake_auth() -> tuple[int, Any]:
     status_code = 200
     response = {"Status": "Login Succeeded", "IdentityToken": "9cbaf023786cd7"}
     return status_code, response
 
 
-def get_fake_ping() -> Tuple[int, Any]:
+def get_fake_ping() -> tuple[int, Any]:
     return 200, "OK"
 
 
-def get_fake_search() -> Tuple[int, Any]:
+def get_fake_search() -> tuple[int, Any]:
     status_code = 200
     response = [{"Name": "busybox", "Description": "Fake Description"}]
     return status_code, response
 
 
-def get_fake_images() -> Tuple[int, Any]:
+def get_fake_images() -> tuple[int, Any]:
     status_code = 200
     response = [
         {
@@ -106,7 +107,7 @@ def get_fake_images() -> Tuple[int, Any]:
     return status_code, response
 
 
-def get_fake_image_history() -> Tuple[int, Any]:
+def get_fake_image_history() -> tuple[int, Any]:
     status_code = 200
     response = [
         {"Id": "b750fe79269d", "Created": 1364102658, "CreatedBy": "/bin/bash"},
@@ -116,14 +117,14 @@ def get_fake_image_history() -> Tuple[int, Any]:
     return status_code, response
 
 
-def post_fake_import_image() -> Tuple[int, Any]:
+def post_fake_import_image() -> tuple[int, Any]:
     status_code = 200
     response = "Import messages..."
 
     return status_code, response
 
 
-def get_fake_containers() -> Tuple[int, Any]:
+def get_fake_containers() -> tuple[int, Any]:
     status_code = 200
     response = [
         {
@@ -137,27 +138,27 @@ def get_fake_containers() -> Tuple[int, Any]:
     return status_code, response
 
 
-def post_fake_start_container() -> Tuple[int, Any]:
+def post_fake_start_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_resize_container() -> Tuple[int, Any]:
+def post_fake_resize_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_create_container() -> Tuple[int, Any]:
+def post_fake_create_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def get_fake_inspect_container(tty: bool = False) -> Tuple[int, Any]:
+def get_fake_inspect_container(tty: bool = False) -> tuple[int, Any]:
     status_code = 200
-    response: Dict[str, Any] = {
+    response: dict[str, Any] = {
         "Id": FAKE_CONTAINER_ID,
         "Config": {"Labels": {"foo": "bar"}, "Privileged": True, "Tty": tty},
         "ID": FAKE_CONTAINER_ID,
@@ -177,7 +178,7 @@ def get_fake_inspect_container(tty: bool = False) -> Tuple[int, Any]:
     return status_code, response
 
 
-def get_fake_inspect_image() -> Tuple[int, Any]:
+def get_fake_inspect_image() -> tuple[int, Any]:
     status_code = 200
     response = {
         "Id": FAKE_IMAGE_ID,
@@ -210,19 +211,19 @@ def get_fake_inspect_image() -> Tuple[int, Any]:
     return status_code, response
 
 
-def get_fake_insert_image() -> Tuple[int, Any]:
+def get_fake_insert_image() -> tuple[int, Any]:
     status_code = 200
     response = {"StatusCode": 0}
     return status_code, response
 
 
-def get_fake_wait() -> Tuple[int, Any]:
+def get_fake_wait() -> tuple[int, Any]:
     status_code = 200
     response = {"StatusCode": 0}
     return status_code, response
 
 
-def get_fake_logs() -> Tuple[int, Any]:
+def get_fake_logs() -> tuple[int, Any]:
     status_code = 200
     response = (
         b"\x01\x00\x00\x00\x00\x00\x00\x00"
@@ -233,13 +234,13 @@ def get_fake_logs() -> Tuple[int, Any]:
     return status_code, response
 
 
-def get_fake_diff() -> Tuple[int, Any]:
+def get_fake_diff() -> tuple[int, Any]:
     status_code = 200
     response = [{"Path": "/test", "Kind": 1}]
     return status_code, response
 
 
-def get_fake_events() -> Tuple[int, Any]:
+def get_fake_events() -> tuple[int, Any]:
     status_code = 200
     response = [
         {
@@ -252,19 +253,19 @@ def get_fake_events() -> Tuple[int, Any]:
     return status_code, response
 
 
-def get_fake_export() -> Tuple[int, Any]:
+def get_fake_export() -> tuple[int, Any]:
     status_code = 200
     response = "Byte Stream...."
     return status_code, response
 
 
-def post_fake_exec_create() -> Tuple[int, Any]:
+def post_fake_exec_create() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_EXEC_ID}
     return status_code, response
 
 
-def post_fake_exec_start() -> Tuple[int, Any]:
+def post_fake_exec_start() -> tuple[int, Any]:
     status_code = 200
     response = (
         b"\x01\x00\x00\x00\x00\x00\x00\x11bin\nboot\ndev\netc\n"
@@ -274,12 +275,12 @@ def post_fake_exec_start() -> Tuple[int, Any]:
     return status_code, response
 
 
-def post_fake_exec_resize() -> Tuple[int, Any]:
+def post_fake_exec_resize() -> tuple[int, Any]:
     status_code = 201
     return status_code, ""
 
 
-def get_fake_exec_inspect() -> Tuple[int, Any]:
+def get_fake_exec_inspect() -> tuple[int, Any]:
     return (
         200,
         {
@@ -301,102 +302,102 @@ def get_fake_exec_inspect() -> Tuple[int, Any]:
     )
 
 
-def post_fake_stop_container() -> Tuple[int, Any]:
+def post_fake_stop_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_kill_container() -> Tuple[int, Any]:
+def post_fake_kill_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_pause_container() -> Tuple[int, Any]:
+def post_fake_pause_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_unpause_container() -> Tuple[int, Any]:
+def post_fake_unpause_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_restart_container() -> Tuple[int, Any]:
+def post_fake_restart_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_rename_container() -> Tuple[int, Any]:
+def post_fake_rename_container() -> tuple[int, Any]:
     status_code = 204
     return status_code, None
 
 
-def delete_fake_remove_container() -> Tuple[int, Any]:
+def delete_fake_remove_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_image_create() -> Tuple[int, Any]:
+def post_fake_image_create() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_IMAGE_ID}
     return status_code, response
 
 
-def delete_fake_remove_image() -> Tuple[int, Any]:
+def delete_fake_remove_image() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_IMAGE_ID}
     return status_code, response
 
 
-def get_fake_get_image() -> Tuple[int, Any]:
+def get_fake_get_image() -> tuple[int, Any]:
     status_code = 200
     response = "Byte Stream...."
     return status_code, response
 
 
-def post_fake_load_image() -> Tuple[int, Any]:
+def post_fake_load_image() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_IMAGE_ID}
     return status_code, response
 
 
-def post_fake_commit() -> Tuple[int, Any]:
+def post_fake_commit() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_push() -> Tuple[int, Any]:
+def post_fake_push() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_IMAGE_ID}
     return status_code, response
 
 
-def post_fake_build_container() -> Tuple[int, Any]:
+def post_fake_build_container() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_CONTAINER_ID}
     return status_code, response
 
 
-def post_fake_tag_image() -> Tuple[int, Any]:
+def post_fake_tag_image() -> tuple[int, Any]:
     status_code = 200
     response = {"Id": FAKE_IMAGE_ID}
     return status_code, response
 
 
-def get_fake_stats() -> Tuple[int, Any]:
+def get_fake_stats() -> tuple[int, Any]:
     status_code = 200
     response = fake_stat.OBJ
     return status_code, response
 
 
-def get_fake_top() -> Tuple[int, Any]:
+def get_fake_top() -> tuple[int, Any]:
     return (
         200,
         {
@@ -417,7 +418,7 @@ def get_fake_top() -> Tuple[int, Any]:
     )
 
 
-def get_fake_volume_list() -> Tuple[int, Any]:
+def get_fake_volume_list() -> tuple[int, Any]:
     status_code = 200
     response = {
         "Volumes": [
@@ -438,7 +439,7 @@ def get_fake_volume_list() -> Tuple[int, Any]:
     return status_code, response
 
 
-def get_fake_volume() -> Tuple[int, Any]:
+def get_fake_volume() -> tuple[int, Any]:
     status_code = 200
     response = {
         "Name": "perfectcherryblossom",
@@ -450,23 +451,23 @@ def get_fake_volume() -> Tuple[int, Any]:
     return status_code, response
 
 
-def fake_remove_volume() -> Tuple[int, Any]:
+def fake_remove_volume() -> tuple[int, Any]:
     return 204, None
 
 
-def post_fake_update_container() -> Tuple[int, Any]:
+def post_fake_update_container() -> tuple[int, Any]:
     return 200, {"Warnings": []}
 
 
-def post_fake_update_node() -> Tuple[int, Any]:
+def post_fake_update_node() -> tuple[int, Any]:
     return 200, None
 
 
-def post_fake_join_swarm() -> Tuple[int, Any]:
+def post_fake_join_swarm() -> tuple[int, Any]:
     return 200, None
 
 
-def get_fake_network_list() -> Tuple[int, Any]:
+def get_fake_network_list() -> tuple[int, Any]:
     return (
         200,
         [
@@ -490,7 +491,7 @@ def get_fake_network_list() -> Tuple[int, Any]:
                     "com.docker.network.bridge.default_bridge": "true",
                     "com.docker.network.bridge.enable_icc": "true",
                     "com.docker.network.bridge.enable_ip_masquerade": "true",
-                    "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+                    "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",  # noqa: S104
                     "com.docker.network.bridge.name": "docker0",
                     "com.docker.network.driver.mtu": "1500",
                 },
@@ -499,23 +500,23 @@ def get_fake_network_list() -> Tuple[int, Any]:
     )
 
 
-def get_fake_network() -> Tuple[int, Any]:
+def get_fake_network() -> tuple[int, Any]:
     return 200, get_fake_network_list()[1][0]
 
 
-def post_fake_network() -> Tuple[int, Any]:
+def post_fake_network() -> tuple[int, Any]:
     return 201, {"Id": FAKE_NETWORK_ID, "Warnings": []}
 
 
-def delete_fake_network() -> Tuple[int, Any]:
+def delete_fake_network() -> tuple[int, Any]:
     return 204, None
 
 
-def post_fake_network_connect() -> Tuple[int, Any]:
+def post_fake_network_connect() -> tuple[int, Any]:
     return 200, None
 
 
-def post_fake_network_disconnect() -> Tuple[int, Any]:
+def post_fake_network_disconnect() -> tuple[int, Any]:
     return 200, None
 
 
@@ -524,145 +525,86 @@ prefix = "http+docker://localhost"
 if constants.IS_WINDOWS_PLATFORM:
     prefix = "http+docker://localnpipe"
 
-fake_responses: Dict[Union[str, Tuple[str, str]], Callable[..., Tuple[int, Any]]] = {
-    "{0}/version".format(prefix): get_fake_version,
-    "{1}/{0}/version".format(CURRENT_VERSION, prefix): get_fake_version,
-    "{1}/{0}/info".format(CURRENT_VERSION, prefix): get_fake_info,
-    "{1}/{0}/auth".format(CURRENT_VERSION, prefix): post_fake_auth,
-    "{1}/{0}/_ping".format(CURRENT_VERSION, prefix): get_fake_ping,
-    "{1}/{0}/images/search".format(CURRENT_VERSION, prefix): get_fake_search,
-    "{1}/{0}/images/json".format(CURRENT_VERSION, prefix): get_fake_images,
-    "{1}/{0}/images/test_image/history".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_image_history,
-    "{1}/{0}/images/create".format(CURRENT_VERSION, prefix): post_fake_import_image,
-    "{1}/{0}/containers/json".format(CURRENT_VERSION, prefix): get_fake_containers,
-    "{1}/{0}/containers/3cc2351ab11b/start".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_start_container,
-    "{1}/{0}/containers/3cc2351ab11b/resize".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_resize_container,
-    "{1}/{0}/containers/3cc2351ab11b/json".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_inspect_container,
-    "{1}/{0}/containers/3cc2351ab11b/rename".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_rename_container,
-    "{1}/{0}/images/e9aa60c60128/tag".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_tag_image,
-    "{1}/{0}/containers/3cc2351ab11b/wait".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_wait,
-    "{1}/{0}/containers/3cc2351ab11b/logs".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_logs,
-    "{1}/{0}/containers/3cc2351ab11b/changes".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_diff,
-    "{1}/{0}/containers/3cc2351ab11b/export".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_export,
-    "{1}/{0}/containers/3cc2351ab11b/update".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_update_container,
-    "{1}/{0}/containers/3cc2351ab11b/exec".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_exec_create,
-    "{1}/{0}/exec/d5d177f121dc/start".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_exec_start,
-    "{1}/{0}/exec/d5d177f121dc/json".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_exec_inspect,
-    "{1}/{0}/exec/d5d177f121dc/resize".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_exec_resize,
-    "{1}/{0}/containers/3cc2351ab11b/stats".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_stats,
-    "{1}/{0}/containers/3cc2351ab11b/top".format(CURRENT_VERSION, prefix): get_fake_top,
-    "{1}/{0}/containers/3cc2351ab11b/stop".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_stop_container,
-    "{1}/{0}/containers/3cc2351ab11b/kill".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_kill_container,
-    "{1}/{0}/containers/3cc2351ab11b/pause".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_pause_container,
-    "{1}/{0}/containers/3cc2351ab11b/unpause".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_unpause_container,
-    "{1}/{0}/containers/3cc2351ab11b/restart".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_restart_container,
-    "{1}/{0}/containers/3cc2351ab11b".format(
-        CURRENT_VERSION, prefix
-    ): delete_fake_remove_container,
-    "{1}/{0}/images/create".format(CURRENT_VERSION, prefix): post_fake_image_create,
-    "{1}/{0}/images/e9aa60c60128".format(
-        CURRENT_VERSION, prefix
-    ): delete_fake_remove_image,
-    "{1}/{0}/images/e9aa60c60128/get".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_get_image,
-    "{1}/{0}/images/load".format(CURRENT_VERSION, prefix): post_fake_load_image,
-    "{1}/{0}/images/test_image/json".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_inspect_image,
-    "{1}/{0}/images/test_image/insert".format(
-        CURRENT_VERSION, prefix
-    ): get_fake_insert_image,
-    "{1}/{0}/images/test_image/push".format(CURRENT_VERSION, prefix): post_fake_push,
-    "{1}/{0}/commit".format(CURRENT_VERSION, prefix): post_fake_commit,
-    "{1}/{0}/containers/create".format(
-        CURRENT_VERSION, prefix
-    ): post_fake_create_container,
-    "{1}/{0}/build".format(CURRENT_VERSION, prefix): post_fake_build_container,
-    "{1}/{0}/events".format(CURRENT_VERSION, prefix): get_fake_events,
-    ("{1}/{0}/volumes".format(CURRENT_VERSION, prefix), "GET"): get_fake_volume_list,
-    ("{1}/{0}/volumes/create".format(CURRENT_VERSION, prefix), "POST"): get_fake_volume,
+fake_responses: dict[str | tuple[str, str], Callable[..., tuple[int, Any]]] = {
+    f"{prefix}/version": get_fake_version,
+    f"{prefix}/{CURRENT_VERSION}/version": get_fake_version,
+    f"{prefix}/{CURRENT_VERSION}/info": get_fake_info,
+    f"{prefix}/{CURRENT_VERSION}/auth": post_fake_auth,
+    f"{prefix}/{CURRENT_VERSION}/_ping": get_fake_ping,
+    f"{prefix}/{CURRENT_VERSION}/images/search": get_fake_search,
+    f"{prefix}/{CURRENT_VERSION}/images/json": get_fake_images,
+    f"{prefix}/{CURRENT_VERSION}/images/test_image/history": get_fake_image_history,
+    f"{prefix}/{CURRENT_VERSION}/containers/json": get_fake_containers,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/start": post_fake_start_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/resize": post_fake_resize_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/json": get_fake_inspect_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/rename": post_fake_rename_container,
+    f"{prefix}/{CURRENT_VERSION}/images/e9aa60c60128/tag": post_fake_tag_image,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/wait": get_fake_wait,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/logs": get_fake_logs,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/changes": get_fake_diff,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/export": get_fake_export,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/update": post_fake_update_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/exec": post_fake_exec_create,
+    f"{prefix}/{CURRENT_VERSION}/exec/d5d177f121dc/start": post_fake_exec_start,
+    f"{prefix}/{CURRENT_VERSION}/exec/d5d177f121dc/json": get_fake_exec_inspect,
+    f"{prefix}/{CURRENT_VERSION}/exec/d5d177f121dc/resize": post_fake_exec_resize,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/stats": get_fake_stats,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/top": get_fake_top,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/stop": post_fake_stop_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/kill": post_fake_kill_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/pause": post_fake_pause_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/unpause": post_fake_unpause_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b/restart": post_fake_restart_container,
+    f"{prefix}/{CURRENT_VERSION}/containers/3cc2351ab11b": delete_fake_remove_container,
+    f"{prefix}/{CURRENT_VERSION}/images/create": post_fake_image_create,
+    f"{prefix}/{CURRENT_VERSION}/images/e9aa60c60128": delete_fake_remove_image,
+    f"{prefix}/{CURRENT_VERSION}/images/e9aa60c60128/get": get_fake_get_image,
+    f"{prefix}/{CURRENT_VERSION}/images/load": post_fake_load_image,
+    f"{prefix}/{CURRENT_VERSION}/images/test_image/json": get_fake_inspect_image,
+    f"{prefix}/{CURRENT_VERSION}/images/test_image/insert": get_fake_insert_image,
+    f"{prefix}/{CURRENT_VERSION}/images/test_image/push": post_fake_push,
+    f"{prefix}/{CURRENT_VERSION}/commit": post_fake_commit,
+    f"{prefix}/{CURRENT_VERSION}/containers/create": post_fake_create_container,
+    f"{prefix}/{CURRENT_VERSION}/build": post_fake_build_container,
+    f"{prefix}/{CURRENT_VERSION}/events": get_fake_events,
+    (f"{prefix}/{CURRENT_VERSION}/volumes", "GET"): get_fake_volume_list,
+    (f"{prefix}/{CURRENT_VERSION}/volumes/create", "POST"): get_fake_volume,
     (
-        "{1}/{0}/volumes/{2}".format(CURRENT_VERSION, prefix, FAKE_VOLUME_NAME),
+        f"{prefix}/{CURRENT_VERSION}/volumes/{FAKE_VOLUME_NAME}",
         "GET",
     ): get_fake_volume,
     (
-        "{1}/{0}/volumes/{2}".format(CURRENT_VERSION, prefix, FAKE_VOLUME_NAME),
+        f"{prefix}/{CURRENT_VERSION}/volumes/{FAKE_VOLUME_NAME}",
         "DELETE",
     ): fake_remove_volume,
     (
-        "{1}/{0}/nodes/{2}/update?version=1".format(
-            CURRENT_VERSION, prefix, FAKE_NODE_ID
-        ),
+        f"{prefix}/{CURRENT_VERSION}/nodes/{FAKE_NODE_ID}/update?version=1",
         "POST",
     ): post_fake_update_node,
     (
-        "{1}/{0}/swarm/join".format(CURRENT_VERSION, prefix),
+        f"{prefix}/{CURRENT_VERSION}/swarm/join",
         "POST",
     ): post_fake_join_swarm,
-    ("{1}/{0}/networks".format(CURRENT_VERSION, prefix), "GET"): get_fake_network_list,
+    (f"{prefix}/{CURRENT_VERSION}/networks", "GET"): get_fake_network_list,
     (
-        "{1}/{0}/networks/create".format(CURRENT_VERSION, prefix),
+        f"{prefix}/{CURRENT_VERSION}/networks/create",
         "POST",
     ): post_fake_network,
     (
-        "{1}/{0}/networks/{2}".format(CURRENT_VERSION, prefix, FAKE_NETWORK_ID),
+        f"{prefix}/{CURRENT_VERSION}/networks/{FAKE_NETWORK_ID}",
         "GET",
     ): get_fake_network,
     (
-        "{1}/{0}/networks/{2}".format(CURRENT_VERSION, prefix, FAKE_NETWORK_ID),
+        f"{prefix}/{CURRENT_VERSION}/networks/{FAKE_NETWORK_ID}",
         "DELETE",
     ): delete_fake_network,
     (
-        "{1}/{0}/networks/{2}/connect".format(CURRENT_VERSION, prefix, FAKE_NETWORK_ID),
+        f"{prefix}/{CURRENT_VERSION}/networks/{FAKE_NETWORK_ID}/connect",
         "POST",
     ): post_fake_network_connect,
     (
-        "{1}/{0}/networks/{2}/disconnect".format(
-            CURRENT_VERSION, prefix, FAKE_NETWORK_ID
-        ),
+        f"{prefix}/{CURRENT_VERSION}/networks/{FAKE_NETWORK_ID}/disconnect",
         "POST",
     ): post_fake_network_disconnect,
 }

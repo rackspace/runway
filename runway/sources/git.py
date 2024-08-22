@@ -1,11 +1,13 @@
 """'Git type Path Source."""
 
+from __future__ import annotations
+
 import logging
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from .source import Source
 
@@ -23,7 +25,7 @@ class Git(Source):
     def __init__(
         self,
         *,
-        arguments: Optional[Dict[str, str]] = None,
+        arguments: dict[str, str] | None = None,
         location: str = "",
         uri: str = "",
         **kwargs: Any,
@@ -38,6 +40,7 @@ class Git(Source):
                 module resides. Leaving this as an empty string, ``/``, or ``./``
                 will have runway look in the root folder.
             uri: The uniform resource identifier that targets the remote git repository
+            **kwargs: Arbitrary keyword arguments.
 
         """
         self.args = arguments or {}
@@ -48,7 +51,7 @@ class Git(Source):
 
     def fetch(self) -> Path:
         """Retrieve the git repository from it's remote location."""
-        from git.repo import Repo  # pylint: disable=import-outside-toplevel
+        from git.repo import Repo
 
         ref = self.__determine_git_ref()
         dir_name = "_".join([self.sanitize_git_path(self.uri), ref])
@@ -91,9 +94,7 @@ class Git(Source):
 
     def __determine_git_ref(self) -> str:
         """Determine the git reference code."""
-        ref_config_keys = sum(
-            bool(self.args.get(i)) for i in ["commit", "tag", "branch"]
-        )
+        ref_config_keys = sum(bool(self.args.get(i)) for i in ["commit", "tag", "branch"])
         if ref_config_keys > 1:
             raise ValueError(
                 "Fetching remote git sources failed: conflicting revisions "

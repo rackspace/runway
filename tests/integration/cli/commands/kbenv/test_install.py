@@ -1,30 +1,21 @@
 """Test ``runway kbenv install`` command."""
 
-# pylint: disable=unused-argument
 from __future__ import annotations
 
 import logging
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-import pytest
 from click.testing import CliRunner
 
 from runway._cli import cli
-from runway.env_mgr.kbenv import KB_VERSION_FILENAME, KBEnvManager
+from runway.env_mgr.kbenv import KB_VERSION_FILENAME
 
 if TYPE_CHECKING:
-    from pytest import LogCaptureFixture
-    from pytest_mock import MockerFixture
+    import pytest
 
 
-@pytest.fixture(autouse=True, scope="function")
-def patch_versions_dir(mocker: MockerFixture, tmp_path: Path) -> None:
-    """Patch TFEnvManager.versions_dir."""
-    mocker.patch.object(KBEnvManager, "versions_dir", tmp_path)
-
-
-def test_kbenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
+def test_kbenv_install(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     """Test ``runway kbenv install`` reading version from a file.
 
     For best results, remove any existing installs.
@@ -41,12 +32,11 @@ def test_kbenv_install(cd_tmp_path: Path, caplog: LogCaptureFixture) -> None:
 
 
 def test_kbenv_install_no_version_file(
-    cd_tmp_path: Path, caplog: LogCaptureFixture
+    caplog: pytest.LogCaptureFixture, cli_runner: CliRunner
 ) -> None:
     """Test ``runway kbenv install`` no version file."""
     caplog.set_level(logging.WARNING, logger="runway")
-    runner = CliRunner()
-    result = runner.invoke(cli, ["kbenv", "install"])
+    result = cli_runner.invoke(cli, ["kbenv", "install"])
     assert result.exit_code == 1
 
     assert (
@@ -55,7 +45,7 @@ def test_kbenv_install_no_version_file(
     )
 
 
-def test_kbenv_install_version(caplog: LogCaptureFixture) -> None:
+def test_kbenv_install_version(caplog: pytest.LogCaptureFixture) -> None:
     """Test ``runway kbenv install <version>``.
 
     For best results, remove any existing installs.
