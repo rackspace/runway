@@ -48,6 +48,7 @@ extensions = [
     "sphinx_design",
     "sphinx_github_changelog",
     "sphinxcontrib.apidoc",
+    "sphinxcontrib.autodoc_pydantic",
     "sphinxcontrib.external_links",
     "sphinxcontrib.jquery",
     "sphinxcontrib.programoutput",
@@ -138,7 +139,6 @@ autosectionlabel_prefix_document = True
 autoclass_content = "class"
 autodoc_class_signature = "separated"
 autodoc_default_options = {
-    "inherited-members": "dict",  # show all inherited members
     "member-order": "alphabetical",
     "members": True,
     "show-inheritance": True,
@@ -210,6 +210,21 @@ apidoc_output_dir = "apidocs"
 apidoc_separate_modules = True
 apidoc_toc_file = "index"
 
+# -- Options for sphinxcontrib.autodoc_pydantic  -----------------------------
+# https://autodoc-pydantic.readthedocs.io/en/stable/users/configuration.html
+autodoc_pydantic_field_doc_policy = "docstring"
+autodoc_pydantic_field_list_validators = False
+autodoc_pydantic_field_show_required = False
+autodoc_pydantic_model_erdantic_figure = False  # cspell:word erdantic
+autodoc_pydantic_model_hide_paramlist = True
+autodoc_pydantic_model_hide_reused_validator = True
+autodoc_pydantic_model_show_config_summary = False
+autodoc_pydantic_model_show_field_summary = False
+autodoc_pydantic_model_show_json = True
+autodoc_pydantic_model_show_json_error_strategy = "coerce"
+autodoc_pydantic_model_show_validator_members = False
+autodoc_pydantic_model_show_validator_summary = False
+autodoc_pydantic_model_undoc_members = True  # cspell:word undoc
 
 # -- Options for sphinxcontrib.external_links   ------------------------------
 # https://sphinxcontribexternal-links.readthedocs.io/latest/configuration.html

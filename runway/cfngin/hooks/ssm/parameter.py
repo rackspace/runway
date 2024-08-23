@@ -34,32 +34,7 @@ class _PutParameterResultTypeDef(TypedDict):
 
 
 class ArgsDataModel(BaseModel):
-    """Parameter hook args.
-
-    Attributes:
-        allowed_pattern: A regular expression used to validate the parameter value.
-        data_type: The data type for a String parameter. Supported data types
-            include plain text and Amazon Machine Image IDs.
-        description: Information about the parameter.
-        force: Skip checking the current value of the parameter, just put it.
-            Can be used alongside ``overwrite`` to always update a parameter.
-        key_id: The KMS Key ID that you want to use to encrypt a parameter.
-            Either the default AWS Key Management Service (AWS KMS) key automatically
-            assigned to your AWS account or a custom key.
-            Required for parameters that use the ``SecureString`` data type.
-        name: The fully qualified name of the parameter that you want to add to
-            the system.
-        overwrite: Allow overwriting an existing parameter.
-        policies: One or more policies to apply to a parameter.
-            This field takes a JSON array.
-        tags: Optional metadata that you assign to a resource.
-        tier: The parameter tier to assign to a parameter.
-        type: The type of parameter.
-        value: The parameter value that you want to add to the system.
-            Standard parameters have a value limit of 4 KB.
-            Advanced parameters have a value limit of 8 KB.
-
-    """
+    """Parameter hook args."""
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
