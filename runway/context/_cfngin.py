@@ -51,27 +51,7 @@ def get_fqn(base_fqn: str, delimiter: str, name: str | None = None) -> str:
 
 
 class CfnginContext(BaseContext):
-    """CFNgin context object.
-
-    Attributes:
-        bucket_region: Region where the S3 Bucket is located. The S3 Bucket
-            being the Bucket configured for staging CloudFormation Templates.
-        config: CFNgin configuration file that has been resolved & parsed into a
-            python object.
-        config_path: Path to the configuration file that has been resolved, parsed
-            and made accessible via this object.
-        env: Deploy environment object containing information about the current
-            deploy environment.
-        force_stacks: List of stacks to force.
-        hook_data: Values returned by hooks that are stored based on the ``data_key``
-            defined for the hook. Returned values are only stored if a ``data_key``
-            was provided AND the return value is a dict or ``pydantic.BaseModel``.
-        logger: Custom logger to use when logging messages.
-        parameters: Parameters passed from Runway or read from a file.
-        stack_names: List of Stack names to operate on. If value is falsy, all
-            Stacks defined in the config will be operated on.
-
-    """
+    """CFNgin context object."""
 
     _persistent_graph_lock_code: str | None
     _persistent_graph_lock_tag: str = "cfngin_lock_code"
@@ -79,14 +59,44 @@ class CfnginContext(BaseContext):
     _s3_bucket_verified: bool
 
     bucket_region: str
+    """Region where the S3 Bucket is located.
+
+    The S3 Bucket being the Bucket configured for staging CloudFormation Templates.
+
+    """
+
     config: CfnginConfig
+    """CFNgin configuration file that has been resolved & parsed into a python object."""
+
     config_path: Path
+    """Path to the configuration file that has been resolved, parsed and made accessible via this object."""
+
     env: DeployEnvironment
+    """Deploy environment object containing information about the current deploy environment."""
+
     force_stacks: list[str]
+    """List of stacks to force."""
+
     hook_data: dict[str, Any]
+    """Values returned by hooks that are stored based on the ``data_key`` defined for the hook.
+
+    Returned values are only stored if a ``data_key`` was provided AND the return
+    value is a dict or ``pydantic.BaseModel``.
+
+    """
+
     logger: PrefixAdaptor | RunwayLogger
+    """Custom logger to use when logging messages."""
+
     parameters: MutableMapping[str, Any]
+    """Parameters passed from Runway or read from a file."""
+
     stack_names: list[str]
+    """List of Stack names to operate on.
+
+    If value is falsy, all Stacks defined in the config will be operated on.
+
+    """
 
     def __init__(
         self,
