@@ -47,3 +47,7 @@ class DockerHookData(MutableMap):
         new_obj = cls()
         context.hook_data["docker"] = new_obj
         return new_obj
+
+    def __bool__(self) -> bool:
+        """Implement evaluation of instances as a bool."""
+        return True
