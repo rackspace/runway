@@ -1,0 +1,26 @@
+{
+    "description": "Install `poetry` using `pipx` included in the image.",
+    "documentationURL": "",
+    "id": "poetry",
+    "installsAfter": [],
+    "mounts": [
+        {
+            "source": "devcontainer-pip-cache",
+            "target": "/home/vscode/.cache/pip",
+            "type": "volume"
+        },
+        {
+            "source": "devcontainer-poetry-cache",
+            "target": "/home/vscode/.cache/pypoetry",
+            "type": "volume"
+        },
+        {
+            "source": "devcontainer-${containerWorkspaceFolderBasename}-venv",
+            "target": "${containerWorkspaceFolder}/.venv",
+            "type": "volume"
+        }
+    ],
+    "name": "poetry",
+    "options": {},
+    "version": "0.0.0"
+}

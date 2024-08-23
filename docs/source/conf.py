@@ -230,6 +230,9 @@ autodoc_pydantic_model_undoc_members = True  # cspell:word undoc
 # https://sphinxcontribexternal-links.readthedocs.io/latest/configuration.html
 external_links: dict[str, str] = {
     "CloudFormation": "https://aws.amazon.com/cloudformation",
+    "devcontainer": "https://containers.dev/",
+    "direnv": "https://github.com/direnv/direnv",
+    "poetry-dynamic-versioning": "https://github.com/mtkennerly/poetry-dynamic-versioning",
     "troposphere": "https://github.com/cloudtools/troposphere",
 }
 external_links_substitutions: dict[str, str] = {
