@@ -82,5 +82,5 @@
     "name": "devcontainer-runway",
     "onCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}; sudo apt-get update -y; sudo apt-get install direnv",
     "postAttachCommand": "make setup",
-    "postStartCommand": "sudo chown -R vscode:vscode .venv node_modules ~/.cache/pre-commit ~/.npm ~/.cache/pip ~/.cache/pypoetry"
+    "postStartCommand": "sudo chown -R vscode:vscode .venv node_modules ~/.cache ~/.npm"
 }
