@@ -56,7 +56,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
     """Git tag."""
 
     uri: Annotated[
-        str, Field(title="Git Repository URI", examples=["git@github.com:onicagroup/runway.git"])
+        str, Field(title="Git Repository URI", examples=["git@github.com:rackspace/runway.git"])
     ]
     """Remote git repo URI."""
 
