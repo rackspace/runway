@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.actions.base."""
 
-# pyright: basic
 import unittest
 from unittest.mock import MagicMock, PropertyMock, patch
 

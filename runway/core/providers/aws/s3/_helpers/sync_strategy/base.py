@@ -36,7 +36,7 @@ class BaseSync:
 
     """
 
-    NAME: ClassVar[str | None] = None
+    NAME: ClassVar = None
 
     sync_type: ValidSyncType
 

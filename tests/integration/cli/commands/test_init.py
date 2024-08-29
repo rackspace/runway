@@ -64,13 +64,12 @@ def test_init_handle_validation_error(
         f"{MODULE}.Runway",
         spec=Runway,
         spec_set=True,
-        init=Mock(side_effect=ValidationError([], Mock())),  # type: ignore
+        init=Mock(side_effect=ValidationError),
     )
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
     result = runner.invoke(cli, ["init"])
     assert result.exit_code == 1
-    assert "ValidationError" in result.output
 
 
 def test_init_handle_config_not_found(

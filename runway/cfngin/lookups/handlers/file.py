@@ -1,17 +1,15 @@
 """File lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import base64
 import collections.abc
 import json
 import re
-from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Callable, Final, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, overload
 
 import yaml
-from pydantic import validator
+from pydantic import field_validator
 from troposphere import Base64, GenericHelperFn
 
 from ....lookups.handlers.base import LookupHandler
@@ -19,16 +17,18 @@ from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
+    from collections.abc import Mapping, Sequence
+
+    from typing_extensions import Literal, TypeAlias
+
+    from ....lookups.handlers.base import ParsedArgsTypeDef
 
 _PARAMETER_PATTERN = re.compile(r"{{([::|\w]+)}}")
 
-ParameterizedObjectTypeDef = Union[str, Mapping[str, Any], Sequence[Any], Any]
-ParameterizedObjectReturnTypeDef = Union[
-    dict[str, "ParameterizedObjectReturnTypeDef"],
-    GenericHelperFn,
-    list["ParameterizedObjectReturnTypeDef"],
-]
+ParameterizedObjectTypeDef: TypeAlias = "str | Mapping[str, Any] | Sequence[Any] | Any"
+ParameterizedObjectReturnTypeDef: TypeAlias = (
+    "dict[str, ParameterizedObjectReturnTypeDef] | GenericHelperFn | list[ParameterizedObjectReturnTypeDef]"
+)
 
 
 class ArgsDataModel(BaseModel):
@@ -37,22 +37,23 @@ class ArgsDataModel(BaseModel):
     codec: str
     """Codec that will be used to parse and/or manipulate the data."""
 
-    @validator("codec", allow_reuse=True)
-    def _validate_supported_codec(cls, v: str) -> str:  # noqa: N805
+    @field_validator("codec")
+    @classmethod
+    def _validate_supported_codec(cls, v: str) -> str:
         """Validate that the selected codec is supported."""
         if v in CODECS:
             return v
         raise ValueError(f"Codec '{v}' must be one of: {', '.join(CODECS)}")
 
 
-class FileLookup(LookupHandler):
+class FileLookup(LookupHandler[Any]):
     """File lookup."""
 
-    TYPE_NAME: Final[Literal["file"]] = "file"
+    TYPE_NAME: ClassVar[str] = "file"
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def parse(cls, value: str) -> tuple[str, dict[str, str]]:
+    def parse(cls, value: str) -> tuple[str, ParsedArgsTypeDef]:
         """Parse the value passed to the lookup.
 
         This overrides the default parsing to account for special requirements.
@@ -67,9 +68,11 @@ class FileLookup(LookupHandler):
             ValueError: The value provided does not match the expected regex.
 
         """
-        args: dict[str, str] = {}
+        args: ParsedArgsTypeDef = {}
         try:
-            args["codec"], data_or_path = value.split(":", 1)
+            args["codec"], data_or_path = value.split(  # pyright: ignore[reportGeneralTypeIssues]
+                ":", 1
+            )
         except ValueError:
             raise ValueError(
                 rf"Query '{value}' doesn't match regex: ^(?P<codec>[{'|'.join(CODECS)}]:.+$)"
@@ -77,10 +80,10 @@ class FileLookup(LookupHandler):
         return read_value_from_path(data_or_path), args
 
     @classmethod
-    def handle(cls, value: str, **_: Any) -> Any:
+    def handle(cls, value: str, *_args: Any, **_kwargs: Any) -> Any:
         """Translate a filename into the file contents."""
         data, raw_args = cls.parse(value)
-        args = ArgsDataModel.parse_obj(raw_args)
+        args = ArgsDataModel.model_validate(raw_args)
         return CODECS[args.codec](data)
 
 
@@ -141,7 +144,7 @@ def parameterized_codec(raw: str, b64: bool = False) -> Any:
 
 
 @overload
-def _parameterize_obj(obj: Union[bytes, str]) -> GenericHelperFn: ...
+def _parameterize_obj(obj: bytes | str) -> GenericHelperFn: ...
 
 
 @overload
@@ -180,13 +183,13 @@ def _parameterize_obj(
 
 def yaml_codec(raw: str, parameterized: bool = False) -> Any:
     """YAML codec."""
-    data = yaml.load(raw, Loader=yaml.SafeLoader)
+    data: Mapping[str, Any] = yaml.load(raw, Loader=yaml.SafeLoader)
     return _parameterize_obj(data) if parameterized else data
 
 
 def json_codec(raw: str, parameterized: bool = False) -> Any:
     """JSON codec."""
-    data = json.loads(raw)
+    data: Mapping[str, Any] = json.loads(raw)
     return _parameterize_obj(data) if parameterized else data
 
 

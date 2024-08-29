@@ -13,7 +13,7 @@ class TestAwsLambdaHookDeployResponse:
 
     def test_extra(self) -> None:
         """Test extra fields."""
-        with pytest.raises(ValidationError) as excinfo:
+        with pytest.raises(ValidationError, match="invalid\n  Extra inputs are not permitted"):
             AwsLambdaHookDeployResponse(
                 bucket_name="test-bucket",
                 code_sha256="sha256",
@@ -21,7 +21,3 @@ class TestAwsLambdaHookDeployResponse:
                 object_key="key",
                 runtime="test",
             )
-        errors = excinfo.value.errors()
-        assert len(errors) == 1
-        assert errors[0]["loc"] == ("invalid",)
-        assert errors[0]["msg"] == "extra fields not permitted"

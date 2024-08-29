@@ -1,6 +1,5 @@
 """Tests for the Source type object."""
 
-# pyright: basic
 from __future__ import annotations
 
 import logging

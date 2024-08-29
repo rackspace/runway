@@ -11,14 +11,12 @@ from .base import ConfigComponentDefinition
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from ...models.runway import (
-        RunwayEnvironmentsType,
-        RunwayEnvVarsType,
-        RunwayModuleTypeTypeDef,
-    )
+    from typing_extensions import Self
+
+    from ...models.runway import RunwayEnvironmentsType, RunwayEnvVarsType, RunwayModuleTypeTypeDef
 
 
-class RunwayModuleDefinition(ConfigComponentDefinition):
+class RunwayModuleDefinition(ConfigComponentDefinition[RunwayModuleDefinitionModel]):
     """Runway module definition."""
 
     class_path: str | None
@@ -31,7 +29,6 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     tags: list[str]
     type: RunwayModuleTypeTypeDef | None
 
-    _data: RunwayModuleDefinitionModel
     _supports_vars: tuple[str, ...] = (
         "class_path",
         "env_vars",
@@ -53,7 +50,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
     @child_modules.setter
     def child_modules(
         self,
-        modules: list[RunwayModuleDefinition | RunwayModuleDefinitionModel],  # type: ignore
+        modules: list[RunwayModuleDefinition | RunwayModuleDefinitionModel],
     ) -> None:
         """Set the value of the property.
 
@@ -69,7 +66,7 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
         sanitized: list[RunwayModuleDefinitionModel] = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
-                sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
+                sanitized.append(RunwayModuleDefinitionModel.model_validate(mod.data))
             elif isinstance(mod, RunwayModuleDefinitionModel):  # type: ignore
                 sanitized.append(mod)
             else:
@@ -110,11 +107,11 @@ class RunwayModuleDefinition(ConfigComponentDefinition):
         )
 
     @classmethod
-    def parse_obj(cls, obj: Any) -> RunwayModuleDefinition:
+    def parse_obj(cls: type[Self], obj: object) -> Self:
         """Parse a python object into this class.
 
         Args:
             obj: The object to parse.
 
         """
-        return cls(RunwayModuleDefinitionModel.parse_obj(obj))
+        return cls(RunwayModuleDefinitionModel.model_validate(obj))

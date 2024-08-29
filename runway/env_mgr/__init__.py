@@ -8,7 +8,7 @@ import platform
 import shutil
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union, cast
+from typing import TYPE_CHECKING, cast
 
 from ..compat import cached_property
 from ..mixins import DelCachedPropMixin
@@ -68,11 +68,11 @@ class EnvManager(DelCachedPropMixin):
 
     _bin_name: str
 
-    current_version: Optional[str]
+    current_version: str | None
     env_dir_name: str
     path: Path
 
-    def __init__(self, bin_name: str, dir_name: str, path: Optional[Path] = None) -> None:
+    def __init__(self, bin_name: str, dir_name: str, path: Path | None = None) -> None:
         """Initialize class.
 
         Args:
@@ -126,7 +126,7 @@ class EnvManager(DelCachedPropMixin):
         return self.env_dir / "versions"
 
     @cached_property
-    def version_file(self) -> Optional[Path]:
+    def version_file(self) -> Path | None:
         """Find and return a "<bin version file>" file if one is present.
 
         Returns:
@@ -135,7 +135,7 @@ class EnvManager(DelCachedPropMixin):
         """
         raise NotImplementedError
 
-    def install(self, version_requested: Optional[str] = None) -> str:
+    def install(self, version_requested: str | None = None) -> str:
         """Ensure <bin> is installed."""
         raise NotImplementedError
 
@@ -143,7 +143,7 @@ class EnvManager(DelCachedPropMixin):
         """List installed versions of <bin>."""
         raise NotImplementedError
 
-    def uninstall(self, version: Union[str, Version]) -> bool:
+    def uninstall(self, version: str | Version) -> bool:
         """Uninstall a version of the managed binary.
 
         Args:

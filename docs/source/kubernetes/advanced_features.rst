@@ -6,8 +6,6 @@ Advanced Features
 
 Advanced features and detailed information for using Kubernetes with Runway.
 
-.. contents::
-  :depth: 4
 
 
 ***************************
@@ -28,7 +26,7 @@ This can be set as a relative path or an absolute one.
               - ${env DEPLOY_ENVIRONMENT}
               - config
 
-This would set `KUBECONFIG` to ``<path_to_runway.yml>/.kube/$DEPLOY_ENVIRONMENT/config`` where ``$DEPLOY_ENVIRONMENT`` is the current Runway :ref:`deploy environment <term-deploy-env>`.
+This would set `KUBECONFIG` to ``<path_to_runway.yml>/.kube/$DEPLOY_ENVIRONMENT/config`` where ``$DEPLOY_ENVIRONMENT`` is the current Runway :term:`Deploy Environment`.
 
 
 ----
@@ -50,7 +48,7 @@ Without a version specified, Runway will fallback to whatever ``kubectl`` it fin
 
   1.14.5
 
-Lookups can be used to provide different versions for each :ref:`deploy environment <term-deploy-env>`.
+Lookups can be used to provide different versions for each :term:`Deploy Environment`.
 
 .. code-block:: yaml
   :caption: runway.yml

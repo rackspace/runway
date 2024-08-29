@@ -19,7 +19,7 @@ Args
 ****
 
 .. data:: ecr_repo
-  :type: Optional[Dict[str, Optional[str]]]
+  :type: dict[str, str | None] | None
   :value: None
   :noindex:
 
@@ -30,7 +30,7 @@ Args
   If using a public registry, ``repo_name`` and ``registry_alias``.
 
   .. data:: account_id
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -38,7 +38,7 @@ Args
     it will be acquired automatically if needed.
 
   .. data:: aws_region
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -46,7 +46,7 @@ Args
     automatically if needed.
 
   .. data:: registry_alias
-    :type: Optional[str]
+    :type: str | None
     :value: None
     :noindex:
 
@@ -59,7 +59,7 @@ Args
     The name of the repository.
 
 .. data:: image
-  :type: Optional[DockerImage]
+  :type: DockerImage | None
   :value: None
   :noindex:
 
@@ -70,7 +70,7 @@ Args
   If providing a value for this field, do not provide a value for ``ecr_repo`` or ``repo``.
 
 .. data:: repo
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -78,7 +78,7 @@ Args
   If providing one of the other repo values or ``image``, leave this value empty.
 
 .. data:: tags
-  :type: Optional[List[str]]
+  :type: list[str]
   :value: ["latest"]
   :noindex:
 

@@ -16,14 +16,7 @@ import uuid
 import zipfile
 from collections import OrderedDict
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Optional,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 import botocore.client
 import botocore.exceptions
@@ -38,7 +31,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from mypy_boto3_route53.client import Route53Client
-    from mypy_boto3_route53.type_defs import ResourceRecordSetTypeDef
+    from mypy_boto3_route53.type_defs import ResourceRecordSetExtraOutputTypeDef
     from mypy_boto3_s3.client import S3Client
 
     from ..config.models.cfngin import (
@@ -84,7 +77,7 @@ def parse_zone_id(full_zone_id: str) -> str:
     return full_zone_id.split("/")[2]
 
 
-def get_hosted_zone_by_name(client: Route53Client, zone_name: str) -> Optional[str]:
+def get_hosted_zone_by_name(client: Route53Client, zone_name: str) -> str | None:
     """Get the zone id of an existing zone by name.
 
     Args:
@@ -154,7 +147,7 @@ class SOARecordText:
 class SOARecord:
     """Represents an SOA record."""
 
-    def __init__(self, record: ResourceRecordSetTypeDef) -> None:
+    def __init__(self, record: ResourceRecordSetExtraOutputTypeDef) -> None:
         """Instantiate class."""
         self.name = record["Name"]
         self.text = SOARecordText(record.get("ResourceRecords", [{"Value": ""}])[0]["Value"])
@@ -386,7 +379,7 @@ def get_client_region(client: Any) -> str:
         AWS region string.
 
     """
-    return client._client_config.region_name  # type: ignore  # noqa: SLF001
+    return client._client_config.region_name  # noqa: SLF001
 
 
 def get_s3_endpoint(client: Any) -> str:
@@ -399,10 +392,10 @@ def get_s3_endpoint(client: Any) -> str:
         The AWS endpoint for the client.
 
     """
-    return client._endpoint.host  # type: ignore  # noqa: SLF001
+    return client._endpoint.host  # noqa: SLF001
 
 
-def s3_bucket_location_constraint(region: Optional[str]) -> Optional[str]:
+def s3_bucket_location_constraint(region: str | None) -> str | None:
     """Return the appropriate LocationConstraint info for a new S3 bucket.
 
     When creating a bucket in a region OTHER than us-east-1, you need to
@@ -424,7 +417,7 @@ def s3_bucket_location_constraint(region: Optional[str]) -> Optional[str]:
 def ensure_s3_bucket(
     s3_client: S3Client,
     bucket_name: str,
-    bucket_region: Optional[str] = None,
+    bucket_region: str | None = None,
     *,
     create: bool = True,
     persist_graph: bool = False,
@@ -506,8 +499,8 @@ def is_within_directory(directory: Path | str, target: str) -> bool:
     Determines if the provided path is within a specific directory or its subdirectories.
 
     Args:
-        directory (Union[Path, str]): Path of the directory we're checking.
-        target (str): Path of the file we're checking for containment.
+        directory: Path of the directory we're checking.
+        target: Path of the file we're checking for containment.
 
     Returns:
         bool: True if the target is in the directory or subdirectories, False otherwise.
@@ -553,7 +546,7 @@ class Extractor:
 
     extension: ClassVar[str] = ""
 
-    def __init__(self, archive: Optional[Path] = None) -> None:
+    def __init__(self, archive: Path | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -705,7 +698,7 @@ class SourceProcessor:
                     session.client("s3")
                     .head_object(Bucket=config.bucket, Key=config.key, **extra_s3_args)[
                         "LastModified"
-                    ]  # type: ignore
+                    ]
                     .astimezone(dateutil.tz.tzutc())  # type: ignore
                 )
             except botocore.exceptions.ClientError as client_error:
@@ -809,13 +802,13 @@ class SourceProcessor:
 
     def update_paths_and_config(
         self,
-        config: Union[
-            GitCfnginPackageSourceDefinitionModel,
-            LocalCfnginPackageSourceDefinitionModel,
-            S3CfnginPackageSourceDefinitionModel,
-        ],
+        config: (
+            GitCfnginPackageSourceDefinitionModel
+            | LocalCfnginPackageSourceDefinitionModel
+            | S3CfnginPackageSourceDefinitionModel
+        ),
         pkg_dir_name: str,
-        pkg_cache_dir: Optional[Path] = None,
+        pkg_cache_dir: Path | None = None,
     ) -> None:
         """Handle remote source defined sys.paths & configs.
 

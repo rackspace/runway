@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import locale
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
@@ -37,7 +38,7 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
     metavar="<file-name>",
 )
 @options.verbose
-def runway(indent: int, output: Optional[str], **_: Any) -> None:
+def runway(indent: int, output: str | None, **_: Any) -> None:
     """Output JSON schema Runway configuration files.
 
     The schema that is output can be used to validate configuration files.
@@ -45,7 +46,7 @@ def runway(indent: int, output: Optional[str], **_: Any) -> None:
     and suggestions within configuration files.
 
     """
-    content = RunwayConfigDefinitionModel.schema_json(indent=indent)
+    content = json.dumps(RunwayConfigDefinitionModel.model_json_schema(), indent=indent)
     if output:
         file_path = Path(output).absolute()
         file_path.write_text(  # append empty line to end of file

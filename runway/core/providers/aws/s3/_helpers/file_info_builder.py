@@ -63,7 +63,7 @@ class FileInfoBuilder:
         """
         delete_enabled = self._parameters.delete if self._parameters else False
         return FileInfo(
-            **file_base.dict(),
+            **file_base.dict(),  # pyright: ignore[reportArgumentType]
             **(
                 {"client": self._source_client, "source_client": self._client}
                 if file_base.operation_name == "delete" and delete_enabled

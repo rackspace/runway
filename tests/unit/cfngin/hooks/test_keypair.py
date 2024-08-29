@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.keypair."""
 
-# pyright: basic
 from __future__ import annotations
 
 import os
@@ -11,7 +10,7 @@ from unittest import mock
 
 import boto3
 import pytest
-from moto import mock_ec2, mock_ssm
+from moto.core.decorator import mock_aws
 
 from runway.cfngin.hooks.keypair import KeyPairInfo, ensure_keypair_exists
 
@@ -20,6 +19,8 @@ from ..factories import mock_context
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
+
+    from pytest_mock import MockerFixture
 
     from runway.context import CfnginContext
 
@@ -53,24 +54,19 @@ def context() -> CfnginContext:
 
 
 @pytest.fixture(autouse=True)
-def ec2(ssh_key: SSHKey) -> Iterator[None]:
-    """Mock EC2."""
-    # Force moto to generate a deterministic key pair on creation.
-    # Can be replaced by something more sensible when
-    # https://github.com/spulec/moto/pull/2108 is merged
-
-    key_pair = {
-        "fingerprint": ssh_key.fingerprint,
-        "material": ssh_key.private_key.decode("ascii"),
-    }
-    with mock.patch("moto.ec2.models.random_key_pair", side_effect=[key_pair]), mock_ec2():
-        yield
-
-
-@pytest.fixture(autouse=True)
-def ssm() -> Iterator[None]:
-    """Mock SSM."""
-    with mock_ssm():
+def patch_ssh_key(mocker: MockerFixture, ssh_key: SSHKey) -> Iterator[None]:
+    """Force moto to generate a deterministic key pair on creation."""
+    mocker.patch(
+        "moto.ec2.models.key_pairs.random_rsa_key_pair",
+        side_effect=[
+            {
+                "fingerprint": ssh_key.fingerprint,
+                "material": ssh_key.private_key.decode("ascii"),
+                "material_public": ssh_key.public_key.decode("ascii"),
+            }
+        ],
+    )
+    with mock_aws():
         yield
 
 

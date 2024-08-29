@@ -1,12 +1,11 @@
 """Argument data models."""
 
-# ruff: noqa: UP006, UP035
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Annotated
 
-from pydantic import DirectoryPath, Extra, Field, FilePath, validator
+from pydantic import ConfigDict, DirectoryPath, Field, FilePath, ValidationInfo, field_validator
 
 from .....config.models.utils import resolve_path_field
 from .....utils import BaseModel
@@ -15,6 +14,8 @@ from ...base import HookArgsBaseModel
 
 class DockerOptions(BaseModel):
     """Docker options."""
+
+    model_config = ConfigDict(extra="ignore")
 
     disabled: bool = False
     """Explicitly disable the use of docker (default ``False``).
@@ -30,7 +31,7 @@ class DockerOptions(BaseModel):
 
     """
 
-    extra_files: List[str] = []
+    extra_files: list[str] = []
     """List of absolute file paths within the Docker container to copy into the
     deployment package.
 
@@ -54,7 +55,7 @@ class DockerOptions(BaseModel):
 
     """
 
-    file: Optional[FilePath] = None
+    file: FilePath | None = None
     """Dockerfile to use to build an image for use in this process.
 
     This, ``image`` , or ``runtime`` must be provided.
@@ -69,7 +70,7 @@ class DockerOptions(BaseModel):
 
     """
 
-    image: Optional[str] = None
+    image: str | None = None
     """Docker image to use. If the image does not exist locally, it will be pulled.
 
     This, ``file`` (takes precedence), or ``runtime`` must be provided.
@@ -85,7 +86,7 @@ class DockerOptions(BaseModel):
 
     """
 
-    name: Optional[str] = None
+    name: str | None = None
     """When providing a Dockerfile, this will be the name applied to the resulting image.
     It is the equivalent to ``name`` in the ``name:tag`` syntax of the
     ``docker build [--tag, -t]`` command option.
@@ -118,12 +119,7 @@ class DockerOptions(BaseModel):
 
     """
 
-    class Config:
-        """Model configuration."""
-
-        extra = Extra.ignore
-
-    _resolve_path_fields = validator("file", allow_reuse=True)(resolve_path_field)  # type: ignore
+    _resolve_path_fields = field_validator("file")(resolve_path_field)
 
 
 class AwsLambdaHookArgs(HookArgsBaseModel):
@@ -135,13 +131,13 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
     """
 
-    cache_dir: Optional[Path] = None
+    cache_dir: Path | None = None
     """Explicitly define the directory location.
     Must be an absolute path or it will be relative to the CFNgin module directory.
 
     """
 
-    compatible_architectures: Optional[List[str]] = None
+    compatible_architectures: list[str] | None = None
     """A list of compatible instruction set architectures.
     (https://docs.aws.amazon.com/lambda/latest/dg/foundation-arch.html)
 
@@ -157,7 +153,7 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
     """
 
-    compatible_runtimes: Optional[List[str]] = None
+    compatible_runtimes: list[str] | None = None
     """A list of compatible function runtimes.
     When provided, the ``runtime`` being used to build the deployment package
     must be included in the list or an error will be raised.
@@ -177,7 +173,7 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
     docker: DockerOptions = DockerOptions()
     """Docker options."""
 
-    extend_gitignore: List[str] = []
+    extend_gitignore: list[str] = []
     """gitignore rules that should be added to the rules already defined in a
     ``.gitignore`` file in the source code directory.
     This can be used with or without an existing file.
@@ -199,7 +195,7 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
     """
 
-    license: Optional[str] = Field(default=None, max_length=256)
+    license: Annotated[str | None, Field(max_length=256)] = None
     """The layer's software license. Can be any of the following:
 
     - A SPDX license identifier (e.g. ``Apache-2.0``).
@@ -217,7 +213,7 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
     """
 
-    object_prefix: Optional[str] = None
+    object_prefix: str | None = None
     """Prefix to add to the S3 Object key.
 
     The object will always be prefixed with ``awslambda/functions``.
@@ -226,7 +222,7 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 
     """
 
-    runtime: Optional[str] = None
+    runtime: Annotated[str | None, Field(validate_default=True)] = None
     """Runtime of the Lambda Function
     (https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html).
 
@@ -264,16 +260,15 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
     use_cache: bool = True
     """Whether to use a cache directory with pip that will persist builds (default ``True``)."""
 
-    _resolve_path_fields = validator("cache_dir", "source_code", allow_reuse=True)(resolve_path_field)  # type: ignore
+    _resolve_path_fields = field_validator("cache_dir", "source_code")(resolve_path_field)
 
-    @validator("runtime", always=True, allow_reuse=True)
-    def _validate_runtime_or_docker(
-        cls, v: str | None, values: dict[str, Any]  # noqa: N805
-    ) -> str | None:
+    @field_validator("runtime", mode="before")
+    @classmethod
+    def _validate_runtime_or_docker(cls, v: str | None, info: ValidationInfo) -> str | None:
         """Validate that either runtime is provided or Docker image is provided."""
         if v:  # if runtime was provided, we don't need to check anything else
             return v
-        docker: DockerOptions = values["docker"]
+        docker: DockerOptions = info.data["docker"]
         if docker.disabled:
             raise ValueError("runtime must be provided if docker.disabled is True")
         if not (docker.file or docker.image):
@@ -284,7 +279,9 @@ class AwsLambdaHookArgs(HookArgsBaseModel):
 class PythonHookArgs(AwsLambdaHookArgs):
     """Hook arguments for a Python AWS Lambda deployment package."""
 
-    extend_pip_args: Optional[List[str]] = None
+    model_config = ConfigDict(extra="ignore")
+
+    extend_pip_args: list[str] | None = None
     """Additional arguments that should be passed to ``pip install``.
 
     .. important::
@@ -326,8 +323,3 @@ class PythonHookArgs(AwsLambdaHookArgs):
 
     use_poetry: bool = True
     """Whether poetry should be used if determined appropriate."""
-
-    class Config:
-        """Model configuration."""
-
-        extra = Extra.ignore

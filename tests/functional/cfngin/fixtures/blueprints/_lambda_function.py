@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import awacs.awslambda
 import awacs.dynamodb
@@ -150,7 +150,7 @@ class LambdaFunction(Blueprint):
         return func
 
     @cached_property
-    def lambda_layer(self) -> Optional[awslambda.LayerVersion]:
+    def lambda_layer(self) -> awslambda.LayerVersion | None:
         """AWS Lambda Layer."""
         create_layer = bool(self.variables["LayerContent"].S3Bucket)
         kwargs = {

@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 import click
-from cfn_flip import to_yaml
+from cfn_flip import to_yaml  # pyright: ignore[reportUnknownVariableType]
 from typing_extensions import Literal
 
 from ....blueprints.tf_state import TfState

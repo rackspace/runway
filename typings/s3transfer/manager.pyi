@@ -2,20 +2,7 @@
 
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Dict,
-    Generic,
-    List,
-    Optional,
-    Set,
-    TextIO,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, Optional, TextIO, TypeVar
 
 from .futures import BaseExecutor, TransferFuture
 from .subscribers import BaseSubscriber
@@ -59,18 +46,18 @@ class TransferConfig:
     ) -> None: ...
 
 class TransferManager:
-    ALLOWED_DOWNLOAD_ARGS: ClassVar[List[str]] = ...
-    ALLOWED_UPLOAD_ARGS: ClassVar[List[str]] = ...
-    ALLOWED_COPY_ARGS: ClassVar[List[str]] = ...
-    ALLOWED_DELETE_ARGS: ClassVar[List[str]] = ...
+    ALLOWED_DOWNLOAD_ARGS: ClassVar[list[str]] = ...
+    ALLOWED_UPLOAD_ARGS: ClassVar[list[str]] = ...
+    ALLOWED_COPY_ARGS: ClassVar[list[str]] = ...
+    ALLOWED_DELETE_ARGS: ClassVar[list[str]] = ...
     VALIDATE_SUPPORTED_BUCKET_VALUES: ClassVar[bool] = ...
-    _UNSUPPORTED_BUCKET_PATTERNS: ClassVar[Dict[str, Pattern[str]]] = ...
+    _UNSUPPORTED_BUCKET_PATTERNS: ClassVar[dict[str, Pattern[str]]] = ...
     def __init__(
         self,
         client: S3Client,
         config: Optional[TransferConfig] = ...,
         osutil: Optional[OSUtils] = ...,
-        executor_cls: Optional[Type[BaseExecutor]] = ...,
+        executor_cls: Optional[type[BaseExecutor]] = ...,
     ) -> None: ...
     @property
     def client(self) -> S3Client: ...
@@ -78,40 +65,40 @@ class TransferManager:
     def config(self) -> TransferConfig: ...
     def upload(
         self,
-        fileobj: Union[str, TextIO],
+        fileobj: str | TextIO,
         bucket: str,
         key: str,
-        extra_args: Optional[Dict[str, Any]] = ...,
-        subscribers: Optional[List[BaseSubscriber]] = ...,
+        extra_args: Optional[dict[str, Any]] = ...,
+        subscribers: Optional[list[BaseSubscriber]] = ...,
     ) -> TransferFuture: ...
     def download(
         self,
         bucket: str,
         key: str,
-        fileobj: Union[str, TextIO],
-        extra_args: Optional[Dict[str, Any]] = ...,
-        subscribers: Optional[List[BaseSubscriber]] = ...,
+        fileobj: str | TextIO,
+        extra_args: Optional[dict[str, Any]] = ...,
+        subscribers: Optional[list[BaseSubscriber]] = ...,
     ) -> TransferFuture: ...
     def copy(
         self,
-        copy_source: Dict[str, str],
+        copy_source: dict[str, str],
         bucket: str,
         key: str,
-        extra_args: Optional[Dict[str, Any]] = ...,
-        subscribers: Optional[List[BaseSubscriber]] = ...,
+        extra_args: Optional[dict[str, Any]] = ...,
+        subscribers: Optional[list[BaseSubscriber]] = ...,
         source_client: S3Client = ...,
     ) -> TransferFuture: ...
     def delete(
         self,
         bucket: str,
         key: str,
-        extra_args: Optional[Dict[str, Any]] = ...,
-        subscribers: Optional[List[BaseSubscriber]] = ...,
+        extra_args: Optional[dict[str, Any]] = ...,
+        subscribers: Optional[list[BaseSubscriber]] = ...,
     ) -> TransferFuture: ...
     def __enter__(self) -> TransferConfig: ...
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
+        exc_type: Optional[type[BaseException]],
         exc_value: Optional[BaseException],
         *args: Any,
     ) -> None: ...
@@ -122,8 +109,8 @@ _T = TypeVar("_T")
 class TransferCoordinatorController(Generic[_T]):
     def __init__(self) -> None: ...
     @property
-    def tracked_transfer_coordinators(self) -> Set[_T]: ...
+    def tracked_transfer_coordinators(self) -> set[_T]: ...
     def add_transfer_coordinator(self, transfer_coordinator: _T) -> None: ...
     def remove_transfer_coordinator(self, transfer_coordinator: _T) -> None: ...
-    def cancel(self, msg: str = ..., exc_type: Type[BaseException] = ...) -> None: ...
+    def cancel(self, msg: str = ..., exc_type: type[BaseException] = ...) -> None: ...
     def wait(self) -> None: ...

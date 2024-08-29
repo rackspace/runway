@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
-DOCS_URL = "https://docs.onica.com/projects/runway/"
+DOCS_URL = "https://runway.readthedocs.io/"
 
 
 @click.command("docs", short_help="open doc site")

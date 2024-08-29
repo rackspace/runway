@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from typing_extensions import Literal
 
@@ -33,7 +33,7 @@ class RunwayModuleType:
     Runway determines the type of module you are trying to
     deploy in 3 different ways. First, it will check for the
     ``type`` property as described here, next it will look
-    for a suffix as described in :ref:`Module Definition<runway-module>`,
+    for a suffix as described in :ref:`Module Definition <runway_config:Module>`,
     and finally it will attempt to autodetect your module
     type by scanning the files of the project. If none of
     those settings produces a valid result an error will
@@ -52,7 +52,7 @@ class RunwayModuleType:
     +--------------------+-----------------------------------------------+
     | ``kubernetes``     | Kubernetes                                    |
     +--------------------+-----------------------------------------------+
-    | ``static``         | :ref:`Static Site<mod-staticsite>`            |
+    | ``static``         | :ref:`index:Static Site`                      |
     +--------------------+-----------------------------------------------+
 
     Even when specifying a module ``type`` the module structure
@@ -98,7 +98,7 @@ class RunwayModuleType:
         self.type_str = type_str
         self.module_class = self._determine_module_class()
 
-    def _determine_module_class(self) -> type[RunwayModule]:
+    def _determine_module_class(self) -> type[RunwayModule[Any]]:
         """Determine type of module and return deployment module class.
 
         Returns:
@@ -131,7 +131,7 @@ class RunwayModuleType:
             )
             sys.exit(1)
 
-        return cast(type["RunwayModule"], load_object_from_string(self.class_path))
+        return cast(type["RunwayModule[Any]"], load_object_from_string(self.class_path))
 
     def _set_class_path_based_on_extension(self) -> None:
         """Based on the directory suffix set the class_path."""

@@ -8,7 +8,7 @@ distribution url + callback url paths.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, List  # noqa: UP035
+from typing import TYPE_CHECKING, Any
 
 from ...base import HookArgsBaseModel
 
@@ -21,7 +21,7 @@ LOGGER = logging.getLogger(__name__)
 class HookArgs(HookArgsBaseModel):
     """Hook arguments."""
 
-    alternate_domains: List[str]  # noqa: UP006
+    alternate_domains: list[str]
     """A list of any alternate domains that need to be listed with the primary
     distribution domain.
 
@@ -33,7 +33,7 @@ class HookArgs(HookArgsBaseModel):
     distribution_domain: str
     """Distribution domain."""
 
-    oauth_scopes: List[str]  # noqa: UP006
+    oauth_scopes: list[str]
     """A list of all available validation scopes for oauth."""
 
     redirect_path_sign_in: str
@@ -42,7 +42,7 @@ class HookArgs(HookArgsBaseModel):
     redirect_path_sign_out: str
     """The redirect path after sign out."""
 
-    supported_identity_providers: List[str] = []  # noqa: UP006
+    supported_identity_providers: list[str] = []
     """Supported identity providers."""
 
 
@@ -70,7 +70,7 @@ def update(context: CfnginContext, *_args: Any, **kwargs: Any) -> bool:
         **kwargs: Arbitrary keyword arguments.
 
     """
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     session = context.get_session()
     cognito_client = session.client("cognito-idp")
 

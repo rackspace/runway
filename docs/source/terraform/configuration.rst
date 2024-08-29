@@ -4,8 +4,6 @@
 Configuration
 #############
 
-.. contents::
-  :depth: 4
 
 
 *******
@@ -15,7 +13,7 @@ Options
 Options specific to Terraform Modules.
 
 .. data:: args
-  :type: Optional[Union[Dict[str, List[str]], List[str]]]
+  :type: dict[str, list[str]] | list[str] | None
   :value: None
   :noindex:
 
@@ -32,7 +30,7 @@ Options specific to Terraform Modules.
   .. versionadded:: 1.8.1
 
 .. data:: terraform_backend_config
-  :type: Optional[Dict[str, str]]
+  :type: dict[str, str] | None
   :value: {}
   :noindex:
 
@@ -52,7 +50,7 @@ Options specific to Terraform Modules.
     Added support for any *key: value*.
 
 .. data:: terraform_version
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -66,7 +64,7 @@ Options specific to Terraform Modules.
       terraform_version: 0.11.13
 
 .. data:: terraform_write_auto_tfvars
-  :type: Optional[bool]
+  :type: str | None
   :value: False
   :noindex:
 

@@ -20,7 +20,7 @@ Args
   Name of the key pair to create
 
 .. data:: public_key_path
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -28,7 +28,7 @@ Args
   Incompatible with the SSM options, as the private key will not be available for storing.
 
 .. data:: ssm_key_id
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -36,7 +36,7 @@ Args
   parameter with. If omitted, the default key will be used.
 
 .. data:: ssm_parameter_name
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 

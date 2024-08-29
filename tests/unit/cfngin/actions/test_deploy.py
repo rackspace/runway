@@ -5,7 +5,7 @@ from __future__ import annotations
 import unittest
 from collections import namedtuple
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
@@ -116,7 +116,7 @@ class TestAction:
     )
     def test_upload_disabled(
         self,
-        bucket_name: Optional[str],
+        bucket_name: str | None,
         cfngin_context: CfnginContext,
         explicit: bool,
         expected: bool,
@@ -164,7 +164,7 @@ class TestBuildAction(unittest.TestCase):  # TODO (kyle): refactor tests into th
         )
 
     def _get_context(
-        self, extra_config_args: Optional[dict[str, Any]] = None, **kwargs: Any
+        self, extra_config_args: dict[str, Any] | None = None, **kwargs: Any
     ) -> CfnginContext:
         """Get context."""
         config: dict[str, Any] = {
@@ -445,8 +445,8 @@ class TestLaunchStack(TestBuildAction):  # TODO (kyle): refactor tests to be pyt
 
     def _advance(
         self,
-        new_provider_status: Optional[str],
-        expected_status: Optional[Status],
+        new_provider_status: str | None,
+        expected_status: Status | None,
         expected_reason: str,
     ) -> None:
         """Advance."""

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, call
 
 import pytest
@@ -87,9 +87,9 @@ class TestDockerDependencyInstaller:
     def test_build_image(
         self,
         mocker: MockerFixture,
-        name: Optional[str],
+        name: str | None,
         pull: bool,
-        tag: Optional[str],
+        tag: str | None,
         tmp_path: Path,
     ) -> None:
         """Test build_image."""
@@ -219,10 +219,10 @@ class TestDockerDependencyInstaller:
     )
     def test_image_build_image(
         self,
-        image: Optional[str],
+        image: str | None,
         mocker: MockerFixture,
-        name: Optional[str],
-        runtime: Optional[str],
+        name: str | None,
+        runtime: str | None,
     ) -> None:
         """Test image build image."""
         project = Mock(args=Mock(docker=Mock(file="foo", image=image), runtime=runtime))
@@ -240,10 +240,10 @@ class TestDockerDependencyInstaller:
     )
     def test_image_pull_image(
         self,
-        image: Optional[str],
+        image: str | None,
         mocker: MockerFixture,
         pull: bool,
-        runtime: Optional[str],
+        runtime: str | None,
     ) -> None:
         """Test image pull image."""
         project = Mock(args=Mock(docker=Mock(file=None, image=image, pull=pull), runtime=runtime))
@@ -290,7 +290,7 @@ class TestDockerDependencyInstaller:
         obj = DockerDependencyInstaller(Mock(), client=Mock())
         assert not obj.install()
         run_command.assert_has_calls(
-            [  # type: ignore
+            [
                 call(pre_install_commands[0]),
                 call(install_commands[0]),
                 call(post_install_commands[0]),
@@ -331,7 +331,7 @@ class TestDockerDependencyInstaller:
             )
             == msgs[:-1]
         )
-        docker_logger.log.assert_has_calls([call(level, m) for m in msgs[:-1]])  # type: ignore
+        docker_logger.log.assert_has_calls([call(level, m) for m in msgs[:-1]])
 
     def test_post_install_commands(
         self,
@@ -438,7 +438,7 @@ class TestDockerDependencyInstaller:
                 assert caplog.messages == [f"image not found; pulling docker image {name}..."]
 
     @pytest.mark.parametrize("command, level", [("foo", logging.DEBUG), ("bar", None)])
-    def test_run_command(self, command: str, level: Optional[int], mocker: MockerFixture) -> None:
+    def test_run_command(self, command: str, level: int | None, mocker: MockerFixture) -> None:
         """Test run_command."""
         container = Mock(
             logs=Mock(return_value="log-stream"),

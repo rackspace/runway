@@ -14,13 +14,13 @@ Any other arguments specified but not listed below are sent as filters to the AW
 For example, ``architecture:x86_64`` would add a filter.
 
 .. data:: region
-  :type: Optional[str]
+  :type: str | None
   :noindex:
 
   AWS region to search (e.g. ``us-east-1``). Defaults to the current region.
 
 .. data:: owners
-  :type: Union[List[str], str]
+  :type: List[str] | str | None
   :noindex:
 
   At least one owner must be specified in the query (e.g. ``amazon``, ``self``, or an AWS account ID).
@@ -33,7 +33,7 @@ For example, ``architecture:x86_64`` would add a filter.
   Regex pattern for the name of the AMI (e.g. ``my-ubuntu-server-[0-9]+``).
 
 .. data:: executable_users
-  :type: Optional[str]
+  :type: str | None
   :noindex:
 
   ``amazon``, ``self``, or an AWS account ID.

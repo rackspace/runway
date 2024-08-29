@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import os
 import platform
-from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from docker import DockerClient
 from docker.errors import DockerException, ImageNotFound
@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from docker.models.images import Image
+    from typing_extensions import Self
 
     from ...._logging import RunwayLogger
     from ....context import CfnginContext, RunwayContext
@@ -28,9 +29,6 @@ if TYPE_CHECKING:
     from .models.args import AwsLambdaHookArgs, DockerOptions
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
-
-
-_T = TypeVar("_T")
 
 
 class DockerDependencyInstaller:
@@ -340,7 +338,7 @@ class DockerDependencyInstaller:
                 raise DockerExecFailedError(response)
 
     @classmethod
-    def from_project(cls: type[_T], project: Project[AwsLambdaHookArgs]) -> _T | None:
+    def from_project(cls: type[Self], project: Project[AwsLambdaHookArgs]) -> Self | None:
         """Instantiate class from a project.
 
         High-level method that wraps instantiation in error handling.

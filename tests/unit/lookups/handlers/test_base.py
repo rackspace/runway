@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from typing import Optional
 from unittest.mock import MagicMock
 
 import pytest
@@ -75,7 +74,7 @@ class TestLookupHandler:
             ("undefined", "undefined"),
         ],
     )
-    def test_format_results_handle_none(self, value: str, expected: Optional[str]) -> None:
+    def test_format_results_handle_none(self, value: str, expected: str | None) -> None:
         """Test format_results."""
         assert LookupHandler.format_results(value) == expected
         if isinstance(expected, str):
@@ -117,7 +116,7 @@ class TestLookupHandler:
     def test_parse(
         self,
         query: str,
-        raw_args: Optional[dict[str, str]],
+        raw_args: dict[str, str] | None,
         expected_args: dict[str, str],
     ) -> None:
         """Test parse."""

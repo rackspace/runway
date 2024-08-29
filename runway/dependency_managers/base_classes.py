@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Union
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from ..compat import cached_property
 from ..mixins import CliInterfaceMixin
@@ -27,7 +27,7 @@ class DependencyManager(CliInterfaceMixin):
     CONFIG_FILES: ClassVar[tuple[str, ...]]
     """Configuration files used by the dependency manager."""
 
-    def __init__(self, context: Union[CfnginContext, RunwayContext], cwd: StrPath) -> None:
+    def __init__(self, context: CfnginContext | RunwayContext, cwd: StrPath) -> None:
         """Instantiate class.
 
         Args:

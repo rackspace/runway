@@ -1,12 +1,12 @@
 """Test runway.env_mgr.tfenv."""
 
-# pyright: basic, reportFunctionMemberAccess=none
+# pyright: reportFunctionMemberAccess=none
 from __future__ import annotations
 
 import json
 import re
 import subprocess
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, call
 
 import hcl
@@ -192,7 +192,7 @@ class TestTFEnvManager:
     )
     def test_get_version_from_executable(
         self,
-        expected: Optional[Version],
+        expected: Version | None,
         fake_process: FakeProcess,
         output: str,
     ) -> None:
@@ -292,7 +292,7 @@ class TestTFEnvManager:
             ("0.15.0-alpha13", Version("0.15.0-alpha13")),
         ],
     )
-    def test_parse_version_string(self, provided: str, expected: Optional[Version]) -> None:
+    def test_parse_version_string(self, provided: str, expected: Version | None) -> None:
         """Test parse_version_string."""
         assert TFEnvManager.parse_version_string(provided) == expected
 

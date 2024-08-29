@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import logging
 import subprocess
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -192,8 +192,8 @@ class TestTerraform:
     )
     def test_env_file(
         self,
-        filename: Union[list[str], str],
-        expected: Optional[str],
+        filename: list[str] | str,
+        expected: str | None,
         runway_context: MockRunwayContext,
         tmp_path: Path,
     ) -> None:
@@ -300,8 +300,8 @@ class TestTerraform:
     )
     def test_gen_command(
         self,
-        command: Union[list[str], str],
-        args_list: Optional[list[str]],
+        command: list[str] | str,
+        args_list: list[str] | None,
         expected: list[str],
         mocker: MockerFixture,
         runway_context: MockRunwayContext,
@@ -329,7 +329,7 @@ class TestTerraform:
         """Test handle_backend with no handler."""
         caplog.set_level(LogLevels.DEBUG, logger=MODULE)
         mock_get_full_configuration = MagicMock(return_value={})
-        backend: dict[str, Union[dict[str, Any], str]] = {
+        backend: dict[str, dict[str, Any] | str] = {
             "type": "unsupported",
             "config": {},
         }
@@ -427,7 +427,7 @@ class TestTerraform:
         caplog.set_level(LogLevels.WARNING, logger=MODULE)
         monkeypatch.delenv("TF_WORKSPACE", raising=False)
         mock_get_full_configuration = MagicMock(return_value={})
-        backend: dict[str, Union[dict[str, Any], str]] = {
+        backend: dict[str, dict[str, Any] | str] = {
             "type": "remote",
             "config": {},
         }
@@ -642,7 +642,7 @@ class TestTerraform:
             Terraform, "gen_command", return_value=["mock_gen_command"]
         )
         mock_run_command = mocker.patch(f"{MODULE}.run_module_command")
-        options: dict[str, Union[dict[str, Any], str]] = {
+        options: dict[str, dict[str, Any] | str] = {
             "args": {"init": ["init_arg"]},
             "terraform_backend_config": {"bucket": "name"},
         }
@@ -1038,7 +1038,7 @@ class TestTerraformBackendConfig:
         ],
     )
     def test_get_backend_file(
-        self, tmp_path: Path, filename: Union[list[str], str], expected: Optional[str]
+        self, tmp_path: Path, filename: list[str] | str, expected: str | None
     ) -> None:
         """Test get_backend_file."""
         if isinstance(filename, list):

@@ -9,7 +9,7 @@ import secrets
 import shutil
 import tempfile
 from tempfile import mkstemp
-from typing import TYPE_CHECKING, Any, Dict, List, Optional  # noqa: UP035
+from typing import TYPE_CHECKING, Any
 
 from ... import aws_lambda
 from ...base import HookArgsBaseModel
@@ -34,16 +34,16 @@ class HookArgs(HookArgsBaseModel):
     client_id: str
     """The ID of the Cognito User Pool Client."""
 
-    cookie_settings: Dict[str, Any]  # noqa: UP006
+    cookie_settings: dict[str, Any]
     """The settings for our customized cookies."""
 
-    http_headers: Dict[str, Any]  # noqa: UP006
+    http_headers: dict[str, Any]
     """The additional headers added to our requests."""
 
     nonce_signing_secret_param_name: str
     """SSM param name to store nonce signing secret."""
 
-    oauth_scopes: List[str]  # noqa: UP006
+    oauth_scopes: list[str]
     """The validation scopes for our OAuth requests."""
 
     redirect_path_refresh: str
@@ -58,7 +58,7 @@ class HookArgs(HookArgsBaseModel):
 
     """
 
-    required_group: Optional[str] = None
+    required_group: str | None = None
     """Optional User Pool group to which access should be restricted."""
 
 
@@ -77,7 +77,7 @@ def write(
 
     """
     cognito_domain = context.hook_data["aae_domain_updater"].get("domain")
-    args = HookArgs.parse_obj(kwargs)
+    args = HookArgs.model_validate(kwargs)
     config = {
         "client_id": args.client_id,
         "cognito_auth_domain": cognito_domain,
@@ -177,7 +177,7 @@ def get_nonce_signing_secret(param_name: str, context: CfnginContext) -> str:
     ssm_client = session.client("ssm")
     try:
         response = ssm_client.get_parameter(Name=param_name, WithDecryption=True)
-        return response["Parameter"]["Value"]
+        return response["Parameter"].get("Value", "")
     except ssm_client.exceptions.ParameterNotFound:
         secret = random_key(16)
         ssm_client.put_parameter(

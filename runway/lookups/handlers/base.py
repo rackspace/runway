@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 import logging
+from abc import ABC, abstractmethod
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Any, ClassVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypedDict, TypeVar, cast, overload
 
 import yaml
 from troposphere import BaseAWSObject
@@ -21,6 +22,12 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+ContextTypeVar = TypeVar(
+    "ContextTypeVar", "CfnginContext", "RunwayContext", "CfnginContext | RunwayContext"
+)
+"""Type variable for context type."""
+
+
 TransformToTypeLiteral = Literal["bool", "str"]
 
 
@@ -29,7 +36,22 @@ def str2bool(v: str) -> bool:
     return v.lower() in ("yes", "true", "t", "1", "on", "y")
 
 
-class LookupHandler:
+class ParsedArgsTypeDef(TypedDict, total=False):
+    """Partial type definition for the args returned by :meth:`LookupHandler.parse`.
+
+    This class can be subclassed to model all expected arguments if needed.
+
+    """
+
+    default: str
+    get: str
+    indent: str
+    load: Literal["json", "troposphere", "yaml"]
+    region: str
+    transform: TransformToTypeLiteral
+
+
+class LookupHandler(ABC, Generic[ContextTypeVar]):
     """Base class for lookup handlers."""
 
     TYPE_NAME: ClassVar[str]
@@ -100,19 +122,25 @@ class LookupHandler:
             return value.data
         return value
 
+    @overload
     @classmethod
+    @abstractmethod
     def handle(
-        cls,
-        __value: str,
-        context: CfnginContext | RunwayContext,
-        *__args: Any,
-        provider: Provider | None = None,
-        **__kwargs: Any,
-    ) -> Any:
+        cls, value: str, context: ContextTypeVar, *, provider: Provider, **_kwargs: Any
+    ) -> Any: ...
+
+    @overload
+    @classmethod
+    @abstractmethod
+    def handle(cls, value: str, context: ContextTypeVar, **_kwargs: Any) -> Any: ...
+
+    @classmethod
+    @abstractmethod
+    def handle(cls, value: str, context: ContextTypeVar, **_kwargs: Any) -> Any:
         """Perform the lookup.
 
         Args:
-            __value: Parameter(s) given to the lookup.
+            value: Parameter(s) given to the lookup.
             context: The current context object.
             provider: CFNgin AWS provider.
 
@@ -120,7 +148,7 @@ class LookupHandler:
         raise NotImplementedError
 
     @classmethod
-    def parse(cls, value: str) -> tuple[str, dict[str, str]]:
+    def parse(cls, value: str) -> tuple[str, ParsedArgsTypeDef]:
         """Parse the value passed to a lookup in a standardized way.
 
         Args:
@@ -135,9 +163,9 @@ class LookupHandler:
         colon_split = raw_value.split("::", 1)
 
         query = colon_split.pop(0)
-        args: dict[str, str] = cls._parse_args(colon_split[0]) if colon_split else {}
+        args = cls._parse_args(colon_split[0]) if colon_split else {}
 
-        return query, args
+        return query, cast(ParsedArgsTypeDef, args)
 
     @classmethod
     def _parse_args(cls, args: str) -> dict[str, str]:
@@ -270,7 +298,7 @@ class LookupHandler:
         if not to_type:
             return value
 
-        return mapping[to_type](value, **kwargs)  # type: ignore
+        return mapping[to_type](value, **kwargs)
 
     @classmethod
     def _transform_to_bool(cls, value: Any, **_: Any) -> bool:

@@ -7,14 +7,13 @@ from typing import TYPE_CHECKING, Any, overload
 
 from ....exceptions import UnresolvedVariable
 from ....variables import Variable
-from ...models.runway import (
-    RunwayDeploymentDefinitionModel,
-    RunwayModuleDefinitionModel,
-)
+from ...models.runway import RunwayDeploymentDefinitionModel, RunwayModuleDefinitionModel
 from ._module_def import RunwayModuleDefinition
 from .base import ConfigComponentDefinition
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from ...models.base import ConfigProperty
     from ...models.runway import (
         RunwayAssumeRoleDefinitionModel,
@@ -25,7 +24,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__.replace("._", "."))
 
 
-class RunwayDeploymentDefinition(ConfigComponentDefinition):
+class RunwayDeploymentDefinition(ConfigComponentDefinition[RunwayDeploymentDefinitionModel]):
     """Runway deployment definition."""
 
     account_alias: str | None
@@ -39,7 +38,6 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
     parameters: dict[str, Any]
     regions: list[str]
 
-    _data: RunwayDeploymentDefinitionModel
     _pre_process_vars: tuple[str, ...] = (
         "account_alias",
         "account_id",
@@ -98,7 +96,9 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         """
         if not all(isinstance(i, RunwayModuleDefinition) for i in modules):  # type: ignore
             raise TypeError("modules must be type list[RunwayModuleDefinition]")
-        self._data.modules = [RunwayModuleDefinitionModel.parse_obj(mod.data) for mod in modules]
+        self._data.modules = [
+            RunwayModuleDefinitionModel.model_validate(mod.data) for mod in modules
+        ]
 
     def reverse(self) -> None:
         """Reverse the order of modules and regions."""
@@ -126,7 +126,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         sanitized: list[RunwayModuleDefinitionModel] = []
         for i, mod in enumerate(modules):
             if isinstance(mod, RunwayModuleDefinition):
-                sanitized.append(RunwayModuleDefinitionModel.parse_obj(mod.data))
+                sanitized.append(RunwayModuleDefinitionModel.model_validate(mod.data))
             elif isinstance(mod, RunwayModuleDefinitionModel):  # type: ignore
                 sanitized.append(mod)
             else:
@@ -152,23 +152,23 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
 
     @overload
     @classmethod
-    def parse_obj(cls, obj: list[dict[str, Any]]) -> list[RunwayDeploymentDefinition]: ...
+    def parse_obj(cls: type[Self], obj: list[dict[str, Any]]) -> list[Self]: ...
 
     @overload
     @classmethod
     def parse_obj(
-        cls,
+        cls: type[Self],
         obj: list[ConfigProperty] | set[ConfigProperty] | tuple[ConfigProperty, ...],
-    ) -> list[RunwayDeploymentDefinition]: ...
+    ) -> list[Self]: ...
 
     @overload
     @classmethod
-    def parse_obj(cls, obj: dict[str, Any] | ConfigProperty) -> RunwayDeploymentDefinition: ...
+    def parse_obj(cls: type[Self], obj: dict[str, Any] | ConfigProperty) -> Self: ...
 
     @classmethod
-    def parse_obj(  # type: ignore
-        cls, obj: Any
-    ) -> RunwayDeploymentDefinition | list[RunwayDeploymentDefinition]:
+    def parse_obj(  # pyright: ignore[reportIncompatibleMethodOverride]
+        cls: type[Self], obj: Any
+    ) -> Self | list[Self]:
         """Parse a python object into this class.
 
         Args:
@@ -177,4 +177,4 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition):
         """
         if isinstance(obj, (list, set, tuple)):
             return [cls(RunwayDeploymentDefinitionModel.parse_obj(o)) for o in obj]  # type: ignore
-        return cls(RunwayDeploymentDefinitionModel.parse_obj(obj))
+        return cls(RunwayDeploymentDefinitionModel.model_validate(obj))

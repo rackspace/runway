@@ -92,7 +92,7 @@ class JwksClient:
         """Initialize.
 
         Args:
-            options (Optional[dict[str, str]]): Options for the client.
+            options: Options for the client.
 
         """
         self.options = options

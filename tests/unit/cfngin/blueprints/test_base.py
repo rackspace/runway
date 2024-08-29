@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, ClassVar, Union
+from typing import TYPE_CHECKING, Any, ClassVar
 from unittest.mock import Mock
 
 import pytest
@@ -359,7 +359,7 @@ class TestCFNParameter:
             (1, "1"),
         ],
     )
-    def test_value(self, expected: Union[list[str], str], provided: Any) -> None:
+    def test_value(self, expected: list[str] | str, provided: Any) -> None:
         """Test value."""
         assert CFNParameter("myParameter", provided).value == expected
 

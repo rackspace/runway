@@ -4,11 +4,8 @@
 Directory Structure
 ###################
 
-Example directory structures for a ref:`static site <mod-staticsite>` module.
+Example directory structures for a :ref:`index:Static Site` :term:`Module`.
 
-
-.. contents::
-  :depth: 4
 
 
 ***********

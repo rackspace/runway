@@ -32,7 +32,7 @@ def test_new(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     assert caplog.messages == [
         "runway.yml generated",
         "See addition getting started information at "
-        "https://runway.readthedocs.io/stable/getting_started.html",
+        "https://runway.readthedocs.io/page/getting_started.html",
     ]
 
 

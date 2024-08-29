@@ -1,10 +1,9 @@
 """Hook data lookup."""
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from troposphere import BaseAWSObject
 
@@ -12,17 +11,16 @@ from ....lookups.handlers.base import LookupHandler
 from ....utils import MutableMap
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
 
     from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)
 
 
-class HookDataLookup(LookupHandler):
+class HookDataLookup(LookupHandler["CfnginContext"]):
     """Hook data lookup."""
 
-    TYPE_NAME: Final[Literal["hook_data"]] = "hook_data"
+    TYPE_NAME: ClassVar[str] = "hook_data"
     """Name that the Lookup is registered as."""
 
     @classmethod

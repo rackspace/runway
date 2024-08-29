@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 
 class FakeTransferFutureCallArgs:
     """Fake TransferFutureCallArgs."""
 
-    def __init__(self, *, extra_args: Optional[dict[str, Any]] = None, **kwargs: Any) -> None:
+    def __init__(self, *, extra_args: dict[str, Any] | None = None, **kwargs: Any) -> None:
         """Instantiate class."""
         self.extra_args = extra_args or {}
         for kwarg, val in kwargs.items():
@@ -20,9 +20,9 @@ class FakeTransferFutureMeta:
 
     def __init__(
         self,
-        size: Optional[int] = None,
-        call_args: Optional[FakeTransferFutureCallArgs] = None,
-        transfer_id: Optional[str] = None,
+        size: int | None = None,
+        call_args: FakeTransferFutureCallArgs | None = None,
+        transfer_id: str | None = None,
     ) -> None:
         """Instantiate class."""
         self.size = size
@@ -35,8 +35,8 @@ class FakeTransferFuture:
 
     def __init__(
         self,
-        result: Optional[str] = None,
-        exception: Optional[Exception] = None,
+        result: str | None = None,
+        exception: Exception | None = None,
         meta: FakeTransferFutureMeta = None,
     ) -> None:
         """Instantiate class."""
@@ -44,7 +44,7 @@ class FakeTransferFuture:
         self._exception = exception
         self.meta = meta or FakeTransferFutureMeta()
 
-    def result(self) -> Optional[str]:
+    def result(self) -> str | None:
         """Return result."""
         if self._exception:
             raise self._exception

@@ -6,12 +6,11 @@ the output; not the *Export.Name*.
 
 """
 
-# pyright: reportIncompatibleMethodOverride=none
 from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Final, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, ClassVar, NamedTuple, cast
 
 from botocore.exceptions import ClientError
 
@@ -21,10 +20,10 @@ from .base import LookupHandler
 
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
-    from typing_extensions import Literal
 
     from ...cfngin.providers.aws.default import Provider
     from ...context import CfnginContext, RunwayContext
+    from .base import ParsedArgsTypeDef
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,14 +35,14 @@ class OutputQuery(NamedTuple):
     output_name: str
 
 
-class CfnLookup(LookupHandler):
+class CfnLookup(LookupHandler["CfnginContext | RunwayContext"]):
     """CloudFormation Stack Output lookup."""
 
-    TYPE_NAME: Final[Literal["cfn"]] = "cfn"
+    TYPE_NAME: ClassVar[str] = "cfn"
     """Name that the Lookup is registered as."""
 
     @staticmethod
-    def should_use_provider(args: dict[str, str], provider: Provider | None) -> bool:
+    def should_use_provider(args: ParsedArgsTypeDef, provider: Provider | None) -> bool:
         """Determine if the provider should be used for the lookup.
 
         This will open happen when the lookup is used with CFNgin.
@@ -54,7 +53,7 @@ class CfnLookup(LookupHandler):
 
         """
         if provider:
-            if args.get("region") and provider.region != args["region"]:
+            if "region" in args and provider.region != args["region"]:
                 LOGGER.debug("not using provider; requested region does not match")
                 return False
             LOGGER.debug("using provider")

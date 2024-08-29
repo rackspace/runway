@@ -44,5 +44,5 @@ def new(ctx: click.Context, **_: Any) -> None:
     LOGGER.success("runway.yml generated")
     LOGGER.notice(
         "See addition getting started information at "
-        "https://docs.onica.com/projects/runway/page/getting_started.html"
+        "https://runway.readthedocs.io/page/getting_started.html"
     )

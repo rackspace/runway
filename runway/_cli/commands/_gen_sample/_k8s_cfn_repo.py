@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 import click
-from cfn_flip import to_yaml
+from cfn_flip import to_yaml  # pyright: ignore[reportUnknownVariableType]
 
 from ....blueprints.k8s.k8s_iam import Iam
 from ....blueprints.k8s.k8s_master import Cluster

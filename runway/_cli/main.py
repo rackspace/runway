@@ -65,7 +65,7 @@ class _CliGroup(click.Group):
 def cli(ctx: click.Context, **_: Any) -> None:
     """Runway CLI.
 
-    Full documentation available at https://docs.onica.com/projects/runway/
+    Full documentation available at https://runway.readthedocs.io/
 
     """
     opts = ctx.meta["global.options"]

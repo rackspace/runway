@@ -6,8 +6,6 @@ Advanced Features
 
 Advanced features and detailed information for using Serverless Framework with Runway.
 
-.. contents::
-  :depth: 4
 
 
 .. _sls-skip-npm-ci:
@@ -40,7 +38,7 @@ The value of this option is recursively merged into a resolved clone of the modu
 To create this resolved clone, Runway uses "`serverless print`_" (including `args <sls-args>`_) to resolve the module's Serverless configuration file and output the contents to a temporary file.
 The temporary file is deleted after each execution of Runway.
 
-This functionality can be especially useful when used alongside :ref:`remote module paths <runway-module-path>` such as a module from a :ref:`git repository <runway-module-path-git>` to change values on the fly without needing to modify the source for small differences in each environment.
+This functionality can be especially useful when used alongside :ref:`remote module paths <runway_config:path>` such as a module from a :ref:`git repository <runway_config:Git Repository>` to change values on the fly without needing to modify the source for small differences in each environment.
 
 .. rubric:: Example
 .. code-block:: yaml

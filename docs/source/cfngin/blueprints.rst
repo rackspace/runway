@@ -9,7 +9,7 @@ Blueprints
 ##########
 
 A |Blueprint| is a python classes that dynamically builds CloudFormation templates.
-Where you would specify a raw Cloudformation template in a |stack| using the |template_path| key, you instead specify a |Blueprint| subclass using the |class_path| key.
+Where you would specify a raw Cloudformation template in a |Stack| using the |template_path| key, you instead specify a |Blueprint| subclass using the |class_path| key.
 
 Traditionally Blueprints are built using troposphere_, but that is not absolutely necessary.
 
@@ -27,9 +27,6 @@ In the end, all that is required is that the |Blueprint| is a subclass of :class
 
       """
 
-
-.. contents::
-  :depth: 4
 
 
 *********
@@ -81,7 +78,7 @@ TroposphereType
 ===============
 
 The :class:`~runway.cfngin.blueprints.variables.types.TroposphereType` can be used to generate resources for use in the :class:`~runway.cfngin.blueprints.base.Blueprint` directly from user-specified configuration.
-Which of the below case applies depends on what ``defined_type`` was chosen, and how it would be normally used in the :ref:`Blueprint <term-blueprint>` (and CloudFormation in general).
+Which of the below case applies depends on what ``defined_type`` was chosen, and how it would be normally used in the :term:`Blueprint` (and :link:`CloudFormation` in general).
 
 Resource Types
 --------------
@@ -219,7 +216,7 @@ A sample config for the above:
 
 
 CFNType
-=======
+========
 
 The :class:`~runway.cfngin.blueprints.variables.types.CFNType` can be used to signal that a variable should be submitted to CloudFormation as a Parameter instead of only available to the |Blueprint| when rendering.
 This is useful if you want to leverage AWS-Specific Parameter types (e.g. ``List<AWS::EC2::Image::Id>``) or Systems Manager Parameter Store values (e.g. ``AWS::SSM::Parameter::Value<String>``).
@@ -306,7 +303,7 @@ To use this in your |Blueprint|, you can get the name from context using ``self.
 Referencing the Stack short name
 ================================
 
-The |Stack| short name is the name you specified for the |stack| within your YAML config.
+The |Stack| short name is the name you specified for the |Stack| within your YAML config.
 It does not include the |namespace|.
 If your CFNgin namespace is ``CFNginIsCool`` and the stack's short name is ``myAwesomeEC2Instance``, the short name would be ``myAwesomeEC2Instance``.
 

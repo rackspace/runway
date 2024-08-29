@@ -4,8 +4,7 @@
 Advanced Features
 #################
 
-.. contents::
-  :depth: 4
+
 
 .. _`Auth@Edge`:
 
@@ -93,7 +92,7 @@ See :ref:`Static Site Examples <staticsite-examples>` to see how to do this in A
   The destination name of the file to create.
 
 .. data:: file
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -102,7 +101,7 @@ See :ref:`Static Site Examples <staticsite-examples>` to see how to do this in A
   This or ``content`` must be specified.
 
 .. data:: content_type
-  :type: Optional[str]
+  :type: str | None
   :value: None
   :noindex:
 
@@ -114,7 +113,7 @@ See :ref:`Static Site Examples <staticsite-examples>` to see how to do this in A
   * ``text/yaml`` to serialize ``content`` into YAML.
 
 .. data:: content
-  :type: Optional[Union[str, List[Any], Dict[str, Any]]]
+  :type: str, list[Any], dict[str, Any] | None
   :value: None
   :noindex:
 

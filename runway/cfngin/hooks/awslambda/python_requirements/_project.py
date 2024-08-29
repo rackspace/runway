@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import shutil
-from typing import TYPE_CHECKING, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from .....compat import cached_property
 from .....dependency_managers import (
@@ -33,7 +33,7 @@ class PythonProject(Project[PythonHookArgs]):
     """Name of the default cache directory."""
 
     @cached_property
-    def docker(self) -> Optional[PythonDockerDependencyInstaller]:
+    def docker(self) -> PythonDockerDependencyInstaller | None:
         """Docker interface that can be used to build the project."""
         return PythonDockerDependencyInstaller.from_project(self)
 
@@ -72,7 +72,7 @@ class PythonProject(Project[PythonHookArgs]):
         return Pip(self.ctx, self.project_root)
 
     @cached_property
-    def pipenv(self) -> Optional[Pipenv]:
+    def pipenv(self) -> Pipenv | None:
         """Pipenv dependency manager.
 
         Return:
@@ -90,7 +90,7 @@ class PythonProject(Project[PythonHookArgs]):
         raise PipenvNotFoundError
 
     @cached_property
-    def poetry(self) -> Optional[Poetry]:
+    def poetry(self) -> Poetry | None:
         """Poetry dependency manager.
 
         Return:
@@ -121,7 +121,7 @@ class PythonProject(Project[PythonHookArgs]):
         return "pip"
 
     @cached_property
-    def requirements_txt(self) -> Optional[Path]:
+    def requirements_txt(self) -> Path | None:
         """Dependency file for the project."""
         if self.poetry:  # prioritize poetry
             return self.poetry.export(output=self.tmp_requirements_txt)

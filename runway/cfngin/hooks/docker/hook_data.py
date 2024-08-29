@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, overload
+from typing import TYPE_CHECKING, overload
 
 from docker import DockerClient
 
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class DockerHookData(MutableMap):
     """Docker hook_data object."""
 
-    image: Optional[DockerImage] = None
+    image: DockerImage | None = None
 
     @cached_property
     def client(self) -> DockerClient:
@@ -30,7 +30,7 @@ class DockerHookData(MutableMap):
     @overload
     def update_context(self, context: None = ...) -> None: ...
 
-    def update_context(self, context: Optional[CfnginContext] = None) -> Optional[DockerHookData]:
+    def update_context(self, context: CfnginContext | None = None) -> DockerHookData | None:
         """Update context object with new the current DockerHookData."""
         if not context:
             return None
@@ -47,3 +47,7 @@ class DockerHookData(MutableMap):
         new_obj = cls()
         context.hook_data["docker"] = new_obj
         return new_obj
+
+    def __bool__(self) -> bool:
+        """Implement evaluation of instances as a bool."""
+        return True

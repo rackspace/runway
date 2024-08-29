@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import click
 
@@ -32,19 +32,19 @@ LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 class DeployEnvironment(DelCachedPropMixin):
     """Runway deploy environment."""
 
-    __name: Optional[str]
+    __name: str | None
     _ignore_git_branch: bool
 
-    name_derived_from: Optional[str]
+    name_derived_from: str | None
     root_dir: Path
 
     def __init__(
         self,
         *,
-        environ: Optional[dict[str, str]] = None,
-        explicit_name: Optional[str] = None,
+        environ: dict[str, str] | None = None,
+        explicit_name: str | None = None,
         ignore_git_branch: bool = False,
-        root_dir: Optional[Path] = None,
+        root_dir: Path | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -70,7 +70,7 @@ class DeployEnvironment(DelCachedPropMixin):
         )
 
     @property
-    def aws_profile(self) -> Optional[str]:
+    def aws_profile(self) -> str | None:
         """Get AWS profile from environment variables."""
         return self.vars.get("AWS_PROFILE")
 
@@ -90,7 +90,7 @@ class DeployEnvironment(DelCachedPropMixin):
         self._update_vars({"AWS_DEFAULT_REGION": region, "AWS_REGION": region})
 
     @cached_property
-    def branch_name(self) -> Optional[str]:
+    def branch_name(self) -> str | None:
         """Git branch name."""
         if isinstance(git, type):
             LOGGER.debug(
@@ -100,9 +100,7 @@ class DeployEnvironment(DelCachedPropMixin):
             return None
         try:
             LOGGER.debug("getting git branch name...")
-            return git.Repo(  # type: ignore
-                str(self.root_dir), search_parent_directories=True
-            ).active_branch.name
+            return git.Repo(str(self.root_dir), search_parent_directories=True).active_branch.name
         except InvalidGitRepositoryError:
             return None
         except TypeError:
@@ -327,7 +325,7 @@ class DeployEnvironment(DelCachedPropMixin):
                 "override via the DEPLOY_ENVIRONMENT environment variable"
             )
 
-    def _parse_branch_name(self) -> Optional[str]:
+    def _parse_branch_name(self) -> str | None:
         """Parse branch name for use as deploy environment name."""
         if self.branch_name:
             if self.branch_name.startswith("ENV-"):

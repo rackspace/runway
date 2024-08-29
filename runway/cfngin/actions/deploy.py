@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Union
+from typing import TYPE_CHECKING, Any, Callable
 
 from ..exceptions import (
     CancelExecution,
@@ -185,7 +185,7 @@ def handle_hooks(
     provider: Provider,
     context: CfnginContext,
     *,
-    dump: Union[bool, str] = False,
+    dump: bool | str = False,
     outline: bool = False,
 ) -> None:
     """Handle pre/post hooks.
@@ -602,7 +602,7 @@ class Action(BaseAction):
         if isinstance(dump, str):
             plan.dump(directory=dump, context=self.context, provider=self.provider)
 
-    def post_run(self, *, dump: Union[bool, str] = False, outline: bool = False, **_: Any) -> None:
+    def post_run(self, *, dump: bool | str = False, outline: bool = False, **_: Any) -> None:
         """Any steps that need to be taken after running the action."""
         handle_hooks(
             "post_deploy",

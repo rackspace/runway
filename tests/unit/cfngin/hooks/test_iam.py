@@ -1,6 +1,5 @@
 """Tests for runway.cfngin.hooks.iam."""
 
-# pyright: basic
 from __future__ import annotations
 
 from datetime import datetime

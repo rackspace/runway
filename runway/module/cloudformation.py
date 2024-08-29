@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
-class CloudFormation(RunwayModule):
+class CloudFormation(RunwayModule["ModuleOptions | dict[str, Any]"]):
     """CloudFormation (CFNgin) Runway Module."""
 
     def __init__(
