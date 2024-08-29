@@ -6,7 +6,7 @@
 [![npm](https://img.shields.io/npm/v/@onica/runway?style=flat)](https://www.npmjs.com/package/@onica/runway)
 [![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)](https://github.com/psf/black)
 
-![runway-example.gif](https://raw.githubusercontent.com/onicagroup/runway/master/docs/source/images/runway-example.gif)
+![runway-example.gif](https://raw.githubusercontent.com/rackspace/runway/master/docs/source/images/runway-example.gif)
 
 Runway is a lightweight integration app designed to ease management of infrastructure tools.
 

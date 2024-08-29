@@ -2,7 +2,7 @@
 name = "runway"
 version = "2.0.0-dev"  # do not change
 authors = [
-  "Onica Group LLC <opensource@onica.com>",
+  "Rackspace Technology, Inc. <opensource@rackspace.com>",
 ]
 classifiers = [
   "Intended Audience :: Developers",
@@ -16,7 +16,7 @@ classifiers = [
   "Topic :: Utilities",
 ]
 description = "Simplify infrastructure/app testing/deployment"
-documentation = "https://docs.onica.com/projects/runway"
+documentation = "https://runway.readthedocs.io"
 homepage = "https://github.com/rackspace/runway"
 keywords = ["cli"]
 license = "Apache-2.0"

@@ -1,11 +1,11 @@
 {
   "author": {
-    "email": "opensource@onica.com",
-    "name": "Onica Group LLC",
-    "url": "https://onica.com"
+    "email": "opensource@rackspace.com",
+    "name": "Rackspace Technology, Inc.",
+    "url": "https://rackspace.com"
   },
   "bugs": {
-    "url": "https://github.com/onicagroup/runway/issues"
+    "url": "https://github.com/rackspace/runway/issues"
   },
   "dependencies": {
     "tar": "^7.4.2"
@@ -22,7 +22,7 @@
     "postinstall.js",
     "preuninstall.js"
   ],
-  "homepage": "https://github.com/onicagroup/runway",
+  "homepage": "https://github.com/rackspace/runway",
   "keywords": [
     "aws",
     "ci",
