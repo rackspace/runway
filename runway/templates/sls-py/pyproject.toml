@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "runway-sample-sls-py"
 version = "0.0.0"
-authors = ["Onica Group LLC <opensource@onica.com>"]
+authors = ["Rackspace Technology, Inc. <opensource@rackspace.com>"]
 description = "Runway Sample"
 license = "Apache-2.0"
 

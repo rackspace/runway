@@ -42,7 +42,7 @@ class GitCfnginPackageSourceDefinitionModel(ConfigProperty):
     uri: str = Field(
         ...,
         title="Git Repository URI",
-        examples=["git@github.com:onicagroup/runway.git"],
+        examples=["git@github.com:rackspace/runway.git"],
     )
 
     class Config(ConfigProperty.Config):

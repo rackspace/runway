@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 RUNWAY_YML = """---
-# See full syntax at https://docs.onica.com/projects/runway
+# See full syntax at https://runway.readthedocs.io
 deployments:
   - modules:
       - path: sampleapp.cfn

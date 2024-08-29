@@ -17,8 +17,8 @@ SRC_DIR = DOCS_DIR / "source"
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 project = "Runway"
-copyright = "2021, Onica Group"  # noqa: A001
-author = "Onica Group"
+copyright = "2024, Rackspace Technology, Inc."  # noqa: A001
+author = "Rackspace Technology, Inc."
 release = Version.from_git().serialize(metadata=False, style=Style.SemVer)
 version = ".".join(release.split(".")[:2])  # short X.Y version
 
@@ -115,7 +115,7 @@ htmlhelp_basename = "runwaydoc"
 # -- Options for LaTeX output ------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
 latex_documents = [
-    (master_doc, "runway.tex", "runway Documentation", "Onica Group", "manual"),
+    (master_doc, "runway.tex", "runway Documentation", "Rackspace Technology, Inc.", "manual"),
 ]
 latex_elements = {}
 

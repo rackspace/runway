@@ -2,7 +2,7 @@
 name = "runway-quickstart-conduit"
 version = "0.0.0"
 authors = [
-  "Onica Group LLC <opensource@onica.com>",
+  "Rackspace Technology, Inc. <opensource@rackspace.com>",
 ]
 description = "Runway Quickstart"
 license = "Apache-2.0"

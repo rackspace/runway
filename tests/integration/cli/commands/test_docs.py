@@ -12,7 +12,7 @@ from runway._cli import cli
 if TYPE_CHECKING:
     from unittest.mock import MagicMock
 
-DOCS_URL = "https://docs.onica.com/projects/runway/"
+DOCS_URL = "https://runway.readthedocs.io"
 
 
 @patch("click.launch")
