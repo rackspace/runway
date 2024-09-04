@@ -45,7 +45,7 @@ This functionality can be especially useful when used alongside :ref:`remote mod
 
   deployments:
     - modules:
-        - path: git::git://github.com/onicagroup/example.git//sampleapp?tag=v1.0.0
+        - path: git::git://github.com/rackspace/example.git//sampleapp?tag=v1.0.0
           options:
             extend_serverless_yml:
               custom:

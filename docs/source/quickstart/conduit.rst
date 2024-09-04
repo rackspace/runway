@@ -63,13 +63,13 @@ Setup
         $ rm 35a66d144d8def340278cd55080d5c745714aca4
         $ mv angular-realworld-example-app-35a66d144d8def340278cd55080d5c745714aca4 frontend && cd frontend
         $ mkdir scripts
-        $ cd scripts && { curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/build.js ; cd -; }
+        $ cd scripts && { curl -O https://raw.githubusercontent.com/rackspace/runway/master/quickstarts/conduit/build.js ; cd -; }
         $ sed -i 's/^\s*"build":\s.*$/    "build": "node scripts\/build",/' package.json
         $ sed -i 's/^\s*"rxjs":\s.*$/    "rxjs": "~6.3.3",/' package.json
         $ npm install
-        $ curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py
+        $ curl -O https://raw.githubusercontent.com/rackspace/runway/master/quickstarts/conduit/update_env_endpoint.py
         $ cd ..
-        $ curl -O https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/runway.yml
+        $ curl -O https://raw.githubusercontent.com/rackspace/runway/master/quickstarts/conduit/runway.yml
 
     .. tab-item:: Windows
 
@@ -93,13 +93,13 @@ Setup
         $ Rename-Item angular-realworld-example-app-35a66d144d8def340278cd55080d5c745714aca4 frontend && cd frontend
         $ (gc .\package.json -raw).Replace("`"rxjs`": `"^6.2.1`"", "`"rxjs`": `"~6.3.3`"") | sc .\package.json
         $ mkdir scripts
-        $ Invoke-WebRequest "https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/build.js" -OutFile scripts/build.js
+        $ Invoke-WebRequest "https://raw.githubusercontent.com/rackspace/runway/master/quickstarts/conduit/build.js" -OutFile scripts/build.js
         $ (gc .\package.json) -replace "^\s*`"build`":\s.*$", "    `"build`": `"node scripts/build`"," | Out-File .\package.json -Force -Encoding UTF8
         $ npm install
-        $ Invoke-WebRequest "https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/update_env_endpoint.py" -OutFile update_env_endpoint.py
+        $ Invoke-WebRequest "https://raw.githubusercontent.com/rackspace/runway/master/quickstarts/conduit/update_env_endpoint.py" -OutFile update_env_endpoint.py
         $ cd ..
-        $ Invoke-WebRequest "https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/pyproject.toml" -OutFile pyproject.toml
-        $ Invoke-WebRequest "https://raw.githubusercontent.com/onicagroup/runway/master/quickstarts/conduit/runway.yml" -OutFile runway.yml
+        $ Invoke-WebRequest "https://raw.githubusercontent.com/rackspace/runway/master/quickstarts/conduit/pyproject.toml" -OutFile pyproject.toml
+        $ Invoke-WebRequest "https://raw.githubusercontent.com/rackspace/runway/master/quickstarts/conduit/runway.yml" -OutFile runway.yml
 
 .. highlight:: sh
 

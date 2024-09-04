@@ -22,12 +22,12 @@ class TestGit:
             cache_dir=cd_tmp_path,
             location="/",
             options={},
-            uri="https://github.com/onicagroup/runway.git",
+            uri="https://github.com/rackspace/runway.git",
         ).fetch()
         assert result.parent == cd_tmp_path
-        assert "onicagroup_runway" in result.name
+        assert "rackspace_runway" in result.name
 
     def test_sanitize_git_path(self) -> None:
         """Ensure git path is property sanitized."""
-        path = Git.sanitize_git_path("https://github.com/onicagroup/runway.git")
-        assert path == "github.com_onicagroup_runway"
+        path = Git.sanitize_git_path("https://github.com/rackspace/runway.git")
+        assert path == "github.com_rackspace_runway"

@@ -61,7 +61,7 @@ jobs:
       - name: ℹ️ Output GitHub Context
         id: gh-context
         run: |
-          export _REPO_ORIGIN="onicagroup/runway";
+          export _REPO_ORIGIN="rackspace/runway";
           echo "repo-origin=${_REPO_ORIGIN}" >> "${GITHUB_OUTPUT}";
           export _REPO_HEAD="${{ github.event.pull_request.head.repo.full_name || github.repository }}";
           echo "repo-head=${_REPO_HEAD}" >> "${GITHUB_OUTPUT}";

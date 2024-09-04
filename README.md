@@ -1,11 +1,11 @@
 # Runway
 
-[![CI/CD](https://github.com/onicagroup/runway/workflows/CI/CD/badge.svg?branch=master)](https://github.com/onicagroup/runway/actions?query=workflow%3ACI%2FCD)
-[![codecov](https://codecov.io/gh/onicagroup/runway/branch/master/graph/badge.svg?token=Ku28I0RY80)](https://codecov.io/gh/onicagroup/runway)
+[![CI/CD](https://github.com/rackspace/runway/workflows/CI/CD/badge.svg?branch=master)](https://github.com/rackspace/runway/actions?query=workflow%3ACI%2FCD)
+[![codecov](https://codecov.io/gh/rackspace/runway/branch/master/graph/badge.svg?token=Ku28I0RY80)](https://codecov.io/gh/rackspace/runway)
 [![PyPi](https://img.shields.io/pypi/v/runway?style=flat)](https://pypi.org/project/runway/)
 [![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)](https://github.com/psf/black)
 
-![runway-example.gif](https://raw.githubusercontent.com/onicagroup/runway/master/docs/source/images/runway-example.gif)
+![runway-example.gif](https://raw.githubusercontent.com/rackspace/runway/master/docs/source/images/runway-example.gif)
 
 Runway is a lightweight integration app designed to ease management of infrastructure tools.
 

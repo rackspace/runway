@@ -1,4 +1,4 @@
-# See full syntax at https://github.com/onicagroup/runway
+# See full syntax at https://github.com/rackspace/runway
 
 deployments:
   - modules:

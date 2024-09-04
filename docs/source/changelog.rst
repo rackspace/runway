@@ -7,6 +7,6 @@ CHANGELOG
    The PAT used only needs repo.public_repo access.
 
 .. changelog::
-  :changelog-url: https://github.com/onicagroup/runway/releases
-  :github: https://github.com/onicagroup/runway/releases
+  :changelog-url: https://github.com/rackspace/runway/releases
+  :github: https://github.com/rackspace/runway/releases
   :pypi: https://pypi.org/project/runway/

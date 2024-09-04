@@ -1,4 +1,4 @@
-.. _Releases: https://github.com/onicagroup/runway/releases
+.. _Releases: https://github.com/rackspace/runway/releases
 
 ###############
 Release Process

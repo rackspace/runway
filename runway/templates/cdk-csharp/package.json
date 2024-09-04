@@ -1,10 +1,10 @@
 {
-  "author": "Onica",
+  "author": "Rackspace Technology, Inc.",
   "description": "Sample CDK Project",
   "devDependencies": {
     "aws-cdk": "^0.27.0"
   },
-  "homepage": "https://www.onica.com",
+  "homepage": "https://www.rackspace.com",
   "main": "app.py",
   "name": "sampleapp",
   "private": true,

@@ -36,66 +36,66 @@ class TypeDefTestDefinition(TypedDict):  # noqa: D101
 
 TESTS: list[TypeDefTestDefinition] = [
     {
-        "definition": "git::git://github.com/onicagroup/foo/foo-bar.git",
+        "definition": "git::git://github.com/rackspace/foo/foo-bar.git",
         "expected": {
             "location": "./",
             "arguments": {},
             "source": "git",
-            "uri": "git://github.com/onicagroup/foo/foo-bar.git",
+            "uri": "git://github.com/rackspace/foo/foo-bar.git",
         },
     },
     {
-        "definition": "git::git://github.com/onicagroup/foo/bar.git",
+        "definition": "git::git://github.com/rackspace/foo/bar.git",
         "expected": {
             "location": "./",
             "arguments": {},
             "source": "git",
-            "uri": "git://github.com/onicagroup/foo/bar.git",
+            "uri": "git://github.com/rackspace/foo/bar.git",
         },
     },
     {
-        "definition": "git::git://github.com/onicagroup/foo/bar.git//foo/bar",
+        "definition": "git::git://github.com/rackspace/foo/bar.git//foo/bar",
         "expected": {
             "location": "foo/bar",
             "arguments": {},
             "source": "git",
-            "uri": "git://github.com/onicagroup/foo/bar.git",
+            "uri": "git://github.com/rackspace/foo/bar.git",
         },
     },
     {
-        "definition": "git::git://github.com/onicagroup/foo/bar.git?branch=foo",
+        "definition": "git::git://github.com/rackspace/foo/bar.git?branch=foo",
         "expected": {
             "location": "./",
             "arguments": {"branch": "foo"},
             "source": "git",
-            "uri": "git://github.com/onicagroup/foo/bar.git",
+            "uri": "git://github.com/rackspace/foo/bar.git",
         },
     },
     {
-        "definition": "git::git://github.com/onicagroup/foo/bar.git?branch=foo&bar=baz",
+        "definition": "git::git://github.com/rackspace/foo/bar.git?branch=foo&bar=baz",
         "expected": {
             "location": "./",
             "arguments": {"branch": "foo", "bar": "baz"},
             "source": "git",
-            "uri": "git://github.com/onicagroup/foo/bar.git",
+            "uri": "git://github.com/rackspace/foo/bar.git",
         },
     },
     {
-        "definition": "git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo",
+        "definition": "git::git://github.com/rackspace/foo/bar.git//src/foo/bar?branch=foo",
         "expected": {
             "location": "src/foo/bar",
             "arguments": {"branch": "foo"},
             "source": "git",
-            "uri": "git://github.com/onicagroup/foo/bar.git",
+            "uri": "git://github.com/rackspace/foo/bar.git",
         },
     },
     {
-        "definition": "git::git://github.com/onicagroup/foo/bar.git//src/foo/bar?branch=foo&bar=baz",
+        "definition": "git::git://github.com/rackspace/foo/bar.git//src/foo/bar?branch=foo&bar=baz",
         "expected": {
             "location": "src/foo/bar",
             "arguments": {"branch": "foo", "bar": "baz"},
             "source": "git",
-            "uri": "git://github.com/onicagroup/foo/bar.git",
+            "uri": "git://github.com/rackspace/foo/bar.git",
         },
     },
     {

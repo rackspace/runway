@@ -1,4 +1,4 @@
-.. _Runway blueprints: https://github.com/onicagroup/runway/tree/master/runway/blueprints
+.. _Runway blueprints: https://github.com/rackspace/runway/tree/master/runway/blueprints
 .. _troposphere: https://github.com/cloudtools/troposphere
 
 .. _Blueprint:
@@ -216,7 +216,7 @@ A sample config for the above:
 
 
 CFNType
-=======
+========
 
 The :class:`~runway.cfngin.blueprints.variables.types.CFNType` can be used to signal that a variable should be submitted to CloudFormation as a Parameter instead of only available to the |Blueprint| when rendering.
 This is useful if you want to leverage AWS-Specific Parameter types (e.g. ``List<AWS::EC2::Image::Id>``) or Systems Manager Parameter Store values (e.g. ``AWS::SSM::Parameter::Value<String>``).

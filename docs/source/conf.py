@@ -95,7 +95,7 @@ htmlhelp_basename = "runwaydoc"
 # -- Options for LaTeX output ------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-latex-output
 latex_documents = [
-    (master_doc, "runway.tex", "runway Documentation", "Onica Group", "manual"),
+    (master_doc, "runway.tex", "runway Documentation", "Rackspace Technology, Inc.", "manual"),
 ]
 latex_elements = {}
 

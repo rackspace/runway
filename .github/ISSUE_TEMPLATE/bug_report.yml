@@ -13,7 +13,7 @@ body:
 
         ⚠ Please make sure that this [issue wasn't already requested][issue search], or already implemented in the master branch.
 
-        [issue search]: https://github.com/onicagroup/runway/issues?q=is%3Aissue+is%3Aopen+
+        [issue search]: https://github.com/rackspace/runway/issues?q=is%3Aissue+is%3Aopen+
   - type: textarea
     attributes:
       label: Bug Description

@@ -6,7 +6,7 @@ sys_path: ./../../../
 tags:
   Environment: ${environment}
   Namespace: ${namespace}
-  Repository: https://github.com/onicagroup/runway
+  Repository: https://github.com/rackspace/runway
 
 stacks:
   - name: test-runner-boundary
