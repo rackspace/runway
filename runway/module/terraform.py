@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -414,7 +415,14 @@ class Terraform(RunwayModule[TerraformOptions], DelCachedPropMixin):
                 self.logger.debug("directory retained: %s", child)
                 continue
             self.logger.debug("removing: %s", child)
-            send2trash(str(child))  # does not support Path objects
+            if Path.exists(child):
+                try:
+                    Path.unlink(child)
+                except IsADirectoryError:
+                    shutil.rmtree(child)
+                except OSError:
+                    self.logger.warning("unable to remove %s, sending to .Trash", child)
+                    send2trash(child)  # does not support Path objects
 
     def deploy(self) -> None:
         """Run Terraform apply."""
