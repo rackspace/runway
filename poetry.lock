@@ -2897,22 +2897,6 @@ attrs = "*"
 pbr = "*"
 
 [[package]]
-name = "send2trash"
-version = "1.8.3"
-description = "Send file to trash natively under Mac OS X, Windows and Linux"
-optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
-files = [
-    {file = "Send2Trash-1.8.3-py3-none-any.whl", hash = "sha256:0c31227e0bd08961c7665474a3d1ef7193929fedda4233843689baa056be46c9"},
-    {file = "Send2Trash-1.8.3.tar.gz", hash = "sha256:b18e7a3966d99871aefeb00cfbcfdced55ce4871194810fc71f4aa484b953abf"},
-]
-
-[package.extras]
-nativelib = ["pyobjc-framework-Cocoa", "pywin32"]
-objc = ["pyobjc-framework-Cocoa"]
-win32 = ["pywin32"]
-
-[[package]]
 name = "setuptools"
 version = "71.0.2"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -3508,4 +3492,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "6001058ff738862292efbb820abc8091ff782e728088bd53749753e3d868c515"
+content-hash = "6e3331fedf68a21badd5dda6a784bc9a85654fd925a43afb59ace049c4d07036"
