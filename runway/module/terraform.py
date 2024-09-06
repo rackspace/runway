@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
 import hcl
-from send2trash import send2trash
 from typing_extensions import Literal
 
 from .._logging import PrefixAdaptor
@@ -415,14 +414,10 @@ class Terraform(RunwayModule[TerraformOptions], DelCachedPropMixin):
                 self.logger.debug("directory retained: %s", child)
                 continue
             self.logger.debug("removing: %s", child)
-            if Path.exists(child):
-                try:
-                    Path.unlink(child)
-                except IsADirectoryError:
-                    shutil.rmtree(child)
-                except OSError:
-                    self.logger.warning("unable to remove %s, sending to .Trash", child)
-                    send2trash(child)  # does not support Path objects
+            if child.is_dir():
+                shutil.rmtree(child, ignore_errors=True)
+            else:
+                child.unlink(missing_ok=True)
 
     def deploy(self) -> None:
         """Run Terraform apply."""

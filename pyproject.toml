@@ -52,7 +52,6 @@ pyhcl = "^0.4"  # does not support HCL2, possibly move to extras_require in the 
 python-hcl2 = ">=3.0.0"
 pyyaml = ">5.4"
 requests = "*"
-send2trash = "*"
 tomli = ">=1.2.2"
 troposphere = ">=2.4, <5"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
