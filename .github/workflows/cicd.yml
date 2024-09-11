@@ -216,8 +216,6 @@ jobs:
           fail_ci_if_error: true
   build-pypi:
     name: Build PyPi 📦
-    needs:
-      - pre-commit
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub (complete)
