@@ -4,46 +4,16 @@ autolabeler:  # cspell:ignore autolabeler
     branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
   - label: changelog:skip
     branch: [/^(dependabot)\/.*/, /^pre-commit-ci-update-config/, /^renovate\/.*lockfile/]
-  - label: cloudformation
-    files:
-      - '**/templates/*.json'
-      - '**/templates/*.template'
-      - '**/templates/*.yaml'
-      - '**/templates/*.yml'
   - label: dependencies
     branch: [/^(dep|depend|dependabot|deps|renovate)\/.*/]
   - label: documentation
     branch: [/^(docs)\/.*/]
   - label: feature
     branch: [/^(enhancement|feat|feature)\/.*/]
-  - label: github_actions
-    files:
-      - .github/workflows/*.yml
-  - label: javascript
-    files:
-      - '**/*.js'
-      - '**/package-lock.json'
-      - '**/package.json'
   - label: maintenance
     branch: [/^(chore|maint|maintain|maintenance)\/.*/]
-  - label: npm
-    files:
-      - npm/.npmignore
-      - npm/postinstall.js
-      - npm/preuninstall.js
   - label: changelog:patch
     branch: [/^(bug|bugfix|fix|hotfix)\/.*/]
-  - label: poetry
-    files:
-      - poetry.lock
-      - poetry.toml
-      - pyproject.toml
-  - label: python
-    files:
-      - '**/*.py'
-      - poetry.lock
-      - pyproject.toml
-      - setup.cfg
   - label: release
     branch: [/^(release)\/.*/]
 categories:

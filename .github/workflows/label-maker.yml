@@ -12,7 +12,7 @@ on:
 jobs:
   label-maker:
     # Skip running the job from forks.
-    if: github.repository == 'rackspace/runway' && github.actor != 'dependabot[bot]'
+    if: github.repository == 'rackspace/runway' && !endswith(github.actor, '[bot]')
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub

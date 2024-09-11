@@ -1,0 +1,153 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "configMigration": true,
+    "dependencyDashboardLabels": [
+        "renovate"
+    ],
+    "extends": [
+        ":dependencyDashboard",
+        ":prImmediately",
+        ":maintainLockFilesWeekly",
+        ":rebaseStalePrs",
+        ":renovatePrefix",
+        "config:recommended"
+    ],
+    "ignorePaths": [
+        "**/infrastructure/public/common/**",
+        "**/node_modules/**",
+        "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates/**",
+        "**/runway/templates/**",
+        "**/tests/**"
+    ],
+    "packageRules": [
+        {
+            "addLabels": [
+                "changelog:skip"
+            ],
+            "description": "add labels - dev-dependencies",
+            "matchDepTypes": [
+                "dev",
+                "devDependencies",
+                "dev-dependencies",
+                "docs",
+                "lint",
+                "linters",
+                "test"
+            ],
+            "prPriority": -1
+        },
+        {
+            "automerge": true,
+            "automergeType": "pr",
+            "description": "group all `cspell` related packages together and enable automerge",
+            "groupName": "cspell",
+            "matchManagers": [
+                "npm"
+            ],
+            "matchPackageNames": [
+                "/^@.*/cspell-.*/",
+                "cspell"
+            ],
+            "matchPackagePrefixes": [
+                "@cspell/",
+                "cspell-"
+            ]
+        },
+        {
+            "addLabels": [
+                "changelog:skip"
+            ],
+            "automerge": true,
+            "automergeType": "pr",
+            "description": "automerge devcontainer updates",
+            "matchManagers": [
+                "devcontainer"
+            ]
+        },
+        {
+            "addLabels": [
+                "changelog:skip"
+            ],
+            "automerge": true,
+            "automergeType": "pr",
+            "description": "automerge github actions and runner updates",
+            "matchManagers": [
+                "github-actions"
+            ]
+        },
+        {
+            "addLabels": [
+                "changelog:skip"
+            ],
+            "automerge": true,
+            "automergeType": "pr",
+            "description": "automerge lockfile updates",
+            "gitLabIgnoreApprovals": true,
+            "matchUpdateTypes": [
+                "lockFileMaintenance"
+            ],
+            "platformAutomerge": true
+        },
+        {
+            "description": "keep v0.x dependencies updated",
+            "matchCategories": [
+                "python"
+            ],
+            "matchDepTypes": [
+                "dependencies"
+            ],
+            "matchPackageNames": [
+                "pyhcl"
+            ],
+            "rangeStrategy": "bump"
+        },
+        {
+            "automerge": true,
+            "automergeType": "pr",
+            "description": "npm - bump & automerge",
+            "matchManagers": [
+                "npm"
+            ],
+            "platformAutomerge": true,
+            "rangeStrategy": "bump"
+        },
+        {
+            "automerge": false,
+            "automergeType": "pr",
+            "description": "npm - disable automerge & set rangeStrategy to auto for main dependencies",
+            "matchDepTypes": [
+                "dependencies"
+            ],
+            "matchManagers": [
+                "npm"
+            ],
+            "rangeStrategy": "auto"
+        },
+        {
+            "automerge": true,
+            "automergeType": "pr",
+            "description": "poetry - bump & automerge",
+            "matchManagers": [
+                "poetry"
+            ],
+            "platformAutomerge": true,
+            "rangeStrategy": "bump"
+        },
+        {
+            "automerge": false,
+            "automergeType": "pr",
+            "description": "poetry - disable automerge & set rangeStrategy to auto for main dependencies",
+            "matchDepTypes": [
+                "dependencies"
+            ],
+            "matchManagers": [
+                "poetry"
+            ],
+            "rangeStrategy": "auto"
+        }
+    ],
+    "platformAutomerge": true,
+    "semanticCommits": "disabled",
+    "separateMinorPatch": false,
+    "separateMultipleMajor": true
+}
