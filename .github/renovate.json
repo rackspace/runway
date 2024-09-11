@@ -46,11 +46,9 @@
             ],
             "matchPackageNames": [
                 "/^@.*/cspell-.*/",
-                "cspell"
-            ],
-            "matchPackagePrefixes": [
-                "@cspell/",
-                "cspell-"
+                "cspell",
+                "@cspell/{/,}**",
+                "cspell-{/,}**"
             ]
         },
         {
