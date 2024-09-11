@@ -1680,13 +1680,13 @@ tests = ["pytest (>=4.6)"]
 
 [[package]]
 name = "mypy-boto3"
-version = "1.35.14"
-description = "Type annotations for boto3 1.35.14 master module generated with mypy-boto3-builder 8.0.1"
+version = "1.35.16"
+description = "Type annotations for boto3 1.35.16 master module generated with mypy-boto3-builder 8.0.1"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3-1.35.14-py3-none-any.whl", hash = "sha256:5dd24051295543a869d8826cc4ce593dcfbb0031473259cb22df4d3344a4d568"},
-    {file = "mypy_boto3-1.35.14.tar.gz", hash = "sha256:b291d66ec0fbfb7670768608d03815a9f56732fd6451ce71240577cea35e476a"},
+    {file = "mypy_boto3-1.35.16-py3-none-any.whl", hash = "sha256:da553e341aa789499817756f4a6e3a270168497f3370ee0e6a47f847f7692775"},
+    {file = "mypy_boto3-1.35.16.tar.gz", hash = "sha256:df0206ae9c8ad2b77b6b2ff58ecf4acb238be53a3729e99002f14802f00efb0f"},
 ]
 
 [package.dependencies]
@@ -3489,4 +3489,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "6e3331fedf68a21badd5dda6a784bc9a85654fd925a43afb59ace049c4d07036"
+content-hash = "fbb718207746398286f40e8d20d6ea51ca7dd60a1e5f5439c8d0d42c1420df80"
