@@ -134,19 +134,6 @@ jobs:
         run: make setup-npm
       - name: 🚀 Run Linters
         run: make lint
-  pre-commit:
-    name: pre-commit
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.10']
-    steps:
-      - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v4
-      - name: 🏗 Setup Python
-        uses: finleyfamily/action-setup-python@v1.0.0
-      - name: 🚀 Run pre-commit
-        uses: pre-commit/action@v3.0.1
   test-functional:
     name: Functional Tests
     needs:
