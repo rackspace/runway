@@ -40,6 +40,11 @@ jobs:
     needs:
       - build-pypi
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/runway
+    permissions:
+      id-token: write
     steps:
       - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
@@ -56,9 +61,7 @@ jobs:
           poetry-install: false
           poetry-plugins: poetry-dynamic-versioning[plugin]
       - name: 🚀 Publish Distribution 📦 to PyPI
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
-        run: poetry publish
+        run: pypa/gh-action-pypi-publish@v1.10.1
   notify-on-publish:
     name: Notify
     needs:

@@ -20,6 +20,7 @@ prettytable
 pydantic
 pydocstyle
 pyhcl
+pypa
 pywin
 pyyaml
 runpy
