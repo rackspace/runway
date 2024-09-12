@@ -94,7 +94,7 @@ testfixtures = "^8.3.0"  # TODO (kyle) remove use of this dependency - was inher
 tomli-w = "^1.0.0"
 
 [tool.poetry.group.types.dependencies]
-mypy-boto3 = "^1.35.16"  # importable boto3 type annotations
+mypy-boto3 = "^1.35.17"  # importable boto3 type annotations
 
 [tool.poetry.group.types.dependencies.boto3-stubs]
 extras = [
