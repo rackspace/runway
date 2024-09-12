@@ -81,7 +81,7 @@ ruff = "^0.5.7"
 
 [tool.poetry.group.test.dependencies]
 coverage = {extras = ["toml"], version = "^7.6.1"}
-moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.12"}
+moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.14"}
 pipenv = "^2022.1.8"  # only used in tests
 pytest = "^8.3.2"
 pytest-cov = "^5.0.0"
