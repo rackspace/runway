@@ -743,7 +743,6 @@ def get_file_hash(
     filename: str,
     algorithm: Literal[
         "blake2b",
-        "blake2b",
         "md5",
         "sha1",
         "sha224",
