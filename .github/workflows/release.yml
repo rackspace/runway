@@ -40,6 +40,9 @@ jobs:
     needs:
       - build-pypi
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/runway
     permissions:
       id-token: write
     steps:
@@ -58,7 +61,7 @@ jobs:
           poetry-install: false
           poetry-plugins: poetry-dynamic-versioning[plugin]
       - name: 🚀 Publish Distribution 📦 to PyPI
-        run: poetry publish
+        run: pypa/gh-action-pypi-publish@v1.10.1
   notify-on-publish:
     name: Notify
     needs:
