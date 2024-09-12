@@ -40,6 +40,8 @@ jobs:
     needs:
       - build-pypi
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - name: ⤵️ Check out code from GitHub (complete)
         uses: actions/checkout@v4
@@ -56,8 +58,6 @@ jobs:
           poetry-install: false
           poetry-plugins: poetry-dynamic-versioning[plugin]
       - name: 🚀 Publish Distribution 📦 to PyPI
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pypi_password }}
         run: poetry publish
   notify-on-publish:
     name: Notify
