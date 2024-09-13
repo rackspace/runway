@@ -99,7 +99,7 @@ class Pipenv(DependencyManager):
         output = Path(output)
         if not (self.cwd / "Pipfile.lock").is_file():
             LOGGER.warning("Pipfile.lock does not exist! creating it...")
-            self._run_command(self.generate_command("lock", quiet=True), env=environ)
+            self._run_command(self.generate_command("lock"), env=environ)
         try:
             result = self._run_command(
                 self.generate_command("requirements", dev=dev),
@@ -107,7 +107,6 @@ class Pipenv(DependencyManager):
                 suppress_output=True,
             )
         except subprocess.CalledProcessError as exc:
-            LOGGER.error("failed to export pipenv requirements")
             raise PipenvExportFailedError from exc
         output.parent.mkdir(exist_ok=True, parents=True)  # ensure directory exists
         output.write_text(str(result), encoding=locale.getpreferredencoding(do_setlocale=False))

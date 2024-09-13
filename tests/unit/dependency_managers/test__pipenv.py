@@ -78,7 +78,7 @@ class TestPipenv:
         assert expected.is_file()
         export_kwargs.setdefault("dev", False)
         mock_generate_command.assert_has_calls(
-            [call("lock", quiet=True), call("requirements", **export_kwargs)]
+            [call("lock"), call("requirements", **export_kwargs)]
         )
         cfngin_context.env.vars["PIPENV_IGNORE_VIRTUALENVS"] = "1"
         mock_run_command.assert_has_calls(
