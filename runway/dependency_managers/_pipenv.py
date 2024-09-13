@@ -107,6 +107,7 @@ class Pipenv(DependencyManager):
                 suppress_output=True,
             )
         except subprocess.CalledProcessError as exc:
+            LOGGER.error("failed to export pipenv requirements")
             raise PipenvExportFailedError from exc
         output.parent.mkdir(exist_ok=True, parents=True)  # ensure directory exists
         output.write_text(str(result), encoding=locale.getpreferredencoding(do_setlocale=False))
