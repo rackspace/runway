@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import subprocess
 from typing import TYPE_CHECKING, Any
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 
@@ -15,6 +15,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pytest_mock import MockerFixture
+
+    from ..factories import MockCfnginContext
 
 MODULE = "runway.dependency_managers._pipenv"
 
@@ -61,48 +63,60 @@ class TestPipenv:
     def test_export(
         self,
         export_kwargs: dict[str, Any],
+        cfngin_context: MockCfnginContext,
         mocker: MockerFixture,
         tmp_path: Path,
     ) -> None:
         """Test export."""
         expected = tmp_path / "expected" / "test.requirements.txt"
         mock_generate_command = mocker.patch.object(
-            Pipenv, "generate_command", return_value="generate_command"
+            Pipenv, "generate_command", side_effect=["lock", "requirements"]
         )
         mock_run_command = mocker.patch.object(Pipenv, "_run_command", return_value="_run_command")
-        obj = Pipenv(Mock(), tmp_path)
+        obj = Pipenv(cfngin_context, tmp_path)
         assert obj.export(output=expected, **export_kwargs) == expected
         assert expected.is_file()
         export_kwargs.setdefault("dev", False)
-        export_kwargs["requirements"] = True  # hardcoded in the method
-        mock_generate_command.assert_called_once_with("lock", **export_kwargs)
-        mock_run_command.assert_called_once_with(
-            mock_generate_command.return_value, suppress_output=True
+        mock_generate_command.assert_has_calls(
+            [call("lock", quiet=True), call("requirements", **export_kwargs)]
+        )
+        cfngin_context.env.vars["PIPENV_IGNORE_VIRTUALENVS"] = "1"
+        mock_run_command.assert_has_calls(
+            [
+                call("lock", env=cfngin_context.env.vars),
+                call("requirements", env=cfngin_context.env.vars, suppress_output=True),
+            ]
         )
 
     def test_export_raise_from_called_process_error(
         self,
+        cfngin_context: MockCfnginContext,
         mocker: MockerFixture,
         tmp_path: Path,
     ) -> None:
         """Test export raise PoetryExportFailedError from CalledProcessError."""
         output = tmp_path / "expected" / "test.requirements.txt"
-        mock_generate_command = mocker.patch.object(
-            Pipenv, "generate_command", return_value="generate_command"
-        )
+        mocker.patch.object(Pipenv, "generate_command", side_effect=["lock", "requirements"])
         mock_run_command = mocker.patch.object(
             Pipenv,
             "_run_command",
-            side_effect=subprocess.CalledProcessError(
-                returncode=1,
-                cmd=mock_generate_command.return_value,
-            ),
+            side_effect=[
+                None,
+                subprocess.CalledProcessError(
+                    returncode=1,
+                    cmd="pipenv requirements",
+                ),
+            ],
         )
 
         with pytest.raises(PipenvExportFailedError):
-            assert Pipenv(Mock(), tmp_path).export(output=output)
-        mock_run_command.assert_called_once_with(
-            mock_generate_command.return_value, suppress_output=True
+            assert Pipenv(cfngin_context, tmp_path).export(output=output)
+        cfngin_context.env.vars["PIPENV_IGNORE_VIRTUALENVS"] = "1"
+        mock_run_command.assert_has_calls(
+            [
+                call("lock", env=cfngin_context.env.vars),
+                call("requirements", env=cfngin_context.env.vars, suppress_output=True),
+            ]
         )
 
     @pytest.mark.parametrize(

@@ -30,6 +30,9 @@ This can be done by including the ``dockerize_pip`` configuration option which c
 
 Payloads are uploaded to either the |cfngin_bucket| or an explicitly specified bucket, with the object key containing it's checksum to allow repeated uploads to be skipped in subsequent runs.
 
+.. versionchanged:: 2.8.0
+  Use of pipenv now requires version ``>= 2022.8.13``.
+  This is the version that changed how ``requirements.txt`` files are generated.
 
 
 ****

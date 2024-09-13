@@ -87,21 +87,23 @@ class Pipenv(DependencyManager):
         """Export the lock file to other formats (requirements.txt only).
 
         The underlying command being executed by this method is
-        ``pipenv lock --requirements``.
+        ``pipenv requirements``.
 
         Args:
             dev: Include development dependencies.
             output: Path to the output file.
 
         """
+        environ = self.ctx.env.vars.copy()
+        environ["PIPENV_IGNORE_VIRTUALENVS"] = "1"
         output = Path(output)
+        if not (self.cwd / "Pipfile.lock").is_file():
+            LOGGER.warning("Pipfile.lock does not exist! creating it...")
+            self._run_command(self.generate_command("lock", quiet=True), env=environ)
         try:
             result = self._run_command(
-                self.generate_command(
-                    "lock",
-                    dev=dev,
-                    requirements=True,
-                ),
+                self.generate_command("requirements", dev=dev),
+                env=environ,
                 suppress_output=True,
             )
         except subprocess.CalledProcessError as exc:
