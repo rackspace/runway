@@ -354,14 +354,21 @@ def _handle_use_pipenv(
         sys.exit(1)
     LOGGER.info("creating requirements.txt from Pipfile...")
     req_path = os.path.join(dest_path, "requirements.txt")  # noqa: PTH118
-    cmd = ["pipenv", "lock", "--requirements", "--keep-outdated"]
+    cmd = ["pipenv", "requirements"]
+    environ = os.environ.copy()
+    environ["PIPENV_IGNORE_VIRTUALENVS"] = "1"
+
+    if not (Path(package_root) / "Pipfile.lock").is_file():
+        LOGGER.warning("Pipfile.lock does not exist! creating it...")
+        subprocess.check_call(["pipenv", "lock"], cwd=package_root, env=environ)
+
     if python_path:
         cmd.insert(0, python_path)
         cmd.insert(1, "-m")
     with (
         open(req_path, "w", encoding="utf-8") as requirements,  # noqa: PTH123
         subprocess.Popen(
-            cmd, cwd=package_root, stdout=requirements, stderr=subprocess.PIPE
+            cmd, cwd=package_root, env=environ, stdout=requirements, stderr=subprocess.PIPE
         ) as pipenv_process,
     ):
         _stdout, stderr = pipenv_process.communicate(timeout=timeout)

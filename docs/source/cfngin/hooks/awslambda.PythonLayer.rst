@@ -21,6 +21,9 @@ It also ensures that binary files built during the install process are compatibl
 
 .. versionadded:: 2.5.0
 
+.. versionchanged:: 2.8.0
+  Use of pipenv now requires version ``>= 2022.8.13``.
+  This is the version that changed how ``requirements.txt`` files are generated.
 
 
 ****
