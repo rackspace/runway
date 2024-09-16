@@ -1935,13 +1935,13 @@ files = [
 
 [[package]]
 name = "pipenv"
-version = "2024.0.1"
+version = "2024.0.2"
 description = "Python Development Workflow for Humans."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pipenv-2024.0.1-py3-none-any.whl", hash = "sha256:5360835c613837423a99b8c94952b139b777b3eaabb42cb9edb34556245b4c25"},
-    {file = "pipenv-2024.0.1.tar.gz", hash = "sha256:ae5a83fa5b66065cebd2bd8f73f0b281b3bd202a13d58cc644f0b9765128c990"},
+    {file = "pipenv-2024.0.2-py3-none-any.whl", hash = "sha256:3e9556c72fda1706186edfe66b72f4eae59ff1326fc2c9a60f4a1d590a4eb7f3"},
+    {file = "pipenv-2024.0.2.tar.gz", hash = "sha256:f4aca545b472e5ea00bd5131ef2b9047f509c420b89e998caa1085ed06d197cb"},
 ]
 
 [package.dependencies]
@@ -3408,4 +3408,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "ae0e109645d9219decbde19c6bfb0d32becda34cd9e7e8266fb5cd46731b143e"
+content-hash = "739366d671640645fa7c9459ea5f52e1d9709607d20f62a2f7c87cc460efe7da"
