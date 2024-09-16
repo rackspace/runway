@@ -178,17 +178,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.35.14"
+version = "1.35.19"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.35.14-py3-none-any.whl", hash = "sha256:c3e138e9041d59cd34cdc28a587dfdc899dba02ea26ebc3e10fb4bc88e5cf31b"},
-    {file = "boto3-1.35.14.tar.gz", hash = "sha256:7bc78d7140c353b10a637927fe4bc4c4d95a464d1b8f515d5844def2ee52cbd5"},
+    {file = "boto3-1.35.19-py3-none-any.whl", hash = "sha256:84b3fe1727945bc3cada832d969ddb3dc0d08fce1677064ca8bdc13a89c1a143"},
+    {file = "boto3-1.35.19.tar.gz", hash = "sha256:9979fe674780a0b7100eae9156d74ee374cd1638a9f61c77277e3ce712f3e496"},
 ]
 
 [package.dependencies]
-botocore = ">=1.35.14,<1.36.0"
+botocore = ">=1.35.19,<1.36.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -197,13 +197,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.16"
-description = "Type annotations for boto3 1.35.16 generated with mypy-boto3-builder 8.0.1"
+version = "1.35.19"
+description = "Type annotations for boto3 1.35.19 generated with mypy-boto3-builder 8.0.1"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.16-py3-none-any.whl", hash = "sha256:7dee283bd3a5272fe759a43e22fc0658b5ee35679cb4932e33ad0c602f559b61"},
-    {file = "boto3_stubs-1.35.16.tar.gz", hash = "sha256:39b77ede4914704c2ee5e97fd3486d6af26745cbedf6bc06f33c0ffadd0fb2c9"},
+    {file = "boto3_stubs-1.35.19-py3-none-any.whl", hash = "sha256:6adace32995ae7b88675cf0bbde3b4f31876cbf57520db1ec1f392ac32660b4c"},
+    {file = "boto3_stubs-1.35.19.tar.gz", hash = "sha256:c5842cd82d4a1570613f178831c2b6d1b60f511b87f56cc014f2a216c03ecf5a"},
 ]
 
 [package.dependencies]
@@ -269,7 +269,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.16)", "botocore (==1.35.16)"]
+boto3 = ["boto3 (==1.35.19)", "botocore (==1.35.19)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -619,13 +619,13 @@ xray = ["mypy-boto3-xray (>=1.35.0,<1.36.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.35.14"
+version = "1.35.19"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.35.14-py3-none-any.whl", hash = "sha256:24823135232f88266b66ae8e1d0f3d40872c14cd976781f7fe52b8f0d79035a0"},
-    {file = "botocore-1.35.14.tar.gz", hash = "sha256:8515a2fc7ca5bcf0b10016ba05ccf2d642b7cb77d8773026ff2fa5aa3bf38d2e"},
+    {file = "botocore-1.35.19-py3-none-any.whl", hash = "sha256:c83f7f0cacfe7c19b109b363ebfa8736e570d24922f16ed371681f58ebab44a9"},
+    {file = "botocore-1.35.19.tar.gz", hash = "sha256:42d6d8db7250cbd7899f786f9861e02cab17dc238f64d6acb976098ed9809625"},
 ]
 
 [package.dependencies]
@@ -637,7 +637,7 @@ urllib3 = [
 ]
 
 [package.extras]
-crt = ["awscrt (==0.21.2)"]
+crt = ["awscrt (==0.21.5)"]
 
 [[package]]
 name = "botocore-stubs"
@@ -1637,13 +1637,13 @@ tests = ["pytest (>=4.6)"]
 
 [[package]]
 name = "mypy-boto3"
-version = "1.35.16"
-description = "Type annotations for boto3 1.35.16 master module generated with mypy-boto3-builder 8.0.1"
+version = "1.35.19"
+description = "Type annotations for boto3 1.35.19 master module generated with mypy-boto3-builder 8.0.1"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3-1.35.16-py3-none-any.whl", hash = "sha256:da553e341aa789499817756f4a6e3a270168497f3370ee0e6a47f847f7692775"},
-    {file = "mypy_boto3-1.35.16.tar.gz", hash = "sha256:df0206ae9c8ad2b77b6b2ff58ecf4acb238be53a3729e99002f14802f00efb0f"},
+    {file = "mypy_boto3-1.35.19-py3-none-any.whl", hash = "sha256:2216f6080943af3bdc75f90e5990ff5175744e0186d0f39d9a7d6c44186acd2e"},
+    {file = "mypy_boto3-1.35.19.tar.gz", hash = "sha256:cf35b059e95b4fd9e079aa560d47e18a711d7b924f03b8689ded302c086d663c"},
 ]
 
 [package.dependencies]
@@ -3408,4 +3408,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "63385fc0e05806d5476714ce3f6253b7109a7ee21544787cbcad805b98268c2d"
+content-hash = "2aa8c254d3218ae7dcfa0275963b4b39fb41d4c4d9ca1d4ffd835d8344bff2e4"
