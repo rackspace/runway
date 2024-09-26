@@ -198,9 +198,9 @@ class TFEnvManager(EnvManager):
                 data: Dict with lists to flatten.
 
             """
-            if not isinstance(data, dict):
+            if not isinstance(data, dict):  # TODO (kyle): improve with `typing.TypeIs` narrowing
                 return data
-            copy_data = data.copy()
+            copy_data = cast("dict[str, Any]", data).copy()
             for attr, val in copy_data.items():
                 if isinstance(val, list):
                     if len(cast("list[Any]", val)) == 1:
@@ -210,7 +210,7 @@ class TFEnvManager(EnvManager):
                         data[attr] = [_flatten_lists(v) for v in cast("list[Any]", val)]
                 elif isinstance(val, dict):
                     data[attr] = _flatten_lists(cast("dict[str, Any]", val))
-            return data
+            return cast("dict[str, Any]", data)
 
         try:
             result: dict[str, Any] | list[dict[str, Any]] = load_terraform_module(

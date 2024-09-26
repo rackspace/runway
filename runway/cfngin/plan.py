@@ -50,7 +50,7 @@ def json_serial(obj: set[Any] | Any) -> Any:
 
     """
     if isinstance(obj, set):
-        return list(obj)
+        return list(obj)  # pyright: ignore[reportUnknownArgumentType]
     raise TypeError
 
 
