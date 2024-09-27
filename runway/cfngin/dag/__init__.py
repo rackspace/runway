@@ -306,7 +306,7 @@ class DAG:
         for ind_node, dep_nodes in graph_dict.items():
             if not isinstance(dep_nodes, collections.abc.Iterable):
                 raise TypeError(f"{ind_node}: dict values must be lists")
-            for dep_node in dep_nodes:
+            for dep_node in cast("list[str]", dep_nodes):
                 self.add_edge(ind_node, dep_node)
 
     def reset_graph(self) -> None:

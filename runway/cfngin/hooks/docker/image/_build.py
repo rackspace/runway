@@ -135,7 +135,7 @@ class ImageBuildArgs(BaseModel):
                 v.setdefault("tag", repo)
             elif isinstance(v, DockerImageBuildApiOptions) and not v.tag:
                 v.tag = repo
-        return v
+        return v  # pyright: ignore[reportUnknownVariableType]
 
     @field_validator("ecr_repo", mode="before")
     @classmethod

@@ -6,7 +6,7 @@ import base64
 import collections.abc
 import json
 import re
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, overload
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, cast, overload
 
 import yaml
 from pydantic import field_validator
@@ -121,7 +121,7 @@ def parameterized_codec(raw: str, b64: Literal[False] = ...) -> GenericHelperFn:
 
 
 @overload
-def parameterized_codec(raw: str, b64: Literal[True] = ...) -> Base64: ...
+def parameterized_codec(raw: str, b64: Literal[True]) -> Base64: ...
 
 
 def parameterized_codec(raw: str, b64: bool = False) -> Any:
@@ -175,9 +175,13 @@ def _parameterize_obj(
     if isinstance(obj, str):
         return _parameterize_string(obj)
     if isinstance(obj, collections.abc.Mapping):
-        return {key: _parameterize_obj(value) for key, value in obj.items()}
+        # TODO (kyle): improve with `typing.TypeIs` narrowing
+        return {
+            key: _parameterize_obj(value) for key, value in cast("Mapping[str, Any]", obj).items()
+        }
     if isinstance(obj, collections.abc.Sequence):
-        return [_parameterize_obj(item) for item in obj]
+        # TODO (kyle): improve with `typing.TypeIs` narrowing
+        return [_parameterize_obj(item) for item in cast("Sequence[Any]", obj)]
     return obj
 
 

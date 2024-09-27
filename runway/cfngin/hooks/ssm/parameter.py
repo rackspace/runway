@@ -110,10 +110,10 @@ class ArgsDataModel(BaseModel):
     @classmethod
     def _convert_tags(cls, v: dict[str, str] | list[dict[str, str]] | Any) -> list[dict[str, str]]:
         """Convert tags to acceptable value."""
-        if isinstance(v, list):
-            return v
-        if isinstance(v, dict):
-            return [{"Key": k, "Value": v} for k, v in v.items()]
+        if isinstance(v, list):  # TODO (kyle): improve with `typing.TypeIs` narrowing
+            return cast("list[dict[str, str]]", v)
+        if isinstance(v, dict):  # TODO (kyle): improve with `typing.TypeIs` narrowing
+            return [{"Key": k, "Value": v} for k, v in cast("dict[str, str]", v).items()]
         raise ValueError(
             f"unexpected type {type(v)}; permitted: dict[str, str] | list[dict[str, str]] | none"
         )

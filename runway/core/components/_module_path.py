@@ -158,7 +158,7 @@ class ModulePath:
                 definition=obj.path,
                 deploy_environment=deploy_environment,
             )
-        if isinstance(obj, (type(None), Path, str)):
+        if isinstance(obj, (type(None), Path, str)):  # pyright: ignore[reportUnnecessaryIsInstance]
             return cls(
                 cache_dir=cache_dir,
                 definition=obj,

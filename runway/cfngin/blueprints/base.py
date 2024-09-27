@@ -47,6 +47,8 @@ PARAMETER_PROPERTIES = {
 class CFNParameter:
     """Wrapper around a value to indicate a CloudFormation Parameter."""
 
+    value: list[Any] | str
+
     def __init__(self, name: str, value: bool | float | list[Any] | str | Any) -> None:
         """Instantiate class.
 
