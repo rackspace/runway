@@ -57,7 +57,7 @@ typing_extensions = "*"  # only really needed for < 3.8 but can still be used in
 yamllint = "*"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^3.8.0"
+pre-commit = "^4.0.1"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.2.0"
@@ -75,11 +75,11 @@ sphinxcontrib-jquery = "^4.1"
 sphinxcontrib-programoutput = "^0.17"
 
 [tool.poetry.group.lint.dependencies]
-black = "^24.8.0"
-ruff = "^0.6.8"
+black = "^24.10.0"
+ruff = "^0.6.9"
 
 [tool.poetry.group.test.dependencies]
-coverage = {extras = ["toml"], version = "^7.6.1"}
+coverage = {extras = ["toml"], version = "^7.6.2"}
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.16"}
 pipenv = "^2024.1.0"  # only used in tests
 pytest = "^8.3.3"
@@ -90,10 +90,10 @@ pytest-subprocess = "^1.5.2"
 pytest-sugar = "^1.0.0"
 pytest-xdist = {extras = ["psutil"], version = "^3.6.1"}
 testfixtures = "^8.3.0"  # TODO (kyle) remove use of this dependency - was inherited
-tomli-w = "^1.0.0"
+tomli-w = "^1.1.0"
 
 [tool.poetry.group.types.dependencies]
-mypy-boto3 = "^1.35.29"  # importable boto3 type annotations
+mypy-boto3 = "^1.35.36"  # importable boto3 type annotations
 
 [tool.poetry.group.types.dependencies.boto3-stubs]
 extras = [
@@ -114,7 +114,7 @@ extras = [
   "ssm",
   "sts",
 ]
-version = "^1.35.29"
+version = "^1.35.36"
 
 [tool.poetry.scripts]
 runway = "runway._cli.main:cli"

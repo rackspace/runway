@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 💂 Enforce Branch Name
-        uses: finleyfamily/action-enforce-branch-name@v1.0.0
+        uses: finleyfamily/action-enforce-branch-name@v1.0.1
         with:
           allowed_prefixes: >-
             bugfix,chore,dep,depend,dependabot,deps,docs,feat,feature,fix,hotfix,
