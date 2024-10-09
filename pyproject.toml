@@ -90,7 +90,7 @@ pytest-subprocess = "^1.5.2"
 pytest-sugar = "^1.0.0"
 pytest-xdist = {extras = ["psutil"], version = "^3.6.1"}
 testfixtures = "^8.3.0"  # TODO (kyle) remove use of this dependency - was inherited
-tomli-w = "^1.0.0"
+tomli-w = "^1.1.0"
 
 [tool.poetry.group.types.dependencies]
 mypy-boto3 = "^1.35.36"  # importable boto3 type annotations
