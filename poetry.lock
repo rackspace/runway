@@ -1322,13 +1322,13 @@ all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2
 
 [[package]]
 name = "igittigitt"
-version = "2.1.4"
+version = "2.1.5"
 description = "A spec-compliant gitignore parser for Python"
 optional = false
 python-versions = ">=3.8.0"
 files = [
-    {file = "igittigitt-2.1.4-py3-none-any.whl", hash = "sha256:79c48999be429de95dd4829b312667a7150cbb02bdb1424dfe081316d737ec92"},
-    {file = "igittigitt-2.1.4.tar.gz", hash = "sha256:9278d55de8852dca57fddb04a8a02edba6b4a9d9a5ac0fb6b2c32c919724807b"},
+    {file = "igittigitt-2.1.5-py3-none-any.whl", hash = "sha256:bf21d657b770fea35cbe3d4f2a62f6222065460c52ca897f271bd389ec1e79af"},
+    {file = "igittigitt-2.1.5.tar.gz", hash = "sha256:7ef4984bbd53b7d5832ba547926eb49774f15556bb08506273362e92b978b58a"},
 ]
 
 [package.dependencies]
