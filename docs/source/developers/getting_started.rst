@@ -14,26 +14,30 @@ Before getting started, `fork this repo`_ and `clone your fork`_.
 Development Environment
 ***********************
 
-This project includes an optional `VSCode Dev Container <https://code.visualstudio.com/docs/remote/containers>`__.
-This is an Ubuntu 22.04 image that will launch with operating system pre-requisites already installed and VSCode configured for Python debugging.
-It's not required to use this for development work, but does provide an easy and consistent way to get started.
+.. tip::
+  This project includes a :link:`devcontainer` which can be used for development.
+  It provides all of the tools required (node, :link:`npm`, :link:`poetry`, :link:`python`, etc) for development and a few bonuses for *quality of life* (:link:`direnv`, :lin:`vscode` extensions, etc).
 
-This project uses poetry_ to create Python virtual environment.
+  .. seealso::
+    - `Devcontainers: Personalizing with dotfile repositories <https://code.visualstudio.com/docs/devcontainers/containers#_personalizing-with-dotfile-repositories>`__
+    - `Personalizing GitHub Codespaces for your account <https://docs.github.com/en/codespaces/setting-your-user-preferences/personalizing-github-codespaces-for-your-account>`__
+
+
+  It's not required to use this for development work, but does provide an easy and consistent way to get started.
+
+This project uses :link:`poetry` to create Python virtual environment.
 This must be installed on your system before setting up your dev environment.
-Additionally, the poetry-dynamic-versioning_ plugin should be installed.
-Refer to the documentation of poetry-dynamic-versioning_ for how to install it based on how you installed poetry_.
+Additionally, the :link:`poetry-dynamic-versioning` plugin should be installed.
+Refer to the documentation of :link:`poetry-dynamic-versioning` for how to install it based on how you installed :link:`poetry`.
 
-With poetry_ installed, run ``make setup`` to setup your development environment.
+With :link:`poetry` installed, run ``make setup`` to setup your development environment.
 This will create all the required virtual environments to work on Runway, build docs locally, and run integration tests locally.
 The virtual environments all have Runway installed as editable meaning as you make changes to the code of your local clone, it will be reflected in all the virtual environments.
-
-.. _poetry: https://python-poetry.org
-.. _poetry-dynamic-versioning: https://github.com/mtkennerly/poetry-dynamic-versioning
 
 pre-commit
 ==========
 
-`pre-commit <https://pre-commit.com/>`__ is configured for this project to help developers follow the coding style.
+:link:`pre-commit` is configured for this project to help developers follow the coding style.
 If you used ``make setup`` to setup your environment, it is already setup for you.
 If not, you can run ``make setup-pre-commit`` to to install the pre-commit hooks.
 
@@ -43,4 +47,4 @@ You can also run ``make run-pre-commit`` at any time to manually trigger these h
 pyright Type Checking
 =====================
 
-This project uses pyright to perform type checking. To run type checking locally, install pyright (``make setup-npm``) then run ``make lint`` or ``make lint-pyright``.
+This project uses :link:`pyright` to perform type checking. To run type checking locally, install pyright (``make setup-npm``) then run ``make lint`` or ``make lint-pyright``.

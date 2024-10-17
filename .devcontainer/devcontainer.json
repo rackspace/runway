@@ -1,20 +1,90 @@
 {
-    "build": {
-        "args": {
-            "VARIANT": "ubuntu-22.04"
-        },
-        "dockerfile": "Dockerfile"
+    "containerEnv": {
+        "AWS_DEFAULT_REGION": "${localEnv:AWS_DEFAULT_REGION:us-east-1}",
+        "AWS_MAX_ATTEMPTS": "20",
+        "AWS_RETRY_MODE": "adaptive",
+        "CFNGIN_STACK_POLL_TIME": "3",
+        "PRE_COMMIT_HOME": "/home/vscode/.cache-pre-commit",
+        "TZ": "${localEnv:TZ:US/Eastern}"
     },
     "customizations": {
+        "settings": {
+            "terminal.integrated.defaultProfile.linux": "zsh",
+            "terminal.integrated.profiles.linux": {
+                "bash": null,
+                "zsh": {
+                    "icon": "terminal",
+                    "path": "zsh"
+                }
+            }
+        },
         "vscode": {
             "extensions": [
-                "ms-python.python"
+                "ms-python.python",
+                "Compulim.vscode-clock",
+                "DavidAnson.vscode-markdownlint",
+                "PeterSchmalfeldt.explorer-exclude",
+                "SirTori.indenticator",
+                "Tyriar.sort-lines",
+                "VisualStudioExptTeam.vscodeintellicode",
+                "bierner.markdown-checkbox",
+                "charliermarsh.ruff",
+                "christian-kohler.path-intellisense",
+                "donjayamanne.githistory",
+                "eamodio.gitlens",
+                "editorconfig.editorconfig",
+                "github.vscode-github-actions",
+                "hashicorp.terraform",
+                "lextudio.restructuredtext",
+                "mohsen1.prettify-json",
+                "ms-python.black-formatter",
+                "ms-python.vscode-pylance",
+                "oderwat.indent-rainbow",
+                "redhat.vscode-yaml",
+                "remcohaszing.schemastore",
+                "richie5um2.vscode-sort-json",
+                "streetsidesoftware.code-spell-checker",
+                "tamasfe.even-better-toml",
+                "trond-snekvik.simple-rst",
+                "yzhang.markdown-all-in-one"
             ]
         }
     },
     "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+        "./local-features/poetry": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/devcontainers/features/node:1": {}
     },
-    "name": "Ubuntu",
-    "remoteUser": "vscode"
+    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "mounts": [
+        {
+            "source": "${localEnv:HOME}/.aws",
+            "target": "/home/vscode/.aws",
+            "type": "bind"
+        },
+        {
+            "source": "devcontainer-${containerWorkspaceFolderBasename}-node_modules",
+            "target": "${containerWorkspaceFolder}/node_modules",
+            "type": "volume"
+        },
+        {
+            "source": "devcontainer-npm-cache",
+            "target": "/home/vscode/.npm",
+            "type": "volume"
+        },
+        {
+            "source": "devcontainer-poetry-cache",
+            "target": "/home/vscode/.cache-pypoetry",
+            "type": "volume"
+        },
+        {
+            "source": "devcontainer-${containerWorkspaceFolderBasename}-pre-commit-cache",
+            "target": "/home/vscode/.cache-pre-commit",
+            "type": "volume"
+        }
+    ],
+    "name": "devcontainer-runway",
+    "onCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}; sudo apt-get update -y; sudo apt-get install direnv",
+    "postAttachCommand": "make setup",
+    "postStartCommand": "sudo chown -R vscode:vscode .venv node_modules ~/.cache-pypoetry ~/.cache-pre-commit ~/.npm"
 }
