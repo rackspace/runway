@@ -79,7 +79,7 @@ black = "^24.10.0"
 ruff = "^0.6.9"
 
 [tool.poetry.group.test.dependencies]
-coverage = {extras = ["toml"], version = "^7.6.2"}
+coverage = {extras = ["toml"], version = "^7.6.3"}
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.17"}
 pipenv = "^2024.1.0"  # only used in tests
 pytest = "^8.3.3"
