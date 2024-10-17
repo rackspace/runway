@@ -178,17 +178,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.35.41"
+version = "1.35.43"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.35.41-py3-none-any.whl", hash = "sha256:2bf7e7f376aee52155fc4ae4487f29333a6bcdf3a05c3bc4fede10b972d951a6"},
-    {file = "boto3-1.35.41.tar.gz", hash = "sha256:e74bc6d69c04ca611b7f58afe08e2ded6cb6504a4a80557b656abeefee395f88"},
+    {file = "boto3-1.35.43-py3-none-any.whl", hash = "sha256:e6a50a0599f75b21de0de1a551a0564793d25b304fa623e4052e527b268de734"},
+    {file = "boto3-1.35.43.tar.gz", hash = "sha256:0197f460632804577aa78b2f6daf7b823bffa9d4d67a5cebb179efff0fe9631b"},
 ]
 
 [package.dependencies]
-botocore = ">=1.35.41,<1.36.0"
+botocore = ">=1.35.43,<1.36.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -197,13 +197,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "boto3-stubs"
-version = "1.35.41"
-description = "Type annotations for boto3 1.35.41 generated with mypy-boto3-builder 8.1.2"
+version = "1.35.43"
+description = "Type annotations for boto3 1.35.43 generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3_stubs-1.35.41-py3-none-any.whl", hash = "sha256:724c5999390eed5ed84832dcd003d1dcd1b12c941e50f6a6f63378c407d8fa0a"},
-    {file = "boto3_stubs-1.35.41.tar.gz", hash = "sha256:5884048edf0581479ecc3726c0b4b6d83640b5590d4646cbd229bae8f5a5666b"},
+    {file = "boto3_stubs-1.35.43-py3-none-any.whl", hash = "sha256:d9c9d0611cdf28a7ef131a4cfd49625f0daf187ecbc5ac87a92d669f3826baf2"},
+    {file = "boto3_stubs-1.35.43.tar.gz", hash = "sha256:08e86ded9e6677aa4248fbd774eb52cda568686c0c6b64e127e517e88b28981c"},
 ]
 
 [package.dependencies]
@@ -269,7 +269,7 @@ bedrock-agent = ["mypy-boto3-bedrock-agent (>=1.35.0,<1.36.0)"]
 bedrock-agent-runtime = ["mypy-boto3-bedrock-agent-runtime (>=1.35.0,<1.36.0)"]
 bedrock-runtime = ["mypy-boto3-bedrock-runtime (>=1.35.0,<1.36.0)"]
 billingconductor = ["mypy-boto3-billingconductor (>=1.35.0,<1.36.0)"]
-boto3 = ["boto3 (==1.35.41)", "botocore (==1.35.41)"]
+boto3 = ["boto3 (==1.35.43)", "botocore (==1.35.43)"]
 braket = ["mypy-boto3-braket (>=1.35.0,<1.36.0)"]
 budgets = ["mypy-boto3-budgets (>=1.35.0,<1.36.0)"]
 ce = ["mypy-boto3-ce (>=1.35.0,<1.36.0)"]
@@ -622,13 +622,13 @@ xray = ["mypy-boto3-xray (>=1.35.0,<1.36.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.35.41"
+version = "1.35.43"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.35.41-py3-none-any.whl", hash = "sha256:915c4d81e3a0be3b793c1e2efdf19af1d0a9cd4a2d8de08ee18216c14d67764b"},
-    {file = "botocore-1.35.41.tar.gz", hash = "sha256:8a09a32136df8768190a6c92f0240cd59c30deb99c89026563efadbbed41fa00"},
+    {file = "botocore-1.35.43-py3-none-any.whl", hash = "sha256:7cfdee9117617da97daaf259dd8484bcdc259c59eb7d1ce7db9ecf8506b7d36c"},
+    {file = "botocore-1.35.43.tar.gz", hash = "sha256:04539b85ade060601a3023cacb538fc17aad8c059a5a2e18fe4bc5d0d91fbd72"},
 ]
 
 [package.dependencies]
@@ -1672,13 +1672,13 @@ tests = ["pytest (>=4.6)"]
 
 [[package]]
 name = "mypy-boto3"
-version = "1.35.41"
-description = "Type annotations for boto3 1.35.41 master module generated with mypy-boto3-builder 8.1.2"
+version = "1.35.43"
+description = "Type annotations for boto3 1.35.43 master module generated with mypy-boto3-builder 8.1.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3-1.35.41-py3-none-any.whl", hash = "sha256:5de542bc1268967b9272210785fd6cc1359cf4638bb97e11f984b28df475373b"},
-    {file = "mypy_boto3-1.35.41.tar.gz", hash = "sha256:2a223c257b5e0171f1441e8bbb8dbc723fd82d6e1acc34621bf7899e88ac0598"},
+    {file = "mypy_boto3-1.35.43-py3-none-any.whl", hash = "sha256:b008f3c1389b9906fe28c8f02735d525ef8bdcf00aaaa23c7e296984128a571a"},
+    {file = "mypy_boto3-1.35.43.tar.gz", hash = "sha256:5740d654bab486d35ba92139a7ac7346e2799ccc6772c113eaa56668f30364bc"},
 ]
 
 [package.dependencies]
@@ -3494,4 +3494,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "86b339b37318c1d6c5dbfe46ed86fc33c98ac34f2bde0dc01043ae651fb1991c"
+content-hash = "9eac425797cc751f28baca4bf59378c2baf46629e4f39ff5f8624e2dc8a3335a"
