@@ -10,6 +10,8 @@ function __install_poetry {
 }
 
 function __configure_poetry {
+  # defaults to `~/.cache/pypoetry`, using a volume for anything inside of `~/.cache` causes dotfile to not be installed
+  poetry config cache-dir "${HOME}/.cache-pypoetry"
   poetry config virtualenvs.create true;
   poetry config virtualenvs.in-project true;
   poetry config virtualenvs.prefer-active-python true;

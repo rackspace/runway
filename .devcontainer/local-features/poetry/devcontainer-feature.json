@@ -5,16 +5,6 @@
     "installsAfter": [],
     "mounts": [
         {
-            "source": "devcontainer-pip-cache",
-            "target": "/home/vscode/.cache/pip",
-            "type": "volume"
-        },
-        {
-            "source": "devcontainer-poetry-cache",
-            "target": "/home/vscode/.cache/pypoetry",
-            "type": "volume"
-        },
-        {
             "source": "devcontainer-${containerWorkspaceFolderBasename}-venv",
             "target": "${containerWorkspaceFolder}/.venv",
             "type": "volume"

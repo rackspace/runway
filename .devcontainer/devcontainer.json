@@ -4,11 +4,23 @@
         "AWS_MAX_ATTEMPTS": "20",
         "AWS_RETRY_MODE": "adaptive",
         "CFNGIN_STACK_POLL_TIME": "3",
+        "PRE_COMMIT_HOME": "/home/vscode/.cache-pre-commit",
         "TZ": "${localEnv:TZ:US/Eastern}"
     },
     "customizations": {
+        "settings": {
+            "terminal.integrated.defaultProfile.linux": "zsh",
+            "terminal.integrated.profiles.linux": {
+                "bash": null,
+                "zsh": {
+                    "icon": "terminal",
+                    "path": "zsh"
+                }
+            }
+        },
         "vscode": {
             "extensions": [
+                "ms-python.python",
                 "Compulim.vscode-clock",
                 "DavidAnson.vscode-markdownlint",
                 "PeterSchmalfeldt.explorer-exclude",
@@ -26,7 +38,6 @@
                 "lextudio.restructuredtext",
                 "mohsen1.prettify-json",
                 "ms-python.black-formatter",
-                "ms-python.python",
                 "ms-python.vscode-pylance",
                 "oderwat.indent-rainbow",
                 "redhat.vscode-yaml",
@@ -36,19 +47,7 @@
                 "tamasfe.even-better-toml",
                 "trond-snekvik.simple-rst",
                 "yzhang.markdown-all-in-one"
-            ],
-            "settings": {
-                "terminal.integrated.defaultProfile.linux": "zsh",
-                "terminal.integrated.profiles.linux": {
-                    "bash": {
-                        "icon": "terminal-bash",
-                        "path": "bash"
-                    },
-                    "zsh": {
-                        "path": "zsh"
-                    }
-                }
-            }
+            ]
         }
     },
     "features": {
@@ -74,13 +73,18 @@
             "type": "volume"
         },
         {
+            "source": "devcontainer-poetry-cache",
+            "target": "/home/vscode/.cache-pypoetry",
+            "type": "volume"
+        },
+        {
             "source": "devcontainer-${containerWorkspaceFolderBasename}-pre-commit-cache",
-            "target": "/home/vscode/.cache/pre-commit",
+            "target": "/home/vscode/.cache-pre-commit",
             "type": "volume"
         }
     ],
     "name": "devcontainer-runway",
     "onCreateCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}; sudo apt-get update -y; sudo apt-get install direnv",
     "postAttachCommand": "make setup",
-    "postStartCommand": "sudo chown -R vscode:vscode .venv node_modules ~/.cache ~/.npm"
+    "postStartCommand": "sudo chown -R vscode:vscode .venv node_modules ~/.cache-pypoetry ~/.cache-pre-commit ~/.npm"
 }
