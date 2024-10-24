@@ -1,0 +1,16 @@
+{
+    "description": "Install `poetry` using `pipx` included in the image.",
+    "documentationURL": "",
+    "id": "poetry",
+    "installsAfter": [],
+    "mounts": [
+        {
+            "source": "devcontainer-${containerWorkspaceFolderBasename}-venv",
+            "target": "${containerWorkspaceFolder}/.venv",
+            "type": "volume"
+        }
+    ],
+    "name": "poetry",
+    "options": {},
+    "version": "0.0.0"
+}

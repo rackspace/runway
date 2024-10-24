@@ -1,8 +1,14 @@
 {
     "recommendations": [
         "DavidAnson.vscode-markdownlint",
+        "charliermarsh.ruff",
         "editorconfig.editorconfig",
+        "lextudio.restructuredtext",
+        "ms-python.black-formatter",
         "ms-python.python",
-        "ms-python.vscode-pylance"
+        "ms-python.vscode-pylance",
+        "redhat.vscode-yaml",
+        "streetsidesoftware.code-spell-checker",
+        "tamasfe.even-better-toml"
     ]
 }
