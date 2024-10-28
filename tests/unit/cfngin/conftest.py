@@ -13,13 +13,13 @@ def cfngin_fixtures() -> Path:
     return Path(__file__).parent / "fixtures"
 
 
-@pytest.fixture()
+@pytest.fixture
 def empty_dag() -> DAG:
     """Create an empty DAG."""
     return DAG()
 
 
-@pytest.fixture()
+@pytest.fixture
 def basic_dag() -> DAG:
     """Create a basic DAG."""
     dag = DAG()

@@ -31,7 +31,7 @@ def copy_basic_fixtures(cfngin_fixtures: Path, tmp_path: Path) -> None:
     copy_fixture(src=cfngin_fixtures / "configs" / "basic.yml", dest=tmp_path / "basic.yml")
 
 
-@pytest.fixture()
+@pytest.fixture
 def patch_safehaven(mocker: MockerFixture) -> Mock:
     """Patch SafeHaven."""
     mock_haven = mocker.patch("runway.cfngin.cfngin.SafeHaven")

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 MODULE = "runway.lookups.handlers.ecr"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_format_results(mocker: MockerFixture) -> MagicMock:
     """Mock EcrLookup.format_results."""
     return mocker.patch.object(

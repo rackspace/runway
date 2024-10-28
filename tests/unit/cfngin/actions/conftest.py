@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
 
-@pytest.fixture()
+@pytest.fixture
 def provider_get_stack(mocker: MockerFixture) -> MagicMock:
     """Patches ``runway.cfngin.providers.aws.default.Provider.get_stack``."""
     return_value: StackTypeDef = {

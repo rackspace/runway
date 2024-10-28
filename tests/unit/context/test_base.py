@@ -29,7 +29,7 @@ TEST_ENV_CREDS = {
 }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_boto3_session(mocker: MockerFixture) -> MagicMock:
     """Mock boto3.Session."""
     mock_session = MagicMock(autospec=boto3.Session)
@@ -37,7 +37,7 @@ def mock_boto3_session(mocker: MockerFixture) -> MagicMock:
     return mock_session
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_sso_botocore_session(mocker: MockerFixture) -> MagicMock:
     """Mock runway.aws_sso_botocore.session.Session."""
     return mocker.patch(f"{MODULE}.Session")
