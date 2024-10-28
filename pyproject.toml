@@ -81,7 +81,7 @@ ruff = "^0.6.9"
 [tool.poetry.group.test.dependencies]
 coverage = {extras = ["toml"], version = "^7.6.4"}
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.18"}
-pipenv = "^2024.1.0"  # only used in tests
+pipenv = "^2024.2.0"  # only used in tests
 pytest = "^8.3.3"
 pytest-cov = "^5.0.0"
 pytest-mock = "^3.14.0"

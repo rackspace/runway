@@ -1970,13 +1970,13 @@ files = [
 
 [[package]]
 name = "pipenv"
-version = "2024.1.0"
+version = "2024.2.0"
 description = "Python Development Workflow for Humans."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pipenv-2024.1.0-py3-none-any.whl", hash = "sha256:79536f2f5be20f5101a018ca6257d4d32720d89e015691ab77bcc80bf639f2b7"},
-    {file = "pipenv-2024.1.0.tar.gz", hash = "sha256:422b09dc40798994a9641961983a1a4d1e831de8b91b2ad4d3d2ecb0ec42887c"},
+    {file = "pipenv-2024.2.0-py3-none-any.whl", hash = "sha256:8c157ba3077608b55c019ea7d2a60420db582ca23d5f7b2b1437c715a20023d6"},
+    {file = "pipenv-2024.2.0.tar.gz", hash = "sha256:7aafe2cf582b563c8ead5c7c6ecac1dcec490ab080efdcaf96b0e074c5cb7fa2"},
 ]
 
 [package.dependencies]
@@ -1986,7 +1986,7 @@ setuptools = ">=67"
 virtualenv = ">=20.24.2"
 
 [package.extras]
-dev = ["beautifulsoup4", "black (==23.3)", "flake8 (>=3.3,<4)", "invoke", "parver", "sphinx", "towncrier"]
+dev = ["beautifulsoup4", "black (==24.3.0)", "flake8 (>=3.3,<4)", "invoke", "parver", "sphinx", "towncrier"]
 tests = ["flaky", "mock", "pytest (>=5)", "pytest-timeout", "pytest-xdist"]
 
 [[package]]
@@ -3494,4 +3494,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "ee4e6bbf4692579f453a11cb6b74b731f099e20168f010bae640c3231d1dd2d2"
+content-hash = "bd71c1cd6ab0d94b5a42e7cf5531d6978944d9438a2159e5a2e467670f11256b"
