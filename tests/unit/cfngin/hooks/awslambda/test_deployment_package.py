@@ -47,7 +47,7 @@ MODULE = "runway.cfngin.hooks.awslambda.deployment_package"
 ProjectTypeAlias = Project[AwsLambdaHookArgs]
 
 
-@pytest.fixture()
+@pytest.fixture
 def project(cfngin_context: CfnginContext, tmp_path: Path) -> ProjectTypeAlias:
     """Mock project object."""
     args = AwsLambdaHookArgs(

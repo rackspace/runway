@@ -73,7 +73,7 @@ class MockSubmitters(NamedTuple):
     instances: dict[str, Mock]
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_submitters(mocker: MockerFixture) -> MockSubmitters:
     """Mock handler submitters."""
     classes = {

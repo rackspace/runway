@@ -25,13 +25,13 @@ def pytest_ignore_collect(path: Any, config: Config) -> bool:  # noqa: ARG001
     return not (config.option.integration or config.option.integration_only)
 
 
-@pytest.fixture()
+@pytest.fixture
 def configs() -> Path:
     """Path to Runway config fixtures."""
     return TEST_ROOT.parent / "fixtures" / "configs"
 
 
-@pytest.fixture()
+@pytest.fixture
 def cp_config(configs: Path) -> Callable[[str, Path], Path]:
     """Copy a config file."""
 

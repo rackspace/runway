@@ -22,7 +22,7 @@ MODULE = "runway.cfngin.lookups.handlers.awslambda"
 QUERY = "test::foo=bar"
 
 
-@pytest.fixture()
+@pytest.fixture
 def hook_data() -> AwsLambdaHookDeployResponse:
     """Fixture for hook response data."""
     return AwsLambdaHookDeployResponse(

@@ -42,7 +42,7 @@ def tf_version(request: SubRequest) -> Generator[str, None, None]:
     file_path.unlink(missing_ok=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def deploy_result(
     cli_runner: CliRunner, no_backend: Path  # noqa: ARG001
 ) -> Generator[Result, None, None]:

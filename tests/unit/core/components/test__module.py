@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 MODULE = "runway.core.components._module"
 
 
-@pytest.fixture()
+@pytest.fixture
 def empty_opts_from_file(mocker: MockerFixture) -> None:
     """Empty Module.opts_from_file."""
     mocker.patch.object(Module, "opts_from_file", {})

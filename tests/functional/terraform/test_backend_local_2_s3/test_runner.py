@@ -46,7 +46,7 @@ def tf_version(request: SubRequest) -> Iterator[str]:
     file_path.unlink(missing_ok=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def deploy_local_backend_result(
     cli_runner: CliRunner, local_backend: Path  # noqa: ARG001
 ) -> Result:
@@ -54,7 +54,7 @@ def deploy_local_backend_result(
     return cli_runner.invoke(cli, ["deploy", "--tag", "local"], env={"CI": "1"})
 
 
-@pytest.fixture()
+@pytest.fixture
 def deploy_s3_backend_result(
     cli_runner: CliRunner, s3_backend: Path  # noqa: ARG001
 ) -> Iterator[Result]:
