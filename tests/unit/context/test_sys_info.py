@@ -14,13 +14,13 @@ if TYPE_CHECKING:
 MODULE = "runway.context.sys_info"
 
 
-@pytest.fixture()
+@pytest.fixture
 def clear_os_info() -> None:
     """Clear OsInfo singleton."""
     OsInfo.clear_singleton()
 
 
-@pytest.fixture()
+@pytest.fixture
 def clear_system_info() -> None:
     """Clear OsInfo singleton."""
     SystemInfo.clear_singleton()

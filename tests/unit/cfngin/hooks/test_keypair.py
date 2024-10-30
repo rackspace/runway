@@ -47,7 +47,7 @@ def ssh_key(cfngin_fixtures: Path) -> SSHKey:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def context() -> CfnginContext:
     """Mock context."""
     return mock_context(namespace="fake")

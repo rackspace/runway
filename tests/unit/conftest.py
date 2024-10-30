@@ -89,19 +89,19 @@ def fx_config() -> YamlLoader:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def fx_deployments() -> YamlLoaderDeployment:
     """Return YAML loader for deployment fixtures."""
     return YamlLoaderDeployment(TEST_ROOT / "fixtures" / "deployments")
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_docker_client() -> DockerClient:
     """Create a docker client with mock API backend."""
     return make_fake_client()
 
 
-@pytest.fixture()
+@pytest.fixture
 def tempfile_temporary_directory(mocker: MockerFixture, tmp_path: Path) -> MagicMock:
     """Mock tempfile.TemporaryDirectory."""
     return mocker.patch(
@@ -127,43 +127,43 @@ def yaml_fixtures(request: pytest.FixtureRequest, fixture_dir: Path) -> dict[str
     return result
 
 
-@pytest.fixture()
+@pytest.fixture
 def deploy_environment(tmp_path: Path) -> DeployEnvironment:
     """Create a deploy environment that can be used for testing."""
     return DeployEnvironment(explicit_name="test", root_dir=tmp_path)
 
 
-@pytest.fixture()
+@pytest.fixture
 def cfngin_context(runway_context: MockRunwayContext) -> MockCfnginContext:
     """Create a mock CFNgin context object."""
     return MockCfnginContext(deploy_environment=runway_context.env, parameters={})
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_sleep(mocker: MockerFixture) -> Mock:
     """Patch built-in ``time.sleep``."""
     return mocker.patch("time.sleep", return_value=None)
 
 
-@pytest.fixture()
+@pytest.fixture
 def platform_darwin(mocker: MockerFixture) -> None:
     """Patch platform.system to always return "Darwin"."""
     mocker.patch("platform.system", return_value="Darwin")
 
 
-@pytest.fixture()
+@pytest.fixture
 def platform_linux(mocker: MockerFixture) -> None:
     """Patch platform.system to always return "Linux"."""
     mocker.patch("platform.system", return_value="Linux")
 
 
-@pytest.fixture()
+@pytest.fixture
 def platform_windows(mocker: MockerFixture) -> None:
     """Patch platform.system to always return "Windows"."""
     mocker.patch("platform.system", return_value="Windows")
 
 
-@pytest.fixture()
+@pytest.fixture
 def patch_runway_config(
     request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, runway_config: MockRunwayConfig
 ) -> MockRunwayConfig:
@@ -174,13 +174,13 @@ def patch_runway_config(
     return runway_config
 
 
-@pytest.fixture()
+@pytest.fixture
 def runway_config() -> MockRunwayConfig:
     """Create a mock runway config object."""
     return MockRunwayConfig()
 
 
-@pytest.fixture()
+@pytest.fixture
 def runway_context(request: pytest.FixtureRequest, tmp_path: Path) -> MockRunwayContext:
     """Create a mock Runway context object."""
     env_vars = {

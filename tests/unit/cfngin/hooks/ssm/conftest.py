@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from ....factories import MockCfnginContext
 
 
-@pytest.fixture()
+@pytest.fixture
 def ssm_client(
     cfngin_context: MockCfnginContext, ssm_stubber: Stubber  # noqa: ARG001
 ) -> SSMClient:
@@ -21,7 +21,7 @@ def ssm_client(
     return cfngin_context.get_session().client("ssm")
 
 
-@pytest.fixture()
+@pytest.fixture
 def ssm_stubber(cfngin_context: MockCfnginContext) -> Stubber:
     """Create SSM stubber."""
     return cfngin_context.add_stubber("ssm")

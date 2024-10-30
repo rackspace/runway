@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.docker.image._build"
 
 
-@pytest.fixture()
+@pytest.fixture
 def tmp_dockerfile(cd_tmp_path: Path) -> Path:
     """Create temporary Dockerfile."""
     dockerfile = cd_tmp_path / "Dockerfile"

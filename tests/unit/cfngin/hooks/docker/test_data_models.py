@@ -29,7 +29,7 @@ MOCK_IMAGE_PROPS = {
 }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_image() -> MagicMock:
     """Return a mock docker.models.images.Image."""
     return MagicMock(spec=Image, **MOCK_IMAGE_PROPS)

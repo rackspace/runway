@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 MODULE = "runway.cfngin.hooks.awslambda._python_hooks"
 
 
-@pytest.fixture()
+@pytest.fixture
 def args(tmp_path: Path) -> PythonHookArgs:
     """Fixture for creating default function args."""
     return PythonHookArgs(

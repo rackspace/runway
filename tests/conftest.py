@@ -50,20 +50,20 @@ def pytest_addoption(parser: Parser) -> None:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def cli_runner(request: SubRequest) -> CliRunner:
     """Initialize instance of `click.testing.CliRunner`."""
     return cli_runner_factory(request)
 
 
-@pytest.fixture()
+@pytest.fixture
 def cli_runner_isolated(cli_runner: CliRunner) -> Generator[CliRunner, None, None]:
     """Initialize instance of `click.testing.CliRunner` with `isolate_filesystem()` called."""
     with cli_runner.isolated_filesystem():
         yield cli_runner
 
 
-@pytest.fixture()
+@pytest.fixture
 def cd_tmp_path(tmp_path: Path) -> Iterator[Path]:
     """Change directory to a temporary path.
 
@@ -79,7 +79,7 @@ def cd_tmp_path(tmp_path: Path) -> Iterator[Path]:
         os.chdir(prev_dir)
 
 
-@pytest.fixture()
+@pytest.fixture
 def root_dir() -> Path:
     """Return a path object to the root directory."""
     return Path(__file__).parent.parent

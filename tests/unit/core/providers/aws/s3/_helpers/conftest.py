@@ -18,7 +18,7 @@ class LocalFiles(TypedDict):
     tmp_path: Path
 
 
-@pytest.fixture()
+@pytest.fixture
 def loc_files(tmp_path: Path) -> LocalFiles:
     """Fixture for creating local files."""
     file0 = tmp_path / "some_directory" / "text0.txt"
