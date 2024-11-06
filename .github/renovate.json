@@ -40,6 +40,7 @@
         },
         {
             "automerge": true,
+            "automergeStrategy": "squash",
             "automergeType": "pr",
             "description": "group all `cspell` related packages together and enable automerge",
             "groupName": "cspell",
@@ -78,6 +79,7 @@
                 "changelog:skip"
             ],
             "automerge": true,
+            "automergeStrategy": "squash",
             "automergeType": "pr",
             "description": "automerge devcontainer updates",
             "matchManagers": [
@@ -89,6 +91,7 @@
                 "changelog:skip"
             ],
             "automerge": true,
+            "automergeStrategy": "squash",
             "automergeType": "pr",
             "description": "automerge github actions and runner updates",
             "matchManagers": [
@@ -100,6 +103,7 @@
                 "changelog:skip"
             ],
             "automerge": true,
+            "automergeStrategy": "squash",
             "automergeType": "pr",
             "description": "automerge lockfile updates",
             "gitLabIgnoreApprovals": true,
@@ -123,6 +127,7 @@
         },
         {
             "automerge": true,
+            "automergeStrategy": "squash",
             "automergeType": "pr",
             "description": "npm - bump & automerge",
             "matchManagers": [
@@ -145,6 +150,7 @@
         },
         {
             "automerge": true,
+            "automergeStrategy": "squash",
             "automergeType": "pr",
             "description": "poetry - bump & automerge",
             "matchManagers": [
