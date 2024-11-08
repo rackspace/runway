@@ -76,7 +76,7 @@ sphinxcontrib-programoutput = "^0.17"
 
 [tool.poetry.group.lint.dependencies]
 black = "^24.10.0"
-ruff = "^0.7.2"
+ruff = "^0.7.3"
 
 [tool.poetry.group.test.dependencies]
 coverage = {extras = ["toml"], version = "^7.6.4"}
