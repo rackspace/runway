@@ -40,7 +40,7 @@ repos:
           )$
       - id: trailing-whitespace
   - repo: https://github.com/pappasam/toml-sort
-    rev: v0.23.1
+    rev: v0.24.1
     hooks:
       - id: toml-sort-fix
   - repo: https://github.com/ITProKyle/pre-commit-hook-yamlfmt
@@ -54,7 +54,7 @@ repos:
             docs/runway-example\.yml
           )$
   - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.18
+    rev: 0.7.19
     hooks:
       - id: mdformat
         additional_dependencies:
