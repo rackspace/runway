@@ -37,9 +37,9 @@ class ConfigNotFound(RunwayError):
 
     looking_for: list[str]
     message: str
-    path: Path
+    path: Path | None
 
-    def __init__(self, *, looking_for: list[str] | None = None, path: Path) -> None:
+    def __init__(self, looking_for: list[str] | None = None, path: Path | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -56,6 +56,9 @@ class ConfigNotFound(RunwayError):
             self.message = f"config file not found at path {path}"
         super().__init__(self.path, self.looking_for)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.looking_for, self.path)
 
 class DockerConnectionRefusedError(RunwayError):
     """Docker connection refused.
@@ -89,7 +92,9 @@ class DockerExecFailedError(RunwayError):
     exit_code: int
     """The ``StatusCode`` returned by Docker."""
 
-    def __init__(self, response: dict[str, Any]) -> None:
+    message: str = "error message undefined"
+
+    def __init__(self, response: dict[str, Any] | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -99,9 +104,10 @@ class DockerExecFailedError(RunwayError):
                 that may not streamed.
 
         """
-        self.exit_code = response.get("StatusCode", 1)  # we can assume this will be > 0
-        error: dict[Any, Any] = response.get("Error") or {}  # value from dict could be NoneType
-        self.message = error.get("Message", "error message undefined")
+        self.exit_code = response.get("StatusCode", 1) if response else 1  # we can assume this will be > 0
+        error: dict[Any, Any] | None  = response.get("Error") if response else {}  # value from dict could be NoneType
+        if error:
+            self.message = error.get("Message", "error message undefined")
         super().__init__()
 
 
@@ -114,12 +120,13 @@ class FailedLookup(RunwayError):
 
     """
 
-    cause: Exception
-    lookup: VariableValueLookup
+    cause: Exception | None
+    lookup: VariableValueLookup | None
     message: str = "Failed lookup"
 
     def __init__(
-        self, lookup: VariableValueLookup, cause: Exception, *args: Any, **kwargs: Any
+        self, lookup: VariableValueLookup | None = None, cause: Exception | None = None
+        , *args: Any, **kwargs: Any
     ) -> None:
         """Instantiate class.
 
@@ -135,6 +142,9 @@ class FailedLookup(RunwayError):
         self.lookup = lookup
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.lookup, self.cause)
 
 class FailedVariableLookup(RunwayError):
     """Lookup could not be resolved.
@@ -143,12 +153,13 @@ class FailedVariableLookup(RunwayError):
 
     """
 
-    cause: FailedLookup
-    variable: Variable
+    cause: FailedLookup | None
+    variable: Variable | None
     message: str
 
     def __init__(
-        self, variable: Variable, lookup_error: FailedLookup, *args: Any, **kwargs: Any
+        self, variable: Variable | None = None,
+        lookup_error: FailedLookup | None = None, *args: Any, **kwargs: Any
     ) -> None:
         """Instantiate class.
 
@@ -163,9 +174,12 @@ class FailedVariableLookup(RunwayError):
         self.variable = variable
         self.message = (
             f'Could not resolve lookup "{lookup_error.lookup}" for variable "{variable.name}"'
-        )
+        ) if variable and lookup_error else "Failed variable lookup"
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.cause, self.variable)
 
 class HclParserError(RunwayError):
     """HCL/HCL2 parser error."""
@@ -202,27 +216,32 @@ class InvalidLookupConcatenation(RunwayError):
 
     """
 
-    concatenated_lookups: VariableValueConcatenation[Any]
-    invalid_lookup: VariableValue
-    message: str
+    concatenated_lookups: VariableValueConcatenation[Any] | None
+    invalid_lookup: VariableValue | None
+    message: str = "Invalid lookup concatenation"
 
     def __init__(
         self,
-        invalid_lookup: VariableValue,
-        concat_lookups: VariableValueConcatenation[Any],
+        invalid_lookup: VariableValue | None = None,
+        concat_lookups: VariableValueConcatenation[Any] | None = None,
         *args: Any,
         **kwargs: Any,
     ) -> None:
         """Instantiate class."""
         self.concatenated_lookups = concat_lookups
         self.invalid_lookup = invalid_lookup
-        self.message = (
-            f"expected return value of type {str} but received "
-            f'{type(invalid_lookup.value)} for lookup "{invalid_lookup}" '
-            f'in "{concat_lookups}"'
-        )
+        if concat_lookups and invalid_lookup:
+            self.message = (
+                f"expected return value of type {str} but received "
+                f'{type(invalid_lookup.value)} for lookup "{invalid_lookup}" '
+                f'in "{concat_lookups}"'
+            )
+
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.invalid_lookup, self.concatenated_lookups)
 
 class KubectlVersionNotSpecified(RunwayError):
     """kubectl version is required but was not specified.
@@ -259,13 +278,13 @@ class NpmNotFound(RunwayError):
 class OutputDoesNotExist(RunwayError):
     """Raised when a specific stack output does not exist."""
 
-    output: str
+    output: str | None
     """Name of the CloudFormation Stack's Output that does not exist."""
 
-    stack_name: str
+    stack_name: str | None
     """Name of a CloudFormation Stack."""
 
-    def __init__(self, stack_name: str, output: str, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, stack_name: str | None = None, output: str | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -281,17 +300,21 @@ class OutputDoesNotExist(RunwayError):
         self.message = f"Output {output} does not exist on stack {stack_name}"
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.output, self.stack_name)
+
 
 class RequiredTagNotFoundError(RunwayError):
     """Required tag not found on resource."""
 
-    resource: str
+    resource: str | None
     """An ID or name to identify a resource."""
 
-    tag_key: str
+    tag_key: str | None
     """Key of the tag that could not be found."""
 
-    def __init__(self, resource: str, tag_key: str) -> None:
+    def __init__(self, resource: str | None = None, tag_key: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -304,6 +327,10 @@ class RequiredTagNotFoundError(RunwayError):
         self.message = f"required tag '{tag_key}' not found for {resource}"
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.resource, self.tag_key)
+
 
 class UnknownLookupType(RunwayError):
     """Lookup type provided does not match a registered lookup.
@@ -314,9 +341,9 @@ class UnknownLookupType(RunwayError):
 
     """
 
-    message: str
+    message: str = "Unknown lookup type"
 
-    def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, lookup: VariableValueLookup | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -325,16 +352,18 @@ class UnknownLookupType(RunwayError):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        self.message = f'Unknown lookup type "{lookup.lookup_name.value}" in "{lookup}"'
+        if lookup:
+            self.message = f'Unknown lookup type "{lookup.lookup_name.value}" in "{lookup}"'
+
         super().__init__(*args, **kwargs)
 
 
 class UnresolvedVariable(RunwayError):
     """Raised when trying to use a variable before it has been resolved."""
 
-    message: str
+    message: str = "Unresolved variable"
 
-    def __init__(self, variable: Variable, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, variable: Variable | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -343,8 +372,10 @@ class UnresolvedVariable(RunwayError):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        self.message = f'Attempted to use variable "{variable.name}" before it was resolved'
-        self.variable = variable
+        if variable:
+            self.message = f'Attempted to use variable "{variable.name}" before it was resolved'
+            self.variable = variable
+
         super().__init__(*args, **kwargs)
 
 
@@ -357,10 +388,10 @@ class UnresolvedVariableValue(RunwayError):
 
     """
 
-    lookup: VariableValueLookup
+    lookup: VariableValueLookup | None
     message: str = "Unresolved lookup"
 
-    def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, lookup: VariableValueLookup | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -369,23 +400,26 @@ class UnresolvedVariableValue(RunwayError):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        self.lookup = lookup
+        if lookup:
+            self.message = f'Unresolved lookup "{lookup}"'
+            self.lookup = lookup
         super().__init__(*args, **kwargs)
 
 
 class VariablesFileNotFound(RunwayError):
     """Defined variables file could not be found."""
 
-    file_path: Path
-    message: str
+    file_path: Path | None
+    message: str = "Defined variables file not found"
 
-    def __init__(self, file_path: Path) -> None:
+    def __init__(self, file_path: Path | None = None) -> None:
         """Instantiate class.
 
         Args:
             file_path: Path where the file was expected to be found.
 
         """
-        self.file_path = file_path
-        self.message = f"defined variables file not found at path {file_path}"
+        if file_path:
+            self.file_path = file_path
+            self.message = f"defined variables file not found at path {file_path}"
         super().__init__(self.file_path)
