@@ -10,6 +10,7 @@ from runway.exceptions import ConfigNotFound
 if TYPE_CHECKING:
     from pathlib import Path
 
+
 class TestConfigNotFound:
     """Test "ConfigNotFound."""
 

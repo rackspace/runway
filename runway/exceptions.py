@@ -60,6 +60,7 @@ class ConfigNotFound(RunwayError):
         """Support for pickling."""
         return self.__class__, (self.looking_for, self.path)
 
+
 class DockerConnectionRefusedError(RunwayError):
     """Docker connection refused.
 
@@ -104,8 +105,12 @@ class DockerExecFailedError(RunwayError):
                 that may not streamed.
 
         """
-        self.exit_code = response.get("StatusCode", 1) if response else 1  # we can assume this will be > 0
-        error: dict[Any, Any] | None  = response.get("Error") if response else {}  # value from dict could be NoneType
+        self.exit_code = (
+            response.get("StatusCode", 1) if response else 1
+        )  # we can assume this will be > 0
+        error: dict[Any, Any] | None = (
+            response.get("Error") if response else {}
+        )  # value from dict could be NoneType
         if error:
             self.message = error.get("Message", "error message undefined")
         super().__init__()
@@ -125,8 +130,11 @@ class FailedLookup(RunwayError):
     message: str = "Failed lookup"
 
     def __init__(
-        self, lookup: VariableValueLookup | None = None, cause: Exception | None = None
-        , *args: Any, **kwargs: Any
+        self,
+        lookup: VariableValueLookup | None = None,
+        cause: Exception | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 
@@ -146,6 +154,7 @@ class FailedLookup(RunwayError):
         """Support for pickling."""
         return self.__class__, (self.lookup, self.cause)
 
+
 class FailedVariableLookup(RunwayError):
     """Lookup could not be resolved.
 
@@ -158,8 +167,11 @@ class FailedVariableLookup(RunwayError):
     message: str
 
     def __init__(
-        self, variable: Variable | None = None,
-        lookup_error: FailedLookup | None = None, *args: Any, **kwargs: Any
+        self,
+        variable: Variable | None = None,
+        lookup_error: FailedLookup | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 
@@ -173,13 +185,16 @@ class FailedVariableLookup(RunwayError):
         self.cause = lookup_error
         self.variable = variable
         self.message = (
-            f'Could not resolve lookup "{lookup_error.lookup}" for variable "{variable.name}"'
-        ) if variable and lookup_error else "Failed variable lookup"
+            (f'Could not resolve lookup "{lookup_error.lookup}" for variable "{variable.name}"')
+            if variable and lookup_error
+            else "Failed variable lookup"
+        )
         super().__init__(*args, **kwargs)
 
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
         return self.__class__, (self.cause, self.variable)
+
 
 class HclParserError(RunwayError):
     """HCL/HCL2 parser error."""
@@ -243,6 +258,7 @@ class InvalidLookupConcatenation(RunwayError):
         """Support for pickling."""
         return self.__class__, (self.invalid_lookup, self.concatenated_lookups)
 
+
 class KubectlVersionNotSpecified(RunwayError):
     """kubectl version is required but was not specified.
 
@@ -284,7 +300,9 @@ class OutputDoesNotExist(RunwayError):
     stack_name: str | None
     """Name of a CloudFormation Stack."""
 
-    def __init__(self, stack_name: str | None = None, output: str | None = None, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, stack_name: str | None = None, output: str | None = None, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -343,7 +361,9 @@ class UnknownLookupType(RunwayError):
 
     message: str = "Unknown lookup type"
 
-    def __init__(self, lookup: VariableValueLookup | None = None, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, lookup: VariableValueLookup | None = None, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -391,7 +411,9 @@ class UnresolvedVariableValue(RunwayError):
     lookup: VariableValueLookup | None
     message: str = "Unresolved lookup"
 
-    def __init__(self, lookup: VariableValueLookup | None = None, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, lookup: VariableValueLookup | None = None, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
