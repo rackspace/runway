@@ -33,10 +33,10 @@ class CfnginBucketAccessDenied(CfnginError):
 
     """
 
-    bucket_name: str
+    bucket_name: str | None
     message: str
 
-    def __init__(self, *, bucket_name: str) -> None:
+    def __init__(self, bucket_name: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -47,6 +47,10 @@ class CfnginBucketAccessDenied(CfnginError):
         self.message = f"access denied for cfngin_bucket {bucket_name}"
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.bucket_name,)
+
 
 class CfnginBucketNotFound(CfnginError):
     """CFNgin bucket specified or default bucket being used but it does not exist.
@@ -56,10 +60,10 @@ class CfnginBucketNotFound(CfnginError):
 
     """
 
-    bucket_name: str
+    bucket_name: str | None
     message: str
 
-    def __init__(self, *, bucket_name: str) -> None:
+    def __init__(self, *, bucket_name: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -69,6 +73,10 @@ class CfnginBucketNotFound(CfnginError):
         self.bucket_name = bucket_name
         self.message = f"cfngin_bucket does not exist {bucket_name}"
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.bucket_name,)
 
 
 class CfnginBucketRequired(CfnginError):
@@ -95,25 +103,34 @@ class CfnginBucketRequired(CfnginError):
         self.config_path = config_path
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.config_path,)
+
 
 class CfnginOnlyLookupError(CfnginError):
     """Attempted to use a CFNgin lookup outside of CFNgin."""
 
-    lookup_name: str
+    lookup_name: str | None
 
-    def __init__(self, lookup_name: str) -> None:
+    def __init__(self, lookup_name: str | None = None) -> None:
         """Instantiate class."""
         self.lookup_name = lookup_name
         self.message = f"attempted to use CFNgin only lookup {lookup_name} outside of CFNgin"
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.lookup_name,)
+
 
 class ChangesetDidNotStabilize(CfnginError):
     """Raised when the applying a changeset fails."""
 
+    id: str | None
     message: str
 
-    def __init__(self, change_set_id: str) -> None:
+    def __init__(self, change_set_id: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -124,13 +141,25 @@ class ChangesetDidNotStabilize(CfnginError):
         self.message = f"Changeset '{change_set_id}' did not reach a completed state."
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.id,)
+
 
 class GraphError(CfnginError):
     """Raised when the graph is invalid (e.g. acyclic dependencies)."""
 
+    exception: Exception | None
+    stack: str | None
+    dependency: str | None
     message: str
 
-    def __init__(self, exception: Exception, stack: str, dependency: str) -> None:
+    def __init__(
+        self,
+        exception: Exception | None = None,
+        stack: str | None = None,
+        dependency: str | None = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -149,13 +178,21 @@ class GraphError(CfnginError):
         )
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.exception, self.stack, self.dependency)
+
 
 class ImproperlyConfigured(CfnginError):
     """Raised when a component is improperly configured."""
 
+    error: Exception | None
+    kls: Any | None
     message: str
 
-    def __init__(self, kls: Any, error: Exception, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, kls: Any | None = None, error: Exception | None = None, *args: Any, **kwargs: Any
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -167,6 +204,10 @@ class ImproperlyConfigured(CfnginError):
         """
         self.message = f'Class "{kls}" is improperly configured: {error}'
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.kls, self.error)
 
 
 class InvalidConfig(CfnginError):
@@ -194,17 +235,21 @@ class InvalidConfig(CfnginError):
 class InvalidDockerizePipConfiguration(CfnginError):
     """Raised when the provided configuration for dockerized pip is invalid."""
 
-    message: str
+    message: str = "Invalid configuration for dockerized pip"
 
-    def __init__(self, msg: str) -> None:
+    def __init__(self, msg: str | None = None) -> None:
         """Instantiate class.
 
         Args:
             msg: The reason for the error being raised.
 
         """
-        self.message = msg
+        self.message = msg if msg else self.message
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.message,)
 
 
 class InvalidUserdataPlaceholder(CfnginError):
@@ -214,10 +259,16 @@ class InvalidUserdataPlaceholder(CfnginError):
 
     """
 
+    blueprint_name: str | None
+    exception_message: str | None
     message: str
 
     def __init__(
-        self, blueprint_name: str, exception_message: str, *args: Any, **kwargs: Any
+        self,
+        blueprint_name: str | None = None,
+        exception_message: str | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 
@@ -235,13 +286,18 @@ class InvalidUserdataPlaceholder(CfnginError):
         )
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.blueprint_name, self.exception_message)
+
 
 class MissingEnvironment(CfnginError):
     """Raised when an environment lookup is used but the key doesn't exist."""
 
+    key: str | None
     message: str
 
-    def __init__(self, key: str, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, key: str | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -254,13 +310,18 @@ class MissingEnvironment(CfnginError):
         self.message = f"Environment missing key {key}."
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.key,)
+
 
 class MissingParameterException(CfnginError):
     """Raised if a required parameter with no default is missing."""
 
-    message: str
+    parameters: list[str] | None
+    message: str = "Missing required cloudformation parameters"
 
-    def __init__(self, parameters: list[str], *args: Any, **kwargs: Any) -> None:
+    def __init__(self, parameters: list[str] | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -270,16 +331,29 @@ class MissingParameterException(CfnginError):
 
         """
         self.parameters = parameters
-        self.message = f"Missing required cloudformation parameters: {', '.join(parameters)}"
+        if parameters:
+            self.message = f"Missing required cloudformation parameters: {', '.join(parameters)}"
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.parameters,)
 
 
 class MissingVariable(CfnginError):
     """Raised when a variable with no default is not provided a value."""
 
+    blueprint_name: str | None
+    variable_name: str | None
     message: str
 
-    def __init__(self, blueprint_name: str, variable_name: str, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        blueprint_name: str | None = None,
+        variable_name: str | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -291,6 +365,10 @@ class MissingVariable(CfnginError):
         """
         self.message = f'Variable "{variable_name}" in blueprint "{blueprint_name}" is missing'
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.blueprint_name, self.variable_name)
 
 
 class PipError(CfnginError):
@@ -326,23 +404,33 @@ class PipenvError(CfnginError):
 class PersistentGraphCannotLock(CfnginError):
     """Raised when the persistent graph in S3 cannot be locked."""
 
+    reason: str | None
     message: str
 
-    def __init__(self, reason: str) -> None:
+    def __init__(self, reason: str | None = None) -> None:
         """Instantiate class."""
         self.message = f"Could not lock persistent graph; {reason}"
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.reason,)
 
 
 class PersistentGraphCannotUnlock(CfnginError):
     """Raised when the persistent graph in S3 cannot be unlocked."""
 
+    reason: Exception | str | None
     message: str
 
-    def __init__(self, reason: Exception | str) -> None:
+    def __init__(self, reason: Exception | str | None = None) -> None:
         """Instantiate class."""
         self.message = f"Could not unlock persistent graph; {reason}"
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.reason,)
 
 
 class PersistentGraphLocked(CfnginError):
@@ -352,9 +440,10 @@ class PersistentGraphLocked(CfnginError):
 
     """
 
+    reason: str | None
     message: str
 
-    def __init__(self, *, message: str | None = None, reason: str | None = None) -> None:
+    def __init__(self, message: str | None = None, reason: str | None = None) -> None:
         """Instantiate class."""
         if message:
             self.message = message
@@ -362,6 +451,10 @@ class PersistentGraphLocked(CfnginError):
             reason = reason or "This action requires the graph to be unlocked to be executed."
             self.message = f"Persistent graph is locked. {reason}"
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.message, self.reason)
 
 
 class PersistentGraphLockCodeMismatch(CfnginError):
@@ -372,15 +465,21 @@ class PersistentGraphLockCodeMismatch(CfnginError):
 
     """
 
+    provided_code: str | None
+    s3_code: str | None
     message: str
 
-    def __init__(self, provided_code: str, s3_code: str | None) -> None:
+    def __init__(self, provided_code: str | None = None, s3_code: str | None = None) -> None:
         """Instantiate class."""
         self.message = (
             f"The provided lock code '{provided_code}' does not match the S3 "
             f"object lock code '{s3_code}'"
         )
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.provided_code, self.s3_code)
 
 
 class PersistentGraphUnlocked(CfnginError):
@@ -390,6 +489,7 @@ class PersistentGraphUnlocked(CfnginError):
 
     """
 
+    reason: str | None
     message: str
 
     def __init__(self, message: str | None = None, reason: str | None = None) -> None:
@@ -401,13 +501,18 @@ class PersistentGraphUnlocked(CfnginError):
             self.message = f"Persistent graph is unlocked. {reason}"
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.message, self.reason)
+
 
 class PlanFailed(CfnginError):
     """Raised if any step of a plan fails."""
 
-    message: str
+    failed_steps: list[Step] | None
+    message: str = "Plan failed"
 
-    def __init__(self, failed_steps: list[Step], *args: Any, **kwargs: Any) -> None:
+    def __init__(self, failed_steps: list[Step] | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -416,12 +521,17 @@ class PlanFailed(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        self.failed_steps = failed_steps
+        if failed_steps:
+            self.failed_steps = failed_steps
 
-        step_names = ", ".join(step.name for step in failed_steps)
-        self.message = f"The following steps failed: {step_names}"
+            step_names = ", ".join(step.name for step in failed_steps)
+            self.message = f"The following steps failed: {step_names}"
 
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.failed_steps,)
 
 
 class StackDidNotChange(CfnginError):
@@ -433,9 +543,10 @@ class StackDidNotChange(CfnginError):
 class StackDoesNotExist(CfnginError):
     """Raised when a stack does not exist in AWS."""
 
+    stack_name: str | None
     message: str
 
-    def __init__(self, stack_name: str, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, stack_name: str | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -450,14 +561,26 @@ class StackDoesNotExist(CfnginError):
         )
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.stack_name,)
+
 
 class StackUpdateBadStatus(CfnginError):
     """Raised if the state of a stack can't be handled."""
 
+    stack_name: str | None
+    stack_status: str | None
+    reason: str | None
     message: str
 
     def __init__(
-        self, stack_name: str, stack_status: str, reason: str, *args: Any, **kwargs: Any
+        self,
+        stack_name: str | None = None,
+        stack_status: str | None = None,
+        reason: str | None = None,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 
@@ -478,6 +601,10 @@ class StackUpdateBadStatus(CfnginError):
         )
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.stack_name, self.stack_status, self.reason)
+
 
 class StackFailed(CfnginError):
     """Raised when a stack action fails.
@@ -486,9 +613,11 @@ class StackFailed(CfnginError):
 
     """
 
+    stack_name: str | None
+    status_reason: str | None
     message: str
 
-    def __init__(self, stack_name: str, status_reason: str | None = None) -> None:
+    def __init__(self, stack_name: str | None = None, status_reason: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -504,13 +633,25 @@ class StackFailed(CfnginError):
             self.message += f' with reason "{status_reason}"'
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.stack_name, self.status_reason)
+
 
 class UnableToExecuteChangeSet(CfnginError):
     """Raised if changeset execution status is not ``AVAILABLE``."""
 
+    stack_name: str | None
+    change_set_id: str | None
+    execution_status: str | None
     message: str
 
-    def __init__(self, stack_name: str, change_set_id: str, execution_status: str) -> None:
+    def __init__(
+        self,
+        stack_name: str | None = None,
+        change_set_id: str | None = None,
+        execution_status: str | None = None,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -531,6 +672,10 @@ class UnableToExecuteChangeSet(CfnginError):
 
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.stack_name, self.change_set_id, self.execution_status)
+
 
 class UnhandledChangeSetStatus(CfnginError):
     """Raised when creating a changeset failed for an unhandled reason.
@@ -539,10 +684,18 @@ class UnhandledChangeSetStatus(CfnginError):
 
     """
 
+    stack_name: str | None
+    id: str | None
+    status: str | None
+    status_reason: str | None
     message: str
 
     def __init__(
-        self, stack_name: str, change_set_id: str, status: str, status_reason: str
+        self,
+        stack_name: str | None = None,
+        change_set_id: str | None = None,
+        status: str | None = None,
+        status_reason: str | None = None,
     ) -> None:
         """Instantiate class.
 
@@ -564,13 +717,25 @@ class UnhandledChangeSetStatus(CfnginError):
 
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.stack_name, self.id, self.status, self.status_reason)
+
 
 class UnresolvedBlueprintVariable(CfnginError):
     """Raised when trying to use a variable before it has been resolved."""
 
-    message: str
+    blueprint_name: str | None
+    variable: Variable | None
+    message: str = "Variable has not been resolved"
 
-    def __init__(self, blueprint_name: str, variable: Variable, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        blueprint_name: str | None = None,
+        variable: Variable | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -581,18 +746,24 @@ class UnresolvedBlueprintVariable(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        self.message = (
-            f'Variable "{variable.name}" in blueprint "{blueprint_name}" hasn\'t been resolved'
-        )
+        if variable:
+            self.message = (
+                f'Variable "{variable.name}" in blueprint "{blueprint_name}" hasn\'t been resolved'
+            )
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.blueprint_name, self.variable)
 
 
 class UnresolvedBlueprintVariables(CfnginError):
     """Raised when trying to use variables before they has been resolved."""
 
+    blueprint_name: str | None
     message: str
 
-    def __init__(self, blueprint_name: str, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, blueprint_name: str | None = None, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -605,17 +776,25 @@ class UnresolvedBlueprintVariables(CfnginError):
         self.message = f"Blueprint: \"{blueprint_name}\" hasn't resolved it's variables"
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.blueprint_name,)
+
 
 class ValidatorError(CfnginError):
     """Used for errors raised by custom validators of blueprint variables."""
 
+    variable: str | None
+    validator: str | None
+    value: str | None
+    exception: Exception | None
     message: str
 
     def __init__(
         self,
-        variable: str,
-        validator: str,
-        value: str,
+        variable: str | None = None,
+        validator: str | None = None,
+        value: str | None = None,
         exception: Exception | None = None,
     ) -> None:
         """Instantiate class.
@@ -640,6 +819,10 @@ class ValidatorError(CfnginError):
             self.message += f": {self.exception.__class__.__name__}: {self.exception!s}"
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.variable, self.validator, self.value, self.exception)
+
     def __str__(self) -> str:
         """Return the exception's message when converting to a string."""
         return self.message
@@ -648,9 +831,17 @@ class ValidatorError(CfnginError):
 class VariableTypeRequired(CfnginError):
     """Raised when a variable defined in a blueprint is missing a type."""
 
+    blueprint_name: str | None
+    variable_name: str | None
     message: str
 
-    def __init__(self, blueprint_name: str, variable_name: str, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self,
+        blueprint_name: str | None = None,
+        variable_name: str | None = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """Instantiate class.
 
         Args:
@@ -664,3 +855,7 @@ class VariableTypeRequired(CfnginError):
             f'Variable "{variable_name}" in blueprint "{blueprint_name}" does not have a type'
         )
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.blueprint_name, self.variable_name)
