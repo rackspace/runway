@@ -1555,7 +1555,7 @@ class Provider(BaseProvider):
             if output_name not in self._outputs[stack.fqn]:
                 self._outputs[stack.fqn][
                     output_name
-                ] = f"<inferred-change: {stack.fqn}.{output_name}={output_params['Value']}>"
+                ] = f"<inferred-change = {stack.fqn}.{output_name}={output_params['Value']}>"
 
         # when creating a changeset for a new stack, CFN creates a temporary
         # stack with a status of REVIEW_IN_PROGRESS. this is only removed if

@@ -834,7 +834,7 @@ class TestProviderDefaultMode(unittest.TestCase):
             full_changeset=changes, params_diff=[], fqn=stack_name, answer="y"
         )
         expected_outputs = {
-            "FakeOutput": "<inferred-change: MockStack.FakeOutput={'Ref': 'FakeResource'}>"
+            "FakeOutput": "<inferred-change = MockStack.FakeOutput={'Ref': 'FakeResource'}>"
         }
         assert self.provider.get_outputs(stack_name) == expected_outputs
         assert result == expected_outputs
