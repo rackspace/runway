@@ -63,7 +63,7 @@ class CfnginBucketNotFound(CfnginError):
     bucket_name: str | None
     message: str
 
-    def __init__(self, *, bucket_name: str | None = None) -> None:
+    def __init__(self, bucket_name: str | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -85,7 +85,7 @@ class CfnginBucketRequired(CfnginError):
     config_path: Path | None
     message: str
 
-    def __init__(self, *, config_path: AnyPath | None = None, reason: str | None = None) -> None:
+    def __init__(self, config_path: AnyPath | None = None, reason: str | None = None) -> None:
         """Instantiate class.
 
         Args:
