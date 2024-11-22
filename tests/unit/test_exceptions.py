@@ -4,6 +4,16 @@ from __future__ import annotations
 
 import pickle
 from typing import TYPE_CHECKING, Any
+from unittest import mock
+import pytest
+
+from runway.variables import (
+    Variable,
+    VariableValueLookup,
+    VariableValue,
+    VariableValueConcatenation,
+)
+from runway.cfngin.plan import Step
 
 from runway.exceptions import (
     ConfigNotFound,
@@ -48,10 +58,28 @@ from runway.cfngin.exceptions import (
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from runway.variables import VariableValueLookup, VariableValue, VariableValueConcatenation
-    from runway.variables.models import Variable as RunwayVariable
-    from runway.cfngin.variables import Variable as CfnginVariable
+    from runway.variables import (
+        Variable,
+        VariableValueLookup,
+        VariableValue,
+        VariableValueConcatenation,
+    )
     from runway.cfngin.plan import Step
+
+
+@pytest.fixture
+def variable() -> Variable:
+    """Return a Variable instance."""
+    return Variable(name="test", value="test")
+
+
+@pytest.fixture
+def step() -> Step:
+    """Return a Step instance."""
+    stack = mock.MagicMock()
+    stack.name = "stack"
+    stack.fqn = "namespace-stack"
+    return Step(stack=stack, fn=None)
 
 
 class TestConfigNotFound:
@@ -84,14 +112,14 @@ class TestFailedLookup:
 class TestFailedVariableLookup:
     """Test "FailedVariableLookup."""
 
-    def test_pickle(self, variable: RunwayVariable, lookup_error: FailedLookup) -> None:
+    def test_pickle(self, variable: Variable, lookup_error: FailedLookup) -> None:
         """Test pickling."""
         exc = FailedVariableLookup(variable, lookup_error)
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
-class TestInvalidLookupCombination:
-    """Test "InvalidLookupCombination."""
+class TestInvalidLookupConcatenation:
+    """Test "InvalidLookupConcatenation."""
 
     def test_pickle(
         self, invalid_lookup: VariableValue, concat_lookups: VariableValueConcatenation
@@ -106,7 +134,7 @@ class TestOutputDoesNotExist:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = OutputDoesNotExist("foo")
+        exc = OutputDoesNotExist("foo", "bar")
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
@@ -347,7 +375,7 @@ class TestUnhandledChangeSetStatus:
 class TestUnresolvedBlueprintVariable:
     """Test "UnresolvedBlueprintVariable."""
 
-    def test_pickle(self, variable: CfnginVariable) -> None:
+    def test_pickle(self, variable: Variable) -> None:
         """Test pickling."""
         exc = UnresolvedBlueprintVariable("blueprint_name", variable)
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
@@ -358,7 +386,7 @@ class TestUnresolvedBlueprintVariables:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = UnresolvedBlueprintVariables("blueprint_name", ["variable1", "variable2"])
+        exc = UnresolvedBlueprintVariables("blueprint_name")
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 

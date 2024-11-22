@@ -83,6 +83,7 @@ class CfnginBucketRequired(CfnginError):
     """CFNgin bucket is required to use a feature but it not provided/disabled."""
 
     config_path: Path | None
+    reason: str | None
     message: str
 
     def __init__(self, config_path: AnyPath | None = None, reason: str | None = None) -> None:
@@ -94,6 +95,7 @@ class CfnginBucketRequired(CfnginError):
 
         """
         self.message = "cfngin_bucket is required"
+        self.reason = reason
         if reason:
             self.message += f"; {reason}"
         if isinstance(config_path, str):
@@ -105,7 +107,7 @@ class CfnginBucketRequired(CfnginError):
 
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
-        return self.__class__, (self.config_path,)
+        return self.__class__, (self.config_path, self.reason)
 
 
 class CfnginOnlyLookupError(CfnginError):
@@ -202,6 +204,8 @@ class ImproperlyConfigured(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.kls = kls
+        self.error = error
         self.message = f'Class "{kls}" is improperly configured: {error}'
         super().__init__(*args, **kwargs)
 
@@ -230,6 +234,10 @@ class InvalidConfig(CfnginError):
         else:
             self.message = errors
         super().__init__(errors)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.errors,)
 
 
 class InvalidDockerizePipConfiguration(CfnginError):
@@ -280,6 +288,8 @@ class InvalidUserdataPlaceholder(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.blueprint_name = blueprint_name
+        self.exception_message = exception_message
         self.message = (
             f'{exception_message}. Could not parse userdata in blueprint {blueprint_name}". '
             "Make sure to escape all $ symbols with a $$."
@@ -363,6 +373,8 @@ class MissingVariable(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.blueprint_name = blueprint_name
+        self.variable_name = variable_name
         self.message = f'Variable "{variable_name}" in blueprint "{blueprint_name}" is missing'
         super().__init__(*args, **kwargs)
 
@@ -409,6 +421,7 @@ class PersistentGraphCannotLock(CfnginError):
 
     def __init__(self, reason: str | None = None) -> None:
         """Instantiate class."""
+        self.reason = reason
         self.message = f"Could not lock persistent graph; {reason}"
         super().__init__()
 
@@ -425,6 +438,7 @@ class PersistentGraphCannotUnlock(CfnginError):
 
     def __init__(self, reason: Exception | str | None = None) -> None:
         """Instantiate class."""
+        self.reason = reason
         self.message = f"Could not unlock persistent graph; {reason}"
         super().__init__()
 
@@ -445,6 +459,7 @@ class PersistentGraphLocked(CfnginError):
 
     def __init__(self, message: str | None = None, reason: str | None = None) -> None:
         """Instantiate class."""
+        self.reason = reason
         if message:
             self.message = message
         else:
@@ -471,6 +486,9 @@ class PersistentGraphLockCodeMismatch(CfnginError):
 
     def __init__(self, provided_code: str | None = None, s3_code: str | None = None) -> None:
         """Instantiate class."""
+
+        self.provided_code = provided_code
+        self.s3_code = s3_code
         self.message = (
             f"The provided lock code '{provided_code}' does not match the S3 "
             f"object lock code '{s3_code}'"
@@ -494,6 +512,7 @@ class PersistentGraphUnlocked(CfnginError):
 
     def __init__(self, message: str | None = None, reason: str | None = None) -> None:
         """Instantiate class."""
+        self.reason = reason
         if message:
             self.message = message
         else:
@@ -521,9 +540,8 @@ class PlanFailed(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.failed_steps = failed_steps
         if failed_steps:
-            self.failed_steps = failed_steps
-
             step_names = ", ".join(step.name for step in failed_steps)
             self.message = f"The following steps failed: {step_names}"
 
@@ -555,6 +573,7 @@ class StackDoesNotExist(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.stack_name = stack_name
         self.message = (
             f'Stack: "{stack_name}" does not exist in outputs or the lookup is '
             "not available in this CFNgin run"
@@ -594,7 +613,7 @@ class StackUpdateBadStatus(CfnginError):
         """
         self.stack_name = stack_name
         self.stack_status = stack_status
-
+        self.reason = reason
         self.message = (
             f'Stack: "{stack_name}" cannot be updated nor re-created from state '
             f"{stack_status}: {reason}"
@@ -662,7 +681,7 @@ class UnableToExecuteChangeSet(CfnginError):
 
         """
         self.stack_name = stack_name
-        self.id = change_set_id
+        self.change_set_id = change_set_id
         self.execution_status = execution_status
 
         self.message = (
@@ -746,6 +765,8 @@ class UnresolvedBlueprintVariable(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.blueprint_name = blueprint_name
+        self.variable = variable
         if variable:
             self.message = (
                 f'Variable "{variable.name}" in blueprint "{blueprint_name}" hasn\'t been resolved'
@@ -773,6 +794,7 @@ class UnresolvedBlueprintVariables(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.blueprint_name = blueprint_name
         self.message = f"Blueprint: \"{blueprint_name}\" hasn't resolved it's variables"
         super().__init__(*args, **kwargs)
 
@@ -851,6 +873,8 @@ class VariableTypeRequired(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.blueprint_name = blueprint_name
+        self.variable_name = variable_name
         self.message = (
             f'Variable "{variable_name}" in blueprint "{blueprint_name}" does not have a type'
         )
