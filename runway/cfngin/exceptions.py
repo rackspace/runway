@@ -486,7 +486,6 @@ class PersistentGraphLockCodeMismatch(CfnginError):
 
     def __init__(self, provided_code: str | None = None, s3_code: str | None = None) -> None:
         """Instantiate class."""
-
         self.provided_code = provided_code
         self.s3_code = s3_code
         self.message = (

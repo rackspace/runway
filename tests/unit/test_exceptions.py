@@ -5,25 +5,8 @@ from __future__ import annotations
 import pickle
 from typing import TYPE_CHECKING, Any
 from unittest import mock
+
 import pytest
-
-from runway.variables import (
-    Variable,
-    VariableValueLookup,
-    VariableValue,
-    VariableValueConcatenation,
-)
-from runway.cfngin.plan import Step
-
-from runway.exceptions import (
-    ConfigNotFound,
-    DockerExecFailedError,
-    FailedLookup,
-    FailedVariableLookup,
-    InvalidLookupConcatenation,
-    OutputDoesNotExist,
-    RequiredTagNotFoundError,
-)
 
 from runway.cfngin.exceptions import (
     CfnginBucketAccessDenied,
@@ -41,13 +24,13 @@ from runway.cfngin.exceptions import (
     MissingVariable,
     PersistentGraphCannotLock,
     PersistentGraphCannotUnlock,
-    PersistentGraphLocked,
     PersistentGraphLockCodeMismatch,
+    PersistentGraphLocked,
     PersistentGraphUnlocked,
     PlanFailed,
     StackDoesNotExist,
-    StackUpdateBadStatus,
     StackFailed,
+    StackUpdateBadStatus,
     UnableToExecuteChangeSet,
     UnhandledChangeSetStatus,
     UnresolvedBlueprintVariable,
@@ -55,16 +38,25 @@ from runway.cfngin.exceptions import (
     ValidatorError,
     VariableTypeRequired,
 )
+from runway.cfngin.plan import Step
+from runway.exceptions import (
+    ConfigNotFound,
+    DockerExecFailedError,
+    FailedLookup,
+    FailedVariableLookup,
+    InvalidLookupConcatenation,
+    OutputDoesNotExist,
+    RequiredTagNotFoundError,
+)
+from runway.variables import (
+    Variable,
+    VariableValue,
+    VariableValueConcatenation,
+    VariableValueLookup,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from runway.variables import (
-        Variable,
-        VariableValueLookup,
-        VariableValue,
-        VariableValueConcatenation,
-    )
-    from runway.cfngin.plan import Step
 
 
 @pytest.fixture
