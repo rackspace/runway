@@ -320,7 +320,7 @@ class OutputDoesNotExist(RunwayError):
 
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
-        return self.__class__, (self.output, self.stack_name)
+        return self.__class__, (self.stack_name, self.output)
 
 
 class RequiredTagNotFoundError(RunwayError):
