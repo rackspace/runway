@@ -82,7 +82,7 @@ ruff = "^0.7.4"
 coverage = {extras = ["toml"], version = "^7.6.8"}
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.0.21"}
 pipenv = "^2024.4.0"  # only used in tests
-pytest = "^8.3.3"
+pytest = "^8.3.4"
 pytest-cov = "^6.0.0"
 pytest-mock = "^3.14.0"
 pytest-order = "^1.3.0"
