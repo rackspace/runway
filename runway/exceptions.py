@@ -299,9 +299,7 @@ class OutputDoesNotExist(RunwayError):
     stack_name: str
     """Name of a CloudFormation Stack."""
 
-    def __init__(
-        self, stack_name: str, output: str, *args: Any, **kwargs: Any
-    ) -> None:
+    def __init__(self, stack_name: str, output: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -360,9 +358,7 @@ class UnknownLookupType(RunwayError):
 
     message: str = "Unknown lookup type"
 
-    def __init__(
-        self, lookup: VariableValueLookup, *args: Any, **kwargs: Any
-    ) -> None:
+    def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -408,9 +404,7 @@ class UnresolvedVariableValue(RunwayError):
     lookup: VariableValueLookup
     message: str = "Unresolved lookup"
 
-    def __init__(
-        self, lookup: VariableValueLookup, *args: Any, **kwargs: Any
-    ) -> None:
+    def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:

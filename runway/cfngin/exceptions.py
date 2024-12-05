@@ -71,7 +71,6 @@ class CfnginBucketNotFound(CfnginError):
         super().__init__()
 
 
-
 class CfnginBucketRequired(CfnginError):
     """CFNgin bucket is required to use a feature but it not provided/disabled."""
 
@@ -131,10 +130,8 @@ class ChangesetDidNotStabilize(CfnginError):
         super().__init__()
 
 
-
 class GraphError(CfnginError):
     """Raised when the graph is invalid (e.g. acyclic dependencies)."""
-
 
     message: str
 
@@ -174,9 +171,7 @@ class ImproperlyConfigured(CfnginError):
     error: Exception
     message: str
 
-    def __init__(
-        self, kls: Any, error: Exception, *args: Any, **kwargs: Any
-    ) -> None:
+    def __init__(self, kls: Any, error: Exception, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
 
         Args:
@@ -222,7 +217,6 @@ class InvalidConfig(CfnginError):
         return self.__class__, (self.errors,)
 
 
-
 class InvalidDockerizePipConfiguration(CfnginError):
     """Raised when the provided configuration for dockerized pip is invalid."""
 
@@ -237,7 +231,6 @@ class InvalidDockerizePipConfiguration(CfnginError):
         """
         self.message = msg
         super().__init__()
-
 
 
 class InvalidUserdataPlaceholder(CfnginError):
@@ -300,7 +293,6 @@ class MissingEnvironment(CfnginError):
         super().__init__(*args, **kwargs)
 
 
-
 class MissingParameterException(CfnginError):
     """Raised if a required parameter with no default is missing."""
 
@@ -323,7 +315,6 @@ class MissingParameterException(CfnginError):
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
         return self.__class__, (self.parameters,)
-
 
 
 class MissingVariable(CfnginError):
@@ -522,7 +513,6 @@ class PlanFailed(CfnginError):
         return self.__class__, (self.failed_steps,)
 
 
-
 class StackDidNotChange(CfnginError):
     """Raised when there are no changes to be made by the provider."""
 
@@ -560,7 +550,7 @@ class StackUpdateBadStatus(CfnginError):
 
     def __init__(
         self,
-        stack_name: str ,
+        stack_name: str,
         stack_status: str,
         reason: str,
         *args: Any,
@@ -733,8 +723,8 @@ class UnresolvedBlueprintVariable(CfnginError):
         self.blueprint_name = blueprint_name
         self.variable = variable
         self.message = (
-                f'Variable "{variable.name}" in blueprint "{blueprint_name}" hasn\'t been resolved'
-            )
+            f'Variable "{variable.name}" in blueprint "{blueprint_name}" hasn\'t been resolved'
+        )
         super().__init__(*args, **kwargs)
 
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
@@ -747,7 +737,6 @@ class UnresolvedBlueprintVariables(CfnginError):
 
     message: str
     blueprint_name: str
-
 
     def __init__(self, blueprint_name: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.

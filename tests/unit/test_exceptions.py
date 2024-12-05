@@ -108,7 +108,12 @@ class TestFailedVariableLookup:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = FailedVariableLookup(Variable(name="test", value="test"), FailedLookup(VariableValueLookup(VariableValueLiteral("env"), "foo"), Exception("error")))
+        exc = FailedVariableLookup(
+            Variable(name="test", value="test"),
+            FailedLookup(
+                VariableValueLookup(VariableValueLiteral("env"), "foo"), Exception("error")
+            ),
+        )
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
