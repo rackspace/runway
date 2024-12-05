@@ -53,6 +53,7 @@ from runway.variables import (
     VariableValue,
     VariableValueConcatenation,
     VariableValueLookup,
+    VariableValueLiteral,
 )
 
 if TYPE_CHECKING:
@@ -86,38 +87,37 @@ class TestConfigNotFound:
 class TestDockerExecFailedError:
     """Test "DockerExecFailedError."""
 
-    def test_pickle(self, response: dict[str, Any] = {}) -> None:
+    def test_pickle(self) -> None:
         """Test pickling."""
-        exc = DockerExecFailedError(response)
+        exc = DockerExecFailedError(dict(StatusCode=1))
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
 class TestFailedLookup:
     """Test "FailedLookup."""
 
-    def test_pickle(self, lookup: VariableValueLookup, cause: Exception) -> None:
+    def test_pickle(self) -> None:
         """Test pickling."""
-        exc = FailedLookup(lookup, cause)
+
+        exc = FailedLookup("foo", "bar")
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
 class TestFailedVariableLookup:
     """Test "FailedVariableLookup."""
 
-    def test_pickle(self, variable: Variable, lookup_error: FailedLookup) -> None:
+    def test_pickle(self) -> None:
         """Test pickling."""
-        exc = FailedVariableLookup(variable, lookup_error)
+        exc = FailedVariableLookup(Variable(name="test", value="test"), FailedLookup(VariableValueLookup(VariableValueLiteral("env"), "foo"), Exception("error")))
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
 class TestInvalidLookupConcatenation:
     """Test "InvalidLookupConcatenation."""
 
-    def test_pickle(
-        self, invalid_lookup: VariableValue, concat_lookups: VariableValueConcatenation
-    ) -> None:
+    def test_pickle(self) -> None:
         """Test pickling."""
-        exc = InvalidLookupConcatenation(invalid_lookup, concat_lookups)
+        exc = InvalidLookupConcatenation(VariableValueConcatenation({"foo"}), VariableValue())
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
@@ -133,9 +133,9 @@ class TestOutputDoesNotExist:
 class TestRequiredTagNotFoundError:
     """Test "RequiredTagNotFoundError."""
 
-    def test_pickle(self, tag_key: str) -> None:
+    def test_pickle(self) -> None:
         """Test pickling."""
-        exc = RequiredTagNotFoundError("foo", tag_key)
+        exc = RequiredTagNotFoundError("foo", "bar")
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
@@ -153,7 +153,7 @@ class TestCfnginBucketAccessDenied:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = CfnginBucketAccessDenied("bucket_name")
+        exc = CfnginBucketAccessDenied("foo")
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
@@ -162,7 +162,7 @@ class TestCfnginBucketNotFound:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = CfnginBucketNotFound(bucket_name="bucket_name")
+        exc = CfnginBucketNotFound("foo")
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
@@ -216,7 +216,7 @@ class TestInvalidConfig:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = InvalidConfig(errors=["error1", "error2"])
+        exc = InvalidConfig(Exception("error"))
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
@@ -288,7 +288,7 @@ class TestPersistentGraphLocked:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = PersistentGraphLocked(message="message", reason="reason")
+        exc = PersistentGraphLocked("foo", "bar")
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
