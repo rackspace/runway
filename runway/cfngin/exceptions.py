@@ -288,7 +288,6 @@ class MissingEnvironment(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
-
         self.message = f"Environment missing key {key}."
         super().__init__(*args, **kwargs)
 

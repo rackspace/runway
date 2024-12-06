@@ -193,7 +193,7 @@ class FailedVariableLookup(RunwayError):
 
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
-        return self.__class__, (self.cause, self.variable)
+        return self.__class__, (self.variable, self.cause)
 
 
 class HclParserError(RunwayError):
