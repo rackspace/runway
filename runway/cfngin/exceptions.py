@@ -781,8 +781,6 @@ class UnresolvedBlueprintVariables(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        self.args = args
-        self.kwargs = kwargs
         self.blueprint_name = blueprint_name
         self.message = f"Blueprint: \"{blueprint_name}\" hasn't resolved it's variables"
         super().__init__(*args, **kwargs)
