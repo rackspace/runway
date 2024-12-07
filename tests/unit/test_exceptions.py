@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pickle
 from typing import TYPE_CHECKING, Any
-from unittest import mock
 
 import pytest
 
@@ -39,6 +38,9 @@ from runway.cfngin.exceptions import (
     VariableTypeRequired,
 )
 from runway.cfngin.plan import Step
+from runway.cfngin.stack import Stack
+from runway.config import CfnginStackDefinitionModel
+from runway.core.components import DeployEnvironment
 from runway.exceptions import (
     ConfigNotFound,
     DockerExecFailedError,
@@ -52,12 +54,27 @@ from runway.variables import (
     Variable,
     VariableValue,
     VariableValueConcatenation,
-    VariableValueLookup,
     VariableValueLiteral,
+    VariableValueLookup,
 )
+
+from .factories import MockCfnginContext
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+def generate_stack_definition(
+    base_name: str, stack_id: Any = None, **overrides: Any
+) -> CfnginStackDefinitionModel:
+    """Generate stack definition."""
+    definition: dict[str, Any] = {
+        "name": f"{base_name}-{stack_id}" if stack_id else base_name,
+        "class_path": f"tests.unit.cfngin.fixtures.mock_blueprints.{base_name.upper()}",
+        "requires": [],
+    }
+    definition.update(overrides)
+    return CfnginStackDefinitionModel(**definition)
 
 
 @pytest.fixture
@@ -69,7 +86,14 @@ def variable() -> Variable:
 @pytest.fixture
 def step() -> Step:
     """Return a Step instance."""
-    stack = mock.MagicMock()
+    stack = Stack(
+        definition=generate_stack_definition(
+            base_name="vpc",
+            required_by=["fakeStack0"],
+            variables={"Param1": "${output fakeStack.FakeOutput}"},
+        ),
+        context=MockCfnginContext(deploy_environment=DeployEnvironment()),
+    )
     stack.name = "stack"
     stack.fqn = "namespace-stack"
     return Step(stack=stack, fn=None)
@@ -89,7 +113,7 @@ class TestDockerExecFailedError:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = DockerExecFailedError(dict(StatusCode=1))
+        exc = DockerExecFailedError({"StatusCode": 1})
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 
@@ -98,7 +122,6 @@ class TestFailedLookup:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-
         exc = FailedLookup("foo", "bar")
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
@@ -106,10 +129,10 @@ class TestFailedLookup:
 class TestFailedVariableLookup:
     """Test "FailedVariableLookup."""
 
-    def test_pickle(self) -> None:
+    def test_pickle(self, variable: Variable) -> None:
         """Test pickling."""
         exc = FailedVariableLookup(
-            Variable(name="test", value="test"),
+            variable,
             FailedLookup(
                 VariableValueLookup(VariableValueLiteral("env"), "foo"), Exception("error")
             ),
@@ -122,7 +145,10 @@ class TestInvalidLookupConcatenation:
 
     def test_pickle(self) -> None:
         """Test pickling."""
-        exc = InvalidLookupConcatenation(VariableValueConcatenation({"foo"}), VariableValue())
+        data = [VariableValueLiteral("test")]
+        exc = InvalidLookupConcatenation(
+            VariableValue.parse_obj("test"), VariableValueConcatenation(data)
+        )
         assert str(pickle.loads(pickle.dumps(exc))) == str(exc)
 
 

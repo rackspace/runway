@@ -47,6 +47,10 @@ class CfnginBucketAccessDenied(CfnginError):
         self.message = f"access denied for cfngin_bucket {bucket_name}"
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.bucket_name,)
+
 
 class CfnginBucketNotFound(CfnginError):
     """CFNgin bucket specified or default bucket being used but it does not exist.
@@ -69,6 +73,10 @@ class CfnginBucketNotFound(CfnginError):
         self.bucket_name = bucket_name
         self.message = f"cfngin_bucket does not exist {bucket_name}"
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.bucket_name,)
 
 
 class CfnginBucketRequired(CfnginError):
@@ -113,11 +121,16 @@ class CfnginOnlyLookupError(CfnginError):
         self.message = f"attempted to use CFNgin only lookup {lookup_name} outside of CFNgin"
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.lookup_name,)
+
 
 class ChangesetDidNotStabilize(CfnginError):
     """Raised when the applying a changeset fails."""
 
     message: str
+    change_set_id: str
 
     def __init__(self, change_set_id: str) -> None:
         """Instantiate class.
@@ -126,8 +139,13 @@ class ChangesetDidNotStabilize(CfnginError):
             change_set_id: The changeset that failed.
 
         """
+        self.change_set_id = change_set_id
         self.message = f"Changeset '{change_set_id}' did not reach a completed state."
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.change_set_id,)
 
 
 class GraphError(CfnginError):
@@ -278,6 +296,7 @@ class MissingEnvironment(CfnginError):
     """Raised when an environment lookup is used but the key doesn't exist."""
 
     message: str
+    key: str
 
     def __init__(self, key: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -288,8 +307,13 @@ class MissingEnvironment(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.key = key
         self.message = f"Environment missing key {key}."
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.key,)
 
 
 class MissingParameterException(CfnginError):
@@ -383,30 +407,34 @@ class PersistentGraphCannotLock(CfnginError):
     """Raised when the persistent graph in S3 cannot be locked."""
 
     message: str
+    reason: str
 
     def __init__(self, reason: str) -> None:
         """Instantiate class."""
+        self.reason = reason
         self.message = f"Could not lock persistent graph; {reason}"
         super().__init__()
 
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
-        return self.__class__, (self.message,)
+        return self.__class__, (self.reason,)
 
 
 class PersistentGraphCannotUnlock(CfnginError):
     """Raised when the persistent graph in S3 cannot be unlocked."""
 
     message: str
+    reason: str | Exception
 
     def __init__(self, reason: Exception | str) -> None:
         """Instantiate class."""
+        self.reason = reason
         self.message = f"Could not unlock persistent graph; {reason}"
         super().__init__()
 
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
-        return self.__class__, (self.message,)
+        return self.__class__, (self.reason,)
 
 
 class PersistentGraphLocked(CfnginError):
@@ -522,6 +550,7 @@ class StackDoesNotExist(CfnginError):
     """Raised when a stack does not exist in AWS."""
 
     message: str
+    stack_name: str
 
     def __init__(self, stack_name: str, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -532,11 +561,16 @@ class StackDoesNotExist(CfnginError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.stack_name = stack_name
         self.message = (
             f'Stack: "{stack_name}" does not exist in outputs or the lookup is '
             "not available in this CFNgin run"
         )
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.stack_name,)
 
 
 class StackUpdateBadStatus(CfnginError):

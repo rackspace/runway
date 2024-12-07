@@ -58,7 +58,7 @@ class ConfigNotFound(RunwayError):
 
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
-        return self.__class__, (self.looking_for, self.path)
+        return self.__class__, (self.path, self.looking_for)
 
 
 class DockerConnectionRefusedError(RunwayError):
@@ -68,7 +68,7 @@ class DockerConnectionRefusedError(RunwayError):
 
     - Docker is not installed.
     - Docker service is not running.
-    - The current user does not have adequate perons (e.g. not a member of
+    - The current user does not have adequate permissions (e.g. not a member of
       the ``docker`` group).
 
     """
