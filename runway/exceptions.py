@@ -39,7 +39,7 @@ class ConfigNotFound(RunwayError):
     message: str
     path: Path
 
-    def __init__(self, *, looking_for: list[str] | None = None, path: Path) -> None:
+    def __init__(self, path: Path, looking_for: list[str] | None = None) -> None:
         """Instantiate class.
 
         Args:
@@ -55,6 +55,10 @@ class ConfigNotFound(RunwayError):
         else:
             self.message = f"config file not found at path {path}"
         super().__init__(self.path, self.looking_for)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.path, self.looking_for)
 
 
 class DockerConnectionRefusedError(RunwayError):
@@ -89,6 +93,8 @@ class DockerExecFailedError(RunwayError):
     exit_code: int
     """The ``StatusCode`` returned by Docker."""
 
+    message: str = "error message undefined"
+
     def __init__(self, response: dict[str, Any]) -> None:
         """Instantiate class.
 
@@ -99,10 +105,15 @@ class DockerExecFailedError(RunwayError):
                 that may not streamed.
 
         """
+        self._response = response
         self.exit_code = response.get("StatusCode", 1)  # we can assume this will be > 0
         error: dict[Any, Any] = response.get("Error") or {}  # value from dict could be NoneType
         self.message = error.get("Message", "error message undefined")
         super().__init__()
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self._response,)
 
 
 class FailedLookup(RunwayError):
@@ -119,7 +130,11 @@ class FailedLookup(RunwayError):
     message: str = "Failed lookup"
 
     def __init__(
-        self, lookup: VariableValueLookup, cause: Exception, *args: Any, **kwargs: Any
+        self,
+        lookup: VariableValueLookup,
+        cause: Exception,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 
@@ -135,6 +150,10 @@ class FailedLookup(RunwayError):
         self.lookup = lookup
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.lookup, self.cause)
+
 
 class FailedVariableLookup(RunwayError):
     """Lookup could not be resolved.
@@ -148,7 +167,11 @@ class FailedVariableLookup(RunwayError):
     message: str
 
     def __init__(
-        self, variable: Variable, lookup_error: FailedLookup, *args: Any, **kwargs: Any
+        self,
+        variable: Variable,
+        lookup_error: FailedLookup,
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """Instantiate class.
 
@@ -165,6 +188,10 @@ class FailedVariableLookup(RunwayError):
             f'Could not resolve lookup "{lookup_error.lookup}" for variable "{variable.name}"'
         )
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.variable, self.cause)
 
 
 class HclParserError(RunwayError):
@@ -221,7 +248,12 @@ class InvalidLookupConcatenation(RunwayError):
             f'{type(invalid_lookup.value)} for lookup "{invalid_lookup}" '
             f'in "{concat_lookups}"'
         )
+
         super().__init__(*args, **kwargs)
+
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.invalid_lookup, self.concatenated_lookups)
 
 
 class KubectlVersionNotSpecified(RunwayError):
@@ -281,6 +313,10 @@ class OutputDoesNotExist(RunwayError):
         self.message = f"Output {output} does not exist on stack {stack_name}"
         super().__init__(*args, **kwargs)
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.stack_name, self.output)
+
 
 class RequiredTagNotFoundError(RunwayError):
     """Required tag not found on resource."""
@@ -304,6 +340,10 @@ class RequiredTagNotFoundError(RunwayError):
         self.message = f"required tag '{tag_key}' not found for {resource}"
         super().__init__()
 
+    def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
+        """Support for pickling."""
+        return self.__class__, (self.resource, self.tag_key)
+
 
 class UnknownLookupType(RunwayError):
     """Lookup type provided does not match a registered lookup.
@@ -314,7 +354,7 @@ class UnknownLookupType(RunwayError):
 
     """
 
-    message: str
+    message: str = "Unknown lookup type"
 
     def __init__(self, lookup: VariableValueLookup, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -326,13 +366,14 @@ class UnknownLookupType(RunwayError):
 
         """
         self.message = f'Unknown lookup type "{lookup.lookup_name.value}" in "{lookup}"'
+
         super().__init__(*args, **kwargs)
 
 
 class UnresolvedVariable(RunwayError):
     """Raised when trying to use a variable before it has been resolved."""
 
-    message: str
+    message: str = "Unresolved variable"
 
     def __init__(self, variable: Variable, *args: Any, **kwargs: Any) -> None:
         """Instantiate class.
@@ -345,6 +386,7 @@ class UnresolvedVariable(RunwayError):
         """
         self.message = f'Attempted to use variable "{variable.name}" before it was resolved'
         self.variable = variable
+
         super().__init__(*args, **kwargs)
 
 
@@ -369,6 +411,7 @@ class UnresolvedVariableValue(RunwayError):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        self.message = f'Unresolved lookup "{lookup}"'
         self.lookup = lookup
         super().__init__(*args, **kwargs)
 
