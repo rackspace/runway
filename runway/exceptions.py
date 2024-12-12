@@ -185,9 +185,7 @@ class FailedVariableLookup(RunwayError):
         self.cause = lookup_error
         self.variable = variable
         self.message = (
-            (f'Could not resolve lookup "{lookup_error.lookup}" for variable "{variable.name}"')
-            if variable and lookup_error
-            else "Failed variable lookup"
+            f'Could not resolve lookup "{lookup_error.lookup}" for variable "{variable.name}"'
         )
         super().__init__(*args, **kwargs)
 
