@@ -55,7 +55,7 @@
         "ghcr.io/devcontainers/features/docker-in-docker:2": {},
         "ghcr.io/devcontainers/features/node:1": {}
     },
-    "image": "mcr.microsoft.com/devcontainers/python:3.12",
+    "image": "mcr.microsoft.com/devcontainers/python:3.13",
     "mounts": [
         {
             "source": "${localEnv:HOME}/.aws",
