@@ -61,7 +61,7 @@ jobs:
           poetry-install: false
           poetry-plugins: poetry-dynamic-versioning[plugin]
       - name: 🚀 Publish Distribution 📦 to PyPI
-        run: pypa/gh-action-pypi-publish@v1.10.1
+        run: pypa/gh-action-pypi-publish@v1.12.3
   notify-on-publish:
     name: Notify
     needs:
