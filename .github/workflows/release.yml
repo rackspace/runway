@@ -55,13 +55,8 @@ jobs:
         with:
           name: pypi-dist
           path: dist
-      - name: 🏗 Setup Python
-        uses: finleyfamily/action-setup-python@v1.1.0
-        with:
-          poetry-install: false
-          poetry-plugins: poetry-dynamic-versioning[plugin]
       - name: 🚀 Publish Distribution 📦 to PyPI
-        run: pypa/gh-action-pypi-publish@v1.12.3
+        uses: pypa/gh-action-pypi-publish@v1.12.3
   notify-on-publish:
     name: Notify
     needs:
