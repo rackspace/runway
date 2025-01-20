@@ -1,7 +1,7 @@
 {
   "devDependencies": {
     "cspell": "^8.17.2",
-    "pyright": "^1.1.388"
+    "pyright": "^1.1.392"
   },
   "name": "runway",
   "version": "0.0.0"

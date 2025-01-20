@@ -75,7 +75,7 @@ class Bucket(DelCachedPropMixin):
         try:
             return BaseResponse(
                 **self.client.head_bucket(Bucket=self.name)
-                or {}  # pyright: ignore[reportArgumentType]
+                or {}  # pyright: ignore[reportCallIssue]
             )
         except ClientError as err:
             LOGGER.debug(
