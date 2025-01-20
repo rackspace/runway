@@ -913,7 +913,7 @@ class SourceProcessor:
             Directory name for the supplied uri
 
         """
-        dir_name = uri[:-4] if uri.endswith(".git") else uri  # drop .git
+        dir_name = uri.removesuffix(".git")  # drop .git
         dir_name = self.sanitize_uri_path(dir_name)
         if ref is not None:
             dir_name += f"-{ref}"

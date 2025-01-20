@@ -903,8 +903,7 @@ def split_s3_bucket_key(s3_path: str) -> tuple[str, str]:
         Bucket name, key
 
     """
-    if s3_path.startswith("s3://"):
-        s3_path = s3_path[5:]
+    s3_path = s3_path.removeprefix("s3://")
     return find_bucket_key(s3_path)
 
 

@@ -17,7 +17,7 @@ __all__ = [
     "ExactTimestampsSync",
     "MissingFileSync",
     "NeverSync",
-    "register_sync_strategies",
     "SizeAndLastModifiedSync",
     "SizeOnlySync",
+    "register_sync_strategies",
 ]

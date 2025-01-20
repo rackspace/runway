@@ -1,4 +1,4 @@
-"""CFNgin blueprint variable types."""
+"""CFNgin blueprint variable types."""  # noqa: A005
 
 from __future__ import annotations
 

@@ -397,13 +397,13 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
         for item in self.values():
             item.resolve(context, provider=provider, variables=variables, **kwargs)
 
-    def __delitem__(self, __key: str) -> None:
+    def __delitem__(self, _key: str) -> None:
         """Delete item by index."""
-        del self._data[__key]
+        del self._data[_key]
 
-    def __getitem__(self, __key: str) -> VariableValue:
+    def __getitem__(self, _key: str) -> VariableValue:
         """Get item by index."""
-        return self._data[__key]
+        return self._data[_key]
 
     def __iter__(self) -> Iterator[str]:
         """How the object is iterated."""
@@ -417,9 +417,9 @@ class VariableValueDict(VariableValue, MutableMapping[str, VariableValue]):
         """Return object representation."""
         return f"dict[{', '.join(f'{k}={v}' for k, v in self.items())}]"
 
-    def __setitem__(self, __key: str, __value: VariableValue) -> None:
+    def __setitem__(self, _key: str, _value: VariableValue) -> None:
         """Set item by index."""
-        self._data[__key] = __value
+        self._data[_key] = _value
 
 
 class VariableValueList(VariableValue, MutableSequence[VariableValue]):
@@ -507,30 +507,28 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         del self._data[index]
 
     @overload
-    def __getitem__(self, __index: int) -> VariableValue: ...
+    def __getitem__(self, _index: int) -> VariableValue: ...
 
     @overload
-    def __getitem__(self, __index: slice) -> list[VariableValue]: ...
+    def __getitem__(self, _index: slice) -> list[VariableValue]: ...
 
-    def __getitem__(  # pyright: ignore[reportIncompatibleMethodOverride]
-        self, __index: int | slice
-    ) -> MutableSequence[VariableValue] | VariableValue:
+    def __getitem__(self, _index: int | slice) -> MutableSequence[VariableValue] | VariableValue:
         """Get item by index."""
-        return self._data[__index]
+        return self._data[_index]
 
     @overload
-    def __setitem__(self, __index: int, __value: VariableValue) -> None: ...
+    def __setitem__(self, _index: int, _value: VariableValue) -> None: ...
 
     @overload
-    def __setitem__(self, __index: slice, __value: list[VariableValue]) -> None: ...
+    def __setitem__(self, _index: slice, _value: list[VariableValue]) -> None: ...
 
     def __setitem__(  # pyright: ignore[reportIncompatibleMethodOverride]
         self,
-        __index: int | slice,
-        __value: list[VariableValue] | VariableValue,
+        _index: int | slice,
+        _value: list[VariableValue] | VariableValue,
     ) -> None:
         """Set item by index."""
-        self._data[__index] = __value  # type: ignore
+        self._data[_index] = _value  # type: ignore
 
     def __iter__(self) -> Iterator[VariableValue]:
         """Object iteration."""
@@ -688,33 +686,33 @@ class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
         for value in self:
             value.resolve(context, provider=provider, variables=variables, **kwargs)
 
-    def __delitem__(self, __index: int) -> None:
+    def __delitem__(self, _index: int) -> None:
         """Delete item by index."""
-        del self._data[__index]
+        del self._data[_index]
 
     @overload
-    def __getitem__(self, __index: int) -> _VariableValue: ...
+    def __getitem__(self, _index: int) -> _VariableValue: ...
 
     @overload
-    def __getitem__(self, __index: slice) -> list[_VariableValue]: ...
+    def __getitem__(self, _index: slice) -> list[_VariableValue]: ...
 
-    def __getitem__(self, __index: int | slice) -> list[_VariableValue] | _VariableValue:
+    def __getitem__(self, _index: int | slice) -> list[_VariableValue] | _VariableValue:
         """Get item by index."""
-        return self._data[__index]
+        return self._data[_index]
 
     @overload
-    def __setitem__(self, __index: int, __value: _VariableValue) -> None: ...
+    def __setitem__(self, _index: int, _value: _VariableValue) -> None: ...
 
     @overload
-    def __setitem__(self, __index: slice, __value: list[_VariableValue]) -> None: ...
+    def __setitem__(self, _index: slice, _value: list[_VariableValue]) -> None: ...
 
     def __setitem__(
         self,
-        __index: int | slice,
-        __value: list[_VariableValue] | _VariableValue,
+        _index: int | slice,
+        _value: list[_VariableValue] | _VariableValue,
     ) -> None:
         """Set item by index."""
-        self._data[__index] = __value
+        self._data[_index] = _value
 
     def __iter__(self) -> Iterator[_VariableValue]:
         """Object iteration."""
@@ -940,13 +938,13 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
         for item in self._data.values():
             item.resolve(context, provider=provider, variables=variables, **kwargs)
 
-    def __delitem__(self, __key: str) -> None:
+    def __delitem__(self, _key: str) -> None:
         """Delete item by index."""
-        del self._data[__key]
+        del self._data[_key]
 
-    def __getitem__(self, __key: str) -> VariableValue:
+    def __getitem__(self, _key: str) -> VariableValue:
         """Get item by index."""
-        return self._data[__key]
+        return self._data[_key]
 
     def __iter__(self) -> Iterator[str]:
         """How the object is iterated."""
@@ -962,6 +960,6 @@ class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
             self._model_class.__name__ + f"[{', '.join(f'{k}={v}' for k, v in self._data.items())}]"
         )
 
-    def __setitem__(self, __key: str, __value: VariableValue) -> None:
+    def __setitem__(self, _key: str, _value: VariableValue) -> None:
         """Set item by index."""
-        self._data[__key] = __value
+        self._data[_key] = _value
