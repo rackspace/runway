@@ -306,7 +306,7 @@ class VariableValue:
                     lookup_query=lookup_query,
                     variable_type=variable_type,
                 )
-                tokens[last_open : (next_close + 1)] = [lookup]  # type: ignore
+                tokens[last_open : (next_close + 1)] = [lookup]
             else:
                 break  # cov: ignore
 
