@@ -3367,17 +3367,17 @@ files = [
 
 [[package]]
 name = "troposphere"
-version = "4.8.3"
+version = "4.9.0"
 description = "AWS CloudFormation creation library"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "troposphere-4.8.3-py3-none-any.whl", hash = "sha256:9a474aad9eb8daa3459408b20fd2fa536358aceaaf96cafd86492e3a7c4f3a02"},
-    {file = "troposphere-4.8.3.tar.gz", hash = "sha256:22d64cc738a3a09ad4f001812049dc77e30a46a3716ba9bd53559ff89964e74d"},
+    {file = "troposphere-4.9.0-py3-none-any.whl", hash = "sha256:a5550eccb2b4fb4fd861af54d01bcea1704845b00e45376a7fe87a0aa6f0646d"},
+    {file = "troposphere-4.9.0.tar.gz", hash = "sha256:c0eab90c3723f70a04ece651fc648e5c9b8afbb80ce2dadb87cc22404b2fc884"},
 ]
 
 [package.dependencies]
-cfn-flip = ">=1.0.2"
+cfn_flip = ">=1.0.2"
 
 [package.extras]
 policy = ["awacs (>=2.0.0)"]
