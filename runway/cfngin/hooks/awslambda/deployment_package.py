@@ -61,7 +61,7 @@ class DeploymentPackage(DelCachedPropMixin, Generic[_ProjectTypeVar]):
     }
     """Mapping of metadata to the tag-key is is stored in on the S3 object."""
 
-    SIZE_EOCD: Final[Literal[22]] = 22
+    SIZE_EOCD: Final = 22
     """Size of a zip file's End of Central Directory Record (empty zip)."""
 
     ZIPFILE_PERMISSION_MASK: ClassVar[int] = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO) << 16

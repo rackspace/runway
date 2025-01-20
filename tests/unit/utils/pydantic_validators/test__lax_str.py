@@ -30,7 +30,7 @@ class Model(BaseModel):
         ("foo", "foo"),
         (5, "5"),
         (1.0, "1.0"),
-        (Decimal(1.0), "1"),
+        (Decimal("1.0"), "1"),
         (SomeEnum.FOO, "foo"),
         (b"foo", "foo"),
         (None, None),

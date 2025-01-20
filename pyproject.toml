@@ -248,8 +248,6 @@ extend-safe-fixes = [
   "UP040",
 ]
 ignore = [
-  "ANN101",  # Missing type annotation for `self` in method
-  "ANN102",  # Missing type annotation for `cls` in classmethod
   "ANN401",  # Dynamically typed expressions (typing.Any) are disallowed  # TODO (kyle): improve type annotations
   "COM812",  # Trailing comma missing
   "D203",  # 1 blank line required before class docstring
@@ -293,7 +291,6 @@ select = ["ALL"]
   "N999",  # Invalid module name  # NOTE (kyle): these are fine here
 ]
 "tests/*" = [
-  "PT004",  # Fixture does not return anything, add leading underscore
   "S101",  # Use of `assert` detected  # NOTE (kyle): this is fine here
   "SLF001",  # Private member accessed  # NOTE (kyle): fine in tests
 ]

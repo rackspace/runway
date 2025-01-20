@@ -58,7 +58,7 @@ class LookupHandler(ABC, Generic[ContextTypeVar]):
     """Name that the Lookup is registered as."""
 
     @classmethod
-    def dependencies(cls, __lookup_query: VariableValue) -> set[str]:
+    def dependencies(cls, _lookup_query: VariableValue) -> set[str]:
         """Calculate any dependencies required to perform this lookup.
 
         Note that lookup_query may not be (completely) resolved at this time.
