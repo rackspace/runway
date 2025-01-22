@@ -1622,13 +1622,13 @@ files = [
 
 [[package]]
 name = "moto"
-version = "5.0.26"
+version = "5.0.27"
 description = "A library that allows you to easily mock out tests based on AWS infrastructure"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "moto-5.0.26-py3-none-any.whl", hash = "sha256:803831f427ca6c0452ae4fb898d731cfc19906466a33a88cbc1076abcbfcbba7"},
-    {file = "moto-5.0.26.tar.gz", hash = "sha256:6829f58a670a087e7c5b63f8183c6b72d64a1444e420c212250b7326b69a9183"},
+    {file = "moto-5.0.27-py3-none-any.whl", hash = "sha256:27042fd94c8def0166d9f2ae8d39d9488d4b3115542b5fca88566c0424549013"},
+    {file = "moto-5.0.27.tar.gz", hash = "sha256:6c123de7e0e5e6508a10c399ba3ecf2d5143f263f8e804fd4a7091941c3f5207"},
 ]
 
 [package.dependencies]
@@ -1640,7 +1640,7 @@ py-partiql-parser = {version = "0.6.1", optional = true, markers = "extra == \"s
 python-dateutil = ">=2.1,<3.0.0"
 PyYAML = {version = ">=5.1", optional = true, markers = "extra == \"s3\" or extra == \"ssm\""}
 requests = ">=2.5"
-responses = ">=0.15.0"
+responses = ">=0.15.0,<0.25.5 || >0.25.5"
 werkzeug = ">=0.5,<2.2.0 || >2.2.0,<2.2.1 || >2.2.1"
 xmltodict = "*"
 
@@ -3551,4 +3551,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "ff490cff01860f8237d40843a367e4a1eb435c5eadd115f9eb18b2559a906163"
+content-hash = "efee019bf01884c51837b518f36d24affc6f290420f7acd9f0359731d992f21e"
