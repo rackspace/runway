@@ -66,13 +66,13 @@ type-checking = ["mypy (>=1.9,<2.0)", "types-docutils (>=0.20,<0.21)", "typing-e
 
 [[package]]
 name = "awacs"
-version = "2.4.1"
+version = "2.5.0"
 description = "AWS Access Policy Language creation library"
 optional = false
-python-versions = ">=3.7.0"
+python-versions = ">=3.9"
 files = [
-    {file = "awacs-2.4.1-py3-none-any.whl", hash = "sha256:8c54470f6a2d45de1ec2907417b46f791e44bf6e7d2d5a581ca1d5153b3ea9e6"},
-    {file = "awacs-2.4.1.tar.gz", hash = "sha256:b0da356ae56374ea872c6cdb00946bb22e9cd817c3f3ad6b008019e3a45d8040"},
+    {file = "awacs-2.5.0-py3-none-any.whl", hash = "sha256:ec546ff7eb46f448e28ffdbc7540fab6a9fcb0583550dde1811a520c46cbd2a7"},
+    {file = "awacs-2.5.0.tar.gz", hash = "sha256:99d53cf0a1f56f1b0944e1bbd2d4b6158bd14ab9479412bd18ac51e20835385c"},
 ]
 
 [[package]]
