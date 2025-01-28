@@ -52,7 +52,7 @@ jobs:
           name: pypi-dist
           path: dist
       - name: 🚀 Publish Distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.12.3
+        uses: pypa/gh-action-pypi-publish@v1.12.4
   notify-on-publish:
     name: Notify
     needs:
