@@ -3086,13 +3086,13 @@ Sphinx = "*"
 
 [[package]]
 name = "sphinx-notfound-page"
-version = "1.0.4"
+version = "1.1.0"
 description = "Sphinx extension to build a 404 page with absolute URLs"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "sphinx_notfound_page-1.0.4-py3-none-any.whl", hash = "sha256:f7c26ae0df3cf3d6f38f56b068762e6203d0ebb7e1c804de1059598d7dd8b9d8"},
-    {file = "sphinx_notfound_page-1.0.4.tar.gz", hash = "sha256:2a52f49cd367b5c4e64072de1591cc367714098500abf4ecb9a3ecb4fec25aae"},
+    {file = "sphinx_notfound_page-1.1.0-py3-none-any.whl", hash = "sha256:835dc76ff7914577a1f58d80a2c8418fb6138c0932c8da8adce4d9096fbcd389"},
+    {file = "sphinx_notfound_page-1.1.0.tar.gz", hash = "sha256:913e1754370bb3db201d9300d458a8b8b5fb22e9246a816643a819a9ea2b8067"},
 ]
 
 [package.dependencies]
@@ -3551,4 +3551,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9, <3.13"
-content-hash = "ab3e710d2667c30f6a259a55f1fa19121be9eb8b88b71d32344f5ba9605c8697"
+content-hash = "fe85dabb241dac84cf3f0e179f5889df87d7368c4502696826d03c2578cd6bc7"
