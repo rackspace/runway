@@ -793,10 +793,40 @@ class TestProviderDefaultMode(unittest.TestCase):
 
     def test_noninteractive_destroy_stack_termination_protected(self) -> None:
         """Test noninteractive_destroy_stack with termination protection."""
-        self.stubber.add_client_error("delete_stack")
+        self.stubber.add_client_error("delete_stack", service_message="TerminationProtection")
+        self.stubber.add_response(
+            "describe_stacks",
+            {
+                "Stacks": [
+                    generate_describe_stacks_stack("fake-stack", stack_status="ROLLBACK_COMPLETE")
+                ]
+            },
+        )
+        self.stubber.add_response(
+            "describe_stacks",
+            {"Stacks": [generate_describe_stacks_stack("fake-stack", termination_protection=True)]},
+        )
+        self.stubber.add_response(
+            "update_termination_protection",
+            {},
+            {"EnableTerminationProtection": False, "StackName": "fake-stack"},
+        )
+        self.stubber.add_response("delete_stack", {}, {"StackName": "fake-stack"})
+
+        with self.stubber:
+            self.provider.noninteractive_destroy_stack("fake-stack")
+        self.stubber.assert_no_pending_responses()
+
+    def test_noninteractive_destroy_stack_termination_protected_not_allowed(
+        self,
+    ) -> None:
+        """Test noninteractive_destroy_stack with termination protection."""
+        self.stubber.add_client_error("delete_stack", service_message="TerminationProtection")
 
         with self.stubber, pytest.raises(ClientError):
-            self.provider.noninteractive_destroy_stack("fake-stack")
+            self.provider.noninteractive_destroy_stack(
+                "fake-stack", allow_disable_termination_protection=False
+            )
         self.stubber.assert_no_pending_responses()
 
     @patch("runway.cfngin.providers.aws.default.output_full_changeset")
