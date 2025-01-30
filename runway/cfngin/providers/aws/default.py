@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
     from mypy_boto3_cloudformation.type_defs import (
         ChangeTypeDef,
+        DeleteStackInputRequestTypeDef,
         DescribeChangeSetOutputTypeDef,
         ParameterTypeDef,
         StackEventTypeDef,
@@ -1184,7 +1185,9 @@ class Provider(BaseProvider):
             raise exceptions.CancelExecution
 
         try:
-            return self.noninteractive_destroy_stack(fqn, **kwargs)
+            return self.noninteractive_destroy_stack(
+                fqn, allow_disable_termination_protection=False, **kwargs
+            )
         except botocore.exceptions.ClientError as err:
             if "TerminationProtection" in err.response["Error"]["Message"]:
                 approval = ui.ask(
@@ -1272,19 +1275,36 @@ class Provider(BaseProvider):
 
         self.cloudformation.execute_change_set(ChangeSetName=change_set_id)
 
-    def noninteractive_destroy_stack(self, fqn: str, **_kwargs: Any) -> None:
+    def noninteractive_destroy_stack(
+        self, fqn: str, *, allow_disable_termination_protection: bool = True, **_kwargs: Any
+    ) -> None:
         """Delete a CloudFormation stack without interaction.
 
         Args:
             fqn: A fully qualified stack name.
+            allow_disable_termination_protection: Whether to disable termination protection
+                if deletion fails do to it being enable.
+                Termination protection will only be disable if the Stack's state
+                would typically allow for recreation.
 
         """
         LOGGER.debug("%s:destroying stack", fqn)
-        args = {"StackName": fqn}
+        args: DeleteStackInputRequestTypeDef = {"StackName": fqn}
         if self.service_role:
             args["RoleARN"] = self.service_role
 
-        self.cloudformation.delete_stack(**args)  # pyright: ignore[reportArgumentType]
+        try:
+            self.cloudformation.delete_stack(**args)
+        except botocore.exceptions.ClientError as exc:
+            if (
+                allow_disable_termination_protection
+                and "TerminationProtection" in exc.response["Error"]["Message"]
+                and self.is_stack_recreatable(self.get_stack(fqn))
+            ):
+                self.update_termination_protection(fqn, False)
+                self.cloudformation.delete_stack(**args)
+            else:
+                raise
 
     def noninteractive_changeset_update(
         self,
