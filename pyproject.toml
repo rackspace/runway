@@ -75,7 +75,7 @@ sphinxcontrib-jquery = "^4.1"
 sphinxcontrib-programoutput = "^0.17"
 
 [tool.poetry.group.lint.dependencies]
-black = "^24.10.0"
+black = "^25.1.0"
 ruff = "^0.9.3"
 
 [tool.poetry.group.test.dependencies]
