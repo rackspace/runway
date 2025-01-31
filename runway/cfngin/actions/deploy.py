@@ -378,10 +378,11 @@ class Action(BaseAction):
                     return status
 
                 LOGGER.debug("%s:entered roll back", stack.fqn)
-                if status.reason and "updating" in status.reason:
-                    reason = "rolling back update"
-                else:
-                    reason = "rolling back new stack"
+                reason = (
+                    "rolling back update"
+                    if status.reason and "updating" in status.reason
+                    else "rolling back new stack"
+                )
 
                 return SubmittedStatus(reason)
             if provider.is_stack_in_progress(provider_stack):

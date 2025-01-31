@@ -42,10 +42,11 @@ def register_lookup_handler(
     handler = handler_or_path
     LOGGER.debug("registering CFNgin lookup: %s=%s", lookup_type, handler_or_path)
 
-    if isinstance(handler_or_path, str):
-        handler = cast(type, load_object_from_string(handler_or_path))
-    else:
-        handler = handler_or_path
+    handler = (
+        cast(type, load_object_from_string(handler_or_path))
+        if isinstance(handler_or_path, str)
+        else handler_or_path
+    )
 
     try:
         if issubclass(handler, LookupHandler):
