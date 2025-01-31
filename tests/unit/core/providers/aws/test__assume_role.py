@@ -11,7 +11,6 @@ import pytest
 from runway.core.providers.aws import AssumeRole
 
 if TYPE_CHECKING:
-
     from ....factories import MockRunwayContext
 
 NEW_CREDENTIALS = {

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Module with Terraform state resources."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar

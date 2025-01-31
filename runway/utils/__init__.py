@@ -415,7 +415,7 @@ class YamlDumper(yaml.Dumper):
     humanreadable and complies with yamllint.
 
     Example:
-        >>> print(yaml.dump({'key': ['val1', 'val2']}, Dumper=YamlDumper))
+        >>> print(yaml.dump({"key": ["val1", "val2"]}, Dumper=YamlDumper))
 
     Note:
         YAML 1.2 Specification: https://yaml.org/spec/1.2/spec.html
@@ -843,10 +843,11 @@ def which(program: str) -> str | None:
     fname, file_ext = os.path.splitext(program)  # noqa: PTH122
     fpath, fname = os.path.split(program)
 
-    if not file_ext and platform.system().lower() == "windows":
-        fnames = [fname + ext for ext in get_extensions()]
-    else:
-        fnames = [fname]
+    fnames = (
+        [fname + ext for ext in get_extensions()]
+        if not file_ext and platform.system().lower() == "windows"
+        else [fname]
+    )
 
     for i in fnames:
         if fpath:

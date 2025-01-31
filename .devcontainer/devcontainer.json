@@ -37,7 +37,6 @@
                 "hashicorp.terraform",
                 "lextudio.restructuredtext",
                 "mohsen1.prettify-json",
-                "ms-python.black-formatter",
                 "ms-python.vscode-pylance",
                 "oderwat.indent-rainbow",
                 "redhat.vscode-yaml",

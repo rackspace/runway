@@ -269,10 +269,11 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             )
         if any(isinstance(i, str) for i in [raw_regions, parallel_regions]):
             return values  # one is a lookup so skip the remainder of the checks
-        if isinstance(raw_regions, list):
-            regions = raw_regions
-        else:
-            regions = RunwayDeploymentRegionDefinitionModel.model_validate(raw_regions)
+        regions = (
+            raw_regions
+            if isinstance(raw_regions, list)
+            else RunwayDeploymentRegionDefinitionModel.model_validate(raw_regions)
+        )
 
         if regions and parallel_regions:
             raise ValueError("only one of parallel_regions or regions can be defined")

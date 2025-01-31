@@ -145,7 +145,8 @@ class TestRunwayStaticSiteModuleParametersDataModel:
     def test_init_extra(self) -> None:
         """Test init extra."""
         obj = RunwayStaticSiteModuleParametersDataModel(
-            namespace="test", invalid="val"  # type: ignore
+            namespace="test",
+            invalid="val",  # type: ignore
         )
         assert "invalid" not in obj.dict()
 

@@ -512,7 +512,11 @@ class TestExceptionRetries(unittest.TestCase):
         raise MockException("Broke.")
 
     def _throws_exception2(
-        self, a: Any, b: Any, x: Any = None, y: Any = None  # noqa: ARG002
+        self,
+        a: Any,  # noqa: ARG002
+        b: Any,  # noqa: ARG002
+        x: Any = None,  # noqa: ARG002
+        y: Any = None,  # noqa: ARG002
     ) -> list[Any]:
         """Throws exception2."""
         self.counter += 1

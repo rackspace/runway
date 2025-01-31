@@ -14,7 +14,6 @@ from runway.config.models.base import ConfigProperty
 from runway.exceptions import UnresolvedVariable
 
 if TYPE_CHECKING:
-
     from ....factories import MockRunwayContext
 
 

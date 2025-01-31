@@ -172,8 +172,7 @@ class GraphError(CfnginError):
         self.dependency = dependency
         self.exception = exception
         self.message = (
-            f"Error detected when adding '{dependency}' "
-            f"as a dependency of '{stack}': {exception}"
+            f"Error detected when adding '{dependency}' as a dependency of '{stack}': {exception}"
         )
         super().__init__()
 

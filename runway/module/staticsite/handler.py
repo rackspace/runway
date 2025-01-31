@@ -242,8 +242,7 @@ class StaticSite(RunwayModule[StaticSiteOptions]):
                     {
                         "args": self._get_domain_updater_variables(),
                         "data_key": "aae_domain_updater",
-                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
-                        "domain_updater.delete",
+                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge.domain_updater.delete",
                         "required": True,
                     }
                 )
@@ -404,8 +403,7 @@ class StaticSite(RunwayModule[StaticSiteOptions]):
                 post_deploy.insert(
                     0,
                     {
-                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge."
-                        "client_updater.update",
+                        "path": "runway.cfngin.hooks.staticsite.auth_at_edge.client_updater.update",
                         "required": True,
                         "data_key": "client_updater",
                         "args": self._get_client_updater_variables(

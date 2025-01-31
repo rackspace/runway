@@ -26,8 +26,7 @@ class LambdaFunction(Blueprint):
         "AppName": {"type": str, "description": "Name of app."},
         "Code": {
             "type": awslambda.Code,
-            "description": "The troposphere.awslambda.Code object "
-            "returned by the aws lambda hook.",
+            "description": "The troposphere.awslambda.Code object returned by the aws lambda hook.",
         },
         "Entrypoint": {
             "type": CFNString,

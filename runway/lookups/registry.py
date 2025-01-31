@@ -30,10 +30,11 @@ def register_lookup_handler(
     """
     handler = handler_or_path
 
-    if isinstance(handler_or_path, str):
-        handler = cast(type, load_object_from_string(handler_or_path))
-    else:
-        handler = handler_or_path
+    handler = (
+        cast(type, load_object_from_string(handler_or_path))
+        if isinstance(handler_or_path, str)
+        else handler_or_path
+    )
 
     try:
         if issubclass(handler, LookupHandler):
@@ -42,8 +43,7 @@ def register_lookup_handler(
     except Exception:  # noqa: BLE001
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     raise TypeError(
-        f"lookup {handler_or_path} must be a subclass of "
-        "runway.lookups.handlers.base.LookupHandler"
+        f"lookup {handler_or_path} must be a subclass of runway.lookups.handlers.base.LookupHandler"
     )
 
 

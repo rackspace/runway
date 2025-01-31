@@ -49,14 +49,18 @@ class TestRunwayStaticSiteExtraFileDataModel:
         """Test init extra."""
         with pytest.raises(ValidationError):
             RunwayStaticSiteExtraFileDataModel(
-                content="test-content", name="test-name", invalid="val"  # type: ignore
+                content="test-content",
+                name="test-name",
+                invalid="val",  # type: ignore
             )
 
     def test_init_content_and_file(self, tmp_path: Path) -> None:
         """Test init content and file."""
         with pytest.raises(ValidationError):
             RunwayStaticSiteExtraFileDataModel(
-                content="test-content", file=tmp_path, name="test-name"  # type: ignore
+                content="test-content",
+                file=tmp_path,
+                name="test-name",  # type: ignore
             )
 
     def test_init_content(self) -> None:
@@ -148,7 +152,8 @@ class TestRunwayStaticSitePreBuildStepDataModel:
         """Test init extra."""
         with pytest.raises(ValidationError):
             RunwayStaticSitePreBuildStepDataModel(
-                command="runway --help", invalid="val"  # type: ignore
+                command="runway --help",
+                invalid="val",  # type: ignore
             )
 
     def test_init_required(self, tmp_path: Path) -> None:
@@ -211,7 +216,8 @@ class TestRunwayStaticSiteSourceHashingDirectoryDataModel:
         """Test init extra."""
         with pytest.raises(ValidationError):
             RunwayStaticSiteSourceHashingDirectoryDataModel(
-                path=tmp_path, invalid="val"  # type: ignore
+                path=tmp_path,
+                invalid="val",  # type: ignore
             )
 
     def test_init_required(self) -> None:

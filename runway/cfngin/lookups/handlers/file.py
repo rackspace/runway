@@ -26,9 +26,7 @@ if TYPE_CHECKING:
 _PARAMETER_PATTERN = re.compile(r"{{([::|\w]+)}}")
 
 ParameterizedObjectTypeDef: TypeAlias = "str | Mapping[str, Any] | Sequence[Any] | Any"
-ParameterizedObjectReturnTypeDef: TypeAlias = (
-    "dict[str, ParameterizedObjectReturnTypeDef] | GenericHelperFn | list[ParameterizedObjectReturnTypeDef]"
-)
+ParameterizedObjectReturnTypeDef: TypeAlias = "dict[str, ParameterizedObjectReturnTypeDef] | GenericHelperFn | list[ParameterizedObjectReturnTypeDef]"  # noqa: E501
 
 
 class ArgsDataModel(BaseModel):

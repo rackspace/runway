@@ -282,8 +282,7 @@ class NpmNotFound(RunwayError):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Instantiate class."""
         self.message = (
-            '"npm" not found in path or is not executable; '
-            "please ensure it is installed correctly"
+            '"npm" not found in path or is not executable; please ensure it is installed correctly'
         )
         super().__init__(*args, **kwargs)
 

@@ -737,7 +737,7 @@ class Provider(BaseProvider):
     @staticmethod
     def _tail_print(event: StackEventTypeDef) -> None:
         print(  # noqa: T201
-            f'{event.get("ResourceStatus")} {event.get("ResourceType")} {event.get("EventId")}'
+            f"{event.get('ResourceStatus')} {event.get('ResourceType')} {event.get('EventId')}"
         )
 
     def get_delete_failed_status_reason(self, stack_name: str) -> str | None:
@@ -1573,9 +1573,9 @@ class Provider(BaseProvider):
             output_params,
         ) in stack.blueprint.output_definitions.items():
             if output_name not in self._outputs[stack.fqn]:
-                self._outputs[stack.fqn][
-                    output_name
-                ] = f"<inferred-change = {stack.fqn}.{output_name}={output_params['Value']}>"
+                self._outputs[stack.fqn][output_name] = (
+                    f"<inferred-change = {stack.fqn}.{output_name}={output_params['Value']}>"
+                )
 
         # when creating a changeset for a new stack, CFN creates a temporary
         # stack with a status of REVIEW_IN_PROGRESS. this is only removed if
@@ -1585,8 +1585,7 @@ class Provider(BaseProvider):
                 temp_stack = self.get_stack(stack.fqn)
                 if self.is_stack_in_review(temp_stack):
                     LOGGER.debug(
-                        "removing temporary stack that is created "
-                        'with a ChangeSet of type "CREATE"'
+                        'removing temporary stack that is created with a ChangeSet of type "CREATE"'
                     )
                     # this method is currently only used by one action so
                     # hardcoding should be fine for now.

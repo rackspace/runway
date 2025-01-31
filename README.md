@@ -3,7 +3,7 @@
 [![CI/CD](https://github.com/rackspace/runway/workflows/CI/CD/badge.svg?branch=master)](https://github.com/rackspace/runway/actions?query=workflow%3ACI%2FCD)
 [![codecov](https://codecov.io/gh/rackspace/runway/branch/master/graph/badge.svg?token=Ku28I0RY80)](https://codecov.io/gh/rackspace/runway)
 [![PyPi](https://img.shields.io/pypi/v/runway?style=flat)](https://pypi.org/project/runway/)
-[![code style: black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/rackspace/runway/master.svg)](https://results.pre-commit.ci/latest/github/rackspace/runway/master)
 
 ![runway-example.gif](https://raw.githubusercontent.com/rackspace/runway/master/docs/source/images/runway-example.gif)

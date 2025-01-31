@@ -75,7 +75,6 @@ sphinxcontrib-jquery = "^4.1"
 sphinxcontrib-programoutput = "^0.17"
 
 [tool.poetry.group.lint.dependencies]
-black = "^24.10.0"
 ruff = "^0.9.3"
 
 [tool.poetry.group.test.dependencies]
@@ -121,27 +120,6 @@ runway = "runway._cli.main:cli"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/rackspace/runway/issues"
-
-[tool.black]
-force-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.demo
-  | \.hg
-  | \.mypy_cache
-  | \.runway
-  | \.tox
-  | \.venv
-  | _build
-  | build
-  | dist
-  | runway/aws_sso_botocore
-)/
-'''
-include = '\.pyi?$'
-line-length = 100
-target-version = ["py310", "py311", "py312", "py39"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -236,9 +214,12 @@ extend-exclude = [
   "typings",
 ]
 force-exclude = true
-line-length = 120
+line-length = 100
 show-fixes = true
 target-version = "py39"  # important to set before applying fixes
+
+[tool.ruff.format]  # https://docs.astral.sh/ruff/settings/#format
+docstring-code-format = true
 
 [tool.ruff.lint]  # https://docs.astral.sh/ruff/settings/#lint
 extend-safe-fixes = [
@@ -326,6 +307,9 @@ known-local-folder = [
 known-third-party = [
   "docker",  # NOTE (kyle): the `docker/` directory confuses isort
 ]
+
+[tool.ruff.lint.pycodestyle]  # https://docs.astral.sh/ruff/settings/#lint_pycodestyle_max-line-length
+max-line-length = 140
 
 [tool.ruff.lint.pydocstyle]  # https://docs.astral.sh/ruff/settings/#lintpydocstyle
 convention = "google"

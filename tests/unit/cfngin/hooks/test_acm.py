@@ -246,7 +246,9 @@ class TestCertificate:
         assert not cert.domain_changed()
 
     def test_get_certificate(
-        self, cfngin_context: MockCfnginContext, mock_sleep: None  # noqa: ARG002
+        self,
+        cfngin_context: MockCfnginContext,
+        mock_sleep: None,  # noqa: ARG002
     ) -> None:
         """Test get_certificate."""
         # setup context
@@ -681,7 +683,9 @@ class TestCertificate:
         monkeypatch.setattr(cert, "deploy_stack", lambda: STATUS.recreate)  # type: ignore
         monkeypatch.setattr(cert, "get_certificate", MagicMock(side_effect=["old", cert_arn]))
         monkeypatch.setattr(
-            cert, "_wait_for_stack", MagicMock(side_effect=[STATUS.new, None])  # type: ignore
+            cert,
+            "_wait_for_stack",
+            MagicMock(side_effect=[STATUS.new, None]),  # type: ignore
         )
         monkeypatch.setattr(
             cert,

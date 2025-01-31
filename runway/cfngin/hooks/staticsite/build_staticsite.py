@@ -117,10 +117,11 @@ def build(
         "artifact_key_prefix": f"{args.options.namespace}-{args.options.name}-"
     }
 
-    if args.options.build_output:
-        build_output = os.path.join(args.options.path, args.options.build_output)  # noqa: PTH118
-    else:
-        build_output = args.options.path
+    build_output = (
+        os.path.join(args.options.path, args.options.build_output)  # noqa: PTH118
+        if args.options.build_output
+        else args.options.path
+    )
 
     context_dict["artifact_bucket_name"] = RxrefLookup.handle(
         args.artifact_bucket_rxref_lookup, provider=provider, context=context

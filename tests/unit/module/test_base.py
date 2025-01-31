@@ -54,8 +54,7 @@ class TestRunwayModuleNpm:
             RunwayModuleNpm.check_for_npm()
         mock_which.assert_called_once_with("npm")
         assert caplog.messages == [
-            '"npm" not found in path or is not executable; please ensure it is '
-            "installed correctly"
+            '"npm" not found in path or is not executable; please ensure it is installed correctly'
         ]
 
     def test_check_for_npm(self, mocker: MockerFixture) -> None:

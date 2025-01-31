@@ -135,8 +135,7 @@ def validate_variable_type(
         value = CFNParameter(name=var_name, value=value)
     elif not isinstance(value, var_type):
         raise TypeError(
-            f"Value for variable {var_name} must be of type {var_type}. Actual "
-            f"type: {type(value)}"
+            f"Value for variable {var_name} must be of type {var_type}. Actual type: {type(value)}"
         )
     return value
 

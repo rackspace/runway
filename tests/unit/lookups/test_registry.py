@@ -30,9 +30,9 @@ def test_autoloaded_lookup_handlers(mocker: MockerFixture) -> None:
     handlers = ["cfn", "ecr", "env", "random.string", "ssm", "var"]
     for handler in handlers:
         assert handler in RUNWAY_LOOKUP_HANDLERS, f'Lookup handler: "{handler}" not registered'
-    assert len(RUNWAY_LOOKUP_HANDLERS) == len(
-        handlers
-    ), f"expected {len(handlers)} autoloaded handlers but found {len(RUNWAY_LOOKUP_HANDLERS)}"
+    assert len(RUNWAY_LOOKUP_HANDLERS) == len(handlers), (
+        f"expected {len(handlers)} autoloaded handlers but found {len(RUNWAY_LOOKUP_HANDLERS)}"
+    )
 
 
 def test_register_lookup_handler_function() -> None:

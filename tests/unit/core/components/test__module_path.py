@@ -247,9 +247,7 @@ class TestModulePath:
         else:
             assert (
                 obj.module_root
-                == ModulePath.REMOTE_SOURCE_HANDLERS[
-                    obj.source
-                ].return_value.fetch.return_value  # type: ignore
+                == ModulePath.REMOTE_SOURCE_HANDLERS[obj.source].return_value.fetch.return_value  # type: ignore
             )
             ModulePath.REMOTE_SOURCE_HANDLERS[obj.source].assert_called_once_with(  # type: ignore
                 **obj.metadata

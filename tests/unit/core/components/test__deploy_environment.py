@@ -123,8 +123,7 @@ class TestDeployEnvironment:
 
         assert obj.branch_name is None
         assert (
-            "failed to import git; ensure git is your path and executable "
-            "to read the branch name"
+            "failed to import git; ensure git is your path and executable to read the branch name"
         ) in caplog.messages
 
     def test_branch_name_type_error(

@@ -13,7 +13,6 @@ from ....utils import BaseModel
 from ...utils import read_value_from_path
 
 if TYPE_CHECKING:
-
     from ....context import CfnginContext
 
 

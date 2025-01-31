@@ -34,8 +34,8 @@ class PrefixAdaptor(logging.LoggerAdapter):  # type: ignore
     """LoggerAdapter that adds prefixes to messages.
 
     Example:
-        >>> logger = PrefixAdaptor('something', logging.getLogger('example'))
-        ... logger.info('my message')
+        >>> logger = PrefixAdaptor("something", logging.getLogger("example"))
+        ... logger.info("my message")
 
     """
 

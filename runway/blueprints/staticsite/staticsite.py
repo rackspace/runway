@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Module with static website bucket and CloudFront distribution."""
+
 from __future__ import annotations
 
 import hashlib
@@ -92,9 +93,7 @@ class StaticSite(Blueprint):
         "RoleBoundaryArn": {
             "type": str,
             "default": "",
-            "description": "(Optional) IAM Role permissions "
-            "boundary applied to any created "
-            "roles.",
+            "description": "(Optional) IAM Role permissions boundary applied to any created roles.",
         },
         "WAFWebACL": {
             "type": str,

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Module with update_api_endpoint."""
+
 import os
 import re
 import subprocess

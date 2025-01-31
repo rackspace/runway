@@ -35,7 +35,9 @@ MODULE = "runway.module.utils"
     ],
 )
 def test_format_npm_command_for_logging_darwin(
-    command: list[str], expected: str, platform_darwin: None  # noqa: ARG001
+    command: list[str],
+    expected: str,
+    platform_darwin: None,  # noqa: ARG001
 ) -> None:
     """Test format_npm_command_for_logging on Darwin/macOS."""
     assert format_npm_command_for_logging(command) == expected
@@ -51,7 +53,9 @@ def test_format_npm_command_for_logging_darwin(
     ],
 )
 def test_format_npm_command_for_logging_windows(
-    command: list[str], expected: str, platform_windows: None  # noqa: ARG001
+    command: list[str],
+    expected: str,
+    platform_windows: None,  # noqa: ARG001
 ) -> None:
     """Test format_npm_command_for_logging on windows."""
     assert format_npm_command_for_logging(command) == expected

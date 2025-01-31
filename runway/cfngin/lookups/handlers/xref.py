@@ -9,7 +9,6 @@ from ....lookups.handlers.base import LookupHandler
 from .output import deconstruct
 
 if TYPE_CHECKING:
-
     from ...providers.aws.default import Provider
 
 LOGGER = logging.getLogger(__name__)

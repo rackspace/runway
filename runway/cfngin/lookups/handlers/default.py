@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, ClassVar
 from ....lookups.handlers.base import LookupHandler
 
 if TYPE_CHECKING:
-
     from ....context import CfnginContext
 
 
@@ -41,8 +40,7 @@ class DefaultLookup(LookupHandler["CfnginContext"]):
             env_var_name, default_val = value.split("::", 1)
         except ValueError:
             raise ValueError(
-                f"Invalid value for default: {value}. Must be in "
-                "<env_var>::<default value> format."
+                f"Invalid value for default: {value}. Must be in <env_var>::<default value> format."
             ) from None
 
         if context and env_var_name in context.parameters:

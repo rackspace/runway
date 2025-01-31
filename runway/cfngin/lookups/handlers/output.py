@@ -12,7 +12,6 @@ from ....utils import DOC_SITE
 from ...exceptions import StackDoesNotExist
 
 if TYPE_CHECKING:
-
     from ....context import CfnginContext
     from ....lookups.handlers.base import ParsedArgsTypeDef
     from ....variables import VariableValue

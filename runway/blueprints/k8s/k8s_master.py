@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Module with k8s cluster resources."""
+
 import awacs.iam
 from awacs.aws import Allow, Condition, PolicyDocument, Statement, StringLike
 from awacs.helpers.trust import make_simple_assume_policy

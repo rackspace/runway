@@ -55,6 +55,6 @@ def test_plan_log_messages(plan_result: Result, runway_config: RunwayConfig) -> 
         "  Type: Resource",
     ]
     expected = "\n".join(expected_lines)
-    assert (
-        expected in plan_result.stdout
-    ), f"stdout does not match expected\n\nEXPECTED:\n{expected}\n\nSTDOUT:\n{plan_result.stdout}"
+    assert expected in plan_result.stdout, (
+        f"stdout does not match expected\n\nEXPECTED:\n{expected}\n\nSTDOUT:\n{plan_result.stdout}"
+    )

@@ -158,7 +158,9 @@ class MissingFileSync(BaseSync):
         super().__init__(sync_type)
 
     def determine_should_sync(
-        self, src_file: FileStats | None, dest_file: FileStats | None  # noqa: ARG002
+        self,
+        src_file: FileStats | None,
+        dest_file: FileStats | None,  # noqa: ARG002
     ) -> bool:
         """Determine if file should sync."""
         LOGGER.debug(
@@ -183,7 +185,9 @@ class NeverSync(BaseSync):
         super().__init__(sync_type)
 
     def determine_should_sync(
-        self, src_file: FileStats | None, dest_file: FileStats | None  # noqa: ARG002
+        self,
+        src_file: FileStats | None,  # noqa: ARG002
+        dest_file: FileStats | None,  # noqa: ARG002
     ) -> bool:
         """Determine if file should sync."""
         return False

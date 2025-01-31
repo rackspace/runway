@@ -4,7 +4,6 @@
         "charliermarsh.ruff",
         "editorconfig.editorconfig",
         "lextudio.restructuredtext",
-        "ms-python.black-formatter",
         "ms-python.python",
         "ms-python.vscode-pylance",
         "redhat.vscode-yaml",
