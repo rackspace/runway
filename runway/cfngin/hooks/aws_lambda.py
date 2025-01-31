@@ -266,8 +266,7 @@ def _zip_from_file_patterns(
     files = list(_find_files(root, includes, excludes, follow_symlinks))
     if not files:
         raise RuntimeError(
-            "Empty list of files for Lambda payload. Check "
-            "your include/exclude options for errors."
+            "Empty list of files for Lambda payload. Check your include/exclude options for errors."
         )
 
     LOGGER.info("adding %d files:", len(files))
@@ -1028,17 +1027,18 @@ def upload_lambda_functions(  # noqa: D417
             from troposphere.awslambda import Function
             from runway.cfngin.blueprints.base import Blueprint
 
+
             class LambdaBlueprint(Blueprint):
                 def create_template(self):
-                    code = self.context.hook_data['lambda']['MyFunction']
+                    code = self.context.hook_data["lambda"]["MyFunction"]
 
                     self.template.add_resource(
                         Function(
-                            'MyFunction',
+                            "MyFunction",
                             Code=code,
-                            Handler='my_function.handler',
-                            Role='...',
-                            Runtime='python2.7'
+                            Handler="my_function.handler",
+                            Role="...",
+                            Runtime="python2.7",
                         )
                     )
 

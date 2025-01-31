@@ -415,7 +415,7 @@ class YamlDumper(yaml.Dumper):
     humanreadable and complies with yamllint.
 
     Example:
-        >>> print(yaml.dump({'key': ['val1', 'val2']}, Dumper=YamlDumper))
+        >>> print(yaml.dump({"key": ["val1", "val2"]}, Dumper=YamlDumper))
 
     Note:
         YAML 1.2 Specification: https://yaml.org/spec/1.2/spec.html

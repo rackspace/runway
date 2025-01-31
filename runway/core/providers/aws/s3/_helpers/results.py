@@ -142,13 +142,10 @@ AllResultTypes = (
     SuccessResult,
     QueuedResult,
 )
-AnyResultType: TypeAlias = (
-    "CommandResult | CtrlCResult | DryRunResult | ErrorResult | FailureResult | FinalTotalSubmissionsResult | ProgressResult | QueuedResult | SuccessResult"  # noqa: E501
-)
+AnyResultType: TypeAlias = "CommandResult | CtrlCResult | DryRunResult | ErrorResult | FailureResult | FinalTotalSubmissionsResult | ProgressResult | QueuedResult | SuccessResult"  # noqa: E501
 
 
 class _ResultHandlerMappingTypedDict(TypedDict, total=False):
-
     CommandResult: Callable[..., None]
     CtrlCResult: Callable[..., None]
     DryRunResult: Callable[..., None]
@@ -419,9 +416,7 @@ class ResultRecorder(BaseResultHandler):
             # If the total size is no longer None that means we just learned
             # of the size so let's update the appropriate places with this
             # knowledge
-            if (
-                result.total_transfer_size is not None
-            ):  # pyright: ignore[reportUnnecessaryComparison]
+            if result.total_transfer_size is not None:  # pyright: ignore[reportUnnecessaryComparison]
                 self._ongoing_total_sizes[ongoing_key] = total_transfer_size
                 # Figure out how many bytes have been unaccounted for as
                 # the recorder has been keeping track of how many bytes

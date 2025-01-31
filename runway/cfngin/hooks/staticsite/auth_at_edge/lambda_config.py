@@ -127,7 +127,9 @@ def write(
             # to the temporary folder
             shutil.copytree(
                 os.path.join(  # noqa: PTH118
-                    os.path.dirname(__file__), "templates", handler  # noqa: PTH120
+                    os.path.dirname(__file__),  # noqa: PTH120
+                    "templates",
+                    handler,
                 ),
                 dirpath,
                 dirs_exist_ok=True,
@@ -144,7 +146,9 @@ def write(
             # Copy the shared jose-dependent util module to the temporary folder
             shutil.copyfile(
                 os.path.join(  # noqa: PTH118
-                    os.path.dirname(__file__), "templates", "shared_jose.py"  # noqa: PTH120
+                    os.path.dirname(__file__),  # noqa: PTH120
+                    "templates",
+                    "shared_jose.py",
                 ),
                 os.path.join(dirpath, "shared_jose.py"),  # noqa: PTH118
             )

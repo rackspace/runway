@@ -38,7 +38,10 @@ class MockProviderBuilder(ProviderBuilder):
         self.region = region
 
     def build(
-        self, *, profile: str | None = None, region: str | None = None  # noqa: ARG002
+        self,
+        *,
+        profile: str | None = None,  # noqa: ARG002
+        region: str | None = None,  # noqa: ARG002
     ) -> Provider:
         """Mock build method."""
         return self.provider

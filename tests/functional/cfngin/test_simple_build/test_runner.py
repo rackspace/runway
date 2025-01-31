@@ -151,9 +151,9 @@ def test_stacks_exists(cfngin_context: CfnginContext) -> None:
     client = cfngin_context.get_session(region="us-east-1").client("cloudformation")
     assert cfngin_context.stacks, "no stacks found in context/config"
     for stack in cfngin_context.stacks:
-        assert client.describe_stacks(StackName=stack.fqn)[
-            "Stacks"
-        ], f"unable to describe stack: {stack.fqn}"
+        assert client.describe_stacks(StackName=stack.fqn)["Stacks"], (
+            f"unable to describe stack: {stack.fqn}"
+        )
 
 
 @pytest.mark.order(after="test_destroy_exit_code")
@@ -163,6 +163,6 @@ def test_stacks_not_exists(cfngin_context: CfnginContext) -> None:
     assert cfngin_context.stacks, "no stacks found in context/config"
     for stack in cfngin_context.stacks:
         with pytest.raises(client.exceptions.ClientError, match="does not exist"):
-            assert not client.describe_stacks(StackName=stack.fqn)[
-                "Stacks"
-            ], f"stack exists: {stack.fqn}"
+            assert not client.describe_stacks(StackName=stack.fqn)["Stacks"], (
+                f"stack exists: {stack.fqn}"
+            )

@@ -143,8 +143,7 @@ class Runway:
         if not self.tests:
             LOGGER.error("no tests defined in runway.yml")
             LOGGER.error(
-                "to learn more about using Runway to run tests, visit "
-                "%s/page/defining_tests.html",
+                "to learn more about using Runway to run tests, visit %s/page/defining_tests.html",
                 DOC_SITE,
             )
             LOGGER.error(

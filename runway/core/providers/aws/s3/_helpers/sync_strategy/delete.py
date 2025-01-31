@@ -27,7 +27,9 @@ class DeleteSync(BaseSync):
     NAME: ClassVar[Literal["delete"]] = "delete"
 
     def determine_should_sync(
-        self, src_file: FileStats | None, dest_file: FileStats | None  # noqa: ARG002
+        self,
+        src_file: FileStats | None,  # noqa: ARG002
+        dest_file: FileStats | None,
     ) -> bool:
         """Determine if file should sync."""
         if dest_file:

@@ -102,9 +102,9 @@ class TestMutableMap:
         mute_map = MutableMap(**VALUE)
 
         assert mute_map.find("NOT_VALID", "default_val") == "default_val", "default should be used"
-        assert (
-            mute_map.find("str_val", "default_val") == VALUE["str_val"]
-        ), "default should be ignored"
+        assert mute_map.find("str_val", "default_val") == VALUE["str_val"], (
+            "default should be ignored"
+        )
 
 
 TestParamsTypeDef: TypeAlias = "dict[str, str] | list[str] | str | None"

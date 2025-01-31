@@ -4,14 +4,14 @@
             "source.fixAll.ruff": "explicit",
             "source.organizeImports": "always"
         },
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.detectIndentation": false,
         "editor.formatOnSave": true,
         "editor.insertSpaces": true,
         "editor.rulers": [
             81,
             88,
-            98
+            100
         ],
         "editor.tabSize": 4
     },

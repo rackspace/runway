@@ -76,7 +76,8 @@ class TestBaseAction(unittest.TestCase):
     ) -> None:
         """Test ensure cfn bucket exists."""
         mock_ensure_s3_bucket.side_effect = botocore.exceptions.ClientError(
-            {}, "head_bucket"  # type: ignore
+            {},
+            "head_bucket",  # type: ignore
         )
         action = BaseAction(
             context=mock_context("mynamespace"),

@@ -73,9 +73,9 @@ def test_deploy_promotezip_log_messages(deploy_promotezip_result: Result) -> Non
     assert (
         "test_promotezip:found existing package for helloWorld0" in deploy_promotezip_result.stdout
     ), f"expected not in stdout:\n{deploy_promotezip_result.stdout}"
-    assert (
-        "downloading s3://" in deploy_promotezip_result.stdout
-    ), f"expected not in stdout:\n{deploy_promotezip_result.stdout}"
+    assert "downloading s3://" in deploy_promotezip_result.stdout, (
+        f"expected not in stdout:\n{deploy_promotezip_result.stdout}"
+    )
     assert (
         "est_promotezip:found existing package for helloWorld1" in deploy_promotezip_result.stdout
     ), f"expected not in stdout:\n{deploy_promotezip_result.stdout}"

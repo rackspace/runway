@@ -85,7 +85,8 @@ class Filter:
             return sorted(  # sort for consistency
                 [
                     FilterPattern(
-                        type=f.type, pattern=os.path.join(rootdir, f.pattern)  # noqa: PTH118
+                        type=f.type,
+                        pattern=os.path.join(rootdir, f.pattern),  # noqa: PTH118
                     )
                     for f in patterns
                 ]

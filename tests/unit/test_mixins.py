@@ -117,7 +117,9 @@ class TestCliInterfaceMixin:
         ]
 
     def test_list2cmdline_darwin(
-        self, mocker: MockerFixture, platform_darwin: None  # noqa: ARG002
+        self,
+        mocker: MockerFixture,
+        platform_darwin: None,  # noqa: ARG002
     ) -> None:
         """Test list2cmdline on Darwin/macOS systems."""
         mock_list2cmdline = mocker.patch(f"{MODULE}.subprocess.list2cmdline")
@@ -127,7 +129,9 @@ class TestCliInterfaceMixin:
         mock_join.assert_called_once_with("foo")
 
     def test_list2cmdline_linus(
-        self, mocker: MockerFixture, platform_linux: None  # noqa: ARG002
+        self,
+        mocker: MockerFixture,
+        platform_linux: None,  # noqa: ARG002
     ) -> None:
         """Test list2cmdline on Linux systems."""
         mock_list2cmdline = mocker.patch(f"{MODULE}.subprocess.list2cmdline")
@@ -137,7 +141,9 @@ class TestCliInterfaceMixin:
         mock_join.assert_called_once_with("foo")
 
     def test_list2cmdline_windows(
-        self, mocker: MockerFixture, platform_windows: None  # noqa: ARG002
+        self,
+        mocker: MockerFixture,
+        platform_windows: None,  # noqa: ARG002
     ) -> None:
         """Test list2cmdline on Windows systems."""
         mock_list2cmdline = mocker.patch(

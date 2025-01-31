@@ -477,9 +477,7 @@ class TestPlan(unittest.TestCase):
         with pytest.raises(GraphError) as expected:
             Graph.from_steps([Step(vpc), Step(db), Step(app)])
         message = (
-            "Error detected when adding 'db-1' "
-            "as a dependency of 'app-1': graph is "
-            "not acyclic"
+            "Error detected when adding 'db-1' as a dependency of 'app-1': graph is not acyclic"
         )
         assert str(expected.value) == message
 

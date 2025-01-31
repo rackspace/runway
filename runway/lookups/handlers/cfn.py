@@ -124,8 +124,7 @@ class CfnLookup(LookupHandler["CfnginContext | RunwayContext"]):
             # StackDoesNotExist is only raised by provider
             if "default" in args:
                 LOGGER.debug(
-                    "unable to resolve lookup for CloudFormation Stack "
-                    'output "%s"; using default',
+                    'unable to resolve lookup for CloudFormation Stack output "%s"; using default',
                     raw_query,
                     exc_info=True,
                 )

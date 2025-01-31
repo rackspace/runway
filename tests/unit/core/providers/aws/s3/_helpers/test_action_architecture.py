@@ -171,7 +171,7 @@ class TestActionArchitecture:
             f"{MODULE}.S3TransferHandlerFactory",
             return_value=Mock(return_value=mock_s3_transfer_handler),
         )
-        self.parameters.src = f'{loc_files["tmp_path"]}{os.sep}'
+        self.parameters.src = f"{loc_files['tmp_path']}{os.sep}"
         self.parameters.dest = "s3://bucket/"
         self.parameters.paths_type = "locals3"
         assert self.action.run() == expected

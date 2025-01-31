@@ -206,7 +206,8 @@ class TestBuildAction(unittest.TestCase):  # TODO (kyle): refactor tests into th
         provider.get_stack_status_reason.return_value = "reason"
         self.deploy_action.provider_builder = MockProviderBuilder(provider=provider)
         status = self.deploy_action._destroy_stack(
-            MockStack("vpc", in_progress_behavior="wait"), status=PENDING  # type: ignore
+            MockStack("vpc", in_progress_behavior="wait"),
+            status=PENDING,  # type: ignore
         )
         provider.is_stack_being_destroyed.assert_called_once_with(provider.get_stack.return_value)
         provider.is_stack_destroyed.assert_called_once_with(provider.get_stack.return_value)

@@ -77,10 +77,7 @@ def warn(context: CfnginContext, *_args: Any, **kwargs: Any) -> bool:
         )
         functions = get_replicated_function_names(stack.get("Outputs", []))
         if functions:
-            cmd = (
-                "aws lambda delete-function --function-name $x "
-                f"--region {context.env.aws_region}"
-            )
+            cmd = f"aws lambda delete-function --function-name $x --region {context.env.aws_region}"
             LOGGER.warning(
                 "About to delete the Static Site stack that contains "
                 "replicated Lambda functions. These functions cannot "

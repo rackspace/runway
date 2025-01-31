@@ -458,7 +458,8 @@ class TestProvideLastModifiedTimeSubscriber:
         )
         mock_create_warning = mocker.patch(f"{MODULE}.create_warning", return_value="warning")
         assert not ProvideLastModifiedTimeSubscriber(
-            None, self.result_queue  # type: ignore
+            None,
+            self.result_queue,  # type: ignore
         ).on_done(
             future  # type: ignore
         )

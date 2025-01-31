@@ -136,7 +136,8 @@ def download_kb_release(
     try:
         LOGGER.verbose("downloading kubectl from %s...", kb_url)
         urlretrieve(  # noqa: S310
-            kb_url + "/" + filename, os.path.join(download_dir, filename)  # noqa: PTH118
+            kb_url + "/" + filename,
+            os.path.join(download_dir, filename),  # noqa: PTH118
         )
     except URLError as exc:
         handle_bin_download_error(exc, "kubectl")

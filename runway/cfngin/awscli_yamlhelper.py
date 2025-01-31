@@ -22,7 +22,9 @@ import yaml
 
 
 def intrinsics_multi_constructor(
-    loader: yaml.Loader, tag_prefix: str, node: yaml.Node  # noqa: ARG001
+    loader: yaml.Loader,
+    tag_prefix: str,  # noqa: ARG001
+    node: yaml.Node,
 ) -> dict[str, Any]:
     """YAML constructor to parse CloudFormation intrinsics.
 

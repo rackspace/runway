@@ -19,7 +19,10 @@ class TestEnvManager:
     """Test runway.env_mgr.EnvManager."""
 
     def test___init___darwin(
-        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture  # noqa: ARG002
+        self,
+        platform_darwin: None,  # noqa: ARG002
+        cd_tmp_path: Path,
+        mocker: MockerFixture,
     ) -> None:
         """Test __init__ on Darwin platform."""
         home = cd_tmp_path / "home"
@@ -72,7 +75,10 @@ class TestEnvManager:
         assert obj.versions_dir == expected_env_dir / "versions"
 
     def test_bin(
-        self, platform_darwin: None, cd_tmp_path: Path, mocker: MockerFixture  # noqa: ARG002
+        self,
+        platform_darwin: None,  # noqa: ARG002
+        cd_tmp_path: Path,
+        mocker: MockerFixture,
     ) -> None:
         """Test bin."""
         home = cd_tmp_path / "home"

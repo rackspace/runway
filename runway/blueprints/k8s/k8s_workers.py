@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Module with k8s nodegroup."""
+
 import gzip
 import json
 import os
@@ -23,7 +24,10 @@ from runway.cfngin.blueprints.variables.types import (
 def get_valid_instance_types() -> Any:
     """Return list of instance types from either a JSON or gzipped JSON file."""
     base_path = os.path.join(  # noqa: PTH118
-        os.path.dirname(botocore.__file__), "data", "ec2", "2016-11-15"  # noqa: PTH120
+        os.path.dirname(botocore.__file__),  # noqa: PTH120
+        "data",
+        "ec2",
+        "2016-11-15",
     )
 
     json_path = os.path.join(base_path, "service-2.json")  # noqa: PTH118

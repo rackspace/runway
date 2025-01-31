@@ -61,8 +61,7 @@ def register_lookup_handler(
         DOC_SITE,
     )
     raise TypeError(
-        f"lookup {handler_or_path} must be a subclass of "
-        "runway.lookups.handlers.base.LookupHandler"
+        f"lookup {handler_or_path} must be a subclass of runway.lookups.handlers.base.LookupHandler"
     )
 
 

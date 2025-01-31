@@ -57,9 +57,9 @@ def test_deploy_bad_log_messages(deploy_bad_result: Result, namespace: str) -> N
     )
     # output may or may not have a "rolled back" or "failed (creating new stack)" msg
     # depends on API throttling
-    assert (
-        "[runway] The following steps failed: recreate-failed" in deploy_bad_result.stdout
-    ), f"stdout does not match expected\n\nSTDOUT:\n{deploy_bad_result.stdout}"
+    assert "[runway] The following steps failed: recreate-failed" in deploy_bad_result.stdout, (
+        f"stdout does not match expected\n\nSTDOUT:\n{deploy_bad_result.stdout}"
+    )
 
 
 @pytest.mark.order(after="test_deploy_bad_log_messages")

@@ -20,7 +20,6 @@ from runway.cfngin.status import (
 )
 
 if TYPE_CHECKING:
-
     from ...factories import MockCfnginContext
 
 COMPLETE_W_REASON = CompleteStatus("test successful")

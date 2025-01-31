@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Module with k8s IAM resources."""
+
 import awacs.autoscaling
 import awacs.sts
 from awacs.aws import Allow, PolicyDocument, Statement

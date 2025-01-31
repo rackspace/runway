@@ -44,7 +44,8 @@ def tf_version(request: SubRequest) -> Generator[str, None, None]:
 
 @pytest.fixture
 def deploy_result(
-    cli_runner: CliRunner, no_backend: Path  # noqa: ARG001
+    cli_runner: CliRunner,
+    no_backend: Path,  # noqa: ARG001
 ) -> Generator[Result, None, None]:
     """Execute `runway deploy` with `runway destroy` as a cleanup step."""
     yield cli_runner.invoke(cli, ["deploy"], env={"CI": "1"})

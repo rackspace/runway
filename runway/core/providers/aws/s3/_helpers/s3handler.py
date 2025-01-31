@@ -631,7 +631,9 @@ class UploadStreamRequestSubmitter(UploadRequestSubmitter):
         return bool(fileinfo.operation_name == "upload" and self._config_params.is_stream)
 
     def _add_additional_subscribers(
-        self, subscribers: list[BaseSubscriber], fileinfo: FileInfo  # noqa: ARG002
+        self,
+        subscribers: list[BaseSubscriber],
+        fileinfo: FileInfo,  # noqa: ARG002
     ) -> None:
         """Add additional subscribers."""
         expected_size = self._config_params.expected_size

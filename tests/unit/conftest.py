@@ -119,7 +119,9 @@ def yaml_fixtures(request: pytest.FixtureRequest, fixture_dir: Path) -> dict[str
 
     """
     file_paths: list[str] = getattr(
-        cast("Module", request.module), "YAML_FIXTURES", []  # type: ignore
+        cast("Module", request.module),
+        "YAML_FIXTURES",
+        [],  # type: ignore
     )
     result: dict[str, Any] = {}
     for file_path in file_paths:

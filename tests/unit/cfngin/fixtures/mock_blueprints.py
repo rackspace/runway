@@ -335,8 +335,7 @@ class VPC(Blueprint):
         "UseNatGateway": {
             "type": CFNString,
             "allowed_values": ["true", "false"],
-            "description": "If set to true, will configure a NAT Gateway"
-            "instead of NAT instances.",
+            "description": "If set to true, will configure a NAT Gatewayinstead of NAT instances.",
             "default": "false",
         },
     }

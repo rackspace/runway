@@ -42,8 +42,7 @@ def register_lookup_handler(
     except Exception:  # noqa: BLE001
         LOGGER.debug("failed to validate lookup handler", exc_info=True)
     raise TypeError(
-        f"lookup {handler_or_path} must be a subclass of "
-        "runway.lookups.handlers.base.LookupHandler"
+        f"lookup {handler_or_path} must be a subclass of runway.lookups.handlers.base.LookupHandler"
     )
 
 

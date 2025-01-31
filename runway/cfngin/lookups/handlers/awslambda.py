@@ -22,7 +22,6 @@ from ....lookups.handlers.base import LookupHandler
 from ....utils import load_object_from_string
 
 if TYPE_CHECKING:
-
     from ....config import CfnginConfig
     from ....config.models.cfngin import CfnginHookDefinitionModel
     from ....context import CfnginContext
@@ -75,8 +74,7 @@ class AwsLambdaLookup(LookupHandler["CfnginContext"]):
             return _AwsLambdaHookDeployResponse.model_validate(context.hook_data[data_key])
         except ValidationError:
             raise TypeError(
-                "expected AwsLambdaHookDeployResponseTypedDict, "
-                f"not {context.hook_data[data_key]}"
+                f"expected AwsLambdaHookDeployResponseTypedDict, not {context.hook_data[data_key]}"
             ) from None
 
     @staticmethod

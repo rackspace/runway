@@ -11,7 +11,6 @@ from ....lookups.handlers.base import LookupHandler
 from ....utils import MutableMap
 
 if TYPE_CHECKING:
-
     from ....context import CfnginContext
 
 LOGGER = logging.getLogger(__name__)

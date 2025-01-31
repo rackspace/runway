@@ -55,7 +55,6 @@ class CfnLintHandler(TestHandler):
                     or {}
                 ).get("templates"):
                     logger.warning(
-                        'cfnlintrc is missing a "templates" '
-                        "section which is required by cfn-lint"
+                        'cfnlintrc is missing a "templates" section which is required by cfn-lint'
                     )
                 raise

@@ -77,7 +77,8 @@ def download_tf_release(
         handle_bin_download_error(exc, "Terraform")
 
     tf_hash = get_hash_for_filename(
-        filename, os.path.join(download_dir, shasums_name)  # noqa: PTH118
+        filename,
+        os.path.join(download_dir, shasums_name),  # noqa: PTH118
     )
     checksum = FileHash(hashlib.sha256())
     checksum.add_file(os.path.join(download_dir, filename))  # noqa: PTH118

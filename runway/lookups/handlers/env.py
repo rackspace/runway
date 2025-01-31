@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, ClassVar
 from .base import LookupHandler
 
 if TYPE_CHECKING:
-
     from ...context import CfnginContext, RunwayContext
 
 

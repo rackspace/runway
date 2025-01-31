@@ -323,8 +323,7 @@ class TestLambdaHooks(unittest.TestCase):
     def test_patterns_exclude_all(self) -> None:
         """Test patterns exclude all."""
         msg = (
-            "Empty list of files for Lambda payload. Check your "
-            "include/exclude options for errors."
+            "Empty list of files for Lambda payload. Check your include/exclude options for errors."
         )
 
         with self.temp_directory_with_files() as temp_dir, ShouldRaise(RuntimeError(msg)):

@@ -15,7 +15,8 @@ if TYPE_CHECKING:
 
 @pytest.fixture
 def ssm_client(
-    cfngin_context: MockCfnginContext, ssm_stubber: Stubber  # noqa: ARG001
+    cfngin_context: MockCfnginContext,
+    ssm_stubber: Stubber,  # noqa: ARG001
 ) -> SSMClient:
     """Create SSM client."""
     return cfngin_context.get_session().client("ssm")
