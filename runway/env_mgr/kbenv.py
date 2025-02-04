@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 KB_VERSION_FILENAME = ".kubectl-version"
-RELEASE_URI = "https://storage.googleapis.com/kubernetes-release/release"
+RELEASE_URI = "https://dl.k8s.io/release"
 
 
 def verify_kb_release(kb_url: str, download_dir: str, filename: str) -> None:
