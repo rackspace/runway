@@ -35,12 +35,12 @@ categories:
 category-template: >-
   ### $TITLE
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
-commitish: master  # cspell:ignore commitish
 exclude-contributors:
   - dependabot
 exclude-labels:
   - changelog:skip
   - release
+filter-by-commitish: true  # cspell:ignore commitish
 name-template: v$RESOLVED_VERSION
 sort-direction: ascending
 tag-template: v$RESOLVED_VERSION
