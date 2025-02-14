@@ -776,14 +776,14 @@ six = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "1.24.0"
+version = "1.25.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "cfn_lint-1.24.0-py3-none-any.whl", hash = "sha256:b8ca01ba384587aa7c0e09bf71cb4fa6993bd6da56498139f316e238f47d4eb8"},
-    {file = "cfn_lint-1.24.0.tar.gz", hash = "sha256:8b081808aa3a2f60abf9ef4ce05b1f270adab5b81124376f2f8e95c2fd767fb6"},
+    {file = "cfn_lint-1.25.1-py3-none-any.whl", hash = "sha256:bbf6c2d95689da466dc427217ab7ed8f3a2a4a134df70876cc63e41aaad9385a"},
+    {file = "cfn_lint-1.25.1.tar.gz", hash = "sha256:717012566c6034ffa7e60fcf1b350804d093ee37589a1e91a1fd867f33a930b7"},
 ]
 
 [package.dependencies]
@@ -2531,14 +2531,14 @@ cli = ["click (>=5.0)"]
 
 [[package]]
 name = "python-hcl2"
-version = "6.1.0"
+version = "6.1.1"
 description = "A parser for HCL2"
 optional = false
 python-versions = ">=3.7.0"
 groups = ["main"]
 files = [
-    {file = "python-hcl2-6.1.0.tar.gz", hash = "sha256:c06c0547e731dcb2453d68470a0f1e38869d6b5115a833e44c50d7083ce2423e"},
-    {file = "python_hcl2-6.1.0-py3-none-any.whl", hash = "sha256:6ee4bbaf9abf813e65fbcad514278d387d0a3d57e53dd16c413154e6989b0d71"},
+    {file = "python-hcl2-6.1.1.tar.gz", hash = "sha256:5c41525c71bd7b6b5a3a64e45a9bf40b1c1782da4fdaea42311d42ede71d2ec2"},
+    {file = "python_hcl2-6.1.1-py3-none-any.whl", hash = "sha256:67a0859bdb7d4f258a3278c3f2f058e6d65df28b5f99a8c2b1f0907a51eddfc8"},
 ]
 
 [package.dependencies]
