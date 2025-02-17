@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - release
+      - release/v*
 
 jobs:
   update_draft_release:
@@ -24,3 +24,5 @@ jobs:
           # Using the action token, we would need to push a tag to the repo
           # (instead of creating one from the release interface) then connect
           # the release draft to the tag.
+        with:
+          commitish: ${{ github.ref }}  # cspell:ignore commitish
