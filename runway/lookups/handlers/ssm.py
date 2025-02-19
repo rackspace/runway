@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from ...lookups.handlers.base import LookupHandler
 
@@ -36,7 +36,7 @@ class SsmLookup(LookupHandler["CfnginContext | RunwayContext"]):
         """
         query, args = cls.parse(value)
 
-        session = context.get_session(region=args.get("region"))
+        session = context.get_session(region=cast("str | None", args.get("region")))
         client = session.client("ssm")
 
         try:
