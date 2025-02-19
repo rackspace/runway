@@ -31,7 +31,10 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from mypy_boto3_route53.client import Route53Client
-    from mypy_boto3_route53.type_defs import ResourceRecordSetExtraOutputTypeDef
+    from mypy_boto3_route53.type_defs import (
+        ListHostedZonesResponseTypeDef,
+        ResourceRecordSetOutputTypeDef,
+    )
     from mypy_boto3_s3.client import S3Client
 
     from ..config.models.cfngin import (
@@ -90,7 +93,8 @@ def get_hosted_zone_by_name(client: Route53Client, zone_name: str) -> str | None
     """
     paginator = client.get_paginator("list_hosted_zones")
 
-    for page in paginator.paginate():
+    # NOTE (@ITProKyle): for some reason, type checker is not seeing this is `PageIterator` as a generic
+    for page in cast("Iterator[ListHostedZonesResponseTypeDef]", paginator.paginate()):
         for zone in page["HostedZones"]:
             if zone["Name"] == zone_name:
                 return parse_zone_id(zone["Id"])
@@ -147,7 +151,7 @@ class SOARecordText:
 class SOARecord:
     """Represents an SOA record."""
 
-    def __init__(self, record: ResourceRecordSetExtraOutputTypeDef) -> None:
+    def __init__(self, record: ResourceRecordSetOutputTypeDef) -> None:
         """Instantiate class."""
         self.name = record["Name"]
         self.text = SOARecordText(record.get("ResourceRecords", [{"Value": ""}])[0]["Value"])
