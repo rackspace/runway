@@ -36,7 +36,7 @@ class AccountDetails:
         aliases: list[str] = []
         paginator = self.__session.client("iam").get_paginator("list_account_aliases")
         response_iterator = paginator.paginate()
-        # NOTE (@ITProKyle): for some reason, type checker is not seeing this is `PageIterator` as a generic
+        # NOTE (@ITProKyle): for some reason, pyright is not seeing `PageIterator` as a generic
         for page in cast("Iterator[ListAccountAliasesResponseTypeDef]", response_iterator):
             aliases.extend(page.get("AccountAliases", []))
         return aliases

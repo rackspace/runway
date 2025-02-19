@@ -203,7 +203,7 @@ def prune_archives(context: CfnginContext, session: Session) -> bool:
         Prefix=context.hook_data["staticsite"]["artifact_key_prefix"],
     )
 
-    # NOTE (@ITProKyle): for some reason, type checker is not seeing this is `PageIterator` as a generic
+    # NOTE (@ITProKyle): for some reason, pyright is not seeing `PageIterator` as a generic
     for page in cast("Iterator[ListObjectsV2OutputTypeDef]", response_iterator):
         archives.extend(page.get("Contents", []))  # type: ignore
     archives_to_prune = get_archives_to_prune(archives, context.hook_data["staticsite"])

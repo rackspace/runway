@@ -201,7 +201,7 @@ def get_matching_s3_objects(
     for key_prefix in prefixes:
         kwargs["Prefix"] = key_prefix
 
-        # NOTE (@ITProKyle): for some reason, type checker is not seeing this is `PageIterator` as a generic
+        # NOTE (@ITProKyle): for some reason, pyright is not seeing `PageIterator` as a generic
         for page in cast("Iterator[ListObjectsV2OutputTypeDef]", paginator.paginate(**kwargs)):
             for obj in page.get("Contents", []):
                 if "Key" in obj and obj["Key"].endswith(suffix):

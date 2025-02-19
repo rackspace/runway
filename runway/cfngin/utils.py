@@ -93,7 +93,7 @@ def get_hosted_zone_by_name(client: Route53Client, zone_name: str) -> str | None
     """
     paginator = client.get_paginator("list_hosted_zones")
 
-    # NOTE (@ITProKyle): for some reason, type checker is not seeing this is `PageIterator` as a generic
+    # NOTE (@ITProKyle): for some reason, pyright is not seeing `PageIterator` as a generic
     for page in cast("Iterator[ListHostedZonesResponseTypeDef]", paginator.paginate()):
         for zone in page["HostedZones"]:
             if zone["Name"] == zone_name:
