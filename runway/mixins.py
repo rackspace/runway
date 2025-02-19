@@ -109,7 +109,7 @@ class CliInterfaceMixin:
         command: Iterable[str] | str,
         *,
         env: dict[str, str] | None = ...,
-        suppress_output: Literal[False] = ...,
+        suppress_output: Literal[False],
     ) -> None: ...
 
     def _run_command(

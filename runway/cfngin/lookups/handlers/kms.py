@@ -55,7 +55,7 @@ class KmsLookup(LookupHandler["CfnginContext"]):
         else:
             query, args = cls.parse(value)
 
-        kms = context.get_session(region=args.get("region")).client("kms")
+        kms = context.get_session(region=cast("str | None", args.get("region"))).client("kms")
 
         decrypted = cast(
             "BinaryIO | bytes",
