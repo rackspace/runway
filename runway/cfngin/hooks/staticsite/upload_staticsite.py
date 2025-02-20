@@ -18,7 +18,10 @@ from ....utils import JsonEncoder
 from ..base import HookArgsBaseModel
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from boto3.session import Session
+    from mypy_boto3_s3.type_defs import ListObjectsV2OutputTypeDef
 
     from ....context import CfnginContext
 
@@ -200,7 +203,8 @@ def prune_archives(context: CfnginContext, session: Session) -> bool:
         Prefix=context.hook_data["staticsite"]["artifact_key_prefix"],
     )
 
-    for page in response_iterator:
+    # NOTE (@ITProKyle): for some reason, pyright is not seeing `PageIterator` as a generic
+    for page in cast("Iterator[ListObjectsV2OutputTypeDef]", response_iterator):
         archives.extend(page.get("Contents", []))  # type: ignore
     archives_to_prune = get_archives_to_prune(archives, context.hook_data["staticsite"])
 

@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from ....compat import cached_property
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     import boto3
+    from mypy_boto3_iam.type_defs import ListAccountAliasesResponseTypeDef
 
     from ....context import CfnginContext, RunwayContext
 
@@ -33,7 +36,8 @@ class AccountDetails:
         aliases: list[str] = []
         paginator = self.__session.client("iam").get_paginator("list_account_aliases")
         response_iterator = paginator.paginate()
-        for page in response_iterator:
+        # NOTE (@ITProKyle): for some reason, pyright is not seeing `PageIterator` as a generic
+        for page in cast("Iterator[ListAccountAliasesResponseTypeDef]", response_iterator):
             aliases.extend(page.get("AccountAliases", []))
         return aliases
 

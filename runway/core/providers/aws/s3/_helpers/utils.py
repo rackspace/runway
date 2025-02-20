@@ -25,6 +25,7 @@ from typing import (
     Callable,
     NamedTuple,
     TextIO,
+    cast,
     overload,
 )
 
@@ -33,11 +34,15 @@ from dateutil.tz import tzlocal, tzutc
 from s3transfer.subscribers import BaseSubscriber
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterator
     from queue import Queue
 
     from mypy_boto3_s3.client import S3Client
-    from mypy_boto3_s3.type_defs import DeleteObjectRequestRequestTypeDef, ObjectTypeDef
+    from mypy_boto3_s3.type_defs import (
+        DeleteObjectRequestTypeDef,
+        ListObjectsV2OutputTypeDef,
+        ObjectTypeDef,
+    )
     from s3transfer.futures import TransferFuture
     from s3transfer.utils import CallArgs
 
@@ -136,8 +141,9 @@ class BucketLister:
             kwargs.update(extra_args)
 
         paginator = self._client.get_paginator("list_objects_v2")
-        pages = paginator.paginate(**kwargs)  # type: ignore
-        for page in pages:
+        pages = paginator.paginate(**kwargs)  # pyright: ignore[reportArgumentType]
+        # NOTE (@ITProKyle): for some reason, pyright is not seeing `PageIterator` as a generic
+        for page in cast("Iterator[ListObjectsV2OutputTypeDef]", pages):
             contents = page.get("Contents", [])
             for content in contents:
                 source_path = bucket + "/" + content.get("Key", "")
@@ -210,7 +216,7 @@ class DeleteSourceObjectSubscriber(DeleteSourceSubscriber):
     def _delete_source(self, future: TransferFuture) -> None:
         """Delete source."""
         call_args = future.meta.call_args
-        delete_object_kwargs: DeleteObjectRequestRequestTypeDef = {
+        delete_object_kwargs: DeleteObjectRequestTypeDef = {
             "Bucket": self._get_bucket(call_args),
             "Key": self._get_key(call_args),
         }

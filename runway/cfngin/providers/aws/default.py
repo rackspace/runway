@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
     from mypy_boto3_cloudformation.type_defs import (
         ChangeTypeDef,
-        DeleteStackInputRequestTypeDef,
+        DeleteStackInputTypeDef,
         DescribeChangeSetOutputTypeDef,
         ParameterTypeDef,
         StackEventTypeDef,
@@ -1289,7 +1289,7 @@ class Provider(BaseProvider):
 
         """
         LOGGER.debug("%s:destroying stack", fqn)
-        args: DeleteStackInputRequestTypeDef = {"StackName": fqn}
+        args: DeleteStackInputTypeDef = {"StackName": fqn}
         if self.service_role:
             args["RoleARN"] = self.service_role
 

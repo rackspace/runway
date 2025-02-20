@@ -47,7 +47,7 @@ def list_ecr_images(client: ECRClient, repository_name: str) -> list[ImageIdenti
     try:
         response = client.list_images(repositoryName=repository_name, filter={"tagStatus": "ANY"})
         image_ids.extend(response["imageIds"])
-        while response.get("nextToken"):
+        while "nextToken" in response:
             response = client.list_images(
                 filter={"tagStatus": "ANY"},
                 nextToken=response["nextToken"],
