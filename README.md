@@ -1,6 +1,6 @@
 # Runway
 
-[![CI/CD](https://github.com/rackspace/runway/workflows/CI/CD/badge.svg?branch=master)](https://github.com/rackspace/runway/actions?query=workflow%3ACI%2FCD)
+[![CI/CD](https://github.com/rackspace/runway/actions/workflows/cicd.yml/badge.svg)](https://github.com/rackspace/runway/actions/workflows/cicd.yml)
 [![codecov](https://codecov.io/gh/rackspace/runway/branch/master/graph/badge.svg?token=Ku28I0RY80)](https://codecov.io/gh/rackspace/runway)
 [![PyPi](https://img.shields.io/pypi/v/runway?style=flat)](https://pypi.org/project/runway/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
