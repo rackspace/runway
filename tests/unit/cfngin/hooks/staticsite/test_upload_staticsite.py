@@ -206,10 +206,10 @@ def test_sync_extra_files_file_reference(cfngin_context: MockCfnginContext) -> N
         "put_object",
         {},
         {
-            "Bucket": "bucket",
-            "Key": "test",
-            # Don't want to make any more assumptions about how upload_file works
             "Body": ANY,
+            "Bucket": "bucket",
+            "ChecksumAlgorithm": ANY,
+            "Key": "test",
         },
     )
 
@@ -230,10 +230,11 @@ def test_sync_extra_files_file_reference_with_content_type(
         "put_object",
         {},
         {
-            "Bucket": "bucket",
-            "Key": "test.json",
             "Body": ANY,
+            "Bucket": "bucket",
+            "ChecksumAlgorithm": ANY,
             "ContentType": "application/json",
+            "Key": "test.json",
         },
     )
 
