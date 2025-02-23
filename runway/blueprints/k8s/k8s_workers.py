@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 """Module with k8s nodegroup."""
 
-import gzip
-import json
-import os
-from typing import Any
+from typing import Any, cast
 
-import botocore
+from botocore.loaders import Loader
 from troposphere import Base64, Equals, If, Not, NoValue, Output, Sub, autoscaling, ec2
 from troposphere.policies import AutoScalingRollingUpdate, UpdatePolicy
 
@@ -22,27 +19,17 @@ from runway.cfngin.blueprints.variables.types import (
 
 
 def get_valid_instance_types() -> Any:
-    """Return list of instance types from either a JSON or gzipped JSON file."""
-    base_path = os.path.join(  # noqa: PTH118
-        os.path.dirname(botocore.__file__),  # noqa: PTH120
-        "data",
-        "ec2",
-        "2016-11-15",
-    )
+    """Return list of instance types from ``botocore`` data.
 
-    json_path = os.path.join(base_path, "service-2.json")  # noqa: PTH118
-    gzip_path = os.path.join(base_path, "service-2.json.gz")  # noqa: PTH118
+    ``botocore>=2.32.1`` started including compressed data files in it's wheel artifact.
+    This broke the previous implementation of this function as it manually loaded the file.
+    Now, we use the loading mechanism built into ``botocore`` to load the data file
+    which automatically handles compressed vs uncompressed data.
 
-    if os.path.exists(gzip_path):  # noqa: PTH110
-        with gzip.open(gzip_path, "rt", encoding="utf-8") as stream:
-            data = json.load(stream)
-    elif os.path.exists(json_path):  # noqa: PTH110
-        with open(json_path, encoding="utf-8") as stream:  # noqa: PTH123
-            data = json.load(stream)
-    else:
-        raise FileNotFoundError("Neither JSON nor gzipped JSON file found.")
-
-    return data["shapes"]["InstanceType"]["enum"]
+    """
+    return cast(Any, Loader().load_service_model("ec2", "service-2"))["shapes"]["InstanceType"][
+        "enum"
+    ]
 
 
 class NodeGroup(Blueprint):
