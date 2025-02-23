@@ -47,7 +47,10 @@ class SsmLookup(LookupHandler["CfnginContext | RunwayContext"]):
                 **args,
             )
         except client.exceptions.ParameterNotFound:
-            if args.get("default"):
+            if "default" in args:
+                LOGGER.debug(
+                    'unable to resolve SSM parameter "%s"; using default', query, exc_info=True
+                )
                 args.pop("load", None)  # don't load a default value
                 return cls.format_results(args.pop("default"), **args)
             raise

@@ -76,7 +76,28 @@ class TestSsmLookup:
         cfn_stub.assert_no_pending_responses()
         rw_stub.assert_no_pending_responses()
 
-    def test_handle_default(self, runway_context: MockRunwayContext) -> None:
+    @pytest.mark.parametrize("default_value", ["foo", ""])
+    def test_handle_default(self, default_value: str, runway_context: MockRunwayContext) -> None:
+        """Test resolution of a default value."""
+        stubber = runway_context.add_stubber("ssm")
+        var = Variable(
+            "test_var",
+            f"${{ssm /test/invalid::default={default_value}}}",
+            variable_type="runway",
+        )
+
+        stubber.add_client_error(
+            "get_parameter",
+            "ParameterNotFound",
+            expected_params=get_parameter_request("/test/invalid"),
+        )
+
+        with stubber:
+            var.resolve(context=runway_context)
+            assert var.value == default_value
+        stubber.assert_no_pending_responses()
+
+    def test_handle_default_nested(self, runway_context: MockRunwayContext) -> None:
         """Test resolution of a default value."""
         name = "/test/param"
         value = "test value"
