@@ -41,6 +41,7 @@
     },
     "files.insertFinalNewline": true,
     "python.analysis.typeCheckingMode": "off",
+    "python.languageServer": "None",
     "python.pythonPath": "${workspaceFolder}/.venv/",
     "python.testing.pytestArgs": [
         "tests",
