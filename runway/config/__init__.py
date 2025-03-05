@@ -7,7 +7,7 @@ import re
 import sys
 from pathlib import Path
 from string import Template
-from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, cast
 
 import yaml
 
@@ -130,10 +130,14 @@ class CfnginConfig(BaseConfig[CfnginConfigDefinitionModel]):
 
     """
 
-    EXCLUDE_REGEX = r"runway(\..*)?\.(yml|yaml)"
+    # Matches filenames that start with "bitbucket-pipelines", "buildspec",
+    # "docker-compose", or "runway" and end with ".yml" or ".yaml"
+    EXCLUDE_REGEX: ClassVar[str] = (
+        r"(?x)^(bitbucket-pipelines|buildspec|docker-compose|runway)(\..*)?\.(yml|yaml)"
+    )
     """Regex for file names to exclude when looking for config files."""
 
-    EXCLUDE_LIST = ["bitbucket-pipelines.yml", "buildspec.yml", "docker-compose.yml"]
+    EXCLUDE_LIST: ClassVar[list[str]] = []
     """Explicit files names to ignore when looking for config files."""
 
     cfngin_bucket: str | None
