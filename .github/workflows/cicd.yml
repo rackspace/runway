@@ -25,8 +25,12 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
+      functional: ${{ steps.filter.outputs.functional }}
+      functional-tests: ${{ steps.filter.outputs.functional-tests }}
       infra-test: ${{ steps.filter.outputs.infrastructure-test }}
       infra-test-alt: ${{ steps.filter.outputs.infrastructure-test-alt }}
+      linting: ${{ steps.filter.outputs.linting }}
+      tests: ${{ steps.filter.outputs.tests }}
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4  # not needed for pull_request
@@ -36,6 +40,14 @@ jobs:
         id: filter
         with:
           filters: |
+            functional:
+              - 'pyproject.toml'
+              - 'poetry.lock'
+              - 'runway/**'
+              - '!runway/templates/**'
+            functional-tests:
+              - 'tests/conftest.py'
+              - 'tests/functional/**'
             infrastructure-test:
               - 'infrastructure/blueprints/admin_user.py'
               - 'infrastructure/blueprints/cfngin_bucket.py'
@@ -49,6 +61,15 @@ jobs:
               - 'infrastructure/blueprints/prevent_privilege_escalation.py'
               - 'infrastructure/blueprints/test_runner_boundary.py'
               - 'infrastructure/test-alt/common/**'
+            linting:
+              - '**/*.py'
+              - '**/*.pyi'
+              - '.github/workflows/cicd.yml'
+              - 'package-lock.json'
+              - 'package.json'
+            tests:
+              - '.github/workflows/cicd.yml'
+              - 'tests/**'
   info:
     name: Output useful information
     runs-on: ubuntu-latest
@@ -107,6 +128,8 @@ jobs:
         working-directory: infrastructure
   lint-python:
     name: Lint Python
+    needs: changes
+    if: needs.changes.outputs.functional == 'true' || needs.changes.outputs.linting == 'true' || needs.changes.outputs.tests == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -137,10 +160,12 @@ jobs:
   test-functional:
     name: Functional Tests
     needs:
+      - changes
       - deploy-test-infrastructure
       - info
     if: |
       always() &&
+      (needs.changes.outputs.functional == 'true' || needs.changes.outputs.functional-tests == 'true') &&
       needs.info.outputs.is-fork == 'false' &&
       needs.info.outputs.is-actor-bot == 'false' &&
       (needs.deploy-test-infrastructure.result == 'success' || needs.deploy-test-infrastructure.result == 'skipped')
@@ -172,6 +197,8 @@ jobs:
         run: make test-functional
   test-python:
     name: Test Python
+    needs: changes
+    if: needs.changes.outputs.functional == 'true' || needs.changes.outputs.tests == 'true'
     strategy:
       fail-fast: false
       matrix:
