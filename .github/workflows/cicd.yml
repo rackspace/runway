@@ -25,6 +25,8 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
+      functional: ${{ steps.filter.outputs.functional || steps.filter-exclude.outputs.functional }}
+      functional-tests: ${{ steps.filter.outputs.functional-tests }}
       infra-test: ${{ steps.filter.outputs.infrastructure-test }}
       infra-test-alt: ${{ steps.filter.outputs.infrastructure-test-alt }}
     steps:
@@ -36,6 +38,13 @@ jobs:
         id: filter
         with:
           filters: |
+            functional:
+              - 'pyproject.toml'
+              - 'poetry.lock'
+              - 'runway/**'
+            functional-tests:
+              - 'tests/conftest.py'
+              - 'tests/functional/**'
             infrastructure-test:
               - 'infrastructure/blueprints/admin_user.py'
               - 'infrastructure/blueprints/cfngin_bucket.py'
@@ -49,6 +58,14 @@ jobs:
               - 'infrastructure/blueprints/prevent_privilege_escalation.py'
               - 'infrastructure/blueprints/test_runner_boundary.py'
               - 'infrastructure/test-alt/common/**'
+      - uses: dorny/paths-filter@v3  # cspell:ignore dorny
+        id: filter-exclude
+        with:
+          filters: |
+            functional:
+              - 'runway/**'
+              - '!runway/templates/**'
+          predicate-quantifier: every  # was implemented but not added to the action manifest so results in a warning
   info:
     name: Output useful information
     runs-on: ubuntu-latest
@@ -137,10 +154,12 @@ jobs:
   test-functional:
     name: Functional Tests
     needs:
+      - changes
       - deploy-test-infrastructure
       - info
     if: |
       always() &&
+      (needs.changes.outputs.functional == 'true' || needs.changes.outputs.functional-tests == 'true') &&
       needs.info.outputs.is-fork == 'false' &&
       needs.info.outputs.is-actor-bot == 'false' &&
       (needs.deploy-test-infrastructure.result == 'success' || needs.deploy-test-infrastructure.result == 'skipped')
