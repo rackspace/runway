@@ -286,7 +286,7 @@ class PythonHookArgs(AwsLambdaHookArgs):
 
     .. important::
       When providing this field, be careful not to duplicate any of the arguments
-      passed by this hook (e.g. ``--requirements``, ``--target``, ``--no-input``).
+      passed by this hook (e.g. ``--requirement``, ``--target``, ``--no-input``).
       Providing duplicate arguments will result in an error.
 
     .. rubric:: Example
@@ -323,3 +323,23 @@ class PythonHookArgs(AwsLambdaHookArgs):
 
     use_poetry: bool = True
     """Whether poetry should be used if determined appropriate."""
+
+    @field_validator("extend_pip_args", mode="after")
+    @classmethod
+    def _validate_extend_pip_args_no_requirement(cls, v: list[str | None]) -> list[str | None]:
+        """Validate that ``--requirement`` is not present in the value."""
+        if v and ("--requirement" in v or "-r" in v):
+            raise ValueError(
+                "can't contain '--requirement' or '-r'; conflicts with arguments provided by the hook"
+            )
+        return v
+
+    @field_validator("extend_pip_args", mode="after")
+    @classmethod
+    def _validate_extend_pip_args_no_target(cls, v: list[str | None]) -> list[str | None]:
+        """Validate that ``--target`` is not present in the value."""
+        if v and ("--target" in v or "-t" in v):
+            raise ValueError(
+                "can't contain '--target' or '-t'; conflicts with arguments provided by the hook"
+            )
+        return v
