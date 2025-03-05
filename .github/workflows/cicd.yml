@@ -29,8 +29,6 @@ jobs:
       functional-tests: ${{ steps.filter.outputs.functional-tests }}
       infra-test: ${{ steps.filter.outputs.infrastructure-test }}
       infra-test-alt: ${{ steps.filter.outputs.infrastructure-test-alt }}
-      linting: ${{ steps.filter.outputs.linting }}
-      tests: ${{ steps.filter.outputs.tests }}
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4  # not needed for pull_request
@@ -60,15 +58,6 @@ jobs:
               - 'infrastructure/blueprints/prevent_privilege_escalation.py'
               - 'infrastructure/blueprints/test_runner_boundary.py'
               - 'infrastructure/test-alt/common/**'
-            linting:
-              - '**/*.py'
-              - '**/*.pyi'
-              - '.github/workflows/cicd.yml'
-              - 'package-lock.json'
-              - 'package.json'
-            tests:
-              - '.github/workflows/cicd.yml'
-              - 'tests/**'
       - uses: dorny/paths-filter@v3  # cspell:ignore dorny
         id: filter-exclude
         with:
@@ -135,8 +124,6 @@ jobs:
         working-directory: infrastructure
   lint-python:
     name: Lint Python
-    needs: changes
-    if: needs.changes.outputs.functional == 'true' || needs.changes.outputs.linting == 'true' || needs.changes.outputs.tests == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -204,8 +191,6 @@ jobs:
         run: make test-functional
   test-python:
     name: Test Python
-    needs: changes
-    if: needs.changes.outputs.functional == 'true' || needs.changes.outputs.tests == 'true'
     strategy:
       fail-fast: false
       matrix:
