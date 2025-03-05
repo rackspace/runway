@@ -25,7 +25,7 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      functional: ${{ steps.filter.outputs.functional }}
+      functional: ${{ steps.filter.outputs.functional || steps.filter-exclude.outputs.functional }}
       functional-tests: ${{ steps.filter.outputs.functional-tests }}
       infra-test: ${{ steps.filter.outputs.infrastructure-test }}
       infra-test-alt: ${{ steps.filter.outputs.infrastructure-test-alt }}
@@ -44,7 +44,6 @@ jobs:
               - 'pyproject.toml'
               - 'poetry.lock'
               - 'runway/**'
-              - '!runway/templates/**'
             functional-tests:
               - 'tests/conftest.py'
               - 'tests/functional/**'
@@ -70,6 +69,14 @@ jobs:
             tests:
               - '.github/workflows/cicd.yml'
               - 'tests/**'
+      - uses: dorny/paths-filter@v3  # cspell:ignore dorny
+        id: filter-exclude
+        with:
+          filters: |
+            functional:
+              - 'runway/**'
+              - '!runway/templates/**'
+          predicate-quantifier: every  # was implemented but not added to the action manifest so results in a warning
   info:
     name: Output useful information
     runs-on: ubuntu-latest
