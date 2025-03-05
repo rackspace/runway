@@ -126,6 +126,36 @@ class TestAwsLambdaHookArgs:
 class TestPythonHookArgs:
     """Test PythonHookArgs."""
 
+    @pytest.mark.parametrize("arg_flag", ["-r", "--requirement"])
+    def test__validate_extend_pip_args_no_requirement(self, arg_flag: str, tmp_path: Path) -> None:
+        """Test _validate_extend_pip_args_no_requirement."""
+        with pytest.raises(
+            ValidationError,
+            match="extend_pip_args\n  "
+            "Value error, can't contain '--requirement' or '-r'; conflicts with arguments provided by the hook",
+        ):
+            PythonHookArgs(
+                bucket_name="test-bucket",
+                extend_pip_args=[arg_flag, "foo.txt"],
+                runtime="test",
+                source_code=tmp_path,
+            )
+
+    @pytest.mark.parametrize("arg_flag", ["-t", "--target"])
+    def test__validate_extend_pip_args_no_target(self, arg_flag: str, tmp_path: Path) -> None:
+        """Test _validate_extend_pip_args_no_target."""
+        with pytest.raises(
+            ValidationError,
+            match="extend_pip_args\n  "
+            "Value error, can't contain '--target' or '-t'; conflicts with arguments provided by the hook",
+        ):
+            PythonHookArgs(
+                bucket_name="test-bucket",
+                extend_pip_args=[arg_flag, "/tmp/foo"],
+                runtime="test",
+                source_code=tmp_path,
+            )
+
     def test_extra(self, tmp_path: Path) -> None:
         """Test extra fields."""
         obj = PythonHookArgs(
