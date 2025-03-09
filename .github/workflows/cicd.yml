@@ -107,7 +107,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v4
       - name: 🏗 Setup Python
-        uses: finleyfamily/action-setup-python@v1.1.0
+        uses: finleyfamily/action-setup-python@v1.2.0
         with:
           poetry-plugins: poetry-dynamic-versioning[plugin]
       - name: 🏗 Configure AWS Credentials
@@ -143,7 +143,7 @@ jobs:
           cache: npm
           node-version: ${{ env.NODE_VERSION }}
       - name: 🏗 Setup Python
-        uses: finleyfamily/action-setup-python@v1.1.0
+        uses: finleyfamily/action-setup-python@v1.2.0
         with:
           poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: ${{ matrix.python-version }}
@@ -173,7 +173,7 @@ jobs:
           cache: npm
           node-version: ${{ env.NODE_VERSION }}
       - name: 🏗 Setup Python
-        uses: finleyfamily/action-setup-python@v1.1.0
+        uses: finleyfamily/action-setup-python@v1.2.0
         with:
           poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: '3.10'
@@ -212,7 +212,7 @@ jobs:
           cache: npm
           node-version: ${{ env.NODE_VERSION }}
       - name: 🏗 Setup Python
-        uses: finleyfamily/action-setup-python@v1.1.0
+        uses: finleyfamily/action-setup-python@v1.2.0
         with:
           poetry-plugins: poetry-dynamic-versioning[plugin]
           python-version: ${{ matrix.python-version }}
@@ -242,7 +242,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: 🏗 Setup Python
-        uses: finleyfamily/action-setup-python@v1.1.0
+        uses: finleyfamily/action-setup-python@v1.2.0
         with:
           poetry-install: false
           poetry-plugins: poetry-dynamic-versioning[plugin]

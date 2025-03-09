@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: 🏗 Setup Python
-        uses: finleyfamily/action-setup-python@v1.1.0
+        uses: finleyfamily/action-setup-python@v1.2.0
         with:
           poetry-plugins: poetry-dynamic-versioning[plugin]
       # Remove apt repos that are known to break from time to time
