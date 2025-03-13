@@ -182,6 +182,8 @@ jobs:
         run: |
           sudo apt update -y
           sudo apt install -y default-libmysqlclient-dev libxml2-dev libxmlsec1-dev libxmlsec1-openssl pkg-config
+          docker --version
+          docker builder ls
       - name: 🏗 Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

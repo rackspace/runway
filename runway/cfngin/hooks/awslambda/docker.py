@@ -209,7 +209,7 @@ class DockerDependencyInstaller:
         """
         image, log_stream = self.client.images.build(
             dockerfile=docker_file.name,
-            forcerm=True,
+            # forcerm=True,
             path=str(docker_file.parent),
             pull=self.options.pull,
         )
