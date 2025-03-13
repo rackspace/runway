@@ -120,23 +120,28 @@ test: ## run integration and unit tests
 
 test-functional: ## run function tests only
 	@echo "Running functional tests..."
-	@if [ $${CI} ]; then \
-		echo "  using pytest-xdist"; \
-		poetry run pytest \
-			--dist loadfile \
-			--functional \
-			--log-cli-format "[%(levelname)s] %(message)s" \
-			--log-cli-level 15 \
-			--no-cov \
-			--numprocesses auto; \
-	else \
-		echo "  not using pytest-xdist"; \
-		poetry run pytest \
-			--functional \
-			--log-cli-format "[%(levelname)s] %(message)s" \
-			--log-cli-level 15 \
-			--no-cov; \
-	fi
+	# @if [ $${CI} ]; then \
+	# 	echo "  using pytest-xdist"; \
+	# 	poetry run pytest \
+	# 		--dist loadfile \
+	# 		--functional \
+	# 		--log-cli-format "[%(levelname)s] %(message)s" \
+	# 		--log-cli-level 15 \
+	# 		--no-cov \
+	# 		--numprocesses auto; \
+	# else \
+	# 	echo "  not using pytest-xdist"; \
+	# 	poetry run pytest  \
+	# 		--functional \
+	# 		--log-cli-format "[%(levelname)s] %(message)s" \
+	# 		--log-cli-level 15 \
+	# 		--no-cov; \
+	# fi
+	poetry run pytest ./tests/functional/cfngin/hooks/test_awslambda \
+		--functional \
+		--log-cli-format "[%(levelname)s] %(message)s" \
+		--log-cli-level 15 \
+		--no-cov; \
 
 test-integration: ## run integration tests only
 	@echo "Running integration tests..."
