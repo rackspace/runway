@@ -9,7 +9,7 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = ">=3.7, <4"
-xmlsec = "*"
+xmlsec = "<=1.3.13"  # NOTE (@ITProKyle): bug introduced in 1.3.14 & 15 - https://github.com/xmlsec/python-xmlsec/issues/314
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
