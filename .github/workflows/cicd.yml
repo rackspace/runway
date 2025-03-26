@@ -45,7 +45,6 @@ jobs:
             functional-tests:
               - 'tests/conftest.py'
               - 'tests/functional/**'
-              - Makefile
             infrastructure-test:
               - 'infrastructure/blueprints/admin_user.py'
               - 'infrastructure/blueprints/cfngin_bucket.py'
