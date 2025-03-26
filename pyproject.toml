@@ -57,7 +57,7 @@ typing_extensions = "*"  # only really needed for < 3.8 but can still be used in
 yamllint = "*"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "^4.1.0"
+pre-commit = "^4.2.0"
 
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.2.0"
