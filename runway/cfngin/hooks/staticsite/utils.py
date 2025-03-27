@@ -54,12 +54,12 @@ def get_hash_of_files(
     files_to_hash: list[StrPath] = []
     for i in directories:
         gitignore = get_ignorer(
-            root_path / cast(str, i["path"]),
+            root_path / cast("str", i["path"]),
             cast("list[str] | None", i.get("exclusions")),
         )
 
         with change_dir(root_path):
-            for root, dirs, files in os.walk(cast(str, i["path"]), topdown=True):
+            for root, dirs, files in os.walk(cast("str", i["path"]), topdown=True):
                 sub_root = Path(root).resolve()
                 if root != "./" and gitignore.match(sub_root):
                     dirs[:] = []

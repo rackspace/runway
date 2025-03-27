@@ -32,7 +32,7 @@ LOGGER = logging.getLogger(__name__)
 # https://github.com/boto/botocore/blob/1.6.1/botocore/data/cloudformation/2010-05-15/waiters-2.json#L22
 #
 # This can be controlled via an environment variable, mostly for testing.
-STACK_POLL_TIME = int(os.environ.get("CFNGIN_STACK_POLL_TIME", 30))
+STACK_POLL_TIME = int(os.environ.get("CFNGIN_STACK_POLL_TIME", "30"))
 
 
 def build_walker(concurrency: int) -> Callable[..., Any]:

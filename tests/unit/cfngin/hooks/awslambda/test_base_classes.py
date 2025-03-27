@@ -37,7 +37,7 @@ class TestAwsLambdaHook:
     def test_build_response_deploy(self, mocker: MockerFixture) -> None:
         """Test build_response."""
         deployment_package = cast(
-            DeploymentPackage[Any],
+            "DeploymentPackage[Any]",
             mocker.patch.object(
                 AwsLambdaHook,
                 "deployment_package",
@@ -71,7 +71,7 @@ class TestAwsLambdaHook:
     def test_build_response_plan(self, mocker: MockerFixture) -> None:
         """Test build_response."""
         deployment_package = cast(
-            DeploymentPackage[Any],
+            "DeploymentPackage[Any]",
             mocker.patch.object(
                 AwsLambdaHook,
                 "deployment_package",

@@ -15,10 +15,12 @@
 from __future__ import annotations
 
 import json
-from collections.abc import MutableMapping, MutableSequence
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import yaml
+
+if TYPE_CHECKING:
+    from collections.abc import MutableMapping, MutableSequence
 
 
 def intrinsics_multi_constructor(
@@ -53,11 +55,11 @@ def intrinsics_multi_constructor(
 
     elif isinstance(node, yaml.SequenceNode):
         # Value of this node is an array (Ex: [1,2])
-        value = cast(MutableSequence[Any], loader.construct_sequence(node))
+        value = cast("MutableSequence[Any]", loader.construct_sequence(node))
 
     else:
         # Value of this node is an mapping (ex: {foo: bar})
-        value = cast(MutableMapping[Any, Any], loader.construct_mapping(node))  # type: ignore
+        value = cast("MutableMapping[Any, Any]", loader.construct_mapping(node))  # type: ignore
 
     return {cfntag: value}
 

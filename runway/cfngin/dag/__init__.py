@@ -45,7 +45,7 @@ class DAG:
         graph = self.graph
         if node_name in graph:
             raise KeyError(f"node {node_name} already exists")
-        graph[node_name] = cast(set[str], set())
+        graph[node_name] = cast("set[str]", set())
 
     def add_node_if_not_exists(self, node_name: str) -> None:
         """Add a node if it does not exist yet, ignoring duplicates.
@@ -340,7 +340,7 @@ class DAG:
         """
         graph = self.graph
 
-        in_degree = {node: 0 for node in graph}
+        in_degree = dict.fromkeys(graph, 0)
         for node in graph:
             for val in graph[node]:
                 in_degree[val] += 1

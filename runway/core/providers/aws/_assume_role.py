@@ -126,7 +126,7 @@ class AssumeRole(AbstractContextManager["AssumeRole"]):
         for k, v in self.ctx.current_aws_creds.items():
             new = "OLD_" + k
             LOGGER.debug('saving environment variable "%s" as "%s"', k, new)
-            self.ctx.env.vars[new] = cast(str, v)
+            self.ctx.env.vars[new] = cast("str", v)
 
     def __enter__(self) -> Self:
         """Enter the context manager."""

@@ -6,13 +6,13 @@ import logging
 import platform
 import shutil
 import subprocess
-from collections.abc import Iterable
 from contextlib import suppress
 from typing import TYPE_CHECKING, ClassVar, cast, overload
 
 from .compat import shlex_join
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import Path
 
     from typing_extensions import Literal
@@ -77,7 +77,7 @@ class CliInterfaceMixin:
             if isinstance(v, str):
                 result.extend([cls.convert_to_cli_arg(k), v])
             elif isinstance(v, (list, set, tuple)):
-                for i in cast(Iterable[str], v):
+                for i in cast("Iterable[str]", v):
                     result.extend([cls.convert_to_cli_arg(k), i])
             elif isinstance(v, bool) and v:
                 result.append(cls.convert_to_cli_arg(k))

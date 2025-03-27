@@ -9,7 +9,6 @@ import operator
 import sys
 import threading
 import time
-from collections.abc import Iterable
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -32,6 +31,8 @@ from ...utils import parse_cloudformation_template
 from ..base import BaseProvider
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     import boto3
     from mypy_boto3_cloudformation.client import CloudFormationClient
     from mypy_boto3_cloudformation.type_defs import (
@@ -521,7 +522,7 @@ def generate_stack_policy_args(
             #
             # args["StackPolicyURL"] = stack_policy.url
             raise NotImplementedError
-        args["StackPolicyBody"] = cast(str, stack_policy.body)
+        args["StackPolicyBody"] = cast("str", stack_policy.body)
     return args
 
 
@@ -799,12 +800,12 @@ class Provider(BaseProvider):
             time.sleep(GET_EVENTS_SLEEP)
         if chronological:
             return cast(
-                Iterable["StackEventTypeDef"],
+                "Iterable[StackEventTypeDef]",
                 reversed(
                     cast("list[StackEventTypeDef]", functools.reduce(operator.iadd, event_list, []))
                 ),
             )
-        return cast(Iterable["StackEventTypeDef"], functools.reduce(operator.iadd, event_list, []))
+        return cast("Iterable[StackEventTypeDef]", functools.reduce(operator.iadd, event_list, []))
 
     def get_rollback_status_reason(self, stack_name: str) -> str | None:
         """Process events and returns latest roll back reason.

@@ -699,7 +699,7 @@ class TestCFNginContext:
         with stubber:
             assert obj.unlock_persistent_graph("123")
 
-    @pytest.mark.parametrize("graph_dict", cast(list[dict[str, list[str]]], [{"stack0": []}, {}]))
+    @pytest.mark.parametrize("graph_dict", cast("list[dict[str, list[str]]]", [{"stack0": []}, {}]))
     def test_unlock_persistent_graph(
         self, graph_dict: dict[str, list[str]], mocker: MockerFixture
     ) -> None:

@@ -196,7 +196,7 @@ class TestCopyRequestSubmitter(BaseTransferRequestSubmitterTest):
         self.config_params["guess_mime_type"] = True
         future = self.transfer_request_submitter.submit(fileinfo)
         assert self.transfer_manager.copy.return_value is future
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.copy.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.copy.call_args[1])
         assert call_kwargs["copy_source"] == {
             "Bucket": self.source_bucket,
             "Key": self.source_key,
@@ -224,7 +224,7 @@ class TestCopyRequestSubmitter(BaseTransferRequestSubmitterTest):
         self.config_params["content_type"] = "text/plain"
         self.transfer_request_submitter.submit(fileinfo)
 
-        copy_call_kwargs = cast(dict[str, Any], self.transfer_manager.copy.call_args[1])
+        copy_call_kwargs = cast("dict[str, Any]", self.transfer_manager.copy.call_args[1])
         assert copy_call_kwargs["extra_args"] == {"ContentType": "text/plain"}
         ref_subscribers = [ProvideSizeSubscriber, CopyResultSubscriber]
         actual_subscribers = copy_call_kwargs["subscribers"]
@@ -263,7 +263,7 @@ class TestCopyRequestSubmitter(BaseTransferRequestSubmitterTest):
         self.config_params["storage_class"] = "STANDARD_IA"
         self.transfer_request_submitter.submit(fileinfo)
 
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.copy.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.copy.call_args[1])
         assert call_kwargs["extra_args"] == {"StorageClass": "STANDARD_IA"}
 
     def test_submit_move_adds_delete_source_subscriber(self) -> None:
@@ -281,7 +281,7 @@ class TestCopyRequestSubmitter(BaseTransferRequestSubmitterTest):
             DeleteSourceObjectSubscriber,
             CopyResultSubscriber,
         ]
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.copy.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.copy.call_args[1])
         actual_subscribers = call_kwargs["subscribers"]
         assert len(ref_subscribers) == len(actual_subscribers)
         for i, actual_subscriber in enumerate(actual_subscribers):
@@ -295,7 +295,7 @@ class TestCopyRequestSubmitter(BaseTransferRequestSubmitterTest):
         )
         self.config_params["guess_mime_type"] = False
         self.transfer_request_submitter.submit(fileinfo)
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.copy.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.copy.call_args[1])
         ref_subscribers = [ProvideSizeSubscriber, CopyResultSubscriber]
         actual_subscribers = call_kwargs["subscribers"]
         assert len(ref_subscribers) == len(actual_subscribers)
@@ -387,7 +387,7 @@ class TestDeleteRequestSubmitter(BaseTransferRequestSubmitterTest):
         future = self.transfer_request_submitter.submit(fileinfo)
         assert self.transfer_manager.delete.return_value is future
 
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.delete.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.delete.call_args[1])
         assert call_kwargs["bucket"] == self.bucket
         assert call_kwargs["key"] == self.key
         assert call_kwargs["extra_args"] == {}
@@ -466,7 +466,7 @@ class TestDownloadRequestSubmitter(BaseTransferRequestSubmitterTest):
         fileinfo = self.create_file_info(self.key)
         future = self.transfer_request_submitter.submit(fileinfo)
         assert self.transfer_manager.download.return_value is future
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.download.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.download.call_args[1])
         assert call_kwargs["fileobj"] == self.filename
         assert call_kwargs["bucket"] == self.bucket
         assert call_kwargs["key"] == self.key
@@ -510,7 +510,7 @@ class TestDownloadRequestSubmitter(BaseTransferRequestSubmitterTest):
         self.config_params["sse_c"] = "AES256"
         self.config_params["sse_c_key"] = "test-key"
         self.transfer_request_submitter.submit(fileinfo)
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.download.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.download.call_args[1])
         assert call_kwargs["extra_args"] == {
             "SSECustomerAlgorithm": "AES256",
             "SSECustomerKey": "test-key",
@@ -529,7 +529,7 @@ class TestDownloadRequestSubmitter(BaseTransferRequestSubmitterTest):
             DeleteSourceObjectSubscriber,
             DownloadResultSubscriber,
         ]
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.download.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.download.call_args[1])
         actual_subscribers = call_kwargs["subscribers"]
         assert len(ref_subscribers) == len(actual_subscribers)
         for i, actual_subscriber in enumerate(actual_subscribers):
@@ -637,7 +637,7 @@ class TestDownloadStreamRequestSubmitter(BaseTransferRequestSubmitterTest):
         future = self.transfer_request_submitter.submit(fileinfo)
         assert self.transfer_manager.download.return_value is future
 
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.download.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.download.call_args[1])
         assert isinstance(call_kwargs["fileobj"], StdoutBytesWriter)
         assert call_kwargs["bucket"] == self.bucket
         assert call_kwargs["key"] == self.key
@@ -811,7 +811,7 @@ class TestS3TransferHandlerFactory:
         assert S3TransferHandlerFactory(self.config_params, self.runtime_config)(
             self.client, self.result_queue
         )
-        call_kwargs = cast(dict[str, Any], mock_processor.call_args[1])
+        call_kwargs = cast("dict[str, Any]", mock_processor.call_args[1])
         assert len(call_kwargs["result_handlers"]) == 2
         assert isinstance(call_kwargs["result_handlers"][0], ResultRecorder)
         assert isinstance(call_kwargs["result_handlers"][1], OnlyShowErrorsResultPrinter)
@@ -823,7 +823,7 @@ class TestS3TransferHandlerFactory:
         assert S3TransferHandlerFactory(self.config_params, self.runtime_config)(
             self.client, self.result_queue
         )
-        call_kwargs = cast(dict[str, Any], mock_processor.call_args[1])
+        call_kwargs = cast("dict[str, Any]", mock_processor.call_args[1])
         assert len(call_kwargs["result_handlers"]) == 2
         assert isinstance(call_kwargs["result_handlers"][0], ResultRecorder)
         assert isinstance(call_kwargs["result_handlers"][1], NoProgressResultPrinter)
@@ -835,7 +835,7 @@ class TestS3TransferHandlerFactory:
         assert S3TransferHandlerFactory(self.config_params, self.runtime_config)(
             self.client, self.result_queue
         )
-        call_kwargs = cast(dict[str, Any], mock_processor.call_args[1])
+        call_kwargs = cast("dict[str, Any]", mock_processor.call_args[1])
         assert len(call_kwargs["result_handlers"]) == 2
         assert isinstance(call_kwargs["result_handlers"][0], ResultRecorder)
         assert isinstance(call_kwargs["result_handlers"][1], OnlyShowErrorsResultPrinter)
@@ -847,7 +847,7 @@ class TestS3TransferHandlerFactory:
         assert S3TransferHandlerFactory(self.config_params, self.runtime_config)(
             self.client, self.result_queue
         )
-        call_kwargs = cast(dict[str, Any], mock_processor.call_args[1])
+        call_kwargs = cast("dict[str, Any]", mock_processor.call_args[1])
         assert len(call_kwargs["result_handlers"]) == 1
         assert isinstance(call_kwargs["result_handlers"][0], ResultRecorder)
 
@@ -882,7 +882,7 @@ class TestUploadRequestSubmitter(BaseTransferRequestSubmitterTest):
         future = self.transfer_request_submitter.submit(fileinfo)
 
         assert self.transfer_manager.upload.return_value is future
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.upload.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.upload.call_args[1])
         assert call_kwargs["fileobj"] == self.filename
         assert call_kwargs["bucket"] == self.bucket
         assert call_kwargs["key"] == self.key
@@ -904,7 +904,7 @@ class TestUploadRequestSubmitter(BaseTransferRequestSubmitterTest):
         self.config_params["content_type"] = "text/plain"
         self.transfer_request_submitter.submit(fileinfo)
 
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.upload.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.upload.call_args[1])
         assert call_kwargs["extra_args"] == {"ContentType": "text/plain"}
         ref_subscribers = [ProvideSizeSubscriber, UploadResultSubscriber]
         actual_subscribers = call_kwargs["subscribers"]
@@ -959,7 +959,7 @@ class TestUploadRequestSubmitter(BaseTransferRequestSubmitterTest):
         self.config_params["storage_class"] = "STANDARD_IA"
         self.transfer_request_submitter.submit(fileinfo)
 
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.upload.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.upload.call_args[1])
         assert call_kwargs["extra_args"] == {"StorageClass": "STANDARD_IA"}
 
     def test_submit_move_adds_delete_source_subscriber(self) -> None:
@@ -974,7 +974,7 @@ class TestUploadRequestSubmitter(BaseTransferRequestSubmitterTest):
             DeleteSourceFileSubscriber,
             UploadResultSubscriber,
         ]
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.upload.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.upload.call_args[1])
         actual_subscribers = call_kwargs["subscribers"]
         assert len(ref_subscribers) == len(actual_subscribers)
         for i, actual_subscriber in enumerate(actual_subscribers):
@@ -986,7 +986,7 @@ class TestUploadRequestSubmitter(BaseTransferRequestSubmitterTest):
         self.config_params["guess_mime_type"] = False
         self.transfer_request_submitter.submit(fileinfo)
 
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.upload.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.upload.call_args[1])
         ref_subscribers = [ProvideSizeSubscriber, UploadResultSubscriber]
         actual_subscribers = call_kwargs["subscribers"]
         assert len(ref_subscribers) == len(actual_subscribers)
@@ -1040,7 +1040,7 @@ class TestUploadStreamRequestSubmitter(BaseTransferRequestSubmitterTest):
         future = self.transfer_request_submitter.submit(fileinfo)
         assert self.transfer_manager.upload.return_value is future
 
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.upload.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.upload.call_args[1])
         assert isinstance(call_kwargs["fileobj"], NonSeekableStream)
         assert call_kwargs["bucket"] == self.bucket
         assert call_kwargs["key"] == self.key
@@ -1076,7 +1076,7 @@ class TestUploadStreamRequestSubmitter(BaseTransferRequestSubmitterTest):
         self.config_params["expected_size"] = provided_size
         fileinfo = FileInfo(src=self.filename, dest=self.bucket + "/" + self.key)
         self.transfer_request_submitter.submit(fileinfo)
-        call_kwargs = cast(dict[str, Any], self.transfer_manager.upload.call_args[1])
+        call_kwargs = cast("dict[str, Any]", self.transfer_manager.upload.call_args[1])
 
         ref_subscribers = [ProvideSizeSubscriber, UploadStreamResultSubscriber]
         actual_subscribers = call_kwargs["subscribers"]

@@ -56,7 +56,7 @@ class TestRunwayStaticSiteLambdaFunctionAssociationDataModel:
     @pytest.mark.parametrize(
         "data",
         [
-            cast(dict[str, Any], {}),
+            cast("dict[str, Any]", {}),
             {"arn": "aws:arn:lambda:us-east-1:function:test"},
             {"type": "origin-request"},
         ],

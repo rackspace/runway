@@ -39,7 +39,7 @@ def pytest_ignore_collect(path: Any, config: Config) -> bool:  # noqa: ARG001
     """Determine if this directory should have its tests collected."""
     if config.option.functional:
         return True
-    return cast(bool, config.option.integration_only)
+    return cast("bool", config.option.integration_only)
 
 
 @pytest.fixture(scope="session", autouse=True)

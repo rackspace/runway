@@ -454,7 +454,7 @@ def dockerized_pip(  # noqa: C901, PLR0912
         docker_run_args["environment"] = "1"
 
     container = client.containers.run(
-        image=cast(str, docker_image),
+        image=cast("str", docker_image),
         command=["/bin/sh", "-c", pip_cmd],
         auto_remove=True,
         detach=True,
@@ -629,7 +629,7 @@ def _zip_package(  # noqa: PLR0915, PLR0912, C901, D417
         LOGGER.debug("Removing python /bin directory from Lambda files")
         shutil.rmtree(os.path.join(tmpdir.name, "bin"))  # noqa: PTH118
     if python_exclude_setuptools_dirs:
-        for i in os.listdir(tmpdir.name):
+        for i in os.listdir(tmpdir.name):  # noqa: PTH208
             if i.endswith((".egg-info", ".dist-info")):
                 LOGGER.debug("Removing directory %s from Lambda files", i)
                 shutil.rmtree(os.path.join(tmpdir.name, i))  # noqa: PTH118
@@ -1050,7 +1050,7 @@ def upload_lambda_functions(  # noqa: D417
     )
     # TODO (craig): add better handling for misconfiguration (e.g. forgetting function names)
     # TODO (craig): support defining dockerize_pip options at the top level of args
-    custom_bucket = cast(str, kwargs.get("bucket", ""))
+    custom_bucket = cast("str", kwargs.get("bucket", ""))
     if not custom_bucket:
         if not context.bucket_name:
             raise ValueError("hook requires bucket argument or top-level cfngin_hook")
@@ -1060,7 +1060,7 @@ def upload_lambda_functions(  # noqa: D417
         bucket_name = custom_bucket
         LOGGER.info("using custom bucket: %s", bucket_name)
 
-    custom_bucket_region = cast(str, kwargs.get("bucket_region", ""))
+    custom_bucket_region = cast("str", kwargs.get("bucket_region", ""))
     if not custom_bucket and custom_bucket_region:
         raise ValueError("Cannot specify `bucket_region` without specifying `bucket`.")
 

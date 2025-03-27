@@ -206,7 +206,7 @@ class TFEnvManager(EnvManager):
                 if isinstance(val, list):
                     if len(cast("list[Any]", val)) == 1:
                         # pull single values out of lists
-                        data[attr] = _flatten_lists(cast(Any, val[0]))
+                        data[attr] = _flatten_lists(cast("Any", val[0]))
                     else:
                         data[attr] = [_flatten_lists(v) for v in cast("list[Any]", val)]
                 elif isinstance(val, dict):

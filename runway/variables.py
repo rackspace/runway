@@ -275,7 +275,7 @@ class VariableValue:
             VariableValueConcatenation(
                 # pyright 1.1.138 is having issues properly inferring the type from comprehension
                 [
-                    VariableValueLiteral(cast(str, t), variable_type=variable_type)
+                    VariableValueLiteral(cast("str", t), variable_type=variable_type)
                     for t in re.split(r"(\$\{|\}|\s+)", obj)  # ${ or space or }
                 ]
             )
@@ -298,11 +298,11 @@ class VariableValue:
 
             if next_close is not None:
                 lookup_query = VariableValueConcatenation(
-                    tokens[(cast(int, last_open) + len(opener) + 1) : next_close],
+                    tokens[(cast("int", last_open) + len(opener) + 1) : next_close],
                     variable_type=variable_type,
                 )
                 lookup = VariableValueLookup(
-                    lookup_name=tokens[cast(int, last_open) + 1],  # type: ignore
+                    lookup_name=tokens[cast("int", last_open) + 1],  # type: ignore
                     lookup_query=lookup_query,
                     variable_type=variable_type,
                 )

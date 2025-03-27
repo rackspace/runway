@@ -84,7 +84,7 @@ class TestRunwayStaticSiteExtraFileDataModel:
     @pytest.mark.parametrize(
         "data",
         [
-            cast(dict[str, str], {}),
+            cast("dict[str, str]", {}),
             {"name": "test"},
             {"content": "test"},
             {"file": "test"},

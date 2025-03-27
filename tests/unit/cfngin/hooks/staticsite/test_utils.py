@@ -76,7 +76,7 @@ def test_get_hash_of_files(
         assert get_hash_of_files(tmp_path) == mock_calculate_hash_of_files.return_value
     mock_get_ignorer.assert_has_calls(
         [
-            call(tmp_path / cast(str, i["path"]), i.get("exclusions"))
+            call(tmp_path / cast("str", i["path"]), i.get("exclusions"))
             for i in (directories or [{"path": "./"}])
         ]
     )

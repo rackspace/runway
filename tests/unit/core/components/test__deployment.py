@@ -132,7 +132,7 @@ class TestDeployment:
             assert not Deployment(
                 context=runway_context,
                 definition=RunwayDeploymentDefinition.parse_obj(
-                    cast(dict[str, Any], fx_deployments.get("min_required"))
+                    cast("dict[str, Any]", fx_deployments.get("min_required"))
                 ),
             ).env_vars_config
 
@@ -161,7 +161,7 @@ class TestDeployment:
         )
         variable = Mock(value=expected)
 
-        raw_deployment: dict[str, Any] = cast(dict[str, Any], fx_deployments.get("min_required"))
+        raw_deployment: dict[str, Any] = cast("dict[str, Any]", fx_deployments.get("min_required"))
         deployment = RunwayDeploymentDefinition.parse_obj(raw_deployment)
         obj = Deployment(context=runway_context, definition=deployment)
         obj.definition._vars.update({"env_vars": variable})

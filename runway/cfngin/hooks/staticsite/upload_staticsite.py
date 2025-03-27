@@ -308,7 +308,7 @@ def calculate_hash_of_extra_files(
 
         if extra_file.content:
             LOGGER.debug("hashing content: %s", extra_file.name)
-            file_hash.update((cast(str, extra_file.content) + "\0").encode())
+            file_hash.update((cast("str", extra_file.content) + "\0").encode())
 
         if extra_file.file:
             with open(extra_file.file, "rb") as f:  # noqa: PTH123
@@ -382,7 +382,7 @@ def sync_extra_files(  # noqa: C901
     s3_client = session.client("s3")
     uploaded: list[str] = []
 
-    hash_param = cast(str, kwargs.get("hash_tracking_parameter", ""))
+    hash_param = cast("str", kwargs.get("hash_tracking_parameter", ""))
     hash_new = None
 
     # serialize content based on content type
@@ -411,7 +411,7 @@ def sync_extra_files(  # noqa: C901
                 Bucket=bucket,
                 Key=extra_file.name,
                 Body=str(extra_file.content).encode(),
-                ContentType=cast(str, extra_file.content_type),
+                ContentType=cast("str", extra_file.content_type),
             )
 
             uploaded.append(extra_file.name)

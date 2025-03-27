@@ -283,7 +283,7 @@ def yaml_to_ordered_dict(  # noqa: C901
                 )
             mapping: OrderedDict[Any, Any] = OrderedDict()
             for key_node, value_node in node.value:
-                key = cast(object, self.construct_object(key_node, deep=deep))
+                key = cast("object", self.construct_object(key_node, deep=deep))
                 try:
                     hash(key)
                 except TypeError as exc:
@@ -302,7 +302,7 @@ def yaml_to_ordered_dict(  # noqa: C901
                 if key in self.NO_DUPE_CHILDREN:
                     # prevent duplicate children keys for this mapping.
                     self._error_mapping_on_dupe(value_node, key_node.value)
-                value = cast(object, self.construct_object(value_node, deep=deep))
+                value = cast("object", self.construct_object(value_node, deep=deep))
                 mapping[key] = value
             return mapping
 
