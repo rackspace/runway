@@ -49,7 +49,7 @@ class RunwayStaticSiteExtraFileDataModel(ConfigProperty):
         """Attempt to fill content_type if not provided."""
         if values.get("content_type"):
             return values
-        name = cast(str, values.get("name", ""))
+        name = cast("str", values.get("name", ""))
         if name.endswith(".json"):
             values["content_type"] = "application/json"
         elif name.endswith((".yaml", ".yml")):

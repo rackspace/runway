@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from ..config.components.runway import RunwayDeploymentDefinition
     from ..context import RunwayContext
 
-LOGGER = cast(_RunwayLogger, _logging.getLogger(__name__))
+LOGGER = cast("_RunwayLogger", _logging.getLogger(__name__))
 
 __all__ = ["Runway", "components", "providers", "type_defs"]
 

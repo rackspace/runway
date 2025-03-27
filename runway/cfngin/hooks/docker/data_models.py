@@ -86,7 +86,7 @@ class DockerImage(BaseModel):
         """Repository URI."""
         if not self._repo:
             self._repo = self.image.attrs["RepoTags"][0].rsplit(":", 1)[0]
-        return cast(str, self._repo)
+        return cast("str", self._repo)
 
     @property
     def short_id(self) -> str:

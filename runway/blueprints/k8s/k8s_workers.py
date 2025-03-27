@@ -27,7 +27,7 @@ def get_valid_instance_types() -> Any:
     which automatically handles compressed vs uncompressed data.
 
     """
-    return cast(Any, Loader().load_service_model("ec2", "service-2"))["shapes"]["InstanceType"][
+    return cast("Any", Loader().load_service_model("ec2", "service-2"))["shapes"]["InstanceType"][
         "enum"
     ]
 

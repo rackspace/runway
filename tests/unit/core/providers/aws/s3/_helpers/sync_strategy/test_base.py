@@ -166,7 +166,7 @@ class TestBaseSync:
         session = Mock()
         obj: BaseSync[Any] = BaseSync()
         obj.register_strategy(session)
-        register_args = cast(Mock, session.register).call_args_list
+        register_args = cast("Mock", session.register).call_args_list
         assert register_args[0][0][0] == "choosing-s3-sync-strategy"
         assert register_args[0][0][1] == obj.use_sync_strategy
 

@@ -53,7 +53,7 @@ def is_readable(path: Path) -> bool:
     """
     if path.is_dir():
         try:
-            os.listdir(path)
+            os.listdir(path)  # noqa: PTH208
         except OSError:
             return False
     else:
@@ -129,7 +129,7 @@ class FileStats:
 
     def dict(self) -> FileStatsDict:
         """Dump contents of object to a dict."""
-        return deepcopy(cast(FileStatsDict, self.__dict__))
+        return deepcopy(cast("FileStatsDict", self.__dict__))
 
 
 class _LastModifiedAndSize(TypedDict):
@@ -221,7 +221,7 @@ class FileGenerator:
             else:
                 # using os.listdir instead of Path.iterdir so we can sort the list
                 # but not load the entire tree into memory
-                listdir_names = os.listdir(path)
+                listdir_names = os.listdir(path)  # noqa: PTH208
                 names: list[str] = []
                 for name in listdir_names:
                     if (path / name).is_dir():

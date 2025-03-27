@@ -117,7 +117,7 @@ class TerraformBackendConfig(ModuleOptions):
         """Get full backend configuration."""
         if not self.config_file:
             return self.data.model_dump(exclude_none=True)
-        result = cast(dict[str, str], hcl.loads(self.config_file.read_text()))
+        result = cast("dict[str, str]", hcl.loads(self.config_file.read_text()))
         result.update(self.data.model_dump(exclude_none=True))
         return result
 

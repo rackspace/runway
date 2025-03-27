@@ -192,7 +192,7 @@ class BaseResultSubscriber(OnDoneFilteredSubscriber):
     def on_progress(self, future: TransferFuture, bytes_transferred: int, **_: Any) -> None:
         """On progress."""
         result_kwargs: dict[str, Any] = self._result_kwargs_cache.get(
-            cast(str, future.meta.transfer_id), cast("dict[str, Any]", {})
+            cast("str", future.meta.transfer_id), cast("dict[str, Any]", {})
         )
         progress_result = ProgressResult(
             bytes_transferred=bytes_transferred, timestamp=time.time(), **result_kwargs
@@ -224,12 +224,12 @@ class BaseResultSubscriber(OnDoneFilteredSubscriber):
             "dest": dest,
             "total_transfer_size": future.meta.size,
         }
-        self._result_kwargs_cache[cast(str, future.meta.transfer_id)] = result_kwargs
+        self._result_kwargs_cache[cast("str", future.meta.transfer_id)] = result_kwargs
 
     def _on_done_pop_from_result_kwargs_cache(self, future: TransferFuture) -> dict[str, Any]:
         """On done, pop from results cache."""
         result_kwargs: dict[str, Any] = self._result_kwargs_cache.pop(
-            cast(str, future.meta.transfer_id)
+            cast("str", future.meta.transfer_id)
         )
         result_kwargs.pop("total_transfer_size")
         return result_kwargs

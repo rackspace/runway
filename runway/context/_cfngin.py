@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
     from .type_defs import PersistentGraphLocation
 
-LOGGER = cast(RunwayLogger, logging.getLogger(__name__))
+LOGGER = cast("RunwayLogger", logging.getLogger(__name__))
 
 
 def get_fqn(base_fqn: str, delimiter: str, name: str | None = None) -> str:

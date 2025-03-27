@@ -834,15 +834,15 @@ class TestServerlessOptions:
 
         assert obj.args == config.get("args", [])
         assert obj.extend_serverless_yml == config.get(
-            "extend_serverless_yml", cast(dict[str, Any], {})
+            "extend_serverless_yml", cast("dict[str, Any]", {})
         )
         if config.get("promotezip"):
             assert obj.promotezip
         else:
             assert not obj.promotezip
-        assert obj.promotezip.bucketname == config.get("promotezip", cast(dict[str, Any], {})).get(
-            "bucketname"
-        )
+        assert obj.promotezip.bucketname == config.get(
+            "promotezip", cast("dict[str, Any]", {})
+        ).get("bucketname")
         assert obj.skip_npm_ci == config.get("skip_npm_ci", False)
 
     def test_parse_invalid_promotezip(self) -> None:

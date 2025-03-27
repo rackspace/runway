@@ -225,7 +225,7 @@ class TestBuildAction(unittest.TestCase):  # TODO (kyle): refactor tests into th
         context = self._get_context(extra_config_args={"persistent_graph_key": "test.json"})
         context._persistent_graph = Graph.from_steps([Step.from_stack_name("removed", context)])
         deploy_action = deploy.Action(context=context)
-        plan = cast(Plan, deploy_action._Action__generate_plan())  # type: ignore
+        plan = cast("Plan", deploy_action._Action__generate_plan())  # type: ignore
 
         assert isinstance(plan, Plan)
         assert plan.description == deploy.Action.DESCRIPTION
@@ -286,7 +286,7 @@ class TestBuildAction(unittest.TestCase):  # TODO (kyle): refactor tests into th
         """Test generate plan."""
         context = self._get_context()
         deploy_action = deploy.Action(context, cancel=MockThreadingEvent())  # type: ignore
-        plan = cast(Plan, deploy_action._Action__generate_plan())  # type: ignore
+        plan = cast("Plan", deploy_action._Action__generate_plan())  # type: ignore
         assert plan.graph.to_dict() == {
             "db": {"bastion", "vpc"},
             "bastion": {"vpc"},
@@ -407,7 +407,7 @@ class TestLaunchStack(TestBuildAction):  # TODO (kyle): refactor tests to be pyt
         self.stack.locked = False
         self.stack_status = None
 
-        plan = cast(Plan, self.deploy_action._Action__generate_plan())  # type: ignore
+        plan = cast("Plan", self.deploy_action._Action__generate_plan())  # type: ignore
         self.step = plan.steps[0]
         self.step.stack = self.stack
 

@@ -429,7 +429,7 @@ Outputs:
                 )
                 == "refs/heads/foo"
             )
-            for i in [cast(dict[str, Any], {}), {"tag": "foo"}, {"commit": "1234"}]:
+            for i in [cast("dict[str, Any]", {}), {"tag": "foo"}, {"commit": "1234"}]:
                 assert (
                     sp.determine_git_ls_remote_ref(
                         GitCfnginPackageSourceDefinitionModel(uri="git@foo", **i)

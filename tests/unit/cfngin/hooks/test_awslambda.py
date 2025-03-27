@@ -364,15 +364,15 @@ class TestLambdaHooks(unittest.TestCase):
     def test_calculate_hash(self) -> None:
         """Test calculate hash."""
         with self.temp_directory_with_files() as temp_dir1:
-            root = cast(str, temp_dir1.path)
+            root = cast("str", temp_dir1.path)
             hash1 = _calculate_hash(ALL_FILES, root)
 
         with self.temp_directory_with_files() as temp_dir2:
-            root = cast(str, temp_dir2.path)
+            root = cast("str", temp_dir2.path)
             hash2 = _calculate_hash(ALL_FILES, root)
 
         with self.temp_directory_with_files() as temp_dir3:
-            root = cast(str, temp_dir3.path)
+            root = cast("str", temp_dir3.path)
             with (Path(root) / ALL_FILES[0]).open("w") as _file:
                 _file.write("modified file data")
             hash3 = _calculate_hash(ALL_FILES, root)
@@ -386,7 +386,7 @@ class TestLambdaHooks(unittest.TestCase):
         files = ["file1.txt", "f2/file2.txt"]
         file1, file2 = files
         with TempDirectory() as temp_dir:
-            root = cast(str, temp_dir.path)
+            root = cast("str", temp_dir.path)
             for file_name in files:
                 temp_dir.write(file_name, b"data")
             hash1 = _calculate_hash([file1], root)
@@ -398,11 +398,11 @@ class TestLambdaHooks(unittest.TestCase):
         files1 = ALL_FILES
         files2 = random.sample(ALL_FILES, k=len(ALL_FILES))
         with TempDirectory() as temp_dir1:
-            root1 = cast(str, temp_dir1.path)
+            root1 = cast("str", temp_dir1.path)
             for file_name in files1:
                 temp_dir1.write(file_name, b"")
             with TempDirectory() as temp_dir2:
-                root2 = cast(str, temp_dir2.path)
+                root2 = cast("str", temp_dir2.path)
                 for file_name in files2:
                     temp_dir2.write(file_name, b"")
                 hash1 = _calculate_hash(files1, root1)
@@ -706,15 +706,15 @@ class TestHandleRequirements:
             expected = b"This is correct."
             tmp_dir.write("requirements.txt", expected)
             req_path = handle_requirements(
-                package_root=cast(str, tmp_dir.path),
-                dest_path=cast(str, tmp_dir.path),
-                requirements=cast(dict[str, bool], find_requirements(cast(str, tmp_dir.path))),
+                package_root=cast("str", tmp_dir.path),
+                dest_path=cast("str", tmp_dir.path),
+                requirements=cast("dict[str, bool]", find_requirements(cast("str", tmp_dir.path))),
             )
 
             assert req_path == os.path.join(  # noqa: PTH118
-                cast(str, tmp_dir.path), "requirements.txt"
+                cast("str", tmp_dir.path), "requirements.txt"
             )
-            assert not (Path(cast(str, tmp_dir.path)) / "Pipfile.lock").is_file()
+            assert not (Path(cast("str", tmp_dir.path)) / "Pipfile.lock").is_file()
             assert tmp_dir.read("requirements.txt") == expected
 
     def test_explicit_pipenv(self, tmp_path: Path) -> None:
@@ -727,7 +727,7 @@ class TestHandleRequirements:
         req_path = handle_requirements(
             package_root=str(tmp_path),
             dest_path=str(tmp_path),
-            requirements=cast(dict[str, bool], find_requirements(str(tmp_path))),
+            requirements=cast("dict[str, bool]", find_requirements(str(tmp_path))),
             use_pipenv=True,
         )
         assert req_path == str(requirements_txt)
@@ -764,7 +764,7 @@ class TestHandleRequirements:
         req_path = handle_requirements(
             package_root=str(tmp_path),
             dest_path=str(tmp_path),
-            requirements=cast(dict[str, bool], find_requirements(str(tmp_path))),
+            requirements=cast("dict[str, bool]", find_requirements(str(tmp_path))),
             use_pipenv=True,
         )
         assert req_path == str(requirements_txt)
@@ -776,8 +776,8 @@ class TestHandleRequirements:
         """Test NotImplimentedError is raised when no requirements file."""
         with TempDirectory() as tmp_dir, pytest.raises(NotImplementedError):
             handle_requirements(
-                package_root=cast(str, tmp_dir.path),
-                dest_path=cast(str, tmp_dir.path),
+                package_root=cast("str", tmp_dir.path),
+                dest_path=cast("str", tmp_dir.path),
                 requirements={
                     "requirements.txt": False,
                     "Pipfile": False,

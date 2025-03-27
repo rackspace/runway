@@ -251,7 +251,7 @@ class MockCfnginContext(CfnginContext):
 
         """
         return cast(
-            boto3.Session,
+            "boto3.Session",
             self._get_mocked_session(
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,
@@ -415,7 +415,7 @@ class MockRunwayContext(RunwayContext):
 
         """
         return cast(
-            boto3.Session,
+            "boto3.Session",
             self._get_mocked_session(
                 aws_access_key_id=aws_access_key_id,
                 aws_secret_access_key=aws_secret_access_key,

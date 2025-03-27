@@ -230,7 +230,7 @@ class TestRunwayModuleNpm:
     @pytest.mark.parametrize(
         "env_vars",
         [
-            cast(dict[str, str], {}),
+            cast("dict[str, str]", {}),
             {"AWS_PROFILE": "something"},
             {"AWS_DEFAULT_PROFILE": "something", "AWS_PROFILE": "something"},
         ],

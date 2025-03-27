@@ -43,7 +43,7 @@ def register_lookup_handler(
     LOGGER.debug("registering CFNgin lookup: %s=%s", lookup_type, handler_or_path)
 
     handler = (
-        cast(type, load_object_from_string(handler_or_path))
+        cast("type", load_object_from_string(handler_or_path))
         if isinstance(handler_or_path, str)
         else handler_or_path
     )

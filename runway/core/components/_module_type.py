@@ -131,7 +131,7 @@ class RunwayModuleType:
             )
             sys.exit(1)
 
-        return cast(type["RunwayModule[Any]"], load_object_from_string(self.class_path))
+        return cast("type[RunwayModule[Any]]", load_object_from_string(self.class_path))
 
     def _set_class_path_based_on_extension(self) -> None:
         """Based on the directory suffix set the class_path."""

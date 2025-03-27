@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypedDict, TypeVar, cast, overload
 
 import yaml
@@ -16,6 +15,8 @@ from ...cfngin.utils import read_value_from_path
 from ...utils import MutableMap
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from ...cfngin.providers.aws.default import Provider
     from ...context import CfnginContext, RunwayContext
     from ...variables import VariableValue
@@ -165,7 +166,7 @@ class LookupHandler(ABC, Generic[ContextTypeVar]):
         query = colon_split.pop(0)
         args = cls._parse_args(colon_split[0]) if colon_split else {}
 
-        return query, cast(ParsedArgsTypeDef, args)
+        return query, cast("ParsedArgsTypeDef", args)
 
     @classmethod
     def _parse_args(cls, args: str) -> dict[str, str]:
@@ -337,7 +338,7 @@ class LookupHandler(ABC, Generic[ContextTypeVar]):
 
         """
         if isinstance(value, (list, set, tuple)):
-            return f"{delimiter}".join(cast(Sequence[str], value))
+            return f"{delimiter}".join(cast("Sequence[str]", value))
         if isinstance(value, MutableMap):
             # convert into a dict with protected attrs removed
             value = value.data

@@ -306,7 +306,7 @@ def test_get_template_path_local_file(tmp_path: Path) -> None:
 
     with change_dir(tmp_path):
         result = get_template_path(template_path)
-        assert template_path.samefile(cast(Path, result))
+        assert template_path.samefile(cast("Path", result))
 
 
 def test_get_template_path_invalid_file(cd_tmp_path: Path) -> None:  # noqa: ARG001
@@ -325,7 +325,7 @@ def test_get_template_path_file_in_syspath(tmp_path: Path, monkeypatch: pytest.M
 
     monkeypatch.syspath_prepend(tmp_path)
     result = get_template_path(Path(template_path.name))
-    assert template_path.samefile(cast(Path, result))
+    assert template_path.samefile(cast("Path", result))
 
 
 def test_resolve_variable() -> None:

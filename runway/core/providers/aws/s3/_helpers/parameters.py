@@ -81,7 +81,7 @@ class ParametersDataModel(BaseModel):
         """Determine paths type for the given src and dest."""
         src_type = "s3" if self.src.startswith("s3://") else "local"
         dest_type = "s3" if self.dest.startswith("s3://") else "local"
-        self.paths_type = cast(PathsType, f"{src_type}{dest_type}")
+        self.paths_type = cast("PathsType", f"{src_type}{dest_type}")
         return self
 
     @field_validator("dest", "src", mode="before")

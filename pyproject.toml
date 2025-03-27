@@ -266,6 +266,7 @@ select = ["ALL"]
 
 [tool.ruff.lint.extend-per-file-ignores]  # https://docs.astral.sh/ruff/settings/#lintextend-per-file-ignores
 "*.py" = [
+  "PGH004",  # Use specific rule codes when using `ruff: noqa`
   "PYI024",  # Use `typing.NamedTuple` instead of `collections.namedtuple`  # NOTE (kyle): should only apply to pyi
 ]
 "runway/templates/*" = [

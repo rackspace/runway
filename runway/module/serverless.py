@@ -376,8 +376,8 @@ class Serverless(RunwayModuleNpm[ServerlessOptions]):
             stdout=subprocess.PIPE,
             universal_newlines=True,
         ) as proc:
-            with cast(IO[str], proc.stdout):
-                for line in cast(IO[str], proc.stdout):
+            with cast("IO[str]", proc.stdout):
+                for line in cast("IO[str]", proc.stdout):
                     print(line, end="")  # noqa: T201
                     if re.search(r"Stack '.*' does not exist", line):
                         stack_missing = True

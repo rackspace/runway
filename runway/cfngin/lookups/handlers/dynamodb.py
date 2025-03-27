@@ -221,7 +221,7 @@ def _lookup_key_parse(table_keys: list[str]) -> ParsedLookupKey:
                 raise ValueError(
                     f"CFNgin does not support looking up the data type: {match.group(1)}"
                 )
-            match_val = cast(Literal["L", "M", "N", "S"], match.group(1))
+            match_val = cast("Literal['L', 'M', 'N', 'S']", match.group(1))
             key = key.replace(match.group(0), "")  # noqa: PLW2901
             new_keys.append({match_val: key})
         else:
@@ -256,13 +256,13 @@ def _get_val_from_ddb_data(
             next_type = k
     if next_type == "L":
         # if type is list, convert it to a list and return
-        return _convert_ddb_list_to_list(data[cast(str, next_type)])
+        return _convert_ddb_list_to_list(data[cast("str", next_type)])
     if next_type == "N":
         # TODO (troyready): handle various types of 'number' datatypes, (e.g. int, double)
         # if a number, convert to an int and return
-        return int(data[cast(str, next_type)])
+        return int(data[cast("str", next_type)])
     # else, just assume its a string and return
-    return str(data[cast(str, next_type)])
+    return str(data[cast("str", next_type)])
 
 
 def _convert_ddb_list_to_list(conversion_list: list[dict[str, Any]]) -> list[Any]:

@@ -113,11 +113,11 @@ class TestBaseContext:
             "credential_provider"
         )
         cred_provider = cast(
-            MagicMock,
+            "MagicMock",
             mock_boto3_session.return_value._session.get_component.return_value,
         )
         cred_provider.get_provider.assert_called_once_with("assume-role")
-        provider = cast(MagicMock, cred_provider.get_provider.return_value)
+        provider = cast("MagicMock", cred_provider.get_provider.return_value)
         assert provider.cache == {}
 
     def test_get_session_with_creds(

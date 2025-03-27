@@ -39,10 +39,10 @@ def tf_version(request: SubRequest) -> Iterator[str]:
     """Set Terraform version."""
     file_path = CURRENT_DIR / TF_VERSION_FILENAME
     file_path.write_text(
-        cast(str, request.param) + "\n",
+        cast("str", request.param) + "\n",
         encoding=locale.getpreferredencoding(do_setlocale=False),
     )
-    yield cast(str, request.param)
+    yield cast("str", request.param)
     file_path.unlink(missing_ok=True)
 
 
