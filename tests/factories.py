@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING, Any, cast
 from click.testing import CliRunner
 
 if TYPE_CHECKING:
-    from _pytest.fixtures import SubRequest
+    import pytest
 
 
-def cli_runner_factory(request: SubRequest) -> CliRunner:
+def cli_runner_factory(request: pytest.FixtureRequest) -> CliRunner:
     """Initialize instance of `click.testing.CliRunner`."""
     kwargs: dict[str, Any] = {
         "env": {
@@ -21,7 +21,7 @@ def cli_runner_factory(request: SubRequest) -> CliRunner:
             **os.environ,
         }
     }
-    mark = request.node.get_closest_marker("cli_runner")
+    mark = cast("pytest.Function | pytest.Item", request.node).get_closest_marker("cli_runner")
     if mark:
         kwargs.update(cast("dict[str, Any]", mark.kwargs))
     return CliRunner(**kwargs)

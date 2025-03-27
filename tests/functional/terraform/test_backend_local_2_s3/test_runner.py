@@ -15,7 +15,6 @@ from runway.env_mgr.tfenv import TF_VERSION_FILENAME
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from _pytest.fixtures import SubRequest
     from click.testing import CliRunner, Result
 
 CURRENT_DIR = Path(__file__).parent
@@ -35,7 +34,7 @@ def tf_state_bucket(cli_runner: CliRunner) -> Iterator[None]:
     params=["0.13.7", "0.14.11", "0.15.5", "1.4.6"],
     scope="module",
 )
-def tf_version(request: SubRequest) -> Iterator[str]:
+def tf_version(request: pytest.FixtureRequest) -> Iterator[str]:
     """Set Terraform version."""
     file_path = CURRENT_DIR / TF_VERSION_FILENAME
     file_path.write_text(

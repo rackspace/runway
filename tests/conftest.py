@@ -13,13 +13,10 @@ from .factories import cli_runner_factory
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterator
 
-    from _pytest.config import Config
-    from _pytest.config.argparsing import Parser
-    from _pytest.fixtures import SubRequest
     from click.testing import CliRunner
 
 
-def pytest_configure(config: Config) -> None:
+def pytest_configure(config: pytest.Config) -> None:
     """Configure pytest."""
     config.addinivalue_line(  # cspell:ignore addinivalue
         "markers",
@@ -28,7 +25,7 @@ def pytest_configure(config: Config) -> None:
     )
 
 
-def pytest_addoption(parser: Parser) -> None:
+def pytest_addoption(parser: pytest.Parser) -> None:
     """Add pytest CLI options."""
     parser.addoption(
         "--functional",
@@ -51,7 +48,7 @@ def pytest_addoption(parser: Parser) -> None:
 
 
 @pytest.fixture
-def cli_runner(request: SubRequest) -> CliRunner:
+def cli_runner(request: pytest.FixtureRequest) -> CliRunner:
     """Initialize instance of `click.testing.CliRunner`."""
     return cli_runner_factory(request)
 
