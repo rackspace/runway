@@ -4,6 +4,8 @@ name: Label Maker
 
 on:
   push:
+    branches-ignore:
+      - release/v*
     paths:
       - .github/workflows/label-maker.yml
       - .github/labels.yml
@@ -12,7 +14,7 @@ on:
 jobs:
   label-maker:
     # Skip running the job from forks.
-    if: github.repository == 'rackspace/runway' && !endswith(github.actor, '[bot]')
+    if: github.repository == 'rackspace/runway' && !endswith(github.actor, '[bot]') && github.event
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
