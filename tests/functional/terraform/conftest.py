@@ -11,8 +11,6 @@ import pytest
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from _pytest.fixtures import SubRequest
-
 
 @pytest.fixture(scope="package")
 def fixture_dir() -> Path:
@@ -21,7 +19,7 @@ def fixture_dir() -> Path:
 
 
 @pytest.fixture
-def local_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, None]:
+def local_backend(fixture_dir: Path, request: pytest.FixtureRequest) -> Generator[Path, None, None]:
     """Copy local_backend.tf into the test directory."""
     file_name = "local_backend.tf"
     og_file = fixture_dir / file_name
@@ -32,7 +30,7 @@ def local_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, Non
 
 
 @pytest.fixture
-def no_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, None]:
+def no_backend(fixture_dir: Path, request: pytest.FixtureRequest) -> Generator[Path, None, None]:
     """Copy no_backend.tf into the test directory."""
     file_name = "no_backend.tf"
     og_file = fixture_dir / file_name
@@ -43,7 +41,7 @@ def no_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, 
 
 
 @pytest.fixture
-def s3_backend(fixture_dir: Path, request: SubRequest) -> Generator[Path, None, None]:
+def s3_backend(fixture_dir: Path, request: pytest.FixtureRequest) -> Generator[Path, None, None]:
     """Copy s3_backend.tf into the test directory."""
     file_name = "s3_backend.tf"
     og_file = fixture_dir / file_name

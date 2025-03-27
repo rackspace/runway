@@ -19,18 +19,16 @@ from ..factories import cli_runner_factory
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from _pytest.config import Config
-    from _pytest.fixtures import SubRequest
     from click.testing import CliRunner
 
 
-def pytest_ignore_collect(path: Any, config: Config) -> bool:  # noqa: ARG001
+def pytest_ignore_collect(path: Any, config: pytest.Config) -> bool:  # noqa: ARG001
     """Determine if this directory should have its tests collected."""
     return not config.option.functional
 
 
 @pytest.fixture(autouse=True, scope="module")
-def cd_test_dir(request: SubRequest) -> Generator[Path, None, None]:
+def cd_test_dir(request: pytest.FixtureRequest) -> Generator[Path, None, None]:
     """Change directory to test directory."""
     test_dir = request.path.parent
     original_wd = Path.cwd()
@@ -55,7 +53,7 @@ def cfngin_bucket_alt() -> str:
 
 @pytest.fixture(scope="module")
 def cfngin_config(
-    request: SubRequest, runway_config: RunwayConfig, runway_context: RunwayContext
+    request: pytest.FixtureRequest, runway_config: RunwayConfig, runway_context: RunwayContext
 ) -> CfnginConfig:
     """Find and return the CFNgin config."""
     runway_config.deployments[0].resolve(runway_context, variables=runway_config.variables)
@@ -82,7 +80,7 @@ def cfngin_context(
 
 
 @pytest.fixture(scope="module")
-def cli_runner(cd_test_dir: Path, request: SubRequest) -> CliRunner:  # noqa: ARG001
+def cli_runner(cd_test_dir: Path, request: pytest.FixtureRequest) -> CliRunner:  # noqa: ARG001
     """Initialize instance of `click.testing.CliRunner`."""
     return cli_runner_factory(request)
 

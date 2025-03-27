@@ -14,7 +14,6 @@ from runway.config import CfnginConfig
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from _pytest.fixtures import SubRequest
     from click.testing import CliRunner, Result
 
     from runway.config import RunwayConfig
@@ -25,7 +24,7 @@ CURRENT_DIR = Path(__file__).parent
 
 @pytest.fixture(scope="module")
 def cfngin_config(
-    request: SubRequest, runway_config: RunwayConfig, runway_context: RunwayContext
+    request: pytest.FixtureRequest, runway_config: RunwayConfig, runway_context: RunwayContext
 ) -> CfnginConfig:
     """Find and return the CFNgin config."""
     runway_config.deployments[0].resolve(runway_context, variables=runway_config.variables)

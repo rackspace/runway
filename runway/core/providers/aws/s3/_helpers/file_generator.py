@@ -154,7 +154,7 @@ class FileGenerator:
         follow_symlinks: bool = True,
         page_size: int | None = None,
         result_queue: Queue[Any] | None = None,
-        request_parameters: Any = None,
+        request_parameters: dict[str, Any] | None = None,
     ) -> None:
         """Instantiate class.
 

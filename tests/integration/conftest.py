@@ -4,19 +4,16 @@ from __future__ import annotations
 
 import shutil
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import Any, Callable
 
 import pytest
-
-if TYPE_CHECKING:
-    from _pytest.config import Config
 
 TEST_ROOT = Path(__file__).parent
 
 CpConfigTypeDef = Callable[[str, Path], Path]
 
 
-def pytest_ignore_collect(path: Any, config: Config) -> bool:  # noqa: ARG001
+def pytest_ignore_collect(path: Any, config: pytest.Config) -> bool:  # noqa: ARG001
     """Determine if this directory should have its tests collected."""
     if config.option.functional:
         return True

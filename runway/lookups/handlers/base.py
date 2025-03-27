@@ -107,7 +107,7 @@ class LookupHandler(ABC, Generic[ContextTypeVar]):
             if isinstance(value, MutableMap):
                 value = value.find(get)
             elif isinstance(value, dict):
-                value = value.get(get)
+                value = cast("Any", value.get(get))
             else:
                 raise TypeError(f'value must be dict type to use "get"; got type "{type(value)}"')
         if (
