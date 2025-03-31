@@ -2598,14 +2598,14 @@ cli = ["click (>=5.0)"]
 
 [[package]]
 name = "python-hcl2"
-version = "7.0.0"
+version = "7.0.1"
 description = "A parser for HCL2"
 optional = false
 python-versions = ">=3.7.0"
 groups = ["main"]
 files = [
-    {file = "python_hcl2-7.0.0-py3-none-any.whl", hash = "sha256:107a1350f2ba1b3a15a64ab727c73374f774de0e7c305f7805f6913087239e71"},
-    {file = "python_hcl2-7.0.0.tar.gz", hash = "sha256:48fdad037bc5d509e3fa845bc86759a8a48376df6ac4d5b7ae12a0f643e6ba97"},
+    {file = "python_hcl2-7.0.1-py3-none-any.whl", hash = "sha256:f851e872397b5a77e85820bd779c58e60cbc077cf6865e91c444da49d878d032"},
+    {file = "python_hcl2-7.0.1.tar.gz", hash = "sha256:41fbae6d154d593d9f8adcbd85e76fbbb86a188561e1d22d293beddc4153d3b6"},
 ]
 
 [package.dependencies]
