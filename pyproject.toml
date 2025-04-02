@@ -113,7 +113,7 @@ extras = [
   "ssm",
   "sts",
 ]
-version = "^1.37.23"
+version = "^1.37.25"
 
 [tool.poetry.scripts]
 runway = "runway._cli.main:cli"
