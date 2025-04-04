@@ -20,7 +20,6 @@ Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudForm
   commands
   runway_config
   lookups/index
-  defining_tests
   repo_structure
 
 

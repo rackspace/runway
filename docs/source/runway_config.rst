@@ -3,7 +3,7 @@ Runway Config File
 ##################
 
 The Runway config file is where all options are defined.
-It contains definitions for deployments, tests, and some global options that impact core functionality.
+It contains definitions for deployment and some global options that impact core functionality.
 
 The Runway config file can have two possible names, ``runway.yml`` or ``runway.yaml``.
 It must be stored at the root of the directory containing the modules to be deployed.
@@ -69,23 +69,6 @@ Top-Level Configuration
     runway_version: ">=1.14.0,<2.0.0"  # or ~=1.14.0
 
   .. versionadded:: 1.11.0
-
-.. attribute:: tests
-  :type: list[test] | None
-  :value: []
-
-  List of Runway test definitions that are executed with the :ref:`test command <commands:test>`.
-  See Test_ for detailed information about defining this value.
-
-  .. rubric:: Example
-  .. code-block:: yaml
-
-    tests:
-      - name: Hello World
-        type: script
-        args:
-          commands:
-            - echo "Hello World"
 
 .. _runway-variables:
 
