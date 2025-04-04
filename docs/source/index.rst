@@ -2,7 +2,7 @@
 Runway
 ######
 
-Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudFormation, Terraform, Serverless) & linting (e.g. yamllint) tools to ease management of per-environment configs & deployment.
+Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudFormation, Terraform, Serverless) tools to ease management of per-environment configs & deployment.
 
 .. image:: images/runway-example.gif
   :align: center

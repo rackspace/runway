@@ -71,7 +71,6 @@ class TestRunwayConfigDefinitionModel:
         assert isinstance(obj.future, RunwayFutureDefinitionModel)
         assert not obj.ignore_git_branch
         assert obj.runway_version is None
-        assert obj.tests == []
         assert isinstance(obj.variables, RunwayVariablesDefinitionModel)
 
     def test_parse_file(self, tmp_path: Path) -> None:

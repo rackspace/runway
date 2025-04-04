@@ -16,11 +16,7 @@ from ..cfngin.lookups.registry import register_lookup_handler
 from ..cfngin.utils import SourceProcessor
 from ..exceptions import ConfigNotFound
 from ..utils import merge_dicts
-from .components.runway import (
-    RunwayDeploymentDefinition,
-    RunwayTestDefinition,
-    RunwayVariablesDefinition,
-)
+from .components.runway import RunwayDeploymentDefinition, RunwayVariablesDefinition
 from .models.cfngin import (
     CfnginConfigDefinitionModel,
     CfnginHookDefinitionModel,
@@ -449,7 +445,6 @@ class RunwayConfig(BaseConfig[RunwayConfigDefinitionModel]):
     future: RunwayFutureDefinitionModel
     ignore_git_branch: bool
     runway_version: SpecifierSet | None
-    tests: list[RunwayTestDefinition]
     variables: RunwayVariablesDefinition
 
     def __init__(self, data: RunwayConfigDefinitionModel, *, path: Path | None = None) -> None:
@@ -465,7 +460,6 @@ class RunwayConfig(BaseConfig[RunwayConfigDefinitionModel]):
         self.future = self._data.future
         self.ignore_git_branch = self._data.ignore_git_branch
         self.runway_version = self._data.runway_version
-        self.tests = [RunwayTestDefinition(t) for t in self._data.tests]
         self.variables = RunwayVariablesDefinition(self._data.variables)
 
     @classmethod
