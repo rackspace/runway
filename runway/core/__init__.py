@@ -4,24 +4,18 @@ from __future__ import annotations
 
 import logging as _logging
 import sys as _sys
-import traceback as _traceback
 from typing import TYPE_CHECKING, Any, cast
 
-import yaml as _yaml
-
 from .. import __version__
-from .._logging import PrefixAdaptor as _PrefixAdaptor
-from .._logging import RunwayLogger as _RunwayLogger
-from ..utils import DOC_SITE
-from ..utils import YamlDumper as _YamlDumper
 from . import components, providers, type_defs
 
 if TYPE_CHECKING:
+    from .._logging import RunwayLogger
     from ..config import RunwayConfig
     from ..config.components.runway import RunwayDeploymentDefinition
     from ..context import RunwayContext
 
-LOGGER = cast("_RunwayLogger", _logging.getLogger(__name__))
+LOGGER = cast("RunwayLogger", _logging.getLogger(__name__))
 
 __all__ = ["Runway", "components", "providers", "type_defs"]
 
