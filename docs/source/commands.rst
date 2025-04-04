@@ -252,23 +252,6 @@ plan
 
 
 
-*********
-preflight
-*********
-
-.. file://./../../runway/_cli/commands/_preflight.py
-
-.. command-output:: runway preflight --help
-
-.. rubric:: Example
-.. code-block:: sh
-
-  $ runway preflight
-
-----
-
-
-
 **********
 run-python
 **********
@@ -353,23 +336,6 @@ taxi
   $ runway taxi
   $ runway taxi --ci --deploy-environment example
   $ runway taxi --tag tag1 --tag tag2
-
-----
-
-
-
-****
-test
-****
-
-.. file://./../../runway/_cli/commands/_test.py
-
-.. command-output:: runway test --help
-
-.. rubric:: Example
-.. code-block:: sh
-
-  $ runway test
 
 ----
 

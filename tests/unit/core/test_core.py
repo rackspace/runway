@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -30,7 +30,6 @@ class TestRunway:
 
         assert result.deployments == runway_config.deployments
         assert result.future == runway_config.future
-        assert result.tests == runway_config.tests
         assert result.ignore_git_branch == runway_config.ignore_git_branch
         assert result.variables == runway_config.variables
         assert result.ctx == runway_context
@@ -218,106 +217,3 @@ class TestRunway:
         ]
         deployment_1.reverse.assert_called_once_with()
         deployment_2.reverse.assert_called_once_with()
-
-    def test_test(
-        self,
-        caplog: pytest.LogCaptureFixture,
-        monkeypatch: pytest.MonkeyPatch,
-        runway_config: MockRunwayConfig,
-        runway_context: MockRunwayContext,
-    ) -> None:
-        """Test test."""
-        caplog.set_level(logging.ERROR, logger="runway")
-        test_handlers = {
-            "exception": MagicMock(handle=MagicMock(side_effect=Exception())),
-            "fail_system_exit_0": MagicMock(handle=MagicMock(side_effect=SystemExit(0))),
-            "fail_system_exit_1": MagicMock(handle=MagicMock(side_effect=SystemExit(1))),
-            "success": MagicMock(),
-        }
-        monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
-        obj = Runway(runway_config, runway_context)  # type: ignore
-
-        obj.tests = [  # type: ignore
-            MagicMock(type="success"),
-            MagicMock(type="fail_system_exit_0"),
-        ]
-        assert not obj.test()
-        assert "the following tests failed" not in "\n".join(caplog.messages)
-        test_handlers["success"].handle.assert_called_with(obj.tests[0].name, obj.tests[0].args)
-        test_handlers["fail_system_exit_0"].handle.assert_called_with(
-            obj.tests[1].name, obj.tests[1].args
-        )
-        obj.tests[0](runway_context, variables=runway_config.variables)
-        obj.tests[1](runway_context, variables=runway_config.variables)
-
-        obj.tests = [  # type: ignore
-            MagicMock(type="fail_system_exit_1", required=False),
-            MagicMock(type="fail_system_exit_0"),
-        ]
-        obj.tests[0].name = "fail_system_exit_1"
-        with pytest.raises(SystemExit) as excinfo:
-            assert not obj.test()
-        assert excinfo.value.code == 1
-        assert "the following tests failed: fail_system_exit_1" in caplog.messages
-        test_handlers["fail_system_exit_1"].handle.assert_called_with(
-            obj.tests[0].name, obj.tests[0].args
-        )
-        test_handlers["fail_system_exit_0"].handle.assert_called_with(
-            obj.tests[1].name, obj.tests[1].args
-        )
-        caplog.clear()
-
-        obj.tests = [  # type: ignore
-            MagicMock(type="exception", required=True),
-            MagicMock(type="success"),
-        ]
-        obj.tests[0].name = "exception"
-        with pytest.raises(SystemExit) as excinfo:
-            assert not obj.test()
-        assert excinfo.value.code == 1
-        assert "exception:running test (fail)" in caplog.messages
-        assert "exception:test required; the remaining tests have been skipped" in caplog.messages
-        test_handlers["exception"].handle.assert_called_with(obj.tests[0].name, obj.tests[0].args)
-        assert test_handlers["success"].handle.call_count == 1
-
-    def test_test_keyerror(
-        self,
-        caplog: pytest.LogCaptureFixture,
-        monkeypatch: pytest.MonkeyPatch,
-        runway_config: MockRunwayConfig,
-        runway_context: MockRunwayContext,
-    ) -> None:
-        """Test test with handler not found."""
-        caplog.set_level(logging.ERROR, logger="runway")
-        test_handlers: dict[str, Any] = {}
-        monkeypatch.setattr(MODULE + "._TEST_HANDLERS", test_handlers)
-        obj = Runway(runway_config, runway_context)  # type: ignore
-
-        obj.tests = [MagicMock(type="missing", required=True)]  # type: ignore
-        obj.tests[0].name = "test"
-        with pytest.raises(SystemExit) as excinfo:
-            assert obj.test()
-        assert excinfo.value.code == 1
-        assert 'test:unable to find handler of type "missing"' in caplog.messages
-        assert "the following tests failed: test" not in caplog.messages
-
-        obj.tests[0].required = False
-        with pytest.raises(SystemExit) as excinfo:
-            assert obj.test()
-        assert excinfo.value.code == 1
-        assert "the following tests failed: test" in caplog.messages
-
-    def test_test_no_tests(
-        self,
-        caplog: pytest.LogCaptureFixture,
-        runway_config: MockRunwayConfig,
-        runway_context: MockRunwayContext,
-    ) -> None:
-        """Test test with no tests defined."""
-        caplog.set_level(logging.ERROR, logger="runway")
-        obj = Runway(runway_config, runway_context)  # type: ignore
-        obj.tests = []
-        with pytest.raises(SystemExit) as excinfo:
-            assert obj.test()
-        assert excinfo.value.code == 1
-        assert "no tests defined in runway.yml" in caplog.messages[0]

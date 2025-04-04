@@ -5,7 +5,7 @@ Lookups
 #######
 
 Runway Lookups allow the use of variables within the Runway config file.
-These variables can then be passed along to :ref:`Deployment <runway_config:Deployment>`, :ref:`Modules <runway_config:Module>` and :ref:`tests <runway_config:Test>`.
+These variables can then be passed along to :ref:`Deployment <runway_config:Deployment>` and :ref:`Modules <runway_config:Module>`.
 
 The syntax for a lookup is ``${<lookup-name> <query>::<arg>=<arg-val>}``.
 

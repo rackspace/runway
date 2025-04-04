@@ -34,7 +34,6 @@ repository = "https://github.com/rackspace/runway"
 python = ">=3.9, <3.13"
 awacs = "*"
 boto3 = "^1.34.50"
-cfn-lint = "*"
 cfn_flip = "^1.2"  # only used in runway._cli.commands._gen_sample.utils
 click = "^8.0"
 coloredlogs = "*, !=15.0.1"
@@ -54,7 +53,6 @@ requests = "*"
 tomli = ">=1.2.2"
 troposphere = ">=2.4, <5"
 typing_extensions = "*"  # only really needed for < 3.8 but can still be used in >= 3.8
-yamllint = "*"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^4.2.0"
@@ -201,7 +199,6 @@ filterwarnings = [
 markers = [
   "wip: isolate tests currently being worked on.",
 ]
-minversion = 6.0
 python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]

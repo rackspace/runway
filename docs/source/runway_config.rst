@@ -3,7 +3,7 @@ Runway Config File
 ##################
 
 The Runway config file is where all options are defined.
-It contains definitions for deployments, tests, and some global options that impact core functionality.
+It contains definitions for deployment and some global options that impact core functionality.
 
 The Runway config file can have two possible names, ``runway.yml`` or ``runway.yaml``.
 It must be stored at the root of the directory containing the modules to be deployed.
@@ -69,23 +69,6 @@ Top-Level Configuration
     runway_version: ">=1.14.0,<2.0.0"  # or ~=1.14.0
 
   .. versionadded:: 1.11.0
-
-.. attribute:: tests
-  :type: list[test] | None
-  :value: []
-
-  List of Runway test definitions that are executed with the :ref:`test command <commands:test>`.
-  See Test_ for detailed information about defining this value.
-
-  .. rubric:: Example
-  .. code-block:: yaml
-
-    tests:
-      - name: Hello World
-        type: script
-        args:
-          commands:
-            - echo "Hello World"
 
 .. _runway-variables:
 
@@ -971,99 +954,3 @@ Below is an example of using a module in a git repository as well as a breakdown
 
   Only one of *branch*, *commit*, or *tag* can be defined.
   If none are defined, *HEAD* is used.
-
-
-----
-
-
-
-****
-Test
-****
-
-.. class:: test
-
-  Tests can be defined as part of the Runway config file.
-  This is to remove the need for complex Makefiles or scripts to initiate test runners.
-  Simply define all tests for a project in the Runway config file and use the :ref:`test command <commands:test>` to execute them.
-
-  .. rubric:: Lookup Support
-
-  .. note::
-    Runway does not set ``AWS_REGION`` or ``AWS_DEFAULT_REGION`` environment variables when using the :ref:`test command <commands:test>`.
-
-  The following fields support lookups:
-
-  - :attr:`test.args`
-  - :attr:`test.required`
-
-  .. attribute:: args
-    :type: dict[str, Any] | str | None
-    :value: {}
-
-    Arguments to be passed to the test.
-    Supported arguments vary by test type.
-    See :ref:`Build-in Test Types<built-in-test-types>` for the arguments supported by each test type.
-
-    .. rubric:: Example
-    .. code-block:: yaml
-
-      tests:
-        - args:
-            commands:
-              - echo "Hello world"
-
-  .. attribute:: name
-    :type: str | None
-
-    Name of the test.
-    Used to more easily identify where different tests begin/end in the logs and to identify which tests failed.
-
-    .. rubric:: Example
-    .. code-block:: yaml
-
-      tests:
-        - name: example-test
-
-  .. attribute:: required
-    :type: bool
-    :value: false
-
-    Whether the test must pass for subsequent tests to be run.
-    If ``false``, testing will continue if the test fails.
-
-    If the test fails, the :ref:`test command <commands:test>` will always return a non-zero exit code regardless of this value.
-
-    .. rubric:: Example
-    .. code-block:: yaml
-      :caption: using a literal value
-
-      tests:
-        - required: false
-
-    .. code-block:: yaml
-      :caption: using a lookup
-
-      tests:
-        - required: ${var test.required}
-
-      variables:
-        test:
-          required: false
-
-  .. attribute:: type
-    :type: str
-
-    The type of test to run.
-
-    .. rubric:: Accepted Values
-
-    - :ref:`cfn-lint <built-in-test-cfn-lint>`
-    - :ref:`script <built-in-test-script>`
-    - :ref:`yamllint <built-in-test-yamllint>`
-
-    .. rubric:: Example
-    .. code-block:: yaml
-
-      tests:
-        - type: script

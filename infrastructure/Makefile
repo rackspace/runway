@@ -13,11 +13,6 @@ destroy:
 		poetry run runway destroy && \
 		popd
 
-test:
-	@pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
-		poetry run runway test && \
-		popd
-
 plan:
 	@pushd $(filter-out $@, $(MAKECMDGOALS))/common/ && \
 		poetry run runway plan && \

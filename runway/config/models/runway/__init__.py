@@ -25,7 +25,6 @@ from .. import utils
 from ..base import ConfigProperty
 from ..utils import RUNWAY_LOOKUP_STRING_ERROR, RUNWAY_LOOKUP_STRING_REGEX
 from ._assume_role import RunwayAssumeRoleDefinitionModel
-from ._builtin_tests import RunwayTestDefinitionModel, ValidRunwayTestTypeValues
 from ._future import RunwayFutureDefinitionModel
 from ._module import RunwayModuleDefinitionModel
 from ._region import RunwayDeploymentRegionDefinitionModel
@@ -62,10 +61,8 @@ __all__ = [
     "RunwayFutureDefinitionModel",
     "RunwayModuleDefinitionModel",
     "RunwayModuleTypeTypeDef",
-    "RunwayTestDefinitionModel",
     "RunwayVariablesDefinitionModel",
     "RunwayVersionField",
-    "ValidRunwayTestTypeValues",
 ]
 
 
@@ -400,13 +397,6 @@ class RunwayConfigDefinitionModel(ConfigProperty):
         ),
     ] = None
     """Define the versions of Runway that can be used with this configuration file."""
-
-    tests: Annotated[
-        list[RunwayTestDefinitionModel],
-        Field(
-            description="Array of Runway test definitions that are executed with the 'test' command."
-        ),
-    ] = []
 
     variables: Annotated[RunwayVariablesDefinitionModel, Field(description="Runway variables.")] = (
         RunwayVariablesDefinitionModel()
