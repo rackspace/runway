@@ -44,6 +44,7 @@ class RunwayDeploymentDefinition(ConfigComponentDefinition[RunwayDeploymentDefin
         "assume_role",
         "env_vars",
         "regions",
+        "parallel_regions",
     )
     _supports_vars: tuple[str, ...] = (
         "account_alias",
