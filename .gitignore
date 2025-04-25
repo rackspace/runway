@@ -2,6 +2,7 @@
 *.egg-info
 *.pyc
 *.pyo
+.DS_Store
 .Trash-*
 .cache
 .coverage
