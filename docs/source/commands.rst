@@ -1,4 +1,3 @@
-.. _kubectl: https://kubernetes.io/docs/reference/kubectl/overview/
 .. _Serverless Framework: https://serverless.com/
 .. _Terraform: https://www.terraform.io
 
@@ -137,77 +136,6 @@ init
   $ runway init
   $ runway init --ci --deploy-environment example
   $ runway init --tag tag1 --tag tag2
-
-----
-
-
-
-*************
-kbenv install
-*************
-
-.. file://./../../runway/_cli/commands/_kbenv/_install.py
-
-.. command-output:: runway kbenv install --help
-
-.. rubric:: Example
-.. code-block:: sh
-
-  $ runway kbenv install
-  $ runway kbenv install v1.14.0
-
-----
-
-
-
-**********
-kbenv list
-**********
-
-.. file://./../../runway/_cli/commands/_kbenv/_list.py
-
-.. command-output:: runway kbenv list --help
-
-.. rubric:: Example
-.. code-block:: sh
-
-  $ runway kbenv list
-
-----
-
-
-
-*********
-kbenv run
-*********
-
-.. file://./../../runway/_cli/commands/_kbenv/_install.py
-
-.. command-output:: runway kbenv run --help
-
-.. rubric:: Example
-.. code-block:: sh
-
-  $ runway kbenv run version --client
-  $ runway kbenv run -- --help
-
-----
-
-
-
-***************
-kbenv uninstall
-***************
-
-.. file://./../../runway/_cli/commands/_kbenv/_uninstall.py
-
-.. command-output:: runway kbenv uninstall --help
-
-.. rubric:: Example
-.. code-block:: sh
-
-  $ runway kbenv uninstall v1.21.0
-  $ runway kbenv uninstall --all
 
 ----
 

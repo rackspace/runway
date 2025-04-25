@@ -559,7 +559,7 @@ Module
 
   A :term:`Module` defines the directory to be processed and applicable options.
 
-  It can consist of :ref:`index:CloudFormation & Troposphere`, :ref:`index:Terraform`, :ref:`index:Serverless Framework`, :ref:`index:AWS Cloud Development Kit (CDK)`, :ref:`index:Kubernetes`, or a :ref:`index:Static Site`.
+  It can consist of :ref:`index:CloudFormation & Troposphere`, :ref:`index:Terraform`, :ref:`index:Serverless Framework`, :ref:`index:AWS Cloud Development Kit (CDK)`, or a :ref:`index:Static Site`.
   It is recommended to place the appropriate extension on each directory for identification (but it is not required).
   See :ref:`repo_structure:Repo Structure` for examples of a module directory structure.
 
@@ -569,8 +569,6 @@ Module
   | ``.cdk``         | :ref:`index:AWS Cloud Development Kit (CDK)`            |
   +------------------+---------------------------------------------------------+
   | ``.cfn``         | :ref:`index:CloudFormation & Troposphere`               |
-  +------------------+---------------------------------------------------------+
-  | ``.k8s``         | :ref:`index:Kubernetes`                                 |
   +------------------+---------------------------------------------------------+
   | ``.sls``         | :ref:`index:Serverless Framework`                       |
   +------------------+---------------------------------------------------------+
@@ -851,7 +849,6 @@ Module
 
     - cdk
     - cloudformation
-    - kubernetes
     - serverless
     - terraform
     - static

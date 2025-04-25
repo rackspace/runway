@@ -74,27 +74,6 @@ It is able to deploy raw CloudFormation templates (JSON & YAML) and Troposphere_
 .. _Troposphere: https://github.com/cloudtools/troposphere
 
 
-Kubernetes
-==========
-
-Kubernetes manifests can be deployed via Runway offering an ideal way to handle core infrastructure-layer (e.g. shared ConfigMaps & Service Accounts) configuration of clusters by using `Kustomize overlays <https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/#bases-and-overlays>`__.
-
-- :ref:`Configuration <k8s-configuration>`
-- :ref:`Directory Structure <k8s-directory-structure>`
-- :ref:`Examples <k8s-examples>`
-- :ref:`Advanced Features <k8s-advanced-features>`
-
-.. toctree::
-  :caption: Kubernetes
-  :maxdepth: 2
-  :hidden:
-
-  kubernetes/configuration
-  kubernetes/directory_structure
-  kubernetes/examples
-  kubernetes/advanced_features
-
-
 Serverless Framework
 ====================
 
