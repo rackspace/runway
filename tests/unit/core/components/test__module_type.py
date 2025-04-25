@@ -10,7 +10,6 @@ import pytest
 from runway.core.components import RunwayModuleType
 from runway.module.cdk import CloudDevelopmentKit
 from runway.module.cloudformation import CloudFormation
-from runway.module.k8s import K8s
 from runway.module.serverless import Serverless
 from runway.module.staticsite.handler import StaticSite
 from runway.module.terraform import Terraform
@@ -29,10 +28,8 @@ class TestRunwayModuleType:
         "files, expected",
         [
             (["cdk.json", "package.json"], CloudDevelopmentKit),
-            (["any.env", "overlays/"], CloudFormation),
             (["any.yml", "serverless.yml"], CloudFormation),
             (["any.yaml", "package.json"], CloudFormation),
-            (["overlays/", "kustomization.yaml", "cdk.json"], K8s),
             (["serverless.yml", "package.json", "cdk.json"], Serverless),
             (["serverless.js", "package.json", "cdk.json"], Serverless),
             (["serverless.ts", "package.json", "cdk.json"], Serverless),
@@ -78,7 +75,6 @@ class TestRunwayModuleType:
         [
             ("cdk", CloudDevelopmentKit),
             ("cfn", CloudFormation),
-            ("k8s", K8s),
             ("sls", Serverless),
             ("web", StaticSite),
             ("tf", Terraform),
@@ -97,7 +93,6 @@ class TestRunwayModuleType:
         [
             ("cdk", CloudDevelopmentKit),
             ("cloudformation", CloudFormation),
-            ("kubernetes", K8s),
             ("serverless", Serverless),
             ("static", StaticSite),
             ("terraform", Terraform),

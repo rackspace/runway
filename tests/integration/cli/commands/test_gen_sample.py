@@ -152,103 +152,6 @@ def test_cfngin(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     assert caplog.messages == [f"Sample CFNgin module created at {module}"]
 
 
-def test_k8s_cfn_repo(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
-    """Test ``runway gen-sample k8s-cfn-repo`` command."""
-    caplog.set_level(logging.INFO, logger="runway.cli")
-    runner = CliRunner()
-    result = runner.invoke(cli, ["gen-sample", "k8s-cfn-repo"])
-    assert result.exit_code == 0
-
-    files = [
-        "aws-auth-cm.k8s/base/kustomization.yaml",
-        "aws-auth-cm.k8s/overlays/template/.kubectl-version",
-        "aws-auth-cm.k8s/overlays/template/kustomization.yaml",
-        "k8s-master.cfn/k8s_hooks/__init__.py",
-        "k8s-master.cfn/k8s_hooks/auth_map.py",
-        "k8s-master.cfn/k8s_hooks/aws-auth-cm.yaml",
-        "k8s-master.cfn/k8s_hooks/awscli.py",
-        "k8s-master.cfn/k8s_hooks/bootstrap.py",
-        "k8s-master.cfn/templates/k8s_iam.yaml",
-        "k8s-master.cfn/templates/k8s_master.yaml",
-        "k8s-master.cfn/stacks.yaml",
-        "k8s-workers.cfn/local_lookups/__init__.py",
-        "k8s-workers.cfn/local_lookups/bootstrap_value.py",
-        "k8s-workers.cfn/templates/k8s_workers.yaml",
-        "k8s-workers.cfn/stacks.yaml",
-        "service-hello-world.k8s/base/configMap.yaml",
-        "service-hello-world.k8s/base/deployment.yaml",
-        "service-hello-world.k8s/base/kustomization.yaml",
-        "service-hello-world.k8s/base/service.yaml",
-        "service-hello-world.k8s/overlays/prod/.kubectl-version",
-        "service-hello-world.k8s/overlays/prod/deployment.yaml",
-        "service-hello-world.k8s/overlays/prod/kustomization.yaml",
-        "service-hello-world.k8s/overlays/template/.kubectl-version",
-        "service-hello-world.k8s/overlays/template/kustomization.yaml",
-        "service-hello-world.k8s/overlays/template/map.yaml",
-        "service-hello-world.k8s/README.md",
-        ".gitignore",
-        "README.md",
-        "runway.yml",
-    ]
-
-    repo = cd_tmp_path / "k8s-cfn-infrastructure"
-    assert repo.is_dir()
-
-    for file_ in files:
-        assert (repo / file_).is_file()
-
-    assert caplog.messages == [
-        f"Sample k8s infrastructure repo created at {repo}",
-        "See the README for setup and deployment instructions.",
-    ]
-
-
-def test_k8s_tf_repo(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
-    """Test ``runway gen-sample k8s-tf-repo`` command."""
-    caplog.set_level(logging.INFO, logger="runway.cli")
-    runner = CliRunner()
-    result = runner.invoke(cli, ["gen-sample", "k8s-tf-repo"])
-    assert result.exit_code == 0
-
-    files = [
-        "eks-base.tf/.terraform-version",
-        "eks-base.tf/main.tf",
-        "eks-base.tf/sleep.py",
-        "gen-kubeconfig.cfn/k8s_hooks/__init__.py",
-        "gen-kubeconfig.cfn/k8s_hooks/awscli.py",
-        "gen-kubeconfig.cfn/hooks.yaml",
-        "job-s3-echo.tf/.terraform-version",
-        "job-s3-echo.tf/main.tf",
-        "job-s3-echo.tf/sleep.py",
-        "service-hello-world.k8s/base/configMap.yaml",
-        "service-hello-world.k8s/base/deployment.yaml",
-        "service-hello-world.k8s/base/kustomization.yaml",
-        "service-hello-world.k8s/base/service.yaml",
-        "service-hello-world.k8s/overlays/dev/.kubectl-version",
-        "service-hello-world.k8s/overlays/dev/kustomization.yaml",
-        "service-hello-world.k8s/overlays/dev/map.yaml",
-        "service-hello-world.k8s/overlays/prod/.kubectl-version",
-        "service-hello-world.k8s/overlays/prod/deployment.yaml",
-        "service-hello-world.k8s/overlays/prod/kustomization.yaml",
-        "service-hello-world.k8s/README.md",
-        ".gitignore",
-        ".kubectl-version",
-        "README.md",
-        "runway.yml",
-    ]
-
-    repo = cd_tmp_path / "k8s-tf-infrastructure"
-    assert repo.is_dir()
-
-    for file_ in files:
-        assert (repo / file_).is_file()
-
-    assert caplog.messages == [
-        f"Sample k8s infrastructure repo created at {repo}",
-        "See the README for setup and deployment instructions.",
-    ]
-
-
 def test_sls_py(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
     """Test ``runway gen-sample sls-py`` command."""
     caplog.set_level(logging.INFO, logger="runway.cli")
@@ -438,8 +341,6 @@ def test_tf(cd_tmp_path: Path, caplog: pytest.LogCaptureFixture) -> None:
         ("cdk-tsc", "sampleapp.cdk"),
         ("cfn", "sampleapp.cfn"),
         ("cfngin", "sampleapp.cfn"),
-        ("k8s-cfn-repo", "k8s-cfn-infrastructure"),
-        ("k8s-tf-repo", "k8s-tf-infrastructure"),
         ("sls-py", "sampleapp.sls"),
         ("sls-tsc", "sampleapp.sls"),
         ("static-angular", "static-angular"),
