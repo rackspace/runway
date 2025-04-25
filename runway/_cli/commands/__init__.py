@@ -7,7 +7,6 @@ from ._docs import docs
 from ._envvars import envvars
 from ._gen_sample import gen_sample
 from ._init import init
-from ._kbenv import kbenv
 from ._new import new
 from ._plan import plan
 from ._run_python import run_python
@@ -25,7 +24,6 @@ __all__ = [
     "envvars",
     "gen_sample",
     "init",
-    "kbenv",
     "new",
     "plan",
     "run_python",

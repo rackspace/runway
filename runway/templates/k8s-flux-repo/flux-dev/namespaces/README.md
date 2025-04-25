@@ -1,3 +1,0 @@
-# namespaces
-
-namespaces go here

@@ -1,4 +1,0 @@
-*.py[co]
-.kube
-.runway
-__pycache__

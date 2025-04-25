@@ -1,7 +1,0 @@
-apiVersion: v1
-data:
-  altGreeting: Have a pineapple!
-  enableRisky: 'true'
-kind: ConfigMap
-metadata:
-  name: the-map
