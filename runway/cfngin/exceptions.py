@@ -386,22 +386,6 @@ class PipError(CfnginError):
         super().__init__()
 
 
-class PipenvError(CfnginError):
-    """Raised when pipenv returns a non-zero exit code."""
-
-    message: str
-
-    def __init__(self) -> None:
-        """Instantiate class."""
-        self.message = (
-            "A non-zero exit code was returned when invoking "
-            "pipenv. Please ensure pipenv in installed and the "
-            "Pipfile being used is valid. More information can be "
-            "found in the error above."
-        )
-        super().__init__()
-
-
 class PersistentGraphCannotLock(CfnginError):
     """Raised when the persistent graph in S3 cannot be locked."""
 

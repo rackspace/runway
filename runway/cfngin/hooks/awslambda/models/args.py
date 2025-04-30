@@ -318,9 +318,6 @@ class PythonHookArgs(AwsLambdaHookArgs):
 
     """
 
-    use_pipenv: bool = True
-    """Whether pipenv should be used if determined appropriate."""
-
     use_poetry: bool = True
     """Whether poetry should be used if determined appropriate."""
 

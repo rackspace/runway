@@ -22,8 +22,7 @@ The returned value can retrieved using the :ref:`hook_data Lookup <hook_data loo
 Configuration consists of some global options, and a dictionary of function specifications.
 In the specifications, each key indicating the name of the function (used for generating names for artifacts), and the value determines what files to include in the ZIP (see more details below).
 
-If a ``requirements.txt`` file or ``Pipfile/Pipfile.lock`` files are found at the root of the provided ``path``, the hook will use the appropriate method to package dependencies with your source code automatically.
-If you want to explicitly use ``pipenv`` over ``pip``, provide ``use_pipenv: true`` for the function.
+If a ``requirements.txt`` file is found at the root of the provided ``path``, the hook will use the appropriate method to package dependencies with your source code automatically.
 
 Docker can be used to collect python dependencies instead of using system python to build appropriate binaries for Lambda.
 This can be done by including the ``dockerize_pip`` configuration option which can have a value of ``true`` or ``non-linux``.
@@ -33,6 +32,9 @@ Payloads are uploaded to either the |cfngin_bucket| or an explicitly specified b
 .. versionchanged:: 2.8.0
   Use of pipenv now requires version ``>= 2022.8.13``.
   This is the version that changed how ``requirements.txt`` files are generated.
+
+.. versionchanged:: 3.0.0
+  Removed support for pipenv.
 
 
 ****
@@ -146,8 +148,8 @@ Args
     :value: None
     :noindex:
 
-    Absolute path to a python interpreter to use for ``pip``/``pipenv`` actions.
-    If not provided, the current python interpreter will be used for ``pip`` and ``pipenv`` will be used from the current ``$PATH``.
+    Absolute path to a python interpreter to use for ``pip``` actions.
+    If not provided, the current python interpreter will be used for ``pip``.
 
   .. data:: runtime
     :type: str | None
@@ -157,14 +159,6 @@ Args
     Runtime of the AWS Lambda Function being uploaded.
     Used with ``dockerize_pip`` to automatically select the appropriate Docker image to use.
     Must provide exactly one of ``docker_file``, ``docker_image``, or ``runtime``.
-
-  .. data:: use_pipenv
-    :type: bool | None
-    :value: False
-    :noindex:
-
-    Will determine if pipenv will be used to generate requirements.txt from an existing Pipfile.
-    To use this option pipenv must be installed.
 
 
 
@@ -189,7 +183,6 @@ Example
           MyFunction:
             path: ./lambda_functions
             dockerize_pip: non-linux
-            use_pipenv: true
             runtime: python3.9
             include:
               - '*.py'

@@ -40,7 +40,6 @@ pre_deploy:
       extend_gitignore:
         - __init__.py
         - Dockerfile
-        - Pipfile
       object_prefix: ${namespace}
       runtime: python3.10
       source_code: ./src/docker_mysql

@@ -13,7 +13,6 @@ pre_deploy:
       functions:
         dockerize:
           dockerize_pip: true
-          use_pipenv: true
           runtime: python3.8
           path: ./lambda_src/dockerize_src
           include:

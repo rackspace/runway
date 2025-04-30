@@ -46,11 +46,10 @@ def test_deploy_log_messages_invoke(deploy_result: Result, namespace: str) -> No
     assert f"{namespace}-nondockerizepip returned 200" in deploy_result.stdout
 
 
-def test_deploy_log_messages_pipenv(deploy_result: Result) -> None:
+def test_deploy_log_messages_requirements(deploy_result: Result) -> None:
     """Test deploy log messages."""
     expected_lines = [
-        "explicitly using pipenv",
-        "creating requirements.txt from Pipfile...",
+        "using requirements.txt for dependencies",
     ]
     expected = "\n".join(f"[runway] {msg}" for msg in expected_lines)
     assert expected in deploy_result.stdout, (

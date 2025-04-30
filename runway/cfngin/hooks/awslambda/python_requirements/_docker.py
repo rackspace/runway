@@ -76,7 +76,7 @@ class PythonDockerDependencyInstaller(DockerDependencyInstaller):
                     self.project.pip.generate_install_command(
                         cache_dir=self.CACHE_DIR if self.project.cache_dir else None,
                         no_cache_dir=not self.project.args.use_cache,
-                        no_deps=bool(self.project.poetry or self.project.pipenv),
+                        no_deps=bool(self.project.poetry),
                         requirements=f"/var/task/{self.project.requirements_txt.name}",
                         target=self.DEPENDENCY_DIR,
                     )

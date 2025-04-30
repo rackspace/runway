@@ -174,5 +174,4 @@ class TestPythonHookArgs:
             source_code=tmp_path,
         )
         assert not obj.extend_pip_args
-        assert obj.use_pipenv
         assert obj.use_poetry

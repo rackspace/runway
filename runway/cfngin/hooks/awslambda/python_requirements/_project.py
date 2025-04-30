@@ -7,13 +7,7 @@ import shutil
 from typing import TYPE_CHECKING, ClassVar
 
 from .....compat import cached_property
-from .....dependency_managers import (
-    Pip,
-    Pipenv,
-    PipenvNotFoundError,
-    Poetry,
-    PoetryNotFoundError,
-)
+from .....dependency_managers import Pip, Poetry, PoetryNotFoundError
 from ..base_classes import Project
 from ..models.args import PythonHookArgs
 from . import PythonDockerDependencyInstaller
@@ -46,8 +40,6 @@ class PythonProject(Project[PythonHookArgs]):
         """
         if self.project_type == "poetry":
             config_files = [self.project_root / config_file for config_file in Poetry.CONFIG_FILES]
-        elif self.project_type == "pipenv":
-            config_files = [self.project_root / config_file for config_file in Pipenv.CONFIG_FILES]
         else:
             config_files = [self.project_root / config_file for config_file in Pip.CONFIG_FILES]
         return tuple(path for path in config_files if path.exists())
@@ -72,24 +64,6 @@ class PythonProject(Project[PythonHookArgs]):
         return Pip(self.ctx, self.project_root)
 
     @cached_property
-    def pipenv(self) -> Pipenv | None:
-        """Pipenv dependency manager.
-
-        Return:
-            If the project uses pipenv and pipenv is not explicitly disabled,
-            an object for interfacing with pipenv will be returned.
-
-        Raises:
-            PipenvNotFoundError: pipenv is not installed or not found in PATH.
-
-        """
-        if self.project_type != "pipenv":
-            return None
-        if Pipenv.found_in_path():
-            return Pipenv(self.ctx, self.project_root)
-        raise PipenvNotFoundError
-
-    @cached_property
     def poetry(self) -> Poetry | None:
         """Poetry dependency manager.
 
@@ -108,16 +82,12 @@ class PythonProject(Project[PythonHookArgs]):
         raise PoetryNotFoundError
 
     @cached_property
-    def project_type(self) -> Literal["pip", "pipenv", "poetry"]:
+    def project_type(self) -> Literal["pip", "poetry"]:
         """Type of python project."""
         if Poetry.dir_is_project(self.project_root):
             if self.args.use_poetry:
                 return "poetry"
             LOGGER.warning("poetry project detected but use of poetry is explicitly disabled")
-        if Pipenv.dir_is_project(self.project_root):
-            if self.args.use_pipenv:
-                return "pipenv"
-            LOGGER.warning("pipenv project detected but use of pipenv is explicitly disabled")
         return "pip"
 
     @cached_property
@@ -125,8 +95,6 @@ class PythonProject(Project[PythonHookArgs]):
         """Dependency file for the project."""
         if self.poetry:  # prioritize poetry
             return self.poetry.export(output=self.tmp_requirements_txt)
-        if self.pipenv:
-            return self.pipenv.export(output=self.tmp_requirements_txt)
         requirements_txt = self.project_root / "requirements.txt"
         if Pip.dir_is_project(self.project_root, file_name=requirements_txt.name):
             return requirements_txt
@@ -143,8 +111,6 @@ class PythonProject(Project[PythonHookArgs]):
         file_names = {*Pip.CONFIG_FILES}
         if self.args.use_poetry:
             file_names.update(Poetry.CONFIG_FILES)
-        if self.args.use_pipenv:
-            file_names.update(Pipenv.CONFIG_FILES)
         return file_names
 
     @cached_property
@@ -158,7 +124,7 @@ class PythonProject(Project[PythonHookArgs]):
 
     def cleanup(self) -> None:
         """Cleanup temporary files after the build process has run."""
-        if (self.poetry or self.pipenv) and self.tmp_requirements_txt.exists():
+        if self.poetry and self.tmp_requirements_txt.exists():
             self.tmp_requirements_txt.unlink()
         shutil.rmtree(self.dependency_directory, ignore_errors=True)
         if not any(self.build_directory.iterdir()):
@@ -176,7 +142,7 @@ class PythonProject(Project[PythonHookArgs]):
                     cache_dir=self.args.cache_dir,
                     extend_args=self.args.extend_pip_args,
                     no_cache_dir=not self.args.use_cache,
-                    no_deps=bool(self.poetry or self.pipenv),
+                    no_deps=bool(self.poetry),
                     requirements=self.requirements_txt,
                     target=self.dependency_directory,
                 )
