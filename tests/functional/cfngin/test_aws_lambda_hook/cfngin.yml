@@ -13,7 +13,7 @@ pre_deploy:
       functions:
         dockerize:
           dockerize_pip: true
-          runtime: python3.8
+          runtime: python3.9
           path: ./lambda_src/dockerize_src
           include:
             - '*.py'
@@ -21,7 +21,7 @@ pre_deploy:
             - '*.pyc'
         nondockerize:
           path: ./lambda_src/nondockerize_src
-          runtime: python3.8
+          runtime: python3.9
           include:
             - '*.py'
           exclude:
@@ -35,6 +35,7 @@ stacks:
       Code: ${hook_data lambda.dockerize}
       Entrypoint: dockerize.handler
       PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+      Runtime: python3.9
   - name: test-nondockerize
     class_path: blueprints.LambdaFunction
     variables:
@@ -42,6 +43,7 @@ stacks:
       Code: ${hook_data lambda.nondockerize}
       Entrypoint: nondockerize.handler
       PermissionsBoundary: ${cfn runway-test-infrastructure-test-runner-boundary.PolicyArn}
+      Runtime: python3.9
 
 post_deploy:
   - path: hooks.awslambda_test.invoke
