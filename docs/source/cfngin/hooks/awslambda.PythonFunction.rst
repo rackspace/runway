@@ -12,7 +12,7 @@ This hook creates deployment packages for Python Lambda Functions, uploads them 
 The return value can be retrieved using the :ref:`hook_data lookup` or by interacting with the :class:`~runway.context.CfnginContext` object passed to the |Blueprint|.
 
 To use this hook to install dependencies, it must be able to find project metadata files.
-This can include ``Pipefile`` & ``Pipfile.lock`` files (pipenv), a ``pyproject.toml`` & ``poetry.lock`` files (poetry), or a ``requirements.txt`` file (pip).
+This can include ``pyproject.toml`` & ``poetry.lock`` files (poetry) or a ``requirements.txt`` file (pip).
 The project metadata files can exist either in the source code directory (value of ``source_code`` arg) or in the same directory as the CFNgin configuration file.
 If metadata files are not found, dependencies will not be included in the deployment package.
 
@@ -26,6 +26,9 @@ It also ensures that binary files built during the install process are compatibl
 .. versionchanged:: 2.8.0
   Use of pipenv now requires version ``>= 2022.8.13``.
   This is the version that changed how ``requirements.txt`` files are generated.
+
+.. versionchanged:: 3.0.0
+  Removed support for pipenv.
 
 
 
@@ -92,9 +95,6 @@ Arguments that can be passed to the hook in the :attr:`~cfngin.hook.args` field.
   :noindex:
 
 .. autoattribute:: runway.cfngin.hooks.awslambda.models.args.PythonHookArgs.use_cache
-  :noindex:
-
-.. autoattribute:: runway.cfngin.hooks.awslambda.models.args.PythonHookArgs.use_pipenv
   :noindex:
 
 .. autoattribute:: runway.cfngin.hooks.awslambda.models.args.PythonHookArgs.use_poetry

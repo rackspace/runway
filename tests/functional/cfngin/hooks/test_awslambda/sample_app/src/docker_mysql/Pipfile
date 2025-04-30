@@ -1,9 +1,0 @@
-[dev-packages]
-
-[packages]
-mysqlclient = "==2.1.1"
-
-[[source]]
-name = "pip_conf_index_global"
-url = "https://pypi.org/simple"
-verify_ssl = false

@@ -18,7 +18,6 @@ env:
   NODE_VERSION: '20'
   PYTEST_ADDOPTS: --color=yes
   RUNWAY_TEST_NAMESPACE: gh-${{ github.run_id }}
-  PIPENV_IGNORE_VIRTUALENVS: '1'
 
 
 jobs:

@@ -59,16 +59,6 @@ body:
       placeholder: 0.0.0
     validations:
       required: true
-  - type: dropdown
-    attributes:
-      label: Installation Type
-      description: How was this version of Runway installed?
-      options:
-        - npm (npm, yarn, etc)
-        - pypi (pip, pipenv, poetry, etc)
-        - direct download (curl, wget, etc)
-    validations:
-      required: true
   - type: textarea
     attributes:
       label: OS / Environment

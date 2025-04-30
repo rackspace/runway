@@ -78,7 +78,6 @@ ruff = "^0.11.7"
 [tool.poetry.group.test.dependencies]
 coverage = {extras = ["toml"], version = "^7.8.0"}
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.1.4"}
-pipenv = "^2024.4.1"  # only used in tests
 pytest = "^8.3.5"
 pytest-cov = "^6.1.1"
 pytest-mock = "^3.14.0"
@@ -167,7 +166,6 @@ exclude = [
   "**/runway/aws_sso_botocore",
   "**/runway/cfngin/hooks/staticsite/auth_at_edge/templates",
   "**/runway/templates/cdk-py",
-  "**/tests/functional/cfngin/test_aws_lambda_hook/lambda_src",
   "**/tests/unit",
   "**/typings",
 ]

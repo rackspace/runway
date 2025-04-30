@@ -30,7 +30,7 @@ import formic
 from troposphere.awslambda import Code
 from typing_extensions import Literal, TypedDict
 
-from ..exceptions import InvalidDockerizePipConfiguration, PipenvError, PipError
+from ..exceptions import InvalidDockerizePipConfiguration, PipError
 from ..utils import ensure_s3_bucket
 
 if TYPE_CHECKING:
@@ -113,7 +113,7 @@ def find_requirements(root: str) -> dict[str, bool] | None:
     """
     findings = {
         file_name: os.path.isfile(os.path.join(root, file_name))  # noqa: PTH118, PTH113
-        for file_name in ["requirements.txt", "Pipfile", "Pipfile.lock"]
+        for file_name in ["requirements.txt"]
     }
 
     if not sum(findings.values()):
@@ -277,24 +277,12 @@ def _zip_from_file_patterns(
     return _zip_files(files, root)
 
 
-def handle_requirements(
-    package_root: str,
-    dest_path: str,
-    requirements: dict[str, bool],
-    pipenv_timeout: int = 300,
-    python_path: str | None = None,
-    use_pipenv: bool = False,
-) -> str:
+def handle_requirements(dest_path: str, requirements: dict[str, bool]) -> str:
     """Use the correct requirements file.
 
     Args:
-        package_root: Base directory containing a requirements file.
         dest_path: Where to output the requirements file if one needs to be created.
         requirements: Map of requirement file names and whether they exist.
-        pipenv_timeout: Seconds to wait for a subprocess to complete.
-        python_path: Explicit python interpreter to be used. Requirement file
-            generators must be installed and executable using ``-m`` if provided.
-        use_pipenv: Explicitly use pipenv to export a Pipfile as requirements.txt.
 
     Returns:
         Path to the final requirements.txt
@@ -304,78 +292,13 @@ def handle_requirements(
             should never be encountered but is included just in case.
 
     """
-    if use_pipenv:
-        LOGGER.info("explicitly using pipenv")
-        return _handle_use_pipenv(
-            package_root=package_root,
-            dest_path=dest_path,
-            python_path=python_path,
-            timeout=pipenv_timeout,
-        )
     if requirements["requirements.txt"]:
         LOGGER.info("using requirements.txt for dependencies")
         return os.path.join(dest_path, "requirements.txt")  # noqa: PTH118
-    if requirements["Pipfile"] or requirements["Pipfile.lock"]:
-        LOGGER.info("using pipenv for dependencies")
-        return _handle_use_pipenv(
-            package_root=package_root,
-            dest_path=dest_path,
-            python_path=python_path,
-            timeout=pipenv_timeout,
-        )
     # This point should never be reached under normal operation since a
     # requirements file of some sort must have been found in another step
     # of the process but just in case it does happen, raise an error.
     raise NotImplementedError("Unable to handle missing requirements file.")
-
-
-def _handle_use_pipenv(
-    package_root: str,
-    dest_path: str,
-    python_path: str | None = None,
-    timeout: int = 300,
-) -> str:
-    """Create requirements file from Pipfile.
-
-    Args:
-        package_root: Base directory to generate requirements from.
-        dest_path: Where to output the requirements file.
-        python_path: Explicit python interpreter to be used. pipenv must be
-            installed and executable using ``-m`` if provided.
-        timeout: Seconds to wait for process to complete.
-
-    Raises:
-        PipenvError: Non-zero exit code returned by pipenv process.
-
-    """
-    if getattr(sys, "frozen", False):
-        LOGGER.error("pipenv can only be used with python installed from PyPi")
-        sys.exit(1)
-    LOGGER.info("creating requirements.txt from Pipfile...")
-    req_path = os.path.join(dest_path, "requirements.txt")  # noqa: PTH118
-    cmd = ["pipenv", "requirements"]
-    environ = os.environ.copy()
-    environ["PIPENV_IGNORE_VIRTUALENVS"] = "1"
-
-    if not (Path(package_root) / "Pipfile.lock").is_file():
-        LOGGER.warning("Pipfile.lock does not exist! creating it...")
-        subprocess.check_call(["pipenv", "lock"], cwd=package_root, env=environ)
-
-    if python_path:
-        cmd.insert(0, python_path)
-        cmd.insert(1, "-m")
-    with (
-        open(req_path, "w", encoding="utf-8") as requirements,  # noqa: PTH123
-        subprocess.Popen(
-            cmd, cwd=package_root, env=environ, stdout=requirements, stderr=subprocess.PIPE
-        ) as pipenv_process,
-    ):
-        _stdout, stderr = pipenv_process.communicate(timeout=timeout)
-        if pipenv_process.returncode == 0:
-            return req_path
-        stderr = stderr.decode("UTF-8")
-        LOGGER.error('"%s" failed with the following output:\n%s', " ".join(cmd), stderr)
-        raise PipenvError
 
 
 def dockerized_pip(  # noqa: C901, PLR0912
@@ -512,13 +435,11 @@ def _zip_package(  # noqa: PLR0915, PLR0912, C901, D417
     excludes: list[str] | None = None,
     follow_symlinks: bool = False,
     includes: list[str],
-    pipenv_timeout: int = 300,
     python_dontwritebytecode: bool = False,
     python_exclude_bin_dir: bool = False,
     python_exclude_setuptools_dirs: bool = False,
     python_path: str | None = None,
     requirements_files: dict[str, bool],
-    use_pipenv: bool = False,
     work_dir: Path,
     **kwargs: Any,
 ) -> tuple[bytes, str]:
@@ -533,22 +454,17 @@ def _zip_package(  # noqa: PLR0915, PLR0912, C901, D417
         follow_symlinks: If true, symlinks will be included in the resulting zip file.
         includes: Inclusion patterns. Only files  matching those patterns will be
             included in the result.
-        pipenv_timeout: pipenv timeout in seconds.
         python_dontwritebytecode: Done write byte code.
         python_exclude_bin_dir: Exclude bin directory.
         python_exclude_setuptools_dirs: Exclude setuptools directories.
-        python_path: Explicit python interpreter to be used. pipenv must be
-            installed and executable using ``-m`` if provided.
+        python_path: Explicit python interpreter to be used.
         requirements_files: Map of requirement file names and whether they exist.
-        use_pipenv: Whether to use pipenv to export a Pipfile as requirements.txt.
         work_dir: Working directory.
 
     Returns:
         Content of the ZIP file as a byte string and calculated hash of all the files
 
     """
-    kwargs.setdefault("pipenv_timeout", 300)
-
     if not work_dir.is_dir():
         work_dir.mkdir(parents=True)
 
@@ -559,14 +475,7 @@ def _zip_package(  # noqa: PLR0915, PLR0912, C901, D417
     tmpdir = tempfile.TemporaryDirectory(prefix="cfngin", dir=work_dir)
     tmp_req = os.path.join(tmpdir.name, "requirements.txt")  # noqa: PTH118
     copydir(package_root, tmpdir.name, includes, excludes, follow_symlinks)
-    tmp_req = handle_requirements(
-        package_root=package_root,
-        dest_path=tmpdir.name,
-        requirements=requirements_files,
-        python_path=python_path,
-        use_pipenv=use_pipenv,
-        pipenv_timeout=pipenv_timeout,
-    )
+    tmp_req = handle_requirements(dest_path=tmpdir.name, requirements=requirements_files)
 
     if should_use_docker(dockerize_pip):
         dockerized_pip(tmpdir.name, **kwargs)
@@ -972,27 +881,17 @@ def upload_lambda_functions(  # noqa: D417
                 directly under this directory will be added to the root of
                 the ZIP file.
 
-            **pipenv_lock_timeout (int | None)**
-                Time in seconds to wait while creating lock file with pipenv.
-
-            **pipenv_timeout (int | None)**
-                Time in seconds to wait while running pipenv.
 
             **python_path (str | None)**
                 Absolute path to a python interpreter to use for
-                ``pip``/``pipenv`` actions. If not provided, the current
-                python interpreter will be used for ``pip`` and ``pipenv``
-                will be used from the current ``$PATH``.
+                ``pip`` actions. If not provided, the current
+                python interpreter will be used for ``pip``.
 
             **runtime (str | None)**
                 Runtime of the AWS Lambda Function being uploaded. Used with
                 ``dockerize_pip`` to automatically select the appropriate
                 Docker image to use. Must provide exactly one of
                 ``docker_file``, ``docker_image``, or ``runtime``.
-
-            **use_pipenv (bool)**
-                Explicitly use Pipfile/Pipfile.lock to prepare package
-                dependencies even if a requirements.txt file is found.
 
     Examples:
         .. Hook configuration.
@@ -1012,7 +911,6 @@ def upload_lambda_functions(  # noqa: D417
                     MyFunction:
                       path: ./lambda_functions
                       dockerize_pip: non-linux
-                      use_pipenv: true
                       runtime: python3.9
                       include:
                         - '*.py'

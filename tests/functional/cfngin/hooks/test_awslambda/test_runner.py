@@ -38,9 +38,6 @@ DOCKER_XMLSEC_DIR = SRC_DIR / "docker_xmlsec"
 
 ENV_VARS = {
     "CI": "1",
-    "PIPENV_IGNORE_VIRTUALENVS": "1",
-    "PIPENV_VENV_IN_PROJECT": "1",
-    "PIPENV_VERBOSITY": "-1",
     "POETRY_VIRTUALENVS_IN_PROJECT": "true",
     "PYTHON_RUNTIME": PYTHON_RUNTIME,
     "PYXMLSEC_STATIC_DEPS": "1",
@@ -155,7 +152,6 @@ def deploy_result(cli_runner: CliRunner) -> Generator[Result, None, None]:
     shutil.rmtree(CURRENT_DIR / ".runway", ignore_errors=True)
     shutil.rmtree(CURRENT_DIR / "sample_app" / ".runway", ignore_errors=True)
     # remove .venv/ & *.lock from source code directories - more important for local testing
-    (DOCKER_MYSQL_DIR / "Pipfile.lock").unlink(missing_ok=True)
     (DOCKER_XMLSEC_DIR / "poetry.lock").unlink(missing_ok=True)
     for subdir in [DOCKER_MYSQL_DIR, DOCKER_XMLSEC_DIR]:
         shutil.rmtree(subdir / ".venv", ignore_errors=True)
@@ -217,7 +213,6 @@ def test_mysql(deploy_result: Result, namespace: str, runway_context: RunwayCont
     response_str = json.dumps(response, indent=4, sort_keys=True)
     assert response["code"] == 200, response_str
     assert len(response["data"]["mysqlclient"]) >= 10
-    assert "Pipfile" not in response["data"]["dir_contents"]
 
 
 def test_xmlsec(deploy_result: Result, namespace: str, runway_context: RunwayContext) -> None:

@@ -48,8 +48,6 @@
         "**/.vscode/extensions.json",
         "**/.vscode/launch.json",
         "**/.vscode/settings.json",
-        "**/Pipfile",
-        "**/Pipfile.lock",
         "**/__pycache__/**",
         "**/_gitignore",
         "**/angular.json",

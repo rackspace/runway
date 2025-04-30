@@ -5,7 +5,6 @@
 # pyright: reportOptionalOperand=none
 from __future__ import annotations
 
-import logging
 import os
 import os.path
 import platform
@@ -125,7 +124,7 @@ class TestLambdaHooks(unittest.TestCase):
         }
         real_kwargs.update(kwargs)
 
-        return upload_lambda_functions(**real_kwargs)  # type: ignore
+        return upload_lambda_functions(**real_kwargs)
 
     @mock_aws
     def test_bucket_default(self) -> None:
@@ -207,7 +206,7 @@ class TestLambdaHooks(unittest.TestCase):
             test_path = "~/test"
 
             mock1.side_effect = lambda p: (  # type: ignore
-                temp_dir.path if p == test_path else orig_expanduser(p)  # type: ignore
+                temp_dir.path if p == test_path else orig_expanduser(p)
             )
 
             results = self.run_hook(functions={"MyFunction": {"path": test_path}})
@@ -527,13 +526,7 @@ class TestLambdaHooks(unittest.TestCase):
     @patch("runway.cfngin.hooks.aws_lambda.subprocess")
     @patch(
         "runway.cfngin.hooks.aws_lambda.find_requirements",
-        MagicMock(
-            return_value={
-                "requirements.txt": True,
-                "Pipfile": False,
-                "Pipfile.lock": False,
-            }
-        ),
+        MagicMock(return_value={"requirements.txt": True}),
     )
     @patch("runway.cfngin.hooks.aws_lambda.copydir", MagicMock())
     @patch(
@@ -692,21 +685,14 @@ class TestDockerizePip:
 class TestHandleRequirements:
     """Test handle_requirements."""
 
-    PIPFILE = (
-        '[[source]]\nurl = "https://pypi.org/simple"\nverify_ssl = false\n'
-        'name = "pip_conf_index_global"\n'
-        '[packages]\nurllib3 = "~=2.2"\n[dev-packages]'
-    )
     REQUIREMENTS = "-i https://pypi.org/simple\n\n"
 
     def test_default(self) -> None:
         """Test default action."""
         with TempDirectory() as tmp_dir:
-            tmp_dir.write("Pipfile", self.PIPFILE.encode("utf-8"))
             expected = b"This is correct."
             tmp_dir.write("requirements.txt", expected)
             req_path = handle_requirements(
-                package_root=cast("str", tmp_dir.path),
                 dest_path=cast("str", tmp_dir.path),
                 requirements=cast("dict[str, bool]", find_requirements(cast("str", tmp_dir.path))),
             )
@@ -714,75 +700,13 @@ class TestHandleRequirements:
             assert req_path == os.path.join(  # noqa: PTH118
                 cast("str", tmp_dir.path), "requirements.txt"
             )
-            assert not (Path(cast("str", tmp_dir.path)) / "Pipfile.lock").is_file()
             assert tmp_dir.read("requirements.txt") == expected
-
-    def test_explicit_pipenv(self, tmp_path: Path) -> None:
-        """Test with 'use_pipenv=True'."""
-        pipfile = tmp_path / "Pipfile"
-        pipfile.write_text(self.PIPFILE)
-        requirements_txt = tmp_path / "requirements.txt"
-        requirements_txt.write_text("This is not correct!")
-
-        req_path = handle_requirements(
-            package_root=str(tmp_path),
-            dest_path=str(tmp_path),
-            requirements=cast("dict[str, bool]", find_requirements(str(tmp_path))),
-            use_pipenv=True,
-        )
-        assert req_path == str(requirements_txt)
-        assert (tmp_path / "Pipfile.lock").is_file()
-
-        assert "urllib3==" in requirements_txt.read_text()
-
-    def test_frozen_pipenv(
-        self, caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-    ) -> None:
-        """Test use pipenv from Pyinstaller build."""  # cspell:ignore Pyinstaller
-        caplog.set_level(logging.ERROR, logger="runway.cfngin.hooks.aws_lambda")
-        monkeypatch.setattr("runway.cfngin.hooks.aws_lambda.sys.frozen", True, raising=False)
-
-        with pytest.raises(SystemExit) as excinfo:
-            handle_requirements(
-                package_root=str(tmp_path),
-                dest_path=str(tmp_path),
-                requirements={
-                    "requirements.txt": False,
-                    "Pipfile": True,
-                    "Pipfile.lock": False,
-                },
-            )
-        assert excinfo.value.code == 1
-        assert caplog.messages == ["pipenv can only be used with python installed from PyPi"]
-
-    def test_implicit_pipenv(self, tmp_path: Path) -> None:
-        """Test implicit use of pipenv."""
-        pipfile = tmp_path / "Pipfile"
-        pipfile.write_text(self.PIPFILE)
-        requirements_txt = tmp_path / "requirements.txt"
-
-        req_path = handle_requirements(
-            package_root=str(tmp_path),
-            dest_path=str(tmp_path),
-            requirements=cast("dict[str, bool]", find_requirements(str(tmp_path))),
-            use_pipenv=True,
-        )
-        assert req_path == str(requirements_txt)
-        assert (tmp_path / "Pipfile.lock").is_file()
-
-        assert "urllib3==" in requirements_txt.read_text()
 
     def test_raise_not_implimented(self) -> None:
         """Test NotImplimentedError is raised when no requirements file."""
         with TempDirectory() as tmp_dir, pytest.raises(NotImplementedError):
             handle_requirements(
-                package_root=cast("str", tmp_dir.path),
-                dest_path=cast("str", tmp_dir.path),
-                requirements={
-                    "requirements.txt": False,
-                    "Pipfile": False,
-                    "Pipfile.lock": False,
-                },
+                dest_path=cast("str", tmp_dir.path), requirements={"requirements.txt": False}
             )
 
 
