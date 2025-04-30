@@ -12,5 +12,5 @@ RunwayEnvironmentsUnresolvedType: TypeAlias = Union[dict[str, Union[bool, list[s
 RunwayEnvVarsType: TypeAlias = dict[str, Union[list[str], str]]
 RunwayEnvVarsUnresolvedType: TypeAlias = Union[RunwayEnvVarsType, str]
 RunwayModuleTypeTypeDef: TypeAlias = Literal[
-    "cdk", "cloudformation", "kubernetes", "serverless", "static", "terraform"
+    "cdk", "cloudformation", "serverless", "static", "terraform"
 ]

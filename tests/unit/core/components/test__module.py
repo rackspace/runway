@@ -279,15 +279,6 @@ class TestModule:
         )
         del mod.type
 
-        mod.definition.type = "kubernetes"
-        assert mod.type == mock_type
-        mock_type.assert_called_with(
-            path=cast("Path", mock_path.module_root),
-            class_path="parent.dir.class",
-            type_str="kubernetes",
-        )
-        del mod.type
-
     @pytest.mark.parametrize(
         "config, use_concurrent, expected",
         [

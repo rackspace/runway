@@ -4,18 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from .utils import DOC_SITE
-
 if TYPE_CHECKING:
     from pathlib import Path
     from types import ModuleType
 
-    from .variables import (
-        Variable,
-        VariableValue,
-        VariableValueConcatenation,
-        VariableValueLookup,
-    )
+    from .variables import Variable, VariableValue, VariableValueConcatenation, VariableValueLookup
 
 
 class RunwayError(Exception):
@@ -254,24 +247,6 @@ class InvalidLookupConcatenation(RunwayError):
     def __reduce__(self) -> tuple[type[Exception], tuple[Any, ...]]:
         """Support for pickling."""
         return self.__class__, (self.invalid_lookup, self.concatenated_lookups)
-
-
-class KubectlVersionNotSpecified(RunwayError):
-    """kubectl version is required but was not specified.
-
-    Version can be specified by using a file or option.
-
-    """
-
-    message: str
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Instantiate class."""
-        self.message = (
-            "kubectl version not specified. Learn how to use Runway to manage kubectl versions "
-            f"at {DOC_SITE}/page/kubernetes/advanced_features.html#version-management"
-        )
-        super().__init__(*args, **kwargs)
 
 
 class NpmNotFound(RunwayError):

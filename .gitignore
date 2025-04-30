@@ -1,4 +1,5 @@
 !infrastructure/**/**/**/package.json
+**/.DS_Store
 *.egg-info
 *.pyc
 *.pyo

@@ -1,4 +1,0 @@
-bases:
-  - ../../base
-resources:
-  - aws-auth-cm.yaml

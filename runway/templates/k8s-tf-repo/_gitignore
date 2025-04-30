@@ -1,5 +1,0 @@
-*.py[co]
-.kube
-.runway
-.terraform
-__pycache__

@@ -1,8 +1,0 @@
-*.py[co]
-.kube
-.runway
-.terraform
-__pycache__
-
-# Ignore any infrastructure repos coincidentally co-located here
-/flux-*

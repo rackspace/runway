@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import sys
 from typing import TYPE_CHECKING, Any, ClassVar, cast
 
@@ -20,7 +19,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-RunwayModuleTypeExtensionsTypeDef = Literal["cdk", "cfn", "k8s", "sls", "tf", "web"]
+RunwayModuleTypeExtensionsTypeDef = Literal["cdk", "cfn", "sls", "tf", "web"]
 
 
 class RunwayModuleType:
@@ -50,8 +49,6 @@ class RunwayModuleType:
     +--------------------+-----------------------------------------------+
     | ``terraform``      | Terraform                                     |
     +--------------------+-----------------------------------------------+
-    | ``kubernetes``     | Kubernetes                                    |
-    +--------------------+-----------------------------------------------+
     | ``static``         | :ref:`index:Static Site`                      |
     +--------------------+-----------------------------------------------+
 
@@ -64,7 +61,6 @@ class RunwayModuleType:
     EXTENSION_MAP: ClassVar[dict[str, str]] = {
         "cdk": "runway.module.cdk.CloudDevelopmentKit",
         "cfn": "runway.module.cloudformation.CloudFormation",
-        "k8s": "runway.module.k8s.K8s",
         "sls": "runway.module.serverless.Serverless",
         "tf": "runway.module.terraform.Terraform",
         "web": "runway.module.staticsite.handler.StaticSite",
@@ -73,7 +69,6 @@ class RunwayModuleType:
     TYPE_MAP: ClassVar[dict[str, str]] = {
         "cdk": EXTENSION_MAP["cdk"],
         "cloudformation": EXTENSION_MAP["cfn"],
-        "kubernetes": EXTENSION_MAP["k8s"],
         "serverless": EXTENSION_MAP["sls"],
         "static": EXTENSION_MAP["web"],
         "terraform": EXTENSION_MAP["tf"],
@@ -160,8 +155,6 @@ class RunwayModuleType:
             self.class_path = self.TYPE_MAP.get("terraform", None)
         elif (self.path / "cdk.json").is_file() and (self.path / "package.json").is_file():
             self.class_path = self.TYPE_MAP.get("cdk", None)
-        elif (self.path / "overlays").is_dir() and self._find_kustomize_files():
-            self.class_path = self.TYPE_MAP.get("kubernetes", None)
         elif (
             next(self.path.glob("*.env"), None)
             or next(self.path.glob("*.yaml"), None)
@@ -170,16 +163,3 @@ class RunwayModuleType:
             self.class_path = self.TYPE_MAP.get("cloudformation", None)
         if self.class_path:
             LOGGER.debug('module class "%s" determined from autodetection', self.class_path)
-
-    def _find_kustomize_files(self) -> bool:
-        """Return true if kustomize yaml file found.
-
-        Returns:
-            boolean: Whether the kustomize yaml exist
-
-        """
-        for _root, _dirnames, filenames in os.walk(self.path):
-            for filename in filenames:
-                if filename == "kustomization.yaml":
-                    return True
-        return False
