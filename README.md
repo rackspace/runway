@@ -18,12 +18,11 @@ Its main goals are to encourage GitOps best-practices, avoid convoluted Makefile
 - Automatic environment identification from git branches
 - Support of IAM roles to assume for each deployment
 - Terraform backend/workspace config management w/per-environment tfvars
-- Automatic kubectl/terraform version management per-environment
+- Automatic terraform version management per-environment
 
 ### Supported Deployment Tools
 
 - AWS CDK
-- Kubectl
 - Serverless Framework
 - CFNgin (CloudFormation)
 - Static websites (build & deploy to S3+CloudFront)

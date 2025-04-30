@@ -29,7 +29,7 @@ def envvars(ctx: click.Context, debug: bool, **_: Any) -> None:
     """Output "env_vars" defined in the Runway config file.
 
     OS environment variables can be set in the Runway config file for different
-    Runway environments (e.g. dev & prod KUBECONFIG values).
+    Runway environments.
     This command allows access to these values for use outside of Runway.
 
     NOTE: Only outputs "env_vars" defined in deployments, not modules.

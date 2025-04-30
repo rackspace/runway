@@ -76,7 +76,7 @@ class EnvManager(DelCachedPropMixin):
         """Initialize class.
 
         Args:
-            bin_name: Name of the binary file (e.g. kubectl)
+            bin_name: Name of the binary file (e.g. terraform)
             dir_name: Name of the directory within the users home
                 directory where binary versions will be stored.
             path: The current working directory.

@@ -138,10 +138,7 @@ class RunwayDeploymentDefinitionModel(ConfigProperty):
             "processing the deployment. (supports lookups)",
             examples=[
                 "${var env_vars.${env DEPLOY_ENVIRONMENT}}",
-                {
-                    "EXAMPLE_VARIABLE": "value",
-                    "KUBECONFIG": [".kube", "${env DEPLOY_ENVIRONMENT}", "config"],
-                },
+                {"EXAMPLE_VARIABLE": "value"},
             ],
         ),
     ] = {}

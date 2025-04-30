@@ -1,4 +1,4 @@
-"""Run a kubectl command."""
+"""Run a terraform command."""
 
 # docs: file://./../../../../docs/source/commands.rst
 import logging

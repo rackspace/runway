@@ -304,17 +304,6 @@ Deployment
 
     .. rubric:: Example
     .. code-block:: yaml
-      :caption: using a lookup as the value
-
-      deployments:
-        - env_vars:
-            NAME: value
-            KUBECONFIG:
-              - .kube
-              - ${env DEPLOY_ENVIRONMENT}
-              - config
-
-    .. code-block:: yaml
       :caption: using a lookup in the value
 
       deployments:
@@ -626,18 +615,6 @@ Module
     Values defined here take precedence.
 
     .. rubric:: Example
-    .. code-block:: yaml
-      :caption: using a lookup as the value
-
-      deployments:
-        - modules:
-          - env_vars:
-              NAME: VALUE
-              KUBECONFIG:
-                - .kube
-                - ${env DEPLOY_ENVIRONMENT}
-                - config
-
     .. code-block:: yaml
       :caption: using a lookup in the value
 

@@ -4,17 +4,7 @@ bucketname
 buildargs
 cfngin
 dockerize
-kbenv
 keypair
-kube
-kubeconfig
-kubectl
-kubelet
-kubelets
-kubernetes
-kustomization
-kustomize
-kustomized
 nosniff
 parseauth
 preload
