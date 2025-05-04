@@ -163,3 +163,134 @@ Some lookup usage may have changed slightly. Here's some examples:
 
   # This is the new usage
   SlackUrl: ${ssm /devops/slack_hook}
+
+*********************************************************
+Migration from upload_lambda_functions to PythonFunction Hook
+*********************************************************
+
+The ``runway.cfngin.hooks.aws_lambda.upload_lambda_functions`` hook is deprecated and slated for removal in Runway v3.0.0. The recommended replacement is the ``runway.cfngin.hooks.awslambda.PythonFunction`` hook (and related hooks like ``PythonLayer``).
+
+The primary difference is that ``upload_lambda_functions`` managed multiple Lambda function packages within a single hook definition, whereas ``PythonFunction`` typically manages a single package per hook definition. This requires splitting one old hook definition into multiple new ones.
+
+--------------------------
+Configuration Changes
+--------------------------
+
+To migrate, replace your existing ``upload_lambda_functions`` hook definition with one or more ``PythonFunction`` definitions.
+
+Key argument mappings:
+
+*   **path:** Change from ``runway.cfngin.hooks.aws_lambda.upload_lambda_functions`` to ``runway.cfngin.hooks.awslambda.PythonFunction``.
+*   **args.bucket** -> ``args.bucket_name``
+*   **args.prefix** -> ``args.object_prefix``
+*   **args.functions.<func_name>.path** -> ``args.source_code`` (in the corresponding new hook definition)
+*   **args.functions.<func_name>.runtime** -> ``args.runtime``
+*   **Dockerization:** ``PythonFunction`` uses Docker for building packages by default (especially when dependencies require it or when deploying cross-platform).
+    *   If the old hook used ``dockerize_pip: true`` or ``dockerize_pip: non-linux``, you might not need explicit Docker configuration in the new hook unless you need to customize the Docker build (e.g., ``args.docker.file``, ``args.docker.image``).
+    *   To *disable* Docker builds (equivalent to the old ``dockerize_pip: false``), use ``args.docker.disabled: true``.
+*   **Include/Exclude:** ``PythonFunction`` uses ``.gitignore`` patterns within the ``source_code`` directory for determining package contents. You can add more patterns using ``args.extend_gitignore``. This replaces the old ``include`` and ``exclude`` arguments.
+*   **data_key:** Each new ``PythonFunction`` hook definition *must* have a unique ``data_key`` assigned. This key is used to reference the hook's output data (e.g., S3 bucket/key) in your blueprints or templates.
+
+--------------------------
+Example Migration
+--------------------------
+
+**Before (using upload_lambda_functions):**
+
+.. code-block:: yaml
+
+  pre_build:
+    - path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+      required: true
+      data_key: lambda_upload  # Generic key for all functions in this hook
+      args:
+        bucket: ${var lambda_bucket_name}
+        prefix: lambda-functions
+        functions:
+          api_handler:
+            path: ./src/api_handler
+            runtime: python3.9
+            include:
+              - "*.py"
+            exclude:
+              - "tests/"
+              - "*.pyc"
+          data_processor:
+            path: ./src/data_processor
+            runtime: python3.9
+            dockerize_pip: true # Build using Docker
+
+**After (using PythonFunction):**
+
+.. code-block:: yaml
+
+  pre_build:
+    - path: runway.cfngin.hooks.awslambda.PythonFunction
+      required: true
+      data_key: api_pkg  # Unique key for the API handler
+      args:
+        bucket_name: ${var lambda_bucket_name}
+        object_prefix: lambda-functions
+        source_code: ./src/api_handler
+        runtime: python3.9
+        # .gitignore in ./src/api_handler handles includes/excludes
+        # Docker build disabled as it wasn't used before
+        docker:
+          disabled: true
+    - path: runway.cfngin.hooks.awslambda.PythonFunction
+      required: true
+      data_key: data_pkg # Unique key for the data processor
+      args:
+        bucket_name: ${var lambda_bucket_name}
+        object_prefix: lambda-functions
+        source_code: ./src/data_processor
+        runtime: python3.9
+        # Docker build enabled by default, no need for explicit arg
+        # unless customization is needed.
+        # .gitignore in ./src/data_processor handles includes/excludes
+
+-----------------------------------
+Updating Blueprint/Template Usage
+-----------------------------------
+
+Previously, you would access the build results using the hook's ``data_key`` and the function name:
+
+.. code-block:: yaml
+
+  # Example in a CFNgin blueprint/template variable definition
+  MyApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: ${hook_data lambda_upload.api_handler.Code.S3Bucket}
+        S3Key: ${hook_data lambda_upload.api_handler.Code.S3Key}
+      # ... other properties
+
+The new, preferred method uses dedicated ``${awslambda...}`` lookups, referencing the specific ``data_key`` you assigned to the ``PythonFunction`` hook:
+
+.. code-block:: yaml
+
+  # Example using ${awslambda...} lookups
+  MyApiFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: ${awslambda.S3Bucket api_pkg}  # Use data_key 'api_pkg'
+        S3Key: ${awslambda.S3Key api_pkg}        # Use data_key 'api_pkg'
+      Runtime: ${awslambda.Runtime api_pkg}      # Get runtime if needed
+      Handler: index.handler                     # Example handler
+      CodeSha256: ${awslambda.CodeSha256 api_pkg} # For drift detection
+      # ... other properties
+
+  MyDataProcessorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: ${awslambda.S3Bucket data_pkg} # Use data_key 'data_pkg'
+        S3Key: ${awslambda.S3Key data_pkg}       # Use data_key 'data_pkg'
+      Runtime: ${awslambda.Runtime data_pkg}
+      Handler: process.handler                   # Example handler
+      CodeSha256: ${awslambda.CodeSha256 data_pkg}
+      # ... other properties
+
+You can also access attributes directly from the hook data object (e.g., ``${hook_data api_pkg.S3Bucket}``), but the dedicated lookups are generally recommended for clarity and future compatibility.
