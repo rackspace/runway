@@ -142,7 +142,7 @@ Example
         docker:
           disabled: true
         extend_gitignore:
-          - "*.lock"
+          - '*.lock'
           - '*.md'
           - '*.toml'
           - tests/
@@ -161,7 +161,7 @@ Example
         #   image: public.ecr.aws/sam/build-python3.9:latest  # inferred from runtime
         #   pull: true  # default value
         extend_gitignore:
-          - "*.lock"
+          - '*.lock'
           - '*.md'
           - '*.toml'
           - tests/
@@ -184,7 +184,7 @@ Example
           file: ./Dockerfile
           pull: false
         extend_gitignore:
-          - "*.lock"
+          - '*.lock'
           - '*.md'
           - '*.toml'
           - tests/
@@ -200,3 +200,80 @@ Example
         XmlS3Bucket: ${awslambda.S3Bucket awslambda.xmlsec}
         XmlS3Key: ${awslambda.S3Key awslambda.xmlsec}
     ...
+
+
+**********************************************************
+How To Migrate From ``aws_lambda.upload_lambda_functions``
+**********************************************************
+
+The ``aws_lambda.upload_lambda_functions`` hook was deprecated in :ref:`v2.5.0 <changelog:v2.5.0>` and removed in :ref:`v3.0.0 <changelog:3.0.0>`.
+To continue uploading AWS Lambda Function deployment packages with CFNgin the :ref:`cfngin/hooks/awslambda.PythonFunction:awslambda.PythonFunction` hook can be used in its place with some modifications to a CFNgin configuration file.
+
+
+Refer to the example below which demonstrates migrating an example CFNgin configuration file for two Lambda Functions stored within ``./lambda_functions/``.
+
+.. tab-set::
+
+  .. tab-item:: ``aws_lambda.upload_lambda_functions``
+
+    .. code-block:: yaml
+      :linenos:
+
+      pre_deploy:
+        - path: runway.cfngin.hooks.aws_lambda.upload_lambda_functions
+          data_key: lambda
+          args:
+            bucket: custom-bucket
+            follow_symlinks: true
+            prefix: cloudformation-custom-resources/
+            payload_acl: authenticated-read
+            functions:
+              MyFunctionFoo:
+                path: ./lambda_functions/foo
+                dockerize_pip: non-linux
+                runtime: python3.9
+                include:
+                  - '*.py'
+                  - '*.txt'
+                exclude:
+                  - '*.pyc'
+                  - test/
+              MyFunctionBar:
+                path: ./lambda_functions/bar
+                dockerize_pip: non-linux
+                runtime: python3.9
+                include:
+                  - '*.py'
+                  - '*.txt'
+                exclude:
+                  - '*.pyc'
+                  - test/
+
+  .. tab-item:: ``awslambda.PythonFunction``
+
+    .. code-block:: yaml
+      :linenos:
+
+      pre_deploy:
+        - path: runway.cfngin.hooks.awslambda.PythonFunction
+          data_key: awslambda.foo
+          args:
+            bucket_name: custom-bucket
+            extend_gitignore:
+              - '*.lock'
+              - '*.pyc'
+              - '*.toml'
+              - tests/
+            runtime: python3.9
+            source_code: ./lambda_functions/foo
+        - path: runway.cfngin.hooks.awslambda.PythonFunction
+          data_key: awslambda.bar
+          args:
+            bucket_name: custom-bucket
+            extend_gitignore:
+              - '*.lock'
+              - '*.pyc'
+              - '*.toml'
+              - tests/
+            runtime: python3.9
+            source_code: ./lambda_functions/bar

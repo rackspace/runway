@@ -14,7 +14,6 @@ Runway is a lightweight wrapper around infrastructure deployment (e.g. CloudForm
   :hidden:
 
   installation
-  upgrades
   getting_started
   quickstart/index
   commands
@@ -148,6 +147,14 @@ Runway maintains a cache of Terraform versions on a system, downloading and inst
 
 
 .. toctree::
+  :caption: Upgrading
+  :maxdepth: 2
+  :glob:
+  :hidden:
+
+  upgrading/*
+
+.. toctree::
   :caption: Developers Guide
   :maxdepth: 2
   :glob:
@@ -172,3 +179,4 @@ Runway maintains a cache of Terraform versions on a system, downloading and inst
   changelog
   License <license>
   terminology
+  upgrades
