@@ -67,13 +67,13 @@ sphinx-copybutton = "^0.5.2"
 sphinx-design = "^0.6.1"
 sphinx-github-changelog = "^1.4.0"
 sphinx-notfound-page = "^1.1.0"
-sphinxcontrib-apidoc = "^0.5.0"
+sphinxcontrib-apidoc = "^0.6.0"
 sphinxcontrib-external-links = "^0.1.1"
 sphinxcontrib-jquery = "^4.1"
 sphinxcontrib-programoutput = "^0.17"
 
 [tool.poetry.group.lint.dependencies]
-ruff = "^0.11.7"
+ruff = "^0.11.10"
 
 [tool.poetry.group.test.dependencies]
 coverage = {extras = ["toml"], version = "^7.8.0"}
