@@ -2775,20 +2775,20 @@ theme-sbt = ["sphinx-book-theme (>=1.1,<2.0)"]
 
 [[package]]
 name = "sphinx-github-changelog"
-version = "1.4.0"
+version = "1.7.1"
 description = "Build a sphinx changelog from GitHub Releases"
 optional = false
-python-versions = "<4.0,>=3.8"
+python-versions = ">=3.9"
 groups = ["docs"]
 files = [
-    {file = "sphinx_github_changelog-1.4.0-py3-none-any.whl", hash = "sha256:cdf2099ea3e4587ae8637be7ba609738bfdeca4bd80c5df6fc45046735ae5c2f"},
-    {file = "sphinx_github_changelog-1.4.0.tar.gz", hash = "sha256:204745e93a1f280e4664977b5fee526b0a011c92ca19c304bd01fd641ddb6393"},
+    {file = "sphinx_github_changelog-1.7.1-py3-none-any.whl", hash = "sha256:5accdbdbd900287c2d6a737c322381e3f2b02053b67029006f335519a8025314"},
+    {file = "sphinx_github_changelog-1.7.1.tar.gz", hash = "sha256:2ec5a716fbd21edcb4f549f8e4503a7ab08a285585aaf291a7e97d79cd6467ab"},
 ]
 
 [package.dependencies]
 docutils = "*"
 requests = "*"
-Sphinx = "*"
+sphinx = "*"
 
 [[package]]
 name = "sphinx-notfound-page"
@@ -3267,4 +3267,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9, <3.13"
-content-hash = "aacd3f97481ac2312aff1bb0f5e1ce5b031bad420c07097075272a4410a929d2"
+content-hash = "7bd1deff0cb2b4a4a329797d2b638a8ff9b96e293268be4fc7970f848ab8b836"
