@@ -79,51 +79,7 @@ class TestStaticSite:
             (
                 {
                     "cloudformation_service_role": "aws:arn:iam:123456789012:role/name",
-                    "staticsite_auth_at_edge": True,
-                    "staticsite_user_pool_arn": "arn:aws:cognito-idp:<region>:<account-id>"
-                    ":userpool/<pool>",
-                },
-                "02",
-            ),
-            (
-                {"staticsite_auth_at_edge": True, "staticsite_create_user_pool": True},
-                "03",
-            ),
-        ],
-    )
-    def test_create_dependencies_yaml(
-        self,
-        expected_yaml: Path,
-        parameters: dict[str, Any],
-        runway_context: RunwayContext,
-        test_file_number: str,
-        tmp_path: Path,
-    ) -> None:
-        """Test _create_dependencies_yaml."""
-        params = {"namespace": "test"}
-        params.update(parameters)
-        obj = StaticSite(
-            runway_context,
-            module_root=tmp_path,
-            name="test",
-            parameters=params,
-        )
-        assert (
-            obj._create_dependencies_yaml(tmp_path).read_text()
-            == (expected_yaml / f"dependencies.{test_file_number}.yaml").read_text()
-        )
-
-    @pytest.mark.parametrize(
-        "parameters, test_file_number",
-        [
-            ({}, "01"),
-            (
-                {
-                    "cloudformation_service_role": "aws:arn:iam:123456789012:role/name",
-                    "staticsite_auth_at_edge": True,
                     "staticsite_role_boundary_arn": "aws:arn:iam:123456789012:policy/name",
-                    "staticsite_user_pool_arn": "arn:aws:cognito-idp:<region>:<account-id>"
-                    ":userpool/<pool>",
                 },
                 "02",
             ),
@@ -160,7 +116,7 @@ class TestStaticSite:
         obj = StaticSite(
             runway_context,
             module_root=tmp_path,
-            parameters={"namespace": "test", "staticsite_auth_at_edge": True},
+            parameters={"namespace": "test"},
         )
         assert not obj.deploy()
         mock_setup_website_module.assert_called_once_with(command="deploy")
@@ -175,48 +131,10 @@ class TestStaticSite:
         obj = StaticSite(
             runway_context,
             module_root=tmp_path,
-            parameters={"namespace": "test", "staticsite_auth_at_edge": True},
+            parameters={"namespace": "test"},
         )
         assert not obj.destroy()
         mock_setup_website_module.assert_called_once_with(command="destroy")
-
-    def test_ensure_auth_at_edge_requirements_exit(
-        self, runway_context: RunwayContext, tmp_path: Path
-    ) -> None:
-        """Test _ensure_auth_at_edge_requirements."""
-        with pytest.raises(SystemExit):
-            StaticSite(
-                runway_context,
-                module_root=tmp_path,
-                parameters={"namespace": "test", "staticsite_auth_at_edge": True},
-            )._ensure_auth_at_edge_requirements()
-
-    def test_ensure_cloudfront_with_auth_at_edge_exit(
-        self, runway_context: RunwayContext, tmp_path: Path
-    ) -> None:
-        """Test _ensure_cloudfront_with_auth_at_edge."""
-        with pytest.raises(SystemExit):
-            StaticSite(
-                runway_context,
-                module_root=tmp_path,
-                parameters={
-                    "namespace": "test",
-                    "staticsite_auth_at_edge": True,
-                    "staticsite_cf_disable": True,
-                },
-            )
-
-    def test_ensure_correct_region_with_auth_at_edge_exit(
-        self, runway_context: RunwayContext, tmp_path: Path
-    ) -> None:
-        """Test _ensure_correct_region_with_auth_at_edge."""
-        runway_context.env.aws_region = "us-west-2"
-        with pytest.raises(SystemExit):
-            StaticSite(
-                runway_context,
-                module_root=tmp_path,
-                parameters={"namespace": "test", "staticsite_auth_at_edge": True},
-            )
 
     def test_ensure_valid_environment_config_exit(
         self, runway_context: RunwayContext, tmp_path: Path
@@ -234,23 +152,14 @@ class TestStaticSite:
             runway_context,
             module_root=tmp_path,
             name="test",
-            parameters={"namespace": "test", "staticsite_auth_at_edge": True},
+            parameters={"namespace": "test"},
         )
-        site_stack_variables = {
-            "Aliases": ["example.com"],
-            "OAuthScopes": "scopes",
-            "RedirectPathSignIn": "signin",
-            "RedirectPathSignOut": "signout",
-        }
+        site_stack_variables = {"Aliases": ["example.com"]}
         result = obj._get_client_updater_variables("test", site_stack_variables)
         mock_add_url_scheme.assert_called_once_with(site_stack_variables["Aliases"][0])
         assert result["alternate_domains"] == [mock_add_url_scheme.return_value]
         assert "rxref test-" in result["client_id"]
         assert "rxref test::" in result["distribution_domain"]
-        assert result["oauth_scopes"] == site_stack_variables["OAuthScopes"]
-        assert result["redirect_path_sign_in"] == site_stack_variables["RedirectPathSignIn"]
-        assert result["redirect_path_sign_out"] == site_stack_variables["RedirectPathSignOut"]
-        assert result["supported_identity_providers"] == obj.parameters.supported_identity_providers
 
     def test_init(
         self, caplog: pytest.LogCaptureFixture, runway_context: RunwayContext, tmp_path: Path
@@ -271,7 +180,7 @@ class TestStaticSite:
         obj = StaticSite(
             runway_context,
             module_root=tmp_path,
-            parameters={"namespace": "test", "staticsite_auth_at_edge": True},
+            parameters={"namespace": "test"},
         )
         assert not obj.plan()
         mock_setup_website_module.assert_called_once_with(command="plan")
@@ -290,7 +199,7 @@ class TestStaticSite:
                 runway_context,
                 module_root=tmp_path,
                 name=provided,
-                parameters={"namespace": "test", "staticsite_auth_at_edge": False},
+                parameters={"namespace": "test"},
             ).sanitized_name
             == expected
         )

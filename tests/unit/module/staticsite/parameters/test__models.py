@@ -86,11 +86,9 @@ class TestRunwayStaticSiteModuleParametersDataModel:
             namespace="test",
             staticsite_additional_redirect_domains="redirect0,redirect1",  # type: ignore
             staticsite_aliases="test-alias",  # type: ignore
-            staticsite_supported_identity_providers="id0, id1",  # type: ignore
         )
         assert obj.additional_redirect_domains == ["redirect0", "redirect1"]
         assert obj.aliases == ["test-alias"]
-        assert obj.supported_identity_providers == ["id0", "id1"]
 
     def test_init_default(self) -> None:
         """Test init default."""
@@ -98,7 +96,6 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         assert not obj.acmcert_arn
         assert obj.additional_redirect_domains == []
         assert obj.aliases == []
-        assert obj.auth_at_edge is False
         assert obj.cf_disable is False
         assert obj.cookie_settings == {
             "idToken": "Path=/; Secure; SameSite=Lax",
@@ -106,7 +103,6 @@ class TestRunwayStaticSiteModuleParametersDataModel:
             "refreshToken": "Path=/; Secure; SameSite=Lax",
             "nonce": "Path=/; Secure; HttpOnly; Max-Age=1800; SameSite=Lax",
         }
-        assert obj.create_user_pool is False
         assert obj.custom_error_responses == []
         assert obj.enable_cf_logging is True
         assert obj.http_headers == {
@@ -123,23 +119,9 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         assert obj.lambda_function_associations == []
         assert obj.namespace == "test"
         assert obj.non_spa is False
-        assert obj.oauth_scopes == [
-            "phone",
-            "email",
-            "profile",
-            "openid",
-            "aws.cognito.signin.user.admin",
-        ]
-        assert obj.redirect_path_auth_refresh == "/refreshauth"
-        assert obj.redirect_path_sign_in == "/parseauth"
-        assert obj.redirect_path_sign_out == "/"
-        assert not obj.required_group
         assert not obj.rewrite_directory_index
         assert not obj.role_boundary_arn
         assert not obj.service_role
-        assert obj.sign_out_url == "/signout"
-        assert obj.supported_identity_providers == ["COGNITO"]
-        assert not obj.user_pool_arn
         assert not obj.web_acl
 
     def test_init_extra(self) -> None:
@@ -162,10 +144,8 @@ class TestRunwayStaticSiteModuleParametersDataModel:
             "staticsite_acmcert_arn": "aws:arn:acm:us-east-1:cert:test",
             "staticsite_additional_redirect_domains": ["github.com"],
             "staticsite_aliases": ["test-alias"],
-            "staticsite_auth_at_edge": True,
             "staticsite_cf_disable": True,
             "staticsite_cookie_settings": {"test-cookie": "val"},
-            "staticsite_create_user_pool": True,
             "staticsite_custom_error_responses": [{"ErrorCode": 404}],
             "staticsite_enable_cf_logging": False,
             "staticsite_http_headers": {"test-header": "val"},
@@ -177,26 +157,18 @@ class TestRunwayStaticSiteModuleParametersDataModel:
             ],
             "namespace": "test",
             "staticsite_non_spa": True,
-            "staticsite_oauth_scopes": ["email"],
-            "staticsite_redirect_path_auth_refresh": "/test-refresh",
-            "staticsite_redirect_path_sign_in": "/test-sign-in",
-            "staticsite_redirect_path_sign_out": "/test-sign-out-redirect",
             "staticsite_required_group": "any",
             "staticsite_rewrite_directory_index": "test-rewrite-index",
             "staticsite_role_boundary_arn": "arn:aws:iam:::role/test",
             "staticsite_sign_out_url": "/test-sign-out",
-            "staticsite_supported_identity_providers": ["google"],
-            "staticsite_user_pool_arn": "arn:aws:cognito:::pool/test",
             "staticsite_web_acl": "arn:aws::::acl/test",
         }
         obj = RunwayStaticSiteModuleParametersDataModel(**data)  # type: ignore
         assert obj.acmcert_arn == data["staticsite_acmcert_arn"]
         assert obj.additional_redirect_domains == data["staticsite_additional_redirect_domains"]
         assert obj.aliases == data["staticsite_aliases"]
-        assert obj.auth_at_edge is data["staticsite_auth_at_edge"]
         assert obj.cf_disable is data["staticsite_cf_disable"]
         assert obj.cookie_settings == data["staticsite_cookie_settings"]
-        assert obj.create_user_pool is data["staticsite_create_user_pool"]
         assert len(obj.custom_error_responses) == len(
             data["staticsite_custom_error_responses"]  # type: ignore
         )
@@ -215,15 +187,7 @@ class TestRunwayStaticSiteModuleParametersDataModel:
         )
         assert obj.namespace == data["namespace"]
         assert obj.non_spa is data["staticsite_non_spa"]
-        assert obj.oauth_scopes == data["staticsite_oauth_scopes"]
-        assert obj.redirect_path_auth_refresh == data["staticsite_redirect_path_auth_refresh"]
-        assert obj.redirect_path_sign_in == data["staticsite_redirect_path_sign_in"]
-        assert obj.redirect_path_sign_out == data["staticsite_redirect_path_sign_out"]
-        assert obj.required_group == data["staticsite_required_group"]
         assert obj.rewrite_directory_index == data["staticsite_rewrite_directory_index"]
         assert obj.role_boundary_arn == data["staticsite_role_boundary_arn"]
         assert obj.service_role == data["cloudformation_service_role"]
-        assert obj.sign_out_url == data["staticsite_sign_out_url"]
-        assert obj.supported_identity_providers == data["staticsite_supported_identity_providers"]
-        assert obj.user_pool_arn == data["staticsite_user_pool_arn"]
         assert obj.web_acl == data["staticsite_web_acl"]

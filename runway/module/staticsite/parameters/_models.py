@@ -80,9 +80,6 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
     aliases: list[str] = []
     """Any custom domains that should be added to the CloudFront Distribution."""
 
-    auth_at_edge: bool = False
-    """Auth@Edge make the static site private by placing it behind an authorization wall."""
-
     cf_disable: bool = False
     """Whether deployment of the CloudFront Distribution should be disabled."""
 
@@ -96,9 +93,6 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
         "nonce": "Path=/; Secure; HttpOnly; Max-Age=1800; SameSite=Lax",
     }
     """The default cookie settings for retrieved tokens and generated nonce's."""
-
-    create_user_pool: bool = False
-    """Whether to create a User Pool for the Auth@Edge configuration."""
 
     custom_error_responses: list[RunwayStaticSiteCustomErrorResponseDataModel] = []
     """Define custom error responses."""
@@ -128,30 +122,6 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
     non_spa: bool = False
     """Whether this site is a single page application (SPA)."""
 
-    oauth_scopes: list[str] = [
-        "phone",
-        "email",
-        "profile",
-        "openid",
-        "aws.cognito.signin.user.admin",
-    ]
-    """Scope is a mechanism in OAuth 2.0 to limit an application's access to a user's account."""
-
-    redirect_path_auth_refresh: str = "/refreshauth"
-    """The path that a user is redirected to when their authorization tokens have expired (1 hour)."""
-
-    redirect_path_sign_in: str = "/parseauth"
-    """The path that a user is redirected to after sign-in."""
-
-    redirect_path_sign_out: str = "/"
-    """The path that a user is redirected to after sign-out."""
-
-    required_group: str | None = None
-    """Name of Cognito User Pool group of which users must be a member to be granted access to the site.
-    If ``None``, allows all UserPool users to have access.
-
-    """
-
     rewrite_directory_index: str | None = None
     """Deploy a Lambda@Edge function designed to rewrite directory indexes."""
 
@@ -164,22 +134,12 @@ class RunwayStaticSiteModuleParametersDataModel(ConfigProperty):
     service_role: str | None = Field(default=None, alias="cloudformation_service_role")
     """IAM role that CloudFormation will use."""
 
-    sign_out_url: str = "/signout"
-    """The path a user should access to sign themselves out of the application."""
-
-    supported_identity_providers: list[str] = ["COGNITO"]
-    """A comma delimited list of the User Pool client identity providers."""
-
-    user_pool_arn: str | None = None
-    """The ARN of a pre-existing Cognito User Pool to use with Auth@Edge."""
-
     web_acl: str | None = None
     """The ARN of a web access control list (web ACL) to associate with the CloudFront Distribution."""
 
     @field_validator(
         "additional_redirect_domains",
         "aliases",
-        "supported_identity_providers",
         mode="before",
     )
     @classmethod
