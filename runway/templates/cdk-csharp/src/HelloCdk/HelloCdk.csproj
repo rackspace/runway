@@ -6,10 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.CDK" Version="0.27.0" />
-    <PackageReference Include="Amazon.CDK.AWS.IAM" Version="0.27.0" />
-    <PackageReference Include="Amazon.CDK.AWS.SNS" Version="0.27.0" />
-    <PackageReference Include="Amazon.CDK.AWS.SQS" Version="0.27.0" />
+    <PackageReference Include="Amazon.CDK" Version="1.204.0" />
+    <PackageReference Include="Amazon.CDK.AWS.IAM" Version="1.204.0" />
+    <PackageReference Include="Amazon.CDK.AWS.SNS" Version="1.204.0" />
+    <PackageReference Include="Amazon.CDK.AWS.SQS" Version="1.204.0" />
   </ItemGroup>
 
 </Project>
