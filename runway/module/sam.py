@@ -146,10 +146,10 @@ class Sam(RunwayModule[SamOptions]):
                 ", ".join(["template.yaml", "template.yml", "sam.yaml", "sam.yml"]),
             )
             return True
-        
+
         if self.parameters or self.explicitly_enabled or self.config_file:
             return False
-            
+
         self.logger.info(
             "skipped; config file for this stage/region not found -- looking for one of: %s",
             ", ".join(gen_sam_config_files(self.stage, self.region)),
@@ -168,25 +168,25 @@ class Sam(RunwayModule[SamOptions]):
 
         """
         cmd = ["sam", command]
-        
+
         # Add template file if found
         if self.template_file:
             cmd.extend(["--template-file", str(self.template_file)])
-            
+
         # Add config file if found
         if self.config_file:
             cmd.extend(["--config-file", str(self.config_file)])
-            
+
         # Add common CLI args
         cmd.extend(self.cli_args)
-        
+
         # Add command-specific args
         cmd.extend(args_list or [])
-        
+
         # Add no-color if needed
         if self.ctx.no_color:
             cmd.append("--no-color")
-            
+
         return cmd
 
     def sam_build(self, *, skip_build: bool = False) -> None:
@@ -199,7 +199,7 @@ class Sam(RunwayModule[SamOptions]):
         if skip_build or self.options.skip_build:
             self.logger.info("skipped sam build")
             return
-            
+
         self.logger.info("build (in progress)")
         run_module_command(
             cmd_list=self.gen_cmd("build", self.options.build_args),
@@ -217,12 +217,12 @@ class Sam(RunwayModule[SamOptions]):
         """
         if not skip_build:
             self.sam_build()
-            
+
         self.logger.info("deploy (in progress)")
-        
+
         # Build deploy command with parameters
         deploy_args = self.options.deploy_args.copy()
-        
+
         # Add parameter overrides if provided
         if self.parameters:
             param_overrides = []
@@ -230,12 +230,12 @@ class Sam(RunwayModule[SamOptions]):
                 param_overrides.append(f"{key}={value}")
             if param_overrides:
                 deploy_args.extend(["--parameter-overrides"] + param_overrides)
-        
+
         # Add stack name based on stage if not already provided
         if not any(arg.startswith("--stack-name") for arg in deploy_args):
             stack_name = f"{self.name}-{self.stage}"
             deploy_args.extend(["--stack-name", stack_name])
-            
+
         run_module_command(
             cmd_list=self.gen_cmd("deploy", deploy_args),
             env_vars=self.ctx.env.vars,
@@ -246,18 +246,18 @@ class Sam(RunwayModule[SamOptions]):
     def sam_delete(self) -> None:
         """Execute `sam delete` command."""
         self.logger.info("destroy (in progress)")
-        
+
         # Build delete command
         delete_args = []
-        
+
         # Add stack name based on stage
         stack_name = f"{self.name}-{self.stage}"
         delete_args.extend(["--stack-name", stack_name])
-        
+
         # Add no-prompts for non-interactive mode
         if self.ctx.is_noninteractive:
             delete_args.append("--no-prompts")
-            
+
         run_module_command(
             cmd_list=self.gen_cmd("delete", delete_args),
             env_vars=self.ctx.env.vars,

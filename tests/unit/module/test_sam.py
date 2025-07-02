@@ -93,7 +93,7 @@ class TestSam:
         mocker.patch(f"{MODULE}.Sam.check_for_sam")
         template_file = tmp_path / "template.yaml"
         template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
-        
+
         module = Sam(self.get_context(), module_root=tmp_path)
         assert module.template_file == template_file
 
@@ -108,7 +108,7 @@ class TestSam:
         mocker.patch(f"{MODULE}.Sam.check_for_sam")
         config_file = tmp_path / "samconfig.toml"
         config_file.write_text("[default.deploy.parameters]\nstack_name = \"test-stack\"")
-        
+
         module = Sam(self.get_context(), module_root=tmp_path)
         assert module.config_file == config_file
 
@@ -125,7 +125,7 @@ class TestSam:
         template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
         config_file = tmp_path / "samconfig.toml"
         config_file.write_text("[default.deploy.parameters]\nstack_name = \"test-stack\"")
-        
+
         module = Sam(self.get_context(), module_root=tmp_path)
         assert module.skip is False
 
@@ -134,12 +134,12 @@ class TestSam:
         mocker.patch(f"{MODULE}.Sam.check_for_sam")
         template_file = tmp_path / "template.yaml"
         template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
-        
+
         context = self.get_context()
         context.no_color = False  # Ensure no-color is False
         module = Sam(context, module_root=tmp_path)
         cmd = module.gen_cmd("build")
-        
+
         expected = [
             "sam", "build",
             "--template-file", str(template_file),
@@ -151,15 +151,15 @@ class TestSam:
         """Test deploy method."""
         mock_check_for_sam = mocker.patch(f"{MODULE}.Sam.check_for_sam")
         mock_sam_deploy = mocker.patch(f"{MODULE}.Sam.sam_deploy")
-        
+
         template_file = tmp_path / "template.yaml"
         template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
         config_file = tmp_path / "samconfig.toml"
         config_file.write_text("[default.deploy.parameters]\nstack_name = \"test-stack\"")
-        
+
         module = Sam(self.get_context(), module_root=tmp_path)
         module.deploy()
-        
+
         mock_check_for_sam.assert_called_once()
         mock_sam_deploy.assert_called_once()
 
@@ -167,10 +167,10 @@ class TestSam:
         """Test deploy method when skipped."""
         mock_check_for_sam = mocker.patch(f"{MODULE}.Sam.check_for_sam")
         mock_sam_deploy = mocker.patch(f"{MODULE}.Sam.sam_deploy")
-        
+
         module = Sam(self.get_context(), module_root=tmp_path)
         module.deploy()
-        
+
         mock_check_for_sam.assert_called_once()
         mock_sam_deploy.assert_not_called()
 
@@ -178,15 +178,15 @@ class TestSam:
         """Test destroy method."""
         mock_check_for_sam = mocker.patch(f"{MODULE}.Sam.check_for_sam")
         mock_sam_delete = mocker.patch(f"{MODULE}.Sam.sam_delete")
-        
+
         template_file = tmp_path / "template.yaml"
         template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
         config_file = tmp_path / "samconfig.toml"
         config_file.write_text("[default.deploy.parameters]\nstack_name = \"test-stack\"")
-        
+
         module = Sam(self.get_context(), module_root=tmp_path)
         module.destroy()
-        
+
         mock_check_for_sam.assert_called_once()
         mock_sam_delete.assert_called_once()
 
