@@ -11,6 +11,7 @@ from ._cdk_py import cdk_py
 from ._cdk_tsc import cdk_tsc
 from ._cfn import cfn
 from ._cfngin import cfngin
+from ._sam import sam
 from ._sls_py import sls_py
 from ._sls_tsc import sls_tsc
 from ._static_angular import static_angular
@@ -23,6 +24,7 @@ __all__ = [
     "cdk_tsc",
     "cfn",
     "cfngin",
+    "sam",
     "sls_py",
     "sls_tsc",
     "static_angular",
@@ -36,6 +38,7 @@ COMMANDS = [
     cdk_tsc,
     cfn,
     cfngin,
+    sam,
     sls_py,
     sls_tsc,
     static_angular,
