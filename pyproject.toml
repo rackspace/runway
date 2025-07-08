@@ -79,7 +79,7 @@ ruff = "^0.11.10"
 coverage = {extras = ["toml"], version = "^7.9.1"}
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.1.8"}
 pytest = "^8.4.1"
-pytest-cov = "^6.1.1"
+pytest-cov = "^6.2.1"
 pytest-mock = "^3.14.1"
 pytest-order = "^1.3.0"
 pytest-subprocess = "^1.5.3"
