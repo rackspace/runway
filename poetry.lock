@@ -1580,14 +1580,14 @@ files = [
 
 [[package]]
 name = "moto"
-version = "5.1.4"
+version = "5.1.8"
 description = "A library that allows you to easily mock out tests based on AWS infrastructure"
 optional = false
 python-versions = ">=3.9"
 groups = ["test"]
 files = [
-    {file = "moto-5.1.4-py3-none-any.whl", hash = "sha256:9a19d7a64c3f03824389cfbd478b64c82bd4d8da21b242a34259360d66cd108b"},
-    {file = "moto-5.1.4.tar.gz", hash = "sha256:b339c3514f2986ebefa465671b688bdbf51796705702214b1bad46490b68507a"},
+    {file = "moto-5.1.8-py3-none-any.whl", hash = "sha256:12f3a15100da7de019c671a516dbba33b14072faba103f16ca79a39b8c803b7d"},
+    {file = "moto-5.1.8.tar.gz", hash = "sha256:5c2f63c051b7c13224cb1483917c85a796468d7e37dcd5d1a5b8de66729de3f4"},
 ]
 
 [package.dependencies]
@@ -3271,4 +3271,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9, <3.13"
-content-hash = "022ad00b489ec531d263804d40724bba3a7238a87df70b50f0f83b5c2a3c4246"
+content-hash = "efd00030227cca075a20ef140bac4d8163c1a187aadf0498585ab209457093e2"
