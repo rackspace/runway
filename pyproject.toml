@@ -76,7 +76,7 @@ sphinxcontrib-programoutput = "^0.17"
 ruff = "^0.11.10"
 
 [tool.poetry.group.test.dependencies]
-coverage = {extras = ["toml"], version = "^7.9.1"}
+coverage = {extras = ["toml"], version = "^7.9.2"}
 moto = {extras = ["ec2", "ecs", "iam", "s3", "ssm"], version = "^5.1.8"}
 pytest = "^8.4.1"
 pytest-cov = "^6.2.1"
