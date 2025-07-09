@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import logging
-import os
-import subprocess
-import tempfile
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 from .._logging import PrefixAdaptor
 from ..compat import cached_property
@@ -143,7 +142,7 @@ class Sam(RunwayModule[SamOptions]):
         if not self.template_file:
             self.logger.info(
                 "skipped; SAM template file not found -- looking for one of: %s",
-                ", ".join(["template.yaml", "template.yml", "sam.yaml", "sam.yml"]),
+                "template.yaml, template.yml, sam.yaml, sam.yml",
             )
             return True
 
@@ -229,7 +228,7 @@ class Sam(RunwayModule[SamOptions]):
             for key, value in self.parameters.items():
                 param_overrides.append(f"{key}={value}")
             if param_overrides:
-                deploy_args.extend(["--parameter-overrides"] + param_overrides)
+                deploy_args.extend(["--parameter-overrides", *param_overrides])
 
         # Add stack name based on stage if not already provided
         if not any(arg.startswith("--stack-name") for arg in deploy_args):

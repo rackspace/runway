@@ -147,16 +147,10 @@ class RunwayModuleType:
 
     def _set_class_path_based_on_autodetection(self) -> None:
         """Based on the files detected in the base path set the class_path."""
-        if (
-            any(
-                (self.path / sam_template).is_file()
-                for sam_template in ["template.yaml", "template.yml", "sam.yaml", "sam.yml"]
-            )
-            and any(
-                (self.path / sam_config).is_file()
-                for sam_config in ["samconfig.toml"]
-            )
-        ):
+        if any(
+            (self.path / sam_template).is_file()
+            for sam_template in ["template.yaml", "template.yml", "sam.yaml", "sam.yml"]
+        ) and any((self.path / sam_config).is_file() for sam_config in ["samconfig.toml"]):
             self.class_path = self.TYPE_MAP.get("sam", None)
         elif (
             any(

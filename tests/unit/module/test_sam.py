@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -18,8 +17,6 @@ if TYPE_CHECKING:
 
     from pytest_mock import MockerFixture
 
-    from runway.context import RunwayContext
-
 
 MODULE = "runway.module.sam"
 
@@ -29,11 +26,9 @@ class TestSamOptions:
 
     def test_init(self) -> None:
         """Test __init__."""
-        options = SamOptions.parse_obj({
-            "build_args": ["--use-container"],
-            "deploy_args": ["--guided"],
-            "skip_build": True
-        })
+        options = SamOptions.parse_obj(
+            {"build_args": ["--use-container"], "deploy_args": ["--guided"], "skip_build": True}
+        )
         assert options.build_args == ["--use-container"]
         assert options.deploy_args == ["--guided"]
         assert options.skip_build is True
@@ -64,11 +59,7 @@ class TestSam:
     def test_init(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test __init__."""
         mock_check_for_sam = mocker.patch(f"{MODULE}.Sam.check_for_sam")
-        module = Sam(
-            self.get_context(),
-            module_root=tmp_path,
-            parameters=self.generic_parameters
-        )
+        module = Sam(self.get_context(), module_root=tmp_path, parameters=self.generic_parameters)
         assert module.name == tmp_path.name
         assert module.stage == "test"
         assert module.region == "us-east-1"
@@ -92,7 +83,9 @@ class TestSam:
         """Test template_file property."""
         mocker.patch(f"{MODULE}.Sam.check_for_sam")
         template_file = tmp_path / "template.yaml"
-        template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
+        template_file.write_text(
+            "AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31"
+        )
 
         module = Sam(self.get_context(), module_root=tmp_path)
         assert module.template_file == template_file
@@ -107,7 +100,7 @@ class TestSam:
         """Test config_file property."""
         mocker.patch(f"{MODULE}.Sam.check_for_sam")
         config_file = tmp_path / "samconfig.toml"
-        config_file.write_text("[default.deploy.parameters]\nstack_name = \"test-stack\"")
+        config_file.write_text('[default.deploy.parameters]\nstack_name = "test-stack"')
 
         module = Sam(self.get_context(), module_root=tmp_path)
         assert module.config_file == config_file
@@ -122,9 +115,11 @@ class TestSam:
         """Test skip property with template and config."""
         mocker.patch(f"{MODULE}.Sam.check_for_sam")
         template_file = tmp_path / "template.yaml"
-        template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
+        template_file.write_text(
+            "AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31"
+        )
         config_file = tmp_path / "samconfig.toml"
-        config_file.write_text("[default.deploy.parameters]\nstack_name = \"test-stack\"")
+        config_file.write_text('[default.deploy.parameters]\nstack_name = "test-stack"')
 
         module = Sam(self.get_context(), module_root=tmp_path)
         assert module.skip is False
@@ -133,18 +128,16 @@ class TestSam:
         """Test gen_cmd method."""
         mocker.patch(f"{MODULE}.Sam.check_for_sam")
         template_file = tmp_path / "template.yaml"
-        template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
+        template_file.write_text(
+            "AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31"
+        )
 
         context = self.get_context()
         context.no_color = False  # Ensure no-color is False
         module = Sam(context, module_root=tmp_path)
         cmd = module.gen_cmd("build")
 
-        expected = [
-            "sam", "build",
-            "--template-file", str(template_file),
-            "--region", "us-east-1"
-        ]
+        expected = ["sam", "build", "--template-file", str(template_file), "--region", "us-east-1"]
         assert cmd == expected
 
     def test_deploy(self, tmp_path: Path, mocker: MockerFixture) -> None:
@@ -153,9 +146,11 @@ class TestSam:
         mock_sam_deploy = mocker.patch(f"{MODULE}.Sam.sam_deploy")
 
         template_file = tmp_path / "template.yaml"
-        template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
+        template_file.write_text(
+            "AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31"
+        )
         config_file = tmp_path / "samconfig.toml"
-        config_file.write_text("[default.deploy.parameters]\nstack_name = \"test-stack\"")
+        config_file.write_text('[default.deploy.parameters]\nstack_name = "test-stack"')
 
         module = Sam(self.get_context(), module_root=tmp_path)
         module.deploy()
@@ -180,9 +175,11 @@ class TestSam:
         mock_sam_delete = mocker.patch(f"{MODULE}.Sam.sam_delete")
 
         template_file = tmp_path / "template.yaml"
-        template_file.write_text("AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31")
+        template_file.write_text(
+            "AWSTemplateFormatVersion: '2010-09-09'\nTransform: AWS::Serverless-2016-10-31"
+        )
         config_file = tmp_path / "samconfig.toml"
-        config_file.write_text("[default.deploy.parameters]\nstack_name = \"test-stack\"")
+        config_file.write_text('[default.deploy.parameters]\nstack_name = "test-stack"')
 
         module = Sam(self.get_context(), module_root=tmp_path)
         module.destroy()
@@ -203,7 +200,7 @@ class TestSam:
             Sam.check_for_sam()
         mock_which.assert_called_once_with("sam")
 
-    def test_init(self, tmp_path: Path, mocker: MockerFixture) -> None:
+    def test_init_method(self, tmp_path: Path, mocker: MockerFixture) -> None:
         """Test init method."""
         mock_check_for_sam = mocker.patch(f"{MODULE}.Sam.check_for_sam")
         module = Sam(self.get_context(), module_root=tmp_path)
