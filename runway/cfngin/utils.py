@@ -703,7 +703,7 @@ class SourceProcessor:
                     .head_object(Bucket=config.bucket, Key=config.key, **extra_s3_args)[
                         "LastModified"
                     ]
-                    .astimezone(dateutil.tz.tzutc())  # type: ignore
+                    .astimezone(dateutil.tz.tzutc())
                 )
             except botocore.exceptions.ClientError as client_error:
                 LOGGER.error(
