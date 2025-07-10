@@ -25,6 +25,7 @@ from runway.utils import (
     load_object_from_string,
     md5sum,
     sha256sum,
+    str_to_bool,
 )
 
 if TYPE_CHECKING:
@@ -397,3 +398,33 @@ def test_sha256sum(tmp_path: Path) -> None:
     test_file.write_bytes(contents)
 
     assert sha256sum(str(test_file)) == expected.hexdigest()
+
+
+@pytest.mark.parametrize(
+    "provided, expected",
+    [
+        (False, False),
+        (True, True),
+        (0, False),
+        (1, True),
+        (None, False),
+        ("", False),
+        ("1", True),
+        ("0", False),
+        ("true", True),
+        ("false", False),
+        ("yes", True),
+        ("no", False),
+        ("t", True),
+        ("off", False),
+    ],
+)
+def test_str_to_bool(provided: bool | int | str | None, expected: bool) -> None:
+    """Test str_to_bool."""
+    assert str_to_bool(provided) is expected
+
+
+def test_str_to_bool_raise_type_error() -> None:
+    """Test str_to_bool."""
+    with pytest.raises(TypeError):
+        str_to_bool({"foo": "bar"})  # pyright: ignore[reportArgumentType]

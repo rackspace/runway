@@ -1,16 +1,20 @@
 """Runway CLI logging setup."""
 
+from __future__ import annotations
+
 import logging
 import os
-from typing import Any
+import sys
+from typing import Any, TextIO
 
 import coloredlogs
+from humanfriendly.terminal import terminal_supports_colors  # type: ignore
+from typing_extensions import TypedDict
 
-from runway import LogLevels
-
+from .. import LogLevels
 from ..compat import cached_property
+from ..utils import str_to_bool
 
-# COLOR_FORMAT = "%(levelname)s:%(name)s:\033[%(color)sm%(message)s\033[39m"
 LOGGER = logging.getLogger("runway")
 
 LOG_FORMAT = "[runway] %(message)s"
@@ -37,14 +41,18 @@ LOG_LEVEL_STYLES: dict[str, dict[str, Any]] = {
 }
 
 
+class LogSettingsEnvTypeDef(TypedDict):
+    """Type definition for :attr:`runway._cli.logs.LogSettings._env` attribute."""
+
+    field_styles: str | None
+    fmt: str | None
+    level_styles: str | None
+
+
 class LogSettings:
     """CLI log settings."""
 
-    ENV = {
-        "field_styles": os.getenv("RUNWAY_LOG_FIELD_STYLES"),
-        "fmt": os.getenv("RUNWAY_LOG_FORMAT"),
-        "level_styles": os.getenv("RUNWAY_LOG_LEVEL_STYLES"),
-    }
+    _env: LogSettingsEnvTypeDef
 
     def __init__(self, *, debug: int = 0, no_color: bool = False, verbose: bool = False) -> None:
         """Instantiate class.
@@ -55,6 +63,11 @@ class LogSettings:
             verbose: Whether to display verbose logs.
 
         """
+        self._env = {
+            "field_styles": os.getenv("RUNWAY_LOG_FIELD_STYLES"),
+            "fmt": os.getenv("RUNWAY_LOG_FORMAT"),
+            "level_styles": os.getenv("RUNWAY_LOG_LEVEL_STYLES"),
+        }
         self.debug = debug
         self.no_color = no_color
         self.verbose = verbose
@@ -63,9 +76,11 @@ class LogSettings:
     def coloredlogs(self) -> dict[str, Any]:
         """Return settings for coloredlogs."""
         return {
-            "fmt": self.fmt,
             "field_styles": self.field_styles,
+            "fmt": self.fmt,
+            "isatty": None if self.no_color else self.supports_colors,
             "level_styles": self.level_styles,
+            "stream": self.stream,
         }
 
     @cached_property
@@ -75,8 +90,8 @@ class LogSettings:
         If "RUNWAY_LOG_FORMAT" exists in the environment, it will be used.
 
         """
-        fmt = self.ENV["fmt"]
-        if isinstance(fmt, str):
+        fmt = self._env["fmt"]
+        if isinstance(fmt, str) and fmt:
             return fmt
         if self.debug or self.no_color or self.verbose:
             return LOG_FORMAT_VERBOSE
@@ -94,9 +109,9 @@ class LogSettings:
             return {}
 
         result = LOG_FIELD_STYLES.copy()
-        if self.ENV["field_styles"]:
+        if self._env["field_styles"]:
             result.update(
-                coloredlogs.parse_encoded_styles(self.ENV["field_styles"])  # type: ignore
+                coloredlogs.parse_encoded_styles(self._env["field_styles"])  # type: ignore
             )
         return result
 
@@ -112,9 +127,9 @@ class LogSettings:
             return {}
 
         result = LOG_LEVEL_STYLES.copy()
-        if self.ENV["level_styles"]:
+        if self._env["level_styles"]:
             result.update(
-                coloredlogs.parse_encoded_styles(self.ENV["level_styles"])  # type: ignore
+                coloredlogs.parse_encoded_styles(self._env["level_styles"])  # type: ignore
             )
         return result
 
@@ -126,6 +141,20 @@ class LogSettings:
         if self.verbose:
             return LogLevels.VERBOSE
         return LogLevels.INFO
+
+    @property
+    def stream(self) -> TextIO:
+        """Stream that will be logged to."""
+        return sys.stdout
+
+    @cached_property
+    def supports_colors(self) -> bool:
+        """Return if ``stream`` is connected to a terminal that supports ANSI escape sequences."""
+        if str_to_bool(os.getenv("GITLAB_CI")):
+            # GitLab does not use a TTY which is necessary for `terminal_supports_colors`/
+            #   `coloredlogs.install()` to autodetect color support.
+            return True
+        return terminal_supports_colors(self.stream)  # type: ignore
 
 
 def setup_logging(*, debug: int = 0, no_color: bool = False, verbose: bool = False) -> None:
