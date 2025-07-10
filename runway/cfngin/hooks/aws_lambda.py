@@ -428,7 +428,7 @@ def _pip_has_no_color_option(python_path: str) -> bool:
 
 
 # TODO (kyle): refactor logic to breakup logic into smaller chunks
-def _zip_package(  # noqa: PLR0915, PLR0912, C901, D417
+def _zip_package(  # noqa: PLR0912, C901, D417
     package_root: str,
     *,
     dockerize_pip: DockerizePipArgTypeDef = False,
@@ -545,13 +545,9 @@ def _zip_package(  # noqa: PLR0915, PLR0912, C901, D417
 
     req_files = _find_files(tmpdir.name, includes="**", follow_symlinks=False)
     contents, content_hash = _zip_files(req_files, tmpdir.name)
-    if sys.version_info.major < 3:
-        remove_error = OSError
-    else:
-        remove_error = PermissionError
     try:
         tmpdir.cleanup()
-    except remove_error:
+    except PermissionError:
         LOGGER.warning(
             'Error removing temporary Lambda build directory "%s", '
             "likely due to root-owned files it in. Delete it manually to "

@@ -15,7 +15,7 @@ PACKAGE_DIR = Path(__file__).parent
 def handler(event: dict[str, Any], context: object) -> LambdaResponse:  # noqa: ARG001
     """Lambda Function entrypoint."""
     try:
-        import requests
+        import requests  # noqa: PLC0415
 
         return {
             "code": 200,

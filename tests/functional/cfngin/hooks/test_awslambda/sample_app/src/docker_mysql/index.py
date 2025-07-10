@@ -15,7 +15,7 @@ PACKAGE_DIR = Path(__file__).parent
 def handler(event: dict[str, Any], context: object) -> LambdaResponse:  # noqa: ARG001
     """Lambda Function entrypoint."""
     try:
-        import MySQLdb  # type: ignore
+        import MySQLdb  # type: ignore  # noqa: PLC0415
 
         return {
             "code": 200,

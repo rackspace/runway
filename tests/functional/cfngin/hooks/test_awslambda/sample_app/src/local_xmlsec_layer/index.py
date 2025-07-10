@@ -16,8 +16,8 @@ OPT_DIR = Path("/opt")
 def handler(event: dict[str, Any], context: object) -> LambdaResponse:  # noqa: ARG001
     """Lambda Function entrypoint."""
     try:
-        import lxml  # type: ignore
-        import xmlsec  # type: ignore
+        import lxml  # type: ignore  # noqa: PLC0415
+        import xmlsec  # type: ignore  # noqa: PLC0415
 
         return {
             "code": 200,

@@ -793,7 +793,7 @@ class CommandResultRecorder:
             LOGGER.debug(
                 "Exception caught during command execution: %s",
                 exc_value,
-                exc_info=True,
+                exc_info=True,  # noqa: LOG014
             )
             if exc_value:
                 self.result_queue.put(ErrorResult(exception=exc_value))

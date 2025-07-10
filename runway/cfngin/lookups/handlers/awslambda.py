@@ -60,7 +60,7 @@ class AwsLambdaLookup(LookupHandler["CfnginContext"]):
         """
         # needs to be imported here to avoid cyclic imports for conditional code
         # caused by import of runway.cfngin.actions.deploy in runway.cfngin.hooks.base
-        from ...hooks.awslambda.models.responses import (
+        from ...hooks.awslambda.models.responses import (  # noqa: PLC0415
             AwsLambdaHookDeployResponse as _AwsLambdaHookDeployResponse,
         )
 
@@ -142,7 +142,7 @@ class AwsLambdaLookup(LookupHandler["CfnginContext"]):
         """
         # needs to be imported here to avoid cyclic imports for conditional code
         # caused by import of runway.cfngin.actions.deploy in runway.cfngin.hooks.base
-        from ...hooks.awslambda.base_classes import AwsLambdaHook as _AwsLambdaHook
+        from ...hooks.awslambda.base_classes import AwsLambdaHook as _AwsLambdaHook  # noqa: PLC0415
 
         kls = load_object_from_string(hook_def.path)
         if (
