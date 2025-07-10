@@ -73,7 +73,7 @@ Given the above config file and persistent graph, when running ``runway deploy``
 
 #. **removed_stack** is deleted from CloudFormation and deleted from the persistent graph object in S3.
 
-#. **first_stack** is updated in CloudFormation and updated in the persistent graph object in S3 (incase dependencies change).
+#. **first_stack** is updated in CloudFormation and updated in the persistent graph object in S3 (in case dependencies change).
 
 #. **new_stack** is created in CloudFormation and added to the persistent graph object in S3.
 
