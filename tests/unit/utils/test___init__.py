@@ -229,7 +229,7 @@ class TestSafeHaven:
         expected_logs = ["entering a safe haven...", "resetting sys.modules..."]
 
         with SafeHaven() as obj:
-            from ..fixtures import mock_hooks  # noqa: F401
+            from ..fixtures import mock_hooks  # noqa: F401, PLC0415
 
             assert sys.modules != orig_val
             obj.reset_sys_modules()
@@ -245,7 +245,7 @@ class TestSafeHaven:
 
         assert module not in sys.modules
         with SafeHaven(sys_modules_exclude=[module]) as obj:
-            from ..fixtures import mock_hooks  # noqa: F401
+            from ..fixtures import mock_hooks  # noqa: F401, PLC0415
 
             assert module in sys.modules
             obj.reset_sys_modules()

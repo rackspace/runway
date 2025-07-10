@@ -245,6 +245,7 @@ ignore = [
   "N818",  # Exception name should be named with an Error suffix  # TODO (kyle): resolve in next major release
   "PERF203",  # `try`-`except` within a loop incurs performance overhead
   "PGH003",  # Use specific rule codes when ignoring type issues  # TODO (kyle): resolve this eventually
+  "PLW1641",  # Object does not implement `__hash__` method
   "RUF012",  # TODO (kyle): remove when resolved - https://github.com/astral-sh/ruff/issues/5243
   "S105",  # (hardcoded-password-string) Possible hardcoded password
   "S106",  # (hardcoded-password-func-arg) Possible hardcoded password

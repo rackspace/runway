@@ -1,6 +1,5 @@
 """Test runway.core.components._deploy_environment."""
 
-# ruff: noqa: SLF001
 from __future__ import annotations
 
 import logging

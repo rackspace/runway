@@ -258,7 +258,7 @@ class Step:
                 step action.
 
         """
-        from runway.config.models.cfngin import CfnginStackDefinitionModel
+        from runway.config.models.cfngin import CfnginStackDefinitionModel  # noqa: PLC0415
 
         stack_def = CfnginStackDefinitionModel.model_construct(
             name=stack_name, requires=requires or []
