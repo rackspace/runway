@@ -3,3 +3,4 @@ MD012: false  # no-multiple-blanks: Multiple consecutive blank lines
 MD013: false  # line-length
 MD014: false  # commands-show-output: Dollar signs used before commands without showing output
 MD024: false  # no-duplicate-heading/no-duplicate-header
+MD059: false  # descriptive-link-text: Link text should be descriptive

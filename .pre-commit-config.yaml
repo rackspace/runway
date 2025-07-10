@@ -1,6 +1,3 @@
-default_language_version:
-  node: system
-
 exclude: |
   (?x)^(
     (.*/)?package-lock\.json|
@@ -66,3 +63,7 @@ repos:
     rev: v0.45.0
     hooks:
       - id: markdownlint
+        exclude: |
+          (?x)^(
+            .github/pull_request_template.md
+          )$
