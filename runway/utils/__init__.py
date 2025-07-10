@@ -810,6 +810,24 @@ def sha256sum(filename: str) -> str:
     return sha256.hexdigest()
 
 
+def str_to_bool(value: bool | int | str | None) -> bool:
+    """Convert string to boolean.
+
+    Args:
+        value: Value to convert.
+
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return bool(value)
+    if isinstance(value, str):
+        return value.lower() in ("yes", "true", "t", "1")
+    if value is None:
+        return False
+    raise TypeError(f"Cannot convert {value} to bool")
+
+
 @contextmanager
 def use_embedded_pkgs(embedded_lib_path: str | None = None) -> Iterator[None]:
     """Temporarily prepend embedded packages to sys.path."""
