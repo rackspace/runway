@@ -249,6 +249,12 @@ class InvalidLookupConcatenation(RunwayError):
         return self.__class__, (self.invalid_lookup, self.concatenated_lookups)
 
 
+class SamNotFound(RunwayError):
+    """Raised when SAM CLI could not be executed or was not found in path."""
+
+    message: str = "AWS SAM CLI not found"
+
+
 class NpmNotFound(RunwayError):
     """Raised when npm could not be executed or was not found in path."""
 
