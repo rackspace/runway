@@ -60,7 +60,7 @@ pre-commit = "^4.2.0"
 [tool.poetry.group.docs.dependencies]
 autodoc-pydantic = "^2.2.0"
 doc8 = "^1.1.2"
-furo = "^2024.8.6"
+furo = "^2025.7.19"
 jsx-lexer = "^2.0.1"
 sphinx = "^7.4.7"
 sphinx-copybutton = "^0.5.2"
