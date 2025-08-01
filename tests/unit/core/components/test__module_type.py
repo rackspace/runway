@@ -10,6 +10,7 @@ import pytest
 from runway.core.components import RunwayModuleType
 from runway.module.cdk import CloudDevelopmentKit
 from runway.module.cloudformation import CloudFormation
+from runway.module.sam import Sam
 from runway.module.serverless import Serverless
 from runway.module.staticsite.handler import StaticSite
 from runway.module.terraform import Terraform
@@ -30,6 +31,10 @@ class TestRunwayModuleType:
             (["cdk.json", "package.json"], CloudDevelopmentKit),
             (["any.yml", "serverless.yml"], CloudFormation),
             (["any.yaml", "package.json"], CloudFormation),
+            (["template.yaml", "samconfig.toml"], Sam),
+            (["template.yml", "samconfig.toml"], Sam),
+            (["sam.yaml", "samconfig.toml"], Sam),
+            (["sam.yml", "samconfig.toml"], Sam),
             (["serverless.yml", "package.json", "cdk.json"], Serverless),
             (["serverless.js", "package.json", "cdk.json"], Serverless),
             (["serverless.ts", "package.json", "cdk.json"], Serverless),
@@ -75,6 +80,7 @@ class TestRunwayModuleType:
         [
             ("cdk", CloudDevelopmentKit),
             ("cfn", CloudFormation),
+            ("sam", Sam),
             ("sls", Serverless),
             ("web", StaticSite),
             ("tf", Terraform),
@@ -93,6 +99,7 @@ class TestRunwayModuleType:
         [
             ("cdk", CloudDevelopmentKit),
             ("cloudformation", CloudFormation),
+            ("sam", Sam),
             ("serverless", Serverless),
             ("static", StaticSite),
             ("terraform", Terraform),
