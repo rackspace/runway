@@ -30,7 +30,7 @@ jobs:
       infra-test-alt: ${{ steps.filter.outputs.infrastructure-test-alt }}
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v4  # not needed for pull_request
+        uses: actions/checkout@v5  # not needed for pull_request
         if: |
           github.event_name == 'push'
       - uses: dorny/paths-filter@v3  # cspell:ignore dorny
@@ -104,7 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: 🏗 Setup Python
         uses: finleyfamily/action-setup-python@v1.2.0
         with:
@@ -135,7 +135,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: test
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: 🏗 Setup Node
         uses: actions/setup-node@v4
         with:
@@ -165,7 +165,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: 🏗 Setup Node
         uses: actions/setup-node@v4
         with:
@@ -202,7 +202,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: test
     steps:
       - name: ⤵️ Check out code from GitHub (complete)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: 🏗 Setup Node
@@ -237,7 +237,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub (complete)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: 🏗 Setup Python
