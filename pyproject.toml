@@ -89,7 +89,7 @@ testfixtures = "^8.3.0"  # TODO (kyle) remove use of this dependency - was inher
 tomli-w = "^1.2.0"
 
 [tool.poetry.group.types.dependencies]
-mypy-boto3 = "^1.39.0"  # importable boto3 type annotations
+mypy-boto3 = "^1.40.0"  # importable boto3 type annotations
 
 [tool.poetry.group.types.dependencies.boto3-stubs]
 extras = [
@@ -110,7 +110,7 @@ extras = [
   "ssm",
   "sts",
 ]
-version = "^1.39.9"
+version = "^1.40.15"
 
 [tool.poetry.scripts]
 runway = "runway._cli.main:cli"
