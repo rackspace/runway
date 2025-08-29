@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-RunwayModuleTypeExtensionsTypeDef = Literal["cdk", "cfn", "sls", "tf", "web"]
+RunwayModuleTypeExtensionsTypeDef = Literal["cdk", "cfn", "sam", "sls", "tf", "web"]
 
 
 class RunwayModuleType:
@@ -45,6 +45,8 @@ class RunwayModuleType:
     +--------------------+-----------------------------------------------+
     | ``cloudformation`` | CloudFormation                                |
     +--------------------+-----------------------------------------------+
+    | ``sam``            | AWS SAM                                       |
+    +--------------------+-----------------------------------------------+
     | ``serverless``     | Serverless Framework                          |
     +--------------------+-----------------------------------------------+
     | ``terraform``      | Terraform                                     |
@@ -61,6 +63,7 @@ class RunwayModuleType:
     EXTENSION_MAP: ClassVar[dict[str, str]] = {
         "cdk": "runway.module.cdk.CloudDevelopmentKit",
         "cfn": "runway.module.cloudformation.CloudFormation",
+        "sam": "runway.module.sam.Sam",
         "sls": "runway.module.serverless.Serverless",
         "tf": "runway.module.terraform.Terraform",
         "web": "runway.module.staticsite.handler.StaticSite",
@@ -69,6 +72,7 @@ class RunwayModuleType:
     TYPE_MAP: ClassVar[dict[str, str]] = {
         "cdk": EXTENSION_MAP["cdk"],
         "cloudformation": EXTENSION_MAP["cfn"],
+        "sam": EXTENSION_MAP["sam"],
         "serverless": EXTENSION_MAP["sls"],
         "static": EXTENSION_MAP["web"],
         "terraform": EXTENSION_MAP["tf"],
@@ -143,7 +147,12 @@ class RunwayModuleType:
 
     def _set_class_path_based_on_autodetection(self) -> None:
         """Based on the files detected in the base path set the class_path."""
-        if (
+        if any(
+            (self.path / sam_template).is_file()
+            for sam_template in ["template.yaml", "template.yml", "sam.yaml", "sam.yml"]
+        ) and any((self.path / sam_config).is_file() for sam_config in ["samconfig.toml"]):
+            self.class_path = self.TYPE_MAP.get("sam", None)
+        elif (
             any(
                 (self.path / sls).is_file()
                 for sls in ["serverless.js", "serverless.ts", "serverless.yml"]
