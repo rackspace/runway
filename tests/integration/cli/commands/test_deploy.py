@@ -207,3 +207,108 @@ def test_deploy_select_module_child_modules_all(
     assert len(deployment.modules) == 2
     assert deployment.modules[0].name == "parallel-sampleapp-01.cfn"
     assert deployment.modules[1].name == "parallel-sampleapp-02.cfn"
+
+
+def test_deploy_options_module(
+    caplog: pytest.LogCaptureFixture,
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test deploy option --module."""
+    caplog.set_level(logging.ERROR, logger="runway.cli.utils")
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    cp_config("tagged_modules", cd_tmp_path)
+    runner = CliRunner()
+
+    # Exact module name match
+    result = runner.invoke(cli, ["deploy", "--module", "sampleapp-01.cfn"])
+    assert result.exit_code == 0
+    deployment = mock_runway.return_value.deploy.call_args.args[0][0]
+    assert len(deployment.modules) == 1
+    assert deployment.modules[0].name == "sampleapp-01.cfn"
+
+    # Multiple module names
+    result = runner.invoke(
+        cli, ["deploy", "--module", "sampleapp-01.cfn", "--module", "sampleapp-02.cfn"]
+    )
+    assert result.exit_code == 0
+    deployment = mock_runway.return_value.deploy.call_args.args[0][0]
+    assert len(deployment.modules) == 2
+    assert deployment.modules[0].name == "sampleapp-01.cfn"
+    assert deployment.modules[1].name == "sampleapp-02.cfn"
+
+    # Glob pattern matching
+    result = runner.invoke(cli, ["deploy", "--module", "sampleapp-0*.cfn"])
+    assert result.exit_code == 0
+    deployment = mock_runway.return_value.deploy.call_args.args[0][0]
+    # Should match sampleapp-01.cfn, sampleapp-02.cfn, parallel_parent (with children 03,04,05), sampleapp-06.cfn
+    assert len(deployment.modules) == 4
+    assert deployment.modules[0].name == "sampleapp-01.cfn"
+    assert deployment.modules[1].name == "sampleapp-02.cfn"
+    assert deployment.modules[2].name == "parallel_parent"
+    assert len(deployment.modules[2].child_modules) == 3
+    assert deployment.modules[3].name == "sampleapp-06.cfn"
+
+    # No match error
+    result = runner.invoke(cli, ["deploy", "--module", "nonexistent-module"])
+    assert result.exit_code == 1
+    assert "No modules found matching: nonexistent-module" in caplog.messages
+
+
+def test_deploy_options_module_child_modules(
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test deploy option --module with child modules."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    cp_config("tagged_modules", cd_tmp_path)
+    runner = CliRunner()
+
+    # Match child module by name - includes parent with only matching children
+    result = runner.invoke(cli, ["deploy", "--module", "sampleapp-03.cfn"])
+    assert result.exit_code == 0
+    deployment = mock_runway.return_value.deploy.call_args.args[0][0]
+    assert len(deployment.modules) == 1
+    assert deployment.modules[0].name == "parallel_parent"
+    assert len(deployment.modules[0].child_modules) == 1
+    assert deployment.modules[0].child_modules[0].name == "sampleapp-03.cfn"
+
+    # Match multiple child modules
+    result = runner.invoke(
+        cli, ["deploy", "--module", "sampleapp-03.cfn", "--module", "sampleapp-04.cfn"]
+    )
+    assert result.exit_code == 0
+    deployment = mock_runway.return_value.deploy.call_args.args[0][0]
+    assert len(deployment.modules) == 1
+    assert deployment.modules[0].name == "parallel_parent"
+    assert len(deployment.modules[0].child_modules) == 2
+
+    # Match parent module by name - includes all children
+    result = runner.invoke(cli, ["deploy", "--module", "parallel_parent"])
+    assert result.exit_code == 0
+    deployment = mock_runway.return_value.deploy.call_args.args[0][0]
+    assert len(deployment.modules) == 1
+    assert deployment.modules[0].name == "parallel_parent"
+    # All 3 children should be included when parent is matched
+    assert len(deployment.modules[0].child_modules) == 3
+
+
+def test_deploy_options_stack(
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test deploy option --stack."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    cp_config("min_required", cd_tmp_path)
+    runner = CliRunner()
+
+    # Verify stack names are passed to context
+    result = runner.invoke(cli, ["deploy", "--stack", "vpc-stack", "--stack", "rds-stack"])
+    assert result.exit_code == 0
+
+    # Verify the RunwayContext was created with stack_names
+    runway_context = mock_runway.call_args.args[1]
+    assert runway_context.stack_names == ["vpc-stack", "rds-stack"]

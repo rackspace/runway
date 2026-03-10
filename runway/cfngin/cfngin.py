@@ -197,7 +197,7 @@ class CFNgin:
         config.load()
         return self._get_context(config, config_path)
 
-    def plan(self, force: bool = False, sys_path: Path | None = None) -> None:
+    def plan(self, force: bool = False, sys_path: Path | None = None) -> dict[str, str]:
         """Run the CFNgin plan action.
 
         Args:
@@ -206,9 +206,13 @@ class CFNgin:
             sys_path: Explicitly define a path to work in.
                 If not provided, ``self.sys_path`` is used.
 
+        Returns:
+            Dictionary mapping stack FQNs to changeset IDs if create_changeset is True.
+
         """
+        all_changesets: dict[str, str] = {}
         if self.should_skip(force):
-            return
+            return all_changesets
         sys_path = sys_path or self.sys_path
         config_file_paths = self.find_config_files(sys_path=sys_path)
         with SafeHaven(environ=self.__ctx.env.vars):
@@ -222,7 +226,12 @@ class CFNgin:
                         provider_builder=self._get_provider_builder(ctx.config.service_role),
                     )
                     action.execute()
+                    # Collect changeset results from this config
+                    all_changesets.update(ctx.changeset_results)
                 logger.success("plan (complete)")
+        # Store results in RunwayContext for access by CLI
+        self.__ctx.changeset_results.update(all_changesets)
+        return all_changesets
 
     def should_skip(self, force: bool = False) -> bool:
         """Determine if action should be taken or not.
@@ -262,10 +271,11 @@ class CFNgin:
         return CfnginContext(
             config_path=config_path,
             config=config,
+            create_changeset=self.__ctx.create_changeset,
             deploy_environment=self.__ctx.env.copy(),
             force_stacks=[],  # placeholder
             parameters=self.parameters,
-            stack_names=[],  # placeholder
+            stack_names=self.__ctx.stack_names,
             work_dir=self.__ctx.work_dir,
         )
 

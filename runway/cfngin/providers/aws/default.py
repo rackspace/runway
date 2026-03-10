@@ -1461,6 +1461,7 @@ class Provider(BaseProvider):
         template: Template,
         parameters: list[ParameterTypeDef],
         tags: list[TagTypeDef],
+        retain_changeset: bool = False,
     ) -> dict[str, str]:
         """Get the changes from a ChangeSet.
 
@@ -1471,9 +1472,12 @@ class Provider(BaseProvider):
                 to be applied to the Cloudformation stack.
             tags: A list of dictionaries that defines the tags that should be
                 applied to the Cloudformation stack.
+            retain_changeset: If True, keep the changeset instead of deleting it.
+                This allows the changeset to be executed later.
 
         Returns:
-            Stack outputs with inferred changes.
+            Stack outputs with inferred changes. If retain_changeset is True,
+            includes 'changeset_id' key with the changeset ARN.
 
         """
         try:
@@ -1534,7 +1538,11 @@ class Provider(BaseProvider):
                         fqn=stack.fqn,
                     )
 
-        self.cloudformation.delete_change_set(ChangeSetName=change_set_id)
+        # Conditionally delete or retain the changeset
+        if retain_changeset:
+            LOGGER.info("%s:changeset retained for later execution: %s", stack.fqn, change_set_id)
+        else:
+            self.cloudformation.delete_change_set(ChangeSetName=change_set_id)
 
         # ensure current stack outputs are loaded
         self.get_outputs(stack.fqn)
@@ -1581,7 +1589,8 @@ class Provider(BaseProvider):
         # when creating a changeset for a new stack, CFN creates a temporary
         # stack with a status of REVIEW_IN_PROGRESS. this is only removed if
         # the changeset is executed or it is manually deleted.
-        if change_type == "CREATE":
+        # Skip cleanup if retaining changeset (needed for later execution)
+        if change_type == "CREATE" and not retain_changeset:
             try:
                 temp_stack = self.get_stack(stack.fqn)
                 if self.is_stack_in_review(temp_stack):
@@ -1595,7 +1604,10 @@ class Provider(BaseProvider):
                 # not an issue if the stack was already cleaned up
                 LOGGER.debug("%s:stack does not exist", stack.fqn)
 
-        return self.get_outputs(stack.fqn)
+        outputs = self.get_outputs(stack.fqn)
+        if retain_changeset:
+            outputs["changeset_id"] = change_set_id
+        return outputs
 
     @staticmethod
     def params_as_dict(

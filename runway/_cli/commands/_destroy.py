@@ -19,11 +19,20 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.ci
 @options.debug
 @options.deploy_environment
+@options.modules
 @options.no_color
+@options.stacks
 @options.tags
 @options.verbose
 @click.pass_context
-def destroy(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) -> None:
+def destroy(
+    ctx: click.Context,
+    debug: bool,
+    modules: tuple[str, ...],
+    stacks: tuple[str, ...],
+    tags: tuple[str, ...],
+    **_: Any,
+) -> None:
     """Destroy infrastructure as code.
 
     \b
@@ -38,7 +47,8 @@ def destroy(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) ->
         - name of the current working directory
     2. Selects deployments & modules to deploy.
         - (default) prompts
-        - (tags) module contains all tags
+        - (--module) module name matches pattern
+        - (--tag) module contains all tags
         - (non-interactive) all
     3. Destroys selected deployments/modules in reverse the order defined.
 
@@ -58,9 +68,11 @@ def destroy(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) ->
             ctx.exit(0)
         click.echo("")
     try:
+        # Store stacks in context for CFNgin to use
+        ctx.obj.stacks = stacks
         Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).destroy(
             Runway.reverse_deployments(
-                select_deployments(ctx, ctx.obj.runway_config.deployments, tags)
+                select_deployments(ctx, ctx.obj.runway_config.deployments, tags, modules)
             )
         )
     except ValidationError as err:
