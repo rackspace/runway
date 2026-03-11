@@ -1,6 +1,8 @@
 """``runway deploy`` command."""
 
 # docs: file://./../../../docs/source/commands.rst
+from __future__ import annotations
+
 import logging
 from typing import Any
 
@@ -69,9 +71,7 @@ def deploy(
         # Execute changesets from file if provided
         if changeset_file:
             runway_ctx = ctx.obj.get_runway_context()
-            execute_changesets_from_file(
-                runway_ctx, changeset_file, stack_filter=stacks if stacks else None
-            )
+            execute_changesets_from_file(runway_ctx, changeset_file, stack_filter=stacks or None)
             return
 
         # Normal deploy flow

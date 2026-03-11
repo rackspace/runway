@@ -191,7 +191,7 @@ def output_full_changeset(
     if answer == "n":
         return
     if answer in ["y", "v"]:
-        msg = f"{fqn if fqn else 'Full changeset'} full changeset"
+        msg = f"{fqn or 'Full changeset'} full changeset"
         if params_diff:
             LOGGER.info(
                 "%s:\n\n%s\n%s",
@@ -1455,7 +1455,7 @@ class Provider(BaseProvider):
 
         return json.dumps(template, cls=JsonEncoder), parameters
 
-    def get_stack_changes(  # noqa: C901, PLR0912
+    def get_stack_changes(  # noqa: C901, PLR0912, PLR0915
         self,
         stack: Stack,
         template: Template,

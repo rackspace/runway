@@ -327,10 +327,7 @@ def _module_name_matches(module_name: str, patterns: tuple[str, ...]) -> bool:
         True if the module name matches any pattern.
 
     """
-    for pattern in patterns:
-        if fnmatch.fnmatch(module_name, pattern):
-            return True
-    return False
+    return any(fnmatch.fnmatch(module_name, pattern) for pattern in patterns)
 
 
 def select_modules_by_name(
@@ -360,7 +357,8 @@ def select_modules_by_name(
                 else:
                     # Otherwise, filter child modules by name
                     module.child_modules = [
-                        c for c in module.child_modules
+                        c
+                        for c in module.child_modules
                         if _module_name_matches(c.name, module_names)
                     ]
                     if module.child_modules:

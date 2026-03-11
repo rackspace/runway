@@ -261,7 +261,7 @@ def yaml_to_ordered_dict(  # noqa: C901
                 mapping: dict[str, Any] = {}
                 for val in node.value:
                     a = val[0]
-                    b = mapping.get(a.value, None)
+                    b = mapping.get(a.value)
                     if b:
                         raise ConstructorError(
                             f"{node_name} mapping cannot have duplicate keys "

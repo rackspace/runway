@@ -10,20 +10,15 @@ from __future__ import annotations
 import json
 import logging
 from typing import TYPE_CHECKING
-from unittest.mock import Mock, PropertyMock
 
 from click.testing import CliRunner
 
 from runway._cli import cli
-from runway.config import RunwayConfig
-from runway.context import RunwayContext
-from runway.core import Runway
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     import pytest
-    from pytest_mock import MockerFixture
 
     from ...conftest import CpConfigTypeDef
 
@@ -34,7 +29,6 @@ def test_variables(
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
     caplog: pytest.LogCaptureFixture,
-    mocker: MockerFixture,
 ) -> None:
     """Test variables command basic execution."""
     caplog.set_level(logging.INFO, logger="runway")
@@ -49,7 +43,6 @@ def test_variables(
 def test_variables_format_json(
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    mocker: MockerFixture,
 ) -> None:
     """Test variables command with JSON output format."""
     cp_config("simple_env_vars", cd_tmp_path)
@@ -65,7 +58,6 @@ def test_variables_format_json(
 def test_variables_format_table(
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    mocker: MockerFixture,
 ) -> None:
     """Test variables command with table output format."""
     cp_config("simple_env_vars", cd_tmp_path)
@@ -80,7 +72,6 @@ def test_variables_format_table(
 def test_variables_with_env_vars(
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    mocker: MockerFixture,
 ) -> None:
     """Test variables command shows environment variables."""
     cp_config("simple_env_vars", cd_tmp_path)
@@ -96,7 +87,7 @@ def test_variables_with_env_vars(
 
 
 def test_variables_options_deploy_environment(
-    cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture
+    cd_tmp_path: Path, cp_config: CpConfigTypeDef
 ) -> None:
     """Test variables option -e, --deploy-environment."""
     cp_config("min_required", cd_tmp_path)
@@ -112,7 +103,6 @@ def test_variables_options_tag(
     caplog: pytest.LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    mocker: MockerFixture,
 ) -> None:
     """Test variables option --tag."""
     caplog.set_level(logging.ERROR, logger="runway.cli.commands.variables")
@@ -135,7 +125,6 @@ def test_variables_options_module(
     caplog: pytest.LogCaptureFixture,
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    mocker: MockerFixture,
 ) -> None:
     """Test variables option --module."""
     caplog.set_level(logging.ERROR, logger="runway.cli.utils")
@@ -157,7 +146,7 @@ def test_variables_options_module(
 
 
 def test_variables_no_config(
-    cd_tmp_path: Path,
+    cd_tmp_path: Path,  # noqa: ARG001
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Test variables command when no config file exists."""
@@ -170,7 +159,6 @@ def test_variables_no_config(
 def test_variables_with_parameters(
     cd_tmp_path: Path,
     cp_config: CpConfigTypeDef,
-    mocker: MockerFixture,
 ) -> None:
     """Test variables command shows parameters."""
     cp_config("variables_test", cd_tmp_path)

@@ -13,8 +13,8 @@ from botocore.exceptions import ClientError, WaiterError
 if TYPE_CHECKING:
     from mypy_boto3_cloudformation.client import CloudFormationClient
 
-    from ..context import RunwayContext
     from .._logging import RunwayLogger
+    from ..context import RunwayContext
 
 LOGGER = cast("RunwayLogger", logging.getLogger(__name__.replace("._", ".")))
 
@@ -128,9 +128,7 @@ class ChangesetExecutor:
 
             raise ChangesetExecutionError(stack_fqn, changeset_id, error_msg) from err
 
-    def _wait_for_stack(
-        self, stack_name: str, change_type: str, timeout: int = 3600
-    ) -> None:
+    def _wait_for_stack(self, stack_name: str, change_type: str, timeout: int = 3600) -> None:
         """Wait for stack operation to complete.
 
         Args:
@@ -222,11 +220,10 @@ def execute_changesets_from_file(
             continue
 
         # Check if this stack is targeted (if --stack option used)
-        if stack_filter:
-            if not any(stack_fqn.endswith(s) or s in stack_fqn for s in stack_filter):
-                LOGGER.debug("Skipping %s (not in --stack filter)", stack_fqn)
-                skipped_count += 1
-                continue
+        if stack_filter and not any(stack_fqn.endswith(s) or s in stack_fqn for s in stack_filter):
+            LOGGER.debug("Skipping %s (not in --stack filter)", stack_fqn)
+            skipped_count += 1
+            continue
 
         executor.execute(stack_fqn, changeset_id)
         executed_count += 1

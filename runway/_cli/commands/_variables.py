@@ -11,7 +11,7 @@ import click
 import yaml
 from pydantic import ValidationError
 
-from ...core import Runway
+from ...core import Runway, components
 from ...exceptions import ConfigNotFound, UnresolvedVariable, VariablesFileNotFound
 from .. import options
 from ..utils import select_deployments
@@ -74,9 +74,7 @@ def variables(
 
     try:
         runway = Runway(ctx.obj.runway_config, ctx.obj.get_runway_context())
-        deployments = select_deployments(
-            ctx, ctx.obj.runway_config.deployments, tags, modules
-        )
+        deployments = select_deployments(ctx, ctx.obj.runway_config.deployments, tags, modules)
         result = get_resolved_variables(runway, deployments)
     except ValidationError as err:
         LOGGER.error(err, exc_info=debug)
@@ -106,8 +104,6 @@ def get_resolved_variables(
         Dictionary containing all resolved variables organized by scope.
 
     """
-    from ...core import components
-
     result: dict[str, Any] = {
         "runway_variables": {},
         "deployments": [],
@@ -209,6 +205,59 @@ def _print_variables(variables: dict[str, Any], output_format: str) -> None:
         click.echo(yaml.safe_dump(variables, default_flow_style=False, sort_keys=False))
 
 
+def _print_key_values(data: dict[str, Any], indent: str, show_none: bool = True) -> None:
+    """Print key-value pairs with consistent formatting.
+
+    Args:
+        data: Dictionary of key-value pairs to print.
+        indent: Indentation string for formatting.
+        show_none: Whether to show (none) when data is empty.
+
+    """
+    if data:
+        for key, value in data.items():
+            click.echo(f"{indent}{key}: {value}")
+    elif show_none:
+        click.echo(f"{indent}(none)")
+
+
+def _print_section(title: str, data: dict[str, Any], indent: str) -> None:
+    """Print a section header and its key-value content.
+
+    Args:
+        title: Section title to display.
+        data: Dictionary of key-value pairs.
+        indent: Base indentation string.
+
+    """
+    click.secho(f"\n{indent}{title}:", bold=True)
+    _print_key_values(data, indent + "  ")
+
+
+def _print_module(module: dict[str, Any]) -> None:
+    """Print module details in table format.
+
+    Args:
+        module: Module dictionary containing name, path, parameters, etc.
+
+    """
+    click.secho(f"\n  --- Module: {module['name']} ---", bold=True)
+    if module.get("path"):
+        click.echo(f"      Path: {module['path']}")
+
+    if module.get("parameters"):
+        click.secho("      Parameters:", bold=True)
+        _print_key_values(module["parameters"], "        ", show_none=False)
+
+    if module.get("env_vars"):
+        click.secho("      Environment Variables:", bold=True)
+        _print_key_values(module["env_vars"], "        ", show_none=False)
+
+    if module.get("options"):
+        click.secho("      Options:", bold=True)
+        _print_key_values(module["options"], "        ", show_none=False)
+
+
 def _print_table(variables: dict[str, Any]) -> None:
     """Print variables in a table format.
 
@@ -217,50 +266,14 @@ def _print_table(variables: dict[str, Any]) -> None:
 
     """
     click.secho("\n=== Runway Variables ===", bold=True)
-    runway_vars = variables.get("runway_variables", {})
-    if runway_vars:
-        for key, value in runway_vars.items():
-            click.echo(f"  {key}: {value}")
-    else:
-        click.echo("  (none)")
+    _print_key_values(variables.get("runway_variables", {}), "  ")
 
     for deployment in variables.get("deployments", []):
         click.secho(f"\n=== Deployment: {deployment['name']} ===", bold=True)
-
-        click.secho("\n  Parameters:", bold=True)
-        params = deployment.get("parameters", {})
-        if params:
-            for key, value in params.items():
-                click.echo(f"    {key}: {value}")
-        else:
-            click.echo("    (none)")
-
-        click.secho("\n  Environment Variables:", bold=True)
-        env_vars = deployment.get("env_vars", {})
-        if env_vars:
-            for key, value in env_vars.items():
-                click.echo(f"    {key}: {value}")
-        else:
-            click.echo("    (none)")
+        _print_section("Parameters", deployment.get("parameters", {}), "  ")
+        _print_section("Environment Variables", deployment.get("env_vars", {}), "  ")
 
         for module in deployment.get("modules", []):
-            click.secho(f"\n  --- Module: {module['name']} ---", bold=True)
-            if module.get("path"):
-                click.echo(f"      Path: {module['path']}")
-
-            if module.get("parameters"):
-                click.secho("      Parameters:", bold=True)
-                for key, value in module["parameters"].items():
-                    click.echo(f"        {key}: {value}")
-
-            if module.get("env_vars"):
-                click.secho("      Environment Variables:", bold=True)
-                for key, value in module["env_vars"].items():
-                    click.echo(f"        {key}: {value}")
-
-            if module.get("options"):
-                click.secho("      Options:", bold=True)
-                for key, value in module["options"].items():
-                    click.echo(f"        {key}: {value}")
+            _print_module(module)
 
     click.echo()

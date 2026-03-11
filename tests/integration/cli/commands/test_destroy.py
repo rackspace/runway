@@ -325,9 +325,7 @@ def test_destroy_options_stack(
     runner = CliRunner()
 
     # Verify stack names are passed to context
-    result = runner.invoke(
-        cli, ["destroy", "--ci", "--stack", "vpc-stack", "--stack", "rds-stack"]
-    )
+    result = runner.invoke(cli, ["destroy", "--ci", "--stack", "vpc-stack", "--stack", "rds-stack"])
     assert result.exit_code == 0
 
     # Verify the RunwayContext was created with stack_names

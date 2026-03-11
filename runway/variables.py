@@ -543,7 +543,7 @@ class VariableValueList(VariableValue, MutableSequence[VariableValue]):
         return f"list[{', '.join(repr(i) for i in self._data)}]"
 
 
-class VariableValueLiteral(Generic[_LiteralValue], VariableValue):
+class VariableValueLiteral(VariableValue, Generic[_LiteralValue]):
     """The literal value of a variable as provided."""
 
     def __init__(
@@ -583,7 +583,7 @@ class VariableValueLiteral(Generic[_LiteralValue], VariableValue):
         return f"Literal[{self._data}]"
 
 
-class VariableValueConcatenation(Generic[_VariableValue], VariableValue):
+class VariableValueConcatenation(VariableValue, Generic[_VariableValue]):
     """A concatenated variable values."""
 
     def __init__(
@@ -860,7 +860,7 @@ class VariableValueLookup(VariableValue):
         return f"${{{self.lookup_name.value} {self.lookup_query.value}}}"
 
 
-class VariableValuePydanticModel(Generic[_PydanticModelTypeVar], VariableValue):
+class VariableValuePydanticModel(VariableValue, Generic[_PydanticModelTypeVar]):
     """A pydantic model variable value."""
 
     def __init__(
