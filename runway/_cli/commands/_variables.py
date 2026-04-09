@@ -176,7 +176,7 @@ def get_resolved_variables(
 def _safe_get_value(obj: Any, attr: str, default: Any) -> Any:
     """Safely get an attribute value, returning default on error."""
     try:
-        value = getattr(obj, attr, default)
+        value: Any = getattr(obj, attr, default)
         if value is None:
             return default
         # Convert to dict if it's a special type

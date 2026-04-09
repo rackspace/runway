@@ -7,7 +7,6 @@ import logging
 from typing import Any
 
 import click
-from pydantic import ValidationError
 
 from ...core import Runway
 from ...exceptions import ConfigNotFound, VariablesFileNotFound
@@ -84,10 +83,8 @@ def deploy(
         ctx.exit(1)
     except (FileNotFoundError, ValueError) as err:
         # Handle changeset file errors (not found, invalid JSON)
+        # Note: ValidationError is a subclass of ValueError, so it's caught here too
         LOGGER.error(str(err), exc_info=debug)
-        ctx.exit(1)
-    except ValidationError as err:
-        LOGGER.error(err, exc_info=debug)
         ctx.exit(1)
     except (ConfigNotFound, VariablesFileNotFound) as err:
         LOGGER.error(err.message, exc_info=debug)
