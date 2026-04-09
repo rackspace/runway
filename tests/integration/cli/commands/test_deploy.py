@@ -7,6 +7,7 @@ Runway's core logic has been mocked out to test on separately from the CLI.
 
 from __future__ import annotations
 
+import json
 import logging
 from typing import TYPE_CHECKING
 from unittest.mock import Mock
@@ -14,6 +15,7 @@ from unittest.mock import Mock
 from click.testing import CliRunner
 
 from runway._cli import cli
+from runway._cli.changeset_executor import ChangesetExecutionError
 from runway.config import RunwayConfig
 from runway.context import RunwayContext
 from runway.core import Runway
@@ -312,3 +314,87 @@ def test_deploy_options_stack(
     # Verify the RunwayContext was created with stack_names
     runway_context = mock_runway.call_args.args[1]
     assert runway_context.stack_names == ["vpc-stack", "rds-stack"]
+
+
+def test_deploy_execute_changesets(
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test deploy --execute-changesets with a changeset file."""
+    mock_exec = mocker.patch(f"{MODULE}.execute_changesets_from_file")
+    cp_config("min_required", cd_tmp_path)
+
+    # Create a changeset file
+    cs_file = cd_tmp_path / "changesets.json"
+    cs_file.write_text(
+        json.dumps(
+            {"changesets": [{"stack": "ns-stack1", "changeset_id": "cs-1"}]}
+        )
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["deploy", "--execute-changesets", str(cs_file)])
+    assert result.exit_code == 0
+    mock_exec.assert_called_once()
+    # Verify stack_filter is None when no --stack provided
+    assert mock_exec.call_args.kwargs.get("stack_filter") is None
+
+
+def test_deploy_execute_changesets_with_stack_filter(
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test deploy --execute-changesets with --stack filter."""
+    mock_exec = mocker.patch(f"{MODULE}.execute_changesets_from_file")
+    cp_config("min_required", cd_tmp_path)
+
+    cs_file = cd_tmp_path / "changesets.json"
+    cs_file.write_text(json.dumps({"changesets": []}))
+
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        ["deploy", "--execute-changesets", str(cs_file), "--stack", "vpc-stack"],
+    )
+    assert result.exit_code == 0
+    mock_exec.assert_called_once()
+    assert mock_exec.call_args.kwargs.get("stack_filter") == ("vpc-stack",)
+
+
+def test_deploy_execute_changesets_error(
+    caplog: pytest.LogCaptureFixture,
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test deploy --execute-changesets handles ChangesetExecutionError."""
+    caplog.set_level(logging.ERROR, logger="runway")
+    mocker.patch(
+        f"{MODULE}.execute_changesets_from_file",
+        side_effect=ChangesetExecutionError("my-stack", "cs-1", "bad status"),
+    )
+    cp_config("min_required", cd_tmp_path)
+
+    cs_file = cd_tmp_path / "changesets.json"
+    cs_file.write_text(json.dumps({"changesets": []}))
+
+    runner = CliRunner()
+    result = runner.invoke(cli, ["deploy", "--execute-changesets", str(cs_file)])
+    assert result.exit_code == 1
+
+
+def test_deploy_execute_changesets_file_not_found(
+    caplog: pytest.LogCaptureFixture,
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+) -> None:
+    """Test deploy --execute-changesets with nonexistent file."""
+    caplog.set_level(logging.ERROR, logger="runway")
+    cp_config("min_required", cd_tmp_path)
+
+    runner = CliRunner()
+    # Click's type=click.Path(exists=True) will catch this before the command runs
+    result = runner.invoke(cli, ["deploy", "--execute-changesets", "/tmp/nonexistent.json"])
+    assert result.exit_code != 0
