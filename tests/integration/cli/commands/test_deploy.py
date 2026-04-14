@@ -327,11 +327,7 @@ def test_deploy_execute_changesets(
 
     # Create a changeset file
     cs_file = cd_tmp_path / "changesets.json"
-    cs_file.write_text(
-        json.dumps(
-            {"changesets": [{"stack": "ns-stack1", "changeset_id": "cs-1"}]}
-        )
-    )
+    cs_file.write_text(json.dumps({"changesets": [{"stack": "ns-stack1", "changeset_id": "cs-1"}]}))
 
     runner = CliRunner()
     result = runner.invoke(cli, ["deploy", "--execute-changesets", str(cs_file)])

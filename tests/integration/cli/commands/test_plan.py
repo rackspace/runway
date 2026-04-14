@@ -225,7 +225,7 @@ def test_plan_options_create_changeset_json_output(
     mocker: MockerFixture,
 ) -> None:
     """Test plan option --create-changeset --output json."""
-    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
     mock_output = mocker.patch(f"{MODULE}.output_changesets")
     cp_config("min_required", cd_tmp_path)
     runner = CliRunner()
@@ -233,8 +233,6 @@ def test_plan_options_create_changeset_json_output(
     result = runner.invoke(cli, ["plan", "--create-changeset", "--output", "json"])
     assert result.exit_code == 0
     # Verify output_changesets is called with the "json" format
-    _, kwargs = mock_output.call_args
-    # Second positional arg or keyword 'output_format'
     call_args = mock_output.call_args
     assert call_args.args[1] == "json" or call_args.kwargs.get("output_format") == "json"
 
