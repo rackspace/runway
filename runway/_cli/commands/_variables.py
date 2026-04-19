@@ -184,7 +184,7 @@ def _safe_get_value(obj: Any, attr: str, default: Any) -> Any:
             return value.model_dump()
         if hasattr(value, "__dict__") and not isinstance(value, (dict, list, str)):
             return dict(value)
-        return value
+        return cast("Any", value)
     except (UnresolvedVariable, AttributeError):
         return default
 
