@@ -14,6 +14,7 @@ from ._schema import schema
 from ._takeoff import takeoff
 from ._taxi import taxi
 from ._tfenv import tfenv
+from ._variables import variables
 from ._whichenv import whichenv
 
 __all__ = [
@@ -31,5 +32,6 @@ __all__ = [
     "takeoff",
     "taxi",
     "tfenv",
+    "variables",
     "whichenv",
 ]

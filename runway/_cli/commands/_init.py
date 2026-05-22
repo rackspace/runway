@@ -19,11 +19,20 @@ LOGGER = logging.getLogger(__name__.replace("._", "."))
 @options.ci
 @options.debug
 @options.deploy_environment
+@options.modules
 @options.no_color
+@options.stacks
 @options.tags
 @options.verbose
 @click.pass_context
-def init(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) -> None:
+def init(
+    ctx: click.Context,
+    debug: bool,
+    modules: tuple[str, ...],
+    stacks: tuple[str, ...],
+    tags: tuple[str, ...],
+    **_: Any,
+) -> None:
     """Run initialization/bootstrap steps.
 
     \b
@@ -38,7 +47,8 @@ def init(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) -> No
         - name of the current working directory
     2. Selects deployments & modules to deploy.
         - (default) prompts
-        - (tags) module contains all tags
+        - (--module) module name matches pattern
+        - (--tag) module contains all tags
         - (non-interactive) all
     3. Initializes/bootstraps selected deployments/modules in the order defined.
        (e.g. "cdk bootstrap", "terraform init")
@@ -54,8 +64,10 @@ def init(ctx: click.Context, debug: bool, tags: tuple[str, ...], **_: Any) -> No
 
     """  # noqa: D301
     try:
+        # Store stacks in context for CFNgin to use
+        ctx.obj.stacks = stacks
         Runway(ctx.obj.runway_config, ctx.obj.get_runway_context()).init(
-            select_deployments(ctx, ctx.obj.runway_config.deployments, tags)
+            select_deployments(ctx, ctx.obj.runway_config.deployments, tags, modules)
         )
     except ValidationError as err:
         LOGGER.error(err, exc_info=debug)

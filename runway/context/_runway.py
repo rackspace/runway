@@ -27,15 +27,30 @@ def str2bool(v: str) -> bool:
 class RunwayContext(BaseContext):
     """Runway context object."""
 
+    changeset_results: dict[str, str]
+    """Mapping of stack FQN to changeset ID for retained changesets."""
+
     command: RunwayActionTypeDef | None
     """Runway command/action being run."""
+
+    create_changeset: bool
+    """Whether to retain CloudFormation changesets instead of deleting them."""
+
+    output_format: str
+    """Output format for changeset information (text or json)."""
+
+    stack_names: list[str]
+    """CFNgin stack names to target. If empty, all stacks are targeted."""
 
     def __init__(
         self,
         *,
         command: RunwayActionTypeDef | None = None,
+        create_changeset: bool = False,
         deploy_environment: DeployEnvironment | None = None,
         logger: PrefixAdaptor | RunwayLogger = LOGGER,
+        output_format: str = "text",
+        stack_names: list[str] | None = None,
         work_dir: Path | None = None,
         **_: Any,
     ) -> None:
@@ -43,8 +58,12 @@ class RunwayContext(BaseContext):
 
         Args:
             command: Runway command/action being run.
+            create_changeset: Whether to retain changesets instead of deleting.
             deploy_environment: The current deploy environment.
             logger: Custom logger.
+            output_format: Output format for changeset info (text or json).
+            stack_names: CFNgin stack names to target. If not provided,
+                all stacks defined in the config will be targeted.
             work_dir: Working directory used by Runway.
 
         """
@@ -53,7 +72,11 @@ class RunwayContext(BaseContext):
             logger=logger,
             work_dir=work_dir,
         )
+        self.changeset_results = {}
         self.command = command
+        self.create_changeset = create_changeset
+        self.output_format = output_format
+        self.stack_names = stack_names or []
         self._inject_profile_credentials()
 
     @cached_property
@@ -99,8 +122,11 @@ class RunwayContext(BaseContext):
         """Copy the contents of this object into a new instance."""
         return self.__class__(
             command=self.command,
+            create_changeset=self.create_changeset,
             deploy_environment=self.env.copy(),
             logger=self.logger,
+            output_format=self.output_format,
+            stack_names=self.stack_names.copy(),
             work_dir=self.work_dir,
         )
 

@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from ...conftest import CpConfigTypeDef
 
 MODULE = "runway._cli.commands._plan"
+OUTPUT_MODULE = "runway._cli.changeset_output"
 
 
 def test_plan(cd_tmp_path: Path, cp_config: CpConfigTypeDef, mocker: MockerFixture) -> None:
@@ -198,3 +199,96 @@ def test_plan_select_module_child_modules_all(
     assert len(deployment.modules) == 2
     assert deployment.modules[0].name == "parallel-sampleapp-01.cfn"
     assert deployment.modules[1].name == "parallel-sampleapp-02.cfn"
+
+
+def test_plan_options_create_changeset(
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test plan option --create-changeset."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    mock_output = mocker.patch(f"{MODULE}.output_changesets")
+    cp_config("min_required", cd_tmp_path)
+    runner = CliRunner()
+
+    result = runner.invoke(cli, ["plan", "--create-changeset"])
+    assert result.exit_code == 0
+    mock_runway.assert_called_once()
+    # output_changesets should be called when --create-changeset is used
+    mock_output.assert_called_once()
+
+
+def test_plan_options_create_changeset_json_output(
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test plan option --create-changeset --output json."""
+    mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    mock_output = mocker.patch(f"{MODULE}.output_changesets")
+    cp_config("min_required", cd_tmp_path)
+    runner = CliRunner()
+
+    result = runner.invoke(cli, ["plan", "--create-changeset", "--output", "json"])
+    assert result.exit_code == 0
+    # Verify output_changesets is called with the "json" format
+    call_args = mock_output.call_args
+    assert call_args.args[1] == "json" or call_args.kwargs.get("output_format") == "json"
+
+
+def test_plan_without_create_changeset_no_output(
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test plan without --create-changeset does not call output_changesets."""
+    mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    mock_output = mocker.patch(f"{MODULE}.output_changesets")
+    cp_config("min_required", cd_tmp_path)
+    runner = CliRunner()
+
+    result = runner.invoke(cli, ["plan"])
+    assert result.exit_code == 0
+    mock_output.assert_not_called()
+
+
+def test_plan_options_stack(
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test plan option --stack."""
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    cp_config("min_required", cd_tmp_path)
+    runner = CliRunner()
+
+    result = runner.invoke(cli, ["plan", "--stack", "vpc-stack", "--stack", "rds-stack"])
+    assert result.exit_code == 0
+    runway_context = mock_runway.call_args.args[1]
+    assert runway_context.stack_names == ["vpc-stack", "rds-stack"]
+
+
+def test_plan_options_module(
+    caplog: pytest.LogCaptureFixture,
+    cd_tmp_path: Path,
+    cp_config: CpConfigTypeDef,
+    mocker: MockerFixture,
+) -> None:
+    """Test plan option --module."""
+    caplog.set_level(logging.ERROR, logger="runway.cli.utils")
+    mock_runway = mocker.patch(f"{MODULE}.Runway", Mock(spec=Runway, spec_set=True))
+    cp_config("tagged_modules", cd_tmp_path)
+    runner = CliRunner()
+
+    # Exact module name match
+    result = runner.invoke(cli, ["plan", "--module", "sampleapp-01.cfn"])
+    assert result.exit_code == 0
+    deployment = mock_runway.return_value.plan.call_args.args[0][0]
+    assert len(deployment.modules) == 1
+    assert deployment.modules[0].name == "sampleapp-01.cfn"
+
+    # No match error
+    result = runner.invoke(cli, ["plan", "--module", "nonexistent-module"])
+    assert result.exit_code == 1
+    assert "No modules found matching: nonexistent-module" in caplog.messages

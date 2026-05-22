@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fnmatch
 import logging
 import os
 import sys
@@ -35,25 +36,34 @@ class CliContext:
         self,
         *,
         ci: bool = False,
+        create_changeset: bool = False,
         debug: int = 0,
         deploy_environment: str | None = None,
+        output_format: str = "text",
         verbose: bool = False,
+        stacks: tuple[str, ...] | None = None,
         **_: Any,
     ) -> None:
         """Instantiate class.
 
         Args:
             ci: Whether Runway is being run in non-interactive mode.
+            create_changeset: Whether to retain changesets instead of deleting.
             debug: Debug level
             deploy_environment: Name of the deploy environment.
+            output_format: Output format for changeset info (text or json).
             verbose: Whether to display verbose logs.
+            stacks: CFNgin stack names to target.
 
         """
         self._deploy_environment = deploy_environment
         self.ci = ci
+        self.create_changeset = create_changeset
         self.debug = debug
+        self.output_format = output_format
         self.root_dir = Path.cwd()
         self.verbose = verbose
+        self.stacks = stacks or ()
 
     @cached_property
     def env(self) -> DeployEnvironment:
@@ -113,7 +123,10 @@ class CliContext:
 
         """
         return RunwayContext(
+            create_changeset=self.create_changeset,
             deploy_environment=deploy_environment or self.env,
+            output_format=self.output_format,
+            stack_names=list(self.stacks) if self.stacks else None,
             work_dir=self.runway_config_path.parent / ".runway",
         )
 
@@ -174,15 +187,17 @@ def select_deployments(
     ctx: click.Context,
     deployments: list[RunwayDeploymentDefinition],
     tags: tuple[str, ...] | None = None,
+    module_names: tuple[str, ...] | None = None,
 ) -> list[RunwayDeploymentDefinition]:
     """Select which deployments to run.
 
-    Uses tags, interactive prompts, or selects all.
+    Uses tags, module names, interactive prompts, or selects all.
 
     Args:
         ctx: Current click context.
         deployments: List of deployment(s) to choose from.
         tags: Deployment tags to filter.
+        module_names: Module names or glob patterns to filter.
 
     Returns:
         Selected deployment(s).
@@ -190,6 +205,8 @@ def select_deployments(
     """
     if tags:
         return select_modules_using_tags(ctx, deployments, tags)
+    if module_names:
+        return select_modules_by_name(ctx, deployments, module_names)
     if ctx.obj.env.ci:
         return deployments
     if len(deployments) == 1:
@@ -294,4 +311,64 @@ def select_modules_using_tags(
     if deployments_to_run:
         return deployments_to_run
     LOGGER.error("No modules found with the provided tag(s): %s", ", ".join(tags))
+    return ctx.exit(1)
+
+
+def _module_name_matches(module_name: str, patterns: tuple[str, ...]) -> bool:
+    """Check if a module name matches any of the provided patterns.
+
+    Supports exact matches and glob patterns (e.g., 'network-*', '*.cfn').
+
+    Args:
+        module_name: The module name to check.
+        patterns: Tuple of name patterns to match against.
+
+    Returns:
+        True if the module name matches any pattern.
+
+    """
+    return any(fnmatch.fnmatch(module_name, pattern) for pattern in patterns)
+
+
+def select_modules_by_name(
+    ctx: click.Context,
+    deployments: list[RunwayDeploymentDefinition],
+    module_names: tuple[str, ...],
+) -> list[RunwayDeploymentDefinition]:
+    """Select modules to run using module names or glob patterns.
+
+    Args:
+        ctx: Current click context.
+        deployments: List of deployments to check.
+        module_names: List of module names or glob patterns to filter.
+
+    Returns:
+        List of selected deployments with selected modules.
+
+    """
+    deployments_to_run: list[RunwayDeploymentDefinition] = []
+    for deployment in deployments:
+        modules_to_run: list[RunwayModuleDefinition] = []
+        for module in deployment.modules:
+            if module.child_modules:
+                # If the parent module name matches, include it with all children
+                if _module_name_matches(module.name, module_names):
+                    modules_to_run.append(module)
+                else:
+                    # Otherwise, filter child modules by name
+                    module.child_modules = [
+                        c
+                        for c in module.child_modules
+                        if _module_name_matches(c.name, module_names)
+                    ]
+                    if module.child_modules:
+                        modules_to_run.append(module)
+            elif _module_name_matches(module.name, module_names):
+                modules_to_run.append(module)
+        if modules_to_run:
+            deployment.modules = modules_to_run
+            deployments_to_run.append(deployment)
+    if deployments_to_run:
+        return deployments_to_run
+    LOGGER.error("No modules found matching: %s", ", ".join(module_names))
     return ctx.exit(1)

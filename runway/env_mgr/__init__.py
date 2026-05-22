@@ -85,7 +85,7 @@ class EnvManager(DelCachedPropMixin):
         self._bin_name = bin_name + self.command_suffix
         self.current_version = None
         self.env_dir_name = dir_name if platform.system() == "Windows" else "." + dir_name
-        self.path = path if path else Path.cwd()
+        self.path = path or Path.cwd()
 
     @property
     def bin(self) -> Path:

@@ -309,6 +309,7 @@ class MockRunwayContext(RunwayContext):
         *,
         command: RunwayActionTypeDef | None = None,
         deploy_environment: DeployEnvironment,
+        stack_names: list[str] | None = None,
         work_dir: Path | None = None,
         **_: Any,
     ) -> None:
@@ -317,12 +318,18 @@ class MockRunwayContext(RunwayContext):
         Args:
             command: Runway command/action being run.
             deploy_environment: The current deploy environment.
+            stack_names: CFNgin stack names to target.
             work_dir: Working directory used by Runway.
 
         """
         self._boto3_sessions: dict[str, MockBoto3Session] = {}
 
-        super().__init__(command=command, deploy_environment=deploy_environment, work_dir=work_dir)
+        super().__init__(
+            command=command,
+            deploy_environment=deploy_environment,
+            stack_names=stack_names,
+            work_dir=work_dir,
+        )
 
     @property
     def use_concurrent(self) -> bool:
