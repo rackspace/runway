@@ -1,0 +1,17 @@
+deployments:
+  - name: test_deployment
+    parameters:
+      param1: value1
+      param2: value2
+    env_vars:
+      ENV_VAR1: env_value1
+      ENV_VAR2: env_value2
+    modules:
+      - path: module1.cfn
+        parameters:
+          module_param: module_value
+        env_vars:
+          MODULE_ENV: module_env_value
+      - path: module2.cfn
+    regions:
+      - us-east-1

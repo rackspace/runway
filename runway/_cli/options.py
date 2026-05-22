@@ -52,3 +52,51 @@ verbose = click.option(
     is_flag=True,
     help="Display Runway verbose logs.",
 )
+
+modules = click.option(
+    "--module",
+    "modules",
+    metavar="<module-name>...",
+    multiple=True,
+    help="Select modules by name. Supports glob patterns (e.g., 'network-*'). "
+    "This option can be specified more than once to select multiple modules. "
+    '(e.g. "--module network-vpc --module app-*.cfn").',
+)
+
+stacks = click.option(
+    "--stack",
+    "stacks",
+    metavar="<stack-name>...",
+    multiple=True,
+    help="Select CFNgin stacks by name within the targeted module(s). "
+    "This option can be specified more than once to select multiple stacks. "
+    "Only applies to CloudFormation/CFNgin modules. "
+    '(e.g. "--stack vpc-stack --stack security-groups").',
+)
+
+create_changeset = click.option(
+    "--create-changeset",
+    "create_changeset",
+    default=False,
+    is_flag=True,
+    help="Create and retain CloudFormation changesets instead of deleting them after showing diff. "
+    "Outputs changeset IDs for use in CI/CD pipelines. "
+    "Use with --output json for machine-readable output.",
+)
+
+changeset_output_format = click.option(
+    "--output",
+    "output_format",
+    type=click.Choice(["text", "json"]),
+    default="text",
+    help="Output format for changeset information. Use 'json' for CI/CD integration.",
+)
+
+execute_changesets = click.option(
+    "--execute-changesets",
+    "changeset_file",
+    type=click.Path(exists=True),
+    metavar="<file>",
+    help="Execute changesets from a JSON file created by 'runway plan --create-changeset'. "
+    "Skips normal stack update logic and executes the pre-created changesets directly.",
+)

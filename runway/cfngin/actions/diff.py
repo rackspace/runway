@@ -216,8 +216,15 @@ class Action(deploy.Action):
             stack.resolve(self.context, provider)
             parameters = self.build_parameters(stack, provider_stack)
             outputs = provider.get_stack_changes(
-                stack, self._template(stack.blueprint), parameters, tags
+                stack,
+                self._template(stack.blueprint),
+                parameters,
+                tags,
+                retain_changeset=self.context.create_changeset,
             )
+            # Store changeset ID if retained for CI/CD workflows
+            if self.context.create_changeset and "changeset_id" in outputs:
+                self.context.changeset_results[stack.fqn] = outputs["changeset_id"]
             stack.set_outputs(outputs)
         except exceptions.StackDidNotChange:
             LOGGER.info("%s:no changes", stack.fqn)

@@ -65,11 +65,17 @@ class CfnginContext(BaseContext):
 
     """
 
+    changeset_results: dict[str, str]
+    """Mapping of stack FQN to changeset ID for retained changesets."""
+
     config: CfnginConfig
     """CFNgin configuration file that has been resolved & parsed into a python object."""
 
     config_path: Path
     """Path to the configuration file that has been resolved, parsed and made accessible via this object."""
+
+    create_changeset: bool
+    """Whether to retain CloudFormation changesets instead of deleting them."""
 
     env: DeployEnvironment
     """Deploy environment object containing information about the current deploy environment."""
@@ -103,6 +109,7 @@ class CfnginContext(BaseContext):
         *,
         config: CfnginConfig | None = None,
         config_path: Path | None = None,
+        create_changeset: bool = False,
         deploy_environment: DeployEnvironment | None = None,
         force_stacks: list[str] | None = None,
         logger: PrefixAdaptor | RunwayLogger = LOGGER,
@@ -116,6 +123,7 @@ class CfnginContext(BaseContext):
         Args:
             config: The CFNgin configuration being operated on.
             config_path: Path to the config file that was provided.
+            create_changeset: Whether to retain changesets instead of deleting.
             deploy_environment: The current deploy environment.
             force_stacks: A list of stacks to force work on. Used to work on locked stacks.
             logger: Custom logger.
@@ -137,8 +145,10 @@ class CfnginContext(BaseContext):
         self._persistent_graph_lock_code = None
         self._persistent_graph = None
         self._s3_bucket_verified = False
+        self.changeset_results = {}
         self.config = config or CfnginConfig.parse_obj({"namespace": "example"})
         self.bucket_region = self.config.cfngin_bucket_region or self.env.aws_region
+        self.create_changeset = create_changeset
         self.parameters = parameters or {}
         self.force_stacks = force_stacks or []
         self.hook_data = {}
@@ -348,6 +358,7 @@ class CfnginContext(BaseContext):
         return self.__class__(
             config_path=self.config_path,
             config=self.config,
+            create_changeset=self.create_changeset,
             deploy_environment=self.env.copy(),
             force_stacks=self.force_stacks,
             logger=self.logger,

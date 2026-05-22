@@ -84,11 +84,7 @@ class Project(Generic[_AwsLambdaHookArgsTypeVar_co]):
         """
         if not self.args.use_cache:
             return None
-        cache_dir = (
-            self.args.cache_dir
-            if self.args.cache_dir
-            else self.ctx.work_dir / self.DEFAULT_CACHE_DIR_NAME
-        )
+        cache_dir = self.args.cache_dir or self.ctx.work_dir / self.DEFAULT_CACHE_DIR_NAME
         cache_dir.mkdir(exist_ok=True, parents=True)
         return cache_dir
 
