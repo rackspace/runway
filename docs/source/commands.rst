@@ -167,7 +167,7 @@ plan
 
 .. note:: Currently only supported for :ref:`index:AWS Cloud Development Kit (CDK)`, :ref:`index:CloudFormation & Troposphere`, and :ref:`index:Terraform`.
 
-.. command-output:: runway new --help
+.. command-output:: runway plan --help
 
 .. rubric:: Example
 .. code-block:: sh
