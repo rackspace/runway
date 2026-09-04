@@ -62,7 +62,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v5
       - name: 🚀 Microsoft Teams Notification
-        uses: skitionek/notify-microsoft-teams@v1.0.9  # cspell:ignore skitionek
+        uses: skitionek/notify-microsoft-teams@v1.3.0  # cspell:ignore skitionek
         if: always()
         with:
           webhook_url: ${{ secrets.MSTEAMS_WEBHOOK }}
