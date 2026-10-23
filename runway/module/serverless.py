@@ -148,7 +148,7 @@ class Serverless(RunwayModuleNpm[ServerlessOptions]):
         Args:
             context: Runway context object for the current session.
             explicitly_enabled: Whether or not the module is explicitly enabled.
-                This is can be set in the event that the current environment being
+                This can be set in the event that the current environment being
                 deployed to matches the defined environments of the module/deployment.
             logger: Used to write logs.
             module_root: Root path of the module.
