@@ -2,7 +2,9 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "configMigration": true,
     "dependencyDashboard": {
-        "labels": ["renovate"]
+        "labels": [
+            "renovate"
+        ]
     },
     "extends": [
         ":dependencyDashboard",
